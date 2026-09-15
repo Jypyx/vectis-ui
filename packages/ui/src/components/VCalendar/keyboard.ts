@@ -33,8 +33,10 @@ export type CalendarIntent =
   | { kind: 'rowEdge'; edge: 'start' | 'end' }
   /** Show the previous or next period, as the toolbar's buttons do. */
   | { kind: 'period'; delta: -1 | 1 }
-  /** Take up what is focused: create here, open a card, or commit a move under way. */
+  /** Take up what is focused: report an empty cell, or commit a move under way. */
   | { kind: 'activate' }
+  /** Take hold of a card, so the arrows move it. */
+  | { kind: 'grab' }
   /** Abandon a move under way and put the event back. */
   | { kind: 'cancel' }
   /** Move the grabbed event. */
@@ -46,7 +48,9 @@ export type CalendarIntent =
  * Where the focus is when the key arrives, which is what decides the answer:
  *
  * - `cell` — an empty part of the grid. The arrows travel, Enter creates.
- * - `event` — a card, at rest. Enter takes hold of it; every other key is the browser's.
+ * - `event` — a card, at rest. Space takes hold of it; every other key is the browser's,
+ *   Enter included, which presses the card as a button and so opens the event. Enter is the
+ *   one a reader tries first on a button, and `event-activate` has no other keyboard route.
  * - `grabbed` — a card being moved. The arrows now move the EVENT, Enter commits, Escape
  *   puts it back where it was.
  */
@@ -96,7 +100,7 @@ export function calendarIntent(
     }
   }
 
-  if (focus === 'event') return key === 'Enter' || key === ' ' ? { kind: 'activate' } : undefined
+  if (focus === 'event') return key === ' ' ? { kind: 'grab' } : undefined
 
   switch (key) {
     case 'ArrowLeft':

@@ -683,11 +683,11 @@ describe('moving an event with the keyboard, in the month view', () => {
       ...props,
     })
     const chip = utils.container.querySelector('.v-calendar-event') as HTMLElement
-    await fireEvent.keyDown(chip, { key: 'Enter' })
+    await fireEvent.keyDown(chip, { key: ' ' })
     return utils
   }
 
-  it('takes hold on Enter without also opening the event', async () => {
+  it('takes hold on Space without also opening the event', async () => {
     const { container, emitted } = await held()
     expect(container.querySelector('[data-grabbed]')).not.toBeNull()
     expect(emitted('event-activate')).toBeUndefined()
@@ -901,6 +901,52 @@ describe('dragging an event', () => {
     pointer(card, 'pointerup', { clientX: 100, clientY: 100 })
     await fireEvent.click(container.querySelector('.v-calendar-event')!)
     expect(emitted('event-activate')).toHaveLength(1)
+  })
+
+  /*
+   * A browser sends the click after a captured release to the CAPTURE element, so a press
+   * captured at once would never reach the card it landed on. Nothing short of real input
+   * retargets it, jsdom and a synthetic event alike, which is why this asks about the capture.
+   */
+  it('takes hold of the pointer only once the press travels', async () => {
+    const { container } = drag()
+    const root = container.querySelector('.v-calendar-time-grid') as HTMLElement
+    const setPointerCapture = vi.fn()
+    root.setPointerCapture = setPointerCapture
+    const card = container.querySelector('.v-calendar-event')!
+
+    pointer(card, 'pointerdown', { clientX: 100, clientY: 100 })
+    pointer(card, 'pointermove', { clientX: 101, clientY: 101 })
+    expect(setPointerCapture).not.toHaveBeenCalled()
+
+    pointer(card, 'pointermove', { clientX: 100, clientY: 200 })
+    expect(setPointerCapture).toHaveBeenCalledOnce()
+  })
+
+  /*
+   * A dragged card takes no pointer events, so marking one at the press would let the release
+   * land on the cell beneath it, and the click that follows would report that cell.
+   */
+  it('does not mark a card that is only pressed as dragged', async () => {
+    const { container } = drag()
+    const card = container.querySelector('.v-calendar-event')!
+    pointer(card, 'pointerdown', { clientX: 100, clientY: 100 })
+    await nextTick()
+    expect(container.querySelector('[data-dragging]')).toBeNull()
+  })
+
+  it('forgets a press that leaves the calendar before it travels', async () => {
+    const { container, emitted } = drag()
+    const root = container.querySelector('.v-calendar-time-grid')!
+    const card = container.querySelector('.v-calendar-event')!
+    pointer(card, 'pointerdown', { clientX: 100, clientY: 100 })
+    pointer(root, 'pointerleave', { clientX: 100, clientY: 100 })
+    // The button is up by now, somewhere outside; the pointer coming back must carry nothing.
+    pointer(root, 'pointermove', { clientX: 100, clientY: 300 })
+    pointer(root, 'pointerup', { clientX: 100, clientY: 300 })
+    await nextTick()
+    expect(container.querySelector('[data-dragging]')).toBeNull()
+    expect(emitted('event-move')).toBeUndefined()
   })
 
   it('ignores anything but the left button', async () => {
@@ -1126,7 +1172,7 @@ describe('the echo left behind while dragging', () => {
   it('shows one while a card is held by the keyboard and moved', async () => {
     const { container } = mount({ view: 'day', events: [event({ id: 'a' })] })
     const card = container.querySelector('.v-calendar-event') as HTMLElement
-    await fireEvent.keyDown(card, { key: 'Enter' })
+    await fireEvent.keyDown(card, { key: ' ' })
     // Taking hold is not yet moving: nothing has been given up, so nothing to echo.
     expect(container.querySelector('[data-ghost]')).toBeNull()
 
@@ -1338,7 +1384,7 @@ describe('an event running past midnight', () => {
 
   it('keeps crossing midnight when it is nudged with the keyboard', async () => {
     const { container, emitted } = mount({ events: [overnight] })
-    await fireEvent.keyDown(cardOn(container, '2026-06-09')!, { key: 'Enter' })
+    await fireEvent.keyDown(cardOn(container, '2026-06-09')!, { key: ' ' })
     await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'ArrowDown' })
     await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'Enter' })
     const [moved] = emitted('event-move')!.at(-1) as [CalendarEvent]
@@ -1889,7 +1935,7 @@ describe('moving an event with the keyboard', () => {
       ...props,
     })
     const card = utils.container.querySelector('.v-calendar-event') as HTMLElement
-    await fireEvent.keyDown(card, { key: 'Enter' })
+    await fireEvent.keyDown(card, { key: ' ' })
     return { ...utils, card }
   }
 
@@ -1909,15 +1955,29 @@ describe('moving an event with the keyboard', () => {
         },
       },
     })
-    await fireEvent.keyDown(container.querySelector('.v-calendar-event')!, { key: 'Enter' })
+    await fireEvent.keyDown(container.querySelector('.v-calendar-event')!, { key: ' ' })
     expect(seen.at(-1)).toBe(true)
   })
 
-  it('takes hold on Enter and says so', async () => {
+  it('takes hold on Space and says so', async () => {
     const { container, emitted } = await held()
     expect(container.querySelector('[data-grabbed]')).not.toBeNull()
     expect(emitted('event-activate')).toBeUndefined()
     expect(container.querySelector('[role="status"]')!.textContent).toContain('Event held')
+  })
+
+  /*
+   * Enter presses the card as the button it is, which is the keyboard's only way to open an
+   * event that can also be moved. Cancelled here, the browser would never turn it into a click.
+   */
+  it('leaves Enter to the card, so a movable event can still be opened', async () => {
+    const { container } = mount({ view: 'week', events: [event({ id: 'a', title: 'Standup' })] })
+    const card = container.querySelector('.v-calendar-event') as HTMLElement
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })
+    card.dispatchEvent(enter)
+    await nextTick()
+    expect(enter.defaultPrevented).toBe(false)
+    expect(container.querySelector('[data-grabbed]')).toBeNull()
   })
 
   it('moves by a slot on the vertical arrows, and announces where it is', async () => {

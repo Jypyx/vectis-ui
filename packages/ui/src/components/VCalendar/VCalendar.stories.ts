@@ -712,9 +712,9 @@ export const Editing: Story = {
 }
 
 /**
- * The same three gestures, without a pointer. `Enter` takes hold of an event, the arrows
+ * The same three gestures, without a pointer. `Space` takes hold of an event, the arrows
  * move it and `Shift` with them changes when it ends, `Enter` places it and `Escape` puts it
- * back. Every step is announced.
+ * back. Every step is announced. `Enter` on a card at rest opens it instead.
  */
 export const KeyboardEditing: Story = {
   args: { view: 'week', dayStart: 8, dayEnd: 18, label: 'Keyboard editing' },
@@ -744,7 +744,7 @@ export const KeyboardEditing: Story = {
     const card = canvas.getByRole('button', { name: new RegExp(t.value.standup) })
 
     card.focus()
-    await userEvent.keyboard('{Enter}')
+    await userEvent.keyboard('[Space]')
     // Taking hold must not ALSO press the button: the two would fire on one keystroke.
     await waitFor(() => expect(card).toHaveAttribute('data-grabbed'))
 
@@ -754,6 +754,84 @@ export const KeyboardEditing: Story = {
     await waitFor(() =>
       expect(canvas.getByRole('button', { name: /9:30 AM – 10:00 AM/ })).toBeVisible(),
     )
+  },
+}
+
+/**
+ * A calendar whose events can be moved and drawn still opens an event on a click, or on `Enter`,
+ * and still reports an empty cell on a click. The output shows what was last reported.
+ */
+export const OpenOnClick: Story = {
+  args: { view: 'day', dayStart: 8, dayEnd: 18, creatable: true, label: 'Opening events' },
+  render: (args) => ({
+    components: { VCalendar },
+    setup: () => ({
+      args,
+      events: ref<CalendarEvent[]>([
+        {
+          id: 'a',
+          title: t.value.review,
+          start: ANCHOR,
+          end: ANCHOR,
+          startTime: '09:00',
+          endTime: '10:00',
+        },
+      ]),
+      last: ref('—'),
+    }),
+    template: `
+      <div style="display: grid; gap: 12px; height: 520px; grid-template-rows: 1fr auto; padding: 16px">
+        <VCalendar
+          v-bind="args"
+          v-model:events="events"
+          @event-activate="(e) => (last = 'event ' + e.id)"
+          @cell-activate="(c) => (last = 'cell ' + c.time)"
+        />
+        <output>{{ last }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const output = canvasElement.querySelector('output')!
+    const card = canvas.getByRole('button', { name: new RegExp(t.value.review) })
+    const cellAt = (minutes: number) =>
+      canvasElement.querySelector<HTMLElement>(`.v-calendar-cell[data-minutes="${minutes}"]`)!
+
+    // Each report is preceded by a different one, so every assertion proves its own step.
+    await userEvent.click(cellAt(840))
+    await waitFor(() => expect(output).toHaveTextContent('cell 14:00'))
+
+    card.focus()
+    await userEvent.keyboard('{Enter}')
+    await waitFor(() => expect(output).toHaveTextContent('event a'))
+    await expect(card).not.toHaveAttribute('data-grabbed')
+
+    await userEvent.click(cellAt(900))
+    await waitFor(() => expect(output).toHaveTextContent('cell 15:00'))
+
+    /*
+     * A real browser hit-tests the release, which is the whole reason this half is a play
+     * function: a card marked as dragged at the PRESS takes no pointer events, so the release
+     * landed on the cell beneath it and the click reported that cell. jsdom hit-tests nothing.
+     */
+    card.scrollIntoView({ block: 'center' })
+    const box = card.getBoundingClientRect()
+    const centre = { x: box.left + box.width / 2, y: box.top + box.height / 2 }
+    card.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        bubbles: true,
+        pointerId: 1,
+        button: 0,
+        clientX: centre.x,
+        clientY: centre.y,
+      }),
+    )
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    await expect(card.contains(document.elementFromPoint(centre.x, centre.y))).toBe(true)
+
+    await userEvent.click(card)
+    await waitFor(() => expect(output).toHaveTextContent('event a'))
   },
 }
 

@@ -213,6 +213,7 @@ const {
   onPointermove,
   onPointerup,
   onPointercancel,
+  onPointerleave,
   onCardKeydown,
   focusCell,
   idOfCard,
@@ -776,7 +777,6 @@ function onGridPointerdown(event: PointerEvent) {
             minutesAt(item.startTime, props.timeWindow.start),
         grabColumn: point.columnIndex,
       }),
-      event,
       rtl,
     )
     return
@@ -809,7 +809,6 @@ function onGridPointerdown(event: PointerEvent) {
       grabOffset: 0,
       grabColumn: point.columnIndex,
     }),
-    event,
     rtl,
   )
 }
@@ -843,7 +842,6 @@ function onBandPointerdown(event: PointerEvent) {
       grabOffset: 0,
       grabColumn: pointAt(event.clientX, event.clientY, rect, rtl).columnIndex,
     }),
-    event,
     rtl,
   )
 }
@@ -1165,6 +1163,7 @@ defineExpose({
     @pointermove="onPointermove"
     @pointerup="onPointerup"
     @pointercancel="onPointercancel"
+    @pointerleave="onPointerleave"
   >
     <div class="v-calendar-head">
       <div class="v-calendar-head-gutter" />

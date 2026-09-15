@@ -126,7 +126,7 @@ export type GestureInit<G extends GestureBase> = Omit<
 >
 
 /**
- * A gesture held by the KEYBOARD rather than by a pointer: grabbed with Enter, and waiting
+ * A gesture held by the KEYBOARD rather than by a pointer: grabbed with Space, and waiting
  * for the arrows to move it. Both grids draw the card differently in that state, which is
  * what makes it worth a name.
  */
@@ -143,9 +143,10 @@ export interface CalendarGestureOptions<E extends CalendarEvent, G extends Gestu
   /** The view's own box: what "outside the calendar" is measured against. */
   rootEl: Ref<HTMLElement | null>
   /**
-   * The element the pointer is captured on. It must contain every surface a gesture can start
-   * on, and carry the move, up and cancel bindings: capture retargets every later pointer event
-   * to it, which is what makes one set of bindings serve every kind of gesture.
+   * The element the pointer is captured on once a press travels. It must contain every surface
+   * a gesture can start on, and carry the move, up, cancel and leave bindings: capture retargets
+   * every later pointer event to it, which is what makes one set of bindings serve every kind of
+   * gesture.
    */
   captureEl: Ref<HTMLElement | null>
   /** The box the cells occupy, which points and edges are read against. */
@@ -273,10 +274,10 @@ export function useCalendarGesture<E extends CalendarEvent, G extends GestureBas
 
   /**
    * Starts a gesture. Every entry point funnels through here, so the rules that make a gesture
-   * safe — one at a time, the origin captured once, the pointer taken hold of on the capture
-   * element — are written once.
+   * safe — one at a time, the origin captured once — are written once. The pointer itself is
+   * only taken hold of once the press travels, in `onPointermove`.
    */
-  function start(init: GestureInit<G>, event?: PointerEvent, rtl = isRtl()) {
+  function start(init: GestureInit<G>, rtl = isRtl()) {
     gesture.value = {
       ...init,
       preview: { ...init.origin },
@@ -286,8 +287,21 @@ export function useCalendarGesture<E extends CalendarEvent, G extends GestureBas
       outside: false,
       rtl,
     } as G
+  }
 
-    if (!event) return
+  /**
+   * Takes hold of the pointer on the capture element, so the drag keeps following it past the
+   * calendar's edges.
+   *
+   * TRAP — called when the press crosses the drag threshold, NEVER at the press. The browser
+   * sends the `click` that follows a captured `pointerup` to the CAPTURE element, so a press
+   * captured at once reaches the scroller instead of the card or the cell under it: clicking an
+   * event would open nothing and clicking an empty slot would report nothing, on every calendar
+   * whose events can be moved or drawn. Neither jsdom nor a synthetic pointer event reproduces
+   * the retargeting (a synthetic pointer cannot be captured), so the unit suite pins WHEN the
+   * capture is asked for rather than where the click lands.
+   */
+  function capture(pointerId: number) {
     // @fallback
     /*
      * Wrapped because a pointer event fired by a TEST refers to no real pointer,
@@ -295,7 +309,7 @@ export function useCalendarGesture<E extends CalendarEvent, G extends GestureBas
      * the capture element, which no test is checking.
      */
     try {
-      options.captureEl.value?.setPointerCapture(event.pointerId)
+      options.captureEl.value?.setPointerCapture(pointerId)
     } catch {
       /* a synthetic pointer: nothing to capture */
     }
@@ -324,6 +338,7 @@ export function useCalendarGesture<E extends CalendarEvent, G extends GestureBas
       return
     }
 
+    if (!state.moved) capture(event.pointerId)
     state.moved = true
     // Each box is measured ONCE per move and handed to everything that reads it.
     const rootRect = options.rootEl.value?.getBoundingClientRect()
@@ -381,6 +396,19 @@ export function useCalendarGesture<E extends CalendarEvent, G extends GestureBas
   function onPointercancel() {
     gesture.value = null
     release()
+  }
+
+  /*
+   * A press that leaves the capture element before it has travelled far enough to be captured.
+   * Its `pointerup` then lands outside and never reaches the bindings, so without this the
+   * gesture would outlive the press: a mouse keeps the same pointer id, and bringing it back over
+   * the calendar with the button up would pick the event up and carry it. A captured pointer
+   * never leaves, so a real drag is untouched.
+   */
+  function onPointerleave(event: PointerEvent) {
+    const state = gesture.value
+    if (!state || state.pointerId !== event.pointerId || state.moved) return
+    onPointercancel()
   }
 
   /*
@@ -449,14 +477,14 @@ export function useCalendarGesture<E extends CalendarEvent, G extends GestureBas
     if (!intent) return
 
     if (!state) {
-      // An event that cannot be moved keeps a button's ordinary behaviour: Enter opens it,
+      // An event that cannot be moved keeps a button's ordinary behaviour: Space presses it,
       // which the card's click handler reports.
-      const init = intent.kind === 'activate' ? options.grab(item) : null
+      const init = intent.kind === 'grab' ? options.grab(item) : null
       if (!init) return
       /*
-       * Enter and Space are ALSO how a button is pressed. Without this the same keystroke
-       * would take hold of the event and open it at once, and every attempt to move something
-       * would fire the consumer's editor over the top of it.
+       * Space is ALSO how a button is pressed, on its release. Cancelling the keydown is what
+       * stops that press, so the keystroke that takes hold of the event does not open it too:
+       * without it every attempt to move something would fire the consumer's editor over it.
        */
       event.preventDefault()
       start(init)
@@ -496,7 +524,12 @@ export function useCalendarGesture<E extends CalendarEvent, G extends GestureBas
     const state = gesture.value
     const mine = state !== null && state.id === id
     return {
-      dragging: mine && state.pointerId !== null,
+      /*
+       * TRAP — only once the press has travelled. A dragged card takes no pointer events, so
+       * marked at the press it lets the release land on the cell beneath it: the click then goes
+       * to that cell, and clicking an event reports an empty slot instead of opening it.
+       */
+      dragging: mine && state.pointerId !== null && state.moved,
       rejected: mine && state.outside,
       grabbed: mine && state.pointerId === null,
       hintId: options.editable() && !isGhostId(id) ? options.hintId() : undefined,
@@ -519,6 +552,7 @@ export function useCalendarGesture<E extends CalendarEvent, G extends GestureBas
     onPointermove,
     onPointerup,
     onPointercancel,
+    onPointerleave,
     onCardKeydown,
     refocusCard,
     focusCell,

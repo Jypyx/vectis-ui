@@ -57,9 +57,17 @@ describe('moving about the grid', () => {
 })
 
 describe('a card at rest', () => {
-  it('is taken hold of by Enter, and leaves Escape to the browser', () => {
-    expect(calendarIntent('Enter', false, 'event', SLOT, false)).toEqual({ kind: 'activate' })
+  it('is taken hold of by Space, and leaves Escape to the browser', () => {
+    expect(calendarIntent(' ', false, 'event', SLOT, false)).toEqual({ kind: 'grab' })
     expect(calendarIntent('Escape', false, 'event', SLOT, false)).toBeUndefined()
+  })
+
+  /*
+   * Enter is left to the card, a button, which it presses: that is how the event is opened,
+   * and a card taken hold of by Enter could not be opened from the keyboard at all.
+   */
+  it('leaves Enter to the button, so the event opens', () => {
+    expect(calendarIntent('Enter', false, 'event', SLOT, false)).toBeUndefined()
   })
 
   /*

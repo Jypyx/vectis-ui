@@ -163,6 +163,7 @@ const {
   onPointermove,
   onPointerup,
   onPointercancel,
+  onPointerleave,
   onCardKeydown,
   focusCell,
   idOfCard,
@@ -377,7 +378,6 @@ function onGridPointerdown(event: PointerEvent) {
       originY: event.clientY,
       grabIndex: indexAt(event.clientX, event.clientY, rect, rtl),
     },
-    event,
     rtl,
   )
 }
@@ -499,6 +499,7 @@ defineExpose({
       @pointermove="onPointermove"
       @pointerup="onPointerup"
       @pointercancel="onPointercancel"
+      @pointerleave="onPointerleave"
       @click="onGridClick"
     >
       <div

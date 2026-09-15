@@ -257,19 +257,30 @@ anyone who cannot use a pointer.
 | key                      | what it does                                                 |
 | ------------------------ | ------------------------------------------------------------ |
 | `Enter` on an empty cell | reports `cell-activate`, the day and hour your form opens on |
-| `Enter` on a card        | takes hold of the event                                      |
+| `Enter` on a card        | presses it, which reports `event-activate`                   |
+| `Space` on a card        | takes hold of the event                                      |
 | arrows, once held        | moves it by a slot, or by a day                              |
 | `Shift` + arrows         | changes when it ends                                         |
-| `Enter`                  | places it                                                    |
+| `Enter` or `Space`       | places it                                                    |
 | `Escape`                 | puts it back where it was                                    |
 
 Drawing a slot out has no keystroke of its own. The keyboard's way to a new event is the cell it
 reports: its day and hour are where your form starts, and the length is chosen there.
 
-Each step is announced, and taking hold does **not** also open the event — the same keystroke would
-otherwise do both.
+Each step is announced, and taking hold does **not** also open the event: `Space` is how a button is
+pressed as well, and the same keystroke would otherwise do both. `Enter` is left to the card so an
+event that can be moved can still be opened, which is the key a reader tries first on a button.
 
 <Canvas of={VCalendarStories.KeyboardEditing} />
+
+### Opening an event
+
+A click on a card, or `Enter` on it, reports `event-activate`, and a click on an empty part of the
+grid reports `cell-activate`. That holds on a calendar whose events can be moved and drawn: the
+pointer is only taken hold of once a press travels, so a press that stays still is an ordinary
+click on whatever it landed on.
+
+<Canvas of={VCalendarStories.OpenOnClick} />
 
 ## Custom content
 
@@ -312,8 +323,9 @@ tall as its content, so there is nothing to switch on.
   tabindex** so exactly one cell is ever in the tab order. Each cell names its own day and hour in
   full, so nothing is lost to a reader who cannot see the row of day names above.
 - **Keyboard**: arrows move by a day and by an hour, `Home`/`End` reach the ends of the row,
-  `PageUp`/`PageDown` turn to the previous and next period, and `Enter` takes up whatever is
-  focused. Every gesture the pointer offers is reachable this way — see the table above.
+  `PageUp`/`PageDown` turn to the previous and next period, `Enter` reports a cell or opens a card,
+  and `Space` takes hold of a card to move it. Every gesture the pointer offers is reachable this
+  way — see the table above.
 - Every event is a real button, reachable and activatable without a pointer. Each points at one
   shared node describing how it can be moved, rather than repeating the sentence on every card.
 - **The resize strip is not a control.** A button inside a button is invalid HTML and a blocking

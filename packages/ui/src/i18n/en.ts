@@ -174,8 +174,9 @@ export const en: Messages = {
     untitled: '(No title)',
     eventRoleDescription: 'event',
     eventHint:
-      'Press Enter to take hold of this event, then the arrow keys to move it and Shift with the arrow keys to change when it ends.',
-    grabbed: 'Event held. Use the arrow keys to move it, Enter to place it, Escape to cancel.',
+      'Press Enter to open this event. Press Space to take hold of it, then the arrow keys to move it and Shift with the arrow keys to change when it ends.',
+    grabbed:
+      'Event held. Use the arrow keys to move it, Enter or Space to place it, Escape to cancel.',
     dropped: 'Event placed.',
     reverted: 'Move cancelled. The event is back where it was.',
     movedTo: (title, when) => `${title} moved to ${when}.`,
