@@ -17,6 +17,7 @@ const meta = {
   title: 'Components/Badge',
   component: VBadge,
   argTypes: {
+    variant: { control: 'inline-radio', options: ['solid', 'soft'] },
     tone: { control: 'select', options: ['neutral', 'accent', 'danger', 'success', 'warning'] },
     color: { control: 'color' },
     count: { control: 'number' },
@@ -28,6 +29,7 @@ const meta = {
     ringColor: { control: 'color' },
   },
   args: {
+    variant: 'solid',
     tone: 'accent',
     count: 8,
     dot: false,
@@ -47,17 +49,47 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-/** The 5 tones in full-colour rendering — check `neutral` in both themes. */
+/** The 5 tones in both variants, solid then soft — check `neutral` in both themes. */
 export const Tones: Story = {
   render: () => ({
     components: { VBadge },
-    setup: () => ({ tones: ['neutral', 'accent', 'success', 'warning', 'danger'] }),
+    setup: () => ({
+      tones: ['neutral', 'accent', 'success', 'warning', 'danger'],
+      variants: ['solid', 'soft'],
+    }),
     template: `
-      <div style="display: flex; gap: 16px; flex-wrap: wrap">
-        <div v-for="tone in tones" :key="tone" style="display: flex; flex-direction: column; align-items: center; gap: 4px">
-          <VBadge :tone="tone" :count="8" />
-          <small>{{ tone }}</small>
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <div v-for="variant in variants" :key="variant" style="display: flex; gap: 16px; flex-wrap: wrap">
+          <div v-for="tone in tones" :key="tone" style="display: flex; flex-direction: column; align-items: center; gap: 4px">
+            <VBadge :variant="variant" :tone="tone" :count="8" />
+            <small>{{ tone }}</small>
+          </div>
         </div>
+      </div>
+    `,
+  }),
+}
+
+/**
+ * `soft` tints the pill with the tone and writes the content in it, for a count that should not
+ * draw the eye. An icon follows the text colour. A `dot` stays solid.
+ */
+export const Soft: Story = {
+  render: () => ({
+    components: { VAvatar, VBadge },
+    setup: () => ({ icons }),
+    template: `
+      <div style="display: flex; gap: 16px; align-items: center">
+        <VBadge variant="soft" :count="12" />
+        <VBadge variant="soft" tone="danger" :count="120" />
+        <VBadge variant="soft" tone="success" :icon="icons.check" />
+        <VBadge variant="soft" color="#7c3aed" :count="8" />
+        <VBadge variant="soft" overlay tone="danger" :count="3" bordered>
+          <VAvatar name="Xavier Darmet" />
+        </VBadge>
+        <VBadge variant="soft" overlay dot tone="success" bordered>
+          <VAvatar name="Xavier Darmet" />
+        </VBadge>
       </div>
     `,
   }),

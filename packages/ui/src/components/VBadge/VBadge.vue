@@ -20,21 +20,30 @@ import type { IconSource } from '../VIcon/types'
 
 import { customColorStyle } from '../../utils/css'
 
+export type BadgeVariant = 'solid' | 'soft'
 export type BadgeTone = 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
 export type BadgeOverlayPosition = 'top' | 'bottom'
 
 interface BadgeProps {
   /**
-   * The meaning the badge carries, expressed as a colour. The pill is filled with
-   * it and the text adapts to stay readable; there is a single, fully coloured
-   * rendering, so no variant to choose alongside it.
+   * How strongly the badge is painted: filled with the full colour (`solid`, the
+   * default), or a tinted background with the text in the colour (`soft`), for a
+   * count that should not draw the eye. A `dot` is always solid: with no content to
+   * tint, a soft dot would be a pale disc barely distinguishable from the page.
+   */
+  variant?: BadgeVariant
+  /**
+   * The meaning the badge carries, expressed as a colour. A solid badge is filled
+   * with it and its text adapts to stay readable; a soft one is tinted with it and
+   * writes its text in it.
    */
   tone?: BadgeTone
   /**
-   * A colour of your own (hex, CSS name or `oklch()`), which replaces the tone. On
-   * browsers that support `contrast-color()` the text turns black or white by
-   * itself; everywhere else it falls back to white, so with a light colour the
-   * contrast is yours to check.
+   * A colour of your own (hex, CSS name or `oklch()`), which replaces the tone. On a
+   * solid badge, browsers that support `contrast-color()` turn the text black or
+   * white by themselves; everywhere else it falls back to white, so with a light
+   * colour the contrast is yours to check. A soft badge derives its background and
+   * text from that colour mixed with the theme's surface and text.
    */
   color?: string
   /**
@@ -81,6 +90,7 @@ interface BadgeProps {
 }
 
 const props = withDefaults(defineProps<BadgeProps>(), {
+  variant: 'solid',
   tone: 'accent',
   color: undefined,
   count: undefined,
@@ -123,6 +133,7 @@ const Pill: FunctionalComponent = () =>
     'span',
     {
       class: 'v-badge v-tone',
+      'data-variant': props.variant,
       'data-tone': props.tone,
       'data-custom': props.color !== undefined ? '' : undefined,
       'data-dot': props.dot ? '' : undefined,
@@ -210,6 +221,25 @@ Pill.props = []
   .v-badge[data-custom] {
     --badge-bg: var(--custom-color);
     --badge-text-fallback: var(--vectis-color-text-on-accent);
+  }
+
+  /* The soft pair of the same table. The text is the tone's own colour rather than
+     contrast-color(): the black or white that function picks reads on a pale tint, but
+     says nothing of the tone. At (0,3,0) it beats the `@supports` rule above whatever
+     the order. A dot is left out: with no content, a soft dot is a pale disc on the
+     page, which a presence marker cannot afford. */
+  .v-badge[data-variant='soft']:not([data-dot]) {
+    --badge-bg: var(--tone-bg-soft);
+
+    color: var(--tone-text-tinted);
+  }
+
+  /* A custom colour's soft pair, derived as VChip derives its own, so the same value
+     gives a soft chip and a soft badge the same tint in both themes. */
+  .v-badge[data-variant='soft'][data-custom]:not([data-dot]) {
+    --badge-bg: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 85%);
+
+    color: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 30%);
   }
 
   .v-badge[data-icon-only] {

@@ -3,6 +3,10 @@ export default {
   lead: "Un petit compteur ou un marqueur, seul ou épinglé au coin d'autre chose. Il n'est jamais interactif : ce qu'il rapporte appartient à l'élément sur lequel il se pose.",
 
   examples: {
+    variants: {
+      title: 'Variantes',
+      text: "<code>variant</code> remplit le badge de la couleur (<code>solid</code>, par défaut) ou le teinte et écrit le contenu dans la couleur (<code>soft</code>), pour un compteur qui ne doit pas attirer l'œil. Un point reste toujours plein.",
+    },
     tones: {
       title: 'Tons',
       text: '<code>tone</code> définit la couleur : <code>accent</code>, <code>neutral</code>, <code>success</code>, <code>warning</code> ou <code>danger</code>.',
@@ -44,9 +48,11 @@ export default {
   api: {
     VBadge: {
       props: {
-        tone: "Ce que le badge signifie, exprimé en couleur. La pastille en est remplie et le texte s'adapte pour rester lisible : il n'y a donc qu'un seul rendu et aucune variante à choisir à côté.",
+        variant:
+          "L'intensité avec laquelle le badge est peint : rempli de la couleur, ou un fond teinté avec le contenu dans la couleur, pour un compteur qui ne doit pas attirer l'œil. Un point reste toujours plein, un disque pâle sans contenu se distinguant mal de la page.",
+        tone: "Ce que le badge signifie, exprimé en couleur. Un badge plein en est rempli et son texte s'adapte pour rester lisible ; un badge teinté en prend la teinte et y écrit son texte.",
         color:
-          'Une couleur à vous, en hexadécimal, en nom CSS ou en <code>oklch()</code>, qui remplace le ton. Là où <code>contrast-color()</code> est pris en charge, le texte passe au noir ou au blanc de lui-même ; ailleurs il retombe sur le blanc, donc avec une couleur claire le contraste reste à votre charge.',
+          'Une couleur à vous, en hexadécimal, en nom CSS ou en <code>oklch()</code>, qui remplace le ton. Sur un badge plein, là où <code>contrast-color()</code> est pris en charge, le texte passe au noir ou au blanc de lui-même ; ailleurs il retombe sur le blanc, donc avec une couleur claire le contraste reste à votre charge. Un badge teinté mélange son fond et son texte à partir de cette couleur et du thème.',
         count:
           "Le nombre à afficher. Au-delà de 99, il devient 99+, pour qu'un compteur chargé ne puisse pas étirer la pastille indéfiniment.",
         icon: "Une icône unique affichée à la place d'un nombre. Elle l'emporte sur <code>count</code>, et elle est ignorée quand le badge est un point.",

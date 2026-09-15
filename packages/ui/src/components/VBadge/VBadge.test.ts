@@ -43,6 +43,14 @@ describe('VBadge', () => {
     expect(container.querySelector('.v-badge')!.getAttribute('data-tone')).toBe('danger')
   })
 
+  it('variant: mirrored as data-variant, solid by default', () => {
+    const { container } = render(VBadge, { props: { count: 3 } })
+    expect(container.querySelector('.v-badge')!.getAttribute('data-variant')).toBe('solid')
+
+    const { container: soft } = render(VBadge, { props: { count: 3, variant: 'soft' } })
+    expect(soft.querySelector('.v-badge')!.getAttribute('data-variant')).toBe('soft')
+  })
+
   it('color: data-custom + an inline --custom-color; both absent without color', () => {
     const { container } = render(VBadge, { props: { color: 'hotpink', count: 3 } })
     const badge = container.querySelector('.v-badge')!

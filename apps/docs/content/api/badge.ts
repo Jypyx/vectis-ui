@@ -9,6 +9,7 @@ export default {
     {
       name: 'VBadge',
       props: [
+        { name: 'variant', type: 'BadgeVariant', values: "'solid' | 'soft'", default: "'solid'" },
         { name: 'tone', type: 'BadgeTone', values: "'neutral' | 'accent' | 'danger' | 'success' | 'warning'", default: "'accent'" },
         { name: 'color', type: 'string' },
         { name: 'count', type: 'number' },

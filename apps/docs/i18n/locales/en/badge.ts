@@ -3,6 +3,10 @@ export default {
   lead: 'A small count or marker, on its own or pinned to the corner of something else. It is never interactive: what it reports belongs to the element it sits on.',
 
   examples: {
+    variants: {
+      title: 'Variants',
+      text: '<code>variant</code> fills the badge with the colour (<code>solid</code>, the default) or tints it and writes the content in the colour (<code>soft</code>), for a count that should not draw the eye. A dot is always solid.',
+    },
     tones: {
       title: 'Tones',
       text: '<code>tone</code> sets the colour: <code>accent</code>, <code>neutral</code>, <code>success</code>, <code>warning</code> or <code>danger</code>.',
@@ -44,9 +48,11 @@ export default {
   api: {
     VBadge: {
       props: {
-        tone: 'The meaning the badge carries, expressed as a colour. The pill is filled with it and the text adapts to stay readable, so there is a single rendering and no variant to choose alongside it.',
+        variant:
+          'How strongly the badge is painted: filled with the full colour, or a tinted background with the content in the colour, for a count that should not draw the eye. A dot is always solid, since a pale disc with nothing in it is hard to tell from the page.',
+        tone: 'The meaning the badge carries, expressed as a colour. A solid badge is filled with it and its text adapts to stay readable; a soft one is tinted with it and writes its text in it.',
         color:
-          'A colour of your own, as hex, a CSS name or <code>oklch()</code>, which replaces the tone. Where <code>contrast-color()</code> is supported the text turns black or white by itself; everywhere else it falls back to white, so with a light colour the contrast is yours to check.',
+          'A colour of your own, as hex, a CSS name or <code>oklch()</code>, which replaces the tone. On a solid badge, where <code>contrast-color()</code> is supported the text turns black or white by itself; everywhere else it falls back to white, so with a light colour the contrast is yours to check. A soft badge mixes its background and text from that colour and the theme.',
         count:
           'The number to display. Anything above 99 is shown as 99+, so a busy counter cannot stretch the pill indefinitely.',
         icon: 'A single icon shown instead of a number. It takes precedence over <code>count</code>, and is ignored when the badge is a dot.',

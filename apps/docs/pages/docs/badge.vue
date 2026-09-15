@@ -20,6 +20,8 @@ import BadgeOverlayPosition from '~/examples/badge/OverlayPosition.vue'
 import badgeOverlayPositionSource from '~/examples/badge/OverlayPosition.vue?raw'
 import BadgeTones from '~/examples/badge/Tones.vue'
 import badgeTonesSource from '~/examples/badge/Tones.vue?raw'
+import BadgeVariants from '~/examples/badge/Variants.vue'
+import badgeVariantsSource from '~/examples/badge/Variants.vue?raw'
 
 definePageMeta({ layout: 'docs' })
 
@@ -37,6 +39,12 @@ useDocsHead('badge')
   </DocsExample>
 
   <h2 id="examples">{{ t('common.examples') }}</h2>
+
+  <h3 id="variants">{{ t('badge.examples.variants.title') }}</h3>
+  <DocsProse keypath="badge.examples.variants.text" />
+  <DocsExample :source="badgeVariantsSource">
+    <BadgeVariants />
+  </DocsExample>
 
   <h3 id="tones">{{ t('badge.examples.tones.title') }}</h3>
   <DocsProse keypath="badge.examples.tones.text" />

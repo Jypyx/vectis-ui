@@ -7,8 +7,9 @@ import * as VBadgeStories from './VBadge.stories'
 
 A **non-interactive** information pill: a counter or an icon. No hover, no focus, no event — the
 information alone. Two formats (a 20px pill or a 10px dot through `dot`), three placements
-(standalone, inline, `overlay` — on the top or bottom corner), and a single full-colour rendering
-driven by `tone` or a custom colour. For a **textual** status, use a `VChip`.
+(standalone, inline, `overlay` — on the top or bottom corner), two variants (`solid`, the default,
+and `soft`) and a colour driven by `tone` or a custom colour. For a **textual** status, use a
+`VChip`.
 
 <Canvas of={VBadgeStories.Default} />
 
@@ -16,15 +17,25 @@ driven by `tone` or a custom colour. For a **textual** status, use a `VChip`.
 
 ## Tones
 
-Five tones (`neutral`, `accent` — the default —, `success`, `warning`, `danger`) in full-colour
-rendering. The text colour adapts **black/white** through `contrast-color()` (Safari 26+);
-browsers without support fall back to a per-tone value (`--vectis-color-text-on-accent`,
+Five tones (`neutral`, `accent` — the default —, `success`, `warning`, `danger`), shown solid then
+soft. On a solid badge the text colour adapts **black/white** through `contrast-color()` (Safari
+26+); browsers without support fall back to a per-tone value (`--vectis-color-text-on-accent`,
 `--vectis-color-text-on-warning`…) — the library's classic solid rendering.
 
 The particularity of the `neutral` tone: a `text`/`surface` inversion (a dark background in
 light, a light background in dark) — a mid grey would be unreadable in one of the two themes.
 
 <Canvas of={VBadgeStories.Tones} />
+
+## Soft
+
+`variant="soft"` paints the tone's tinted surface and writes the count or the icon in the tone's
+own colour, the pair a soft `VChip` uses: a count that should be there without drawing the eye.
+With a custom `color`, both shades are mixed from it against the theme's surface and text, so the
+same value works in both themes. A `dot` ignores the variant and stays solid: with no content to
+carry the colour, a soft dot would be a pale disc barely distinguishable from the page.
+
+<Canvas of={VBadgeStories.Soft} />
 
 ## Custom colour
 
