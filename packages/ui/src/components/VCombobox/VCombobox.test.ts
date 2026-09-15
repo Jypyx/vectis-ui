@@ -225,6 +225,69 @@ describe('VCombobox', () => {
     expect(emptyMulti.queryByRole('button', { name: 'Clear selection' })).toBeNull()
   })
 
+  it('display="text": the labels joined by commas, no chip, and Backspace still takes the last back', async () => {
+    const { container, getByRole, queryAllByRole, emitted, rerender } = renderCombobox({
+      multiple: true,
+      display: 'text',
+      modelValue: ['fr', 're'],
+    })
+    expect(container.querySelector('.v-combobox-text')?.textContent).toBe('France, Réunion')
+    expect(container.querySelector('.v-chip')).toBeNull()
+    expect(queryAllByRole('button', { name: /Remove/ })).toHaveLength(0)
+    // one line: the field does not take the arrangement that lets chips wrap
+    expect(container.querySelector('.v-input-chips')).toBeNull()
+
+    await fireEvent.keyDown(getByRole('combobox'), { key: 'Backspace' })
+    expect(emitted('update:modelValue').at(-1)).toEqual([['fr']])
+
+    await rerender({ modelValue: [] })
+    expect(container.querySelector('.v-combobox-text')).toBeNull()
+  })
+
+  it('display="text" changes nothing for a single value', () => {
+    const { container, getByRole } = renderCombobox({ display: 'text', modelValue: 'fr' })
+    expect(container.querySelector('.v-combobox-text')).toBeNull()
+    expect((getByRole('combobox') as HTMLInputElement).value).toBe('France')
+  })
+
+  it('display="text" read-only: the search input stays folded under the focus', async () => {
+    const { container, getByRole } = renderCombobox({
+      multiple: true,
+      display: 'text',
+      readonly: true,
+      modelValue: ['fr'],
+    })
+    await fireEvent.focus(getByRole('combobox'))
+    expect(container.querySelector('.v-combobox')?.hasAttribute('data-collapsed')).toBe(true)
+  })
+
+  it('the chevron closes an open panel, and keeps the focus in the field while doing so', async () => {
+    const { container, getByRole } = renderCombobox()
+    const input = getByRole('combobox')
+    const chevron = container.querySelector('.v-combobox-chevron') as HTMLElement
+    const field = container.querySelector('.v-input-field') as HTMLElement
+    // `dispatchEvent` answers false when a listener cancelled the event
+    const pressed = (el: Element) =>
+      el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }))
+
+    // closed: a click on the chevron opens, like anywhere else on the field
+    await fireEvent.click(chevron)
+    expect(input.getAttribute('aria-expanded')).toBe('true')
+
+    // the press is cancelled, or the focus would leave the field and the root's focusout
+    // would close the panel before the click reopened it
+    expect(pressed(chevron)).toBe(false)
+    await fireEvent.click(chevron)
+    expect(input.getAttribute('aria-expanded')).toBe('false')
+    expect(document.activeElement).toBe(input)
+
+    // anywhere else on the field leaves an open panel open, and its press alone
+    await fireEvent.click(chevron)
+    await fireEvent.click(field)
+    expect(input.getAttribute('aria-expanded')).toBe('true')
+    expect(pressed(field)).toBe(true)
+  })
+
   it('displays a tick on the right of the selected option', () => {
     const { container } = renderCombobox({ multiple: true, modelValue: ['fr'] })
     const optionByText = (text: string) =>

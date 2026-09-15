@@ -27,6 +27,10 @@ export default {
       title: 'Multiple selection',
       text: '<code>multiple</code> allows selecting several values, which are displayed as removable chips inside the field.',
     },
+    textDisplay: {
+      title: 'Values as text',
+      text: '<code>display="text"</code> shows the chosen values as their labels joined by commas, on one line cut short with an ellipsis. The field keeps the height of an ordinary control, and under the focus the line leaves at least half of it to the search. A value is removed by unticking it in the list, with Backspace on an empty search, or with the <code>clearable</code> cross.',
+    },
     fieldIcon: {
       title: 'Field icon',
       text: '<code>iconStart</code> displays an icon at the beginning of the field. <code>iconStartLabel</code> provides an accessible label if the icon is made interactive.',
@@ -59,7 +63,9 @@ export default {
         options:
           'What the list offers. An entry may be an option, a named block of options, or a separator; a plain list of options remains perfectly valid.',
         multiple:
-          'Allows several values to be chosen, which makes the value a list and shows what has been chosen as chips inside the field.',
+          'Allows several values to be chosen, which makes the value a list and shows what has been chosen inside the field, as chips or as text depending on <code>display</code>.',
+        display:
+          'How the chosen values are shown when several can be chosen: one dismissible chip each, or their labels joined by commas on a single line, cut short with an ellipsis. It changes nothing for a single value, which is always text.',
         label: 'The label above the field, tied to it so that clicking it focuses the field.',
         hint: 'A line of help under the field, read out along with the label.',
         size: 'The height of the field: 32, 40 or 48 pixels. The panel and its rows follow it.',
@@ -73,7 +79,7 @@ export default {
           'An icon inside the field, at the start. It is rendered before the chips rather than in their place. Decorative until a <code>@click:icon-start</code> listener turns it into a button.',
         iconStartLabel: 'What the start icon does, in words, once it is clickable.',
         expandIcon:
-          'The chevron at the end of the field, which turns as the list opens. It is decoration: the field itself is what opens the list, so the chevron is hidden from screen readers and takes no label.',
+          'The chevron at the end of the field, which turns as the list opens. Clicking it while the list is open closes the list. It is decoration all the same: the field itself opens the list and Escape closes it from the keyboard, so the chevron is hidden from screen readers and takes no label.',
         clearable: 'Offers a cross that empties both the selection and the search.',
         clearLabel:
           'What that cross does, in words. It falls back to the design system dictionary.',

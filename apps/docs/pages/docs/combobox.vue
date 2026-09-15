@@ -26,6 +26,8 @@ import ComboboxSizes from '~/examples/combobox/Sizes.vue'
 import comboboxSizesSource from '~/examples/combobox/Sizes.vue?raw'
 import ComboboxStates from '~/examples/combobox/States.vue'
 import comboboxStatesSource from '~/examples/combobox/States.vue?raw'
+import ComboboxTextDisplay from '~/examples/combobox/TextDisplay.vue'
+import comboboxTextDisplaySource from '~/examples/combobox/TextDisplay.vue?raw'
 
 definePageMeta({ layout: 'docs' })
 
@@ -78,6 +80,12 @@ useDocsHead('combobox')
   <DocsProse keypath="combobox.examples.multiple.text" />
   <DocsExample :source="comboboxMultipleSource" stack>
     <ComboboxMultiple />
+  </DocsExample>
+
+  <h3 id="text-display">{{ t('combobox.examples.textDisplay.title') }}</h3>
+  <DocsProse keypath="combobox.examples.textDisplay.text" />
+  <DocsExample :source="comboboxTextDisplaySource" stack>
+    <ComboboxTextDisplay />
   </DocsExample>
 
   <h3 id="field-icon">{{ t('combobox.examples.fieldIcon.title') }}</h3>

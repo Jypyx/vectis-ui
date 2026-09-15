@@ -27,6 +27,10 @@ export default {
       title: 'Sélection multiple',
       text: "<code>multiple</code> permet de sélectionner plusieurs valeurs, qui s'affichent sous forme de puces (chips) supprimables à l'intérieur du champ.",
     },
+    textDisplay: {
+      title: 'Valeurs en texte',
+      text: '<code>display="text"</code> affiche les valeurs choisies sous forme de libellés séparés par des virgules, sur une seule ligne tronquée par des points de suspension. Le champ garde la hauteur d\'un contrôle ordinaire, et sous le focus la ligne laisse au moins la moitié de la place à la recherche. On retire une valeur en la décochant dans la liste, avec Retour arrière sur une recherche vide, ou avec la croix de <code>clearable</code>.',
+    },
     fieldIcon: {
       title: 'Icône du champ',
       text: "<code>iconStart</code> affiche une icône au début du champ. <code>iconStartLabel</code> fournit un label accessible si l'icône est rendue interactive au clic.",
@@ -59,7 +63,9 @@ export default {
         options:
           "Ce que la liste propose. Une entrée peut être une option, un bloc nommé d'options, ou un séparateur ; une simple liste d'options reste parfaitement valable.",
         multiple:
-          'Permet de choisir plusieurs valeurs, ce qui fait de la valeur une liste et montre ce qui a été choisi en puces dans le champ.',
+          'Permet de choisir plusieurs valeurs, ce qui fait de la valeur une liste et montre ce qui a été choisi dans le champ, en puces ou en texte selon <code>display</code>.',
+        display:
+          'Comment les valeurs choisies sont montrées quand on peut en choisir plusieurs : une puce supprimable chacune, ou leurs libellés séparés par des virgules sur une seule ligne, tronquée par des points de suspension. Ne change rien pour une valeur unique, qui est toujours du texte.',
         label: "Le libellé au-dessus du champ, lié à lui pour qu'un clic dessus y place le focus.",
         hint: "Une ligne d'aide sous le champ, lue en même temps que le libellé.",
         size: 'La hauteur du champ : 32, 40 ou 48 pixels. Le panneau et ses lignes la suivent.',
@@ -73,7 +79,7 @@ export default {
           "Une icône dans le champ, au début. Elle est rendue avant les chips et non à leur place. Décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton.",
         iconStartLabel: "Ce que fait l'icône de début, en mots, une fois cliquable.",
         expandIcon:
-          "Le chevron à la fin du champ, qui pivote à l'ouverture de la liste. C'est une décoration : c'est le champ lui-même qui ouvre la liste, donc le chevron est masqué aux lecteurs d'écran et ne prend pas de libellé.",
+          "Le chevron à la fin du champ, qui pivote à l'ouverture de la liste. Un clic dessus quand la liste est ouverte la ferme. Il reste une décoration : le champ lui-même ouvre la liste et Échap la ferme au clavier, donc le chevron est masqué aux lecteurs d'écran et ne prend pas de libellé.",
         clearable: 'Propose une croix qui vide à la fois la sélection et la recherche.',
         clearLabel:
           'Ce que fait cette croix, en mots. Sa valeur par défaut vient du dictionnaire du design system.',

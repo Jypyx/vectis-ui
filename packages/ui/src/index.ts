@@ -148,6 +148,7 @@ export type {
   ComboboxFilter,
   ComboboxSize,
   ComboboxPlacement,
+  ComboboxDisplay,
 } from './components/VCombobox/VCombobox.vue'
 export { default as VBreadcrumb } from './components/VBreadcrumb/VBreadcrumb.vue'
 export type { BreadcrumbItem } from './components/VBreadcrumb/VBreadcrumb.vue'

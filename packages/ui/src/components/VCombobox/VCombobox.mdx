@@ -86,7 +86,8 @@ restricting the list: on reopening, **every** option is offered again (the curre
 tick), and only typing narrows the list. **Enter** selects the active option — or the single result
 when only one is left.
 
-A **chevron** on the right indicates the state and rotates on opening. `clearable` adds a **cross**
+A **chevron** on the right indicates the state and rotates on opening; clicking it while the list is
+open closes it, the focus staying in the field. `clearable` adds a **cross**
 to the left of it — `VInput`'s own prop — which appears as soon as there is **something to clear**
 (a value, Chips or a search) and empties **the whole selection**.
 
@@ -156,6 +157,20 @@ with no empty space.
 
 <Canvas of={VComboboxStories.MultipleSelection} />
 
+### Values as text
+
+`display="text"` spells the chosen values out instead of drawing a `VChip` each: their labels
+joined by commas, on one line, cut short with an ellipsis when they run out of room. The field keeps
+the height of an ordinary control whatever is chosen. Under the focus, the line gives up to half the
+field to the search input; out of focus the input folds away as it does with Chips, and the line
+takes the whole width.
+
+A value is taken back by unticking it in the list, by **Backspace** on an empty search, or all at
+once with the `clearable` cross. The `#chip` slot is not used. With a single value, `display` changes
+nothing: its label is already the field's text.
+
+<Canvas of={VComboboxStories.TextDisplay} />
+
 ### Customizing the Chips
 
 The **`#chip`** slot replaces the VChip of a selected value. It receives:
@@ -189,8 +204,8 @@ button and makes `iconStartLabel` necessary.
 The end of the field belongs to the component: the chevron, the spinner that takes its place while
 loading, and the clear cross to their left. There is no `iconEnd` here for that reason, but the
 chevron itself can be replaced through `expandIcon`, in the same forms as any other icon prop. It
-is decoration and takes no label: what opens the list is the field, not the chevron, so it stays
-hidden from screen readers.
+is decoration and takes no label: what opens the list is the field, and what closes it from the
+keyboard is Escape, so the chevron's pointer shortcut for closing stays hidden from screen readers.
 
 <Canvas of={VComboboxStories.FieldIcon} />
 

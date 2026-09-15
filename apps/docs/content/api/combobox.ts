@@ -11,6 +11,7 @@ export default {
       props: [
         { name: 'options', type: 'ComboboxItem[]' },
         { name: 'multiple', type: 'boolean', default: 'false' },
+        { name: 'display', type: 'ComboboxDisplay', values: "'chip' | 'text'", default: "'chip'" },
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
         { name: 'size', type: 'ComboboxSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },

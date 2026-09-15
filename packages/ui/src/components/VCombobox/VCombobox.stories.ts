@@ -189,6 +189,19 @@ export const Default: Story = {
     await userEvent.keyboard('{ArrowDown}{Enter}')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('re'))
     await expect(input).toHaveValue('Réunion')
+
+    // The chevron opens the list and closes it again. Pressing it hands no focus to the
+    // page: without that, the root's focusout would close the list on the press and the
+    // click would reopen it, which jsdom cannot show since a click moves no focus there.
+    const chevron = canvasElement.querySelector('.v-combobox-chevron')!
+    await userEvent.click(chevron)
+    await waitFor(() => expect(input).toHaveAttribute('aria-expanded', 'true'))
+    await userEvent.click(chevron)
+    await waitFor(() => expect(input).toHaveAttribute('aria-expanded', 'false'))
+    // waitFor: the panel closes on an opacity transition
+    const listbox = canvas.getByRole('listbox', { hidden: true })
+    await waitFor(() => expect(listbox).not.toBeVisible())
+    await expect(input).toHaveFocus()
   },
 }
 
@@ -335,6 +348,51 @@ export const MultipleSelection: Story = {
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('be'))
     await userEvent.click(canvas.getByRole('button', { name: 'Clear selection' }))
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent(/^$/))
+  },
+}
+
+/**
+ * `display="text"` spells the chosen values out as one line, joined by commas and cut short
+ * with an ellipsis. Under the focus the line gives up to half the field to the search.
+ */
+export const TextDisplay: Story = {
+  render: (args) => ({
+    components: { VCombobox },
+    setup: () => ({ args, t, value: ref<string[]>(['fr', 'be', 'ch', 'ca', 'lu']) }),
+    template: `
+      <div style="display: grid; gap: 8px; width: 300px">
+        <button type="button">{{ t.neighbour }}</button>
+        <VCombobox v-bind="args" multiple display="text" clearable v-model="value" :label="t.servedCountries" />
+        <output data-testid="mirror">{{ value.join(',') }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('combobox') as HTMLInputElement
+    const text = canvasElement.querySelector('.v-combobox-text') as HTMLElement
+    const field = canvasElement.querySelector('.v-input-field') as HTMLElement
+
+    // Unfocused, the line fills the field and is cut short rather than wrapping: the
+    // field keeps the height of an ordinary control.
+    await expect(text).toHaveTextContent('France, Belgium, Switzerland, Canada, Luxembourg')
+    await expect(text.scrollWidth).toBeGreaterThan(text.clientWidth)
+    await expect(input.offsetWidth).toBe(0)
+    const height = field.getBoundingClientRect().height
+
+    // Focused, the search takes the other half of the row.
+    await userEvent.click(input)
+    await waitFor(() => expect(input.offsetWidth).toBeGreaterThan(0))
+    await expect(text.getBoundingClientRect().width).toBeLessThanOrEqual(
+      field.getBoundingClientRect().width / 2,
+    )
+    await expect(field.getBoundingClientRect().height).toBeCloseTo(height, 1)
+
+    // Choosing and Backspace change the line in place.
+    await userEvent.keyboard('reun{Enter}')
+    await waitFor(() => expect(text).toHaveTextContent(/Luxembourg, Réunion$/))
+    await userEvent.keyboard('{Backspace}')
+    await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent(/^fr,be,ch,ca,lu$/))
   },
 }
 

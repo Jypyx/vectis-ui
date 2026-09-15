@@ -105,6 +105,12 @@ export type ComboboxPlacement =
 /** The height of the field: 32, 40 or 48 pixels. */
 export type ComboboxSize = 'sm' | 'md' | 'lg'
 
+/**
+ * How the chosen values are shown in a multiple field: one chip each, or their labels
+ * joined by commas.
+ */
+export type ComboboxDisplay = 'chip' | 'text'
+
 interface ComboboxProps {
   /**
    * What the list offers. An entry may be an option, a named block of options, or a
@@ -113,9 +119,16 @@ interface ComboboxProps {
   options: ComboboxItem[]
   /**
    * Allows several values to be chosen, which makes the value a list and shows what has
-   * been chosen as chips inside the field.
+   * been chosen inside the field, as chips or as text depending on `display`.
    */
   multiple?: boolean
+  /**
+   * How the chosen values are shown when several can be chosen: one dismissible chip
+   * each, or their labels joined by commas on a single line, cut short with an ellipsis
+   * when they run out of room. It changes nothing for a single value, which is always
+   * text.
+   */
+  display?: ComboboxDisplay
   /** The label above the field, tied to it so that clicking it focuses the field. */
   label?: string
   /**
@@ -150,8 +163,10 @@ interface ComboboxProps {
   iconStartLabel?: string
   /**
    * The chevron at the end of the field, which turns as the list opens: an icon name,
-   * or an explicit render. It is decoration — the field itself is what opens the list,
-   * so the chevron is hidden from screen readers and takes no label.
+   * or an explicit render. Clicking it while the list is open closes the list. It is
+   * decoration all the same — the field itself is what opens the list, and Escape what
+   * closes it from the keyboard — so the chevron is hidden from screen readers and takes
+   * no label.
    */
   expandIcon?: IconSource
   /** Offers a cross that empties both the selection and the search. */
@@ -194,6 +209,7 @@ interface ComboboxProps {
 
 const props = withDefaults(defineProps<ComboboxProps>(), {
   multiple: false,
+  display: 'chip',
   label: undefined,
   hint: undefined,
   size: 'md',
@@ -598,11 +614,26 @@ watch(
   { flush: 'post' },
 )
 
+/** The chosen values are spelled out as one line of text rather than drawn as chips. */
+const textDisplay = computed(() => props.multiple && props.display === 'text')
+
+// The comma is universal punctuation rather than a word, so it stays out of the dictionary,
+// as in VFileInput's own text display.
+const displayText = computed(() =>
+  textDisplay.value ? selectedValues.value.map(labelOf).join(', ') : '',
+)
+
 // With several values chosen and the field unfocused, the search input folds away so the
 // chips are not followed by an empty gap. It stays in the page and stays focusable —
 // only its width goes.
+//
+// A read-only TEXT display keeps it folded under the focus too: nothing can be typed, and
+// the input's share of the row would only cut the line of values short for nothing.
 const collapsed = computed(
-  () => props.multiple && !focused.value && selectedValues.value.length > 0,
+  () =>
+    props.multiple &&
+    selectedValues.value.length > 0 &&
+    (!focused.value || (textDisplay.value && props.readonly)),
 )
 
 // The clear cross has to appear as soon as there is SOMETHING to clear — chosen values,
@@ -756,10 +787,33 @@ function onFocus() {
   selectQuery()
 }
 
-/** A click anywhere on the field focuses it and opens the panel. */
-function onControlClick() {
+/** Whether a pointer event landed on the chevron, or on the spinner standing in its place. */
+const onChevron = (event: Event) =>
+  event.target instanceof Element &&
+  event.target.closest('.v-combobox-chevron, .v-combobox-spinner') !== null
+
+// @core
+/*
+ * TRAP — the chevron is not focusable, so pressing it would hand the focus to the page:
+ * the root's `focusout` then closes the panel, and the click that follows reopens it. A
+ * click meant to close would flash the list instead. Keeping the focus in the field is
+ * what lets the click below decide.
+ */
+function onControlMousedown(event: MouseEvent) {
+  if (onChevron(event)) event.preventDefault()
+}
+
+/**
+ * A click anywhere on the field focuses it and opens the panel — except on the chevron of
+ * an open panel, which closes it.
+ */
+function onControlClick(event: MouseEvent) {
   if (resolvedDisabled.value) return
   inputRef.value?.focus()
+  if (open.value && onChevron(event)) {
+    closePanel()
+    return
+  }
   openPanel()
   // Selected again AFTER the click, which has just placed the caret somewhere in the
   // middle of the label.
@@ -882,15 +936,16 @@ defineExpose({
     :data-open="open ? '' : undefined"
     @focusout="onFocusout"
   >
-    <div class="v-combobox-control" @click="onControlClick">
+    <div class="v-combobox-control" @mousedown="onControlMousedown" @click="onControlClick">
       <!-- The two arrangements VInput offers a field holding chips: its end controls lifted
            out of the flow, always — the chevron and the cross stay put whether or not the
-           input has folded away — and the chips wrapping, when there are chips at all. -->
+           input has folded away — and the chips wrapping, when there are chips at all. A
+           text display keeps the field on one line and needs only the first. -->
       <VInput
         ref="inputRef"
         v-model="query"
         class="v-input-end-pinned"
-        :class="{ 'v-input-chips': multiple }"
+        :class="{ 'v-input-chips': multiple && !textDisplay }"
         role="combobox"
         aria-haspopup="listbox"
         aria-autocomplete="list"
@@ -918,7 +973,8 @@ defineExpose({
         @clear="onClear"
       >
         <template v-if="multiple || $slots.start" #start>
-          <template v-for="value in multiple ? selectedValues : []" :key="value">
+          <span v-if="displayText" class="v-combobox-text">{{ displayText }}</span>
+          <template v-for="value in multiple && !textDisplay ? selectedValues : []" :key="value">
             <slot
               name="chip"
               :value="value"
@@ -1110,6 +1166,32 @@ defineExpose({
     width: 0;
     height: 0;
     padding: 0;
+  }
+
+  /* The chosen values as one line of text, cut short with an ellipsis. It shrinks before the
+     search input does, the input being `flex: 1` with no floor of its own.
+
+     Under the focus the two share the row, and the line is capped at half of it so that a
+     long selection cannot squeeze what is being typed down to nothing. Folded, the input is
+     out of the flow and the line takes the whole field. */
+  .v-combobox-text {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .v-combobox:not([data-collapsed]) .v-combobox-text {
+    max-inline-size: 50%;
+  }
+
+  /* TRAP — an unbroken line has the whole of its text as its min-content width, and that
+     width travels up through the field to the root. In a grid track or a flex row sized
+     `auto`, the component then widens its container to fit every label instead of cutting
+     them short, and the ellipsis never shows. Chips wrap, so they carry no such minimum. */
+  .v-combobox:has(.v-combobox-text) {
+    min-inline-size: 0;
   }
 
   /* The rows saying "nothing matches" or "loading" are built like an option: they read
