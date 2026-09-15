@@ -35,6 +35,10 @@ export default {
       title: "Contenu d'événement personnalisé",
       text: "Le slot <code>#event</code> remplace le contenu d'une carte et reçoit l'événement, son <code>timeText</code> formaté, le <code>layout</code> dans lequel il est dessiné, s'il se poursuit avant ou après la journée, et s'il est en train d'être glissé ou saisi au clavier.",
     },
+    editing: {
+      title: 'Créer et éditer des événements',
+      text: "Le calendrier signale ce que le lecteur a fait et vous laisse la liste : créer et éditer se résument à trois événements et une boîte de dialogue. Tracer un créneau avec <code>creatable</code> déclenche <code>event-create</code> avec ses deux bornes, cliquer une case vide déclenche <code>cell-activate</code> avec un début seulement, et un bouton placé dans le slot <code>#actions</code> ouvre un formulaire vierge. Cliquer une carte déclenche <code>event-activate</code>, qui ouvre le même formulaire prérempli. Enregistrer écrit un nouveau tableau dans <code>v-model:events</code>, le modèle où le glisser et l'étirement écrivent déjà.",
+    },
   },
 
   api: {

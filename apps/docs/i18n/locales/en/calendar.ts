@@ -35,6 +35,10 @@ export default {
       title: 'Custom event content',
       text: 'The <code>#event</code> slot replaces what a card shows and receives the event, its formatted <code>timeText</code>, the <code>layout</code> it is drawn in, whether it continues before or after the day, and whether it is being dragged or held by the keyboard.',
     },
+    editing: {
+      title: 'Creating and editing events',
+      text: 'The calendar reports what the reader did and leaves the list to you, so creating and editing come down to three events and one dialog. Drawing out a slot with <code>creatable</code> fires <code>event-create</code> with both ends, clicking an empty cell fires <code>cell-activate</code> with a start only, and a button in the <code>#actions</code> slot opens a blank form. Clicking a card fires <code>event-activate</code>, which opens the same form filled in. Saving writes a new array to <code>v-model:events</code>, the same model dragging and resizing already write to.',
+    },
   },
 
   api: {

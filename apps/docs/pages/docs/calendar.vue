@@ -8,6 +8,8 @@ import CalendarColours from '~/examples/calendar/Colours.vue'
 import calendarColoursSource from '~/examples/calendar/Colours.vue?raw'
 import CalendarCustomView from '~/examples/calendar/CustomView.vue'
 import calendarCustomViewSource from '~/examples/calendar/CustomView.vue?raw'
+import CalendarEditing from '~/examples/calendar/Editing.vue'
+import calendarEditingSource from '~/examples/calendar/Editing.vue?raw'
 import CalendarEventSlot from '~/examples/calendar/EventSlot.vue'
 import calendarEventSlotSource from '~/examples/calendar/EventSlot.vue?raw'
 import CalendarMonth from '~/examples/calendar/Month.vue'
@@ -82,6 +84,12 @@ useDocsHead('calendar')
   <DocsProse keypath="calendar.examples.eventSlot.text" />
   <DocsExample :source="calendarEventSlotSource" stack>
     <CalendarEventSlot />
+  </DocsExample>
+
+  <h3 id="creating-and-editing-events">{{ t('calendar.examples.editing.title') }}</h3>
+  <DocsProse keypath="calendar.examples.editing.text" />
+  <DocsExample :source="calendarEditingSource" stack>
+    <CalendarEditing />
   </DocsExample>
 
   <DocsApi page="calendar" :api="api" />
