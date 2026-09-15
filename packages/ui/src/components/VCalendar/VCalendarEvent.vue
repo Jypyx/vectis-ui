@@ -274,10 +274,16 @@ const accessibleName = computed(() =>
   }
 
   /*
-   * A card too short for two lines puts them on ONE: the title first and ellipsized, the
-   * time after it, and the description dropped — which is the only way a quarter of an hour
-   * shows anything at all. Three rem is where a title line, a time line, the gap and the
-   * padding stop fitting; below it there is room for exactly one line.
+   * A card too short for two lines puts them on ONE: the title first, the time after it, and
+   * the description dropped — which is the only way a quarter of an hour shows anything at
+   * all. Three rem is where a title line, a time line, the gap and the padding stop fitting;
+   * below it there is room for exactly one line.
+   *
+   * The TITLE keeps that line. It is what identifies the event, where the times are already in
+   * the card's accessible name and readable from its height. Both items shrink, but the time's
+   * shrink factor is large enough that it gives up its whole width, down to an ellipsis and then
+   * to nothing, before the title loses a character: flex shrinking is weighted by factor times
+   * basis, so a factor a thousand times the title's leaves the title a rounding error.
    *
    * The threshold is a literal because a container query takes no custom properties — the
    * same constraint VPagination's steps are written under.
@@ -291,12 +297,13 @@ const accessibleName = computed(() =>
     }
 
     .v-calendar-event[data-layout='block'] .v-calendar-event-title {
-      flex: 1;
+      flex: 0 1 auto;
       min-inline-size: 0;
     }
 
     .v-calendar-event[data-layout='block'] .v-calendar-event-time {
-      flex: none;
+      flex: 0 1000 auto;
+      min-inline-size: 0;
     }
 
     /* There is no room for a third thing, and the title is what identifies the event. */

@@ -36,7 +36,7 @@ export default {
         { name: 'cell-activate', key: 'cellActivate', type: '[cell: CalendarCell]' },
         { name: 'event-move', key: 'eventMove', type: '[event: E, previous: CalendarEventTimes]' },
         { name: 'event-resize', key: 'eventResize', type: '[event: E, previous: CalendarEventTimes]' },
-        { name: 'event-create', key: 'eventCreate', type: '[event: CalendarEvent]' },
+        { name: 'event-create', key: 'eventCreate', type: '[times: CalendarEventTimes]' },
       ],
       slots: [
         { name: 'actions', type: '{}' },

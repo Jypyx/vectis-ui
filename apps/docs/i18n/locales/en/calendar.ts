@@ -21,7 +21,7 @@ export default {
     },
     allDay: {
       title: 'All-day events',
-      text: '<code>allDay</code> puts an event in the band above the grid, where an event spanning several days already goes.',
+      text: '<code>allDay</code> puts an event in the band above the grid, where an event lasting 24 hours or more already goes. One running past midnight for less than that stays in the grid, as a card in each of its two days.',
     },
     overlapping: {
       title: 'Overlapping events',
@@ -54,7 +54,7 @@ export default {
         dayStart: 'The hour the grid starts at, from 0.',
         dayEnd: 'The hour it ends at, up to 24.',
         slotDuration:
-          'The step everything snaps to, in minutes: how far a nudge moves an event, and how long a newly created one is.',
+          'The step everything snaps to, in minutes: how far a nudge moves an event, and the unit a slot is drawn out in.',
         scrollTime:
           'Where the grid is scrolled to when it first appears, so the working day is in view.',
         hideCurrentTime:
@@ -66,7 +66,7 @@ export default {
         disabled:
           'Freezes the whole calendar: nothing can be moved, created or opened, and no other period can be reached. The cards leave the tab order while the grid keeps its own, so the agenda can still be read. That is what separates it from <code>readonly</code>, which stops the editing alone.',
         creatable:
-          'Makes an event when an empty part of a day is taken up: a click or Enter on a cell makes one a step long, a drag makes one as long as it was drawn. The <code>cell-activate</code> event fires either way, so you can leave this off and still get it.',
+          'Lets an empty stretch of a time grid be drawn out with the pointer, up or down from the slot pressed. On release its times are reported through <code>event-create</code> and nothing is added to <code>events</code>: putting the event on the calendar is yours to do. A click, or Enter on a focused cell, reports <code>cell-activate</code> with or without this.',
         edgeStepDelay:
           'How long a dragged event has to rest against the side of the calendar before the view turns to the previous or next period, in milliseconds. Zero turns that off. The wait is the point of it: paging the instant the pointer touched the edge would make the last day of a week impossible to aim at.',
         noEdgeScroll: 'Stops dragging near the top or bottom of a time grid from scrolling it.',
@@ -84,7 +84,7 @@ export default {
           'An event was dragged or nudged somewhere else. It carries the event as it now stands and where it came from, so undoing it needs no copy of your own.',
         eventResize: "An event's end was dragged or nudged, in the same two parts.",
         eventCreate:
-          'An event was made by taking up an empty part of a day. It has already been added to the list; this is the cue to give it a real name, or to save it.',
+          'An empty stretch of a day was drawn out, and these are its times. Nothing has been added to the list: this is the cue to make the event, in your own model or through your own form.',
       },
       slots: {
         actions: 'Extra controls in the toolbar, between the range and the view menu.',

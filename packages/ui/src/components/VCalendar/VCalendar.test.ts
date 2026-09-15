@@ -552,8 +552,8 @@ describe('the month view', () => {
     expect(container.querySelectorAll('.v-calendar-month-cell[tabindex="0"]')).toHaveLength(1)
   })
 
-  // The square is drawn with a pointer cursor: a click on its empty part reports it as Enter
-  // does, and a click on what the square holds stays that element's own.
+  // A click on the empty part of a square reports it as Enter does, and a click on what the
+  // square holds stays that element's own.
   it('reports a click on the empty part of a day, as Enter does', async () => {
     const { container, emitted } = month({ events: [event({ id: 'a' })] })
     const cell = container.querySelector<HTMLElement>(
@@ -952,6 +952,37 @@ describe('dragging an event', () => {
   })
 
   /*
+   * The dragged card takes no pointer events, so the strip's own `ns-resize` is lost the instant
+   * the press begins. The scroller names the gesture from the press to the release, which is what
+   * the stylesheet holds the cursor on.
+   */
+  it('names a stretch on the scroller for as long as it lasts', async () => {
+    const { container } = drag()
+    const grid = container.querySelector('.v-calendar-time-grid')!
+    const handle = container.querySelector('[data-calendar-handle]')!
+    pointer(handle, 'pointerdown', { clientX: 100, clientY: 100 })
+    await nextTick()
+    expect(grid.getAttribute('data-gesture')).toBe('resize')
+    pointer(grid, 'pointermove', { clientX: 100, clientY: 300 })
+    await nextTick()
+    expect(grid.getAttribute('data-gesture')).toBe('resize')
+    pointer(grid, 'pointerup', { clientX: 100, clientY: 300 })
+    await nextTick()
+    expect(grid.hasAttribute('data-gesture')).toBe(false)
+  })
+
+  it('names no gesture for a plain move, which keeps the cursor it had', async () => {
+    const { container } = drag()
+    const card = container.querySelector('.v-calendar-event')!
+    pointer(card, 'pointerdown', { clientX: 100, clientY: 100 })
+    pointer(card, 'pointermove', { clientX: 100, clientY: 300 })
+    await nextTick()
+    expect(container.querySelector('.v-calendar-time-grid')!.hasAttribute('data-gesture')).toBe(
+      false,
+    )
+  })
+
+  /*
    * A bar has no hours, so dragging it up and down means nothing — but it does move by whole
    * days along the band. jsdom measures every column as zero width, so what this pins is the
    * WIRING: that the band's press starts a gesture and that the release reports a move.
@@ -1145,129 +1176,178 @@ describe('creating an event by taking up an empty slot', () => {
     expect(emitted('event-activate')).toHaveLength(1)
   })
 
-  it('adds one to the model and says so', async () => {
-    const { container, emitted } = empty()
-    const cell = container.querySelector('.v-calendar-cell')!
-    pointer(cell, 'pointerdown', { clientX: 100, clientY: 100 })
-    pointer(cell, 'pointerup', { clientX: 100, clientY: 100 })
+  /*
+   * The window is 9 to 17 over the 600 pixels `layOut` gives the columns, so an hour is 75
+   * pixels: y = 75 is 10:00 and y = 160 is 11:08.
+   */
+  const drawn = (props: Record<string, unknown> = {}) => {
+    const utils = empty(props)
+    layOut(utils.container, '.v-calendar-columns')
+    layOut(utils.container, '.v-calendar-time-grid')
+    return { ...utils, cell: utils.container.querySelector('.v-calendar-cell')! }
+  }
+
+  it('reports the slot drawn out, and adds nothing to the model', async () => {
+    const { container, cell, emitted } = drawn()
+    pointer(cell, 'pointerdown', { clientX: 100, clientY: 75 })
+    pointer(cell, 'pointermove', { clientX: 100, clientY: 160 })
+    pointer(cell, 'pointerup', { clientX: 100, clientY: 160 })
+    await fireEvent.click(cell)
+    expect(emitted('event-create')).toEqual([
+      [{ start: WEDNESDAY, end: WEDNESDAY, startTime: '10:00', endTime: '11:15' }],
+    ])
+    expect(emitted('update:events')).toBeUndefined()
+    // The click the browser sends after the release ends the drag, and names no cell.
+    expect(emitted('cell-activate')).toBeUndefined()
+    expect(container.querySelector('[data-event-id="__vectis-calendar-draft__"]')).toBeNull()
+  })
+
+  it('draws upwards as well, keeping the slot pressed', async () => {
+    const { cell, emitted } = drawn()
+    pointer(cell, 'pointerdown', { clientX: 100, clientY: 150 })
+    pointer(cell, 'pointermove', { clientX: 100, clientY: 80 })
+    pointer(cell, 'pointerup', { clientX: 100, clientY: 80 })
     await nextTick()
-    const created = (emitted('event-create')!.at(-1) as CalendarEvent[])[0]!
-    expect(created.title).toBe('Event #1')
-    expect(emitted('update:events')).toHaveLength(1)
+    expect(emitted('event-create')).toEqual([
+      [{ start: WEDNESDAY, end: WEDNESDAY, startTime: '10:00', endTime: '11:15' }],
+    ])
   })
 
-  it('makes it one slot long, starting where the press landed', async () => {
-    const { container, emitted } = empty({ slotDuration: 15 })
-    const cell = container.querySelector('.v-calendar-cell')!
-    pointer(cell, 'pointerdown', { clientX: 0, clientY: 0 })
-    pointer(cell, 'pointerup', { clientX: 0, clientY: 0 })
+  // A default length is the consumer's decision, so a click makes nothing and reports its cell.
+  it('makes nothing from a click, and reports the cell instead', async () => {
+    const { cell, container, emitted } = drawn()
+    pointer(cell, 'pointerdown', { clientX: 100, clientY: 10 })
     await nextTick()
-    const created = (emitted('event-create')!.at(-1) as CalendarEvent[])[0]!
-    expect(created.startTime).toBe('09:00')
-    expect(created.endTime).toBe('09:15')
-  })
-
-  it('honours a different slot length', async () => {
-    const { container, emitted } = empty({ slotDuration: 30 })
-    const cell = container.querySelector('.v-calendar-cell')!
-    pointer(cell, 'pointerdown', { clientX: 0, clientY: 0 })
-    pointer(cell, 'pointerup', { clientX: 0, clientY: 0 })
-    await nextTick()
-    expect((emitted('event-create')!.at(-1) as CalendarEvent[])[0]!.endTime).toBe('09:30')
-  })
-
-  it('numbers each new event in turn', async () => {
-    const { container, emitted } = empty()
-    const cell = container.querySelector('.v-calendar-cell')!
-    for (let i = 0; i < 2; i++) {
-      pointer(cell, 'pointerdown', { clientX: 0, clientY: 0 })
-      pointer(cell, 'pointerup', { clientX: 0, clientY: 0 })
-      await nextTick()
-    }
-    const titles = (emitted('event-create') as CalendarEvent[][]).map(([e]) => e!.title)
-    expect(titles).toEqual(['Event #1', 'Event #2'])
-  })
-
-  // WCAG 2.1.1: every gesture the pointer offers has a keyboard equivalent, and Enter on an
-  // empty cell is the one `keyboard.ts` names for creating.
-  it('makes the same event from the keyboard, with Enter on a cell', async () => {
-    const { container, emitted } = empty({ slotDuration: 30 })
-    const cell = container.querySelector('.v-calendar-cell[tabindex="0"]') as HTMLElement
-    await fireEvent.keyDown(cell, { key: 'Enter' })
-    const created = (emitted('event-create')!.at(-1) as CalendarEvent[])[0]!
-    expect(created).toMatchObject({
-      title: 'Event #1',
-      start: WEDNESDAY,
-      end: WEDNESDAY,
-      startTime: '09:00',
-      endTime: '09:30',
-    })
-    expect(emitted('update:events')).toHaveLength(1)
+    expect(container.querySelector('[data-event-id="__vectis-calendar-draft__"]')).toBeNull()
+    pointer(cell, 'pointerup', { clientX: 100, clientY: 10 })
+    await fireEvent.click(cell)
+    expect(emitted('event-create')).toBeUndefined()
     expect(emitted('cell-activate')).toEqual([[{ date: WEDNESDAY, time: '09:00' }]])
   })
 
-  /*
-   * The keyboard leaves the focus on its cell, so a reader who cannot see the grid would get
-   * no sign that anything was made. The name is the one the card was given, read before the
-   * calendar's count moved on.
-   */
-  it('says what it made from the keyboard, and where', async () => {
-    const { container } = empty({ slotDuration: 30 })
-    const cell = container.querySelector('.v-calendar-cell[tabindex="0"]') as HTMLElement
-    await fireEvent.keyDown(cell, { key: 'Enter' })
-    const status = container.querySelector('[role="status"]')!.textContent!
-    expect(status).toContain('Event #1 created on')
-    expect(status).toContain('9:00 AM')
-    expect(status).toContain('9:30 AM')
+  it('shows the slot being drawn as an untitled card with its times', async () => {
+    const { cell, container } = drawn()
+    pointer(cell, 'pointerdown', { clientX: 100, clientY: 75 })
+    pointer(cell, 'pointermove', { clientX: 100, clientY: 160 })
+    await nextTick()
+    const draft = container.querySelector('[data-event-id="__vectis-calendar-draft__"]')!
+    expect(draft.textContent).toContain('(No title)')
+    expect(draft.textContent).toContain('10:00 AM')
+    pointer(cell, 'pointerup', { clientX: 100, clientY: 160 })
   })
 
-  // The pointer says nothing, on a drop or on a creation: the card appears under the pointer.
-  it('says nothing when a slot is drawn with the pointer', async () => {
-    const { container } = empty()
-    const cell = container.querySelector('.v-calendar-cell')!
-    pointer(cell, 'pointerdown', { clientX: 0, clientY: 0 })
-    pointer(cell, 'pointerup', { clientX: 0, clientY: 0 })
+  it('holds the move cursor on the scroller once the drawing travels', async () => {
+    const { cell, container } = drawn()
+    const grid = container.querySelector('.v-calendar-time-grid')!
+    pointer(cell, 'pointerdown', { clientX: 100, clientY: 75 })
     await nextTick()
+    expect(grid.hasAttribute('data-gesture')).toBe(false)
+    pointer(grid, 'pointermove', { clientX: 100, clientY: 160 })
+    await nextTick()
+    expect(grid.getAttribute('data-gesture')).toBe('create')
+    pointer(grid, 'pointerup', { clientX: 100, clientY: 160 })
+    await nextTick()
+    expect(grid.hasAttribute('data-gesture')).toBe(false)
+  })
+
+  /*
+   * WCAG 2.1.1: the keyboard's route to a new event is the cell it reports, whose day and hour
+   * open the consumer's form. Enter makes nothing on its own, as a click does not.
+   */
+  it('reports the cell on Enter and makes nothing', async () => {
+    const { container, emitted } = empty({ slotDuration: 30 })
+    const cell = container.querySelector('.v-calendar-cell[tabindex="0"]') as HTMLElement
+    await fireEvent.keyDown(cell, { key: 'Enter' })
+    expect(emitted('cell-activate')).toEqual([[{ date: WEDNESDAY, time: '09:00' }]])
+    expect(emitted('event-create')).toBeUndefined()
+    expect(emitted('update:events')).toBeUndefined()
     expect(container.querySelector('[role="status"]')!.textContent).toBe('')
   })
 
-  // One counter names the card while it is drawn AND once released: counted from the list,
-  // the draft was "Event #2" over a calendar holding one event, then became "Event #1".
-  it('names the card it draws out as it will name the event', async () => {
-    const { container } = empty({
-      events: [event({ id: 'a', startTime: '14:00', endTime: '15:00' })],
-    })
-    const cell = container.querySelector('.v-calendar-cell')!
-    pointer(cell, 'pointerdown', { clientX: 0, clientY: 0 })
-    await nextTick()
-    const draft = container.querySelector('[data-event-id="__vectis-calendar-draft__"]')!
-    expect(draft.textContent).toContain('Event #1')
-    pointer(cell, 'pointerup', { clientX: 0, clientY: 0 })
-  })
-
-  /*
-   * The signal survives even when the making does not: a consumer with their own form leaves
-   * `creatable` alone and keeps `cell-activate`.
-   */
-  it('still reports the slot when it was not told to create', async () => {
+  it('still reports the cell when it was not told to create', async () => {
     const { container, emitted } = empty({ creatable: false })
     await fireEvent.click(container.querySelector('.v-calendar-cell')!)
     expect(emitted('event-create')).toBeUndefined()
     expect(emitted('update:events')).toBeUndefined()
     expect(emitted('cell-activate')).toEqual([[{ date: WEDNESDAY, time: '09:00' }]])
   })
+})
+
+describe('an event running past midnight', () => {
+  // Tuesday 22:00 to Wednesday 02:00: four hours, so a card in each column rather than a bar.
+  const overnight = event({
+    id: 'late',
+    start: '2026-06-09',
+    end: WEDNESDAY,
+    startTime: '22:00',
+    endTime: '02:00',
+  })
+
+  /** The card drawn in a day's column, found by the day rather than by document order. */
+  const cardOn = (container: Element, iso: string) =>
+    container.querySelector(`.v-calendar-cell[data-iso="${iso}"] .v-calendar-block`)
+
+  it('is drawn in both of its days, and not in the band', () => {
+    const { container } = mount({ events: [overnight] })
+    expect(container.querySelectorAll('.v-calendar-block')).toHaveLength(2)
+    expect(
+      cardOn(container, '2026-06-09')!.closest<HTMLElement>('.v-calendar-cell')!.dataset.minutes,
+    ).toBe(String(22 * 60))
+    expect(
+      cardOn(container, WEDNESDAY)!.closest<HTMLElement>('.v-calendar-cell')!.dataset.minutes,
+    ).toBe('0')
+    expect(container.querySelector('.v-calendar-allday')).toBeNull()
+  })
+
+  // The strip drags the event's real end, which is on its second day.
+  it('offers the resize strip on its morning card alone', () => {
+    const { container } = mount({ events: [overnight] })
+    expect(cardOn(container, '2026-06-09')!.querySelector('[data-calendar-handle]')).toBeNull()
+    expect(cardOn(container, WEDNESDAY)!.querySelector('[data-calendar-handle]')).not.toBeNull()
+  })
+
+  it('goes to the band once it lasts a whole day', () => {
+    const { container } = mount({ events: [{ ...overnight, endTime: '22:00' }] })
+    expect(container.querySelector('.v-calendar-block')).toBeNull()
+    expect(container.querySelector('.v-calendar-allday .v-calendar-event')).not.toBeNull()
+  })
 
   /*
-   * With creation on, the press has already become a gesture and reported itself on release.
-   * Reporting the click too would say the same thing twice.
+   * Taken by its morning card, the event is held from its start the evening before, so an hour
+   * down moves it an hour whole: 22:00–02:00 to 23:00–03:00, the start staying on Tuesday.
+   * Laid out at 700 by 600, a column is 100 pixels (Wednesday is the fourth of an en-US week)
+   * and an hour 25.
    */
-  it('reports a created slot once, not twice', async () => {
-    const { container, emitted } = empty()
-    const cell = container.querySelector('.v-calendar-cell')!
-    pointer(cell, 'pointerdown', { clientX: 0, clientY: 0 })
-    pointer(cell, 'pointerup', { clientX: 0, clientY: 0 })
-    await fireEvent.click(cell)
-    expect(emitted('cell-activate')).toHaveLength(1)
+  it('moves as one when it is dragged by its morning card', async () => {
+    const { container, emitted } = mount({ events: [overnight] })
+    layOut(container, '.v-calendar-columns')
+    layOut(container, '.v-calendar-time-grid')
+    const morning = cardOn(container, WEDNESDAY)!
+    pointer(morning, 'pointerdown', { clientX: 350, clientY: 25 })
+    pointer(morning, 'pointermove', { clientX: 350, clientY: 50 })
+    pointer(morning, 'pointerup', { clientX: 350, clientY: 50 })
+    await nextTick()
+    const [moved] = emitted('event-move')!.at(-1) as [CalendarEvent]
+    expect(moved).toMatchObject({
+      start: '2026-06-09',
+      end: WEDNESDAY,
+      startTime: '23:00',
+      endTime: '03:00',
+    })
+  })
+
+  it('keeps crossing midnight when it is nudged with the keyboard', async () => {
+    const { container, emitted } = mount({ events: [overnight] })
+    await fireEvent.keyDown(cardOn(container, '2026-06-09')!, { key: 'Enter' })
+    await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'ArrowDown' })
+    await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'Enter' })
+    const [moved] = emitted('event-move')!.at(-1) as [CalendarEvent]
+    expect(moved).toMatchObject({
+      start: '2026-06-09',
+      end: WEDNESDAY,
+      startTime: '22:15',
+      endTime: '02:15',
+    })
   })
 })
 
@@ -1706,7 +1786,7 @@ describe('letting go outside the calendar', () => {
    * there is nothing to remember beyond "released outside, nothing happens".
    */
   it('creates nothing when a drawn slot is let go outside', async () => {
-    const { container, emitted } = outside({ events: [] })
+    const { container, emitted } = outside({ events: [], creatable: true })
     dragOut(container.querySelector('.v-calendar-cell')!)
     await nextTick()
     expect(emitted('event-create')).toBeUndefined()

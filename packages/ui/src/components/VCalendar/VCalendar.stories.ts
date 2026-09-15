@@ -33,6 +33,7 @@ const t = storyText({
     room: 'Room',
     withAnna: 'With Anna and Ravi',
     quarterly: 'Quarterly plan',
+    nightDeploy: 'Night deploy',
   },
   fr: {
     standup: 'Point quotidien',
@@ -46,6 +47,7 @@ const t = storyText({
     room: 'Salle',
     withAnna: 'Avec Anna et Ravi',
     quarterly: 'Plan trimestriel',
+    nightDeploy: 'Déploiement de nuit',
   },
 })
 
@@ -245,9 +247,8 @@ export const Year: Story = {
 }
 
 /**
- * An event marked `allDay`, or one running from one day to the next, goes into the band
- * above the grid — a card spanning two days cannot be drawn inside one column. Bars that
- * overlap stack onto rows of their own.
+ * An event marked `allDay`, or one lasting twenty-four hours or more, goes into the band
+ * above the grid. Bars that overlap stack onto rows of their own.
  */
 export const AllDay: Story = {
   args: { dayStart: 8, dayEnd: 18, label: 'All-day events' },
@@ -290,6 +291,41 @@ export const AllDay: Story = {
       </div>
     `,
   }),
+}
+
+/**
+ * An event running past midnight for less than a day stays in the grid, as a card in each of
+ * its two days: the evening ends on a dashed edge, the morning starts on one, and only the
+ * morning carries the strip that changes when it ends.
+ */
+export const Overnight: Story = {
+  args: { dayStart: 0, dayEnd: 24, scrollTime: '20:00', label: 'Overnight events' },
+  render: (args) => ({
+    components: { VCalendar },
+    setup: () => ({
+      args,
+      events: ref<CalendarEvent[]>([
+        {
+          id: 'deploy',
+          title: t.value.nightDeploy,
+          start: '2026-06-09',
+          end: '2026-06-10',
+          startTime: '22:00',
+          endTime: '02:00',
+        },
+      ]),
+    }),
+    template: `
+      <div style="height: 560px; padding: 16px">
+        <VCalendar v-bind="args" v-model:events="events" />
+      </div>
+    `,
+  }),
+  // Two cards for the one event, and no bar: below a whole day the band is not where it goes.
+  play: async ({ canvasElement }) => {
+    await waitFor(() => expect(canvasElement.querySelectorAll('.v-calendar-block')).toHaveLength(2))
+    await expect(canvasElement.querySelector('.v-calendar-allday')).toBeNull()
+  },
 }
 
 /**
@@ -535,9 +571,10 @@ export const EventSlot: Story = {
 }
 
 /**
- * Drag a card to move it, drag its bottom edge to change how long it lasts, and — this story
- * asking for `creatable` — press an empty stretch of a day to make an event there. The model
- * is written once, when the gesture ends, never while it is under way.
+ * Drag a card to move it, drag its bottom edge to change how long it lasts, and, this story
+ * asking for `creatable`, draw an empty stretch of a day out, up or down. A move or a stretch is
+ * written to the model once, when the gesture ends; a drawn slot is only reported, and the
+ * output below shows its times.
  */
 export const Editing: Story = {
   args: {
@@ -570,6 +607,7 @@ export const Editing: Story = {
           v-model:events="events"
           @event-move="(e) => (last = e.startTime + '–' + e.endTime)"
           @event-resize="(e) => (last = e.startTime + '–' + e.endTime)"
+          @event-create="(e) => (last = e.startTime + '–' + e.endTime)"
         />
         <output>{{ last }}</output>
       </div>
@@ -651,6 +689,25 @@ export const Editing: Story = {
      */
     await waitFor(() => expect(dragged()).not.toHaveAttribute('data-rejected'))
     await waitFor(() => expect(canvas.getByText(/^11:00–12:00$/)).toBeVisible())
+
+    /*
+     * Act three: a slot drawn UP from an empty hour. The press lands two pixels under the top of
+     * the 15:00 row and the pointer travels to the same place in the 14:00 row, so the slot runs
+     * from 14:00 to the end of the quarter pressed. It is reported and never drawn: once let go,
+     * the event from act one is the only card left.
+     */
+    const rowAt = (minutes: number) =>
+      canvasElement.querySelector<HTMLElement>(`.v-calendar-cell[data-minutes="${minutes}"]`)!
+    rowAt(900).scrollIntoView({ block: 'center' })
+    const pressed = rowAt(900).getBoundingClientRect()
+    const target = rowAt(840).getBoundingClientRect()
+    at(rowAt(900), 'pointerdown', pressed.left + 10, pressed.top + 2)
+    at(root, 'pointermove', pressed.left + 10, target.top + 2)
+    await waitFor(() => expect(root).toHaveAttribute('data-gesture', 'create'))
+    at(root, 'pointerup', pressed.left + 10, target.top + 2)
+
+    await waitFor(() => expect(canvas.getByText(/^14:00–15:15$/)).toBeVisible())
+    await expect(canvasElement.querySelectorAll('.v-calendar-block')).toHaveLength(1)
   },
 }
 

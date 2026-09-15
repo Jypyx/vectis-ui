@@ -41,7 +41,7 @@ import type { CalendarEvent, CalendarEventId, CalendarEventTimes, CalendarView }
 export const MINUTES_PER_HOUR = 60
 
 /** How many minutes a day holds. The upper bound of every time computed here. */
-const MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR
+export const MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR
 
 const DAYS_PER_WEEK = 7
 
@@ -57,8 +57,8 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000
 /**
  * How far the pointer must travel before a press becomes a drag rather than a click.
  *
- * It is what keeps click-to-create and click-to-open alive: a press that never moves this
- * far writes nothing on release and is handled as a plain activation. Without it, the
+ * It is what keeps a click a click, on a card as on an empty cell: a press that never moves
+ * this far writes nothing on release and is handled as a plain activation. Without it, the
  * hand's natural tremor during a click would register as a one-pixel drag and every click
  * would silently move its event.
  */
@@ -107,9 +107,9 @@ export function windowOf(startHour: number, endHour: number): TimeWindow {
  * TRAP — the value is held one minute short of midnight rather than allowed to reach it.
  * A day's last moment is 1440 in this arithmetic, but `24:00` is not a time any of the
  * design system's helpers accept (`isValidTime` rejects it), and the alternative — writing
- * `00:00` on the following day — would turn an ordinary evening appointment into a
- * two-day event and send it to the all-day band. One minute is invisible at every zoom
- * this component offers; a card in the wrong place is not.
+ * `00:00` on the following day — would turn an ordinary evening appointment into one that
+ * runs past midnight, which every gesture then treats differently. One minute is invisible at
+ * every zoom this component offers; an event that changed kind under the pointer is not.
  */
 export function timeOf(minutes: number): string {
   const held = clamp(Math.round(minutes), 0, MINUTES_PER_DAY - 1)
@@ -292,15 +292,47 @@ export function visibleRange(
 }
 
 /**
+ * How long an event lasts, in minutes, counting the days between its dates.
+ *
+ * A time that is not one reads as the far end of its day — midnight for a start, the next
+ * midnight for an end — so a malformed event errs towards being long, and towards the band.
+ */
+export function durationOf(times: CalendarEventTimes): number {
+  return (
+    daySpan(times) * MINUTES_PER_DAY +
+    minutesAt(times.endTime, MINUTES_PER_DAY) -
+    minutesAt(times.startTime, 0)
+  )
+}
+
+/** Whether an event runs from one day into the next without lasting a whole day. */
+export function spansMidnight(times: CalendarEventTimes): boolean {
+  return compareISO(times.start, times.end) < 0 && durationOf(times) < MINUTES_PER_DAY
+}
+
+/**
  * Whether an event belongs in the band above the grid rather than in a day's column.
  *
- * The second clause is not a convenience: an event running from one day to the next cannot
- * be drawn inside a single column, so the band — where it becomes a bar with its times in
- * its label — is the only place it can honestly go.
+ * A day's column holds up to twenty-four hours, so an event running past midnight for less
+ * than that is drawn as two cards — the evening in one column, the early morning in the next —
+ * and only one lasting a whole day or more becomes a bar. Exactly twenty-four hours is a bar:
+ * two cards covering the same hours of two columns would read as two events.
+ *
+ * An event whose end comes before its start has no column to go in either, so it goes to the
+ * band, where `packAllDay` finds no day it covers and draws nothing.
  */
 export function isAllDayEvent(event: CalendarEvent): boolean {
-  return event.allDay === true || compareISO(event.start, event.end) !== 0
+  if (event.allDay === true) return true
+  const order = compareISO(event.start, event.end)
+  if (order === 0) return false
+  return order > 0 || !spansMidnight(event)
 }
+
+/**
+ * Which piece of its event a box is: the whole of it, or one side of midnight for an event
+ * that runs from one day into the next.
+ */
+export type SegmentPart = 'whole' | 'head' | 'tail'
 
 /** One event's box in one day column, in minutes since midnight. */
 export interface EventSegment {
@@ -309,9 +341,17 @@ export interface EventSegment {
   dayIndex: number
   start: number
   end: number
-  /** Whether the window cut it off, so the card can show that it carries on past the edge. */
+  /**
+   * Whether the card carries on past its top or bottom edge: the window cut it off, or
+   * midnight did. Both are drawn the same way.
+   */
   clippedStart: boolean
   clippedEnd: boolean
+  /**
+   * `head` is the evening of an event running past midnight and `tail` its morning. Only a
+   * `whole` or a `tail` holds the event's real end, which is what its resize strip drags.
+   */
+  part: SegmentPart
 }
 
 /**
@@ -333,25 +373,50 @@ export function timedSegments(
   const index = new Map(days.map((iso, i) => [iso, i]))
   const segments: EventSegment[] = []
 
-  for (const event of events) {
-    if (isAllDayEvent(event)) continue
-    const dayIndex = index.get(event.start)
-    if (dayIndex === undefined) continue
-
-    const rawStart = minutesAt(event.startTime, timeWindow.start)
-    const rawEnd = Math.max(minutesAt(event.endTime, rawStart + minDuration), rawStart + 1)
-    if (rawEnd <= timeWindow.start || rawStart >= timeWindow.end) continue
-
+  const push = (
+    id: CalendarEventId,
+    dayIndex: number | undefined,
+    rawStart: number,
+    rawEnd: number,
+    part: SegmentPart,
+  ) => {
+    if (dayIndex === undefined) return
+    if (rawEnd <= timeWindow.start || rawStart >= timeWindow.end) return
     const start = clamp(rawStart, timeWindow.start, timeWindow.end - 1)
     const end = clamp(Math.max(rawEnd, start + minDuration), start + 1, timeWindow.end)
     segments.push({
-      id: event.id,
+      id,
       dayIndex,
       start,
       end,
-      clippedStart: rawStart < timeWindow.start,
-      clippedEnd: rawEnd > timeWindow.end,
+      clippedStart: part === 'tail' || rawStart < timeWindow.start,
+      clippedEnd: part === 'head' || rawEnd > timeWindow.end,
+      part,
     })
+  }
+
+  for (const event of events) {
+    if (isAllDayEvent(event)) continue
+    const rawStart = minutesAt(event.startTime, timeWindow.start)
+
+    if (compareISO(event.start, event.end) === 0) {
+      const rawEnd = Math.max(minutesAt(event.endTime, rawStart + minDuration), rawStart + 1)
+      push(event.id, index.get(event.start), rawStart, rawEnd, 'whole')
+      continue
+    }
+
+    /*
+     * Running past midnight: cut at midnight into two boxes, each in its own day's column. An
+     * event ending at midnight exactly has nothing on its second day, so it is drawn whole — a
+     * tail of no length would otherwise be stretched to a slot and show as a stub at 00:00.
+     */
+    const rawEnd = minutesAt(event.endTime, 0)
+    if (rawEnd === 0) {
+      push(event.id, index.get(event.start), rawStart, MINUTES_PER_DAY, 'whole')
+      continue
+    }
+    push(event.id, index.get(event.start), rawStart, MINUTES_PER_DAY, 'head')
+    push(event.id, index.get(event.end), 0, rawEnd, 'tail')
   }
 
   return segments
@@ -689,65 +754,10 @@ export function snapToSlot(minutes: number, step: number): number {
   return clamp(Math.round(minutes / size) * size, 0, MINUTES_PER_DAY)
 }
 
-/** Rounds a moment DOWN to the step containing it — where a new event begins. */
+/** Rounds a moment DOWN to the step containing it — where a drawn slot begins. */
 export function floorToSlot(minutes: number, step: number): number {
   const size = step > 0 ? step : 1
   return clamp(Math.floor(minutes / size) * size, 0, MINUTES_PER_DAY)
-}
-
-/**
- * Where an event lands when it is dragged or nudged along its day: it keeps its length and
- * moves by `minuteDelta`. Which DAY it lands on is the caller's to set, read from the days on
- * show rather than counted here, so a hidden weekday is never landed on.
- *
- * An event pushed past the end of the window is held against it rather than having its tail
- * cut off — moving something must never change how long it is, which is the other gesture's
- * job.
- */
-export function moveEvent(
-  origin: CalendarEventTimes,
-  minuteDelta: number,
-  timeWindow: TimeWindow,
-): CalendarEventTimes {
-  const startMinutes = minutesAt(origin.startTime, timeWindow.start)
-  const endMinutes = Math.max(minutesAt(origin.endTime, startMinutes), startMinutes + 1)
-  const duration = endMinutes - startMinutes
-
-  const nextStart = clamp(
-    startMinutes + minuteDelta,
-    timeWindow.start,
-    Math.max(timeWindow.start, timeWindow.end - duration),
-  )
-
-  return {
-    start: origin.start,
-    end: origin.start,
-    startTime: timeOf(nextStart),
-    endTime: timeOf(nextStart + duration),
-  }
-}
-
-/**
- * Where the end of an event lands when its bottom edge is dragged. It can never cross the
- * start: the shortest an event may become is one step, which is also the length a new one
- * is created at.
- */
-export function resizeEvent(
-  origin: CalendarEventTimes,
-  endMinutes: number,
-  minDuration: number,
-  timeWindow: TimeWindow,
-): CalendarEventTimes {
-  const startMinutes = minutesAt(origin.startTime, timeWindow.start)
-  const floor = Math.max(minDuration, 1)
-  const end = clamp(endMinutes, startMinutes + floor, timeWindow.end)
-
-  return {
-    start: origin.start,
-    end: origin.start,
-    startTime: timeOf(startMinutes),
-    endTime: timeOf(end),
-  }
 }
 
 /**
@@ -764,7 +774,7 @@ export function daySpan(times: CalendarEventTimes): number {
 /**
  * Moves an event to another day, KEEPING its length in days as well as its times.
  *
- * This is the counterpart of `moveEvent`, and the two must not be confused: that one is for
+ * This is the counterpart of `timeGrid.ts`'s `moveEvent`, and the two must not be confused: that one is for
  * a timed move INSIDE a single day and deliberately collapses `end` onto `start`, so putting
  * a three-day trip through it would silently squash it into one Tuesday. This one is for the
  * whole-day gestures — an all-day bar dragged along the band, a chip dragged across a month —

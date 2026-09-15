@@ -59,8 +59,8 @@ export interface CalendarEvent {
   timezone?: string
   /**
    * Keeps the event in the band above the grid rather than in a day's column. An event
-   * whose `start` and `end` fall on different days is already shown there without this,
-   * since a card spanning two days cannot be drawn inside one column.
+   * lasting twenty-four hours or more is already shown there without this. One running past
+   * midnight for less than that stays in the grid, as a card in each of its two days.
    */
   allDay?: boolean
 }

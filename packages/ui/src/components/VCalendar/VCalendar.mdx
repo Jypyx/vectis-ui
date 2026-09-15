@@ -106,14 +106,27 @@ Monday-to-Friday calendar goes to the Monday.
 
 ## All-day events
 
-An event goes into the band above the grid when it is marked `allDay`, **or** when its `start` and
-`end` fall on different days — a card running from one day to the next cannot be drawn inside a
-single column, so the band is the only place it can honestly go.
+An event goes into the band above the grid when it is marked `allDay`, **or** when it lasts
+twenty-four hours or more, counted from its `start` and `startTime` to its `end` and `endTime`.
 
 Bars that overlap stack onto rows of their own, and the band scrolls once it has more than it can
 show. `#all-day-label` replaces the words beside it.
 
 <Canvas of={VCalendarStories.AllDay} />
+
+## Events past midnight
+
+An event that runs from one day into the next for **less** than twenty-four hours stays in the
+grid, as a card in each of its two days: the evening in the first column, the early morning in the
+second. The edge where midnight cuts it is dashed, the way a card cropped by `dayStart` or `dayEnd`
+is. One ending at midnight exactly is a single card on its first day.
+
+The two cards are one event. Dragging either moves both, keeping the length, so the event may go on
+crossing midnight or come back inside one day. Only the morning card carries the strip that changes
+when it ends, since that is where the end is. An ordinary event is held inside its own day when it
+is moved or stretched, and never turns into an overnight one under the pointer.
+
+<Canvas of={VCalendarStories.Overnight} />
 
 ## The current time
 
@@ -145,9 +158,10 @@ therefore never overlap on screen, whatever `slotDuration` you set.
 
 Fitting the text into that is the card's own job, and it does it by measuring itself rather than by
 counting minutes — so it stays right if you change `--vectis-control-size-calendar-hour`. Below the
-height where two lines fit, title and time go on **one row**, the title ellipsized and the
-description dropped; below the height where even one ordinary line fits, the leading tightens so the
-title still shows.
+height where two lines fit, title and time go on **one row** and the description is dropped. The
+title keeps that row: the time is shortened, then left out, before the title loses a character.
+The times are still in the card's accessible name. Below the height where even one ordinary line
+fits, the leading tightens so the title still shows.
 
 The floor for all of this is `slotDuration`: no event is ever laid out shorter than one slot, which
 is applied to the events themselves before the overlap layout sees them. That is why what you see
@@ -168,13 +182,18 @@ To pin a hue yourself without naming a colour, set `--vectis-calendar-event-hue`
 
 ## Moving, stretching and making events
 
-Drag a card to move it. Drag the strip along its bottom edge to change how long it lasts. Press an
-empty stretch of a day to make an event there — a click makes one `slotDuration` long, and a press
-that travels makes one as long as it was drawn.
+Drag a card to move it. Drag the strip along its bottom edge to change how long it lasts; the
+resize cursor stays for the whole of the drag. With `creatable`, press an empty slot and draw up or
+down to mark out a new event's times, under the move cursor and as an untitled card.
 
 Everything snaps to `slotDuration` (fifteen minutes by default), and **the model is written once,
 when the gesture ends** — never while it is under way. A drag that is interrupted, by a context menu
 or by the page starting to scroll, writes nothing at all.
+
+**A drawn slot is reported, never added.** On release `event-create` hands you its times and the
+card disappears: what the event is called, what else it carries and whether it exists at all are
+yours to decide, by adding it to `events` or by opening your own form. A plain click draws nothing
+and reports `cell-activate`, as it does without `creatable`.
 
 A **faded copy of the event stays where it started** for as long as the drag lasts, so you can see
 what you are moving it from — after a long drag across a week, the place you left is otherwise
@@ -196,8 +215,8 @@ Three emits report what happened, so you can save it:
 // `previous` is where the event came from, so undoing needs no copy of your own.
 @event-move="(event, previous) => save(event)"
 @event-resize="(event, previous) => save(event)"
-// The event has already been added to `events`; this is the cue to name it, or to save it.
-@event-create="(event) => openEditor(event)"
+// Only the times: nothing has been added to `events`, so making the event is yours.
+@event-create="(times) => openEditor(times)"
 ```
 
 ### Across the whole calendar
@@ -227,27 +246,25 @@ the weeks you paged through on the way stay paged.
 
 <Canvas of={VCalendarStories.MonthDragging} />
 
-`readonly` takes moving and stretching away; `creatable` is what adds making an event out of an
-empty slot. Without it `cell-activate` fires all the same, so a consumer who wants to open their own
-form keeps the signal without the component acting on it.
-
-**If your event type adds required fields of its own**, a created event will not have them — nothing
-here could invent a room number. `event-create` fires with the event as made: replace that entry
-with a complete one.
+`readonly` takes moving and stretching away; `creatable` is what adds drawing a slot out.
+`cell-activate` fires on a click or on `Enter` with or without it.
 
 ### With the keyboard
 
 Every gesture above has a keyboard equivalent, because one that did not would be unreachable for
 anyone who cannot use a pointer.
 
-| key                      | what it does                                             |
-| ------------------------ | -------------------------------------------------------- |
-| `Enter` on an empty cell | with `creatable`, makes an event there, as a click would |
-| `Enter` on a card        | takes hold of the event                                  |
-| arrows, once held        | moves it by a slot, or by a day                          |
-| `Shift` + arrows         | changes when it ends                                     |
-| `Enter`                  | places it                                                |
-| `Escape`                 | puts it back where it was                                |
+| key                      | what it does                                                 |
+| ------------------------ | ------------------------------------------------------------ |
+| `Enter` on an empty cell | reports `cell-activate`, the day and hour your form opens on |
+| `Enter` on a card        | takes hold of the event                                      |
+| arrows, once held        | moves it by a slot, or by a day                              |
+| `Shift` + arrows         | changes when it ends                                         |
+| `Enter`                  | places it                                                    |
+| `Escape`                 | puts it back where it was                                    |
+
+Drawing a slot out has no keystroke of its own. The keyboard's way to a new event is the cell it
+reports: its day and hour are where your form starts, and the length is chosen there.
 
 Each step is announced, and taking hold does **not** also open the event — the same keystroke would
 otherwise do both.

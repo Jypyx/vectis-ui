@@ -21,7 +21,7 @@ export default {
     },
     allDay: {
       title: 'Événements sur la journée',
-      text: '<code>allDay</code> place un événement dans le bandeau au-dessus de la grille, où va déjà un événement à cheval sur plusieurs jours.',
+      text: '<code>allDay</code> place un événement dans le bandeau au-dessus de la grille, où va déjà un événement de 24 heures ou plus. Celui qui passe minuit en durant moins reste dans la grille, avec une carte dans chacun de ses deux jours.',
     },
     overlapping: {
       title: 'Événements qui se chevauchent',
@@ -55,7 +55,7 @@ export default {
         dayStart: "L'heure à laquelle la grille commence, à partir de 0.",
         dayEnd: "L'heure à laquelle elle se termine, jusqu'à 24.",
         slotDuration:
-          "Le pas sur lequel tout s'aligne, en minutes : de combien un coup de pouce déplace un événement, et quelle durée a celui qui vient d'être créé.",
+          "Le pas sur lequel tout s'aligne, en minutes : de combien un coup de pouce déplace un événement, et l'unité dans laquelle un créneau se trace.",
         scrollTime:
           'Où la grille est défilée à sa première apparition, pour que la journée de travail soit en vue.',
         hideCurrentTime:
@@ -67,7 +67,7 @@ export default {
         disabled:
           "Fige tout le calendrier : plus rien ne se déplace, ne se crée ni ne s'ouvre, et aucune autre période n'est atteignable. Les cartes sortent du parcours de tabulation, la grille garde le sien, si bien que l'agenda reste lisible. C'est ce qui le distingue de <code>readonly</code>, qui n'arrête que l'édition.",
         creatable:
-          "Crée un événement quand une partie vide d'une journée est prise : un clic ou Entrée sur une cellule en fait un long d'un pas, un glissement en fait un aussi long qu'il a été tracé. L'événement <code>cell-activate</code> part de toute façon : vous pouvez donc laisser ceci de côté et le garder.",
+          "Permet de tracer au pointeur une plage vide d'une grille horaire, vers le haut ou vers le bas depuis le créneau pressé. Au relâchement, ses horaires sont transmis par <code>event-create</code> et rien n'est ajouté à <code>events</code> : mettre l'événement au calendrier vous revient. Un clic, ou Entrée sur une cellule, transmet <code>cell-activate</code> avec ou sans cette prop.",
         edgeStepDelay:
           "Combien de temps un événement déplacé doit reposer contre le bord du calendrier avant que la vue passe à la période précédente ou suivante, en millisecondes. Zéro le désactive. L'attente est tout l'intérêt : tourner la page à l'instant où le pointeur touche le bord rendrait le dernier jour d'une semaine impossible à viser.",
         noEdgeScroll:
@@ -88,7 +88,7 @@ export default {
           "Un événement a été déplacé ou poussé ailleurs. Il porte l'événement tel qu'il est désormais et d'où il vient, si bien qu'annuler ne demande aucune copie de votre part.",
         eventResize: "La fin d'un événement a été déplacée ou poussée, en ces deux mêmes parties.",
         eventCreate:
-          "Un événement a été créé en prenant une partie vide d'une journée. Il est déjà ajouté à la liste ; c'est le signal pour lui donner un vrai nom, ou pour l'enregistrer.",
+          "Une plage vide d'une journée a été tracée, et voici ses horaires. Rien n'a été ajouté à la liste : c'est le signal pour créer l'événement, dans votre propre modèle ou par votre propre formulaire.",
       },
       slots: {
         actions:

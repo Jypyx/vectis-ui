@@ -183,7 +183,7 @@ export const fr: Messages = {
     allDay: 'Journée',
     moreEvents: (count) => `+${count} autre${count > 1 ? 's' : ''}`,
     openDay: (day) => `Ouvrir le ${day}`,
-    newEvent: (index) => `Évènement n°${index}`,
+    untitled: '(Sans titre)',
     eventRoleDescription: 'évènement',
     eventHint:
       'Appuyez sur Entrée pour saisir cet évènement, puis sur les flèches pour le déplacer et sur Maj avec les flèches pour changer son heure de fin.',
@@ -192,6 +192,5 @@ export const fr: Messages = {
     dropped: 'Évènement posé.',
     reverted: "Déplacement annulé. L'évènement est revenu à sa place.",
     movedTo: (title, when) => `${title} déplacé au ${when}.`,
-    createdAt: (title, when) => `${title} créé le ${when}.`,
   },
 }

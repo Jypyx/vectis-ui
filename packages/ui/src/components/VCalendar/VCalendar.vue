@@ -97,8 +97,8 @@ export interface CalendarProps {
   /** The hour it ends at, up to 24. */
   dayEnd?: number
   /**
-   * The step everything snaps to, in minutes: how far a nudge moves an event, and how long
-   * a newly created one is.
+   * The step everything snaps to, in minutes: how far a nudge moves an event, and the unit a
+   * slot is drawn out in.
    */
   slotDuration?: number
   /** Where the grid is scrolled to when it first appears, so the working day is in view. */
@@ -123,10 +123,10 @@ export interface CalendarProps {
    */
   disabled?: boolean
   /**
-   * Makes an event when an empty part of a day is taken up: a click, or Enter on a focused
-   * cell, makes one `slotDuration` long, a drag makes one as long as it was drawn.
-   * `cell-activate` fires either way, so a consumer who wants their own form can leave this
-   * off and still get the signal.
+   * Lets an empty stretch of a time grid be drawn out with the pointer, up or down from the
+   * slot pressed. On release its times are reported through `event-create`, and nothing is
+   * added to `events`: putting the event on the calendar is yours to do. A click, or Enter on a
+   * focused cell, reports `cell-activate` with or without this.
    */
   creatable?: boolean
   /**
@@ -189,7 +189,7 @@ const date = defineModel<string>('date', { default: () => todayISO() })
  * and hands the new list back, never mutating the one it received.
  *
  * Opening an event for editing stays with the consumer — this component reads and
- * rearranges, and never creates or deletes.
+ * rearranges, and never creates or deletes: a slot drawn out is reported, not added.
  */
 const events = defineModel<E[]>('events', { default: () => [] })
 
@@ -209,10 +209,10 @@ const emit = defineEmits<{
   /** An event's end was dragged or nudged, in the same two parts. */
   'event-resize': [event: E, previous: CalendarEventTimes]
   /**
-   * An event was made by taking up an empty part of a day. It has already been added to
-   * `events`; this is the cue to give it a real name, or to save it.
+   * An empty stretch of a day was drawn out, and these are its times. Nothing has been added
+   * to `events`: this is the cue to make the event, in your own model or through your own form.
    */
-  'event-create': [event: CalendarEvent]
+  'event-create': [times: CalendarEventTimes]
 }>()
 
 defineSlots<{
@@ -453,42 +453,14 @@ function onEventDrop(id: CalendarEventId, times: CalendarEventTimes, kind: 'move
   else emit('event-move', next, previous)
 }
 
-/**
- * How many events this calendar has minted, which is what numbers their default names.
- *
- * It counts from one per calendar rather than from the length of the list, so removing an
- * event does not make the next one reuse its name.
- *
- * TRAP — it is the ONE counter, and the grid titles the card being drawn out from it too
- * (`draftTitle`). Two counts — this one and the length of the list — named the card one
- * thing while it was drawn and another once released, as soon as an event had been removed.
+/*
+ * A drawn slot is REPORTED and never added. What an event is called, what else it carries and
+ * whether it exists at all are the consumer's decisions, so the calendar hands over the times
+ * and draws nothing once the pointer is let go. The grid only asks when it was told it could
+ * create, so `creatable` is not checked a second time here.
  */
-const created = ref(0)
-const draftTitle = computed(() => m.value.calendar.newEvent(created.value + 1))
-
 function onSlotCreate(times: CalendarEventTimes) {
-  // The grid only ever asks for this when it was told it could create, so there is no second
-  // guard here: `creatable` is decided once, where the press is read.
-  emit('cell-activate', { date: times.start, time: times.startTime })
-
-  const title = draftTitle.value
-  created.value++
-  const draft: CalendarEvent = {
-    // Vue's own id makes it unique to this calendar, so two on one page cannot collide, and
-    // it is stable across the server and the client.
-    id: `${uid}-${created.value}`,
-    title,
-    ...times,
-  }
-
-  /*
-   * A consumer whose own event type adds REQUIRED fields gets a draft without them — there
-   * is nothing here that could invent a room number or an attendee list. That is what
-   * `event-create` is for: it fires with the event as made, and replacing that entry with a
-   * complete one is the intended answer. Documented in the `.mdx`.
-   */
-  events.value = [...events.value, draft as E]
-  emit('event-create', draft)
+  emit('event-create', times)
 }
 
 defineExpose({
@@ -596,7 +568,6 @@ defineExpose({
         :editable="!readonly && !disabled"
         :disabled="disabled"
         :creatable="creatable && !disabled"
-        :draft-title="draftTitle"
         :hint-id="hintId"
         :edge-step-delay="edgeStepDelay"
         :auto-scroll="!noEdgeScroll"
@@ -799,11 +770,14 @@ defineExpose({
     font-weight: var(--vectis-font-weight-semibold);
   }
 
-  /* A cell of either grid: ruled on two sides, the other two drawn by its neighbours. */
+  /*
+   * A cell of either grid: ruled on two sides, the other two drawn by its neighbours. It keeps
+   * the default cursor: the pointer hand belongs to what can be opened, the events, and a grid
+   * of hands would say every square of the week is a link.
+   */
   .v-calendar-cell {
     border-block-start: 1px solid var(--vectis-color-border);
     border-inline-start: 1px solid var(--vectis-color-border);
-    cursor: pointer;
   }
 
   .v-calendar-cell:first-child {

@@ -7,6 +7,7 @@ import {
   pointWithin,
   columnCount,
   daySpan,
+  durationOf,
   eventsByDay,
   inlineEdgeAt,
   moveEventToDay,
@@ -18,15 +19,14 @@ import {
   minutesAt,
   monthWeeks,
   monthsOfYear,
-  moveEvent,
   normalizeWeekdays,
   packAllDay,
   packDayColumn,
   pointToCell,
-  resizeEvent,
   sameTimes,
   snapToSlot,
   snapToVisibleDay,
+  spansMidnight,
   stepAnchor,
   timeOf,
   timedSegments,
@@ -272,16 +272,47 @@ describe('isAllDayEvent', () => {
     expect(isAllDayEvent(event({ id: 'a', allDay: true }))).toBe(true)
   })
 
-  /*
-   * Not a convenience: a card running from one day to the next cannot be drawn inside a
-   * single column, so the band is the only place it can honestly go.
-   */
-  it('sends an event spanning two days to the band, flag or no flag', () => {
+  it('sends an event lasting more than a day to the band, flag or no flag', () => {
     expect(isAllDayEvent(event({ id: 'b', start: WEDNESDAY, end: FRIDAY }))).toBe(true)
   })
 
   it('leaves an ordinary appointment in the grid', () => {
     expect(isAllDayEvent(event({ id: 'c' }))).toBe(false)
+  })
+
+  // A column holds up to a day, so an evening running into the next morning stays in the grid.
+  it('leaves an event running past midnight for less than a day in the grid', () => {
+    const late = event({ id: 'd', end: '2026-06-11', startTime: '22:00', endTime: '02:00' })
+    expect(isAllDayEvent(late)).toBe(false)
+  })
+
+  it('sends one lasting a whole day exactly to the band', () => {
+    const day = event({ id: 'e', end: '2026-06-11', startTime: '10:00', endTime: '10:00' })
+    expect(isAllDayEvent(day)).toBe(true)
+  })
+
+  it('sends one ending before it starts to the band, where no column is asked to hold it', () => {
+    expect(isAllDayEvent(event({ id: 'f', start: FRIDAY, end: WEDNESDAY }))).toBe(true)
+  })
+})
+
+describe('durationOf and spansMidnight', () => {
+  const times = (end: string, startTime: string, endTime: string) => ({
+    start: WEDNESDAY,
+    end,
+    startTime,
+    endTime,
+  })
+
+  it('counts the minutes across the days between the dates', () => {
+    expect(durationOf(times(WEDNESDAY, '09:00', '10:30'))).toBe(90)
+    expect(durationOf(times('2026-06-11', '22:00', '02:00'))).toBe(240)
+  })
+
+  it('names only an event that crosses midnight without lasting a day', () => {
+    expect(spansMidnight(times(WEDNESDAY, '09:00', '10:00'))).toBe(false)
+    expect(spansMidnight(times('2026-06-11', '22:00', '02:00'))).toBe(true)
+    expect(spansMidnight(times('2026-06-11', '22:00', '22:00'))).toBe(false)
   })
 })
 
@@ -329,6 +360,62 @@ describe('timedSegments', () => {
     const brief = event({ id: 'a', startTime: '09:00', endTime: '09:01' })
     expect(timedSegments([brief], days, DAY, 15)[0]).toMatchObject({ start: 540, end: 555 })
   })
+
+  describe('an event running past midnight', () => {
+    const week = [MONDAY, '2026-06-09', WEDNESDAY]
+    const late = event({
+      id: 'a',
+      start: MONDAY,
+      end: '2026-06-09',
+      startTime: '22:00',
+      endTime: '02:00',
+    })
+
+    it('is cut at midnight into a box in each of its two days', () => {
+      expect(timedSegments([late], week, DAY, 15)).toEqual([
+        {
+          id: 'a',
+          dayIndex: 0,
+          start: at(22),
+          end: at(24),
+          clippedStart: false,
+          clippedEnd: true,
+          part: 'head',
+        },
+        {
+          id: 'a',
+          dayIndex: 1,
+          start: 0,
+          end: at(2),
+          clippedStart: true,
+          clippedEnd: false,
+          part: 'tail',
+        },
+      ])
+    })
+
+    it('keeps whichever half has its day on show', () => {
+      expect(timedSegments([late], ['2026-06-09'], DAY, 15)).toMatchObject([
+        { dayIndex: 0, part: 'tail' },
+      ])
+    })
+
+    // Otherwise the next day would show a slot-long stub at 00:00 for an event already over.
+    it('is drawn whole when it ends at midnight exactly', () => {
+      const evening = { ...late, endTime: '00:00' }
+      expect(timedSegments([evening], week, DAY, 15)).toEqual([
+        {
+          id: 'a',
+          dayIndex: 0,
+          start: at(22),
+          end: at(24),
+          clippedStart: false,
+          clippedEnd: false,
+          part: 'whole',
+        },
+      ])
+    })
+  })
 })
 
 describe('packDayColumn', () => {
@@ -339,6 +426,7 @@ describe('packDayColumn', () => {
     end,
     clippedStart: false,
     clippedEnd: false,
+    part: 'whole' as const,
   })
 
   const byId = (placed: ReturnType<typeof packDayColumn>) =>
@@ -720,36 +808,6 @@ describe('snapping', () => {
   })
 })
 
-describe('moveEvent', () => {
-  const origin = { start: WEDNESDAY, end: WEDNESDAY, startTime: '09:00', endTime: '10:30' }
-
-  it('carries the event whole along its day, keeping how long it lasts', () => {
-    expect(moveEvent(origin, 30, DAY)).toEqual({
-      start: WEDNESDAY,
-      end: WEDNESDAY,
-      startTime: '09:30',
-      endTime: '11:00',
-    })
-  })
-
-  /*
-   * Moving something must never change how long it is — that is the other gesture's job.
-   * So an event pushed past the end of the window is held against it instead of being cut.
-   */
-  it('holds an event at the edge rather than shortening it', () => {
-    const late = moveEvent(origin, 10_000, DAY)
-    expect(late.startTime).toBe('22:30')
-    expect(late.endTime).toBe('23:59')
-  })
-
-  it('holds it at the top edge the same way', () => {
-    expect(moveEvent(origin, -10_000, DAY)).toMatchObject({
-      startTime: '00:00',
-      endTime: '01:30',
-    })
-  })
-})
-
 describe('daySpan', () => {
   it('is zero for an event that starts and ends the same day', () => {
     expect(
@@ -939,27 +997,6 @@ describe('pointWithin', () => {
    */
   it('contains everything when the box has not been laid out', () => {
     expect(pointWithin({ x: 5000, y: -5000 }, { left: 0, top: 0, width: 0, height: 0 })).toBe(true)
-  })
-})
-
-describe('resizeEvent', () => {
-  const origin = { start: WEDNESDAY, end: WEDNESDAY, startTime: '09:00', endTime: '10:00' }
-
-  it('moves the end and leaves the start where it is', () => {
-    expect(resizeEvent(origin, at(11, 30), 15, DAY)).toEqual({
-      start: WEDNESDAY,
-      end: WEDNESDAY,
-      startTime: '09:00',
-      endTime: '11:30',
-    })
-  })
-
-  it('never lets the end cross the start', () => {
-    expect(resizeEvent(origin, at(6), 15, DAY).endTime).toBe('09:15')
-  })
-
-  it('keeps the end inside the window', () => {
-    expect(resizeEvent(origin, 5000, 15, DAY).endTime).toBe('23:59')
   })
 })
 

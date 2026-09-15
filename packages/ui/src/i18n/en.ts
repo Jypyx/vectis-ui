@@ -171,7 +171,7 @@ export const en: Messages = {
     allDay: 'All day',
     moreEvents: (count) => `+${count} more`,
     openDay: (day) => `Open ${day}`,
-    newEvent: (index) => `Event #${index}`,
+    untitled: '(No title)',
     eventRoleDescription: 'event',
     eventHint:
       'Press Enter to take hold of this event, then the arrow keys to move it and Shift with the arrow keys to change when it ends.',
@@ -179,6 +179,5 @@ export const en: Messages = {
     dropped: 'Event placed.',
     reverted: 'Move cancelled. The event is back where it was.',
     movedTo: (title, when) => `${title} moved to ${when}.`,
-    createdAt: (title, when) => `${title} created on ${when}.`,
   },
 }

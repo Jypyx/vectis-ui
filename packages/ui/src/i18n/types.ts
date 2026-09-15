@@ -312,11 +312,8 @@ export interface Messages {
     moreEvents: (count: number) => string
     /** How a day in the month and year views offers to be opened on its own. */
     openDay: (day: string) => string
-    /**
-     * The name a newly created event is given. The number is the one a reader counts,
-     * starting at one — it carries no unit, so a language that writes it differently can.
-     */
-    newEvent: (index: number) => string
+    /** What the card of a slot being drawn out is called, before it is anything else. */
+    untitled: string
     /** What one event IS, said in place of the word "button". */
     eventRoleDescription: string
     /** How a card says it can be moved. It is read once, from a single shared node. */
@@ -328,8 +325,6 @@ export interface Messages {
     reverted: string
     /** How an event's new place is announced, the range already written out. */
     movedTo: (title: string, when: string) => string
-    /** How an event made from the keyboard is announced, its day and times already written out. */
-    createdAt: (title: string, when: string) => string
   }
 }
 
