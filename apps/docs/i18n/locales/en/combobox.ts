@@ -31,6 +31,10 @@ export default {
       title: 'Values as text',
       text: '<code>display="text"</code> shows the chosen values as their labels joined by commas, on one line cut short with an ellipsis. The field keeps the height of an ordinary control, and under the focus the line leaves at least half of it to the search. A value is removed by unticking it in the list, with Backspace on an empty search, or with the <code>clearable</code> cross.',
     },
+    maxValues: {
+      title: 'Values shown while folded',
+      text: '<code>max</code> keeps the first chosen values in view and sums the rest up as "+X", in chips or in text alike. It applies while the field is out of focus: focused, every value comes back so it can be seen and removed. <code>overflowText</code> rephrases the count, and the <code>#overflow</code> slot replaces it.',
+    },
     fieldIcon: {
       title: 'Field icon',
       text: '<code>iconStart</code> displays an icon at the beginning of the field. <code>iconStartLabel</code> provides an accessible label if the icon is made interactive.',
@@ -66,6 +70,9 @@ export default {
           'Allows several values to be chosen, which makes the value a list and shows what has been chosen inside the field, as chips or as text depending on <code>display</code>.',
         display:
           'How the chosen values are shown when several can be chosen: one dismissible chip each, or their labels joined by commas on a single line, cut short with an ellipsis. It changes nothing for a single value, which is always text.',
+        max: 'How many chosen values to show before the rest are summed up as "+X", as chips or as text. It applies while the field is out of focus; focused, every value comes back so it can be seen and removed. Left out, or set to 0, every value is shown. It changes nothing without <code>multiple</code>.',
+        overflowText:
+          'Rephrases the "+X" standing for the values beyond <code>max</code>, "+5 products" for instance. It receives the number of values being hidden.',
         label: 'The label above the field, tied to it so that clicking it focuses the field.',
         hint: 'A line of help under the field, read out along with the label.',
         size: 'The height of the field: 32, 40 or 48 pixels. The panel and its rows follow it.',
@@ -110,6 +117,8 @@ export default {
         option:
           'What a row of the list shows, in place of the plain label: a subtitle, an avatar, a badge. It is told whether the row is the highlighted one and whether it is already chosen.',
         chip: 'Replaces the chip standing for one chosen value. It receives <code>remove</code>, without which the value could no longer be taken back, and the size and density worked out to sit inside the field, which cannot be guessed from outside. The option itself may be missing, if that value has never appeared among the options.',
+        overflow:
+          'Replaces the "+X" standing for the values beyond <code>max</code>. It receives <code>count</code>, the number of values being hidden, and the size and density of the chips inside the field, so that a chip of your own lines up with the others.',
         empty: 'What the panel shows when nothing matches. It receives the term that was searched.',
         loading: 'What the panel shows while loading its first options.',
         valueEnd:

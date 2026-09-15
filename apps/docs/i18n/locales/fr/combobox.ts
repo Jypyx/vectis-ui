@@ -31,6 +31,10 @@ export default {
       title: 'Valeurs en texte',
       text: '<code>display="text"</code> affiche les valeurs choisies sous forme de libellés séparés par des virgules, sur une seule ligne tronquée par des points de suspension. Le champ garde la hauteur d\'un contrôle ordinaire, et sous le focus la ligne laisse au moins la moitié de la place à la recherche. On retire une valeur en la décochant dans la liste, avec Retour arrière sur une recherche vide, ou avec la croix de <code>clearable</code>.',
     },
+    maxValues: {
+      title: 'Valeurs montrées champ replié',
+      text: "<code>max</code> garde en vue les premières valeurs choisies et résume les autres en « +X », en puces comme en texte. Cela vaut tant que le champ n'a pas le focus : sous le focus, toutes les valeurs reviennent pour être vues et retirées. <code>overflowText</code> reformule le compte, et le slot <code>#overflow</code> le remplace.",
+    },
     fieldIcon: {
       title: 'Icône du champ',
       text: "<code>iconStart</code> affiche une icône au début du champ. <code>iconStartLabel</code> fournit un label accessible si l'icône est rendue interactive au clic.",
@@ -66,6 +70,9 @@ export default {
           'Permet de choisir plusieurs valeurs, ce qui fait de la valeur une liste et montre ce qui a été choisi dans le champ, en puces ou en texte selon <code>display</code>.',
         display:
           'Comment les valeurs choisies sont montrées quand on peut en choisir plusieurs : une puce supprimable chacune, ou leurs libellés séparés par des virgules sur une seule ligne, tronquée par des points de suspension. Ne change rien pour une valeur unique, qui est toujours du texte.',
+        max: "Combien de valeurs choisies montrer avant de résumer les autres en « +X », en puces comme en texte. Cela vaut tant que le champ n'a pas le focus ; sous le focus, toutes les valeurs reviennent pour être vues et retirées. Omis, ou à 0, toutes les valeurs sont montrées. Ne change rien sans <code>multiple</code>.",
+        overflowText:
+          'Reformule le « +X » qui représente les valeurs au-delà de <code>max</code>, « +5 produits » par exemple. Reçoit le nombre de valeurs masquées.',
         label: "Le libellé au-dessus du champ, lié à lui pour qu'un clic dessus y place le focus.",
         hint: "Une ligne d'aide sous le champ, lue en même temps que le libellé.",
         size: 'La hauteur du champ : 32, 40 ou 48 pixels. Le panneau et ses lignes la suivent.',
@@ -112,6 +119,8 @@ export default {
         option:
           "Ce qu'une ligne de la liste montre, à la place du simple libellé : un sous-titre, un avatar, un badge. On lui dit si la ligne est celle mise en évidence et si elle est déjà choisie.",
         chip: "Remplace la puce qui représente une valeur choisie. Elle reçoit <code>remove</code>, sans quoi la valeur ne pourrait plus être retirée, ainsi que la taille et la densité calculées pour tenir dans le champ, qui ne se devinent pas de l'extérieur. L'option elle-même peut manquer, si cette valeur n'a jamais figuré parmi les options.",
+        overflow:
+          "Remplace le « +X » qui représente les valeurs au-delà de <code>max</code>. Reçoit <code>count</code>, le nombre de valeurs masquées, ainsi que la taille et la densité des puces du champ, pour qu'une puce à vous s'aligne sur les autres.",
         empty: 'Ce que le panneau montre quand rien ne correspond. Il reçoit le terme cherché.',
         loading: 'Ce que le panneau montre pendant le chargement de ses premières options.',
         valueEnd:

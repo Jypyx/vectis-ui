@@ -18,6 +18,8 @@ import ComboboxInfiniteScroll from '~/examples/combobox/InfiniteScroll.vue'
 import comboboxInfiniteScrollSource from '~/examples/combobox/InfiniteScroll.vue?raw'
 import ComboboxLabelAndHint from '~/examples/combobox/LabelAndHint.vue'
 import comboboxLabelAndHintSource from '~/examples/combobox/LabelAndHint.vue?raw'
+import ComboboxMaxValues from '~/examples/combobox/MaxValues.vue'
+import comboboxMaxValuesSource from '~/examples/combobox/MaxValues.vue?raw'
 import ComboboxMultiple from '~/examples/combobox/Multiple.vue'
 import comboboxMultipleSource from '~/examples/combobox/Multiple.vue?raw'
 import ComboboxPlacement from '~/examples/combobox/Placement.vue'
@@ -86,6 +88,12 @@ useDocsHead('combobox')
   <DocsProse keypath="combobox.examples.textDisplay.text" />
   <DocsExample :source="comboboxTextDisplaySource" stack>
     <ComboboxTextDisplay />
+  </DocsExample>
+
+  <h3 id="max-values">{{ t('combobox.examples.maxValues.title') }}</h3>
+  <DocsProse keypath="combobox.examples.maxValues.text" />
+  <DocsExample :source="comboboxMaxValuesSource" stack>
+    <ComboboxMaxValues />
   </DocsExample>
 
   <h3 id="field-icon">{{ t('combobox.examples.fieldIcon.title') }}</h3>
