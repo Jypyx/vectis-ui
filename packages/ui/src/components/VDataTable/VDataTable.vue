@@ -793,10 +793,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
        unframed, so the caption, the toolbar and the footer sit flush with the edge, and
        the cells' own inline padding as soon as a frame appears. */
     --data-table-frame-pad: 0px;
-    /* The colour a frozen heading is painted with. It follows the frame's own background:
-       any other value would show as a visible seam in the dark theme, where the two
-       surfaces differ. */
-    --data-table-surface: var(--vectis-color-surface);
 
     container-type: inline-size;
     font-family: var(--vectis-text-family);
@@ -826,9 +822,8 @@ const heightStyle = computed<StyleValue | undefined>(() =>
      at all — whatever surrounds the table is what provides the surface then. */
   .v-data-table[data-variant='outlined'] {
     --data-table-frame-pad: var(--data-table-pad-inline);
-    --data-table-surface: var(--vectis-color-surface-raised);
 
-    background: var(--data-table-surface);
+    background: var(--vectis-color-surface-raised);
     border: 1px solid var(--vectis-color-border);
     border-radius: var(--vectis-radius-surface);
     /*
@@ -919,6 +914,11 @@ const heightStyle = computed<StyleValue | undefined>(() =>
        emphasis rather than a typographic role — hence a font token read directly. */
     font-weight: var(--vectis-font-weight-semibold);
     color: var(--vectis-color-text-muted);
+    /* The heading row gets a tint of its own so it reads apart from the data. `muted` and
+       not `sunken`: the striped rows already take `sunken`, and a heading painted the same
+       would read as one more stripe. Opaque in both themes, which is also what a frozen
+       heading needs, the rows scrolling underneath it. */
+    background-color: var(--vectis-color-surface-muted);
     border-block-end: 1px solid var(--vectis-color-border);
   }
 
@@ -956,15 +956,13 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     background-color: var(--vectis-color-accent-surface);
   }
 
-  /* A frozen heading MUST be opaque: the rows scroll underneath it, and without a
-     background they would show through. Its colour is read from the variable holding the
-     table's real surface — a fixed value would leave a visible seam along the frame's
-     edge in the dark theme, where the two surfaces differ. */
+  /* TRAP — a frozen heading relies on the opaque background every `th` already carries: the
+     rows scroll underneath it, and a consumer restyling that background with a translucent
+     colour will see them through. */
   .v-data-table[data-sticky-header] th {
     position: sticky;
     inset-block-start: 0;
     z-index: 1;
-    background-color: var(--data-table-surface);
   }
 
   .v-data-table-sort {

@@ -89,11 +89,13 @@ scrolling edge to edge.
 
 ## Appearance
 
-`striped` alternates the background of even rows; `compact` reduces the cell paddings by one notch
+The header row is painted on a muted surface of its own, which sets the column headings apart
+from the data under them. `striped` alternates the background of even rows, in a lighter tint
+than the header's so a heading never reads as one more stripe; `compact` reduces the cell paddings by one notch
 and switches the composed parts (the search, the footer) to compact; `stickyHeader` freezes the
 header row on vertical scrolling — it assumes a bounded scroll area, through `height` or through a
-parent with a defined height (see **Height**), otherwise nothing scrolls under the header. Its
-opaque background takes the variant's surface: no seam at the frame's edge, dark theme included.
+parent with a defined height (see **Height**), otherwise nothing scrolls under the header, whose
+opaque background the rows pass beneath.
 
 <Canvas of={VDataTableStories.Striped} />
 
