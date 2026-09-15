@@ -129,6 +129,18 @@ interface ComboboxProps {
    * text.
    */
   display?: ComboboxDisplay
+  /**
+   * How many chosen values to show before the rest are summed up as "+X", as chips or as
+   * text alike. It applies while the search input is folded away, which is to say out of
+   * focus: focused, every value comes back so it can be seen and taken back. Left out, or
+   * set to 0, every value is shown. It changes nothing without `multiple`.
+   */
+  max?: number
+  /**
+   * Rephrases the "+X" standing for the values beyond `max`, "+5 products" for instance.
+   * It receives the number of values being hidden.
+   */
+  overflowText?: (count: number) => string
   /** The label above the field, tied to it so that clicking it focuses the field. */
   label?: string
   /**
@@ -210,6 +222,8 @@ interface ComboboxProps {
 const props = withDefaults(defineProps<ComboboxProps>(), {
   multiple: false,
   display: 'chip',
+  max: undefined,
+  overflowText: undefined,
   label: undefined,
   hint: undefined,
   size: 'md',
@@ -295,6 +309,12 @@ defineSlots<{
     size: ChipSize
     compact: boolean
   }): unknown
+  /**
+   * Replaces the "+X" standing for the values beyond `max`. It receives `count`, the number
+   * of values being hidden, and the size and density of the chips inside the field, so that a
+   * chip of your own lines up with the others.
+   */
+  overflow?(props: { count: number; size: ChipSize; compact: boolean }): unknown
   /** What the panel shows when nothing matches. It receives the term that was searched. */
   empty?(props: { query: string }): unknown
   /** What the panel shows while loading its first options. */
@@ -617,12 +637,6 @@ watch(
 /** The chosen values are spelled out as one line of text rather than drawn as chips. */
 const textDisplay = computed(() => props.multiple && props.display === 'text')
 
-// The comma is universal punctuation rather than a word, so it stays out of the dictionary,
-// as in VFileInput's own text display.
-const displayText = computed(() =>
-  textDisplay.value ? selectedValues.value.map(labelOf).join(', ') : '',
-)
-
 // With several values chosen and the field unfocused, the search input folds away so the
 // chips are not followed by an empty gap. It stays in the page and stays focusable —
 // only its width goes.
@@ -634,6 +648,27 @@ const collapsed = computed(
     props.multiple &&
     selectedValues.value.length > 0 &&
     (!focused.value || (textDisplay.value && props.readonly)),
+)
+
+// `max` holds only while the field is folded. Unfolded, the reader is working on the
+// selection, and every value must be there to be seen and taken back — Backspace included,
+// which would otherwise remove a value hidden behind the "+X". `max: 0` means no limit, as
+// on VAvatarGroup: a truthiness test, never `!= null`, which would hide every value.
+const visibleValues = computed(() =>
+  collapsed.value && props.max ? selectedValues.value.slice(0, props.max) : selectedValues.value,
+)
+const overflowCount = computed(() => selectedValues.value.length - visibleValues.value.length)
+
+// Digits and a plus sign stay out of the dictionary, as VAvatarGroup's "+N" does: rephrasing
+// goes through `overflowText` or the `#overflow` slot.
+const resolvedOverflowText = computed(() =>
+  props.overflowText ? props.overflowText(overflowCount.value) : `+${overflowCount.value}`,
+)
+
+// The comma is universal punctuation rather than a word, so it stays out of the dictionary,
+// as in VFileInput's own text display.
+const displayText = computed(() =>
+  textDisplay.value ? visibleValues.value.map(labelOf).join(', ') : '',
 )
 
 // The clear cross has to appear as soon as there is SOMETHING to clear — chosen values,
@@ -974,7 +1009,18 @@ defineExpose({
       >
         <template v-if="multiple || $slots.start" #start>
           <span v-if="displayText" class="v-combobox-text">{{ displayText }}</span>
-          <template v-for="value in multiple && !textDisplay ? selectedValues : []" :key="value">
+          <!-- A box of its own beside the line rather than the end of it: the labels are what
+               the ellipsis cuts, and the count of what they do not show must survive it. -->
+          <span v-if="textDisplay && overflowCount > 0" class="v-combobox-overflow">
+            <slot
+              name="overflow"
+              :count="overflowCount"
+              :size="chipScale.size"
+              :compact="chipScale.compact"
+              >{{ resolvedOverflowText }}</slot
+            >
+          </span>
+          <template v-for="value in multiple && !textDisplay ? visibleValues : []" :key="value">
             <slot
               name="chip"
               :value="value"
@@ -996,6 +1042,25 @@ defineExpose({
               >
             </slot>
           </template>
+          <!-- Not wrapped, unlike the text display's counter: a box around an inline-flex chip
+               opens a line box, whose strut makes the field taller than its chips. Neutral
+               and not dismissible, so it reads as a summary rather than one more value. -->
+          <slot
+            v-if="multiple && !textDisplay && overflowCount > 0"
+            name="overflow"
+            :count="overflowCount"
+            :size="chipScale.size"
+            :compact="chipScale.compact"
+          >
+            <VChip
+              class="v-combobox-overflow-chip"
+              tone="neutral"
+              :size="chipScale.size"
+              :compact="chipScale.compact"
+              :disabled="resolvedDisabled"
+              >{{ resolvedOverflowText }}</VChip
+            >
+          </slot>
           <slot name="start" />
         </template>
 
@@ -1184,6 +1249,13 @@ defineExpose({
 
   .v-combobox:not([data-collapsed]) .v-combobox-text {
     max-inline-size: 50%;
+  }
+
+  /* The "+X" after a line of text never shrinks: the line gives way instead. */
+  .v-combobox-overflow {
+    flex: none;
+    white-space: nowrap;
+    color: var(--vectis-color-text-muted);
   }
 
   /* TRAP — an unbroken line has the whole of its text as its min-content width, and that

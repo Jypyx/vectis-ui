@@ -98,6 +98,7 @@ const t = storyText({
     billingCountry: 'Billing country',
     frozenHint: 'Set by your subscription.',
     searchCountry: 'Search a country',
+    moreCountries: (count: number) => `+${count} more ${count === 1 ? 'country' : 'countries'}`,
   },
   fr: {
     chooseCountry: 'Choisir un pays…',
@@ -128,6 +129,7 @@ const t = storyText({
     billingCountry: 'Pays de facturation',
     frozenHint: 'Défini par votre abonnement.',
     searchCountry: 'Rechercher un pays',
+    moreCountries: (count: number) => `+${count} ${count === 1 ? 'autre pays' : 'autres pays'}`,
   },
 })
 
@@ -393,6 +395,63 @@ export const TextDisplay: Story = {
     await waitFor(() => expect(text).toHaveTextContent(/Luxembourg, Réunion$/))
     await userEvent.keyboard('{Backspace}')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent(/^fr,be,ch,ca,lu$/))
+  },
+}
+
+/**
+ * `max` keeps the first values and sums the rest up as "+X" while the field is folded, as
+ * chips or as text; focused, every value comes back. `overflowText` rephrases the count.
+ */
+export const MaxValues: Story = {
+  render: (args) => ({
+    components: { VCombobox },
+    setup: () => ({
+      args,
+      t,
+      chips: ref<string[]>(['fr', 'be', 'ch', 'ca', 'lu']),
+      text: ref<string[]>(['fr', 'be', 'ch', 'ca', 'lu']),
+      overflowText: (count: number) => t.value.moreCountries(count),
+    }),
+    template: `
+      <div style="display: grid; gap: 16px; width: 300px">
+        <button type="button">{{ t.neighbour }}</button>
+        <VCombobox v-bind="args" multiple :max="2" v-model="chips" :label="t.servedCountries" />
+        <VCombobox v-bind="args" multiple display="text" :max="3" :overflow-text="overflowText" v-model="text" :label="t.otherCountries" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const [chipsRoot, textRoot] = [...canvasElement.querySelectorAll<HTMLElement>('.v-combobox')]
+    const chipsInput = canvas.getByRole('combobox', { name: 'Served countries' })
+
+    // Folded: two chips and a "+3", on a single row of the field.
+    const overflowChip = chipsRoot!.querySelector('.v-combobox-overflow-chip') as HTMLElement
+    await expect(overflowChip).toHaveTextContent('+3')
+    await expect(chipsRoot!.querySelectorAll('.v-chip')).toHaveLength(3)
+
+    // Focused: every value is back, with its cross.
+    await userEvent.click(chipsInput)
+    await waitFor(() => expect(chipsRoot!.querySelector('.v-combobox-overflow-chip')).toBeNull())
+    await expect(canvas.getAllByRole('button', { name: /^Remove / })).toHaveLength(5)
+
+    // Unfocused again, the summary returns.
+    await userEvent.click(canvas.getByRole('button', { name: /Neighbouring/ }))
+    await waitFor(() =>
+      expect(chipsRoot!.querySelector('.v-combobox-overflow-chip')).toHaveTextContent('+3'),
+    )
+
+    // Text: the line is cut short, the count beside it is not, and it stays inside the room
+    // the field leaves before its chevron.
+    const line = textRoot!.querySelector('.v-combobox-text') as HTMLElement
+    const count = textRoot!.querySelector('.v-combobox-overflow') as HTMLElement
+    const chevron = textRoot!.querySelector('.v-combobox-chevron') as HTMLElement
+    await expect(line).toHaveTextContent('France, Belgium, Switzerland')
+    await expect(count).toHaveTextContent('+2 more countries')
+    await expect(count.scrollWidth).toBeLessThanOrEqual(count.clientWidth)
+    await expect(count.getBoundingClientRect().right).toBeLessThanOrEqual(
+      chevron.getBoundingClientRect().left,
+    )
   },
 }
 

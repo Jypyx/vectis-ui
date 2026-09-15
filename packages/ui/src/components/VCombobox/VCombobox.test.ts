@@ -261,6 +261,106 @@ describe('VCombobox', () => {
     expect(container.querySelector('.v-combobox')?.hasAttribute('data-collapsed')).toBe(true)
   })
 
+  describe('max', () => {
+    const FIVE = ['fr', 'be', 're', 'mc', 'lu']
+    const MANY = [...OPTIONS, { value: 'lu', label: 'Luxembourg' }]
+    const chipLabels = (container: Element) =>
+      [...container.querySelectorAll('.v-chip:not(.v-combobox-overflow-chip)')].map((c) =>
+        c.textContent?.trim(),
+      )
+
+    it('folded, shows the first values and sums the rest up as a neutral +X chip', () => {
+      const { container } = renderCombobox({
+        options: MANY,
+        multiple: true,
+        max: 2,
+        modelValue: FIVE,
+      })
+      expect(chipLabels(container)).toEqual(['France', 'Belgium'])
+      const overflow = container.querySelector('.v-combobox-overflow-chip') as HTMLElement
+      expect(overflow.textContent?.trim()).toBe('+3')
+      expect(overflow.dataset.tone).toBe('neutral')
+      expect(overflow.querySelector('.v-chip-dismiss')).toBeNull()
+    })
+
+    it('focused, every value comes back, and Backspace removes the last one', async () => {
+      const { container, getByRole, emitted } = renderCombobox({
+        options: MANY,
+        multiple: true,
+        max: 2,
+        modelValue: FIVE,
+      })
+      await fireEvent.focus(getByRole('combobox'))
+      expect(chipLabels(container)).toHaveLength(5)
+      expect(container.querySelector('.v-combobox-overflow-chip')).toBeNull()
+
+      await fireEvent.keyDown(getByRole('combobox'), { key: 'Backspace' })
+      expect(emitted('update:modelValue').at(-1)).toEqual([['fr', 'be', 're', 'mc']])
+    })
+
+    it('0, or a max the selection does not reach, shows everything with no +X', () => {
+      for (const max of [0, 5]) {
+        const { container, unmount } = renderCombobox({
+          options: MANY,
+          multiple: true,
+          max,
+          modelValue: FIVE,
+        })
+        expect(chipLabels(container)).toHaveLength(5)
+        expect(container.querySelector('.v-combobox-overflow-chip')).toBeNull()
+        unmount()
+      }
+    })
+
+    it('overflowText rephrases the count, in both displays', () => {
+      const overflowText = (count: number) => `+${count} countries`
+      const chips = renderCombobox({
+        options: MANY,
+        multiple: true,
+        max: 1,
+        overflowText,
+        modelValue: FIVE,
+      })
+      expect(chips.container.querySelector('.v-combobox-overflow-chip')?.textContent?.trim()).toBe(
+        '+4 countries',
+      )
+      chips.unmount()
+
+      const { container } = renderCombobox({
+        options: MANY,
+        multiple: true,
+        display: 'text',
+        max: 1,
+        overflowText,
+        modelValue: FIVE,
+      })
+      // the count sits beside the line, never inside what the ellipsis cuts
+      expect(container.querySelector('.v-combobox-text')?.textContent).toBe('France')
+      expect(container.querySelector('.v-combobox-overflow')?.textContent?.trim()).toBe(
+        '+4 countries',
+      )
+    })
+
+    it('the #overflow slot replaces the +X and receives the count and the chip scale', () => {
+      const { container } = render(VCombobox, {
+        props: { options: MANY, multiple: true, max: 3, size: 'lg', modelValue: FIVE },
+        attrs: { 'aria-label': 'Country' },
+        slots: {
+          overflow: ({ count, size, compact }: { count: number; size: string; compact: boolean }) =>
+            h('output', { class: 'custom' }, `${count} ${size} ${compact}`),
+        },
+      })
+      expect(container.querySelector('.custom')?.textContent).toBe('2 sm false')
+      expect(container.querySelector('.v-combobox-overflow-chip')).toBeNull()
+    })
+
+    it('changes nothing without multiple', () => {
+      const { container, getByRole } = renderCombobox({ max: 1, modelValue: 'fr' })
+      expect((getByRole('combobox') as HTMLInputElement).value).toBe('France')
+      expect(container.querySelector('.v-combobox-overflow, .v-combobox-overflow-chip')).toBeNull()
+    })
+  })
+
   it('the chevron closes an open panel, and keeps the focus in the field while doing so', async () => {
     const { container, getByRole } = renderCombobox()
     const input = getByRole('combobox')
