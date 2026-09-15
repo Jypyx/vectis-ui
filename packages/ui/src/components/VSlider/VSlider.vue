@@ -651,9 +651,12 @@ defineExpose({
      vendor pseudo-element below. That is what lets every state be written a single time:
      a state pseudo-class written after the thumb's own pseudo-element is unreliable across
      browsers, so a state has to be read on the control either way, and the thumb inherits
-     the variables from it. */
+     the variables from it.
+
+     The thumb is white in BOTH themes, the VSwitch thumb's colour: on a dark page a thumb
+     painted in `surface` sinks into the track instead of standing out as the handle. */
   .v-slider-input {
-    --slider-thumb-bg: var(--vectis-color-surface);
+    --slider-thumb-bg: var(--vectis-color-text-on-accent);
     --slider-thumb-border: var(--vectis-color-accent);
     --slider-thumb-shadow: var(--vectis-shadow-xs);
     --slider-thumb-outline: none;
@@ -714,9 +717,17 @@ defineExpose({
 
   /* The states, all at (0,3,0) but the base, so their ORDER arbitrates them: hover, then
      read-only, invalid and disabled, each overriding what came before on a thumb that is
-     several at once. */
+     several at once.
+
+     The hover tint is mixed from the thumb's own white rather than read from
+     `accent-surface`: that token turns dark in the dark theme, and a white thumb would
+     flash nearly black under the pointer. */
   .v-slider-input:is(:hover, :active):not(:disabled) {
-    --slider-thumb-bg: var(--vectis-color-accent-surface);
+    --slider-thumb-bg: color-mix(
+      in oklab,
+      var(--vectis-color-text-on-accent),
+      var(--vectis-color-accent) 10%
+    );
   }
 
   .v-slider-input:focus-visible {
