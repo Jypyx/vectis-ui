@@ -20,7 +20,9 @@ import type { StyleValue } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
-import { check as checkIcon } from '../VIcon/icons/check'
+// TRAP — neither import may be named after a prop (`check`, `checkIcon`): every top-level
+// binding of a `<script setup>` reaches the template, where it shadows the prop of that name.
+import { check as checkMark } from '../VIcon/icons/check'
 import { close as closeIcon } from '../VIcon/icons/close'
 import type { IconSource } from '../VIcon/types'
 import { useMessages } from '../../i18n/state'
@@ -83,6 +85,8 @@ interface ChipProps {
    * start icon was given, so the two are never shown together.
    */
   check?: boolean
+  /** The icon of that tick, a built-in check mark by default. `iconFilled` does not reach it. */
+  checkIcon?: IconSource
   /** An icon before the label. The `#start` slot replaces it. */
   iconStart?: IconSource
   /** An icon after the label. The `#end` slot replaces it. */
@@ -120,6 +124,7 @@ const props = withDefaults(defineProps<ChipProps>(), {
   href: undefined,
   selectable: false,
   check: false,
+  checkIcon: () => checkMark,
   iconStart: undefined,
   iconEnd: undefined,
   iconFilled: false,
@@ -213,7 +218,7 @@ function iconOnly() {
       :aria-pressed="selectable ? selected : undefined"
       @click="selectable && !disabled && (selected = !selected)"
     >
-      <VIcon v-if="showCheck" :name="checkIcon" />
+      <VIcon v-if="showCheck" v-bind="iconProps(checkIcon)" />
       <slot v-else name="start">
         <VIcon v-if="iconStart" v-bind="iconProps(iconStart)" :filled="iconFilled" />
       </slot>
@@ -245,7 +250,7 @@ function iconOnly() {
     align-items: center;
     height: var(--control-height);
     border: 1px solid transparent;
-    border-radius: var(--vectis-radius-interactive);
+    border-radius: var(--vectis-radius-chip);
     font-family: var(--vectis-text-family);
     font-size: var(--control-font-size);
     font-weight: var(--vectis-text-control-weight);

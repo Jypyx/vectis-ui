@@ -19,6 +19,7 @@ export default {
         { name: 'href', type: 'string' },
         { name: 'selectable', type: 'boolean', default: 'false' },
         { name: 'check', type: 'boolean', default: 'false' },
+        { name: 'checkIcon', type: 'IconSource', default: 'check' },
         { name: 'iconStart', type: 'IconSource' },
         { name: 'iconEnd', type: 'IconSource' },
         { name: 'iconFilled', type: 'boolean', default: 'false' },

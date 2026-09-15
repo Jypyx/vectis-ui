@@ -9,7 +9,7 @@ export default {
     },
     shapes: {
       title: 'Silhouettes',
-      text: "<code>shape</code> choisit la silhouette : <code>chip</code> prend le rayon d'angle d'un contrôle interactif, <code>pill</code> arrondit complètement les extrémités.",
+      text: "<code>shape</code> choisit la silhouette : <code>chip</code> prend le rayon d'angle d'un contrôle interactif, <code>pill</code> arrondit complètement les extrémités. Les coins de <code>chip</code> lisent <code>--vectis-radius-chip</code>, qui pointe vers <code>--vectis-radius-interactive</code> depuis <code>:root</code> : redéfinissez-le pour arrondir les puces indépendamment des autres contrôles. Posé sur un sélecteur plus étroit que <code>:root</code>, un override de <code>--vectis-radius-interactive</code> n'atteint pas les puces : donnez alors les deux tokens à ce sélecteur.",
     },
     sizes: {
       title: 'Tailles',
@@ -29,7 +29,7 @@ export default {
     },
     selection: {
       title: 'Sélection',
-      text: "<code>selectable</code> transforme la puce en bascule liée à <code>v-model:selected</code>. <code>check</code> ajoute une coche avant le libellé, à la place de l'icône de début.",
+      text: "<code>selectable</code> transforme la puce en bascule liée à <code>v-model:selected</code>. <code>check</code> ajoute une coche avant le libellé, à la place de l'icône de début, et <code>checkIcon</code> change son glyphe.",
     },
     dismissible: {
       title: 'Suppression',
@@ -59,6 +59,8 @@ export default {
           "Fait de la puce quelque chose qui reste choisi. Cela l'emporte sur <code>href</code> et <code>clickable</code>.",
         check:
           "Affiche une coche avant le libellé tant que la puce est sélectionnée. Elle remplace l'icône de début qui aurait été donnée, si bien que les deux ne sont jamais montrées ensemble.",
+        checkIcon:
+          "L'icône de cette coche, une coche intégrée par défaut. <code>iconFilled</code> ne l'atteint pas.",
         iconStart: 'Une icône avant le libellé. Le slot <code>#start</code> la remplace.',
         iconEnd: 'Une icône après le libellé. Le slot <code>#end</code> la remplace.',
         iconFilled:

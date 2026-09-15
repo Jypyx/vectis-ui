@@ -3,6 +3,7 @@ import { expect, userEvent, within } from 'storybook/test'
 import { ref } from 'vue'
 
 import { storyText } from '../../stories/storyText'
+import VButton from '../VButton/VButton.vue'
 import VChip from './VChip.vue'
 
 const t = storyText({
@@ -24,6 +25,8 @@ const t = storyText({
     small: 'Small 32px',
     xsmallCompact: 'XSmall compact 20px',
     smallCompact: 'Small compact 28px',
+    squareCorners: 'Square corners',
+    button: 'Button',
   },
   fr: {
     chipDefault: 'Chip (défaut)',
@@ -43,6 +46,8 @@ const t = storyText({
     small: 'Small 32px',
     xsmallCompact: 'XSmall compact 20px',
     smallCompact: 'Small compact 28px',
+    squareCorners: 'Coins carrés',
+    button: 'Bouton',
   },
 })
 
@@ -58,6 +63,7 @@ const meta = {
     compact: { control: 'boolean' },
     clickable: { control: 'boolean' },
     check: { control: 'boolean' },
+    checkIcon: { control: 'text' },
     dismissIcon: { control: 'text' },
   },
   args: {
@@ -113,6 +119,32 @@ export const Shapes: Story = {
       </div>
     `,
   }),
+}
+
+/**
+ * `--vectis-radius-chip` rounds the chips apart from the other controls: here set to 0 on
+ * the wrapper, while the button beside it keeps `--vectis-radius-interactive`.
+ */
+export const CustomRadius: Story = {
+  render: () => ({
+    components: { VChip, VButton },
+    setup: () => ({ t }),
+    template: `
+      <div style="--vectis-radius-chip: 0px; display: flex; gap: 8px; align-items: center">
+        <VChip tone="accent">{{ t.squareCorners }}</VChip>
+        <VChip shape="pill" tone="accent">Pill</VChip>
+        <VButton size="sm">{{ t.button }}</VButton>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const [chip, pill] = canvasElement.querySelectorAll<HTMLElement>('.v-chip')
+    const button = canvasElement.querySelector<HTMLElement>('.v-button')!
+    await expect(getComputedStyle(chip!).borderTopLeftRadius).toBe('0px')
+    // The pill keeps its own token, and the button the interactive radius.
+    await expect(getComputedStyle(pill!).borderTopLeftRadius).not.toBe('0px')
+    await expect(getComputedStyle(button).borderTopLeftRadius).not.toBe('0px')
+  },
 }
 
 /**
@@ -213,6 +245,23 @@ export const SelectableWithCheck: Story = {
     await userEvent.click(within(canvasElement).getByRole('button'))
     await expect(icon('check')).toBeNull()
     await expect(icon('palette')).toBeVisible()
+  },
+}
+
+/** `checkIcon` replaces the built-in tick: an icon name or an explicit render. */
+export const CustomCheckIcon: Story = {
+  render: () => ({
+    components: { VChip },
+    setup: () => ({ selected: ref(true) }),
+    template: `
+      <VChip selectable check checkIcon="done_all" v-model:selected="selected" tone="accent">
+        Design
+      </VChip>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    await expect(canvasElement.querySelector(".v-icon[data-icon='done_all']")).toBeVisible()
+    await expect(canvasElement.querySelector(".v-icon[data-icon='check']")).toBeNull()
   },
 }
 

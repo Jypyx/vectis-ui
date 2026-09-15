@@ -9,7 +9,7 @@ export default {
     },
     shapes: {
       title: 'Shapes',
-      text: '<code>shape</code> chooses the silhouette: <code>chip</code> takes the corner radius of an interactive control, <code>pill</code> rounds the ends completely.',
+      text: '<code>shape</code> chooses the silhouette: <code>chip</code> takes the corner radius of an interactive control, <code>pill</code> rounds the ends completely. The <code>chip</code> corners read <code>--vectis-radius-chip</code>, which points at <code>--vectis-radius-interactive</code> from <code>:root</code>: set it to round the chips apart from the other controls. Set on a narrower selector than <code>:root</code>, an override of <code>--vectis-radius-interactive</code> does not reach the chips, so give that selector both tokens.',
     },
     sizes: {
       title: 'Sizes',
@@ -29,7 +29,7 @@ export default {
     },
     selection: {
       title: 'Selection',
-      text: '<code>selectable</code> turns the chip into a toggle bound to <code>v-model:selected</code>. <code>check</code> adds a tick before the label, in place of the start icon.',
+      text: '<code>selectable</code> turns the chip into a toggle bound to <code>v-model:selected</code>. <code>check</code> adds a tick before the label, in place of the start icon, and <code>checkIcon</code> changes its glyph.',
     },
     dismissible: {
       title: 'Dismissible',
@@ -59,6 +59,8 @@ export default {
           'Makes the chip something that stays chosen. It takes precedence over <code>href</code> and <code>clickable</code>.',
         check:
           'Shows a tick before the label while the chip is selected. It replaces whatever start icon was given, so the two are never shown together.',
+        checkIcon:
+          'The icon of that tick, a built-in check mark by default. <code>iconFilled</code> does not reach it.',
         iconStart: 'An icon before the label. The <code>#start</code> slot replaces it.',
         iconEnd: 'An icon after the label. The <code>#end</code> slot replaces it.',
         iconFilled:

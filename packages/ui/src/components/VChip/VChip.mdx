@@ -41,10 +41,17 @@ in light/dark, across all three variants.
 
 ## Shapes
 
-`shape="chip"` (the default): rectangular rounded corners (`--vectis-radius-interactive`);
+`shape="chip"` (the default): rectangular rounded corners (`--vectis-radius-chip`);
 `shape="pill"`: a pill (`--vectis-radius-pill`).
 
 <Canvas of={VChipStories.Shapes} />
+
+`--vectis-radius-chip` points at `--vectis-radius-interactive` by default, so a chip rounds like
+every other control until it is given a value of its own. The alias is resolved where the token
+is declared, on `:root`: an override of `--vectis-radius-interactive` on a narrower selector does
+not reach the chips, which then need `--vectis-radius-chip` set on that same selector.
+
+<Canvas of={VChipStories.CustomRadius} />
 
 ## Clickable
 
@@ -75,6 +82,11 @@ The `check` prop displays a Material tick before the label when the chip is sele
 side.
 
 <Canvas of={VChipStories.SelectableWithCheck} />
+
+`check-icon` replaces the tick (an icon name or an explicit render, default `check`). Like the
+tick itself, `icon-filled` does not reach it.
+
+<Canvas of={VChipStories.CustomCheckIcon} />
 
 <Canvas of={VChipStories.SelectionPerTone} />
 

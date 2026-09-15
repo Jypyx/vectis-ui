@@ -98,6 +98,7 @@ const coralCode = `/* Any selector at all. This one is on the panel below. */
      on both grounds, so it needs no dark counterpart. */
   --vectis-focus-ring-color: oklch(58% 0.16 32);
   --vectis-radius-interactive: var(--vectis-radius-pill);
+  --vectis-radius-chip: var(--vectis-radius-pill);
 }
 
 /* Text needs a lighter step on a dark ground: the one role that has to differ. */

@@ -226,6 +226,7 @@ export const semantic = {
     surface: dimension('{radius.lg}', 'Cards, alerts'),
     overlay: dimension('{radius.xl}', 'Dialogs, popovers, menus'),
     pill: dimension('{radius.full}'),
+    chip: dimension('{radius.interactive}', 'Chips (shape="chip"), follows interactive by default'),
   },
   /**
    * How long a change takes, described by what it is: the immediate feedback of a control

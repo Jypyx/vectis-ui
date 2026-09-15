@@ -104,6 +104,22 @@ describe('VChip', () => {
     expect(icon('star')).toBeTruthy()
   })
 
+  it('checkIcon: replaces the built-in tick, `{ src }` rendered as an <img>', async () => {
+    const { container, rerender } = render(VChip, {
+      props: { selectable: true, check: true, selected: true, checkIcon: 'done_all' },
+      slots: { default: 'Filter' },
+    })
+    const icon = (name: string) => container.querySelector(`.v-icon[data-icon='${name}']`)
+    expect(icon('done_all')).toBeTruthy()
+    expect(icon('check')).toBeNull()
+    await rerender({ checkIcon: { src: 'https://example.com/tick.svg' } })
+    expect(container.querySelector('.v-chip-action img')?.getAttribute('src')).toBe(
+      'https://example.com/tick.svg',
+    )
+    await rerender({ selected: false })
+    expect(container.querySelector('.v-chip-action img')).toBeNull()
+  })
+
   it('dismissible: emits dismiss without nesting buttons', async () => {
     const { getAllByRole, emitted } = render(VChip, {
       props: { selectable: true, dismissible: true, selected: true },

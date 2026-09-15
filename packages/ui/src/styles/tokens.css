@@ -242,6 +242,7 @@
     --vectis-radius-surface: var(--vectis-radius-lg);
     --vectis-radius-overlay: var(--vectis-radius-xl);
     --vectis-radius-pill: var(--vectis-radius-full);
+    --vectis-radius-chip: var(--vectis-radius-interactive);
     --vectis-duration-fast: var(--vectis-duration-150);
     --vectis-duration-base: var(--vectis-duration-200);
     --vectis-duration-slow: var(--vectis-duration-300);

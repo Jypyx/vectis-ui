@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { VChip } from 'vectis-ui'
+import { check_circle as checkCircle } from 'vectis-ui/icons'
 
 const frameworks = ref([
   { label: 'Vue', on: true },
@@ -12,6 +13,12 @@ const filters = ref([
   { label: 'Open', on: true },
   { label: 'Assigned to me', on: true },
   { label: 'Archived', on: false },
+])
+
+const labels = ref([
+  { label: 'Bug', on: true },
+  { label: 'Feature', on: false },
+  { label: 'Docs', on: false },
 ])
 </script>
 
@@ -38,6 +45,20 @@ const filters = ref([
       tone="accent"
     >
       {{ filter.label }}
+    </VChip>
+  </div>
+
+  <div class="row" role="group" aria-label="Labels">
+    <VChip
+      v-for="item in labels"
+      :key="item.label"
+      v-model:selected="item.on"
+      selectable
+      check
+      :check-icon="checkCircle"
+      tone="accent"
+    >
+      {{ item.label }}
     </VChip>
   </div>
 </template>
