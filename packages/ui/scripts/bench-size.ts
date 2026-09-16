@@ -1,10 +1,9 @@
 /**
  * Weighs the built artefact and holds it to a committed baseline.
  *
- * WHY THIS EXISTS. Until now nothing in the repo measured a byte of JavaScript, and the CSS
- * figure was printed but never gated. The result was four published size claims — two in
- * `README.md`, two on the documentation site — that had drifted apart from each other and
- * from the artefact, with nothing in the build to notice. This script owns those numbers.
+ * WHY THIS EXISTS. The documentation site quotes size figures, and a figure nothing measures
+ * drifts away from the artefact with nothing in the build to notice. This script owns those
+ * numbers.
  *
  * WHAT IT MEASURES. Three aggregates plus one row per component sheet:
  *

@@ -13,7 +13,7 @@
  * stray one now ships in an isolated file with no neighbours to make it obvious.
  *
  * `--report` prints the gzip cost of the core plus any number of components — the
- * command behind the figures quoted in the README.
+ * command behind the figures quoted on the documentation site.
  */
 import { readFileSync, existsSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'

@@ -56,7 +56,7 @@ jobs:
       # ARTEFACT rather than the source: `check-css-split` for the per-component split, then
       # `bench-size` for the weight. The second one GATES — it holds `dist` to the committed
       # `bench/size-baseline.json`, so a size regression is red here rather than noticed
-      # later by a reader of the README. Growing a figure on purpose means re-baselining
+      # later by a reader of the docs. Growing a figure on purpose means re-baselining
       # (`pnpm --filter vectis-ui bench:size:update`), which shows up as a diff.
       #
       # The runtime benchmarks (`pnpm bench`) are deliberately NOT here: a timing on a

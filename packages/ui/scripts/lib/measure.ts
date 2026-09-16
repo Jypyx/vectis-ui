@@ -37,7 +37,7 @@ export function posix(root: string, path: string): string {
  * The gzipped size in bytes, at level 9.
  *
  * The level is not incidental: it is what `check-css-split.ts` has always reported, so
- * changing it would silently move every figure the README and the docs site quote.
+ * changing it would silently move every figure the docs site quotes.
  */
 export function gzipBytes(source: string | Buffer): number {
   return gzipSync(Buffer.from(source), { level: 9 }).length
