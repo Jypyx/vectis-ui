@@ -2,6 +2,12 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.8.1] - 2026-09-16
+
+No change to the library code. The README shown on npm is rewritten: a short introduction, a quick start, browser support, and links to the documentation at <https://vectis-ui.com>, this changelog and the license.
+
+**Full diff:** [v0.8.0...v0.8.1](https://github.com/Jypyx/vectis-ui/compare/v0.8.0...v0.8.1)
+
 ## [0.8.0] - 2026-09-16
 
 This release follows a consistency audit of all 66 components. The result is one vocabulary across the library: every prop union has an exported name, no boolean prop defaults to `true`, composed components declare the props, events and methods they used to leave to attribute fallthrough, and names that meant the same thing in two families now match.
@@ -208,4 +214,5 @@ The documentation site at <https://vectis-ui.com> covers every component in Engl
 
 **Full diff:** [v0.1.1-rc.0...v0.8.0](https://github.com/Jypyx/vectis-ui/compare/v0.1.1-rc.0...v0.8.0)
 
+[0.8.1]: https://github.com/Jypyx/vectis-ui/releases/tag/v0.8.1
 [0.8.0]: https://github.com/Jypyx/vectis-ui/releases/tag/v0.8.0
