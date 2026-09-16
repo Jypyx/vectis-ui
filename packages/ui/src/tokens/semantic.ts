@@ -21,13 +21,16 @@ export const semantic = {
     'surface-inverse': color('{color.gray.900}', 'Inverted-contrast surfaces: tooltips'),
     'surface-skeleton': color(
       '{color.gray.200}',
-      'The background of the loading silhouettes (VSkeletonLoader); the highlight derives from it in CSS',
+      "The background of VSkeletonLoader's silhouettes, from which its highlight is derived",
     ),
 
     'text-on-inverse': color('{color.white}', 'Text set on an inverted surface'),
 
-    text: color('{color.gray.900}'),
-    'text-muted': color('{color.gray.600}'),
+    text: color('{color.gray.900}', 'The running text of the interface'),
+    'text-muted': color(
+      '{color.gray.600}',
+      'Secondary text: hints, captions, descriptions, start icons',
+    ),
     'text-subtle': color('{color.gray.500}', 'Placeholders, disabled text'),
     'text-on-accent': color('{color.white}', 'Text set on an accent/danger/success background'),
     'text-on-warning': color(
@@ -35,22 +38,37 @@ export const semantic = {
       'Text set on a solid warning background (amber too light for white)',
     ),
 
-    border: color('{color.gray.200}'),
+    border: color('{color.gray.200}', 'Dividers, and the frames of cards, tables and panels'),
     'border-strong': color('{color.gray.300}', 'The borders of form controls'),
 
-    accent: color('{color.indigo.600}'),
-    'accent-hover': color('{color.indigo.700}'),
-    'accent-active': color('{color.indigo.800}'),
+    accent: color(
+      '{color.indigo.600}',
+      'The brand color: solid buttons, checked controls, the selected item',
+    ),
+    'accent-hover': color('{color.indigo.700}', 'The accent color under the pointer'),
+    'accent-active': color('{color.indigo.800}', 'The accent color while pressed'),
     'accent-surface': color('{color.indigo.50}', 'A tinted accent background (badges, selections)'),
-    'accent-border': color('{color.indigo.200}'),
+    'accent-border': color(
+      '{color.indigo.200}',
+      'The border of a tinted accent element, matching the accent surface',
+    ),
     'accent-text': color('{color.indigo.700}', 'Accent text on a neutral or tinted background'),
 
-    danger: color('{color.red.600}'),
-    'danger-hover': color('{color.red.700}'),
-    'danger-active': color('{color.red.800}'),
-    'danger-surface': color('{color.red.50}'),
-    'danger-border': color('{color.red.200}'),
-    'danger-text': color('{color.red.700}'),
+    danger: color('{color.red.600}', 'Destructive actions and errors: solid buttons, error states'),
+    'danger-hover': color('{color.red.700}', 'The danger color under the pointer'),
+    'danger-active': color('{color.red.800}', 'The danger color while pressed'),
+    'danger-surface': color(
+      '{color.red.50}',
+      'A tinted danger background (soft buttons and chips, a destructive menu item)',
+    ),
+    'danger-border': color(
+      '{color.red.200}',
+      'The border of a tinted danger element, matching the danger surface',
+    ),
+    'danger-text': color(
+      '{color.red.700}',
+      'Danger text on a neutral or tinted background: error messages, a destructive menu item',
+    ),
 
     /*
      * Green starts one step darker than the other colours. White text on a filled button
@@ -61,19 +79,34 @@ export const semantic = {
      * The one exception is the warning colour, since no step of an amber is ever dark
      * enough for white, which is why it alone declares a text colour of its own.
      */
-    success: color('{color.green.700}'),
-    'success-hover': color('{color.green.800}'),
-    'success-active': color('{color.green.900}'),
-    'success-surface': color('{color.green.50}'),
-    'success-border': color('{color.green.200}'),
-    'success-text': color('{color.green.800}'),
+    success: color('{color.green.700}', 'A positive outcome: solid chips, badges, notifications'),
+    'success-hover': color('{color.green.800}', 'The success color under the pointer'),
+    'success-active': color('{color.green.900}', 'The success color while pressed'),
+    'success-surface': color(
+      '{color.green.50}',
+      'A tinted success background (soft chips, badges, notifications)',
+    ),
+    'success-border': color(
+      '{color.green.200}',
+      'The border of a tinted success element, matching the success surface',
+    ),
+    'success-text': color('{color.green.800}', 'Success text on a neutral or tinted background'),
 
-    warning: color('{color.amber.600}'),
-    'warning-hover': color('{color.amber.700}'),
-    'warning-active': color('{color.amber.800}'),
-    'warning-surface': color('{color.amber.50}'),
-    'warning-border': color('{color.amber.200}'),
-    'warning-text': color('{color.amber.900}'),
+    warning: color(
+      '{color.amber.600}',
+      'A situation that calls for attention: solid chips, badges, notifications',
+    ),
+    'warning-hover': color('{color.amber.700}', 'The warning color under the pointer'),
+    'warning-active': color('{color.amber.800}', 'The warning color while pressed'),
+    'warning-surface': color(
+      '{color.amber.50}',
+      'A tinted warning background (soft chips, badges, notifications)',
+    ),
+    'warning-border': color(
+      '{color.amber.200}',
+      'The border of a tinted warning element, matching the warning surface',
+    ),
+    'warning-text': color('{color.amber.900}', 'Warning text on a neutral or tinted background'),
 
     backdrop: color('oklch(0% 0 0 / 0.45)', 'The veil behind modal dialogs'),
 
@@ -100,15 +133,15 @@ export const semantic = {
      */
     'event-surface': color(
       'oklch(0.95 0.045 var(--vectis-calendar-event-hue, 265))',
-      'The face of a calendar event that carries no colour of its own',
+      'The face of a calendar event that carries no color of its own',
     ),
     'event-border': color(
       'oklch(0.85 0.08 var(--vectis-calendar-event-hue, 265))',
-      'The edge of that event, and the bar marking its leading side',
+      'The edge of that calendar event, and the bar marking its leading side',
     ),
     'event-text': color(
       'oklch(0.4 0.11 var(--vectis-calendar-event-hue, 265))',
-      'The title written on that face',
+      'The title of that calendar event',
     ),
   },
   /**
@@ -121,14 +154,14 @@ export const semantic = {
    * the typography component renders, and what the components' own stylesheets ask for.
    */
   text: {
-    family: fontFamily('{font.family.sans}', 'The font of all the design system text'),
+    family: fontFamily('{font.family.sans}', 'The running font of every component'),
     'family-heading': fontFamily(
       '{font.family.display}',
-      'The font of the display and heading roles; identical to the running font until it is overridden',
+      'The font of the display and heading roles, the running font until it is overridden',
     ),
     'family-code': fontFamily(
       '{font.family.mono}',
-      'The font of code content (the code variant, VInputOTP)',
+      'The font of code content (the code role, VInputOTP)',
     ),
     display: {
       size: dimension('{font.size.5xl}'),
@@ -225,8 +258,11 @@ export const semantic = {
     interactive: dimension('{radius.md}', 'Buttons, inputs, controls'),
     surface: dimension('{radius.lg}', 'Cards, alerts'),
     overlay: dimension('{radius.xl}', 'Dialogs, popovers, menus'),
-    pill: dimension('{radius.full}'),
-    chip: dimension('{radius.interactive}', 'Chips (shape="chip"), follows interactive by default'),
+    pill: dimension('{radius.full}', 'Full rounding: switches, badges, pill-shaped chips'),
+    chip: dimension(
+      '{radius.interactive}',
+      'Chips with shape="chip", which follow the interactive radius by default',
+    ),
   },
   /**
    * How long a change takes, described by what it is: the immediate feedback of a control
@@ -236,25 +272,43 @@ export const semantic = {
    * the next, so unlike the colours they are stated once and never restated.
    */
   duration: {
-    fast: duration('{duration.150}', 'Colour and border changes on hover, focus, press'),
+    fast: duration('{duration.150}', 'Color and border changes on hover, focus and press'),
     base: duration('{duration.200}', 'The default: a panel opening, a value moving'),
     slow: duration('{duration.300}', 'Movements large enough to be followed by the eye'),
   },
   focus: {
-    'ring-color': color('{color.indigo.500}'),
-    'ring-width': dimension('2px'),
-    'ring-offset': dimension('2px'),
+    'ring-color': color(
+      '{color.indigo.500}',
+      'The keyboard focus ring, which has to stand out against the page',
+    ),
+    'ring-width': dimension('2px', 'The thickness of the focus ring'),
+    'ring-offset': dimension('2px', 'The gap between a control and its focus ring'),
   },
   control: {
-    'height-xs': dimension('1.5rem'),
-    'height-sm': dimension('2rem'),
-    'height-md': dimension('2.5rem'),
-    'height-lg': dimension('3rem'),
-    'height-xl': dimension('3.5rem'),
+    'height-xs': dimension(
+      '1.5rem',
+      'The height of every control at size="xs" (24px), 4px less when compact',
+    ),
+    'height-sm': dimension(
+      '2rem',
+      'The height of every control at size="sm" (32px), 4px less when compact',
+    ),
+    'height-md': dimension(
+      '2.5rem',
+      'The height of every control at size="md" (40px), 4px less when compact',
+    ),
+    'height-lg': dimension(
+      '3rem',
+      'The height of every control at size="lg" (48px), 4px less when compact',
+    ),
+    'height-xl': dimension(
+      '3.5rem',
+      'The height of every control at size="xl" (56px), 4px less when compact',
+    ),
     'border-width': dimension('2px', 'The border of checkable controls (VCheckbox, VRadio)'),
     'size-check': dimension('1.25rem', 'The box of checkable controls (VCheckbox, VRadio)'),
-    'size-check-mark': dimension('0.875rem', "VCheckbox's SVG tick"),
-    'size-check-dot': dimension('0.5rem', "VRadio's inner dot"),
+    'size-check-mark': dimension('0.875rem', "The tick inside VCheckbox's box"),
+    'size-check-dot': dimension('0.5rem', "The dot inside VRadio's circle"),
     'size-switch-w': dimension('2.5rem', "The width of VSwitch's track"),
     'size-switch-h': dimension('1.25rem', "The height of VSwitch's track"),
     'size-switch-pad': dimension(
@@ -279,7 +333,7 @@ export const semantic = {
     'size-slider-field': dimension('5rem', "The width of VSlider's number fields"),
     'size-carousel-block': dimension(
       '24rem',
-      "The default block size of VCarousel's viewport. Load-bearing in the vertical orientation: a percentage flex-basis has no definite reference on the block axis, and every slide would collapse onto its content without it",
+      "The default block size of VCarousel's viewport, which a vertical carousel needs to lay its slides out",
     ),
     'size-carousel-indicator': dimension(
       '0.625rem',
@@ -287,7 +341,7 @@ export const semantic = {
     ),
     'size-carousel-indicator-active': dimension(
       '1.25rem',
-      'The main-axis size of the ACTIVE VCarousel indicator, which stretches from a dot into a pill',
+      'The length of the active VCarousel indicator, which stretches from a dot into a pill',
     ),
     'size-combobox-list-max-block': dimension(
       '18rem',
@@ -313,7 +367,7 @@ export const semantic = {
     ),
     'size-skeleton-surface': dimension(
       '6rem',
-      'The default height of a surface-shaped VSkeletonLoader — a card, an image (96px)',
+      'The default height of a surface-shaped VSkeletonLoader: a card, an image (96px)',
     ),
     'size-toast-width': dimension('22rem', 'The default width of a toast'),
     'size-dialog-width': dimension(
@@ -322,14 +376,11 @@ export const semantic = {
     ),
     'size-snackbar-min': dimension('18rem', 'The minimum width of a snackbar (288px)'),
     'size-snackbar-max': dimension('36rem', 'The maximum width of a snackbar (576px)'),
-    'size-badge-h': dimension('1.25rem', 'The height of VBadge (the pill)'),
+    'size-badge-h': dimension('1.25rem', 'The height of a VBadge pill'),
     'size-badge-dot': dimension('0.625rem', 'The diameter of VBadge in dot mode'),
     'size-badge-ring': dimension('2px', 'The detaching ring of a bordered VBadge'),
-    'size-avatar-ring': dimension('2px', 'The separating ring of stacked Avatars (VAvatarGroup)'),
-    'size-date-picker-cell': dimension(
-      '2.5rem',
-      'The side (height/width) of a VDatePicker day cell',
-    ),
+    'size-avatar-ring': dimension('2px', 'The ring separating stacked avatars (VAvatarGroup)'),
+    'size-date-picker-cell': dimension('2.5rem', 'The side of a VDatePicker day cell'),
     'size-date-picker-day': dimension(
       '{control.height.md}',
       'The diameter of the disc a VDatePicker day is drawn on; the cell grows to hold it',
@@ -337,22 +388,19 @@ export const semantic = {
     'size-date-picker-dot': dimension('0.25rem', 'The diameter of a VDatePicker event dot'),
     'size-date-picker-nav-min': dimension(
       '5.375rem',
-      "The minimum width of VDatePicker's month/year picker buttons (≈86px)",
+      "The minimum width of VDatePicker's month/year picker buttons (about 86px)",
     ),
     'size-tab-indicator': dimension(
       '2px',
       'The thickness of the active tab indicator (VTabs, flat/outlined)',
     ),
     'size-table-search': dimension('16rem', "The width of VDataTable's search field"),
-    'size-time-picker-dial': dimension(
-      '16rem',
-      "The diameter of VTimePicker's clock face (the M3 spec)",
-    ),
+    'size-time-picker-dial': dimension('16rem', "The diameter of VTimePicker's clock face"),
     'size-time-picker-number': dimension(
       '3rem',
       "A numeral cell on VTimePicker's face, and the hand's dot on a marker",
     ),
-    'size-time-picker-center': dimension('0.5rem', "The centre dot of VTimePicker's face"),
+    'size-time-picker-center': dimension('0.5rem', "The center dot of VTimePicker's face"),
     'size-time-picker-hand': dimension('2px', "The thickness of the hand on VTimePicker's face"),
     'size-time-picker-hand-minor': dimension(
       '1rem',
@@ -360,7 +408,7 @@ export const semantic = {
     ),
     'size-file-picker-min-block': dimension(
       '10rem',
-      "The minimum height of VFilePicker's drop zone — icon, two lines, separator and button",
+      "The minimum height of VFilePicker's drop zone: icon, two lines, separator and button",
     ),
     'size-file-picker-icon': dimension(
       '2.5rem',
@@ -408,7 +456,7 @@ export const semantic = {
     'size-calendar-allday-lane': dimension('1.5rem', "One lane of VCalendar's all-day band"),
     'size-calendar-allday-max': dimension(
       '7rem',
-      'The height past which that band scrolls instead of growing',
+      "The height past which VCalendar's all-day band scrolls instead of growing",
     ),
     'size-calendar-now-dot': dimension('0.625rem', "The dot on VCalendar's current-time line"),
     /*
@@ -427,8 +475,8 @@ export const semantic = {
     ),
   },
   icon: {
-    'size-sm': dimension('1rem', '16px icons'),
-    'size-md': dimension('1.25rem', '20px icons'),
-    'size-lg': dimension('1.5rem', '24px icons'),
+    'size-sm': dimension('1rem', 'The icon size of xs controls (16px)'),
+    'size-md': dimension('1.25rem', 'The icon size of sm and md controls (20px)'),
+    'size-lg': dimension('1.5rem', 'The icon size of lg and xl controls (24px)'),
   },
 } satisfies TokenGroup

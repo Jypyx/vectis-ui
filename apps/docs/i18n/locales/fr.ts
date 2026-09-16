@@ -29,6 +29,7 @@ import cssClasses from './fr/cssClasses'
 import dataTable from './fr/dataTable'
 import dateInput from './fr/dateInput'
 import datePicker from './fr/datePicker'
+import designTokens from './fr/designTokens'
 import dialog from './fr/dialog'
 import error from './fr/error'
 import fileInput from './fr/fileInput'
@@ -79,6 +80,7 @@ export default defineI18nLocale((): DocsMessages => ({
 
   installation,
   theming,
+  designTokens,
   iconography,
   fontFamily,
   i18n,

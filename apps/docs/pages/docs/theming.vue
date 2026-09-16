@@ -23,6 +23,7 @@ import { search as searchIcon } from 'vectis-ui/icons'
 definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
+const localePath = useLocalePath()
 useDocsHead('theming')
 
 /*
@@ -180,6 +181,12 @@ export default defineNuxtConfig({
   <DocsProse keypath="theming.tokensDemoCaption" variant="body-sm" tone="muted" />
   <DocsProse keypath="theming.tokensOklch" />
   <DocsProse keypath="theming.tokensPalettes" />
+  <p>
+    <DocsProse tag="span" keypath="theming.tokensReferenceBefore" />
+    {{ ' ' }}
+    <NuxtLink :to="localePath('/docs/design-tokens')">{{ t('nav.design-tokens') }}</NuxtLink>
+    <DocsProse tag="span" keypath="theming.tokensReferenceAfter" />
+  </p>
 
   <h2 id="css-layers">{{ t('theming.layersHeading') }}</h2>
   <DocsProse keypath="theming.layersBody" />

@@ -33,6 +33,9 @@ export default {
     'All colors are expressed in OKLCH, for two reasons: perceptual lightness is strictly identical from one palette to another for the same shade level, and blending hues produces natural transitions without passing through grayish tones.<br>Vectis UI automatically calculates hovered, tinted, or disabled states for your roles thanks to the <code>color-mix()</code> function. If you provide a value originating from another color space (where lightness perception differs), these calculated variations risk losing consistency. Keeping your custom values in OKLCH guarantees a perfectly predictable visual rendering.',
   tokensPalettes:
     'Vectis UI includes only five foundational palettes to cover essential needs without bloating the CSS: <code>gray</code> for surfaces, texts, and borders, <code>indigo</code> for accentuation, and <code>red</code>, <code>green</code>, and <code>amber</code> for error, success, and warning states. Including additional unused palettes would unnecessarily add CSS variables across all your pages.<br>Adding a custom hue is therefore up to the application. You simply need to declare your 11 shades of CSS variables and bind the desired semantic role to them. Integration is immediate, without any compilation step or waiting for a new library version.',
+  tokensReferenceBefore:
+    'Every semantic token, with what it controls and its default value in both themes, is listed on the',
+  tokensReferenceAfter: ' page.',
 
   layersHeading: 'CSS Layers',
   layersBody:

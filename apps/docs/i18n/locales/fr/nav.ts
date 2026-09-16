@@ -16,6 +16,7 @@ const nav: NavMessages = {
 
   installation: 'Installation',
   theming: 'Thématisation',
+  'design-tokens': 'Design tokens',
   iconography: 'Iconographie',
   'font-family': 'Famille de police',
   i18n: 'Localisation (i18n)',

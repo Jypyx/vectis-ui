@@ -45,6 +45,7 @@ import cssClasses from './en/cssClasses'
 import dataTable from './en/dataTable'
 import dateInput from './en/dateInput'
 import datePicker from './en/datePicker'
+import designTokens from './en/designTokens'
 import dialog from './en/dialog'
 import error from './en/error'
 import fileInput from './en/fileInput'
@@ -93,6 +94,7 @@ export interface DocsMessages {
 
   installation: typeof installation
   theming: typeof theming
+  designTokens: typeof designTokens
   iconography: typeof iconography
   fontFamily: typeof fontFamily
   i18n: typeof i18n
@@ -158,6 +160,7 @@ export default defineI18nLocale((): DocsMessages => ({
 
   installation,
   theming,
+  designTokens,
   iconography,
   fontFamily,
   i18n,

@@ -36,6 +36,7 @@ const entry = <S extends string>(slug: S) => ({ slug }) as const
 export const intro = [
   entry('installation'),
   entry('theming'),
+  entry('design-tokens'),
   entry('iconography'),
   entry('font-family'),
   entry('i18n'),

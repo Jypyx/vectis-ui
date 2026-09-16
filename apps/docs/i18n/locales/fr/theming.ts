@@ -33,6 +33,9 @@ export default {
     "Toutes les couleurs sont exprimées en OKLCH, et ce pour deux raisons : la clarté perceptuelle est strictement identique d'une palette à l'autre pour un même niveau de nuance, et le mélange de teintes produit des transitions naturelles sans passer par des tons grisâtres.<br>Vectis UI calcule automatiquement les états survolés, teintés ou désactivés de vos rôles grâce à la fonction <code>color-mix()</code>. Si vous fournissez une valeur issue d'un autre espace colorimétrique (où la perception de la clarté diffère), ces variations calculées risquent de perdre en cohérence. Conserver vos valeurs personnalisées en OKLCH vous garantit un rendu visuel parfaitement prévisible.",
   tokensPalettes:
     "Vectis UI intègre uniquement cinq palettes fondamentales afin de couvrir les besoins essentiels sans alourdir le CSS : <code>gray</code> pour les surfaces, textes et bordures, <code>indigo</code> pour l'accentuation, puis <code>red</code>, <code>green</code> et <code>amber</code> pour les états d'erreur, de succès et d'avertissement. Inclure des palettes supplémentaires non utilisées ajouterait inutilement des variables CSS sur toutes vos pages.<br>L'ajout d'une teinte personnalisée relève donc de l'application. Il suffit de déclarer vos 11 nuances de variables CSS et d'y lier le rôle sémantique souhaité. La prise en compte est immédiate, sans aucune étape de compilation ni attente d'une nouvelle version de la bibliothèque",
+  tokensReferenceBefore:
+    'Tous les tokens sémantiques, avec ce que chacun contrôle et sa valeur par défaut dans les deux thèmes, sont listés sur la page',
+  tokensReferenceAfter: '.',
 
   layersHeading: 'Couches CSS',
   layersBody:

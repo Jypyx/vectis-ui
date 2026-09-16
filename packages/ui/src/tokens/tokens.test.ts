@@ -127,6 +127,35 @@ describe('resolveTokenValue', () => {
   })
 })
 
+describe('the semantic descriptions', () => {
+  /*
+   * The documentation site's Design tokens page prints these sentences as the reference an
+   * application reads to know which token to override, so a role without one is a blank cell
+   * there. The text recipes are the one exception: the page describes a ROLE once, on a row
+   * holding its size, weight, leading and tracking, and four identical sentences here would
+   * say nothing more.
+   */
+  const recipes = Object.entries(semantic.text).filter(([, node]) => !isToken(node))
+  const recipeNames = new Set(
+    recipes.flatMap(([role, group]) =>
+      flattenTokens(group as TokenGroup, ['text', role]).map((f) => f.cssName),
+    ),
+  )
+  const described = flattenTokens(semantic).filter((f) => !recipeNames.has(f.cssName))
+
+  it('describes every role outside the text recipes', () => {
+    const missing = described.filter((f) => !f.token.$description).map((f) => f.cssName)
+
+    expect(missing).toEqual([])
+  })
+
+  it('writes them without an em dash, like the rest of the published documentation', () => {
+    const dashed = described.filter((f) => f.token.$description?.includes('—'))
+
+    expect(dashed.map((f) => f.cssName)).toEqual([])
+  })
+})
+
 describe('the dark theme', () => {
   it('only reassigns roles that already exist', () => {
     // A token existing in one theme alone would leave a component unstyled in the other.
