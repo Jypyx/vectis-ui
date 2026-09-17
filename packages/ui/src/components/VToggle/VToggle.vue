@@ -35,10 +35,15 @@ export type ToggleValue = ItemValue
  * choice is allowed, and a list of them when several are.
  */
 export type ToggleModelValue = ToggleValue | ToggleValue[] | null
+/** How the items that are not selected are drawn. */
 export type ToggleItemVariant = 'ghost' | 'outline'
+/** How a selected item is drawn. */
 export type ToggleSelectedVariant = 'solid' | 'soft' | 'ghost'
+/** The colour of a selected item. */
 export type ToggleTone = 'accent' | 'neutral' | 'danger'
+/** The height of the items, from the scale every control shares. */
 export type ToggleSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+/** Whether the items run across the page or down it. */
 export type ToggleOrientation = 'horizontal' | 'vertical'
 
 interface ToggleProps {
@@ -95,7 +100,7 @@ interface ToggleProps {
    */
   selectedIconFilled?: boolean
   /**
-   * What screen readers announce for the group — "Text alignment", "Filters". It is
+   * What screen readers announce for the group, such as "Text alignment" or "Filters". It is
    * strongly recommended: no default could say what a group of buttons is for.
    */
   label?: string
@@ -125,8 +130,8 @@ defineSlots<{
 }>()
 
 /**
- * What is selected, and its SHAPE follows `multiple`: a single value — or `null`, which is
- * where it starts — when one item may be chosen, and an array when several may. A null or
+ * What is selected, and its SHAPE follows `multiple`: a single value (or `null`, which is
+ * where it starts) when one item may be chosen, and an array when several may. A null or
  * scalar value passed in `multiple` mode is read as an empty selection.
  *
  * The array is never mutated in place; each change is a new one, which is what wakes the
@@ -155,7 +160,9 @@ function isSelected(value: ToggleValue): boolean {
 function select(value: ToggleValue) {
   if (props.multiple) {
     const current = Array.isArray(model.value) ? model.value : []
-    if (props.mandatory && current.length === 1 && current.includes(value)) return
+    // `every` rather than a length of one: the removal takes out every copy of the value, so
+    // a list holding it twice would otherwise be emptied past the guard.
+    if (props.mandatory && current.length > 0 && current.every((v) => v === value)) return
     model.value = toggleValue(current, value)
     return
   }
@@ -195,8 +202,13 @@ provide(toggleKey, {
  * The container is read from the event rather than kept as a reference: the root is a
  * VButtonGroup, so a template ref would hand back its component instance rather than the
  * element the items are navigated inside.
+ *
+ * Only a key pressed ON an item is taken. An item may carry a companion whose content sits
+ * inside the group (a VPopover's panel stays a DOM descendant of its trigger), and an arrow
+ * typed in a field there must move the caret, not the focus.
  */
 function onKeydown(event: KeyboardEvent) {
+  if (!(event.target as Element).matches('.v-toggle-item')) return
   const group = event.currentTarget as HTMLElement
   arrowNavigate(event, group, () => navigableItems(group, '.v-toggle-item:not(:disabled)'), {
     vertical: props.orientation === 'vertical',
@@ -247,7 +259,7 @@ defineExpose({
        over a button that names its own variant, which would erase the one the selected
        item carries. Both stay with the items, through the context.
 
-       `data-variant` is a plain attribute, and it is what tells the sheet an outline row
+       `data-item-variant` is a plain attribute, and it is what tells the sheet an outline row
        from a ghost one — something the items cannot say for themselves, since the
        selected one carries its own variant rather than the row's. -->
   <VButtonGroup

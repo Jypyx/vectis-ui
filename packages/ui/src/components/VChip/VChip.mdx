@@ -142,10 +142,12 @@ internal buttons are natively disabled, and a link becomes inert.
 - A static chip = a plain `<span>`: no interactive role wrongly announced.
 - `selectable` → `aria-pressed` synchronized with `v-model:selected` (the toggle button pattern);
   group the filters inside a named `role="group"` container.
-- Removal is a dedicated button (`aria-label` "Remove") **sibling** of the action — never a button
-  inside a button.
+- Removal is a dedicated button (`aria-label` "Remove") **sibling** of the action, never a button
+  inside a button. In a row of chips every cross would say the same word: give each one a
+  `dismissLabel` naming what it removes ("Remove Paris").
 - An icon-only chip: supply an accessible name through `aria-label` (set through fallthrough on the
-  action element).
+  action element). An interactive chip without one warns in development.
+- A template ref exposes `focus()` and `el`, both reaching the action rather than the pill.
 - Focus is visible through a ring (`--vectis-focus-ring-*`); the transitions respect
   `prefers-reduced-motion`.
 

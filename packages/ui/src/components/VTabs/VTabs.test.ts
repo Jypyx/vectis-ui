@@ -1,5 +1,5 @@
 import { fireEvent, render } from '@testing-library/vue'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, nextTick, ref } from 'vue'
 
 import VTab from './VTab.vue'
@@ -414,5 +414,59 @@ describe('VTabs', () => {
       tabs.value?.focus()
       expect(document.activeElement?.textContent).toBe('Two')
     })
+  })
+})
+
+describe('VTabs — a consumer aria-orientation', () => {
+  it('reaches the tablist in horizontal mode', () => {
+    const { getByRole } = mount({ tabsAttrs: 'aria-orientation="horizontal"' })
+    expect(getByRole('tablist').getAttribute('aria-orientation')).toBe('horizontal')
+  })
+})
+
+describe('VTabs — the selected tab on mount', () => {
+  it('is scrolled into view at once, confined to the row', () => {
+    const scrollBy = vi.fn()
+    const rect = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: Element,
+    ) {
+      return (
+        this.getAttribute('role') === 'tab'
+          ? { left: 400, right: 500, top: 0, bottom: 40 }
+          : { left: 0, right: 300, top: 0, bottom: 40 }
+      ) as DOMRect
+    })
+    const original = Element.prototype.scrollBy
+    Element.prototype.scrollBy = scrollBy
+    try {
+      mount({ initial: 'c' })
+      expect(scrollBy).toHaveBeenCalledWith({ left: 200, top: 0, behavior: 'instant' })
+    } finally {
+      Element.prototype.scrollBy = original
+      rect.mockRestore()
+    }
+  })
+})
+
+describe('VTab — outside a VTabs', () => {
+  it('is an ordinary button: no tab role, no selection state, in the tab order', () => {
+    const { getByRole } = render(VTab, { props: { value: 'x', label: 'X' } })
+    const button = getByRole('button', { name: 'X' })
+    expect(button.hasAttribute('aria-selected')).toBe(false)
+    expect(button.hasAttribute('tabindex')).toBe(false)
+  })
+})
+
+describe('VTab — the #start and #end slots', () => {
+  it('render beside the label, and a slot alone makes an icon-only tab', () => {
+    const { container } = mount({
+      tabs: `<VTab value="a" label="One"><template #start><i class="s" /></template><template #end><i class="e" /></template></VTab>
+        <VTab value="b" aria-label="Two"><template #start><i class="only" /></template></VTab>`,
+    })
+    const [one, two] = tabsOf(container)
+    expect(one!.querySelector('.s')).not.toBeNull()
+    expect(one!.querySelector('.e')).not.toBeNull()
+    expect(two!.querySelector('.only')).not.toBeNull()
+    expect(two!.hasAttribute('data-icon-only')).toBe(true)
   })
 })

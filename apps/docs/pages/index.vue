@@ -430,7 +430,7 @@ const installStep = ref<string>(STEPS[0]!.value)
 
         `align="center"` keeps the tabs at their own width, centred — and the rule still runs the
         full width, because the VTabs variant draws it on the BAR while `align` only centres the
-        list sitting on it. `grow` would be the opposite request: it makes the three tabs share
+        list sitting on it. `full-width` would be the opposite request: it makes the three tabs share
         the bar in equal parts.
       -->
       <div class="vd-editor">

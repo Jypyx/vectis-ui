@@ -67,7 +67,7 @@ Detached, each button carries its own.
 `controls` says what they show — `'icon'`, `'text'` or `'both'` — or takes them away with
 `false`: one prop rather than a boolean beside a union, since you pick a member rather than
 turning one off. `prevIcon` and `nextIcon` accept an icon name **or** an explicit render, and
-`prevLabel`/`nextLabel` supply both the visible text and the accessible name.
+`prevText`/`nextText` supply both the visible text and the accessible name.
 
 The controls advance by one activatable page, not by one page: they step over disabled pages to
 the nearest reachable one, and disable themselves when none is left — which also covers both
@@ -129,6 +129,9 @@ alignment.
   `pageLabel` — because an isolated number is meaningless out of context.
 - The controls keep their `aria-label` even when their label is visible: responsive truncation
   can hide the text, and the accessible name must survive that.
+- A control that reaches the last page it can go to disables itself. When it held the keyboard
+  focus, the focus moves to the page just reached, since a disabled button would otherwise hand
+  it back to the document.
 - The ellipsis is an inert, icon-only button hidden from assistive technologies: it is neither
   announced nor reachable by keyboard, which is also why it carries no accessible name at all.
 - Tabbing is natural — every visible button is a stop, as in a list of links. The left/right

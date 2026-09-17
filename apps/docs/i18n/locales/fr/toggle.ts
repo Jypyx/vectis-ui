@@ -107,6 +107,8 @@ export default {
       },
       slots: {
         default: "Le contenu de l'item, qui remplace la prop <code>label</code>.",
+        start: 'Un contenu avant le libellé, qui prend la place de <code>iconStart</code>.',
+        end: 'Un contenu après le libellé, qui prend la place de <code>iconEnd</code>.',
       },
     },
   },

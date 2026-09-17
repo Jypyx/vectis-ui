@@ -29,7 +29,7 @@ export default {
     },
     controls: {
       title: 'Précédent et suivant',
-      text: '<code>controls</code> décide de ce que montrent les boutons précédent et suivant : une icône, un mot, les deux, ou rien du tout. Leurs icônes et leurs mots vous appartiennent, un libellé étant à la fois le texte visible et le nom accessible.',
+      text: '<code>controls</code> décide de ce que montrent les boutons précédent et suivant : une icône, un mot, les deux, ou rien du tout. Leurs icônes et leurs mots vous appartiennent, un libellé étant à la fois le texte visible et le nom accessible. Un bouton qui atteint la dernière page où il peut aller se désactive et passe le focus clavier à la page atteinte.',
     },
     unreachablePages: {
       title: 'Pages inaccessibles',
@@ -73,9 +73,9 @@ export default {
           "Les boutons précédent et suivant de part et d'autre des pages : ce qu'ils affichent, ou <code>false</code> pour les retirer. Une prop plutôt que deux, la forme que <code>preview</code> de VFilePicker et <code>controls</code> de VCarousel emploient déjà.",
         prevIcon: "L'icône du contrôle précédent.",
         nextIcon: "L'icône du contrôle suivant.",
-        prevLabel:
+        prevText:
           "Le libellé du contrôle précédent, utilisé à la fois comme texte visible et comme ce que les lecteurs d'écran annoncent. Il retombe sur le dictionnaire du design system.",
-        nextLabel:
+        nextText:
           "Le libellé du contrôle suivant, utilisé à la fois comme texte visible et comme ce que les lecteurs d'écran annoncent. Il retombe sur le dictionnaire du design system.",
         disabled: 'Rend tout le composant inutilisable.',
         disabledPages:

@@ -15,7 +15,7 @@ export default {
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'orientation', type: 'TabsOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },
         { name: 'align', type: 'TabsAlign', values: "'start' | 'center' | 'end'", default: "'start'" },
-        { name: 'grow', type: 'boolean', default: 'false' },
+        { name: 'fullWidth', type: 'boolean', default: 'false' },
         { name: 'scrollButtons', type: 'boolean', default: 'false' },
         { name: 'prevIcon', type: 'IconSource' },
         { name: 'nextIcon', type: 'IconSource' },
@@ -43,6 +43,8 @@ export default {
       ],
       slots: [
         { name: 'default', type: '{}' },
+        { name: 'start', type: '{}' },
+        { name: 'end', type: '{}' },
       ],
     },
     {

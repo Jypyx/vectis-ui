@@ -104,11 +104,11 @@ start edge permanently unreachable. A visible corollary in the second row below:
 
 ## Filling the available space
 
-`grow` distributes the available width (or height) between the tabs, and truncates over-long labels.
+`fullWidth` distributes the available width (or height) between the tabs, and truncates over-long labels.
 That is incompatible with scrolling by construction: nothing overflows any more, so the scroll
 controls would stay disabled.
 
-<Canvas of={VTabsStories.Grow} />
+<Canvas of={VTabsStories.FullWidth} />
 
 ## Scrolling
 
@@ -147,6 +147,14 @@ it stays overridable like the rest of the design system. To give the panel a `di
 
 <Canvas of={VTabsStories.Panels} />
 
+Once `#panels` is given, every tab needs its panel: a tab points at its panel through
+`aria-controls`, and a tab with none would point at an identifier that does not exist.
+
+A panel may hold another `VTabs`. Each row styles its own bar, its own tabs and its own panels
+only, so an inner row keeps its orientation, variant and width whatever the outer one uses.
+
+<Canvas of={VTabsStories.Nested} />
+
 ## Disabled tabs and edge cases
 
 A `disabled` tab is a `<button disabled>`: greyed through tokens, inert, and skipped by the arrows —
@@ -156,7 +164,12 @@ two adding up as they do on a `VButtonGroup`.
 
 The `v-model` must reference an existing, activatable tab: the value decides both the panel shown and
 the only tab present in the tab order. A value outside the list breaks nothing, but leaves the entire
-bar out of the tab order.
+bar out of the tab order. On mount, the selected tab is scrolled into view at once when the row
+overflows.
+
+A `VTab` is a direct child of the row: wrapping one (in a `VTooltip`, for instance) puts an element
+the `tablist` does not own between the two, and the rounded ends of the `outlined` frame no longer
+find the first and last tabs. Used outside a `VTabs` altogether, a `VTab` is an ordinary button.
 
 <Canvas of={VTabsStories.Disabled} />
 <Canvas of={VTabsStories.EdgeCases} />
@@ -183,5 +196,8 @@ bar out of the tab order.
   would be cropped there.
 - The active panel is focusable (`tabindex="0"`) so it is reachable even with no interactive content,
   in line with the APG example.
+- A scroll button disables itself once its end is reached. When it held the keyboard focus, the
+  focus moves to the opposite button, or to the selected tab when the row no longer overflows,
+  since a disabled button would otherwise hand it back to the document.
 - The scroll-measuring sentinels are removed from the accessibility tree: a `tablist` owns nothing but
   `tab` children.

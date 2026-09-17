@@ -29,7 +29,7 @@ export default {
     },
     controls: {
       title: 'Previous and next',
-      text: '<code>controls</code> decides what the previous and next buttons show: an icon, a word, both, or nothing at all. Their icons and their wording are yours, a label being both the visible text and the accessible name.',
+      text: '<code>controls</code> decides what the previous and next buttons show: an icon, a word, both, or nothing at all. Their icons and their wording are yours, a label being both the visible text and the accessible name. A control reaching the last page it can go to disables itself and hands the keyboard focus to the page just reached.',
     },
     unreachablePages: {
       title: 'Unreachable pages',
@@ -73,9 +73,9 @@ export default {
           'The previous and next buttons on either side of the pages: what they show, or <code>false</code> to leave them out. One prop rather than two, the shape VFilePicker <code>preview</code> and VCarousel <code>controls</code> already use.',
         prevIcon: 'The icon of the previous control.',
         nextIcon: 'The icon of the next control.',
-        prevLabel:
+        prevText:
           'The wording of the previous control, used both as its visible text and as what screen readers announce. It falls back to the design system dictionary.',
-        nextLabel:
+        nextText:
           'The wording of the next control, used both as its visible text and as what screen readers announce. It falls back to the design system dictionary.',
         disabled: 'Makes the whole component unusable.',
         disabledPages:

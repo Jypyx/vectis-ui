@@ -33,7 +33,7 @@ export default {
     },
     dismissible: {
       title: 'Suppression',
-      text: '<code>dismissible</code> ajoute un second bouton qui émet <code>dismiss</code>, le retrait de la liste vous revenant. <code>dismissIcon</code> et <code>dismissLabel</code> changent son glyphe et ses mots.',
+      text: "<code>dismissible</code> ajoute un second bouton qui émet <code>dismiss</code>, le retrait de la liste vous revenant. <code>dismissIcon</code> et <code>dismissLabel</code> changent son glyphe et ses mots. Dans une rangée de puces, donnez à chaque croix un <code>dismissLabel</code> qui nomme ce qu'elle retire, sans quoi toutes sont annoncées avec le même mot.",
     },
     states: {
       title: 'États',

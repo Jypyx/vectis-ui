@@ -89,7 +89,7 @@ const meta = {
     compact: false,
     orientation: 'horizontal',
     align: 'start',
-    grow: false,
+    fullWidth: false,
     scrollButtons: false,
     activation: 'manual',
   },
@@ -334,13 +334,13 @@ export const Alignment: Story = {
   }),
 }
 
-export const Grow: Story = {
-  args: { grow: true },
+export const FullWidth: Story = {
+  args: { fullWidth: true },
   render: (args) => ({
     components: { VTabs, VTab },
     setup: () => ({ args, tab: ref('a'), t }),
     template: `
-      <VTabs v-bind="args" grow v-model="tab">
+      <VTabs v-bind="args" full-width v-model="tab">
         <VTab value="a" label="Overview" />
         <VTab value="b" label="Details" />
         <VTab value="c" :label="t.longHistory" />
@@ -453,6 +453,17 @@ export const ScrollButtons: Story = {
     const canvas = within(canvasElement)
     const next = canvas.getByRole('button', { name: 'Next tabs' })
 
+    /*
+     * The sentinels are items of the row, and the row's gap opens beside them too: without
+     * cancelling it, the first tab of the segmented track sits a gap and a pixel further
+     * from its edge than the track's own padding.
+     */
+    const list = canvas.getByRole('tablist')
+    const first = canvas.getByRole('tab', { name: 'Paris' })
+    await expect(
+      first.getBoundingClientRect().left - list.getBoundingClientRect().left,
+    ).toBeCloseTo(parseFloat(getComputedStyle(list).paddingInlineStart), 0)
+
     // at the start of the line, only the downstream control is enabled
     await waitFor(async () => {
       await expect(canvas.getByRole('button', { name: 'Previous tabs' })).toBeDisabled()
@@ -464,6 +475,54 @@ export const ScrollButtons: Story = {
     await waitFor(async () => {
       await expect(canvas.getByRole('button', { name: 'Previous tabs' })).toBeEnabled()
     })
+
+    /*
+     * A keyboard reader pressing "next" until the end: the button disables itself under the
+     * focus, and a disabled button hands the focus to <body>, which would send the next Tab
+     * back to the top of the page. The focus has to land on the opposite control instead.
+     */
+    next.focus()
+    for (let i = 0; i < 10 && !(next as HTMLButtonElement).disabled; i++) {
+      await userEvent.keyboard('{Enter}')
+      await new Promise((resolve) => setTimeout(resolve, 500))
+    }
+    await waitFor(async () => {
+      await expect(next).toBeDisabled()
+      await expect(canvas.getByRole('button', { name: 'Previous tabs' })).toHaveFocus()
+    })
+  },
+}
+
+export const Nested: Story = {
+  render: () => ({
+    components: { VTabs, VTab, VTabPanel },
+    setup: () => ({ outer: ref('general'), inner: ref('day') }),
+    template: `
+      <VTabs orientation="vertical" v-model="outer" label="Settings" data-testid="outer">
+        <VTab value="general" label="General" />
+        <VTab value="calendar" label="Calendar" />
+        <template #panels>
+          <VTabPanel value="general">
+            <VTabs variant="inset" v-model="inner" label="View" data-testid="inner">
+              <VTab value="day" label="Day" />
+              <VTab value="week" label="Week" />
+            </VTabs>
+          </VTabPanel>
+          <VTabPanel value="calendar">Calendar</VTabPanel>
+        </template>
+      </VTabs>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    /*
+     * A VTabs inside a panel of another one keeps its own layout: the outer bar is a vertical,
+     * flat one, and none of that may reach the inner, horizontal and segmented row.
+     */
+    const inner = within(canvasElement).getByRole('tablist', { name: 'View' })
+    await expect(getComputedStyle(inner).flexDirection).toBe('row')
+    await expect(getComputedStyle(inner.parentElement!).flexDirection).toBe('row')
+    const day = within(inner).getByRole('tab', { name: 'Day' })
+    await expect(getComputedStyle(day).borderTopLeftRadius).not.toBe('0px')
   },
 }
 

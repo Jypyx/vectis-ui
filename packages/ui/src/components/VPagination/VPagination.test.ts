@@ -300,7 +300,7 @@ describe('VPagination', () => {
 
     it('picks up the custom labels', () => {
       const { getByRole } = render(VPagination, {
-        props: { length: 5, modelValue: 3, prevLabel: 'Previous', nextLabel: 'Next' },
+        props: { length: 5, modelValue: 3, prevText: 'Previous', nextText: 'Next' },
       })
 
       expect(getByRole('button', { name: 'Next' })).toBeTruthy()
@@ -412,5 +412,26 @@ describe('VPagination', () => {
 
       expect(getByRole('button', { name: 'Page 5' }).getAttribute('aria-current')).toBe('page')
     })
+  })
+})
+
+describe('VPagination — robustness', () => {
+  it('reads a fractional model as the nearest whole page', () => {
+    const { container } = render(VPagination, {
+      props: { length: 20, modelValue: 2.4, totalVisible: 7 },
+    })
+    expect(container.querySelector('[aria-current="page"]')?.textContent?.trim()).toBe('2')
+  })
+
+  it('a length that is not a number renders a single page', () => {
+    const { container } = render(VPagination, { props: { length: Number.NaN } })
+    expect(pageLabels(container)).toEqual(['1'])
+  })
+
+  it('a totalVisible that is not a number renders every page', () => {
+    const { container } = render(VPagination, {
+      props: { length: 8, modelValue: 2, totalVisible: Number.NaN },
+    })
+    expect(pageLabels(container)).toEqual(['1', '2', '3', '4', '5', '6', '7', '8'])
   })
 })

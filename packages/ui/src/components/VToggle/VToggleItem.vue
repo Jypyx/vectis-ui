@@ -62,6 +62,10 @@ const props = withDefaults(defineProps<ToggleItemProps>(), {
 const slots = defineSlots<{
   /** The content of the item, replacing the `label` prop. */
   default?(): unknown
+  /** Content before the label, which takes the place of `iconStart`. */
+  start?(): unknown
+  /** Content after the label, which takes the place of `iconEnd`. */
+  end?(): unknown
 }>()
 
 const toggle = inject(toggleKey, null)
@@ -75,7 +79,11 @@ const selected = computed(() => toggle != null && toggle.isSelected(props.value)
  * The same definition as VChip's, and the square itself is VButton's `[data-icon-only]` rule.
  */
 function iconOnly() {
-  return !props.label && !slots.default && Boolean(props.iconStart || props.iconEnd)
+  return (
+    !props.label &&
+    !slots.default &&
+    Boolean(slots.start || slots.end || props.iconStart || props.iconEnd)
+  )
 }
 </script>
 
@@ -96,14 +104,16 @@ function iconOnly() {
     :data-icon-only="iconOnly() ? '' : undefined"
     @click="toggle?.select(value)"
   >
-    <template v-if="iconStart" #start>
-      <VIcon
-        v-bind="iconProps(iconStart)"
-        :filled="iconFilled || (selected && toggle?.selectedIconFilled)"
-      />
+    <template v-if="iconStart || $slots.start" #start>
+      <slot name="start">
+        <VIcon
+          v-bind="iconProps(iconStart!)"
+          :filled="iconFilled || (selected && toggle?.selectedIconFilled)"
+        />
+      </slot>
     </template>
-    <template v-if="iconEnd" #end>
-      <VIcon v-bind="iconProps(iconEnd)" :filled="iconFilled" />
+    <template v-if="iconEnd || $slots.end" #end>
+      <slot name="end"><VIcon v-bind="iconProps(iconEnd!)" :filled="iconFilled" /></slot>
     </template>
     <slot v-if="!iconOnly()">{{ label }}</slot>
   </VButton>

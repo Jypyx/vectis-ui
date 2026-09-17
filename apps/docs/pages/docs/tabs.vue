@@ -10,8 +10,8 @@ import TabsCustomArrows from '~/examples/tabs/CustomArrows.vue'
 import tabsCustomArrowsSource from '~/examples/tabs/CustomArrows.vue?raw'
 import TabsDisabled from '~/examples/tabs/Disabled.vue'
 import tabsDisabledSource from '~/examples/tabs/Disabled.vue?raw'
-import TabsGrow from '~/examples/tabs/Grow.vue'
-import tabsGrowSource from '~/examples/tabs/Grow.vue?raw'
+import TabsFullWidth from '~/examples/tabs/FullWidth.vue'
+import tabsFullWidthSource from '~/examples/tabs/FullWidth.vue?raw'
 import TabsOrientation from '~/examples/tabs/Orientation.vue'
 import tabsOrientationSource from '~/examples/tabs/Orientation.vue?raw'
 import TabsPanels from '~/examples/tabs/Panels.vue'
@@ -74,10 +74,10 @@ useDocsHead('tabs')
     <TabsAlignment />
   </DocsExample>
 
-  <h3 id="grow">{{ t('tabs.examples.grow.title') }}</h3>
-  <DocsProse keypath="tabs.examples.grow.text" />
-  <DocsExample :source="tabsGrowSource" stack>
-    <TabsGrow />
+  <h3 id="full-width">{{ t('tabs.examples.fullWidth.title') }}</h3>
+  <DocsProse keypath="tabs.examples.fullWidth.text" />
+  <DocsExample :source="tabsFullWidthSource" stack>
+    <TabsFullWidth />
   </DocsExample>
 
   <h3 id="orientation">{{ t('tabs.examples.orientation.title') }}</h3>

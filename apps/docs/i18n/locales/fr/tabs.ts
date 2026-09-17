@@ -17,15 +17,15 @@ export default {
     },
     panels: {
       title: 'Panneaux',
-      text: "Un panneau masqué est masqué et non détruit : son contenu garde son état et un champ qu'il contient est toujours soumis. <code>lazy</code> retient le contenu jusqu'à la première ouverture. Sans le slot <code>#panels</code>, aucune zone de panneaux n'est rendue, et ce slot doit être présent ou absent dès le départ.",
+      text: "Un panneau masqué est masqué et non détruit : son contenu garde son état et un champ qu'il contient est toujours soumis. <code>lazy</code> retient le contenu jusqu'à la première ouverture. Sans le slot <code>#panels</code>, aucune zone de panneaux n'est rendue, et ce slot doit être présent ou absent dès le départ. Une fois présent, chaque onglet demande son panneau. Un panneau peut contenir un autre VTabs, qui garde sa propre mise en page.",
     },
     alignment: {
       title: 'Alignement',
       text: '<code>align</code> dit où se placent les onglets le long de la barre quand ils ne la remplissent pas. Il se pose sur la barre et non sur la liste des onglets.',
     },
-    grow: {
+    fullWidth: {
       title: 'Remplir la barre',
-      text: '<code>grow</code> partage toute la barre entre les onglets en parts égales, un libellé trop long pour sa part étant tronqué. Il est incompatible avec le défilement par construction.',
+      text: '<code>fullWidth</code> partage toute la barre entre les onglets en parts égales, un libellé trop long pour sa part étant tronqué. Il est incompatible avec le défilement par construction.',
     },
     orientation: {
       title: 'Orientation',
@@ -37,7 +37,7 @@ export default {
     },
     scrollButtons: {
       title: 'Boutons de défilement',
-      text: '<code>scrollButtons</code> ajoute un bouton à chaque extrémité de la barre, chacun désactivé une fois cette extrémité atteinte. Il est optionnel, et exclut <code>grow</code>.',
+      text: '<code>scrollButtons</code> ajoute un bouton à chaque extrémité de la barre, chacun désactivé une fois cette extrémité atteinte. Un bouton qui avait le focus clavier le passe au bouton opposé en se désactivant. Il est optionnel, et exclut <code>fullWidth</code>.',
     },
     customArrows: {
       title: 'Flèches personnalisées',
@@ -63,9 +63,9 @@ export default {
         compact: 'Retire 4px à la hauteur de chaque onglet.',
         orientation: 'Si les onglets courent en travers de la page ou le long de son côté.',
         align: 'Où se placent les onglets le long de la barre quand ils ne la remplissent pas.',
-        grow: 'Fait partager toute la barre aux onglets, en parts égales.',
+        fullWidth: 'Fait partager toute la barre aux onglets, en parts égales.',
         scrollButtons:
-          "Ajoute un bouton à chaque extrémité de la barre pour la faire défiler, chacun désactivé une fois cette extrémité atteinte. Cela n'a de sens que si les onglets peuvent déborder, donc c'est exclusif de <code>grow</code>.",
+          "Ajoute un bouton à chaque extrémité de la barre pour la faire défiler, chacun désactivé une fois cette extrémité atteinte. Cela n'a de sens que si les onglets peuvent déborder, donc c'est exclusif de <code>fullWidth</code>.",
         prevIcon: "L'icône du bouton de défilement arrière. Elle suit l'orientation par défaut.",
         nextIcon: "L'icône du bouton de défilement avant. Elle suit l'orientation par défaut.",
         prevLabel:
@@ -101,6 +101,8 @@ export default {
       },
       slots: {
         default: "Le contenu de l'onglet, qui remplace la prop <code>label</code>.",
+        start: 'Un contenu avant le libellé, qui prend la place de <code>iconStart</code>.',
+        end: 'Un contenu après le libellé, qui prend la place de <code>iconEnd</code>.',
       },
     },
     VTabPanel: {

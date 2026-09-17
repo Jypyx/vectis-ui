@@ -339,29 +339,27 @@ describe('VToggle', () => {
     it('the arrows move focus without selecting anything', async () => {
       const { container, model } = mount()
       const items = itemsOf(container)
-      const group = container.querySelector('[role="group"]') as HTMLElement
       items[0]?.focus()
 
-      await fireEvent.keyDown(group, { key: 'ArrowRight' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'ArrowRight' })
       expect(document.activeElement).toBe(items[1])
       expect(model.value).toBeNull()
 
-      await fireEvent.keyDown(group, { key: 'ArrowLeft' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'ArrowLeft' })
       expect(document.activeElement).toBe(items[0])
     })
 
     it('wraps at the ends and responds to Home/End', async () => {
       const { container } = mount()
       const items = itemsOf(container)
-      const group = container.querySelector('[role="group"]') as HTMLElement
 
       items[2]?.focus()
-      await fireEvent.keyDown(group, { key: 'ArrowRight' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'ArrowRight' })
       expect(document.activeElement).toBe(items[0])
 
-      await fireEvent.keyDown(group, { key: 'End' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'End' })
       expect(document.activeElement).toBe(items[2])
-      await fireEvent.keyDown(group, { key: 'Home' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'Home' })
       expect(document.activeElement).toBe(items[0])
     })
 
@@ -372,24 +370,22 @@ describe('VToggle', () => {
                 <VToggleItem value="c" label="Three" />`,
       })
       const items = itemsOf(container)
-      const group = container.querySelector('[role="group"]') as HTMLElement
       items[0]?.focus()
-      await fireEvent.keyDown(group, { key: 'ArrowRight' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'ArrowRight' })
       expect(document.activeElement).toBe(items[2])
     })
 
     it('in vertical mode, only the up/down arrows act', async () => {
       const { container } = mount({ toggleAttrs: 'orientation="vertical"' })
       const items = itemsOf(container)
-      const group = container.querySelector('[role="group"]') as HTMLElement
       items[0]?.focus()
 
-      await fireEvent.keyDown(group, { key: 'ArrowRight' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'ArrowRight' })
       expect(document.activeElement).toBe(items[0])
 
-      await fireEvent.keyDown(group, { key: 'ArrowDown' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' })
       expect(document.activeElement).toBe(items[1])
-      await fireEvent.keyDown(group, { key: 'ArrowUp' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'ArrowUp' })
       expect(document.activeElement).toBe(items[0])
     })
   })
@@ -428,12 +424,11 @@ describe('VToggle', () => {
     it('the arrows still reach it', async () => {
       const { container } = mountWrapped()
       const items = itemsOf(container)
-      const group = container.querySelector('[role="group"]') as HTMLElement
       items[0]?.focus()
 
-      await fireEvent.keyDown(group, { key: 'ArrowRight' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'ArrowRight' })
       expect(document.activeElement).toBe(items[1])
-      await fireEvent.keyDown(group, { key: 'ArrowRight' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'ArrowRight' })
       expect(document.activeElement).toBe(items[2])
     })
   })
@@ -479,5 +474,45 @@ describe('VToggle', () => {
       toggle.value?.focus()
       expect(document.activeElement?.textContent).toBe('Center')
     })
+  })
+})
+
+describe('VToggle — robustness', () => {
+  it('leaves the keys typed inside something an item carries alone', async () => {
+    const { container } = mount({
+      items: `<VToggleItem value="a" label="Un" />
+        <span><input data-testid="inside" /></span>
+        <VToggleItem value="b" label="Two" />`,
+    })
+    const input = container.querySelector<HTMLInputElement>('[data-testid="inside"]')!
+    input.focus()
+    const event = new KeyboardEvent('keydown', {
+      key: 'ArrowLeft',
+      bubbles: true,
+      cancelable: true,
+    })
+    input.dispatchEvent(event)
+    expect(event.defaultPrevented).toBe(false)
+    expect(document.activeElement).toBe(input)
+  })
+
+  it('mandatory keeps a value a multiple model holds twice', async () => {
+    const { container, model } = mount({ toggleAttrs: 'multiple mandatory', initial: ['a', 'a'] })
+    await fireEvent.click(itemsOf(container)[0]!)
+    expect(model.value).toEqual(['a', 'a'])
+  })
+})
+
+describe('VToggleItem — the #start and #end slots', () => {
+  it('render beside the label, and a slot alone makes an icon-only item', () => {
+    const { container } = mount({
+      items: `<VToggleItem value="a" label="One"><template #start><i class="s" /></template><template #end><i class="e" /></template></VToggleItem>
+        <VToggleItem value="b" aria-label="Two"><template #start><i class="only" /></template></VToggleItem>`,
+    })
+    const [one, two] = itemsOf(container)
+    expect(one!.querySelector('.s')).not.toBeNull()
+    expect(one!.querySelector('.e')).not.toBeNull()
+    expect(two!.querySelector('.only')).not.toBeNull()
+    expect(two!.hasAttribute('data-icon-only')).toBe(true)
   })
 })

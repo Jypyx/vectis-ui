@@ -442,7 +442,7 @@ defineExpose({
 
      TRAP — the class is doubled to reach (0,6,0), and that is not decoration. Written
      once these are (0,5,0), which TIES with the compound a component overrides a
-     segment's border through (VToggle's outline frame, `.v-toggle[data-variant='outline']
+     segment's border through (VToggle's outline frame, `.v-toggle[data-item-variant='outline']
      > .v-toggle-item[aria-pressed='true']:is(…)`), and a tie between two sheets is
      settled by whichever the consumer's bundler put last. An internal edge is never part
      of a frame, so the group has to win by construction. VToggle's rules are written for

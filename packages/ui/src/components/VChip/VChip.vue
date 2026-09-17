@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// @core
+// @a11y
 /**
  * A small labelled pill standing for a value: a filter in force, a tag, a chosen file, a
  * person picked in a field.
@@ -15,8 +15,8 @@
  * splits the consumer's attributes between the pill and the element that acts.
  */
 
-import { computed } from 'vue'
-import type { StyleValue } from 'vue'
+import { Comment, computed, onMounted, ref, useAttrs } from 'vue'
+import type { StyleValue, VNode } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
@@ -30,6 +30,7 @@ import { useMessages } from '../../i18n/state'
 import { useInertLink } from '../../composables/useInertLink'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { customColorStyle } from '../../utils/css'
+import { isDev } from '../../utils/env'
 
 /** How much visual weight the chip carries. */
 export type ChipVariant = 'soft' | 'solid' | 'outline'
@@ -57,7 +58,7 @@ interface ChipProps {
   tone?: ChipTone
   /**
    * A colour of your own (hex, CSS name or `oklch()`), which REPLACES the tone. Every
-   * shade it needs — the tinted background, the text, the hover — is derived from that
+   * shade it needs (the tinted background, the text, the hover) is derived from that
    * one colour, so it follows the light and the dark theme with nothing to rebuild.
    * Only the contrast of the text on a fully coloured chip is yours to check.
    */
@@ -183,14 +184,53 @@ const actionTag = computed(() =>
 
 const rootStyle = computed<StyleValue>(() => [customColorStyle(props.color), consumerStyle.value])
 
+const actionEl = ref<HTMLElement | null>(null)
+
 const showCheck = computed(() => props.check && props.selectable && selected.value)
 
 // TRAP — a function read by the template, never a `computed`: `slots` is not reactive, so a
 // computed would keep its first answer while a slot behind a `v-if` comes and goes.
-/** An icon and no label at all: the chip becomes a square, as wide as it is tall. */
+/**
+ * An icon and no label at all: the chip becomes a square, as wide as it is tall. The default
+ * slot is asked what it RENDERS, not whether it was passed: a wrapper forwarding an empty
+ * label still hands one down.
+ */
 function iconOnly() {
-  return !slots.default && !!(slots.start || slots.end || props.iconStart || props.iconEnd)
+  return (
+    !(slots.default?.() as VNode[] | undefined)?.some((node) => node.type !== Comment) &&
+    !!(slots.start || slots.end || props.iconStart || props.iconEnd)
+  )
 }
+
+// @devwarn
+// A chip drawn with an icon alone has no accessible name: the icon is decorative, so a
+// clickable, selectable or linked one is announced as a bare button or link. Nothing fails
+// visibly, hence the message. Read once, on mount, off the rendered pill: calling the slot
+// here, outside the render, would draw a Vue warning of its own.
+if (isDev) {
+  const attrs = useAttrs()
+  onMounted(() => {
+    if (
+      actionTag.value !== 'span' &&
+      actionEl.value?.parentElement?.hasAttribute('data-icon-only') &&
+      attrs['aria-label'] === undefined &&
+      attrs['aria-labelledby'] === undefined
+    ) {
+      console.warn(
+        '[VChip] a chip made of an icon alone has no accessible name: set aria-label or aria-labelledby on it.',
+      )
+    }
+  })
+}
+
+// A template ref on the chip reaches the pill, a layout box; the element that is focused,
+// named and clicked is the action inside it.
+defineExpose({
+  /** Moves the focus to the chip's action: its button or link. */
+  focus: (options?: FocusOptions) => actionEl.value?.focus(options),
+  /** The action element, which is also where the consumer's attributes land. */
+  el: actionEl,
+})
 </script>
 
 <template>
@@ -209,13 +249,14 @@ function iconOnly() {
   >
     <component
       :is="actionTag"
+      ref="actionEl"
+      :aria-disabled="isInertLink ? 'true' : undefined"
+      :aria-pressed="selectable ? selected : undefined"
       v-bind="actionAttrs"
       class="v-chip-action"
       :type="actionTag === 'button' ? 'button' : undefined"
       :href="linkHref"
       :disabled="actionTag === 'button' ? disabled : undefined"
-      :aria-disabled="isInertLink ? 'true' : undefined"
-      :aria-pressed="selectable ? selected : undefined"
       @click="selectable && !disabled && (selected = !selected)"
     >
       <VIcon v-if="showCheck" v-bind="iconProps(checkIcon)" />

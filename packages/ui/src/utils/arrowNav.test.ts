@@ -135,3 +135,19 @@ describe('arrowNavigate', () => {
     expect(document.activeElement?.id).toBe('c')
   })
 })
+
+describe('arrowNavigate — modifiers', () => {
+  it('leaves a key held with Alt, Ctrl or Meta to the browser', () => {
+    const container = build('<button id="a"></button><button id="b"></button>')
+    for (const modifier of ['altKey', 'ctrlKey', 'metaKey']) {
+      const event = new KeyboardEvent('keydown', {
+        key: 'ArrowRight',
+        cancelable: true,
+        [modifier]: true,
+      })
+      const handled = arrowNavigate(event, container, () => navigableItems(container, SELECTOR))
+      expect(handled).toBe(false)
+      expect(event.defaultPrevented).toBe(false)
+    }
+  })
+})

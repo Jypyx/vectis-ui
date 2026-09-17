@@ -5,8 +5,11 @@
  * A link has no `disabled` attribute, so the complete inertness a `<button disabled>` gets for
  * free is rebuilt by hand, in parts that only work together. The address is dropped, so the
  * link can be neither focused nor followed; `aria-disabled` tells assistive technology why; and
- * the consumer's `onClick` is filtered out of the attributes, since an `<a>` without an `href`
- * still dispatches clicks and a handler would otherwise run on a control announced as disabled.
+ * the consumer's click listeners are filtered out of the attributes, since an `<a>` without an
+ * `href` still dispatches clicks and a handler would otherwise run on a control announced as
+ * disabled. TRAP — a listener written with a modifier is compiled to a key of its own
+ * (`@click.capture` → `onClickCapture`, `.once` → `onClickOnce`), so the filter is a pattern
+ * and not the single `onClick` key, which let those handlers run on a disabled link.
  *
  * TRAP — the attributes also gain `role="link"`. An `<a>` without `href` is no longer a link
  * but a generic element, on which an `aria-label` is PROHIBITED (axe `aria-prohibited-attr`)
@@ -42,6 +45,9 @@ export interface InertLink {
   attrs: ComputedRef<Record<string, unknown>>
 }
 
+/** `onClick` and the keys Vue compiles its event modifiers to, in any combination. */
+const CLICK_LISTENER = /^onClick(?:Once|Capture|Passive)*$/
+
 export function useInertLink(options: InertLinkOptions): InertLink {
   const isLink = computed(() => options.href() !== undefined)
   const isInertLink = computed(() => isLink.value && options.inert())
@@ -53,7 +59,7 @@ export function useInertLink(options: InertLinkOptions): InertLink {
       const attrs = options.attrs()
       if (!isInertLink.value) return attrs
       const rest: Record<string, unknown> = { role: 'link', ...attrs }
-      delete rest.onClick
+      for (const key of Object.keys(rest)) if (CLICK_LISTENER.test(key)) delete rest[key]
       return rest
     }),
   }

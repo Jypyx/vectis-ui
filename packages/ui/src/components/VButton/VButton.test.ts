@@ -182,3 +182,36 @@ describe('VButton', () => {
     expect(anchor.querySelector('.v-button-spinner')).not.toBeNull()
   })
 })
+
+describe('VButton — a consumer ARIA state', () => {
+  it('a consumer aria-disabled reaches the button', () => {
+    const { getByRole } = render(VButton, {
+      attrs: { 'aria-disabled': 'true' },
+      slots: { default: 'Save' },
+    })
+    expect(getByRole('button').getAttribute('aria-disabled')).toBe('true')
+  })
+
+  it('a consumer aria-busy reaches the button when it is not loading', () => {
+    const { getByRole } = render(VButton, {
+      attrs: { 'aria-busy': 'true' },
+      slots: { default: 'Save' },
+    })
+    expect(getByRole('button').getAttribute('aria-busy')).toBe('true')
+  })
+
+  it('an inert link filters every click listener, modifiers included', async () => {
+    const onClickCapture = vi.fn()
+    const onClickOnce = vi.fn()
+    const onClickPassive = vi.fn()
+    const { container } = render(VButton, {
+      props: { href: '/delete', disabled: true },
+      attrs: { onClickCapture, onClickOnce, onClickPassive },
+      slots: { default: 'Delete' },
+    })
+    ;(container.querySelector('a.v-button') as HTMLAnchorElement).click()
+    expect(onClickCapture).not.toHaveBeenCalled()
+    expect(onClickOnce).not.toHaveBeenCalled()
+    expect(onClickPassive).not.toHaveBeenCalled()
+  })
+})

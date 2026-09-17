@@ -72,6 +72,14 @@ export const Default: Story = {
      */
     await expect(getComputedStyle(current).transitionProperty).toBe('none')
 
+    /*
+     * The ellipsis is a disabled VButton, whose sheet gives a disabled button the "not
+     * allowed" cursor at (0,2,0). The ellipsis is no forbidden control, so its own cursor has
+     * to win that tie by weight, whatever order the sheets land in.
+     */
+    const ellipsis = canvasElement.querySelector('.v-pagination-ellipsis')!
+    await expect(getComputedStyle(ellipsis).cursor).toBe('default')
+
     await userEvent.click(canvas.getByRole('button', { name: 'Next page' }))
 
     await waitFor(async () => {
@@ -191,8 +199,8 @@ export const Controls: Story = {
           label="both custom"
           prev-icon="first_page"
           next-icon="last_page"
-          :prev-label="t.back"
-          :next-label="t.forward"
+          :prev-text="t.back"
+          :next-text="t.forward"
           v-model="d"
         />
         <VPagination :length="10" :controls="false" label="none" v-model="e" />
@@ -301,4 +309,16 @@ export const EdgeCases: Story = {
       </div>
     `,
   }),
+  play: async ({ canvasElement }) => {
+    /*
+     * "Next page" on the second to last page disables itself under the keyboard focus, and a
+     * disabled button hands the focus to <body>. It has to land on the page just reached.
+     */
+    const nav = within(within(canvasElement).getByRole('navigation', { name: 'length 2' }))
+    nav.getByRole('button', { name: 'Next page' }).focus()
+    await userEvent.keyboard('{Enter}')
+    await waitFor(async () => {
+      await expect(nav.getByRole('button', { name: 'Page 2' })).toHaveFocus()
+    })
+  },
 }

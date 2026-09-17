@@ -1,6 +1,8 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 
+import { nextTick, ref } from 'vue'
+
 import VChip from './VChip.vue'
 
 describe('VChip', () => {
@@ -220,5 +222,81 @@ describe('VChip', () => {
       expect(root.getAttribute('data-size')).toBe('sm')
       expect(root.hasAttribute('data-compact')).toBe(true)
     })
+  })
+})
+
+describe('VChip — a consumer ARIA state', () => {
+  it('a consumer aria-disabled reaches the action', () => {
+    const { container } = render(VChip, {
+      props: { clickable: true },
+      attrs: { 'aria-disabled': 'true' },
+      slots: { default: 'Filter' },
+    })
+    expect(container.querySelector('.v-chip-action')!.getAttribute('aria-disabled')).toBe('true')
+  })
+
+  it('a consumer aria-pressed reaches a clickable chip', () => {
+    const { container } = render(VChip, {
+      props: { clickable: true },
+      attrs: { 'aria-pressed': 'true' },
+      slots: { default: 'Filter' },
+    })
+    expect(container.querySelector('.v-chip-action')!.getAttribute('aria-pressed')).toBe('true')
+  })
+
+  it('an inert link filters a capture click listener', async () => {
+    const onClickCapture = vi.fn()
+    const { container } = render(VChip, {
+      props: { href: '/docs', disabled: true },
+      attrs: { onClickCapture },
+      slots: { default: 'Docs' },
+    })
+    await fireEvent.click(container.querySelector('.v-chip-action')!)
+    expect(onClickCapture).not.toHaveBeenCalled()
+  })
+})
+
+describe('VChip — icon-only', () => {
+  it('a default slot rendering nothing still makes an icon-only chip', () => {
+    const { container } = render(VChip, {
+      props: { iconStart: 'star', clickable: true },
+      slots: { default: () => [] },
+    })
+    expect(container.querySelector('.v-chip')!.hasAttribute('data-icon-only')).toBe(true)
+  })
+})
+
+describe('VChip — exposed members and naming', () => {
+  it('focus reaches the action, and el is the action', async () => {
+    const chip = ref<InstanceType<typeof VChip> | null>(null)
+    const { container } = render({
+      components: { VChip },
+      setup: () => ({ chip }),
+      template: '<VChip ref="chip" clickable>Filter</VChip>',
+    })
+    await nextTick()
+    const action = container.querySelector('.v-chip-action')
+    expect(chip.value?.el).toBe(action)
+    chip.value?.focus()
+    expect(document.activeElement).toBe(action)
+  })
+
+  it('warns in development when an interactive chip made of an icon has no name', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    try {
+      render(VChip, { props: { iconStart: 'star', clickable: true } })
+      await nextTick()
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('[VChip]'))
+      warn.mockClear()
+      render(VChip, {
+        props: { iconStart: 'star', clickable: true },
+        attrs: { 'aria-label': 'Star' },
+      })
+      render(VChip, { props: { iconStart: 'star' } })
+      await nextTick()
+      expect(warn).not.toHaveBeenCalled()
+    } finally {
+      warn.mockRestore()
+    }
   })
 })

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-// @a11y — the component's ONLY behavioural JS, and it exists entirely for
+// @a11y
+// The component's ONLY behavioural JS, and it exists entirely for
 // accessibility: an <a> has no native `disabled`, so the inert-link bridge has to
 // reproduce it by hand.
 /**
@@ -38,8 +39,11 @@ import VSpinner from '../VSpinner/VSpinner.vue'
  * Button page as it already does on the Chip, Tabs and Toggle ones — and what stops
  * the IconButton page from naming a type its own page leaves unnamed.
  */
+/** How much visual weight the button carries. */
 export type ButtonVariant = 'solid' | 'outline' | 'ghost' | 'soft'
+/** What the action means, in colour. */
 export type ButtonTone = 'accent' | 'neutral' | 'danger'
+/** The height of the button, from the scale every control shares. */
 export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 interface ButtonProps {
@@ -61,7 +65,7 @@ interface ButtonProps {
   /**
    * Raises the button off the page: a shadow that grows on hover and settles back
    * when pressed, whatever the variant. On `ghost` and `outline`, which have no
-   * background of their own, it also paints the raised surface — in the dark theme
+   * background of their own, it also paints the raised surface: in the dark theme
    * a shadow lying straight on the page background has nothing casting it. Inside a
    * VButtonGroup the group's own value wins over this one.
    */
@@ -178,12 +182,13 @@ const {
 <template>
   <component
     :is="isLink ? 'a' : 'button'"
+    :aria-disabled="isInertLink ? 'true' : undefined"
+    :aria-busy="loading || undefined"
     v-bind="passedAttrs"
     class="v-button v-control v-tone v-variant"
     :href="linkHref"
     :type="isLink ? undefined : type"
     :disabled="isLink ? undefined : isInert"
-    :aria-disabled="isInertLink ? 'true' : undefined"
     :data-variant="resolvedVariant"
     :data-tone="resolvedTone"
     :data-elevated="resolvedElevated ? '' : undefined"
@@ -191,7 +196,6 @@ const {
     :data-compact="resolvedCompact ? '' : undefined"
     :data-full-width="fullWidth ? '' : undefined"
     :data-loading="loading ? '' : undefined"
-    :aria-busy="loading || undefined"
   >
     <!-- The button already carries aria-busy, so the spinner is hidden from
          assistive technology: its own role="status" would announce the same state a
@@ -383,7 +387,8 @@ const {
 
   .v-button-spinner {
     /* A box exactly the size of an icon, since the spinner takes the place of
-       iconStart: the button's width does not jump when it starts loading. The
+       iconStart: a button with a start icon keeps its width when it starts loading
+       (one with a label alone gains the spinner and the gap beside it). The
        font-size is set to that same size so that VSpinner's own box, which measures
        1em, coincides with this one — VSpinner then draws its ring inside it at the
        proportion Material Symbols gives `progress_activity`, which is what makes the

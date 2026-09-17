@@ -1,5 +1,6 @@
 <script setup lang="ts">
-// @a11y — the MANDATORY label is the component's whole reason to exist alongside
+// @a11y
+// The MANDATORY label is the component's whole reason to exist alongside
 // VButton: an icon on its own gives assistive technology no accessible name.
 /**
  * A button showing an icon and nothing else, square rather than oblong. It offers
@@ -30,12 +31,12 @@ interface IconButtonProps {
    */
   label: string
   /**
-   * How much visual weight the button carries — the VButton variants. `ghost` by default,
+   * How much visual weight the button carries, from the VButton variants. `ghost` by default,
    * and inside a VButtonGroup the group's own variant wins over it.
    */
   variant?: ButtonVariant
   /**
-   * What the action means, in colour — the VButton tones. An icon-only button is usually
+   * What the action means, in colour, from the VButton tones. An icon-only button is usually
    * secondary, which is why it starts neutral where VButton starts accent. Left out inside
    * a VButtonGroup it takes the group's tone; on its own it is `neutral`.
    */
@@ -48,7 +49,7 @@ interface IconButtonProps {
   compact?: boolean
   /**
    * The silhouette: a square carrying the corner radius every control shares, or a
-   * circle. The box itself is square either way — only the corners change.
+   * circle. The box itself is square either way: only the corners change.
    */
   shape?: IconButtonShape
   /**
@@ -92,7 +93,7 @@ const props = withDefaults(defineProps<IconButtonProps>(), {
 defineSlots<{
   /**
    * The icon, when the `icon` prop cannot express it: a VIcon, or an inline SVG
-   * marked `aria-hidden="true"` — the button is already named by its `label`.
+   * marked `aria-hidden="true"`, the button being already named by its `label`.
    */
   default(): unknown
 }>()

@@ -15,7 +15,7 @@
  *
  * The only behavioural JavaScript is the keyboard, explained where it is written.
  */
-import { computed, h, ref } from 'vue'
+import { computed, h, nextTick, ref } from 'vue'
 import type { FunctionalComponent } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
@@ -63,7 +63,7 @@ interface PaginationProps {
    */
   length?: number
   /**
-   * How many slots to render, ellipses counted among them — so the row keeps exactly
+   * How many slots to render, ellipses counted among them, so the row keeps exactly
    * the same width whichever page is current. Below five there would be nothing left
    * to show around the current page, so five is the effective minimum. Left out, every
    * page is rendered.
@@ -119,12 +119,12 @@ interface PaginationProps {
    * The wording of the previous control, used both as its visible text and as what
    * screen readers announce. It falls back to the design system dictionary.
    */
-  prevLabel?: string
+  prevText?: string
   /**
    * The wording of the next control, used both as its visible text and as what screen
    * readers announce. It falls back to the design system dictionary.
    */
-  nextLabel?: string
+  nextText?: string
 
   /** Makes the whole component unusable. */
   disabled?: boolean
@@ -147,7 +147,7 @@ interface PaginationProps {
   label?: string
   /**
    * How a page is announced. A pill shows a bare number, which alone means nothing to
-   * a screen reader — this is what turns it into "Page 3". It falls back to the design
+   * a screen reader: this is what turns it into "Page 3". It falls back to the design
    * system dictionary.
    */
   pageLabel?: (page: number) => string
@@ -167,8 +167,8 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   controls: 'icon',
   prevIcon: () => chevronLeftIcon,
   nextIcon: () => chevronRightIcon,
-  prevLabel: undefined,
-  nextLabel: undefined,
+  prevText: undefined,
+  nextText: undefined,
   disabled: false,
   disabledPages: undefined,
   responsive: false,
@@ -180,8 +180,8 @@ const props = withDefaults(defineProps<PaginationProps>(), {
 // aria-labelledby still wins — that arbitration is what `useAriaLabel` is for.
 const m = useMessages()
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.pagination.label)
-const resolvedPrevLabel = computed(() => props.prevLabel ?? m.value.pagination.previous)
-const resolvedNextLabel = computed(() => props.nextLabel ?? m.value.pagination.next)
+const resolvedPrevText = computed(() => props.prevText ?? m.value.pagination.previous)
+const resolvedNextText = computed(() => props.nextText ?? m.value.pagination.next)
 
 /** The page being shown, counted from 1. It starts on the first. */
 const page = defineModel<number>({ default: 1 })
@@ -191,12 +191,15 @@ type PaginationItem =
   | { kind: 'page'; key: string; page: number; edge: boolean; distance: number }
   | { kind: 'gap'; key: string }
 
-const total = computed(() => Math.max(Math.trunc(props.length), 1))
-const currentPage = computed(() => clamp(page.value, 1, total.value))
+// A length or a model that is not a whole number (`NaN` while a page size is still loading,
+// a computed `2.5`) is brought back to a page that exists, or no pill would ever match it.
+const total = computed(() => Math.max(Math.trunc(props.length) || 1, 1))
+const currentPage = computed(() => clamp(Math.round(page.value) || 1, 1, total.value))
 
 const isPageDisabled = computed(() => resolveMatcher(props.disabledPages))
 
-// @a11y — a pill shows nothing but a number, which on its own tells a screen reader
+// @a11y
+// A pill shows nothing but a number, which on its own tells a screen reader
 // nothing at all; this is what has it announced as "Page 3".
 function pageLabelFor(n: number): string {
   return props.pageLabel ? props.pageLabel(n) : m.value.pagination.page(n)
@@ -240,8 +243,8 @@ const items = computed<PaginationItem[]>(() => {
   // With no limit given, nothing is left out. Below five slots there would be no room
   // for the first page, an ellipsis, the current page, another ellipsis and the last,
   // so that is the floor.
-  const visible =
-    props.totalVisible === undefined ? count : Math.max(Math.trunc(props.totalVisible), 5)
+  const limit = Math.trunc(props.totalVisible ?? count)
+  const visible = Number.isNaN(limit) ? count : Math.max(limit, 5)
   if (visible >= count) return pages(1, count)
 
   const start = current - Math.floor((visible - 5) / 2)
@@ -280,6 +283,28 @@ function goTo(n: number | undefined) {
   page.value = clamp(n, 1, total.value)
 }
 
+// @a11y
+/*
+ * The previous and next controls disable themselves once no page is left in their direction,
+ * and a focused button that becomes disabled hands the focus to <body>: a keyboard reader
+ * pressing "Next page" on the second to last page would be sent back to the top of the
+ * document by the next Tab. The focus goes to the page just reached instead, which is always
+ * rendered, the current page being the one pill the responsive steps never hide.
+ *
+ * The focus is read BEFORE the change: a pointer click may not focus a button at all (Safari),
+ * and a control that did not hold the focus has nothing to hand on.
+ */
+async function goFromControl(event: MouseEvent, n: number | undefined) {
+  const control = event.currentTarget as HTMLButtonElement
+  const hadFocus = control === document.activeElement
+  goTo(n)
+  if (!hadFocus) return
+  await nextTick()
+  if (control.disabled) {
+    navEl.value?.querySelector<HTMLElement>('[aria-current="page"]')?.focus()
+  }
+}
+
 /*
  * The previous and next controls, written ONCE: the two differ only by their direction, and
  * a pair of template blocks drifting apart on the next change is exactly what this avoids.
@@ -296,13 +321,14 @@ function goTo(n: number | undefined) {
  */
 const PageControl: FunctionalComponent<{ side: 'prev' | 'next' }> = ({ side }) => {
   const prev = side === 'prev'
-  const label = prev ? resolvedPrevLabel.value : resolvedNextLabel.value
+  const label = prev ? resolvedPrevText.value : resolvedNextText.value
   const icon = prev ? props.prevIcon : props.nextIcon
   const common = {
     class: 'v-pagination-control',
     variant: props.itemVariant,
     disabled: prev ? prevDisabled.value : nextDisabled.value,
-    onClick: () => goTo(prev ? prevTarget.value : nextTarget.value),
+    onClick: (event: MouseEvent) =>
+      goFromControl(event, prev ? prevTarget.value : nextTarget.value),
   }
   const glyph = () => h(VIcon, { ...iconProps(icon), mirrored: true })
   if (props.controls === 'icon') return h(VIconButton, { ...common, label }, glyph)
@@ -470,8 +496,9 @@ function onKeydown(event: KeyboardEvent) {
 
   /* The ellipsis is a disabled button only as a technical device; to the reader it is
      not a control that has been turned off, so it does not take the forbidden
-     cursor. */
-  .v-pagination-ellipsis {
+     cursor. Qualified like the pills: VButton's disabled cursor weighs (0,2,0), and a bare
+     class loses to it whatever the sheet order. */
+  .v-pagination-ellipsis[data-size] {
     cursor: default;
   }
 

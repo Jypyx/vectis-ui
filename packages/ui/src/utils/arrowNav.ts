@@ -36,6 +36,9 @@ export function navigableItems(container: HTMLElement, selector: string): HTMLEl
  * which is then on the left. The block axis needs no such treatment, no language
  * reversing it.
  *
+ * A key held with Alt, Ctrl or Meta is never taken: those are the browser's and the system's
+ * shortcuts (Alt+Left goes back a page), and cancelling one to move a focus would break it.
+ *
  * `items` is a FUNCTION, called only once the key is known to be one of the four. A keydown
  * handler on a container sees every key typed inside it (Tab, Enter, letters), and collecting
  * the list costs a query plus, for most callers, one style read per element.
@@ -50,7 +53,7 @@ export function arrowNavigate(
   const keys = vertical
     ? ['ArrowDown', 'ArrowUp', 'Home', 'End']
     : ['ArrowRight', 'ArrowLeft', 'Home', 'End']
-  if (!keys.includes(event.key)) return false
+  if (event.altKey || event.ctrlKey || event.metaKey || !keys.includes(event.key)) return false
   const list = items()
   if (list.length === 0) return false
   event.preventDefault()

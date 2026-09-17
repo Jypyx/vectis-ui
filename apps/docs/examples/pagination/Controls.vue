@@ -38,8 +38,8 @@ const page = ref(3)
         controls="both"
         :prev-icon="arrowLeftAlt"
         :next-icon="arrowRightAlt"
-        prev-label="Newer"
-        next-label="Older"
+        prev-text="Newer"
+        next-text="Older"
         item-variant="outline"
         label="Pages with wording of their own"
       />

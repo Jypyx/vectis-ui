@@ -33,7 +33,7 @@ export default {
     },
     dismissible: {
       title: 'Dismissible',
-      text: '<code>dismissible</code> adds a second button that emits <code>dismiss</code>, taking the chip out of the list being yours to decide. <code>dismissIcon</code> and <code>dismissLabel</code> change its glyph and its words.',
+      text: '<code>dismissible</code> adds a second button that emits <code>dismiss</code>, taking the chip out of the list being yours to decide. <code>dismissIcon</code> and <code>dismissLabel</code> change its glyph and its words. In a row of chips, give each cross a <code>dismissLabel</code> that names what it removes, or every one is announced with the same word.',
     },
     states: {
       title: 'States',

@@ -17,15 +17,15 @@ export default {
     },
     panels: {
       title: 'Panels',
-      text: 'A hidden panel is hidden and not destroyed, so what it holds keeps its state and a field inside it is still submitted. <code>lazy</code> holds the content back until the panel is opened once. Leaving the <code>#panels</code> slot out renders no panel area at all, and it has to be there or absent from the start.',
+      text: 'A hidden panel is hidden and not destroyed, so what it holds keeps its state and a field inside it is still submitted. <code>lazy</code> holds the content back until the panel is opened once. Leaving the <code>#panels</code> slot out renders no panel area at all, and it has to be there or absent from the start. Once it is there, every tab needs its panel. A panel may hold another VTabs, which keeps its own layout.',
     },
     alignment: {
       title: 'Alignment',
       text: '<code>align</code> says where the tabs sit along the bar when they do not fill it. It is set on the bar rather than on the list of tabs.',
     },
-    grow: {
+    fullWidth: {
       title: 'Filling the bar',
-      text: '<code>grow</code> shares the whole bar between the tabs in equal parts, a label too long for its share being truncated. It is incompatible with scrolling by construction.',
+      text: '<code>fullWidth</code> shares the whole bar between the tabs in equal parts, a label too long for its share being truncated. It is incompatible with scrolling by construction.',
     },
     orientation: {
       title: 'Orientation',
@@ -37,7 +37,7 @@ export default {
     },
     scrollButtons: {
       title: 'Scroll buttons',
-      text: '<code>scrollButtons</code> adds a button at each end of the bar, each disabled once that end is reached. It is opt-in, and excludes <code>grow</code>.',
+      text: '<code>scrollButtons</code> adds a button at each end of the bar, each disabled once that end is reached. A button that held the keyboard focus hands it to the opposite one as it disables itself. It is opt-in, and excludes <code>fullWidth</code>.',
     },
     customArrows: {
       title: 'Custom arrows',
@@ -63,9 +63,9 @@ export default {
         compact: 'Takes 4px off the height of every tab.',
         orientation: 'Whether the tabs run across the page or down its side.',
         align: 'Where the tabs sit along the bar when they do not fill it.',
-        grow: 'Makes the tabs share the whole bar between them, in equal parts.',
+        fullWidth: 'Makes the tabs share the whole bar between them, in equal parts.',
         scrollButtons:
-          'Adds a button at each end of the bar to scroll it, each disabled once that end is reached. It only makes sense when the tabs can overflow, so it excludes <code>grow</code>.',
+          'Adds a button at each end of the bar to scroll it, each disabled once that end is reached. It only makes sense when the tabs can overflow, so it excludes <code>fullWidth</code>.',
         prevIcon:
           'The icon of the button scrolling backwards. It follows the orientation by default.',
         nextIcon:
@@ -103,6 +103,8 @@ export default {
       },
       slots: {
         default: 'The content of the tab, replacing the <code>label</code> prop.',
+        start: 'Content before the label, which takes the place of <code>iconStart</code>.',
+        end: 'Content after the label, which takes the place of <code>iconEnd</code>.',
       },
     },
     VTabPanel: {

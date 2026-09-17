@@ -4,9 +4,11 @@
  * state all come from there — and what this component adds is the handful of
  * attributes that make a button part of a tab row for assistive technology.
  *
- * Used outside a VTabs it still renders, simply never selected, as a quiet neutral button
- * at VButton's own size: the row's decisions all come from the context, and a tab with no
- * row takes VButton's defaults rather than a copy of the row's.
+ * Used outside a VTabs it renders as a quiet neutral button at VButton's own size, and as
+ * nothing more: the row's decisions all come from the context, and a tab with no row takes
+ * VButton's defaults rather than a copy of the row's. It carries no `tab` role either,
+ * which would be an orphan without a tablist, nor the roving `tabindex` that would take
+ * it out of the tab order.
  */
 
 import { computed, inject } from 'vue'
@@ -51,6 +53,10 @@ const props = withDefaults(defineProps<TabProps>(), {
 const slots = defineSlots<{
   /** The content of the tab, replacing the `label` prop. */
   default?(): unknown
+  /** Content before the label, which takes the place of `iconStart`. */
+  start?(): unknown
+  /** Content after the label, which takes the place of `iconEnd`. */
+  end?(): unknown
 }>()
 
 const tabs = inject(tabsKey, null)
@@ -68,7 +74,11 @@ const resolvedDisabled = computed(() => props.disabled || Boolean(tabs?.disabled
  * The same definition as VChip's, and the square itself is VButton's `[data-icon-only]` rule.
  */
 function iconOnly() {
-  return !props.label && !slots.default && Boolean(props.iconStart || props.iconEnd)
+  return (
+    !props.label &&
+    !slots.default &&
+    Boolean(slots.start || slots.end || props.iconStart || props.iconEnd)
+  )
 }
 
 // @keyboard @a11y
@@ -88,10 +98,10 @@ function onFocus() {
   <VButton
     :id="tabId"
     class="v-tab"
-    role="tab"
-    :aria-selected="selected ? 'true' : 'false'"
+    :role="tabs ? 'tab' : undefined"
+    :aria-selected="tabs ? String(selected) : undefined"
     :aria-controls="panelId"
-    :tabindex="selected ? 0 : -1"
+    :tabindex="tabs ? (selected ? 0 : -1) : undefined"
     variant="ghost"
     :elevated="selected && tabs?.variant === 'inset'"
     :tone="selected && tabs ? tabs.tone : 'neutral'"
@@ -102,11 +112,11 @@ function onFocus() {
     @click="tabs?.select(value)"
     @focus="onFocus"
   >
-    <template v-if="iconStart" #start>
-      <VIcon v-bind="iconProps(iconStart)" :filled="iconFilled" />
+    <template v-if="iconStart || $slots.start" #start>
+      <slot name="start"><VIcon v-bind="iconProps(iconStart!)" :filled="iconFilled" /></slot>
     </template>
-    <template v-if="iconEnd" #end>
-      <VIcon v-bind="iconProps(iconEnd)" :filled="iconFilled" />
+    <template v-if="iconEnd || $slots.end" #end>
+      <slot name="end"><VIcon v-bind="iconProps(iconEnd!)" :filled="iconFilled" /></slot>
     </template>
     <!-- The label is wrapped in an element of its own so that it can be truncated:
          an ellipsis cannot be applied to the bare text of a flex container, and tabs
@@ -151,14 +161,14 @@ function onFocus() {
     text-overflow: ellipsis;
   }
 
-  .v-tabs[data-grow] .v-tab[data-size] {
+  .v-tabs[data-full-width] > .v-tabs-bar > .v-tabs-list .v-tab[data-size] {
     flex: 1 1 0;
     min-inline-size: 0;
   }
 
   /* A box nested inside a rounded one needs a smaller radius to look concentric: the
      track's own, less the padding between them. */
-  .v-tabs[data-variant='inset'] .v-tab[data-size] {
+  .v-tabs[data-variant='inset'] > .v-tabs-bar > .v-tabs-list .v-tab[data-size] {
     border-radius: calc(var(--vectis-radius-surface) - var(--vectis-space-1));
   }
 
@@ -172,7 +182,10 @@ function onFocus() {
    * the bar's own gap stays, since that one separates the scroll buttons and not the
    * tabs.
    */
-  .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tab[data-size] {
+  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])
+    > .v-tabs-bar
+    > .v-tabs-list
+    .v-tab[data-size] {
     border-radius: 0;
   }
 
@@ -191,17 +204,23 @@ function onFocus() {
    * children. They are spans, the tabs being the only buttons, which is what makes the
    * distinction work.
    */
-  .v-tabs[data-variant='outlined'] .v-tab[data-size]:first-of-type {
+  .v-tabs[data-variant='outlined'] > .v-tabs-bar > .v-tabs-list .v-tab[data-size]:first-of-type {
     border-start-start-radius: calc(var(--vectis-radius-surface) - 1px);
   }
 
-  .v-tabs[data-variant='outlined'][data-orientation='horizontal'] .v-tab[data-size]:last-of-type {
+  .v-tabs[data-variant='outlined'][data-orientation='horizontal']
+    > .v-tabs-bar
+    > .v-tabs-list
+    .v-tab[data-size]:last-of-type {
     border-start-end-radius: calc(var(--vectis-radius-surface) - 1px);
   }
 
   /* Turned vertical, the track has migrated to the end edge, so the free edge is the
      start one: that is where the ends of the column round their corners. */
-  .v-tabs[data-variant='outlined'][data-orientation='vertical'] .v-tab[data-size]:last-of-type {
+  .v-tabs[data-variant='outlined'][data-orientation='vertical']
+    > .v-tabs-bar
+    > .v-tabs-list
+    .v-tab[data-size]:last-of-type {
     border-end-start-radius: calc(var(--vectis-radius-surface) - 1px);
   }
 
@@ -211,7 +230,10 @@ function onFocus() {
    * that way it follows the selected tone AND the grey of a disabled tab on its own,
    * without this file having to know anything about either.
    */
-  .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tab[data-size]::after {
+  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])
+    > .v-tabs-bar
+    > .v-tabs-list
+    .v-tab[data-size]::after {
     content: '';
     position: absolute;
     inset-inline: 0;
@@ -223,6 +245,8 @@ function onFocus() {
   }
 
   .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
+    > .v-tabs-bar
+    > .v-tabs-list
     .v-tab[data-size]::after {
     inset-block: 0;
     inset-inline: auto;
@@ -232,12 +256,17 @@ function onFocus() {
   }
 
   .v-tabs:is([data-variant='flat'], [data-variant='outlined'])
+    > .v-tabs-bar
+    > .v-tabs-list
     .v-tab[data-size][aria-selected='true']::after {
     opacity: 1;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tab[data-size]::after {
+    .v-tabs:is([data-variant='flat'], [data-variant='outlined'])
+      > .v-tabs-bar
+      > .v-tabs-list
+      .v-tab[data-size]::after {
       transition: none;
     }
   }

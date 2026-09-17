@@ -15,7 +15,7 @@
  * has been updated, which is what lets the component render on a server.
  */
 
-import { computed, provide, ref, useId, useSlots, watch } from 'vue'
+import { computed, onMounted, provide, ref, useId, useSlots, watch } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
@@ -35,11 +35,17 @@ import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
+/** How the bar is drawn: a rule under the tabs, the same inside a card, or a sunken track. */
 export type TabsVariant = 'flat' | 'outlined' | 'inset'
+/** The colour of the selected tab. */
 export type TabsTone = 'accent' | 'neutral' | 'danger'
+/** The height of the tabs, from the scale every control shares. */
 export type TabsSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+/** Whether the tabs run across the page or down its side. */
 export type TabsOrientation = 'horizontal' | 'vertical'
+/** Where the tabs sit along the bar when they do not fill it. */
 export type TabsAlign = 'start' | 'center' | 'end'
+/** Whether a tab is selected when it takes the focus, or only when it is activated. */
 export type TabsActivation = 'manual' | 'automatic'
 
 interface TabsProps {
@@ -59,11 +65,14 @@ interface TabsProps {
   orientation?: TabsOrientation
   /** Where the tabs sit along the bar when they do not fill it. */
   align?: TabsAlign
-  /** Makes the tabs share the whole bar between them, in equal parts. */
-  grow?: boolean
+  /**
+   * Stretches the tabs across the whole bar, every tab taking an equal share of it, on the
+   * terms of VButtonGroup's own `fullWidth`.
+   */
+  fullWidth?: boolean
   /**
    * Adds a button at each end of the bar to scroll it, each disabled once that end is
-   * reached. It only makes sense when the tabs can overflow, so it excludes `grow`.
+   * reached. It only makes sense when the tabs can overflow, so it excludes `fullWidth`.
    */
   scrollButtons?: boolean
   /** The icon of the button scrolling backwards. It follows the orientation by default. */
@@ -100,7 +109,7 @@ const props = withDefaults(defineProps<TabsProps>(), {
   compact: false,
   orientation: 'horizontal',
   align: 'start',
-  grow: false,
+  fullWidth: false,
   scrollButtons: false,
   prevIcon: undefined,
   nextIcon: undefined,
@@ -125,7 +134,7 @@ defineSlots<{
  * The `value` of the selected tab. There is deliberately no default: the component cannot
  * know which of the tabs a consumer wrote should open.
  *
- * CONTRACT — it must name a tab that exists and is not disabled. Pointing it anywhere else
+ * CONTRACT: it must name a tab that exists and is not disabled. Pointing it anywhere else
  * leaves no tab with a tab stop, and the bar becomes unreachable from the keyboard.
  */
 const model = defineModel<ItemValue>()
@@ -270,6 +279,29 @@ watch(
   { flush: 'post' },
 )
 
+// @a11y
+/*
+ * A scroll button disables itself once its end is reached, and a focused button that becomes
+ * disabled hands the focus to <body>: a keyboard reader pressing "next" until the end would be
+ * sent back to the top of the page by the next Tab. The focus moves on first, to the opposite
+ * button, which the row has just scrolled away from, or to the selected tab when both ends are
+ * reached at once (the row no longer overflows). The two buttons are the list's own siblings.
+ *
+ * TRAP — the default `pre` timing is the point: the button still holds the focus when this
+ * runs, the DOM not being patched with `disabled` yet. In `post` timing the focus would
+ * already be on <body>, with nothing left to say which control lost it.
+ */
+watch([atStart, atEnd], ([start, end]) => {
+  const list = listEl.value
+  const prev = list?.previousElementSibling as HTMLElement | null
+  const next = list?.nextElementSibling as HTMLElement | null
+  const focused = document.activeElement
+  const fromPrev = focused === prev
+  if (!(fromPrev ? start : focused === next && end)) return
+  if (fromPrev ? end : start) focusSelected()
+  else (fromPrev ? next : prev)?.focus()
+})
+
 /**
  * Scrolls the bar by most of its own length. No scrolling behaviour is requested,
  * deliberately: leaving it out lets the stylesheet decide, which is what makes the
@@ -300,40 +332,46 @@ function scrollStep(direction: -1 | 1) {
  * itself, which would scroll every scrollable ancestor up to the page. The distances
  * are read from the two boxes, so they are already physical: the same code serves
  * left-to-right, right-to-left and vertical without a single test of direction.
+ *
+ * It also runs once on mount, INSTANTLY: a row opened on a tab past its visible end (a deep
+ * link, a restored route) would otherwise show the first tabs with the selected one out of
+ * sight, and a smooth scroll would animate the page as it loads.
  */
-watch(
-  model,
-  () => {
-    const list = listEl.value
-    const tab = list?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')
-    if (!list || !tab) return
-    const t = tab.getBoundingClientRect()
-    const c = list.getBoundingClientRect()
-    list.scrollBy?.({
-      left: t.left < c.left ? t.left - c.left : t.right > c.right ? t.right - c.right : 0,
-      top: t.top < c.top ? t.top - c.top : t.bottom > c.bottom ? t.bottom - c.bottom : 0,
-    })
-  },
-  // `post`, so the tab that is now selected already carries `aria-selected` when it is looked
-  // for: in the default timing the query would find the one that was selected before.
-  { flush: 'post' },
-)
+function revealSelected(behavior?: ScrollBehavior) {
+  const list = listEl.value
+  const tab = list?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')
+  if (!list || !tab) return
+  const t = tab.getBoundingClientRect()
+  const c = list.getBoundingClientRect()
+  list.scrollBy?.({
+    left: t.left < c.left ? t.left - c.left : t.right > c.right ? t.right - c.right : 0,
+    top: t.top < c.top ? t.top - c.top : t.bottom > c.bottom ? t.bottom - c.bottom : 0,
+    behavior,
+  })
+}
+
+// `post`, so the tab that is now selected already carries `aria-selected` when it is looked
+// for: in the default timing the query would find the one that was selected before.
+watch(model, () => revealSelected(), { flush: 'post' })
+onMounted(() => revealSelected('instant'))
 
 // The root is a container and the tabs are rendered by the consumer's slot, so a template
 // ref reaches neither the row nor a tab. `focus` goes where the Tab key would land: the
 // selected tab, which holds the row's single tab stop.
+function focusSelected(options?: FocusOptions) {
+  const list = listEl.value
+  const tab =
+    list?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]:not(:disabled)') ??
+    list?.querySelector<HTMLElement>('[role="tab"]:not(:disabled)')
+  tab?.focus(options)
+}
+
 defineExpose({
   /**
    * Moves the focus to the selected tab, or to the first tab that can take it when the
    * v-model names none.
    */
-  focus: (options?: FocusOptions) => {
-    const list = listEl.value
-    const tab =
-      list?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]:not(:disabled)') ??
-      list?.querySelector<HTMLElement>('[role="tab"]:not(:disabled)')
-    tab?.focus(options)
-  },
+  focus: focusSelected,
   /** The `role="tablist"` row, which is also where the consumer's attributes land. */
   el: listEl,
 })
@@ -346,7 +384,7 @@ defineExpose({
     :data-variant="variant"
     :data-orientation="orientation"
     :data-align="align"
-    :data-grow="grow ? '' : undefined"
+    :data-full-width="fullWidth ? '' : undefined"
     :data-compact="compact ? '' : undefined"
   >
     <div class="v-tabs-bar">
@@ -364,11 +402,11 @@ defineExpose({
 
       <div
         ref="listEl"
+        :aria-orientation="isVertical ? 'vertical' : undefined"
         v-bind="listAttrs"
         class="v-tabs-list"
         role="tablist"
         :aria-label="ariaLabel"
-        :aria-orientation="isVertical ? 'vertical' : undefined"
         @keydown="onKeydown"
       >
         <!-- The two markers watched to know whether an end of the bar is reached.
@@ -474,15 +512,15 @@ defineExpose({
     gap: var(--vectis-space-1);
   }
 
-  .v-tabs[data-orientation='vertical'] .v-tabs-bar {
+  .v-tabs[data-orientation='vertical'] > .v-tabs-bar {
     flex-direction: column;
   }
 
-  .v-tabs[data-align='center'] .v-tabs-bar {
+  .v-tabs[data-align='center'] > .v-tabs-bar {
     justify-content: center;
   }
 
-  .v-tabs[data-align='end'] .v-tabs-bar {
+  .v-tabs[data-align='end'] > .v-tabs-bar {
     justify-content: flex-end;
   }
 
@@ -494,12 +532,12 @@ defineExpose({
 
      Both frames are named explicitly rather than excluding the third: a fourth frame
      will have to opt in by hand instead of inheriting this silently. */
-  .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tabs-bar {
+  .v-tabs:is([data-variant='flat'], [data-variant='outlined']) > .v-tabs-bar {
     border-block-end: 1px solid var(--vectis-color-border);
   }
 
   .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
-    .v-tabs-bar {
+    > .v-tabs-bar {
     border-block-end: none;
     border-inline-start: 1px solid var(--vectis-color-border);
   }
@@ -514,7 +552,7 @@ defineExpose({
    * ORDER that decides. Moving it up would leave the vertical framed case with two
    * rules on one side and none between the two areas.
    */
-  .v-tabs[data-variant='outlined'][data-orientation='vertical'] .v-tabs-bar {
+  .v-tabs[data-variant='outlined'][data-orientation='vertical'] > .v-tabs-bar {
     border-inline-start: none;
     border-inline-end: 1px solid var(--vectis-color-border);
   }
@@ -522,7 +560,9 @@ defineExpose({
   .v-tabs-list {
     display: flex;
     align-items: center;
-    gap: var(--vectis-space-1);
+    /* Held in a variable because the sentinels cancel it beside themselves. */
+    --tabs-list-gap: var(--vectis-space-1);
+    gap: var(--tabs-list-gap);
     overflow: auto;
     /* Without these the row refuses to shrink below the width of its tabs, and it
        would widen the whole bar instead of scrolling. */
@@ -532,7 +572,7 @@ defineExpose({
     scroll-behavior: smooth;
   }
 
-  .v-tabs[data-orientation='vertical'] .v-tabs-list {
+  .v-tabs[data-orientation='vertical'] > .v-tabs-bar > .v-tabs-list {
     flex-direction: column;
     align-items: stretch;
   }
@@ -540,23 +580,25 @@ defineExpose({
   /* Pulling the row one pixel into the track is what lets the selected tab's indicator
      COVER that line rather than sit on top of it, which would read as a thicker rule.
    */
-  .v-tabs:is([data-variant='flat'], [data-variant='outlined']) .v-tabs-list {
+  .v-tabs:is([data-variant='flat'], [data-variant='outlined']) > .v-tabs-bar > .v-tabs-list {
     margin-block-end: -1px;
     /* On a track the tabs are contiguous segments and not a queue of buttons: no gap
        here, and no rounded corners on the tabs themselves. */
-    gap: 0;
+    --tabs-list-gap: 0px;
   }
 
   /* The row is now a pixel taller than the tabs it holds, so they are pushed against
      its end edge; the indicator each tab draws there then falls exactly on the
      track. */
   .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='horizontal']
-    .v-tabs-list {
+    > .v-tabs-bar
+    > .v-tabs-list {
     align-items: flex-end;
   }
 
   .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
-    .v-tabs-list {
+    > .v-tabs-bar
+    > .v-tabs-list {
     margin-block-end: 0;
     margin-inline-start: -1px;
   }
@@ -566,7 +608,7 @@ defineExpose({
      row under the frame's own border.
 
      TRAP — same specificity as the rule above, so again it is the order that decides. */
-  .v-tabs[data-variant='outlined'][data-orientation='vertical'] .v-tabs-list {
+  .v-tabs[data-variant='outlined'][data-orientation='vertical'] > .v-tabs-bar > .v-tabs-list {
     margin-inline-start: 0;
   }
 
@@ -585,31 +627,52 @@ defineExpose({
     overflow: clip;
   }
 
-  .v-tabs[data-variant='outlined']:not(:has(> .v-tabs-panels)) .v-tabs-bar {
+  .v-tabs[data-variant='outlined']:not(:has(> .v-tabs-panels)) > .v-tabs-bar {
     border-block-end: none;
     border-inline-end: none;
   }
 
-  .v-tabs[data-variant='outlined']:not(:has(> .v-tabs-panels)) .v-tabs-list {
+  .v-tabs[data-variant='outlined']:not(:has(> .v-tabs-panels)) > .v-tabs-bar > .v-tabs-list {
     margin-block-end: 0;
   }
 
   /* The hollow track of the segmented variant is drawn on the scrolling row itself,
      and not on the bar around it: its padding is what keeps the raised tab's shadow
      from being clipped as the row scrolls. */
-  .v-tabs[data-variant='inset'] .v-tabs-list {
+  .v-tabs[data-variant='inset'] > .v-tabs-bar > .v-tabs-list {
     background: var(--vectis-color-surface-sunken);
     padding: var(--vectis-space-1);
     border-radius: var(--vectis-radius-surface);
   }
 
-  .v-tabs[data-grow] .v-tabs-list {
+  .v-tabs[data-full-width] > .v-tabs-bar > .v-tabs-list {
     flex: 1;
   }
 
+  /*
+   * A pixel square each, at the very ends of the row. They are items of the row, so its gap
+   * opens beside them as it does between two tabs: each pulls its neighbour back over that
+   * gap and over its own pixel, so the first and last tabs sit exactly where the row's
+   * padding puts them. The pull is written on both axes, only the main one doing anything.
+   *
+   * Aligned to the start rather than stretched: a negative cross-axis margin on a stretched
+   * item would GROW it past the row, which then scrolls on the other axis too.
+   */
   .v-tabs-sentinel {
     flex: 0 0 1px;
-    align-self: stretch;
+    align-self: flex-start;
+    inline-size: 1px;
+    block-size: 1px;
+  }
+
+  .v-tabs-sentinel:first-child {
+    margin-inline-end: calc(-1px - var(--tabs-list-gap));
+    margin-block-end: calc(-1px - var(--tabs-list-gap));
+  }
+
+  .v-tabs-sentinel:last-child {
+    margin-inline-start: calc(-1px - var(--tabs-list-gap));
+    margin-block-start: calc(-1px - var(--tabs-list-gap));
   }
 
   .v-tabs-scroll {
@@ -639,23 +702,23 @@ defineExpose({
    * track rules above: a fourth frame opts in by hand.
    */
   .v-tabs:is([data-variant='flat'], [data-variant='inset'])[data-orientation='horizontal']
-    .v-tabs-panels {
+    > .v-tabs-panels {
     padding-block-start: var(--tabs-panels-pad);
   }
 
   .v-tabs:is([data-variant='flat'], [data-variant='inset'])[data-orientation='vertical']
-    .v-tabs-panels {
+    > .v-tabs-panels {
     padding-inline-start: var(--tabs-panels-pad);
   }
 
   /* Inside a card the gutter is the panels' alone, on all four sides: the bar spends
      none, so the tabs and their track reach the frame and the content is the only thing
      set back from it. */
-  .v-tabs[data-variant='outlined'] .v-tabs-panels {
+  .v-tabs[data-variant='outlined'] > .v-tabs-panels {
     padding: var(--tabs-panels-pad);
   }
 
-  .v-tabs[data-orientation='vertical'] .v-tabs-panels {
+  .v-tabs[data-orientation='vertical'] > .v-tabs-panels {
     flex: 1;
   }
 
