@@ -90,14 +90,16 @@ export default {
         clearable: 'Offers a cross that empties both the selection and the search.',
         clearLabel:
           'What that cross does, in words. It falls back to the design system dictionary.',
-        emptyText: 'What the panel says when the search matches nothing.',
+        emptyText:
+          'What the panel says when the search matches nothing. A screen reader hears it even when the <code>#empty</code> slot draws something else, so set both together.',
         filter:
           'How the list is narrowed as one types. Turning it off means the options already arrive filtered by their source and are shown exactly as they come. A rule of your own receives the query as it was typed, merely trimmed, not the accent-insensitive form used internally.',
         searchDebounce:
           'How long to wait before telling the source what is being searched for, in milliseconds. Zero tells it at once, which suits a source that is not a network request.',
         loading:
           'Says that something is being loaded. With no option yet, the whole panel says so; with options already listed, a spinner appears at the foot of the list, since what is loading is then the next page. Either way the field replaces its chevron with a spinner.',
-        loadingText: 'What is said while loading, and what the spinner is announced as.',
+        loadingText:
+          'What is said while loading, and what the spinner is announced as. A screen reader hears it even when the <code>#loading</code> slot draws something else, so set both together.',
         hasMore:
           'Says that there are more pages to come, which is what makes the component ask for the next one as the end of the list comes into view.',
         placement:

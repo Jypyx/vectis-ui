@@ -553,3 +553,18 @@ describe('VFileInput — slots and keys', () => {
     warn.mockRestore()
   })
 })
+
+describe('VFileInput — its field is not drawn read-only', () => {
+  it('an editable file field refuses typing without the read-only look', () => {
+    const { container } = render(VFileInput, { props: { modelValue: [], label: 'Files' } })
+    expect(container.querySelector('.v-input')!.hasAttribute('data-readonly')).toBe(false)
+    expect((container.querySelector('.v-input-control') as HTMLInputElement).readOnly).toBe(true)
+  })
+
+  it('a read-only file field still looks read-only', () => {
+    const { container } = render(VFileInput, {
+      props: { modelValue: [], label: 'Files', readonly: true },
+    })
+    expect(container.querySelector('.v-input')!.hasAttribute('data-readonly')).toBe(true)
+  })
+})

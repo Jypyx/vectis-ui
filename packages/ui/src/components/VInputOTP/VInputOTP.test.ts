@@ -154,3 +154,133 @@ describe('VInputOTP — hint', () => {
     expect(container.querySelector('[role="group"]')?.hasAttribute('aria-describedby')).toBe(false)
   })
 })
+
+describe('VInputOTP — the code stays positional', () => {
+  const boxes = (getAllByRole: (role: string) => HTMLElement[]) =>
+    getAllByRole('textbox') as HTMLInputElement[]
+
+  it('readonly: Backspace on an empty box erases nothing', async () => {
+    const { getAllByRole, emitted } = renderOtp({ modelValue: '12', readonly: true })
+    const inputs = boxes(getAllByRole)
+    await fireEvent.keyDown(inputs[2]!, { key: 'Backspace' })
+    expect(emitted('update:modelValue')).toBeUndefined()
+    expect(inputs[1]!.value).toBe('2')
+  })
+
+  // The value is the filled boxes read in order, so the filled boxes must stay a prefix:
+  // a character typed past the first empty box lands in that box instead.
+  it('typing into a box past the first empty one fills the first empty one', async () => {
+    const { getAllByRole, emitted } = renderOtp({ length: 4, modelValue: '1' })
+    const inputs = boxes(getAllByRole)
+    await fireEvent.update(inputs[2]!, '3')
+    expect(emitted('update:modelValue').at(-1)).toEqual(['13'])
+    expect(inputs.map((i) => i.value)).toEqual(['1', '3', '', ''])
+  })
+
+  it('focusing a box past the first empty one moves the focus back to it', async () => {
+    const { getAllByRole } = renderOtp({ length: 4, modelValue: '1' })
+    const inputs = boxes(getAllByRole)
+    inputs[3]!.focus()
+    await fireEvent.focus(inputs[3]!)
+    expect(document.activeElement).toBe(inputs[1])
+  })
+
+  it('emptying a box in the middle closes the gap', async () => {
+    const { getAllByRole, emitted } = renderOtp({ length: 4, modelValue: '1234' })
+    const inputs = boxes(getAllByRole)
+    await fireEvent.update(inputs[1]!, '')
+    expect(emitted('update:modelValue').at(-1)).toEqual(['134'])
+    expect(inputs.map((i) => i.value)).toEqual(['1', '3', '4', ''])
+  })
+
+  it('an invalid character typed over a middle box closes the gap too', async () => {
+    const { getAllByRole, emitted } = renderOtp({ length: 4, modelValue: '1234' })
+    const inputs = boxes(getAllByRole)
+    await fireEvent.update(inputs[1]!, 'x')
+    expect(emitted('update:modelValue').at(-1)).toEqual(['134'])
+  })
+
+  it('complete is emitted when the code BECOMES full, not on every write of a full code', async () => {
+    const { getAllByRole, emitted } = renderOtp({ length: 4 })
+    const inputs = boxes(getAllByRole)
+    await fireEvent.update(inputs[0]!, '1234')
+    expect(emitted('complete')).toEqual([['1234']])
+    await fireEvent.update(inputs[3]!, '4')
+    expect(emitted('complete')).toHaveLength(1)
+  })
+
+  // A filled box whose content was not selected receives the new character NEXT to the old
+  // one: it is the new character that counts.
+  it('a character typed next to the old one in a filled box replaces it', async () => {
+    const { getAllByRole, emitted } = renderOtp({ length: 4, modelValue: '1234' })
+    const inputs = boxes(getAllByRole)
+    const last = inputs[3]!
+    last.value = '47'
+    last.setSelectionRange(2, 2)
+    await fireEvent.input(last)
+    expect(emitted('update:modelValue').at(-1)).toEqual(['1237'])
+    expect(last.value).toBe('7')
+  })
+
+  it('a single typed character equal to a literal of the pattern fills the box', async () => {
+    const { getAllByRole, emitted } = renderOtp({ pattern: 'GT-###', format: 'alphanumeric' })
+    await fireEvent.update(boxes(getAllByRole)[0]!, 'g')
+    expect(emitted('update:modelValue').at(-1)).toEqual(['G'])
+  })
+
+  it('shows an external value through the format filter', () => {
+    const { getAllByRole } = renderOtp({ length: 4, modelValue: 'ab12' })
+    expect(boxes(getAllByRole).map((i) => i.value)).toEqual(['1', '2', '', ''])
+  })
+
+  it('Home and End move to the first box and to the first empty one', async () => {
+    const { getAllByRole } = renderOtp({ length: 4, modelValue: '12' })
+    const inputs = boxes(getAllByRole)
+    inputs[1]!.focus()
+    await fireEvent.keyDown(inputs[1]!, { key: 'End' })
+    expect(document.activeElement).toBe(inputs[2])
+    await fireEvent.keyDown(inputs[2]!, { key: 'Home' })
+    expect(document.activeElement).toBe(inputs[0])
+  })
+})
+
+describe('VInputOTP — in a form', () => {
+  const native = (container: Element) =>
+    container.querySelector('input.v-input-otp-native') as HTMLInputElement | null
+
+  it('submits the code under its name, and keeps name/required/form off the group', async () => {
+    const { container } = render(VInputOTP, {
+      props: { modelValue: '1234', length: 4 },
+      attrs: { name: 'code', required: '', form: 'login' },
+    })
+    const input = native(container)!
+    expect(input.name).toBe('code')
+    expect(input.value).toBe('1234')
+    expect(input.required).toBe(true)
+    expect(input.getAttribute('form')).toBe('login')
+    const group = container.querySelector('[role="group"]')!
+    expect(group.hasAttribute('name')).toBe(false)
+    expect(group.hasAttribute('required')).toBe(false)
+  })
+
+  it('an incomplete code fails validation, a complete one passes', async () => {
+    const { container, rerender } = render(VInputOTP, {
+      props: { modelValue: '12', length: 4 },
+      attrs: { name: 'code', required: '' },
+    })
+    expect(native(container)!.checkValidity()).toBe(false)
+    await rerender({ modelValue: '1234' })
+    expect(native(container)!.checkValidity()).toBe(true)
+  })
+
+  it('the native input is hidden from assistive technology and out of the tab order', () => {
+    const { container, getAllByRole } = render(VInputOTP, {
+      props: { modelValue: '', length: 4 },
+      attrs: { name: 'code' },
+    })
+    const input = native(container)!
+    expect(input.getAttribute('aria-hidden')).toBe('true')
+    expect(input.tabIndex).toBe(-1)
+    expect(getAllByRole('textbox')).toHaveLength(4)
+  })
+})

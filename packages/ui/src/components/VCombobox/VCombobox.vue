@@ -66,7 +66,7 @@ export interface ComboboxOption {
 }
 
 /**
- * A named block of options — the equivalent of the grouping a native list offers. A
+ * A named block of options, the equivalent of the grouping a native list offers. A
  * group none of whose options survive the search disappears entirely, its name
  * included.
  */
@@ -79,7 +79,7 @@ export interface ComboboxGroup {
 
 /**
  * A rule drawn between two blocks of options. It is purely decorative, and a separator
- * the search leaves stranded — at the top, at the bottom, or against another one — is
+ * the search leaves stranded (at the top, at the bottom, or against another one) is
  * simply not drawn.
  */
 export interface ComboboxSeparator {
@@ -93,8 +93,8 @@ const isGroup = (item: ComboboxItem): item is ComboboxGroup => 'options' in item
 const isSeparator = (item: ComboboxItem): item is ComboboxSeparator => 'separator' in item
 
 /**
- * How the list is narrowed as one types: by the component itself, not at all — when the
- * options already arrive filtered by a server — or by a rule of your own.
+ * How the list is narrowed as one types: by the component itself, not at all (when the
+ * options already arrive filtered by a server), or by a rule of your own.
  */
 export type ComboboxFilter = boolean | ((option: ComboboxOption, query: string) => boolean)
 
@@ -110,6 +110,36 @@ export type ComboboxSize = 'sm' | 'md' | 'lg'
  * joined by commas.
  */
 export type ComboboxDisplay = 'chip' | 'text'
+
+/** What the `#option` slot receives. */
+export interface ComboboxOptionSlotProps {
+  option: ComboboxOption
+  index: number
+  active: boolean
+  selected: boolean
+}
+
+/** What the `#chip` slot receives. */
+export interface ComboboxChipSlotProps {
+  value: ItemValue
+  option: ComboboxOption | undefined
+  label: string
+  remove: () => void
+  size: ChipSize
+  compact: boolean
+}
+
+/** What the `#overflow` slot receives. */
+export interface ComboboxOverflowSlotProps {
+  count: number
+  size: ChipSize
+  compact: boolean
+}
+
+/** What the `#empty` slot receives. */
+export interface ComboboxEmptySlotProps {
+  query: string
+}
 
 interface ComboboxProps {
   /**
@@ -163,10 +193,10 @@ interface ComboboxProps {
    * `disabled`.
    */
   readonly?: boolean
-  /** Marks the field as invalid — for a rule of your own. */
+  /** Marks the field as invalid, for a rule of your own. */
   invalid?: boolean
   /**
-   * An icon inside the field, at the start — before the chips when several values can
+   * An icon inside the field, at the start, before the chips when several values can
    * be chosen. It is decorative by default and becomes a real button as soon as a
    * `@click:icon-start` listener is attached, in which case it needs `iconStartLabel`.
    */
@@ -176,8 +206,8 @@ interface ComboboxProps {
   /**
    * The chevron at the end of the field, which turns as the list opens: an icon name,
    * or an explicit render. Clicking it while the list is open closes the list. It is
-   * decoration all the same — the field itself is what opens the list, and Escape what
-   * closes it from the keyboard — so the chevron is hidden from screen readers and takes
+   * decoration all the same (the field itself is what opens the list, and Escape what
+   * closes it from the keyboard), so the chevron is hidden from screen readers and takes
    * no label.
    */
   expandIcon?: IconSource
@@ -185,13 +215,16 @@ interface ComboboxProps {
   clearable?: boolean
   /** What that cross does, in words. It falls back to the design system dictionary. */
   clearLabel?: string
-  /** What the panel says when the search matches nothing. */
+  /**
+   * What the panel says when the search matches nothing. It is also what a screen reader
+   * hears, even when the `#empty` slot draws something else: set both together.
+   */
   emptyText?: string
   /**
    * How the list is narrowed as one types. Turning it off means the options already
    * arrive filtered by their source and are shown exactly as they come.
    *
-   * A rule of your own receives the query as it was TYPED, merely trimmed — not the
+   * A rule of your own receives the query as it was TYPED, merely trimmed, rather than the
    * accent-insensitive form used internally.
    */
   filter?: ComboboxFilter
@@ -208,7 +241,10 @@ interface ComboboxProps {
    * spinner.
    */
   loading?: boolean
-  /** What is said while loading, and what the spinner is announced as. */
+  /**
+   * What is said while loading, and what the spinner is announced as. A screen reader hears
+   * it even when the `#loading` slot draws something else: set both together.
+   */
   loadingText?: string
   /**
    * Says that there are more pages to come, which is what makes the component ask for
@@ -276,22 +312,17 @@ defineSlots<{
    */
   start?(): unknown
   /**
-   * Controls of your own inside the field, placed before the ones the field owns — the
+   * Controls of your own inside the field, placed before the ones the field owns: the
    * clear cross and the chevron. Those two are this component's own affordance, which is
    * why there is no `#end` here: it would replace them.
    */
   'value-end'?(): unknown
   /**
-   * What a row of the list shows, in place of the plain label — a subtitle, an avatar,
+   * What a row of the list shows, in place of the plain label: a subtitle, an avatar,
    * a badge. It is told whether the row is the highlighted one and whether it is
    * already chosen, so the rendering can react to both.
    */
-  option?(props: {
-    option: ComboboxOption
-    index: number
-    active: boolean
-    selected: boolean
-  }): unknown
+  option?(props: ComboboxOptionSlotProps): unknown
   /**
    * Replaces the chip standing for one chosen value.
    *
@@ -301,22 +332,15 @@ defineSlots<{
    * The option itself may be missing, if that value has never appeared among the
    * options.
    */
-  chip?(props: {
-    value: ItemValue
-    option: ComboboxOption | undefined
-    label: string
-    remove: () => void
-    size: ChipSize
-    compact: boolean
-  }): unknown
+  chip?(props: ComboboxChipSlotProps): unknown
   /**
    * Replaces the "+X" standing for the values beyond `max`. It receives `count`, the number
    * of values being hidden, and the size and density of the chips inside the field, so that a
    * chip of your own lines up with the others.
    */
-  overflow?(props: { count: number; size: ChipSize; compact: boolean }): unknown
+  overflow?(props: ComboboxOverflowSlotProps): unknown
   /** What the panel shows when nothing matches. It receives the term that was searched. */
-  empty?(props: { query: string }): unknown
+  empty?(props: ComboboxEmptySlotProps): unknown
   /** What the panel shows while loading its first options. */
   loading?(): unknown
 }>()
@@ -593,6 +617,10 @@ watch(searchTerm, (term) => {
   // Enter would do nothing in the meantime. When the new list does arrive, the position
   // is still within it and simply names its first option.
   activeIndex.value = filtered.value.findIndex((o) => !o.disabled)
+  // The page asked for under the previous term will never arrive, and the first page of
+  // the new one may be exactly as long as the list it replaces — which the paging would
+  // not recognise as an arrival.
+  infiniteScroll.restart()
   emitSearch(term)
 })
 
@@ -620,16 +648,18 @@ query.value = singleLabel()
 
 // That label is a COPY and not something derived, so it has to be refreshed when the
 // options arrive later — otherwise a field mounted with a value but no options yet would
-// show a raw identifier for ever.
+// show a raw identifier for ever — AND when the parent changes the value: an edit form
+// loading its record after mount, or a reset, would otherwise leave the old label on show.
 //
-// ONLY the options are watched. Watching the value as well would bring back the
-// premature read that selecting deliberately avoids, and the two guards below are what
-// keep the refresh from ever overwriting something being typed.
+// Watching the value does not bring back the premature read `select` avoids: this watcher
+// only runs once the value has CHANGED, i.e. once the parent has passed it back down, and
+// its `post` timing reads it after that render. The two guards below keep the refresh from
+// ever overwriting something being typed.
 watch(
-  allOptions,
+  [allOptions, selectedValues],
   () => {
     if (props.multiple || open.value || typed.value) return
-    if (selectedValues.value.length) query.value = singleLabel()
+    query.value = singleLabel()
   },
   { flush: 'post' },
 )
@@ -683,7 +713,17 @@ const clearVisible = computed(() =>
   ),
 )
 
-const optionId = (index: number) => `${optionsId}-option-${index}`
+// @a11y
+// An option's id follows the OPTION, from its place among all the options, and never its
+// place in the filtered list: a screen reader announces the current option when
+// `aria-activedescendant` changes, and a positional id would keep the same value while the
+// filter slides another option under the highlight, which then goes unannounced. Still
+// indexed by the filtered position, which is what the keyboard counts through.
+const sourceIndex = computed(() => new Map(allOptions.value.map((option, i) => [option, i])))
+const optionId = (index: number) => {
+  const option = filtered.value[index]
+  return `${optionsId}-option-${option ? sourceIndex.value.get(option) : index}`
+}
 
 /**
  * A rendered option with its state worked out, ONCE per row: `row` is what the option
@@ -718,6 +758,9 @@ function withState(entry: RenderedOption): OptionRow {
 // level of the panel, a Vue template having no way to declare a reusable fragment. Kept
 // apart from `rendered` on purpose: the highlight moves on every arrow key, and only this
 // cheap pass over the tree follows it — the filtering and the grouping stay where they are.
+// That saves the COMPUTED work only: every option component still re-renders on each move,
+// since a `v-for` row whose slot reads loop variables is always patched. Keep long lists
+// server-paged (`hasMore`) rather than relying on this pass to make them cheap.
 const rows = computed<RowNode[]>(() =>
   rendered.value.map((node) => {
     if (node.kind === 'option') return withState(node)
@@ -766,7 +809,7 @@ const sentinelEl = ref<HTMLElement | null>(null)
 const infiniteScroll = useInfiniteScroll({
   sentinelEl,
   canLoad: () => open.value && props.hasMore && !props.loading,
-  loadedCount: () => allOptions.value.length,
+  loaded: () => allOptions.value,
   onLoadMore: () => emit('load-more'),
 })
 
@@ -781,6 +824,15 @@ function closePanel() {
   typed.value = false
   query.value = singleLabel()
 }
+
+// A field made read-only or disabled while its list is open can no longer be written, so
+// the list goes with it; `select` refuses as well, for the keystroke already on its way.
+watch(
+  () => props.readonly || resolvedDisabled.value,
+  (frozen) => {
+    if (frozen) closePanel()
+  },
+)
 
 /**
  * Closes as soon as the focus leaves the component — the panel included, which is a
@@ -856,7 +908,7 @@ function onControlClick(event: MouseEvent) {
 }
 
 function select(option: ComboboxOption) {
-  if (option.disabled) return
+  if (option.disabled || props.readonly || resolvedDisabled.value) return
   // Remembered immediately: the option may vanish from the list — on the next search —
   // before the parent has even passed the new value back down.
   optionCache.set(option.value, option)
@@ -869,8 +921,10 @@ function select(option: ComboboxOption) {
     model.value = option.value
     // This path does not go through the closing function, so the pending search has to
     // be cancelled here as well — otherwise the last keystroke would fire its request
-    // after the panel had closed.
+    // after the panel had closed. The paging lock goes for the same reason: a page still
+    // on its way when the panel shut would otherwise freeze it on the next opening.
     cancelSearch()
+    infiniteScroll.reset()
     // TRAP — the label is taken from the option just chosen and NOT by reading the value
     // back. With a value bound by the parent, reading it immediately after writing still
     // returns the OLD one, and the field would show the previously selected label.
@@ -893,7 +947,9 @@ function removeValue(value: ItemValue) {
 function onClear() {
   model.value = props.multiple ? [] : ''
   typed.value = false
-  activeIndex.value = -1
+  // The list may still be open (a pointer press on the cross does not close it): the
+  // highlight is moved to the first option rather than dropped, or Enter would do nothing.
+  activeIndex.value = open.value ? filtered.value.findIndex((o) => !o.disabled) : -1
   emit('clear')
 }
 
@@ -902,7 +958,9 @@ function onClear() {
 function move(delta: number) {
   const list = filtered.value
   if (list.length === 0) return
-  let i = activeIndex.value
+  // From "nothing highlighted" the first step lands on an END of the list: starting at -1,
+  // a step back would stop on the second-to-last option.
+  let i = activeIndex.value < 0 && delta < 0 ? 0 : activeIndex.value
   for (let step = 0; step < list.length; step++) {
     i = (i + delta + list.length) % list.length
     if (!list[i]?.disabled) break
@@ -934,7 +992,12 @@ function onKeydown(event: KeyboardEvent) {
       }
       break
     case 'Escape':
-      closePanel()
+      // Consumed only when it closes the list, so a surrounding VDialog stays open; on a
+      // closed list it is left to go on and close the dialog.
+      if (open.value) {
+        event.preventDefault()
+        closePanel()
+      }
       break
     case 'Tab':
       closePanel()
@@ -1289,7 +1352,7 @@ defineExpose({
     flex: none;
     align-items: center;
     justify-content: center;
-    min-height: var(--vectis-space-6);
+    min-height: var(--vectis-control-height-xs);
     color: var(--vectis-color-text-muted);
   }
 

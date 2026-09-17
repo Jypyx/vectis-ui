@@ -265,6 +265,9 @@ the panel where it was asked already falls back on its own.
   listbox.
 - The **field's** spinner is decorative (`aria-hidden`): the loading announcement comes from the
   `role="status"` inserted in the panel, once only.
+- That announcement reads `empty-text` and `loading-text`, never the `#empty` and `#loading` slots,
+  whose drawing is hidden from assistive technology. When a slot says something different (a
+  "create…" action), pass the matching text prop as well.
 
 This component's accessible labels come from the design system dictionary: they translate globally
 (see **Foundations › Internationalization**), and the text props stay authoritative for a

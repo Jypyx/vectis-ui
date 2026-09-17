@@ -49,6 +49,8 @@ export default {
         disabled: 'Rend le champ inutilisable, grisé par les tokens de couleur.',
         readonly:
           "Montre la valeur sans permettre de la changer. Le champ peut toujours être focalisé et copié, et il masque le bouton d'effacement à moins que <code>clearVisible</code> ne réponde explicitement à cette question.",
+        noTyping:
+          "Refuse le clavier sans dessiner le champ en lecture seule : l'attribut natif est posé, mais le champ garde son apparence ordinaire et sa croix d'effacement. Pour un champ dont la valeur vient d'ailleurs, d'un sélecteur ou d'une boîte de dialogue de fichiers, et qui n'en est pas moins modifiable.",
         label: "Le libellé au-dessus du champ, lié à lui pour qu'un clic dessus y place le focus.",
         hint: "Une ligne d'aide sous le champ. Elle est liée au champ pour les technologies d'assistance, donc elle est lue avec le libellé.",
         iconStart:
@@ -59,7 +61,7 @@ export default {
         iconEndLabel: "Ce que fait l'icône de fin, en mots, une fois qu'elle est cliquable.",
         loading:
           "Affiche un indicateur à la fin du champ, à la place de l'icône ou du slot de fin.",
-        loadingLabel:
+        loadingText:
           "Ce que les lecteurs d'écran annoncent pendant que l'indicateur tourne. Il retombe sur le dictionnaire du design system.",
         clearable:
           'Propose une croix qui vide le champ. Elle apparaît quand il y a quelque chose à effacer et que le champ est modifiable.',

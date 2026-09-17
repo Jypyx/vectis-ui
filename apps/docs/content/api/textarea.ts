@@ -23,7 +23,7 @@ export default {
         { name: 'iconStartLabel', type: 'string' },
         { name: 'iconEndLabel', type: 'string' },
         { name: 'loading', type: 'boolean', default: 'false' },
-        { name: 'loadingLabel', type: 'string' },
+        { name: 'loadingText', type: 'string' },
         { name: 'clearable', type: 'boolean', default: 'false' },
         { name: 'clearVisible', type: 'boolean' },
         { name: 'clearLabel', type: 'string' },

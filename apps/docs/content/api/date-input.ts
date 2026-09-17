@@ -32,7 +32,7 @@ export default {
         { name: 'iconStartLabel', type: 'string' },
         { name: 'pickerIconLabel', type: 'string' },
         { name: 'loading', type: 'boolean', default: 'false' },
-        { name: 'loadingLabel', type: 'string' },
+        { name: 'loadingText', type: 'string' },
         { name: 'clearable', type: 'boolean', default: 'false' },
         { name: 'clearLabel', type: 'string' },
         { name: 'pickerIcon', type: 'IconSource', default: 'calendar_today' },
@@ -48,7 +48,7 @@ export default {
         { name: 'start', type: '{}' },
         { name: 'value-end', key: 'valueEnd', type: '{}' },
         { name: 'day', type: 'DatePickerDaySlotProps' },
-        { name: 'footer', type: '{ close: () => void; }' },
+        { name: 'footer', type: 'DateInputFooterSlotProps' },
       ],
     },
   ],
@@ -58,6 +58,12 @@ export default {
       definition: `export interface BuiltinIcon {
   name: string
   paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'DateInputFooterSlotProps',
+      definition: `export interface DateInputFooterSlotProps {
+  close: () => void
 }`,
     },
     {

@@ -37,7 +37,6 @@ import {
   nextTick,
   ref,
   provide,
-  useSlots,
   watch,
   watchEffect,
 } from 'vue'
@@ -58,9 +57,9 @@ import { isRtl } from '../../utils/direction'
 import { isDev } from '../../utils/env'
 import { isKeyboardFocus } from '../../utils/focus'
 import { clamp } from '../../utils/number'
-import { flattenSlot } from '../../utils/vnode'
 
 import { useAriaLabel } from '../../composables/useAriaLabel'
+import { useSlotNodes } from '../../composables/useSlotNodes'
 import { useTimer } from '../../composables/useTimer'
 import { useMessages } from '../../i18n/state'
 
@@ -219,8 +218,6 @@ const props = withDefaults(defineProps<CarouselProps>(), {
   label: undefined,
 })
 
-const slots = useSlots()
-
 defineSlots<{
   /**
    * The slides. How many there are is read from what this slot RENDERS, so a `v-for` is
@@ -298,7 +295,7 @@ const resolvedNextIcon = computed(
  * `setup()` order is deterministic on the first render but not on a later
  * insertion, so a self-incrementing counter would drift.
  */
-const slides = computed(() => flattenSlot(slots.default?.()))
+const slides = useSlotNodes()
 const count = computed(() => slides.value.length)
 
 // A functional component: it renders already-captured VNodes, which

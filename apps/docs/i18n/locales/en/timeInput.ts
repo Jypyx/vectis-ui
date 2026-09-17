@@ -5,7 +5,7 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Label, hint and icon',
-      text: '<code>label</code> and <code>hint</code> behave as on any field. <code>pickerIcon</code> changes the glyph that opens the clock, <code>iconStart</code> puts an icon at the start of the field, and <code>loading</code> shows a spinner in place of the clock icon. <code>pickerIconLabel</code>, <code>clearLabel</code>, <code>loadingLabel</code> and <code>iconStartLabel</code> rename what each of them announces.',
+      text: '<code>label</code> and <code>hint</code> behave as on any field. <code>pickerIcon</code> changes the glyph that opens the clock, <code>iconStart</code> puts an icon at the start of the field, and <code>loading</code> shows a spinner in place of the clock icon. <code>pickerIconLabel</code>, <code>clearLabel</code>, <code>loadingText</code> and <code>iconStartLabel</code> rename what each of them announces.',
     },
     sizes: {
       title: 'Sizes',
@@ -79,7 +79,7 @@ export default {
           'What the end icon does, in words. It names the button that opens the clock, and falls back to the design system dictionary.',
         loading:
           'Shows a spinner in place of the clock icon. It says that something is being loaded and changes nothing else: the field can still be typed into and the panel still opens.',
-        loadingLabel:
+        loadingText:
           'What screen readers announce while the spinner turns. It falls back to the design system dictionary.',
         clearable: 'Offers a cross that empties the value, shown before the end icon.',
         clearLabel:

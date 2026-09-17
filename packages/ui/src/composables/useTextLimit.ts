@@ -18,7 +18,8 @@ interface ValidatableControl {
  * turns red once the reader has actually interacted with it, exactly as a native error
  * does; the form refuses to submit; and anyone inspecting the field finds the error where
  * they would look for any other. The price is that the component then owns that error
- * outright for as long as the soft limit is on.
+ * for as long as it is standing — and only then: a message the consumer set (a server
+ * verdict) is left alone whenever the soft limit has nothing to say.
  *
  * The effect runs AFTER the render rather than before it, because the reference to the
  * real element is not filled in yet at the earlier point. It does nothing at all during a
@@ -34,6 +35,11 @@ export function useTextLimit(options: {
   const max = computed(() => options.maxlength())
   const m = useMessages()
 
+  // Whether the message on the element is ours. Without it the effect would clear the
+  // validity on every re-run, erasing a consumer's own `setCustomValidity` the moment an
+  // unrelated prop such as `maxlength` changed, and letting the form submit.
+  let owned = false
+
   // The dictionary is read INSIDE the effect, which is what makes the error message
   // rewrite itself when the language is changed after the component is on screen. The
   // branches are spelled out rather than written as a ternary so that TypeScript can
@@ -45,8 +51,10 @@ export function useTextLimit(options: {
       const limit = max.value
       if (options.softLimit() && limit != null && length.value > limit) {
         el.setCustomValidity(m.value.field.limitExceeded(limit))
-      } else {
+        owned = true
+      } else if (owned) {
         el.setCustomValidity('')
+        owned = false
       }
     },
     { flush: 'post' },

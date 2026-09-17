@@ -805,9 +805,28 @@ describe('VTimeInput — the field props', () => {
   it('warns for the end-icon props the list form cannot use', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     render(VTimeInput, {
-      props: { mode: 'list', minuteStep: 30, pickerIconLabel: 'Open', loadingLabel: 'Loading' },
+      props: { mode: 'list', minuteStep: 30, pickerIconLabel: 'Open', loadingText: 'Loading' },
     })
-    expect(warn.mock.calls.map(String).join(' ')).toContain('pickerIconLabel, loadingLabel')
+    const said = warn.mock.calls.map(String).join(' ')
+    expect(said).toContain('pickerIconLabel is ignored')
+    expect(said).not.toContain('loadingText')
+  })
+
+  // The list form's loading is announced by the combobox, in the consumer's words. The
+  // loading state is only drawn over an empty list, hence the restriction leaving nothing.
+  it('hands loadingText to the list form', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { getByRole, container } = render(VTimeInput, {
+      props: {
+        mode: 'list',
+        minuteStep: 30,
+        allowedHours: () => false,
+        loading: true,
+        loadingText: 'Fetching times',
+      },
+    })
+    await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
+    expect(container.innerHTML).toContain('Fetching times')
   })
 
   it('exposes focus and the real input, in the list form too', async () => {
@@ -852,5 +871,20 @@ describe('VTimeInput — the footer slot', () => {
     getByTestId('ok').click()
     await nextTick()
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['10:15'])
+  })
+})
+
+describe('VTimeInput — picker mode is not drawn read-only', () => {
+  it('refuses typing without the read-only look', () => {
+    const { container } = render(VTimeInput, { props: { mode: 'picker', label: 'When' } })
+    expect(container.querySelector('.v-input')!.hasAttribute('data-readonly')).toBe(false)
+    expect((container.querySelector('.v-input-control') as HTMLInputElement).readOnly).toBe(true)
+  })
+
+  it('a read-only field still looks read-only', () => {
+    const { container } = render(VTimeInput, {
+      props: { mode: 'picker', label: 'When', readonly: true },
+    })
+    expect(container.querySelector('.v-input')!.hasAttribute('data-readonly')).toBe(true)
   })
 })

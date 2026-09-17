@@ -149,6 +149,10 @@ export type {
   ComboboxSize,
   ComboboxPlacement,
   ComboboxDisplay,
+  ComboboxOptionSlotProps,
+  ComboboxChipSlotProps,
+  ComboboxOverflowSlotProps,
+  ComboboxEmptySlotProps,
 } from './components/VCombobox/VCombobox.vue'
 export { default as VBreadcrumb } from './components/VBreadcrumb/VBreadcrumb.vue'
 export type { BreadcrumbItem } from './components/VBreadcrumb/VBreadcrumb.vue'
@@ -211,6 +215,7 @@ export type {
   DateInputMode,
   DateInputSize,
   DateInputPlacement,
+  DateInputFooterSlotProps,
 } from './components/VDateInput/VDateInput.vue'
 export { default as VTimePicker } from './components/VTimePicker/VTimePicker.vue'
 export type { TimePickerFormat } from './components/VTimePicker/VTimePicker.vue'
@@ -222,6 +227,7 @@ export type {
   TimeInputMode,
   TimeInputSize,
   TimeInputPlacement,
+  TimeInputFooterSlotProps,
 } from './components/VTimeInput/VTimeInput.vue'
 export { default as VCalendar } from './components/VCalendar/VCalendar.vue'
 export type {
@@ -235,7 +241,12 @@ export type {
   CalendarView,
 } from './components/VCalendar/types'
 export { default as VFileInput } from './components/VFileInput/VFileInput.vue'
-export type { FileInputDisplay, FileInputSize } from './components/VFileInput/VFileInput.vue'
+export type {
+  FileInputDisplay,
+  FileInputSize,
+  FileInputChipSlotProps,
+  FileInputCounterSlotProps,
+} from './components/VFileInput/VFileInput.vue'
 /* What `@reject` carries, on VFileInput as on VFilePicker. The two screen a batch through
    the same rule, so the type is declared beside that rule rather than copied into each of
    them — the `TimePickerAllowed` arrangement, and what lets one handler serve both. */

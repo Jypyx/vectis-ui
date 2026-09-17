@@ -41,7 +41,7 @@ export default {
     },
     states: {
       title: 'États',
-      text: "<code>invalid</code> marque le champ en erreur. <code>readonly</code> garde la sélection visible et refuse toute façon de la changer. <code>disabled</code> grise le champ et le sort de l'ordre de tabulation. <code>noDrop</code> n'écarte que le dépôt, et <code>loading</code> est purement visuel, un indicateur remplaçant l'icône de pièce jointe. <code>pickerIconLabel</code>, <code>clearLabel</code> et <code>loadingLabel</code> renomment ce que chacun annonce.",
+      text: "<code>invalid</code> marque le champ en erreur. <code>readonly</code> garde la sélection visible et refuse toute façon de la changer. <code>disabled</code> grise le champ et le sort de l'ordre de tabulation. <code>noDrop</code> n'écarte que le dépôt, et <code>loading</code> est purement visuel, un indicateur remplaçant l'icône de pièce jointe. <code>pickerIconLabel</code>, <code>clearLabel</code> et <code>loadingText</code> renomment ce que chacun annonce.",
     },
   },
 
@@ -80,7 +80,7 @@ export default {
           "Ce que fait l'icône de fin, en mots. Elle nomme le bouton qui ouvre la boîte de dialogue de fichiers, et sa valeur par défaut vient du dictionnaire du design system.",
         loading:
           "Affiche une roue à la place de l'icône de trombone, pendant un envoi. Elle ne change rien d'autre : les fichiers se déposent toujours et la boîte de dialogue s'ouvre toujours.",
-        loadingLabel:
+        loadingText:
           "Ce que les lecteurs d'écran annoncent pendant que la roue tourne. Sa valeur par défaut vient du dictionnaire du design system.",
         clearable:
           "Propose une croix qui vide la sélection. Elle vaut plus la peine ici que sur un champ ordinaire : ce que contient un sélecteur ne s'efface pas en tapant, la croix est donc le seul retour en arrière après un mauvais choix.",

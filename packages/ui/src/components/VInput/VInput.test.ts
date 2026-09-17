@@ -220,3 +220,39 @@ describe('VInput', () => {
     expect(container.querySelector('.v-input')?.hasAttribute('data-compact')).toBe(true)
   })
 })
+
+// A validation library marks the field invalid through the attribute. The component's own
+// `invalid` binding comes after the forwarded attributes, so it must hand the consumer's value
+// through rather than overwrite it with nothing.
+describe('VInput — a consumer aria-invalid', () => {
+  it('reaches the control when `invalid` is not set', () => {
+    const { getByRole } = render(VInput, {
+      props: { modelValue: '' },
+      attrs: { 'aria-invalid': 'true' },
+    })
+    expect(getByRole('textbox').getAttribute('aria-invalid')).toBe('true')
+  })
+})
+
+describe('VInput — noTyping and the counter', () => {
+  // A field filled from a picker or a dialog refuses the keyboard without looking or
+  // announcing itself as read-only.
+  it('noTyping sets the native attribute alone', () => {
+    const { getByRole, container } = render(VInput, {
+      props: { modelValue: 'x', noTyping: true, clearable: true },
+    })
+    expect((getByRole('textbox') as HTMLInputElement).readOnly).toBe(true)
+    expect(container.querySelector('.v-input')!.hasAttribute('data-readonly')).toBe(false)
+    expect(container.querySelector('.v-input-clear')).toBeTruthy()
+  })
+
+  it('ties the counter to the control, after the hint', () => {
+    const { getByRole, container } = render(VInput, {
+      props: { modelValue: 'abc', counter: true, maxlength: 80, hint: 'Help' },
+    })
+    const counter = container.querySelector('.v-input-counter') as HTMLElement
+    const ids = getByRole('textbox').getAttribute('aria-describedby')!.split(' ')
+    expect(ids).toHaveLength(2)
+    expect(ids[1]).toBe(counter.id)
+  })
+})

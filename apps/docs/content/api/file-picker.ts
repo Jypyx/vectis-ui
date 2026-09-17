@@ -27,7 +27,7 @@ export default {
         { name: 'readonly', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'loading', type: 'boolean', default: 'false' },
-        { name: 'loadingLabel', type: 'string' },
+        { name: 'loadingText', type: 'string' },
         { name: 'v-model', key: 'vModel', type: 'File[]', default: '[]' },
       ],
       events: [

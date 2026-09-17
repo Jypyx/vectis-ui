@@ -2,6 +2,8 @@
 import api from '~/content/api/input-otp'
 import InputOtpBasic from '~/examples/input-otp/Basic.vue'
 import inputOtpBasicSource from '~/examples/input-otp/Basic.vue?raw'
+import InputOtpForm from '~/examples/input-otp/InForm.vue'
+import inputOtpFormSource from '~/examples/input-otp/InForm.vue?raw'
 import InputOtpFormats from '~/examples/input-otp/Formats.vue'
 import inputOtpFormatsSource from '~/examples/input-otp/Formats.vue?raw'
 import InputOtpLabelAndHint from '~/examples/input-otp/LabelAndHint.vue'
@@ -84,6 +86,12 @@ useDocsHead('inputOtp')
   <DocsProse keypath="inputOtp.examples.reading.text" />
   <DocsExample :source="inputOtpReadingSource" stack>
     <InputOtpReading />
+  </DocsExample>
+
+  <h3 id="in-a-form">{{ t('inputOtp.examples.form.title') }}</h3>
+  <DocsProse keypath="inputOtp.examples.form.text" />
+  <DocsExample :source="inputOtpFormSource" stack>
+    <InputOtpForm />
   </DocsExample>
 
   <h3 id="states">{{ t('inputOtp.examples.states.title') }}</h3>

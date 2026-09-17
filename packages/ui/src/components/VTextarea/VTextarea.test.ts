@@ -192,3 +192,49 @@ describe('VTextarea — expose', () => {
     expect(holder.value?.el?.selectionEnd).toBe(5)
   })
 })
+
+// A validation library marks the field invalid through the attribute. The component's own
+// `invalid` binding comes after the forwarded attributes, so it must hand the consumer's value
+// through rather than overwrite it with nothing.
+describe('VTextarea — a consumer aria-invalid', () => {
+  it('reaches the control when `invalid` is not set', () => {
+    const { getByRole } = render(VTextarea, {
+      props: { modelValue: '' },
+      attrs: { 'aria-invalid': 'true' },
+    })
+    expect(getByRole('textbox').getAttribute('aria-invalid')).toBe('true')
+  })
+})
+
+describe('VTextarea — robustness and hooks', () => {
+  // A value straight from an API or a database is often null rather than ''.
+  it('mounts with a null model while counting and clearable', () => {
+    const { getByRole } = render(VTextarea, {
+      props: {
+        modelValue: null as unknown as string,
+        counter: true,
+        clearable: true,
+        maxlength: 10,
+        softLimit: true,
+      },
+    })
+    expect((getByRole('textbox') as HTMLTextAreaElement).value).toBe('')
+  })
+
+  it('marks its start and end icons with hook classes, as VInput does', () => {
+    const { container } = render(VTextarea, {
+      props: { modelValue: '', iconStart: 'search', iconEnd: 'info' },
+    })
+    expect(container.querySelector('.v-textarea-icon-start')).toBeTruthy()
+    expect(container.querySelector('.v-textarea-icon-end')).toBeTruthy()
+  })
+
+  it('ties the counter to the control, so it is read out on focus', () => {
+    const { getByRole, container } = render(VTextarea, {
+      props: { modelValue: 'abc', counter: true, maxlength: 80 },
+    })
+    const counter = container.querySelector('.v-textarea-counter') as HTMLElement
+    expect(counter.id).toBeTruthy()
+    expect(getByRole('textbox').getAttribute('aria-describedby')?.split(' ')).toContain(counter.id)
+  })
+})

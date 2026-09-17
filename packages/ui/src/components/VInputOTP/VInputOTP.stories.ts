@@ -160,6 +160,45 @@ export const IconSeparator: Story = {
   }),
 }
 
+/**
+ * `name` and `required` reach a hidden native input, so the code is submitted like any
+ * other field, and an incomplete code keeps the form from submitting.
+ */
+export const InForm: Story = {
+  render: (args) => ({
+    components: { VInputOTP },
+    setup: () => {
+      const sent = ref('')
+      // FormData is not among the globals a template may read, so the reading lives here.
+      const onSubmit = (event: Event) => {
+        sent.value = String(new FormData(event.target as HTMLFormElement).get('code'))
+      }
+      return { args, code: ref(''), sent, onSubmit }
+    },
+    template: `
+      <form
+        style="display: grid; gap: 8px; justify-items: start"
+        @submit.prevent="onSubmit"
+      >
+        <VInputOTP v-bind="args" v-model="code" name="code" required />
+        <button type="submit">Submit</button>
+        <output data-testid="sent">{{ sent }}</output>
+      </form>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const form = canvasElement.querySelector('form')!
+    // Half a code: the browser refuses the form.
+    await userEvent.click(canvas.getByRole('textbox', { name: 'Character 1 of 6' }))
+    await userEvent.keyboard('123')
+    await expect(form.checkValidity()).toBe(false)
+    await userEvent.keyboard('456')
+    await userEvent.click(canvas.getByRole('button', { name: 'Submit' }))
+    await waitFor(() => expect(canvas.getByTestId('sent')).toHaveTextContent('123456'))
+  },
+}
+
 export const Invalid: Story = {
   render: (args) => ({
     components: { VInputOTP },

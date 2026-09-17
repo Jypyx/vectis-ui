@@ -49,6 +49,8 @@ export default {
         disabled: 'Makes the field unusable, greyed out through the colour tokens.',
         readonly:
           'Shows the value without allowing it to be changed. The field can still be focused and copied from, and it hides the clear button unless <code>clearVisible</code> answers that question explicitly.',
+        noTyping:
+          'Refuses the keyboard without drawing the field as read-only: the native attribute is set, but the field keeps its ordinary look and its clear cross. For a field whose value comes from somewhere else, a picker or a file dialog, and which is no less editable for it.',
         label: 'The label above the field, tied to it so that clicking it focuses the field.',
         hint: 'A line of help under the field. It is tied to the input for assistive technology, so it is read out along with the label.',
         iconStart:
@@ -58,7 +60,7 @@ export default {
         iconStartLabel: 'What the start icon does, in words, once it is clickable.',
         iconEndLabel: 'What the end icon does, in words, once it is clickable.',
         loading: 'Shows a spinner at the end of the field, in place of the end icon or slot.',
-        loadingLabel:
+        loadingText:
           'What screen readers announce while the spinner turns. It falls back to the design system dictionary.',
         clearable:
           'Offers a cross that empties the field. It appears when there is something to clear and the field can be edited.',

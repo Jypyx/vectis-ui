@@ -1,6 +1,6 @@
 import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
-import { h } from 'vue'
+import { defineComponent, h, nextTick, ref } from 'vue'
 
 import VAvatar from './VAvatar.vue'
 import VAvatarGroup from './VAvatarGroup.vue'
@@ -111,5 +111,20 @@ describe('VAvatarGroup', () => {
     expect(
       (plain.container.querySelector('.v-avatar-group') as HTMLElement).getAttribute('style'),
     ).toBeNull()
+  })
+
+  // The count is read from the slot inside a computed, and `slots` is not reactive: a
+  // parent passing a new slot whose list it captured outside the slot must still move "+N".
+  it('recounts when the parent hands down a new slot', async () => {
+    const names = ref(['Ada', 'Linus', 'Grace'])
+    const Parent = defineComponent(() => () => {
+      const captured = [...names.value]
+      return h(VAvatarGroup, { max: 2 }, { default: () => avatars(captured) })
+    })
+    const { container } = render(Parent)
+    expect(container.textContent).toContain('+1')
+    names.value = ['Ada', 'Linus', 'Grace', 'Alan', 'Barbara']
+    await nextTick()
+    expect(container.textContent).toContain('+3')
   })
 })

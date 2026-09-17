@@ -35,4 +35,14 @@ describe('useAriaLabel', () => {
     })
     expect(groupOf(container)?.hasAttribute('aria-label')).toBe(false)
   })
+
+  // `:aria-labelledby="headingId ?? null"` renders no attribute, so it names nothing: the
+  // default must survive, or the control ends up with no name at all.
+  it('a null aria-labelledby keeps the default', () => {
+    const { container } = render(Named, {
+      props: { label: 'Alignment' },
+      attrs: { 'aria-labelledby': null },
+    })
+    expect(groupOf(container)?.getAttribute('aria-label')).toBe('Alignment')
+  })
 })

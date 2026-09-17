@@ -139,10 +139,10 @@ defineExpose({
         v-model="model"
         type="checkbox"
         class="v-checkbox-input v-hidden-input"
-        v-bind="forwardedAttrs"
-        :disabled="disabled"
         :aria-invalid="invalid || undefined"
         :aria-readonly="readonly || undefined"
+        v-bind="forwardedAttrs"
+        :disabled="disabled"
         :aria-describedby="describedBy"
         @click="refuseWhenReadonly"
       />

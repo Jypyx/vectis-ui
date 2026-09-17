@@ -48,7 +48,7 @@ interface InputProps {
   compact?: boolean
   /**
    * The native type of the input, which is also what tells a phone which keyboard to
-   * offer — a numeric pad for `number`, an @ key for `email`.
+   * offer: a numeric pad for `number`, an @ key for `email`.
    */
   type?: InputType
   /**
@@ -61,10 +61,17 @@ interface InputProps {
   disabled?: boolean
   /**
    * Shows the value without allowing it to be changed. The field can still be
-   * focused and copied from, and it hides the clear button — unless `clearVisible`
+   * focused and copied from, and it hides the clear button, unless `clearVisible`
    * answers that question explicitly.
    */
   readonly?: boolean
+  /**
+   * Refuses the keyboard without drawing the field as read-only: the native attribute is
+   * set, but the field keeps its ordinary look and its clear cross. For a field whose value
+   * comes from somewhere else, a picker or a file dialog, and which is no less editable for
+   * it.
+   */
+  noTyping?: boolean
   /** The label above the field, tied to it so that clicking it focuses the field. */
   label?: string
   /**
@@ -74,7 +81,7 @@ interface InputProps {
   hint?: string
   /**
    * An icon inside the field, at the start. It is decorative by default and becomes
-   * a real button as soon as a `@click:icon-start` listener is attached — in which
+   * a real button as soon as a `@click:icon-start` listener is attached, in which
    * case it needs `iconStartLabel`. The `#start` slot is rendered after it, so a
    * field composed on top of this one can show both.
    */
@@ -94,7 +101,7 @@ interface InputProps {
    * What screen readers announce while the spinner turns. It falls back to the
    * design system dictionary.
    */
-  loadingLabel?: string
+  loadingText?: string
   /**
    * Offers a cross that empties the field. It appears when there is something to
    * clear and the field can be edited.
@@ -102,7 +109,7 @@ interface InputProps {
   clearable?: boolean
   /**
    * Decides whether the cross is shown, instead of letting the field work it out
-   * from its own content — a read-only field included.
+   * from its own content (a read-only field included).
    *
    * It exists for the components built on top of this one, where what there is to
    * clear is not the text: VCombobox holds its selection as chips beside the field,
@@ -146,12 +153,13 @@ const props = withDefaults(defineProps<InputProps>(), {
   iconStartLabel: undefined,
   iconEndLabel: undefined,
   loading: false,
-  loadingLabel: undefined,
+  loadingText: undefined,
   clearable: false,
   clearVisible: undefined,
   clearLabel: undefined,
   maxlength: undefined,
   softLimit: false,
+  noTyping: false,
   counter: false,
 })
 
@@ -167,12 +175,12 @@ const emit = defineEmits<{
 defineSlots<{
   /**
    * Content at the start of the field, rendered after `iconStart` rather than in its
-   * place — which is what lets a field composed on top of this one put the chips
+   * place, which is what lets a field composed on top of this one put the chips
    * standing for its values here beside an icon it still wants drawn.
    */
   start?(): unknown
   /**
-   * Controls of your own inside the field, placed before the field's own — the clear
+   * Controls of your own inside the field, placed before the field's own: the clear
    * cross and the end icon. It is the slot for something that acts on the VALUE, such
    * as the AM/PM button of a 12-hour time field, which belongs beside the text rather
    * than past the controls that clear and open.
@@ -218,7 +226,11 @@ const {
 const m = useMessages()
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.common.clear)
 
-const { fieldId, hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
+const { fieldId, hintId, counterId, describedBy } = useFieldIds(
+  attrs,
+  () => !!props.hint,
+  () => props.counter,
+)
 
 const { hasIconStartHandler, hasIconEndHandler } = useIconClickHandlers({
   name: 'VInput',
@@ -299,21 +311,22 @@ defineExpose({
       <slot name="start" />
 
       <input
-        v-bind="restAttrs"
         :id="fieldId"
         ref="controlEl"
         v-model="model"
+        :aria-invalid="invalid || undefined"
+        v-bind="restAttrs"
         class="v-input-control"
         :type="type"
         :maxlength="softLimit ? undefined : maxlength"
         :disabled="resolvedDisabled"
-        :readonly="readonly || undefined"
-        :aria-invalid="invalid || undefined"
+        :readonly="readonly || noTyping || undefined"
         :aria-describedby="describedBy"
       />
 
       <span
         v-if="counter"
+        :id="counterId"
         class="v-input-counter v-field-counter"
         :data-over="over ? '' : undefined"
       >
@@ -335,7 +348,7 @@ defineExpose({
         <VIcon :name="closeIcon" />
       </button>
 
-      <VSpinner v-if="loading" :label="loadingLabel" />
+      <VSpinner v-if="loading" :label="loadingText" />
       <slot v-else name="end">
         <button
           v-if="iconEnd && hasIconEndHandler"
@@ -446,9 +459,11 @@ defineExpose({
      browser also matches on a disabled field.
 
      TRAP — this block must stay FIRST in the sequence of states: read-only, then
-     hover, focus, invalid and disabled. Every one of these selectors weighs (0,3,0),
-     `:has()` taking the specificity of what it contains, so nothing but the source
-     order arbitrates between them. Moved further down, this rule would repaint the
+     hover, focus, invalid and disabled. The read-only, focus, invalid and disabled
+     selectors all weigh (0,3,0), `:has()` taking the specificity of what it contains, so
+     nothing but the source order arbitrates between them. Hover alone weighs more, (0,6,0):
+     its `:not()` keeps it off a focused, invalid or disabled field, and on a read-only
+     one it darkens the border as on any other. Moved further down, this rule would repaint the
      error border and the accent focus ring grey, with no error anywhere. What
      belongs to a read-only field is its BASE colour alone. */
   .v-input[data-readonly] .v-input-field {

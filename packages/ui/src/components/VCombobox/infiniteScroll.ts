@@ -21,8 +21,11 @@ export interface InfiniteScrollOptions {
   sentinelEl: Ref<HTMLElement | null>
   /** Whether a page may be asked for right now: the panel open, more to come, none in flight. */
   canLoad: () => boolean
-  /** How many options are loaded. Its growth is the signal that a page has arrived. */
-  loadedCount: () => number
+  /**
+   * The options loaded so far. A change in their NUMBER is the signal that a page has
+   * arrived; a new array of the same length counts only after `restart`.
+   */
+  loaded: () => readonly unknown[]
   /** Asks for the next page. */
   onLoadMore: () => void
 }
@@ -36,6 +39,12 @@ export interface InfiniteScroll {
    * frozen for the rest of the session.
    */
   reset: () => void
+  /**
+   * Releases the lock AND takes the next list handed over as an arrival, whatever its
+   * length. For a new search: the page asked for under the old term never lands, and the
+   * new first page may be exactly as long as the list it replaces.
+   */
+  restart: () => void
 }
 
 export function useInfiniteScroll(options: InfiniteScrollOptions): InfiniteScroll {
@@ -46,6 +55,8 @@ export function useInfiniteScroll(options: InfiniteScrollOptions): InfiniteScrol
    * later, and the gap between the two is wide enough for several requests to go out.
    */
   let pending = false
+  // Set by `restart`: the next list counts as an arrival even at the same length.
+  let rearm = false
 
   function onIntersect(entries: IntersectionObserverEntry[]) {
     if (!entries.some((entry) => entry.isIntersecting)) return
@@ -94,8 +105,13 @@ export function useInfiniteScroll(options: InfiniteScrollOptions): InfiniteScrol
   // each page forces a new answer.
   //
   // It also gives the stopping condition away for nothing: a source that returns no new
-  // option leaves the count unchanged, this never runs, and the loop simply ends.
-  watch(options.loadedCount, () => {
+  // option leaves the count unchanged, nothing happens, and the loop simply ends. That is
+  // why a new array of the same length is NOT an arrival on its own — a source appending
+  // an empty page into a fresh array would otherwise ask again for ever — except after
+  // `restart`, when the list is known to have been replaced.
+  watch(options.loaded, (list, previous) => {
+    if (list.length === previous.length && !rearm) return
+    rearm = false
     pending = false
     const el = options.sentinelEl.value
     if (!observer || !el) return
@@ -106,6 +122,10 @@ export function useInfiniteScroll(options: InfiniteScrollOptions): InfiniteScrol
   return {
     reset: () => {
       pending = false
+    },
+    restart: () => {
+      pending = false
+      rearm = true
     },
   }
 }

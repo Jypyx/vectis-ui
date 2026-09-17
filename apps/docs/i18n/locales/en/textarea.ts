@@ -60,7 +60,7 @@ export default {
         iconStartLabel: 'What the start icon does, in words, once it is clickable.',
         iconEndLabel: 'What the end icon does, in words, once it is clickable.',
         loading: 'Shows a spinner at the end of the field, in place of the end icon or slot.',
-        loadingLabel:
+        loadingText:
           'What screen readers announce while the spinner turns. It falls back to the design system dictionary.',
         clearable:
           'Offers a cross that empties the field. It appears when there is something to clear and the field can be edited.',

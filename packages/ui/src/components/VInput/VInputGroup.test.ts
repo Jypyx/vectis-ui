@@ -1,6 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { h } from 'vue'
+import { defineComponent, h, nextTick, ref } from 'vue'
 
 import VInput from './VInput.vue'
 import VInputGroup from './VInputGroup.vue'
@@ -381,6 +381,50 @@ describe('VInputGroup', () => {
         slots: { default: () => [h(VInput), h(VIconButton, { icon: 'search', label: 'Search' })] },
       })
       expect(warn).not.toHaveBeenCalled()
+    })
+  })
+
+  // The slot is read in a computed, and `slots` is not reactive: only what the slot READS
+  // while it runs is tracked. A parent handing down a new slot whose content was captured
+  // outside it (a render function's local, a v-for item replaced wholesale, a v-if between
+  // two slot templates) must still repaint the row.
+  describe('follows a slot the parent replaces', () => {
+    /** The block's single template factory (vue/one-component-per-file). */
+    const renderTemplate = (template: string, bindings: Record<string, unknown>) =>
+      render(defineComponent({ components: { VInputGroup }, setup: () => bindings, template }))
+
+    it('a render-function slot capturing a local', async () => {
+      const text = ref('before')
+      const Parent = defineComponent(() => () => {
+        const captured = text.value
+        return h(VInputGroup, null, { default: () => [h('span', captured)] })
+      })
+      const { container } = render(Parent)
+      text.value = 'after'
+      await nextTick()
+      expect(root(container).textContent).toContain('after')
+    })
+
+    it('a v-for whose array is replaced', async () => {
+      const rows = ref([{ v: 'before' }])
+      const { container } = renderTemplate(
+        `<VInputGroup v-for="(row, i) in rows" :key="i"><span>{{ row.v }}</span></VInputGroup>`,
+        { rows },
+      )
+      rows.value = [{ v: 'after' }]
+      await nextTick()
+      expect(root(container).textContent).toContain('after')
+    })
+
+    it('a v-if / v-else between two slot templates', async () => {
+      const first = ref(true)
+      const { container } = renderTemplate(
+        `<VInputGroup><template v-if="first" #default><span>before</span></template><template v-else #default><span>after</span></template></VInputGroup>`,
+        { first },
+      )
+      first.value = false
+      await nextTick()
+      expect(root(container).textContent).toContain('after')
     })
   })
 })

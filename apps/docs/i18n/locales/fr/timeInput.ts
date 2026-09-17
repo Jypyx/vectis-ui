@@ -5,7 +5,7 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Libellé, indication et icône',
-      text: "<code>label</code> et <code>hint</code> se comportent comme sur n'importe quel champ. <code>pickerIcon</code> change le glyphe qui ouvre l'horloge, <code>iconStart</code> pose une icône au début du champ, et <code>loading</code> affiche un indicateur à la place de l'icône d'horloge. <code>pickerIconLabel</code>, <code>clearLabel</code>, <code>loadingLabel</code> et <code>iconStartLabel</code> renomment ce que chacun annonce.",
+      text: "<code>label</code> et <code>hint</code> se comportent comme sur n'importe quel champ. <code>pickerIcon</code> change le glyphe qui ouvre l'horloge, <code>iconStart</code> pose une icône au début du champ, et <code>loading</code> affiche un indicateur à la place de l'icône d'horloge. <code>pickerIconLabel</code>, <code>clearLabel</code>, <code>loadingText</code> et <code>iconStartLabel</code> renomment ce que chacun annonce.",
     },
     sizes: {
       title: 'Tailles',
@@ -79,7 +79,7 @@ export default {
           "Ce que fait l'icône de fin, en mots. Elle nomme le bouton qui ouvre l'horloge, et sa valeur par défaut vient du dictionnaire du design system.",
         loading:
           "Affiche une roue à la place de l'icône de l'horloge. Elle dit que quelque chose se charge et ne change rien d'autre : le champ reste saisissable et le panneau s'ouvre toujours.",
-        loadingLabel:
+        loadingText:
           "Ce que les lecteurs d'écran annoncent pendant que la roue tourne. Sa valeur par défaut vient du dictionnaire du design system.",
         clearable: "Propose une croix qui vide la valeur, affichée avant l'icône de fin.",
         clearLabel:

@@ -10,8 +10,10 @@ A one-time code (OTP) — one cell per character, built on native `<input>`s. Th
 advance, backspace, distribution across the cells, arrows). `autocomplete="one-time-code"` on the
 first cell: automatic filling (SMS, password manager) is distributed across the whole set.
 
-The v-model is the concatenation of the characters typed; `complete` is emitted when every cell is
-filled.
+The v-model is the concatenation of the characters typed; `complete` is emitted when the code
+becomes complete. The filled cells always run from the first one: typing into a cell past the first
+empty one fills that empty cell, and emptying a cell moves the following characters back, so the
+value never has a hole in it.
 
 <Canvas of={VInputOTPStories.Default} />
 
@@ -74,6 +76,15 @@ its colour (currentcolor):
 
 <Canvas of={VInputOTPStories.IconSeparator} />
 
+## In a form
+
+The row submits like a native field: `name`, `form` and `required` land on a visually hidden
+`<input>` carrying the code, out of the tab order and hidden from assistive technology. Its
+`pattern` asks for every cell, so an incomplete code is invalid and the browser refuses to submit
+it; when the browser focuses it to report that, the focus goes on to the first empty cell.
+
+<Canvas of={VInputOTPStories.InForm} />
+
 ## States
 
 The `invalid` prop forces the error state (server-side validation) — red borders and `aria-invalid`
@@ -104,8 +115,10 @@ tells this field apart from VInput and the other text fields.
 - The root is a `role="group"` named by `label` ("Verification code" by default).
 - Each cell carries an `aria-label` "Character N of M" counted on the editable cells — the pattern's
   literals are decorative (`aria-hidden`) and never focusable.
-- Keyboard navigation: left/right arrows between cells, and Backspace on an empty cell erases the
-  previous one and goes back to it — the literals are crossed transparently.
+- Keyboard navigation: left/right arrows between cells, Home to the first cell, End to the first
+  empty one, and Backspace on an empty cell erases the previous one and goes back to it — the
+  literals are crossed transparently. A read-only row erases nothing.
+- The cells always read left to right, `dir="rtl"` included: a code is not mirrored.
 - Visible focus: a visual 2px border (border + a `box-shadow` in the same colour, aligned on
   `VInput`), red when invalid; a transparent `outline` line for forced-colors mode.
 - The transitions respect `prefers-reduced-motion`.

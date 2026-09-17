@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // @ssr @core — the number of avatars is read from the slot's VNODES through
-// `flattenSlot`, never from a registry the children would fill at mount: such a
+// `useSlotNodes`, never from a registry the children would fill at mount: such a
 // registry is empty during the server render and full on the client, which is a
 // hydration mismatch.
 /**
@@ -15,14 +15,14 @@
  * in the browser. And the group's size and density reach the avatars through provide/inject.
  */
 
-import { computed, provide, useSlots } from 'vue'
+import { computed, provide } from 'vue'
 import type { StyleValue } from 'vue'
 
 import VAvatar from './VAvatar.vue'
 import type { AvatarSize } from './VAvatar.vue'
 import { AVATAR_DEFAULT_SIZE, avatarGroupKey } from './context'
 
-import { flattenSlot } from '../../utils/vnode'
+import { useSlotNodes } from '../../composables/useSlotNodes'
 
 interface AvatarGroupProps {
   /**
@@ -73,9 +73,7 @@ provide(avatarGroupKey, {
   },
 })
 
-const slots = useSlots()
-
-const items = computed(() => flattenSlot(slots.default?.()))
+const items = useSlotNodes()
 // `max: 0` means "no limit", as documented: a truthiness test, never `!= null`, which would
 // slice everything away and sum the whole group into the "+X" disc.
 const visibleItems = computed(() => (props.max ? items.value.slice(0, props.max) : items.value))

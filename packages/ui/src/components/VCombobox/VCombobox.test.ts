@@ -969,3 +969,154 @@ describe('VCombobox asynchronous', () => {
     expect(field.value?.el?.tagName).toBe('INPUT')
   })
 })
+
+describe('VCombobox state kept in step', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  const keydown = (el: Element, key: string) => {
+    const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })
+    el.dispatchEvent(event)
+    return event
+  }
+
+  // In single mode the field shows a COPY of the label. A value the parent sets or resets
+  // after mount (an edit form loading its record, a form reset) must reach that copy.
+  it('single mode: the field follows a value the parent changes', async () => {
+    const { getByRole, rerender } = renderCombobox({ modelValue: 'fr' })
+    const input = getByRole('combobox') as HTMLInputElement
+    expect(input.value).toBe('France')
+    await rerender({ modelValue: 'be' })
+    await nextTick()
+    expect(input.value).toBe('Belgium')
+    await rerender({ modelValue: '' })
+    await nextTick()
+    expect(input.value).toBe('')
+  })
+
+  it('single mode: a value loaded after mount is labelled', async () => {
+    const { getByRole, rerender } = renderCombobox({ modelValue: '' })
+    await rerender({ modelValue: 're' })
+    await nextTick()
+    expect((getByRole('combobox') as HTMLInputElement).value).toBe('Réunion')
+  })
+
+  // Escape that closes the list is consumed, so a surrounding VDialog stays open; on a
+  // closed list it is left alone, so the dialog closes as usual.
+  it('Escape cancels its default only when it closes the list', async () => {
+    const { getByRole } = renderCombobox()
+    const input = getByRole('combobox')
+    await fireEvent.keyDown(input, { key: 'ArrowDown' })
+    expect(keydown(input, 'Escape').defaultPrevented).toBe(true)
+    await nextTick()
+    expect(input.getAttribute('aria-expanded')).toBe('false')
+    expect(keydown(input, 'Escape').defaultPrevented).toBe(false)
+  })
+
+  // The cross empties the selection while the list stays open: a highlight must survive,
+  // or Enter does nothing and the reader is left with no current option.
+  it('clearing with the list open keeps an option highlighted', async () => {
+    const { getByRole, container } = renderCombobox({
+      multiple: true,
+      modelValue: ['be'],
+      clearable: true,
+      options: [
+        { value: 'a', label: 'Alpha' },
+        { value: 'b', label: 'Bravo' },
+        { value: 'c', label: 'Charlie' },
+      ],
+    })
+    const input = getByRole('combobox')
+    await fireEvent.keyDown(input, { key: 'ArrowDown' })
+    await fireEvent.click(container.querySelector('.v-input-clear') as HTMLElement)
+    await nextTick()
+    const active = () => container.querySelector('[role="option"][data-active]')?.textContent
+    expect(input.getAttribute('aria-activedescendant')).toBeTruthy()
+    await fireEvent.keyDown(input, { key: 'ArrowUp' })
+    expect(active()).toContain('Charlie')
+  })
+
+  // A value made read-only or disabled while the list is open can no longer be written.
+  it('readonly set while the list is open closes it and refuses the selection', async () => {
+    const { getByRole, rerender, emitted } = renderCombobox()
+    const input = getByRole('combobox')
+    await fireEvent.keyDown(input, { key: 'ArrowDown' })
+    await rerender({ readonly: true })
+    await nextTick()
+    expect(input.getAttribute('aria-expanded')).toBe('false')
+    await fireEvent.keyDown(input, { key: 'Enter' })
+    expect(emitted('update:modelValue')).toBeUndefined()
+  })
+
+  // A screen reader announces the current option when aria-activedescendant CHANGES. An
+  // id taken from the position in the filtered list keeps the same value while the filter
+  // swaps the option under it, and the new option goes unannounced.
+  it('narrowing the list to another option changes the active descendant', async () => {
+    const { getByRole } = renderCombobox()
+    const input = getByRole('combobox')
+    await fireEvent.update(input, 'r')
+    const before = input.getAttribute('aria-activedescendant')
+    await fireEvent.update(input, 'reu')
+    expect(input.getAttribute('aria-activedescendant')).not.toBe(before)
+  })
+
+  describe('paging', () => {
+    /** Stubs the observer and hands back a function that reports the sentinel as crossed. */
+    function stubObserver() {
+      let notify: ((entries: Partial<IntersectionObserverEntry>[]) => void) | undefined
+      vi.stubGlobal(
+        'IntersectionObserver',
+        class {
+          constructor(callback: (entries: Partial<IntersectionObserverEntry>[]) => void) {
+            notify = callback
+          }
+          observe() {}
+          unobserve() {}
+          disconnect() {}
+        },
+      )
+      return () => notify?.([{ isIntersecting: true }])
+    }
+
+    const page = (prefix: string) =>
+      Array.from({ length: 3 }, (_, i) => ({ value: `${prefix}${i}`, label: `${prefix} ${i}` }))
+
+    // A new search replaces the list, so a page asked for under the old term will never
+    // arrive; a first page of the new term that happens to be as long as the old list
+    // must not leave the paging frozen.
+    it('a new search releases the lock, even when its page has the same length', async () => {
+      const cross = stubObserver()
+      const { getByRole, rerender, emitted } = renderCombobox({
+        options: page('a'),
+        hasMore: true,
+        filter: false,
+        searchDebounce: 0,
+      })
+      const input = getByRole('combobox')
+      await fireEvent.keyDown(input, { key: 'ArrowDown' })
+      await nextTick()
+      cross()
+      expect(emitted('load-more')).toHaveLength(1)
+      await fireEvent.update(input, 'b')
+      await rerender({ options: page('b') })
+      await nextTick()
+      cross()
+      expect(emitted('load-more')).toHaveLength(2)
+    })
+
+    it('choosing an option while a page is pending releases the lock', async () => {
+      const cross = stubObserver()
+      const { getByRole, emitted } = renderCombobox({ options: page('a'), hasMore: true })
+      const input = getByRole('combobox')
+      await fireEvent.keyDown(input, { key: 'ArrowDown' })
+      await nextTick()
+      cross()
+      await fireEvent.keyDown(input, { key: 'Enter' })
+      await fireEvent.keyDown(input, { key: 'ArrowDown' })
+      await nextTick()
+      cross()
+      expect(emitted('load-more')).toHaveLength(2)
+    })
+  })
+})

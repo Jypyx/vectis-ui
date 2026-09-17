@@ -33,7 +33,11 @@ export default {
     },
     reading: {
       title: 'Reading the code',
-      text: 'The value is one string of the characters alone, never the separators. <code>complete</code> fires once every box is filled, carrying the finished code.',
+      text: 'The value is one string of the characters alone, never the separators. The filled boxes always run from the first one: typing into a box past the first empty one fills that empty box, and emptying a box moves the following characters back. <code>complete</code> fires when the code becomes complete, carrying the finished code.',
+    },
+    form: {
+      title: 'In a form',
+      text: 'The row submits like any native field. <code>name</code>, <code>form</code> and <code>required</code> reach a hidden input that carries the code, and a code that does not fill every box is invalid, so the browser refuses to submit it.',
     },
     states: {
       title: 'States',
@@ -67,7 +71,7 @@ export default {
       },
       events: {
         complete:
-          'Every box has been filled, with the finished code. This is the cue to verify it.',
+          'The code has just become complete, with the finished code. This is the cue to verify it. Retyping a character of a complete code with the same one does not fire it again.',
       },
     },
   },

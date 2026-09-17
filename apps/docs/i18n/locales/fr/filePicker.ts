@@ -73,7 +73,7 @@ export default {
           "Marque la zone comme invalide, ce qui colore son contour. C'est pour une règle à vous : rien ici n'est vérifié par le navigateur, le vrai champ étant masqué.",
         loading:
           "Affiche un indicateur à la place de l'icône de la zone, typiquement pendant un envoi. Il dit que quelque chose se passe et ne change rien d'autre : les fichiers peuvent toujours être déposés et la boîte de dialogue s'ouvre encore.",
-        loadingLabel:
+        loadingText:
           "Ce que les lecteurs d'écran annoncent pendant que l'indicateur tourne. Sa valeur par défaut vient du dictionnaire du design system.",
         vModel:
           "Toujours une LISTE de fichiers, que plusieurs soient permis ou non, jamais un fichier seul. La forme ne dépend pas d'une prop : vous n'avez donc jamais à restreindre une union que TypeScript ne sait pas discriminer.",

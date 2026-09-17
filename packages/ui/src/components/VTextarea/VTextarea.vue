@@ -39,19 +39,19 @@ interface TextareaProps {
    */
   compact?: boolean
   /**
-   * How many lines of text the field shows — the native `rows` attribute, which is
+   * How many lines of text the field shows: the native `rows` attribute, which is
    * what gives the field its height. Anything under 1 is raised to 1, and at 1 the
    * field is exactly as tall as a VInput of the same size.
    */
   rows?: number
   /**
    * Lets the field grow as the text is typed, instead of scrolling inside the height
-   * `rows` gives it — which stays its starting height. It is pure CSS; where the
+   * `rows` gives it, which stays its starting height. It is pure CSS; where the
    * browser does not support it, the field simply behaves like an ordinary textarea.
    */
   autoGrow?: boolean
   /**
-   * Marks the field as invalid whatever the browser thinks — the route for a rule
+   * Marks the field as invalid whatever the browser thinks: the route for a rule
    * only the server can check.
    */
   invalid?: boolean
@@ -71,7 +71,7 @@ interface TextareaProps {
   hint?: string
   /**
    * An icon inside the field, at the start. It is decorative by default and becomes a
-   * real button as soon as a `@click:icon-start` listener is attached — in which case
+   * real button as soon as a `@click:icon-start` listener is attached, in which case
    * it needs `iconStartLabel`. The `#start` slot is rendered after it, so the two can
    * be given together.
    */
@@ -91,7 +91,7 @@ interface TextareaProps {
    * What screen readers announce while the spinner turns. It falls back to the design
    * system dictionary.
    */
-  loadingLabel?: string
+  loadingText?: string
   /**
    * Offers a cross that empties the field. It appears when there is something to
    * clear and the field can be edited.
@@ -99,7 +99,7 @@ interface TextareaProps {
   clearable?: boolean
   /**
    * Decides whether the cross is shown, instead of letting the field work it out from its
-   * own content — a read-only field included. It is the same escape hatch VInput offers,
+   * own content (a read-only field included). It is the same escape hatch VInput offers,
    * for the same reason: a component built on top of this one may hold what there is to
    * clear somewhere other than the text.
    */
@@ -141,7 +141,7 @@ const props = withDefaults(defineProps<TextareaProps>(), {
   iconStartLabel: undefined,
   iconEndLabel: undefined,
   loading: false,
-  loadingLabel: undefined,
+  loadingText: undefined,
   clearable: false,
   clearVisible: undefined,
   clearLabel: undefined,
@@ -171,7 +171,7 @@ defineSlots<{
    */
   end?(): unknown
   /**
-   * Controls of your own inside the field, placed before the field's own — the clear cross
+   * Controls of your own inside the field, placed before the field's own: the clear cross
    * and the end icon. It is the slot for something that acts on the VALUE rather than on
    * the field, and it is VInput's slot of the same name.
    */
@@ -196,7 +196,15 @@ const { attrs, rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs(
 const m = useMessages()
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.common.clear)
 
-const { fieldId, hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
+const { fieldId, hintId, counterId, describedBy } = useFieldIds(
+  attrs,
+  () => !!props.hint,
+  () => props.counter,
+)
+
+// Every length measurement goes through this projection: a value straight from an API or
+// a database is often `null`, and reading `.length` on it would throw at mount.
+const modelText = computed(() => model.value ?? '')
 
 const { hasIconStartHandler, hasIconEndHandler } = useIconClickHandlers({
   name: 'VTextarea',
@@ -211,7 +219,7 @@ const { showClear, onClear } = useClearable({
   clearVisible: () => props.clearVisible,
   disabled: () => props.disabled,
   readonly: () => props.readonly,
-  text: () => model.value,
+  text: () => modelText.value,
   controlEl,
   onCleared: () => {
     model.value = ''
@@ -221,7 +229,7 @@ const { showClear, onClear } = useClearable({
 
 const { counterText, over } = useTextLimit({
   el: controlEl,
-  text: () => model.value,
+  text: () => modelText.value,
   maxlength: () => props.maxlength,
   softLimit: () => props.softLimit,
 })
@@ -262,27 +270,27 @@ defineExpose({
       <button
         v-if="iconStart && hasIconStartHandler"
         type="button"
-        class="v-textarea-action v-field-action"
+        class="v-textarea-action v-field-action v-textarea-icon-start"
         :aria-label="iconStartLabel ?? iconName(iconStart)"
         :disabled="disabled"
         @click="emit('click:icon-start', $event)"
       >
         <VIcon v-bind="iconProps(iconStart)" />
       </button>
-      <VIcon v-else-if="iconStart" v-bind="iconProps(iconStart)" />
+      <VIcon v-else-if="iconStart" v-bind="iconProps(iconStart)" class="v-textarea-icon-start" />
       <slot name="start" />
 
       <textarea
-        v-bind="restAttrs"
         :id="fieldId"
         ref="controlEl"
         v-model="model"
+        :aria-invalid="invalid || undefined"
+        v-bind="restAttrs"
         class="v-textarea-control"
         :rows="resolvedRows"
         :maxlength="softLimit ? undefined : maxlength"
         :disabled="disabled"
         :readonly="readonly || undefined"
-        :aria-invalid="invalid || undefined"
         :aria-describedby="describedBy"
       />
 
@@ -298,19 +306,19 @@ defineExpose({
         <VIcon :name="closeIcon" />
       </button>
 
-      <VSpinner v-if="loading" :label="loadingLabel" />
+      <VSpinner v-if="loading" :label="loadingText" />
       <slot v-else name="end">
         <button
           v-if="iconEnd && hasIconEndHandler"
           type="button"
-          class="v-textarea-action v-field-action"
+          class="v-textarea-action v-field-action v-textarea-icon-end"
           :aria-label="iconEndLabel ?? iconName(iconEnd)"
           :disabled="disabled"
           @click="emit('click:icon-end', $event)"
         >
           <VIcon v-bind="iconProps(iconEnd)" />
         </button>
-        <VIcon v-else-if="iconEnd" v-bind="iconProps(iconEnd)" />
+        <VIcon v-else-if="iconEnd" v-bind="iconProps(iconEnd)" class="v-textarea-icon-end" />
       </slot>
     </div>
 
@@ -320,6 +328,7 @@ defineExpose({
       </VTypography>
       <span
         v-if="counter"
+        :id="counterId"
         class="v-textarea-counter v-field-counter"
         :data-over="over ? '' : undefined"
       >
@@ -472,9 +481,11 @@ defineExpose({
      browser also matches on a disabled field.
 
      TRAP — this block must stay FIRST in the sequence of states: read-only, then
-     hover, focus, invalid and disabled. Every one of these selectors weighs (0,3,0),
-     `:has()` taking the specificity of what it contains, so nothing but the source
-     order arbitrates between them. Moved further down, this rule would repaint the
+     hover, focus, invalid and disabled. The read-only, focus, invalid and disabled
+     selectors all weigh (0,3,0), `:has()` taking the specificity of what it contains, so
+     nothing but the source order arbitrates between them. Hover alone weighs more, (0,6,0):
+     its `:not()` keeps it off a focused, invalid or disabled field, and on a read-only
+     one it darkens the border as on any other. Moved further down, this rule would repaint the
      error border and the accent focus ring grey, with no error anywhere. What belongs
      to a read-only field is its BASE colour alone. */
   .v-textarea[data-readonly] .v-textarea-field {

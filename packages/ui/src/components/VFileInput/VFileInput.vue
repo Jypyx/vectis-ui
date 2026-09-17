@@ -38,7 +38,24 @@ import { joinIds } from '../../utils/ids'
 import { truncateMiddle } from './truncate'
 
 /** How the chosen files are shown inside the field when several are allowed. */
-export type FileInputDisplay = 'text' | 'chip'
+export type FileInputDisplay = 'chip' | 'text'
+
+/** What the `#chip` slot receives. */
+export interface FileInputChipSlotProps {
+  file: File
+  index: number
+  label: string
+  remove: () => void
+  size: ChipSize
+  compact: boolean
+}
+
+/** What the `#counter` slot receives. */
+export interface FileInputCounterSlotProps {
+  count: number
+  bytes: number
+  text: string
+}
 
 /** The height of the field: 32, 40 or 48 pixels. */
 export type FileInputSize = 'sm' | 'md' | 'lg'
@@ -51,7 +68,7 @@ interface FileInputProps {
    *
    * It is applied TWICE, and it has to be: as an attribute, which is what filters the
    * system's file dialog, and again in code, which is the only thing that can filter a
-   * file DROPPED on the component — the attribute has no say over a drop.
+   * file DROPPED on the component, the attribute having no say over a drop.
    */
   accept?: string
   /**
@@ -83,7 +100,7 @@ interface FileInputProps {
    */
   readonly?: boolean
   /**
-   * Marks the field as invalid — for a rule of your own, since nothing here is checked
+   * Marks the field as invalid, for a rule of your own, since nothing here is checked
    * by the browser.
    */
   invalid?: boolean
@@ -114,7 +131,7 @@ interface FileInputProps {
    */
   pickerIconLabel?: string
   /**
-   * Shows a spinner at the end of the field, in place of the attach icon — while an
+   * Shows a spinner at the end of the field, in place of the attach icon, while an
    * upload is under way, typically. It says that something is happening and changes
    * nothing else: files can still be dropped and the dialog still opens.
    */
@@ -123,7 +140,7 @@ interface FileInputProps {
    * What screen readers announce while the spinner turns. It falls back to the design
    * system dictionary.
    */
-  loadingLabel?: string
+  loadingText?: string
   /**
    * Offers a cross that empties the selection. Worth turning on here more than on an
    * ordinary field: what a picker holds cannot be erased by typing, so the cross is the
@@ -158,13 +175,13 @@ const props = withDefaults(defineProps<FileInputProps>(), {
   iconStartLabel: undefined,
   pickerIconLabel: undefined,
   loading: false,
-  loadingLabel: undefined,
+  loadingText: undefined,
   clearable: false,
   clearLabel: undefined,
 })
 
 const emit = defineEmits<{
-  /** The reader changed the selection — added something, removed something, cleared it. */
+  /** The reader changed the selection: added something, removed something, cleared it. */
   change: [files: File[]]
   /**
    * A file was turned away and never joined the selection. It is emitted once PER file,
@@ -189,7 +206,7 @@ defineSlots<{
    */
   start?(): unknown
   /**
-   * Controls of your own inside the field, placed before the ones the field owns — the
+   * Controls of your own inside the field, placed before the ones the field owns: the
    * clear cross and the icon that opens the file dialog. Those two are this component's
    * own affordance, which is why there is no `#end` here: it would replace them.
    */
@@ -199,27 +216,20 @@ defineSlots<{
    *
    * Three of the values it receives are what make it usable without regressions:
    * `label` is the name already shortened in the MIDDLE so that its extension survives,
-   * `remove` is what takes the file out — without it the file could no longer be removed
-   * at all — and the size and density are the ones worked out to sit inside the field,
+   * `remove` is what takes the file out (without it the file could no longer be removed
+   * at all), and the size and density are the ones worked out to sit inside the field,
    * which cannot be guessed from outside.
    */
-  chip?(props: {
-    file: File
-    index: number
-    label: string
-    remove: () => void
-    size: ChipSize
-    compact: boolean
-  }): unknown
+  chip?(props: FileInputChipSlotProps): unknown
   /**
    * Replaces the counter under the field. `text` is the sentence already built and
    * translated; the count and the total size in `bytes` are there for a wording of your own.
    */
-  counter?(props: { count: number; bytes: number; text: string }): unknown
+  counter?(props: FileInputCounterSlotProps): unknown
 }>()
 
 /**
- * Always a LIST of files, whether or not several are allowed — never a file on its own.
+ * Always a LIST of files, whether or not several are allowed, and never a file on its own.
  * The shape of the value does not depend on a prop, so a consumer never has to narrow a
  * union TypeScript has no way of discriminating. With a single file it is simply a list
  * of at most one.
@@ -416,8 +426,8 @@ defineExpose({
   /** Moves the focus to the visible field. */
   focus: (options?: FocusOptions) => inputRef.value?.focus(options),
   /**
-   * Opens the file dialog. It only works when called from something the reader did — a
-   * click, a key press: browsers refuse to open a file dialog by themselves.
+   * Opens the file dialog. It only works when called from something the reader did (a
+   * click, a key press): browsers refuse to open a file dialog by themselves.
    */
   open: openPicker,
   /**
@@ -455,7 +465,8 @@ defineExpose({
         ref="inputRef"
         :class="{ 'v-input-end-pinned v-input-chips': resolvedDisplay === 'chip' }"
         :model-value="displayText"
-        readonly
+        no-typing
+        :readonly="readonly"
         :label="label"
         :placeholder="placeholderText"
         :size="resolvedSize"
@@ -468,7 +479,7 @@ defineExpose({
         :icon-start="iconStart"
         :icon-start-label="iconStartLabel"
         :loading="loading"
-        :loading-label="loadingLabel"
+        :loading-text="loadingText"
         :icon-end="endIcon"
         :icon-end-label="endIconLabel"
         :aria-describedby="describedBy"

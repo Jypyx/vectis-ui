@@ -90,7 +90,8 @@ export default {
         clearable: 'Propose une croix qui vide à la fois la sélection et la recherche.',
         clearLabel:
           'Ce que fait cette croix, en mots. Sa valeur par défaut vient du dictionnaire du design system.',
-        emptyText: 'Ce que dit le panneau quand la recherche ne correspond à rien.',
+        emptyText:
+          "Ce que dit le panneau quand la recherche ne correspond à rien. Un lecteur d'écran l'entend même quand le slot <code>#empty</code> dessine autre chose : renseignez les deux ensemble.",
         filter:
           'Comment la liste se resserre à la saisie. La couper signifie que les options arrivent déjà filtrées par leur source et sont montrées telles quelles. Une règle à vous reçoit la requête TELLE QUE SAISIE, simplement rognée, et non la forme insensible aux accents utilisée en interne.',
         searchDebounce:
@@ -98,7 +99,7 @@ export default {
         loading:
           'Dit que quelque chose est en cours de chargement. Sans option encore, tout le panneau le dit ; avec des options déjà listées, un indicateur apparaît au pied de la liste, puisque ce qui charge est alors la page suivante. Dans les deux cas, le champ remplace son chevron par un indicateur.',
         loadingText:
-          "Ce qui est dit pendant le chargement, et ce comme quoi l'indicateur est annoncé.",
+          "Ce qui est dit pendant le chargement, et ce comme quoi l'indicateur est annoncé. Un lecteur d'écran l'entend même quand le slot <code>#loading</code> dessine autre chose : renseignez les deux ensemble.",
         hasMore:
           "Dit qu'il reste des pages à venir, ce qui est ce qui pousse le composant à demander la suivante quand la fin de la liste entre dans le champ de vision.",
         placement:

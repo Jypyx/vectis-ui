@@ -37,5 +37,5 @@ export default {
 
   composablesHeading: 'Composables',
   composablesBody:
-    'The same rule covers the thirteen composables, <code>usePopover</code>, <code>useFieldPanel</code>, <code>useMaskedField</code>, <code>useFocusoutDismiss</code>, <code>useTextLimit</code>, <code>useRootAttrs</code>, <code>useTimer</code> and their kin: internal, unexported, and documented in their own files. If you find yourself needing one, that is a request for a component.',
+    'The same rule covers the composables, <code>usePopover</code>, <code>useFieldPanel</code>, <code>useMaskedField</code>, <code>useFocusoutDismiss</code>, <code>useTextLimit</code>, <code>useRootAttrs</code>, <code>useTimer</code> and their kin: internal, unexported, and documented in their own files. If you find yourself needing one, that is a request for a component.',
 }

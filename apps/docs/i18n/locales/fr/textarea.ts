@@ -61,7 +61,7 @@ export default {
         iconEndLabel: "Ce que fait l'icône de fin, en mots, une fois qu'elle est cliquable.",
         loading:
           "Affiche un indicateur à la fin du champ, à la place de l'icône ou du slot de fin.",
-        loadingLabel:
+        loadingText:
           "Ce que les lecteurs d'écran annoncent pendant que l'indicateur tourne. Il retombe sur le dictionnaire du design system.",
         clearable:
           'Propose une croix qui vide le champ. Elle apparaît quand il y a quelque chose à effacer et que le champ est modifiable.',

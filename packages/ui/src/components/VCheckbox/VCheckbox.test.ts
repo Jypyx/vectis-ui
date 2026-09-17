@@ -136,3 +136,16 @@ describe('VCheckbox', () => {
     expect(getByRole('checkbox').closest('.v-checkbox')?.hasAttribute('data-readonly')).toBe(false)
   })
 })
+
+// A validation library marks the field invalid through the attribute. The component's own
+// `invalid` binding comes after the forwarded attributes, so it must hand the consumer's value
+// through rather than overwrite it with nothing.
+describe('VCheckbox — a consumer aria-invalid', () => {
+  it('reaches the control when `invalid` is not set', () => {
+    const { getByRole } = render(VCheckbox, {
+      props: {},
+      attrs: { 'aria-invalid': 'true' },
+    })
+    expect(getByRole('checkbox').getAttribute('aria-invalid')).toBe('true')
+  })
+})

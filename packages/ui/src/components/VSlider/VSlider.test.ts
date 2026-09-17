@@ -435,3 +435,16 @@ describe('VSlider — the wrapper-root split', () => {
     expect(ticks().filter((t) => t.hasAttribute('data-filled'))).toHaveLength(8)
   })
 })
+
+// A validation library marks the field invalid through the attribute. The component's own
+// `invalid` binding comes after the forwarded attributes, so it must hand the consumer's value
+// through rather than overwrite it with nothing.
+describe('VSlider — a consumer aria-invalid', () => {
+  it('reaches the control when `invalid` is not set', () => {
+    const { getByRole } = render(VSlider, {
+      props: { modelValue: 20, label: 'Volume' },
+      attrs: { 'aria-invalid': 'true' },
+    })
+    expect(getByRole('slider').getAttribute('aria-invalid')).toBe('true')
+  })
+})

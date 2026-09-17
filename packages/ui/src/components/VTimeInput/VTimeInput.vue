@@ -69,7 +69,18 @@ import { iconStartListener } from '../../composables/useIconClickHandlers'
 import { useMaskedField } from '../../composables/useMaskedField'
 import { useMessages, useResolvedLocale } from '../../i18n/state'
 
+/**
+ * Whether the field can be typed into, only filled from the clock, or picked from a list of
+ * times.
+ */
 export type TimeInputMode = 'picker' | 'input' | 'list'
+
+/** What the `#footer` slot receives. */
+export interface TimeInputFooterSlotProps {
+  confirm: () => void
+  cancel: () => void
+  close: () => void
+}
 
 const MODES: TimeInputMode[] = ['picker', 'input', 'list']
 
@@ -88,7 +99,7 @@ interface TimeInputProps {
   format?: TimePickerFormat
   /**
    * Which form the field takes: one that can be TYPED into, a `picker` one where the
-   * clock is the only way in — so the picker is forced on there — or a searchable LIST of
+   * clock is the only way in (so the picker is forced on there), or a searchable LIST of
    * times at a fixed interval, where a picker would make no sense.
    */
   mode?: TimeInputMode
@@ -97,7 +108,7 @@ interface TimeInputProps {
    * and a panel it opens.
    *
    * It means nothing in `picker` mode, where the clock is already the only way to choose,
-   * nor in `list` mode, which has a panel of its own — VDateInput reads it the same way.
+   * nor in `list` mode, which has a panel of its own. VDateInput reads it the same way.
    */
   showPicker?: boolean
   /**
@@ -122,7 +133,7 @@ interface TimeInputProps {
   allowedMinutes?: TimePickerAllowed
   /**
    * A BCP 47 locale, which decides the clock and how a time is written out. It TAKES
-   * PRECEDENCE over the design system's global locale and falls back to it — which is why
+   * PRECEDENCE over the design system's global locale and falls back to it, which is why
    * it has no literal default: `undefined` has to stay recognizable for the global locale
    * to have its chance.
    */
@@ -147,7 +158,7 @@ interface TimeInputProps {
    * which says how a field that CAN be changed is filled in.
    */
   readonly?: boolean
-  /** Marks the field as invalid — for a rule of your own. */
+  /** Marks the field as invalid, for a rule of your own. */
   invalid?: boolean
   /**
    * An icon inside the field, at the start. It is decorative by default and becomes a
@@ -172,7 +183,7 @@ interface TimeInputProps {
    * What screen readers announce while the spinner turns. It falls back to the design
    * system dictionary.
    */
-  loadingLabel?: string
+  loadingText?: string
   /** Offers a cross that empties the value, shown before the end icon. */
   clearable?: boolean
   /** What that cross does, in words. It falls back to the design system dictionary. */
@@ -213,7 +224,7 @@ const props = withDefaults(defineProps<TimeInputProps>(), {
   iconStartLabel: undefined,
   pickerIconLabel: undefined,
   loading: false,
-  loadingLabel: undefined,
+  loadingText: undefined,
   clearable: false,
   clearLabel: undefined,
   pickerIcon: () => scheduleIcon,
@@ -241,7 +252,7 @@ defineSlots<{
   start?(): unknown
   /**
    * Controls of your own inside the field, after the AM/PM button when there is one and
-   * before the ones the field owns — the clear cross and the icon that opens the panel.
+   * before the ones the field owns: the clear cross and the icon that opens the panel.
    * Those two are this component's own affordance, which is why there is no `#end` here.
    */
   'value-end'?(): unknown
@@ -256,7 +267,7 @@ defineSlots<{
    *
    * It is not rendered in `list` mode, which has no panel of this component's own.
    */
-  footer?(props: { confirm: () => void; cancel: () => void; close: () => void }): unknown
+  footer?(props: TimeInputFooterSlotProps): unknown
 }>()
 
 // `class` and `style` stay on the wrapper; everything else goes down to the text field,
@@ -336,17 +347,16 @@ if (isDev) {
         '[VTimeInput] showPicker is ignored in "list" mode: the list of times is the only panel.',
       )
     // The list form is a VCombobox, which draws the end of the field itself: its own
-    // chevron, and a spinner that names nothing because the panel is what announces the
-    // loading. The three props that describe THIS component's end icon therefore reach
-    // nothing at all, and their absence is invisible on screen.
+    // chevron in place of the clock. The two props that describe THIS component's end icon
+    // therefore reach nothing at all, and their absence is invisible on screen.
+    // `loadingText` is not among them: the combobox announces the loading with it.
     const inert = ([] as string[]).concat(
       props.pickerIcon !== scheduleIcon ? 'pickerIcon' : [],
       props.pickerIconLabel ? 'pickerIconLabel' : [],
-      props.loadingLabel ? 'loadingLabel' : [],
     )
     if (isList.value && inert.length > 0)
       console.warn(
-        `[VTimeInput] ${inert.join(', ')} ${inert.length > 1 ? 'are' : 'is'} ignored in "list" mode: the list draws its own chevron and spinner.`,
+        `[VTimeInput] ${inert.join(', ')} ${inert.length > 1 ? 'are' : 'is'} ignored in "list" mode: the list draws its own chevron.`,
       )
     // A field one types into without the picker has no end icon either, as in VDateInput.
     // A read-only field is left out: it is a state that comes and goes, not a configuration
@@ -772,6 +782,7 @@ defineExpose({
       :clearable="clearable"
       :clear-label="clearLabel"
       :loading="loading"
+      :loading-text="loadingText"
       :placement="placement"
       @clear="emit('clear')"
     />
@@ -786,7 +797,8 @@ defineExpose({
         :inputmode="typing ? 'numeric' : undefined"
         :autocomplete="typing ? 'off' : undefined"
         v-bind="fieldAttrs"
-        :readonly="!typing || readonly"
+        :readonly="readonly"
+        :no-typing="!typing"
         :label="label"
         :hint="hint"
         :placeholder="placeholder ?? (typing ? m.timeInput.maskPlaceholder : undefined)"
@@ -800,7 +812,7 @@ defineExpose({
         :icon-start="iconStart"
         :icon-start-label="iconStartLabel"
         :loading="loading"
-        :loading-label="loadingLabel"
+        :loading-text="loadingText"
         :icon-end="endIcon"
         :icon-end-label="endIconLabel"
         :role="hasPanel ? 'combobox' : undefined"

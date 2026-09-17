@@ -124,10 +124,10 @@ defineExpose({
         v-model="model"
         type="radio"
         class="v-radio-input v-hidden-input"
+        :aria-invalid="invalid || undefined"
         v-bind="forwardedAttrs"
         :value="value"
         :disabled="disabled"
-        :aria-invalid="invalid || undefined"
         :aria-describedby="describedBy"
         @click="refuseWhenReadonly"
       />

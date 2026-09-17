@@ -41,7 +41,7 @@ export default {
     },
     states: {
       title: 'States',
-      text: '<code>invalid</code> marks the field as having an error. <code>readonly</code> keeps the selection on show and refuses every way of changing it. <code>disabled</code> greys the field out and takes it out of the tab order. <code>noDrop</code> turns dropping away alone, and <code>loading</code> is purely visual, a spinner replacing the attach icon. <code>pickerIconLabel</code>, <code>clearLabel</code> and <code>loadingLabel</code> rename what each of them announces.',
+      text: '<code>invalid</code> marks the field as having an error. <code>readonly</code> keeps the selection on show and refuses every way of changing it. <code>disabled</code> greys the field out and takes it out of the tab order. <code>noDrop</code> turns dropping away alone, and <code>loading</code> is purely visual, a spinner replacing the attach icon. <code>pickerIconLabel</code>, <code>clearLabel</code> and <code>loadingText</code> rename what each of them announces.',
     },
   },
 
@@ -79,7 +79,7 @@ export default {
           'What the end icon does, in words. It names the button that opens the file dialog, and falls back to the design system dictionary.',
         loading:
           'Shows a spinner in place of the attach icon, while an upload is under way. It changes nothing else: files can still be dropped and the dialog still opens.',
-        loadingLabel:
+        loadingText:
           'What screen readers announce while the spinner turns. It falls back to the design system dictionary.',
         clearable:
           'Offers a cross that empties the selection. Worth turning on here more than on an ordinary field: what a picker holds cannot be erased by typing, so the cross is the only way back out of a wrong choice.',

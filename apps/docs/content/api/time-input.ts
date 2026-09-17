@@ -30,7 +30,7 @@ export default {
         { name: 'iconStartLabel', type: 'string' },
         { name: 'pickerIconLabel', type: 'string' },
         { name: 'loading', type: 'boolean', default: 'false' },
-        { name: 'loadingLabel', type: 'string' },
+        { name: 'loadingText', type: 'string' },
         { name: 'clearable', type: 'boolean', default: 'false' },
         { name: 'clearLabel', type: 'string' },
         { name: 'pickerIcon', type: 'IconSource', default: 'schedule' },
@@ -44,7 +44,7 @@ export default {
       slots: [
         { name: 'start', type: '{}' },
         { name: 'value-end', key: 'valueEnd', type: '{}' },
-        { name: 'footer', type: '{ confirm: () => void; cancel: () => void; close: () => void; }' },
+        { name: 'footer', type: 'TimeInputFooterSlotProps' },
       ],
     },
   ],
@@ -68,6 +68,14 @@ export default {
     {
       name: 'IconSource',
       definition: `export type IconSource = string | BuiltinIcon | IconRender`,
+    },
+    {
+      name: 'TimeInputFooterSlotProps',
+      definition: `export interface TimeInputFooterSlotProps {
+  confirm: () => void
+  cancel: () => void
+  close: () => void
+}`,
     },
     {
       name: 'TimePickerAllowed',

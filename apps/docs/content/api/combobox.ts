@@ -45,10 +45,10 @@ export default {
       slots: [
         { name: 'start', type: '{}' },
         { name: 'value-end', key: 'valueEnd', type: '{}' },
-        { name: 'option', type: '{ option: ComboboxOption; index: number; active: boolean; selected: boolean; }' },
-        { name: 'chip', type: '{ value: ItemValue; option: ComboboxOption | undefined; label: string; remove: () => void; size: ChipSize; compact: boolean; }' },
-        { name: 'overflow', type: '{ count: number; size: ChipSize; compact: boolean; }' },
-        { name: 'empty', type: '{ query: string; }' },
+        { name: 'option', type: 'ComboboxOptionSlotProps' },
+        { name: 'chip', type: 'ComboboxChipSlotProps' },
+        { name: 'overflow', type: 'ComboboxOverflowSlotProps' },
+        { name: 'empty', type: 'ComboboxEmptySlotProps' },
         { name: 'loading', type: '{}' },
       ],
     },
@@ -64,6 +64,23 @@ export default {
     {
       name: 'ChipSize',
       definition: `export type ChipSize = 'xs' | 'sm'`,
+    },
+    {
+      name: 'ComboboxChipSlotProps',
+      definition: `export interface ComboboxChipSlotProps {
+  value: ItemValue
+  option: ComboboxOption | undefined
+  label: string
+  remove: () => void
+  size: ChipSize
+  compact: boolean
+}`,
+    },
+    {
+      name: 'ComboboxEmptySlotProps',
+      definition: `export interface ComboboxEmptySlotProps {
+  query: string
+}`,
     },
     {
       name: 'ComboboxFilter',
@@ -87,6 +104,23 @@ export default {
   label: string
   icon?: IconSource
   disabled?: boolean
+}`,
+    },
+    {
+      name: 'ComboboxOptionSlotProps',
+      definition: `export interface ComboboxOptionSlotProps {
+  option: ComboboxOption
+  index: number
+  active: boolean
+  selected: boolean
+}`,
+    },
+    {
+      name: 'ComboboxOverflowSlotProps',
+      definition: `export interface ComboboxOverflowSlotProps {
+  count: number
+  size: ChipSize
+  compact: boolean
 }`,
     },
     {

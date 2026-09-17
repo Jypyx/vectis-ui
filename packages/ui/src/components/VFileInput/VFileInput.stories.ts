@@ -370,7 +370,7 @@ export const States: Story = {
  * `iconStartLabel`. At the other end `loading` shows a spinner where the attach icon
  * was, and changes nothing else: files can still be dropped and the dialog still opens.
  *
- * `pickerIconLabel`, `clearLabel` and `loadingLabel` rename the attach button, the clear
+ * `pickerIconLabel`, `clearLabel` and `loadingText` rename the attach button, the clear
  * cross and the spinner when the dictionary's wording is not the right one.
  */
 export const FieldIcon: Story = {

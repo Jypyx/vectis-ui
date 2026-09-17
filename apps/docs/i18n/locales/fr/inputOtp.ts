@@ -33,7 +33,11 @@ export default {
     },
     reading: {
       title: 'Lire le code',
-      text: 'La valeur est une seule chaîne des caractères seuls, jamais des séparateurs. <code>complete</code> est émis dès que toutes les cases sont remplies, avec le code terminé.',
+      text: 'La valeur est une seule chaîne des caractères seuls, jamais des séparateurs. Les cases remplies partent toujours de la première : taper dans une case au-delà de la première case vide remplit cette case vide, et vider une case ramène les caractères suivants en arrière. <code>complete</code> est émis quand le code devient complet, avec le code terminé.',
+    },
+    form: {
+      title: 'Dans un formulaire',
+      text: "La rangée se soumet comme n'importe quel champ natif. <code>name</code>, <code>form</code> et <code>required</code> atteignent un input masqué qui porte le code, et un code qui ne remplit pas toutes les cases est invalide : le navigateur refuse de soumettre le formulaire.",
     },
     states: {
       title: 'États',
@@ -67,7 +71,7 @@ export default {
       },
       events: {
         complete:
-          "Toutes les cases ont été remplies, avec le code terminé. C'est le signal pour le vérifier.",
+          "Le code vient de devenir complet, avec le code terminé. C'est le signal pour le vérifier. Retaper un caractère d'un code complet à l'identique ne le réémet pas.",
       },
     },
   },

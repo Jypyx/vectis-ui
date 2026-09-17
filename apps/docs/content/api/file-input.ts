@@ -11,7 +11,7 @@ export default {
       props: [
         { name: 'multiple', type: 'boolean', default: 'false' },
         { name: 'accept', type: 'string' },
-        { name: 'display', type: 'FileInputDisplay', values: "'text' | 'chip'", default: "'text'" },
+        { name: 'display', type: 'FileInputDisplay', values: "'chip' | 'text'", default: "'text'" },
         { name: 'maxSize', type: 'number' },
         { name: 'maxTotalSize', type: 'number' },
         { name: 'maxFiles', type: 'number' },
@@ -30,7 +30,7 @@ export default {
         { name: 'iconStartLabel', type: 'string' },
         { name: 'pickerIconLabel', type: 'string' },
         { name: 'loading', type: 'boolean', default: 'false' },
-        { name: 'loadingLabel', type: 'string' },
+        { name: 'loadingText', type: 'string' },
         { name: 'clearable', type: 'boolean', default: 'false' },
         { name: 'clearLabel', type: 'string' },
         { name: 'v-model', key: 'vModel', type: 'File[]', default: '[]' },
@@ -45,8 +45,8 @@ export default {
       slots: [
         { name: 'start', type: '{}' },
         { name: 'value-end', key: 'valueEnd', type: '{}' },
-        { name: 'chip', type: '{ file: File; index: number; label: string; remove: () => void; size: ChipSize; compact: boolean; }' },
-        { name: 'counter', type: '{ count: number; bytes: number; text: string; }' },
+        { name: 'chip', type: 'FileInputChipSlotProps' },
+        { name: 'counter', type: 'FileInputCounterSlotProps' },
       ],
     },
   ],
@@ -61,6 +61,25 @@ export default {
     {
       name: 'ChipSize',
       definition: `export type ChipSize = 'xs' | 'sm'`,
+    },
+    {
+      name: 'FileInputChipSlotProps',
+      definition: `export interface FileInputChipSlotProps {
+  file: File
+  index: number
+  label: string
+  remove: () => void
+  size: ChipSize
+  compact: boolean
+}`,
+    },
+    {
+      name: 'FileInputCounterSlotProps',
+      definition: `export interface FileInputCounterSlotProps {
+  count: number
+  bytes: number
+  text: string
+}`,
     },
     {
       name: 'FileRejectReason',

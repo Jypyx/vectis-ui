@@ -114,6 +114,30 @@ afterEach(() => {
 })
 
 describe('VCarousel', () => {
+  // The slides are read from the slot inside a computed, and `slots` is not reactive: a
+  // parent passing a new slot whose list it captured outside the slot must still recount.
+  it('recounts the slides when the parent hands down a new slot', async () => {
+    const count = ref(2)
+    const Parent = defineComponent(() => () => {
+      const captured = count.value
+      return h(
+        VCarousel,
+        { label: 'Gallery' },
+        {
+          default: () =>
+            Array.from({ length: captured }, (_, i) =>
+              h(VCarouselItem, { key: i }, () => `Slide ${i}`),
+            ),
+        },
+      )
+    })
+    const { container } = render(Parent)
+    expect(slidesOf(container)).toHaveLength(2)
+    count.value = 4
+    await nextTick()
+    expect(slidesOf(container)).toHaveLength(4)
+  })
+
   describe('slide count', () => {
     it('counts the slot VNodes, Fragments unwrapped and comments dropped', () => {
       const { container } = mount({

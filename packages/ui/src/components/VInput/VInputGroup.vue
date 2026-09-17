@@ -32,16 +32,16 @@
  * The behavioural JS is one development warning. The row cannot draw itself out of a segment
  * that brought its own label, and the misalignment is silent, so it says so.
  */
-import { computed, provide, useId, useSlots } from 'vue'
+import { computed, provide, useId } from 'vue'
 
 import VTypography from '../VTypography/VTypography.vue'
 
 import { buttonGroupKey } from '../VButton/context'
 
 import { useRootAttrs } from '../../composables/useRootAttrs'
+import { useSlotNodes } from '../../composables/useSlotNodes'
 import { isDev } from '../../utils/env'
 import { joinIds } from '../../utils/ids'
-import { flattenSlot } from '../../utils/vnode'
 
 import { inputGroupKey } from './context'
 
@@ -95,7 +95,6 @@ defineSlots<{
 }>()
 
 const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
-const slots = useSlots()
 
 const labelId = useId()
 const hintId = useId()
@@ -147,12 +146,13 @@ const warned = new Set<string>()
 // @devwarn @ssr — the segments are read from the slot's VNODES, never from a registry the
 // children would fill at mount: a registry is empty on the server and full in the browser.
 //
-// TRAP — the read has to stay inside this computed, and the computed has to be consumed by
+// TRAP — the read has to stay inside a computed, and the computed has to be consumed by
 // the render, which is what `<Segments />` does. Called from a `watchEffect`, which runs
 // BEFORE the render, Vue warns "Slot invoked outside of the render function" on any slot
 // passed as a raw function — which is exactly what a unit test passes.
+const slotNodes = useSlotNodes()
 const segments = computed(() => {
-  const nodes = flattenSlot(slots.default?.())
+  const nodes = slotNodes.value
 
   if (isDev) {
     for (const node of nodes) {
@@ -314,7 +314,9 @@ provide(buttonGroupKey, rowContext)
     min-inline-size: 0;
   }
 
-  .v-input-group-row > :not(:where(.v-overlay)):has(.v-input-field) {
+  /* The field has to be the segment's OWN, never one inside a panel it opens: a VPopover
+     segment holding a VInput in its panel is a button, and stays its natural width. */
+  .v-input-group-row > :not(:where(.v-overlay)):has(.v-input-field:not(:where(.v-overlay *))) {
     flex: 1 1 0;
   }
 

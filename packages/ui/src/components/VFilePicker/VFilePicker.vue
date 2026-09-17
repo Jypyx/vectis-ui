@@ -156,7 +156,7 @@ interface FilePickerProps {
    * What screen readers announce while the spinner turns. It falls back to the design
    * system dictionary.
    */
-  loadingLabel?: string
+  loadingText?: string
 }
 
 defineOptions({ inheritAttrs: false })
@@ -179,7 +179,7 @@ const props = withDefaults(defineProps<FilePickerProps>(), {
   readonly: false,
   invalid: false,
   loading: false,
-  loadingLabel: undefined,
+  loadingText: undefined,
 })
 
 const emit = defineEmits<{
@@ -517,7 +517,7 @@ defineExpose({
       >
         <span class="v-file-picker-icon">
           <slot name="icon">
-            <VSpinner v-if="loading" :label="loadingLabel" />
+            <VSpinner v-if="loading" :label="loadingText" />
             <VIcon v-else v-bind="iconProps(icon)" />
           </slot>
         </span>

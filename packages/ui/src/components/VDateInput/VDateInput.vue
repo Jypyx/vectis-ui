@@ -67,6 +67,11 @@ export type DateInputPlacement =
 /** Whether the field can be typed into, or only filled from the calendar. */
 export type DateInputMode = 'picker' | 'input'
 
+/** What the `#footer` slot receives. */
+export interface DateInputFooterSlotProps {
+  close: () => void
+}
+
 const MODES: DateInputMode[] = ['picker', 'input']
 
 /**
@@ -95,7 +100,7 @@ interface DateInputProps {
   /**
    * A BCP 47 locale, which decides the month and day names, the first day of the week and
    * the order the field is typed in. It TAKES PRECEDENCE over the design system's global
-   * locale and falls back to it — which is why it has no literal default: `undefined` has
+   * locale and falls back to it, which is why it has no literal default: `undefined` has
    * to stay recognizable for the global locale to have its chance.
    */
   locale?: string
@@ -115,8 +120,8 @@ interface DateInputProps {
   events?: DatePickerEvent[]
   // From here on: the field.
   /**
-   * Whether the field can be TYPED into — the default, using the numeric form of the
-   * reader's language — or is filled from the calendar alone, which is `picker`.
+   * Whether the field can be TYPED into (the default, using the numeric form of the
+   * reader's language) or is filled from the calendar alone, which is `picker`.
    *
    * Typing is reserved for choosing a SINGLE date: a period or a list falls back to
    * `picker`, there being no sensible way to type either.
@@ -147,7 +152,7 @@ interface DateInputProps {
    * `mode`, which says how a field that CAN be changed is filled in.
    */
   readonly?: boolean
-  /** Marks the field as invalid — for a rule of your own. */
+  /** Marks the field as invalid, for a rule of your own. */
   invalid?: boolean
   /**
    * An icon inside the field, at the start. It is decorative by default and becomes a
@@ -172,7 +177,7 @@ interface DateInputProps {
    * What screen readers announce while the spinner turns. It falls back to the design
    * system dictionary.
    */
-  loadingLabel?: string
+  loadingText?: string
   /** Offers a cross that empties the value, shown before the end icon. */
   clearable?: boolean
   /** What that cross does, in words. It falls back to the design system dictionary. */
@@ -185,7 +190,7 @@ interface DateInputProps {
   pickerIcon?: IconSource
   /**
    * How the date is WRITTEN OUT in the field. It has no effect on a field being typed
-   * into, which necessarily shows the numeric form one types — so it concerns the
+   * into, which necessarily shows the numeric form one types, so it concerns the
    * `picker` mode, and the period and list selections, which fall back to it.
    */
   displayFormat?: Intl.DateTimeFormatOptions
@@ -221,7 +226,7 @@ const props = withDefaults(defineProps<DateInputProps>(), {
   iconStartLabel: undefined,
   pickerIconLabel: undefined,
   loading: false,
-  loadingLabel: undefined,
+  loadingText: undefined,
   clearable: false,
   clearLabel: undefined,
   pickerIcon: () => calendarTodayIcon,
@@ -257,7 +262,7 @@ defineSlots<{
    */
   start?(): unknown
   /**
-   * Controls of your own inside the field, placed before the ones the field owns — the clear
+   * Controls of your own inside the field, placed before the ones the field owns: the clear
    * cross and the icon that opens the panel. Those two are this component's own affordance,
    * which is why there is no `#end` here: it would replace them.
    */
@@ -265,10 +270,10 @@ defineSlots<{
   /** What a day cell shows, handed straight to the calendar. */
   day?(props: DatePickerDaySlotProps): unknown
   /**
-   * The strip at the foot of the panel — actions, or preset dates such as "today". It
+   * The strip at the foot of the panel: actions, or preset dates such as "today". It
    * receives `close`, which is what lets one of those buttons dismiss the panel.
    */
-  footer?(props: { close: () => void }): unknown
+  footer?(props: DateInputFooterSlotProps): unknown
 }>()
 
 // `class` and `style` stay on the wrapper; everything else goes down to the text field,
@@ -628,7 +633,8 @@ defineExpose({
         :inputmode="typing ? 'numeric' : undefined"
         :autocomplete="typing ? 'off' : undefined"
         v-bind="fieldAttrs"
-        :readonly="!typing || readonly"
+        :readonly="readonly"
+        :no-typing="!typing"
         :label="label"
         :hint="hint"
         :placeholder="placeholder ?? (typing ? maskHint : undefined)"
@@ -642,7 +648,7 @@ defineExpose({
         :icon-start="iconStart"
         :icon-start-label="iconStartLabel"
         :loading="loading"
-        :loading-label="loadingLabel"
+        :loading-text="loadingText"
         :icon-end="endIcon"
         :icon-end-label="endIconLabel"
         :role="hasPanel ? 'combobox' : undefined"

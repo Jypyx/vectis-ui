@@ -467,6 +467,8 @@ defineExpose({
              name of its own. -->
         <input
           ref="endThumbEl"
+          :aria-invalid="invalid || undefined"
+          :aria-readonly="readonly || undefined"
           v-bind="forwardedAttrs"
           type="range"
           class="v-slider-input v-slider-input-end"
@@ -477,8 +479,6 @@ defineExpose({
           :value="endValue"
           :aria-label="thumbEndLabel"
           :aria-valuetext="endValueText"
-          :aria-invalid="invalid || undefined"
-          :aria-readonly="readonly || undefined"
           @keydown="onThumbKeydown"
           @input="onThumbInput('end', $event)"
           @change="onThumbChange('end', $event)"
