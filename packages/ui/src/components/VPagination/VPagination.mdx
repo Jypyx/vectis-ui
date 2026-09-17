@@ -36,11 +36,16 @@ responsive truncation.
 
 ## Variants and tones
 
-The active page is **always** `solid`; `itemVariant` concerns only the inactive pages and the
-controls, in `ghost` (default) or `outline`. `tone` colours the active page, the inactive ones
+The active page is drawn in `selectedVariant`, `solid` by default, `soft` or `ghost` otherwise;
+`itemVariant` concerns only the inactive pages and the controls, in `ghost` (default) or `outline`. `tone` colours the active page, the inactive ones
 staying neutral so that the current number stands out on its own.
 
 <Canvas of={VPaginationStories.Variants} />
+
+In an `outline` row, a current page drawn `soft` or `ghost` keeps the frame's border on its edges,
+so the frame stays closed wherever the current page sits.
+
+<Canvas of={VPaginationStories.SelectedVariants} />
 <Canvas of={VPaginationStories.Tones} />
 
 ## Sizes

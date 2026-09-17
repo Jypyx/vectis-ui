@@ -7,6 +7,10 @@ export default {
       title: 'Variantes et tonalités',
       text: '<code>itemVariant</code> peint les pages qui ne sont pas courantes et les contrôles, en ghost par défaut ou en outlined. <code>tone</code> est la couleur que prend la page courante, le reste de la rangée restant neutre.',
     },
+    selectedVariants: {
+      title: 'Comment la sélection est dessinée',
+      text: '<code>selectedVariant</code> est la façon dont la page courante est peinte dans le ton de la rangée : pleine en <code>solid</code>, teintée en <code>soft</code>, ou par la seule couleur de son texte en <code>ghost</code>. Dans une rangée <code>outline</code>, une page courante soft ou ghost garde la bordure du cadre, qui reste ainsi fermé.',
+    },
     detached: {
       title: 'Détaché',
       text: '<code>detached</code> espace les boutons et rend à chacun ses coins, au lieu de les joindre en contrôle segmenté. <code>seamless</code> les garde joints et retire les traits entre eux, si bien que la rangée se lit comme un cadre unique.',
@@ -61,7 +65,9 @@ export default {
         seamless:
           'Retire les traits entre les boutons joints, si bien que la rangée se lit comme un cadre unique plutôt que comme des segments, aux conditions de la prop de VButtonGroup. Sans effet sous <code>detached</code>.',
         itemVariant:
-          "Comment sont dessinées les pages autres que la page courante, ainsi que les contrôles. La page courante est toujours pleine, quoi que dise cette prop. Elle porte le nom des items parce que c'est ce qu'elle peint : sur VTabs et VDataTable, <code>variant</code> nomme la décoration du cadre.",
+          "Comment sont dessinées les pages autres que la page courante, ainsi que les contrôles. Ce que prend la page courante est <code>selectedVariant</code>. Elle porte le nom des items parce que c'est ce qu'elle peint : sur VTabs et VDataTable, <code>variant</code> nomme la décoration du cadre.",
+        selectedVariant:
+          'Comment est dessinée la page courante, dans le ton de la rangée : pleine, teintée, ou la seule couleur de son texte.',
         tone: 'La couleur que prend la page courante. Les autres pages et les contrôles restent neutres.',
         size: "La hauteur des boutons, tirée de l'échelle partagée par tous les contrôles.",
         compact: 'Retire 4px à la hauteur de chaque bouton.',

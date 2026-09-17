@@ -289,7 +289,7 @@ defineExpose({
   .v-chip {
     display: inline-flex;
     align-items: center;
-    height: var(--control-height);
+    block-size: var(--control-height);
     border: 1px solid transparent;
     border-radius: var(--vectis-radius-chip);
     font-family: var(--vectis-text-family);
@@ -380,7 +380,7 @@ defineExpose({
     display: inline-flex;
     align-items: center;
     gap: var(--control-gap);
-    height: 100%;
+    block-size: 100%;
     padding-block: 0;
     padding-inline: var(--control-padding-inline);
     border: none;
@@ -422,8 +422,8 @@ defineExpose({
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--control-action-size);
-    height: var(--control-action-size);
+    inline-size: var(--control-action-size);
+    block-size: var(--control-action-size);
     margin-inline: calc(var(--vectis-space-1) * -1) var(--vectis-space-1);
     padding: 0;
     border: none;
@@ -459,6 +459,26 @@ defineExpose({
   @media (prefers-reduced-motion: reduce) {
     .v-chip {
       transition: none;
+    }
+  }
+
+  /*
+   * Windows forced colors replace every background with the page's, so a selected chip would look
+   * exactly like the others there: the fill is its only cue, the state being in an ARIA
+   * attribute a sighted reader never sees. It takes the system's own selection pair
+   * instead, and opts out of the forcing for that element alone so the pair is painted.
+   *
+   * TRAP — the class is repeated to reach (0,6,0). The variant, hover and active rules
+   * reach (0,5,0), and with the forcing turned off any of them that still won would paint
+   * its tone over the selection, with HighlightText on top of it.
+   */
+  @media (forced-colors: active) {
+    .v-chip.v-chip.v-chip.v-chip[data-selected]:not([data-disabled]) {
+      forced-color-adjust: none;
+      background-color: Highlight;
+      color: HighlightText;
+      border-color: Highlight;
+      outline-color: CanvasText;
     }
   }
 }

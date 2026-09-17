@@ -270,5 +270,25 @@ function onFocus() {
       transition: none;
     }
   }
+
+  /*
+   * Windows forced colors replace every background with the page's, so the selected tab would look
+   * exactly like the others there: the fill is its only cue, the state being in an ARIA
+   * attribute a sighted reader never sees. It takes the system's own selection pair
+   * instead, and opts out of the forcing for that element alone so the pair is painted.
+   *
+   * TRAP — the class is repeated to reach (0,6,0). The variant, hover and active rules
+   * reach (0,5,0), and with the forcing turned off any of them that still won would paint
+   * its tone over the selection, with HighlightText on top of it.
+   */
+  @media (forced-colors: active) {
+    .v-tab.v-tab.v-tab.v-tab[aria-selected='true']:not(:disabled) {
+      forced-color-adjust: none;
+      background-color: Highlight;
+      color: HighlightText;
+      border-color: Highlight;
+      outline-color: HighlightText;
+    }
+  }
 }
 </style>

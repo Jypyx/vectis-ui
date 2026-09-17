@@ -99,7 +99,7 @@ export const Variants: Story = {
   render: () => ({
     components: { VPagination },
     setup: () => ({ ghost: ref(6), outline: ref(6) }),
-    // The active page is always `solid`: only the inactive pages follow the variant.
+    // Only the inactive pages follow the variant; the current one takes `selectedVariant`.
     // `label` on every instance: several `<nav>`s under one name are indistinguishable
     // in a landmark list — the same reason VDataTable names its own pagination.
     template: `
@@ -109,6 +109,35 @@ export const Variants: Story = {
       </div>
     `,
   }),
+}
+
+export const SelectedVariants: Story = {
+  render: () => ({
+    components: { VPagination },
+    setup: () => ({ solid: ref(3), soft: ref(3), ghost: ref(3) }),
+    template: `
+      <div style="display: grid; gap: 16px">
+        <VPagination :length="6" item-variant="outline" selected-variant="solid" label="solid" v-model="solid" />
+        <VPagination :length="6" item-variant="outline" selected-variant="soft" label="soft" v-model="soft" />
+        <VPagination :length="6" item-variant="outline" selected-variant="ghost" label="ghost" v-model="ghost" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    /*
+     * `soft` and `ghost` leave VButton's border transparent, which in an outline row opens a
+     * gap in the frame for the width of the current page. The page has to carry the frame's
+     * colour on its edges, like its neighbours. jsdom evaluates no style, hence the browser.
+     */
+    for (const name of ['soft', 'ghost']) {
+      const nav = within(within(canvasElement).getByRole('navigation', { name }))
+      const current = nav.getByRole('button', { name: 'Page 3' })
+      const neighbour = nav.getByRole('button', { name: 'Page 2' })
+      await expect(getComputedStyle(current).borderTopColor).toBe(
+        getComputedStyle(neighbour).borderTopColor,
+      )
+    }
+  },
 }
 
 export const Tones: Story = {

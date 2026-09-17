@@ -1,6 +1,8 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 
+import { nextTick, ref } from 'vue'
+
 import VPagination from './VPagination.vue'
 
 /** Labels of the page pills, in DOM order. */
@@ -433,5 +435,28 @@ describe('VPagination — robustness', () => {
       props: { length: 8, modelValue: 2, totalVisible: Number.NaN },
     })
     expect(pageLabels(container)).toEqual(['1', '2', '3', '4', '5', '6', '7', '8'])
+  })
+})
+
+describe('VPagination — selectedVariant and exposed members', () => {
+  it('draws the current page in selectedVariant, solid by default', async () => {
+    const { container, rerender } = render(VPagination, { props: { length: 3, modelValue: 2 } })
+    const current = () => container.querySelector('[aria-current="page"]')!
+    expect(current().getAttribute('data-variant')).toBe('solid')
+    await rerender({ selectedVariant: 'soft' })
+    expect(current().getAttribute('data-variant')).toBe('soft')
+  })
+
+  it('focus lands on the current page, and el is the nav', async () => {
+    const pagination = ref<InstanceType<typeof VPagination> | null>(null)
+    const { container } = render({
+      components: { VPagination },
+      setup: () => ({ pagination }),
+      template: '<VPagination ref="pagination" :length="5" :model-value="3" />',
+    })
+    await nextTick()
+    expect(pagination.value?.el).toBe(container.querySelector('nav'))
+    pagination.value?.focus()
+    expect(document.activeElement).toBe(container.querySelector('[aria-current="page"]'))
   })
 })

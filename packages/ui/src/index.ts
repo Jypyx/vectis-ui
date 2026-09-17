@@ -64,6 +64,7 @@ export type { ButtonGroupOrientation } from './components/VButton/VButtonGroup.v
 export { default as VPagination } from './components/VPagination/VPagination.vue'
 export type {
   PaginationItemVariant,
+  PaginationSelectedVariant,
   PaginationTone,
   PaginationSize,
   PaginationAlign,

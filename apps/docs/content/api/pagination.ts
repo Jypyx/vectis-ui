@@ -14,6 +14,7 @@ export default {
         { name: 'detached', type: 'boolean', default: 'false' },
         { name: 'seamless', type: 'boolean', default: 'false' },
         { name: 'itemVariant', type: 'PaginationItemVariant', values: "'ghost' | 'outline'", default: "'ghost'" },
+        { name: 'selectedVariant', type: 'PaginationSelectedVariant', values: "'solid' | 'soft' | 'ghost'", default: "'solid'" },
         { name: 'tone', type: 'PaginationTone', values: "'accent' | 'neutral' | 'danger'", default: "'accent'" },
         { name: 'size', type: 'PaginationSize', values: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },

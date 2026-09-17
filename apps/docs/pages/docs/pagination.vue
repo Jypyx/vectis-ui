@@ -14,6 +14,8 @@ import PaginationLength from '~/examples/pagination/Length.vue'
 import paginationLengthSource from '~/examples/pagination/Length.vue?raw'
 import PaginationResponsive from '~/examples/pagination/Responsive.vue'
 import paginationResponsiveSource from '~/examples/pagination/Responsive.vue?raw'
+import PaginationSelectedVariants from '~/examples/pagination/SelectedVariants.vue'
+import paginationSelectedVariantsSource from '~/examples/pagination/SelectedVariants.vue?raw'
 import PaginationSizes from '~/examples/pagination/Sizes.vue'
 import paginationSizesSource from '~/examples/pagination/Sizes.vue?raw'
 import PaginationStates from '~/examples/pagination/States.vue'
@@ -46,6 +48,12 @@ useDocsHead('pagination')
   <DocsProse keypath="pagination.examples.variantsAndTones.text" />
   <DocsExample :source="paginationVariantsAndTonesSource" stack>
     <PaginationVariantsAndTones />
+  </DocsExample>
+
+  <h3 id="selected-variants">{{ t('pagination.examples.selectedVariants.title') }}</h3>
+  <DocsProse keypath="pagination.examples.selectedVariants.text" />
+  <DocsExample :source="paginationSelectedVariantsSource" stack>
+    <PaginationSelectedVariants />
   </DocsExample>
 
   <h3 id="detached">{{ t('pagination.examples.detached.title') }}</h3>

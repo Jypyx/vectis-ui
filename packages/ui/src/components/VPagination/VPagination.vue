@@ -38,6 +38,9 @@ import { useMessages } from '../../i18n/state'
 /** How the pages that are not the current one are drawn. */
 export type PaginationItemVariant = 'ghost' | 'outline'
 
+/** How the current page is drawn. */
+export type PaginationSelectedVariant = 'solid' | 'soft' | 'ghost'
+
 /** The colour of the current page. */
 export type PaginationTone = 'accent' | 'neutral' | 'danger'
 
@@ -82,11 +85,16 @@ interface PaginationProps {
    */
   seamless?: boolean
   /**
-   * How the pages OTHER than the current one, and the controls, are drawn. The current page
-   * is always filled, whatever this says. It is named for the ITEMS because that is what it
+   * How the pages OTHER than the current one, and the controls, are drawn. What the current
+   * page takes is `selectedVariant`. It is named for the ITEMS because that is what it
    * paints: on VTabs and VDataTable `variant` names the decoration of the frame instead.
    */
   itemVariant?: PaginationItemVariant
+  /**
+   * How the current page is drawn, in the row's tone: filled, tinted, or the colour of its
+   * text alone. The same choice as VToggle's `selectedVariant`.
+   */
+  selectedVariant?: PaginationSelectedVariant
   /** The colour the current page takes. The other pages and the controls stay neutral. */
   tone?: PaginationTone
   /** The height of the buttons, from the scale shared by every control. */
@@ -159,6 +167,7 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   detached: false,
   seamless: false,
   itemVariant: 'ghost',
+  selectedVariant: 'solid',
   tone: 'accent',
   size: 'md',
   compact: false,
@@ -357,6 +366,21 @@ function onKeydown(event: KeyboardEvent) {
   if (!nav) return
   arrowNavigate(event, nav, () => navigableItems(nav, '.v-pagination-page:not(:disabled)'))
 }
+
+// The pills are rendered by a VButtonGroup inside the nav, so a template ref reaches none of
+// them. `focus` goes to the current page, which every responsive step keeps on screen.
+defineExpose({
+  // Two queries, not one selector list: a list matches in DOM order, which would hand the
+  // focus to the previous control ahead of the current page.
+  /** Moves the focus to the current page, or to the first control that can take it. */
+  focus: (options?: FocusOptions) =>
+    (
+      navEl.value?.querySelector<HTMLElement>('[aria-current="page"]:not(:disabled)') ??
+      navEl.value?.querySelector<HTMLElement>('button:not(:disabled)')
+    )?.focus(options),
+  /** The `<nav>` element, which is also where the consumer's attributes land. */
+  el: navEl,
+})
 </script>
 
 <template>
@@ -365,6 +389,7 @@ function onKeydown(event: KeyboardEvent) {
     class="v-pagination"
     :aria-label="ariaLabel"
     :data-align="align"
+    :data-item-variant="itemVariant"
     :data-controls="controls || undefined"
     :data-responsive="responsive ? '' : undefined"
     @keydown="onKeydown"
@@ -398,7 +423,7 @@ function onKeydown(event: KeyboardEvent) {
         <VButton
           v-if="item.kind === 'page'"
           class="v-pagination-page"
-          :variant="item.page === currentPage ? 'solid' : itemVariant"
+          :variant="item.page === currentPage ? selectedVariant : itemVariant"
           :tone="item.page === currentPage ? tone : 'neutral'"
           :disabled="disabled || isPageDisabled(item.page)"
           :aria-label="pageLabelFor(item.page)"
@@ -522,13 +547,13 @@ function onKeydown(event: KeyboardEvent) {
    * order and the a11y tree, which is intended. No ellipsis replaces one either — it is
    * exactly as wide as the pill it would stand for, so it frees nothing.
    */
-  @container v-pagination (max-width: 36rem) {
+  @container v-pagination (max-inline-size: 36rem) {
     .v-pagination[data-responsive] .v-pagination-page[data-distance='3'] {
       display: none;
     }
   }
 
-  @container v-pagination (max-width: 31rem) {
+  @container v-pagination (max-inline-size: 31rem) {
     .v-pagination[data-responsive] .v-pagination-page[data-distance='2'] {
       display: none;
     }
@@ -542,9 +567,60 @@ function onKeydown(event: KeyboardEvent) {
     }
   }
 
-  @container v-pagination (max-width: 25rem) {
+  @container v-pagination (max-inline-size: 25rem) {
     .v-pagination[data-responsive] .v-pagination-page[data-distance='1'] {
       display: none;
+    }
+  }
+
+  /*
+   * The frame of an `outline` row: the colour its other pages already paint. They are drawn
+   * in the NEUTRAL tone, so this is what their `--tone-border-soft` resolves to; naming that
+   * variable here instead would read the CURRENT page's tone and tint one segment of the
+   * frame accent or red. A disabled page greys its outline to a different token, hence a
+   * variable the second rule changes. VToggle's `--toggle-frame` is the same device.
+   *
+   * `soft` and `ghost` leave VButton's border transparent, which in an outline row opens a
+   * gap in the frame for the whole width of the current page (the `SelectedVariants` play
+   * function). Restoring it on all four sides keeps the frame closed wherever the current
+   * page sits; seamless, the shared edges are cleared again by VButtonGroup's own (0,6,0)
+   * rules, which these (0,5,0) ones stay below.
+   */
+  .v-pagination[data-item-variant='outline'] {
+    --pagination-frame: var(--vectis-color-border-strong);
+  }
+
+  .v-pagination[data-item-variant='outline']
+    > *
+    > .v-pagination-page:is(:disabled, [aria-disabled='true']) {
+    --pagination-frame: var(--vectis-color-border);
+  }
+
+  .v-pagination[data-item-variant='outline']
+    > *
+    > .v-pagination-page[aria-current='page']:is([data-variant='soft'], [data-variant='ghost']) {
+    border-color: var(--pagination-frame);
+  }
+
+  /*
+   * Windows forced colors replace every background with the page's, so the current page would look
+   * exactly like the others there: the fill is its only cue, the state being in an ARIA
+   * attribute a sighted reader never sees. It takes the system's own selection pair
+   * instead, and opts out of the forcing for that element alone so the pair is painted.
+   *
+   * TRAP — the class is repeated to reach (0,6,0). The variant, hover and active rules
+   * reach (0,5,0), and with the forcing turned off any of them that still won would paint
+   * its tone over the selection, with HighlightText on top of it.
+   */
+  @media (forced-colors: active) {
+    .v-pagination-page.v-pagination-page.v-pagination-page.v-pagination-page[aria-current='page']:not(
+        :disabled
+      ) {
+      forced-color-adjust: none;
+      background-color: Highlight;
+      color: HighlightText;
+      border-color: Highlight;
+      outline-color: CanvasText;
     }
   }
 }

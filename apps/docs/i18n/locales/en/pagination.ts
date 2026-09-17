@@ -7,6 +7,10 @@ export default {
       title: 'Variants and tones',
       text: '<code>itemVariant</code> paints the pages that are not current and the controls, ghost by default or outlined. <code>tone</code> is the colour the current page takes, the rest of the row staying neutral.',
     },
+    selectedVariants: {
+      title: 'How the selection is drawn',
+      text: "<code>selectedVariant</code> is how the current page is painted in the row's tone: filled with <code>solid</code>, tinted with <code>soft</code>, or the colour of its text alone with <code>ghost</code>. In an <code>outline</code> row, a soft or ghost current page keeps the frame's border, so the frame stays closed.",
+    },
     detached: {
       title: 'Detached',
       text: '<code>detached</code> spaces the buttons out and gives each its own corners, instead of joining them into a segmented control. <code>seamless</code> keeps them joined and takes the lines out from between them, so the row reads as one frame.',
@@ -61,7 +65,9 @@ export default {
         seamless:
           "Takes the lines out from between the joined buttons, so the row reads as one frame rather than as segments, on the terms of VButtonGroup's own prop. It has no effect under <code>detached</code>.",
         itemVariant:
-          'How the pages other than the current one, and the controls, are drawn. The current page is always filled, whatever this says. It is named for the items because that is what it paints: on VTabs and VDataTable <code>variant</code> names the decoration of the frame instead.',
+          'How the pages other than the current one, and the controls, are drawn. What the current page takes is <code>selectedVariant</code>. It is named for the items because that is what it paints: on VTabs and VDataTable <code>variant</code> names the decoration of the frame instead.',
+        selectedVariant:
+          "How the current page is drawn, in the row's tone: filled, tinted, or the colour of its text alone.",
         tone: 'The colour the current page takes. The other pages and the controls stay neutral.',
         size: 'The height of the buttons, from the scale shared by every control.',
         compact: 'Takes 4px off the height of every button.',

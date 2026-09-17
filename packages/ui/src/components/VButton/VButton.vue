@@ -220,7 +220,7 @@ const {
     align-items: center;
     justify-content: center;
     gap: var(--control-gap);
-    height: var(--control-height);
+    block-size: var(--control-height);
     padding-inline: var(--control-padding-inline);
     border: 1px solid transparent;
     border-radius: var(--vectis-radius-interactive);
@@ -393,8 +393,8 @@ const {
        1em, coincides with this one — VSpinner then draws its ring inside it at the
        proportion Material Symbols gives `progress_activity`, which is what makes the
        spinner and the icon it replaces read at the same size. */
-    width: var(--vectis-icon-size);
-    height: var(--vectis-icon-size);
+    inline-size: var(--vectis-icon-size);
+    block-size: var(--vectis-icon-size);
     font-size: var(--vectis-icon-size);
     flex: none;
     display: inline-flex;
