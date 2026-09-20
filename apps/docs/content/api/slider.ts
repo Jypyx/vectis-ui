@@ -18,6 +18,7 @@ export default {
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'size', type: 'SliderSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
         { name: 'label', type: 'string' },
+        { name: 'hint', type: 'string' },
         { name: 'orientation', type: 'SliderOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },
         { name: 'inputs', type: 'boolean', default: 'false' },
         { name: 'ticks', type: 'boolean', default: 'false' },
@@ -26,6 +27,7 @@ export default {
         { name: 'v-model', key: 'vModel', type: 'SliderValue', default: '0' },
       ],
       events: [
+        { name: 'input', type: '[value: SliderValue]' },
         { name: 'change', type: '[value: SliderValue]' },
       ],
     },

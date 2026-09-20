@@ -26,12 +26,22 @@
    * a control with no text (a row checkbox in VDataTable) would carry 8px of dead space
    * beside it, off-centre in its cell with nothing to say why.
    */
+  /*
+   * The `label` role is taken WHOLE: size, weight and leading. Taking the size alone left
+   * every checkbox, radio and switch label at whatever the host's `font-weight` and
+   * `line-height` happened to be, so a consumer repointing `--vectis-text-label-weight`
+   * moved VAccordionItem, VBreadcrumb, VSideNavigationItem and VTypography and not one
+   * control of this family. "One role = one complete recipe" is the rule, and a recipe
+   * half-read is a token that silently does nothing.
+   */
   .v-choice {
     display: inline-grid;
     grid-template-columns: auto auto;
     align-items: center;
     font-family: var(--vectis-text-family);
     font-size: var(--vectis-text-label-size);
+    font-weight: var(--vectis-text-label-weight);
+    line-height: var(--vectis-text-label-leading);
     color: var(--vectis-color-text);
   }
 
@@ -48,9 +58,12 @@
     margin-inline-start: var(--vectis-space-2);
   }
 
+  /* The `caption` role, whole as well: its weight is the regular one, so it changes nothing
+     today, but left unstated it is the host's line that the hint would take. */
   .v-choice-hint {
     grid-column: 2;
     font-size: var(--vectis-text-caption-size);
+    font-weight: var(--vectis-text-caption-weight);
     line-height: var(--vectis-text-caption-leading);
     color: var(--vectis-color-text-muted);
   }

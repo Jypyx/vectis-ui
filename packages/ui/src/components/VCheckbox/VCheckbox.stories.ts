@@ -8,6 +8,7 @@ import VCheckbox from './VCheckbox.vue'
 const t = storyText({
   en: {
     newsletter: 'Receive the newsletter',
+    acceptTerms: 'Accept the terms',
     labelAfter: 'Label after (default)',
     labelBefore: 'Label before',
     boxRight: 'Box on the right',
@@ -29,6 +30,7 @@ const t = storyText({
   },
   fr: {
     newsletter: 'Recevoir la newsletter',
+    acceptTerms: 'Accepter les conditions',
     labelAfter: 'Libellé après (défaut)',
     labelBefore: 'Libellé avant',
     boxRight: 'Boîte à droite',
@@ -112,8 +114,8 @@ export const Spread: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 8px; max-width: 320px">
-        <VCheckbox spread>{{ t.boxRight }}</VCheckbox>
-        <VCheckbox spread label-position="start">{{ t.boxLeft }}</VCheckbox>
+        <VCheckbox spread>{{ t.boxLeft }}</VCheckbox>
+        <VCheckbox spread label-position="start">{{ t.boxRight }}</VCheckbox>
       </div>
     `,
   }),
@@ -151,6 +153,28 @@ export const Indeterminate: Story = {
     await userEvent.click(canvas.getByRole('checkbox', { name: 'Pears' }).closest('label')!)
     await waitFor(() => expect(all.indeterminate).toBe(false))
     await expect(all).toBeChecked()
+  },
+}
+
+/**
+ * `invalid` colours the box in the danger colour and sets `aria-invalid`. It survives the
+ * pointer: the row's hover steps exclude it, so a control whose whole point is to look
+ * wrong keeps looking wrong under the cursor.
+ */
+export const Invalid: Story = {
+  render: () => ({
+    components: { VCheckbox },
+    setup: () => ({ accepted: ref(false), t }),
+    template: `
+      <div style="display: grid; gap: 8px; justify-items: start">
+        <VCheckbox v-model="accepted" invalid>{{ t.acceptTerms }}</VCheckbox>
+        <VCheckbox :model-value="true" invalid>{{ t.acceptTerms }}</VCheckbox>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    for (const box of canvasElement.querySelectorAll('.v-checkbox-input'))
+      await expect(box).toHaveAttribute('aria-invalid', 'true')
   },
 }
 

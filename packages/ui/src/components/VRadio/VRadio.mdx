@@ -15,12 +15,14 @@ A single size: a 20px dot with a 2px border (the `--vectis-control-size-check` a
 `--vectis-control-border-width` tokens), and an 8px inner dot
 (`--vectis-control-size-check-dot`).
 
-<Canvas of={VRadioStories.Group} />
+<Canvas of={VRadioStories.Default} />
 
-<Controls of={VRadioStories.Group} />
+<Controls of={VRadioStories.Default} />
 
 Every VRadio carries a `value` prop; the group's v-model holds the `value` of the selected
 button.
+
+<Canvas of={VRadioStories.Group} />
 
 ## Label position
 
@@ -59,7 +61,14 @@ automatically:
 The component cancels the click, and the browser puts the previous selection back. The arrow keys
 are covered by the same cancel, since the browser selects the next button through a click it
 dispatches on it: the focus moves, the selection does not. No `aria-readonly` is written,
-because ARIA allows it on a `radiogroup` and not on a `radio`.
+because ARIA allows it on a `radiogroup` and not on a `radio`. Announcing the state is
+therefore the wrapper’s job: put `role="radiogroup" aria-readonly="true"` on the element that
+names the question, or a screen reader user hears nothing to explain why the arrow keys move
+the focus and select nothing.
+
+A read-only button still takes part in constraint validation, unlike a natively read-only
+field: `readonly` with `required` and nothing selected leaves a form the reader cannot submit
+and cannot fix. Validate the model yourself in that case.
 
 <Canvas of={VRadioStories.ReadOnly} />
 
@@ -77,4 +86,7 @@ through by fallthrough onto the input, not onto the wrapper. The invalid state i
 - The input is hidden with `opacity: 0` (never `display: none`): it stays focusable and submitted
   with the form; the arrows navigate within the group (native behaviour).
 - Visible focus through a ring (`--vectis-focus-ring-*`) on the dot, never removed.
+- In Windows forced colors a selected radio takes the system `Highlight` pair. It has to: the
+  inner disc is a background, and every author background is forced to `Canvas` there, so
+  without it a selected button is indistinguishable from an empty one.
 - The transitions respect `prefers-reduced-motion`.

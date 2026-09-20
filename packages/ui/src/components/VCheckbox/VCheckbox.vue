@@ -79,8 +79,8 @@ const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 const { hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
 
 /**
- * Whether the box is ticked. It starts unticked, and `indeterminate` is a separate prop —
- * the dash is a third appearance, never a third value of this one.
+ * Whether the box is ticked. It starts unticked. `indeterminate` is a separate prop: the
+ * dash is a third appearance, never a third value of this one.
  */
 const model = defineModel<boolean>({ default: false })
 
@@ -92,16 +92,25 @@ defineSlots<{
 const inputEl = ref<HTMLInputElement | null>(null)
 
 // @ssr @core
-// On the server there is no element, so the effect simply does nothing. The
-// `flush: 'post'` is load-bearing: it makes the effect run AFTER the DOM has been
-// updated, and on the very first pass the template ref is not filled in before
-// that — in the default timing the property would be written to nothing at all.
-watchEffect(
-  () => {
-    if (inputEl.value) inputEl.value.indeterminate = props.indeterminate
-  },
-  { flush: 'post' },
-)
+// The "partially checked" look exists only as a DOM property, so it is written by hand,
+// from two places.
+//
+// The effect covers the prop moving. On the server there is no element and it simply does
+// nothing; the `flush: 'post'` is load-bearing, since on the very first pass the template
+// ref is not filled in before the DOM has been updated — in the default timing the
+// property would be written to nothing at all.
+//
+// TRAP — the effect alone is not enough. Activating a checkbox CLEARS the property as part
+// of the gesture, and the prop it reads has not moved, so nothing re-runs it and the dash
+// never comes back. Re-asserting it from `change` is what covers that, and it covers it
+// even when the parent refuses the new value, where watching the model would not. That
+// handler is bound after the forwarded attributes, so `mergeProps` keeps a consumer's own
+// `@change` beside it rather than replacing it.
+function syncIndeterminate() {
+  if (inputEl.value) inputEl.value.indeterminate = props.indeterminate
+}
+
+watchEffect(syncIndeterminate, { flush: 'post' })
 
 // @core
 // The native `readonly` attribute does nothing on a checkbox. Cancelling the click is what
@@ -145,6 +154,7 @@ defineExpose({
         :disabled="disabled"
         :aria-describedby="describedBy"
         @click="refuseWhenReadonly"
+        @change="syncIndeterminate"
       />
       <span class="v-checkbox-box" aria-hidden="true">
         <svg class="v-checkbox-mark" viewBox="0 0 12 12">
@@ -209,12 +219,16 @@ defineExpose({
   }
 
   /* The state painting, rule for rule the same as VRadio's with its own classes: keep the
-     two ALIGNED. Every state below but the hovers weighs (0,3,0), so their ORDER arbitrates
-     them: checked, read-only, invalid, then disabled last. The two hovers exclude every state
-     they must not repaint, so no order argument reaches them. */
+     two ALIGNED. The states below weigh (0,3,0), bar the read-only base at (0,2,0), so their
+     ORDER arbitrates them: checked, read-only, invalid, then disabled last.
+
+     The two hovers sit at (0,7,0) and therefore beat every one of them on specificity, order
+     or no order — which is why they have to EXCLUDE by hand each state they must not repaint.
+     Forgetting the invalid pair is what once rubbed the danger border out under the pointer,
+     on a control whose whole point at that moment is to look wrong. */
   .v-checkbox:not([data-readonly])
     .v-choice-row:hover
-    .v-checkbox-input:not(:disabled, :checked, :indeterminate)
+    .v-checkbox-input:not(:disabled, :checked, :indeterminate, :user-invalid, [aria-invalid='true'])
     + .v-checkbox-box {
     border-color: color-mix(
       in oklab,
@@ -230,7 +244,10 @@ defineExpose({
 
   .v-checkbox:not([data-readonly])
     .v-choice-row:hover
-    .v-checkbox-input:not(:disabled):is(:checked, :indeterminate)
+    .v-checkbox-input:not(:disabled, :user-invalid, [aria-invalid='true']):is(
+      :checked,
+      :indeterminate
+    )
     + .v-checkbox-box {
     background: var(--vectis-color-accent-hover);
     border-color: var(--vectis-color-accent-hover);
@@ -282,6 +299,27 @@ defineExpose({
 
   .v-checkbox-input:indeterminate + .v-checkbox-box .v-checkbox-mark-dash {
     opacity: 1;
+  }
+
+  @media (forced-colors: active) {
+    /* Windows forced colors erase every author colour: a `background` becomes `Canvas` and a
+     `border-color` becomes `CanvasText`, so a ticked box keeps the tick its `stroke` gives it and nothing else. The system
+     Highlight pair is what says "selected" here, as it does on a pressed VToggleItem, a
+     selected VChip and the current VPagination page.
+
+     The class is repeated to (0,8,0) so the row's own hover rules, which reach (0,7,0),
+     cannot repaint it: `forced-color-adjust: none` takes the forcing off this element, and
+     a hover left winning would then paint its REAL grey over the system colour. */
+    .v-checkbox-input.v-checkbox-input.v-checkbox-input.v-checkbox-input.v-checkbox-input:is(
+        :checked,
+        :indeterminate
+      ):not(:disabled)
+      + .v-checkbox-box {
+      forced-color-adjust: none;
+      background: Highlight;
+      border-color: Highlight;
+      color: HighlightText;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -30,7 +30,7 @@ interface SwitchProps {
   labelPosition?: SwitchLabelPosition
   /**
    * Pushes the label and the switch to opposite ends of the line, the row taking the
-   * full width available — the usual shape for a list of settings.
+   * full width available. This is the usual shape for a list of settings.
    */
   spread?: boolean
   /**
@@ -133,8 +133,15 @@ defineExpose({
 <style>
 @layer vectis.components {
   /* The track's own measurements, which nothing outside this sheet reads. The row they
-     sit in is `.v-choice`'s (styles/choice.css), and so is the focus ring. */
-  .v-switch {
+     sit in is `.v-choice`'s (styles/choice.css), and so is the focus ring.
+
+     TRAP — the selector is COMPOUNDED with `.v-choice`, which is on this very element and
+     comes from another sheet at the same (0,1,0). Nothing collides today, this rule setting
+     only custom properties and that one only real ones, but the day either gains a
+     `display`, a `font-family` or a `color` the winner would be whichever sheet the
+     consumer's bundler happened to emit last. VCheckbox and VRadio declare no root rule at
+     all, so this is the one place in the family exposed to it. */
+  .v-choice.v-switch {
     --switch-track-w: var(--vectis-control-size-switch-w);
     --switch-track-h: var(--vectis-control-size-switch-h);
     --switch-pad: var(--vectis-control-size-switch-pad);
@@ -143,8 +150,8 @@ defineExpose({
   .v-switch-track {
     display: inline-flex;
     align-items: center;
-    width: var(--switch-track-w);
-    height: var(--switch-track-h);
+    inline-size: var(--switch-track-w);
+    block-size: var(--switch-track-h);
     padding: var(--switch-pad);
     background: var(--vectis-color-border-strong);
     border-radius: var(--vectis-radius-pill);
@@ -152,15 +159,17 @@ defineExpose({
   }
 
   .v-switch-thumb {
-    width: calc(var(--switch-track-h) - var(--switch-pad) * 2);
-    height: calc(var(--switch-track-h) - var(--switch-pad) * 2);
+    inline-size: calc(var(--switch-track-h) - var(--switch-pad) * 2);
+    block-size: calc(var(--switch-track-h) - var(--switch-pad) * 2);
     background: var(--vectis-color-text-on-accent);
     border-radius: var(--vectis-radius-pill);
     box-shadow: var(--vectis-shadow-xs);
     /* The thumb travels through `margin-inline-start` rather than a translation,
        because a logical property follows the reading direction: in a right-to-left
        page the thumb then moves leftwards on its own, where a translateX would have
-       to be mirrored by a second rule. */
+       to be mirrored by a second rule. The track's own box is stated logically for the
+       same reason: it is the one box of the family that is not square, so a physical
+       `width` would name the travel's axis in one page and the other axis in the next. */
     transition: margin-inline-start var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
@@ -172,7 +181,14 @@ defineExpose({
     margin-inline-start: calc(var(--switch-track-w) - var(--switch-track-h));
   }
 
-  /* The 15 % mix VCheckbox and VRadio take on hover, on the track's own colour. */
+  /* The two hover steps VCheckbox and VRadio take, on the track's own colour: the 15 % mix
+     when the switch is off, `accent-hover` when it is on. Both are needed, or a list of
+     switches that are all ON answers the pointer nowhere and a live one cannot be told
+     from a frozen one.
+
+     Unlike its two siblings these exclude no invalid state, and they must not: an invalid
+     switch is RINGED rather than tinted, so the hover repaints a property the invalid rule
+     never touches and the two states simply add up. */
   .v-switch:not([data-readonly])
     .v-choice-row:hover
     .v-switch-input:not(:disabled, :checked)
@@ -184,22 +200,47 @@ defineExpose({
     );
   }
 
+  .v-switch:not([data-readonly])
+    .v-choice-row:hover
+    .v-switch-input:not(:disabled):checked
+    + .v-switch-track {
+    background: var(--vectis-color-accent-hover);
+  }
+
   /* The same pair of selectors as VCheckbox and VRadio, so a switch reports a rule the
      browser checked and one only the consumer can. It is drawn as a RING rather than as
      a border colour: the track has no border to tint, and a shadow changes no geometry,
-     where a border would eat into the padding the thumb travels in. The focus outline
-     sits further out, at its own offset, so the two never sit on the same pixels. */
+     where a border would eat into the padding the thumb travels in. Its width is the same
+     token the other two give their border, so a consumer who thickens their controls
+     thickens all three; the focus outline then starts where the ring ends, at its own
+     offset, and the two never sit on the same pixels. */
   .v-switch-input:user-invalid + .v-switch-track,
   .v-switch-input[aria-invalid='true'] + .v-switch-track {
-    box-shadow: 0 0 0 1px var(--vectis-color-danger);
+    box-shadow: 0 0 0 var(--vectis-control-border-width) var(--vectis-color-danger);
   }
 
-  /* Read-only trades the accent of an ON switch for the muted text colour, the way a
-     read-only checkbox does, and the thumb takes the surface colour that contrasts with it
-     in both themes. `:where()` keeps both rules at the weight of the disabled ones below,
-     which therefore win by order on a switch that is both. */
+  /* Read-only, and it has to say so whichever way the switch is pointing. An OFF switch
+     sinks like a read-only checkbox — `surface-sunken` behind the 1px `border` ring the box
+     and the dot draw as a real border, which a track has nowhere to put but inside itself —
+     and its thumb takes the muted text colour, white being invisible on that pale track.
+     An ON switch trades the accent for that same muted colour and gives the thumb the
+     surface colour, which contrasts with it in both themes; the ring goes with the tint it
+     was drawn against.
+
+     `:where()` keeps all four rules at the weight of the disabled ones below, which
+     therefore win by order on a switch that is both. */
+  :where(.v-switch[data-readonly]) .v-switch-input + .v-switch-track {
+    background: var(--vectis-color-surface-sunken);
+    box-shadow: inset 0 0 0 var(--vectis-control-border-width) var(--vectis-color-border);
+  }
+
+  :where(.v-switch[data-readonly]) .v-switch-input + .v-switch-track .v-switch-thumb {
+    background: var(--vectis-color-text-muted);
+  }
+
   :where(.v-switch[data-readonly]) .v-switch-input:checked + .v-switch-track {
     background: var(--vectis-color-text-muted);
+    box-shadow: none;
   }
 
   :where(.v-switch[data-readonly]) .v-switch-input:checked + .v-switch-track .v-switch-thumb {
@@ -209,13 +250,71 @@ defineExpose({
   /* The thumb takes text-subtle — the colour VCheckbox's disabled tick and VRadio's
      disabled dot take — which is what keeps it visible against the grey track in both
      themes. The greying of the row itself comes from `.v-choice`. */
+  /* The `box-shadow: none` is not tidying: it is this rule's only way of cancelling the
+     rings above it. A checkbox draws both its invalid verdict and its read-only sink with
+     `border-color`, so its disabled rule overwrites them by naming the same property; here
+     they are shadows, and left standing a disabled switch would go on wearing a danger ring
+     around a grey track nobody can act on. */
   .v-switch-input:disabled + .v-switch-track {
     background: var(--vectis-color-surface-muted);
+    box-shadow: none;
   }
 
   .v-switch-input:disabled + .v-switch-track .v-switch-thumb {
     background: var(--vectis-color-text-subtle);
     box-shadow: none;
+  }
+
+  /* Windows forced colors erase every author colour: a `background` becomes `Canvas` and a
+     shadow is dropped altogether, so a switch loses BOTH its state and its outline, the
+     track and the thumb being nothing but backgrounds. The track therefore draws its own
+     edge as a real border here, inside the box so the thumb's travel is unchanged, and the
+     system Highlight pair says "on" as it does on a pressed VToggleItem.
+
+     The classes are repeated to (0,8,0) so the row's own hover rules, which reach (0,7,0),
+     cannot repaint the track: `forced-color-adjust: none` takes the forcing off it, and a
+     hover left winning would then paint its REAL colour over the system one. */
+  @media (forced-colors: active) {
+    .v-switch-input.v-switch-input.v-switch-input.v-switch-input.v-switch-input + .v-switch-track {
+      forced-color-adjust: none;
+      background: Canvas;
+      box-shadow: inset 0 0 0 var(--vectis-control-border-width) CanvasText;
+    }
+
+    .v-switch-input.v-switch-input.v-switch-input.v-switch-input.v-switch-input
+      + .v-switch-track
+      .v-switch-thumb {
+      forced-color-adjust: none;
+      background: CanvasText;
+      box-shadow: none;
+    }
+
+    .v-switch-input.v-switch-input.v-switch-input.v-switch-input.v-switch-input:checked:not(
+        :disabled
+      )
+      + .v-switch-track {
+      background: Highlight;
+      box-shadow: inset 0 0 0 var(--vectis-control-border-width) Highlight;
+    }
+
+    .v-switch-input.v-switch-input.v-switch-input.v-switch-input.v-switch-input:checked:not(
+        :disabled
+      )
+      + .v-switch-track
+      .v-switch-thumb {
+      background: HighlightText;
+    }
+
+    .v-switch-input.v-switch-input.v-switch-input.v-switch-input.v-switch-input:disabled
+      + .v-switch-track {
+      box-shadow: inset 0 0 0 var(--vectis-control-border-width) GrayText;
+    }
+
+    .v-switch-input.v-switch-input.v-switch-input.v-switch-input.v-switch-input:disabled
+      + .v-switch-track
+      .v-switch-thumb {
+      background: GrayText;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

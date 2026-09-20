@@ -7,10 +7,11 @@ const budget = ref<[number, number]>([20, 60])
 
 <template>
   <div class="demo">
-    <!-- The shape of the model is what settles the mode: a pair gives two thumbs. They
-         are stopped from crossing, so the pair stays ordered whatever the reader does,
-         and each thumb is announced as the start or the end of the range rather than
-         as two sliders with the same name. -->
+    <!-- `range` is what settles the mode, and the model then holds a pair. A thumb taken
+         past its sibling pushes it along, so the pair stays ordered whatever the reader
+         does and a range closed onto a single value can still be opened again. Each thumb
+         is announced as the start or the end of the range rather than as two sliders with
+         the same name. -->
     <VSlider v-model="budget" range label="Budget" />
     <p class="value">{{ budget[0] }} to {{ budget[1] }}</p>
   </div>

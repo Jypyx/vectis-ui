@@ -25,7 +25,7 @@ export default {
     },
     readonly: {
       title: 'Lecture seule',
-      text: "<code>readonly</code> montre l'état sans permettre de le changer. L'attribut natif n'a aucun effet sur une case à cocher, donc le composant annule le clic, ce qui couvre aussi la barre d'espace. La case reste focalisable, s'envoie avec son formulaire et est annoncée en lecture seule.",
+      text: "<code>readonly</code> montre l'état sans permettre de le changer. L'attribut natif n'a aucun effet sur une case à cocher, donc le composant annule le clic, ce qui couvre aussi la barre d'espace. La case reste focalisable, s'envoie avec son formulaire et est annoncée en lecture seule. Elle participe toujours à la validation de contrainte, cela dit, donc <code>readonly</code> avec <code>required</code> et rien de coché laisse un formulaire impossible à envoyer comme à corriger.",
     },
   },
 

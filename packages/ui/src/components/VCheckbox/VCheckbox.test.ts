@@ -33,6 +33,21 @@ describe('VCheckbox', () => {
     expect(input.indeterminate).toBe(false)
   })
 
+  // The browser clears the DOM property as part of activating the control, and the prop
+  // has not moved, so nothing re-runs an effect that only reads it: the dash disappeared
+  // for good. The realistic case is a "select all" whose indeterminate state is derived
+  // from rows outside the current page, and therefore stays true across the click.
+  it('puts the indeterminate property back after a click that does not move the prop', async () => {
+    const { getByRole } = render(VCheckbox, {
+      props: { modelValue: false, indeterminate: true, label: 'All' },
+    })
+    const input = getByRole('checkbox') as HTMLInputElement
+    expect(input.indeterminate).toBe(true)
+    await fireEvent.click(input)
+    await nextTick()
+    expect(input.indeterminate).toBe(true)
+  })
+
   it('labelPosition and spread set the data-* attributes on the root', () => {
     const { container } = render(VCheckbox, {
       props: { modelValue: false, labelPosition: 'start', spread: true },
@@ -138,8 +153,9 @@ describe('VCheckbox', () => {
 })
 
 // A validation library marks the field invalid through the attribute. The component's own
-// `invalid` binding comes after the forwarded attributes, so it must hand the consumer's value
-// through rather than overwrite it with nothing.
+// `invalid` binding therefore comes BEFORE the forwarded attributes: bound after them,
+// `mergeProps` copies its key even when the value is `undefined` and the consumer's verdict
+// is silently erased. This test goes red the moment the binding moves back down.
 describe('VCheckbox — a consumer aria-invalid', () => {
   it('reaches the control when `invalid` is not set', () => {
     const { getByRole } = render(VCheckbox, {

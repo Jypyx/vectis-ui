@@ -21,7 +21,7 @@ export default {
     },
     readonly: {
       title: 'Read-only',
-      text: '<code>readonly</code>, set on every button of the group, keeps the selection where it is. The component cancels the click, and the arrow keys are covered too, since the browser selects the next button through a click: the focus moves, the selection does not.',
+      text: '<code>readonly</code>, set on every button of the group, keeps the selection where it is. The component cancels the click, and the arrow keys are covered too, since the browser selects the next button through a click: the focus moves, the selection does not. No <code>aria-readonly</code> is written, ARIA allowing it on a <code>radiogroup</code> and not on a <code>radio</code>: put it on the wrapper that names the question, or nothing announces the state. And a read-only button still takes part in constraint validation, so <code>readonly</code> with <code>required</code> and nothing selected leaves a form that cannot be submitted or fixed.',
     },
   },
 

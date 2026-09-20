@@ -135,8 +135,9 @@ describe('VRadio', () => {
 })
 
 // A validation library marks the field invalid through the attribute. The component's own
-// `invalid` binding comes after the forwarded attributes, so it must hand the consumer's value
-// through rather than overwrite it with nothing.
+// `invalid` binding therefore comes BEFORE the forwarded attributes: bound after them,
+// `mergeProps` copies its key even when the value is `undefined` and the consumer's verdict
+// is silently erased. This test goes red the moment the binding moves back down.
 describe('VRadio — a consumer aria-invalid', () => {
   it('reaches the control when `invalid` is not set', () => {
     const { getByRole } = render(VRadio, {

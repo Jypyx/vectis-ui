@@ -25,13 +25,26 @@ describe('VSlider', () => {
     expect(getByRole('slider', { name: 'Budget (end)' })).toBeTruthy()
   })
 
-  it('prevents the two thumbs from crossing', async () => {
+  // The pair stays ordered, but the thumb the reader is holding is the one that decides:
+  // taken past its sibling it PUSHES it rather than stopping against it. Stopping was the
+  // dead end — two thumbs resting on the same value leave only the top one (the end) under
+  // the pointer, and it could then never come back down.
+  it('a thumb taken past its sibling pushes it rather than stopping against it', async () => {
     const { getByRole, emitted } = render(VSlider, {
       props: { modelValue: [20, 60], range: true, label: 'Budget' },
     })
-    // the start thumb tries to go past the end → pulled back to 60
     await fireEvent.update(getByRole('slider', { name: 'Budget (start)' }), '80')
-    expect(emitted('update:modelValue')).toEqual([[[60, 60]]])
+    expect(emitted('update:modelValue')).toEqual([[[80, 80]]])
+  })
+
+  it('a collapsed range can be taken back down by its end thumb', async () => {
+    const { getByRole, emitted } = render(VSlider, {
+      props: { modelValue: [100, 100], range: true, label: 'Budget' },
+    })
+    const end = getByRole('slider', { name: 'Budget (end)' }) as HTMLInputElement
+    await fireEvent.update(end, '70')
+    expect(emitted('update:modelValue')).toEqual([[[70, 70]]])
+    expect(end.value).toBe('70')
   })
 
   // A range is two native controls: forwarded through $attrs, a consumer's @change only
@@ -92,8 +105,8 @@ describe('VSlider', () => {
       props: { modelValue: [25, 75], range: true, label: 'x' },
     })
     const style = container.querySelector('.v-slider')?.getAttribute('style') ?? ''
-    expect(style).toContain('--start-fraction: 0.25')
-    expect(style).toContain('--end-fraction: 0.75')
+    expect(style).toContain('--slider-start-fraction: 0.25')
+    expect(style).toContain('--slider-end-fraction: 0.75')
   })
 
   it('orientation: data-orientation always mirrors the union, both branches', async () => {
@@ -190,6 +203,32 @@ describe('VSlider', () => {
     expect(emitted('update:modelValue').at(-1)).toEqual([40])
   })
 
+  // A native range stops on the last step that FITS, so with a max that the step does not
+  // reach the committed value has to stop there too. Snapped to `max` instead, the model
+  // held a value the thumb could not: the browser sanitized the input back down, and the
+  // number, the thumb and the fill then disagreed with nothing in the console.
+  it('inputs: a value is snapped to the last step that fits, not to max', async () => {
+    const { getByRole, emitted } = render(VSlider, {
+      props: { modelValue: 0, inputs: true, min: 0, max: 95, step: 10, label: 'Volume' },
+    })
+    const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
+    await fireEvent.update(field, '95')
+    await fireEvent.change(field)
+    expect(emitted('update:modelValue').at(-1)).toEqual([90])
+  })
+
+  // `Math.round((v - min) / 0)` is Infinity and `Infinity * 0` is NaN, which went straight
+  // into the v-model and took every fraction down with it.
+  it('inputs: a step of 0 commits the clamped value rather than NaN', async () => {
+    const { getByRole, emitted } = render(VSlider, {
+      props: { modelValue: 40, inputs: true, step: 0, label: 'Volume' },
+    })
+    const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
+    await fireEvent.update(field, '55')
+    await fireEvent.change(field)
+    expect(emitted('update:modelValue').at(-1)).toEqual([55])
+  })
+
   it('inputs: an empty field → a silent revert, nothing emitted', async () => {
     const { getByRole, emitted } = render(VSlider, {
       props: { modelValue: 40, inputs: true, label: 'Volume' },
@@ -201,7 +240,7 @@ describe('VSlider', () => {
     expect(field.value).toBe('40')
   })
 
-  it('inputs in range mode: two fields, anti-crossing at commit time', async () => {
+  it('inputs in range mode: two fields, the committed one pushing its sibling', async () => {
     const { getAllByRole, getByRole, emitted } = render(VSlider, {
       props: { modelValue: [20, 60], range: true, inputs: true, label: 'Budget' },
     })
@@ -209,7 +248,7 @@ describe('VSlider', () => {
     const start = getByRole('spinbutton', { name: 'Budget (start)' })
     await fireEvent.update(start, '80')
     await fireEvent.change(start)
-    expect(emitted('update:modelValue').at(-1)).toEqual([[60, 60]])
+    expect(emitted('update:modelValue').at(-1)).toEqual([[80, 80]])
   })
 
   it('tooltip: the bubbles are present (1 in single, 2 in range), hidden by default', () => {
@@ -282,6 +321,90 @@ describe('VSlider', () => {
       expect(single.getByRole('slider', { name: 'Volume' })).toBeTruthy()
       expect(single.getByRole('spinbutton', { name: 'Volume' })).toBeTruthy()
     })
+
+    // The component binds its own `aria-label` after the forwarded attributes, so it
+    // wins — which is what gives the two thumbs of a range distinct names. It must
+    // therefore RESOLVE the consumer's attribute rather than overwrite it: bound from a
+    // value that is `undefined`, `mergeProps` copies the key anyway and the slider ends
+    // up with no accessible name at all.
+    it('a consumer aria-label names the thumb, and both thumbs of a range', () => {
+      const single = render(VSlider, {
+        props: { modelValue: 40, inputs: true },
+        attrs: { 'aria-label': 'Volume' },
+      })
+      expect(single.getByRole('slider', { name: 'Volume' })).toBeTruthy()
+      expect(single.getByRole('spinbutton', { name: 'Volume' })).toBeTruthy()
+
+      const range = render(VSlider, {
+        props: { modelValue: [20, 60], range: true },
+        attrs: { 'aria-label': 'Budget' },
+      })
+      expect(range.getByRole('slider', { name: 'Budget (start)' })).toBeTruthy()
+      expect(range.getByRole('slider', { name: 'Budget (end)' })).toBeTruthy()
+    })
+
+    // `aria-labelledby` removes the label outright rather than sitting beside it, so the
+    // end thumb takes the referenced text and the start thumb keeps its generic word.
+    it('a consumer aria-labelledby removes the label prop', () => {
+      const { getByRole } = render(VSlider, {
+        props: { modelValue: 40, label: 'Volume' },
+        attrs: { 'aria-labelledby': 'heading' },
+      })
+      const thumb = getByRole('slider')
+      expect(thumb.getAttribute('aria-labelledby')).toBe('heading')
+      expect(thumb.hasAttribute('aria-label')).toBe(false)
+    })
+  })
+
+  // Same mechanism as the accessible name: the component's own `aria-valuetext` exists
+  // only when `labels` is given, and bound after the forwarded attributes it erased a
+  // consumer's for every slider without them.
+  // The hint is a description, not a name: it is appended to whatever the consumer already
+  // pointed at rather than replacing it, and it reaches the thumb they can focus.
+  it('hint: drawn under the track and appended to the consumer aria-describedby', () => {
+    const { getByRole, getByText } = render(VSlider, {
+      props: { modelValue: 40, label: 'Volume', hint: '0 to 100, in steps of 5' },
+      attrs: { 'aria-describedby': 'mine' },
+    })
+    const hint = getByText('0 to 100, in steps of 5')
+    const described = getByRole('slider').getAttribute('aria-describedby') ?? ''
+    expect(described.split(' ')).toEqual(['mine', hint.id])
+  })
+
+  it('a consumer aria-valuetext survives when the component has none', () => {
+    const { getByRole } = render(VSlider, {
+      props: { modelValue: 40, label: 'Gain' },
+      attrs: { 'aria-valuetext': '40 dB' },
+    })
+    expect(getByRole('slider').getAttribute('aria-valuetext')).toBe('40 dB')
+  })
+
+  // The `change` argument, one step of a drag earlier: a range is two native controls,
+  // so through the forwarded attributes a consumer's `@input` only ever reached the end
+  // thumb, and moving the start one told nobody.
+  it('input: emitted with the whole value by EITHER thumb of a range', async () => {
+    const { getByRole, emitted } = render(VSlider, {
+      props: { modelValue: [20, 60], range: true, label: 'Budget' },
+    })
+    const start = getByRole('slider', { name: 'Budget (start)' }) as HTMLInputElement
+    start.value = '30'
+    await fireEvent.input(start)
+    expect(emitted('input')).toEqual([[[30, 60]]])
+
+    const end = getByRole('slider', { name: 'Budget (end)' }) as HTMLInputElement
+    end.value = '70'
+    await fireEvent.input(end)
+    expect(emitted('input')?.at(-1)).toEqual([[30, 70]])
+  })
+
+  it('input: not emitted while readonly', async () => {
+    const { getByRole, emitted } = render(VSlider, {
+      props: { modelValue: 40, label: 'Volume', readonly: true },
+    })
+    const thumb = getByRole('slider') as HTMLInputElement
+    thumb.value = '70'
+    await fireEvent.input(thumb)
+    expect(emitted('input')).toBeUndefined()
   })
 })
 
@@ -309,13 +432,36 @@ describe('VSlider — the wrapper-root split', () => {
     const root = container.querySelector('.v-slider') as HTMLElement
     expect(root.classList.contains('mine')).toBe(true)
     expect(root.style.margin).toBe('4px')
-    expect(root.style.getPropertyValue('--end-fraction')).toBe('0.5')
+    expect(root.style.getPropertyValue('--slider-end-fraction')).toBe('0.5')
   })
 
   it('warns about a name on a range, which cannot submit two values under one', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     render(VSlider, { props: { modelValue: [20, 60], range: true }, attrs: { name: 'span' } })
     expect(warn.mock.calls.map(String).join(' ')).toContain('only the end thumb carries it')
+    warn.mockRestore()
+  })
+
+  // Read once in the setup body, the guards were blind to everything a parent changed
+  // afterwards: a slider re-rendered into 1901 steps drew no tick and said nothing.
+  it('warns after a re-render that makes the ticks undrawable, and only once', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { rerender } = render(VSlider, {
+      props: { modelValue: 40, step: 10, ticks: true, label: 'Volume' },
+    })
+    expect(warn).not.toHaveBeenCalled()
+    await rerender({ step: 0.5 })
+    expect(warn.mock.calls.map(String).join(' ')).toContain('no tick is drawn past 50')
+    const first = warn.mock.calls.length
+    await rerender({ step: 0.25 })
+    expect(warn.mock.calls.length).toBe(first)
+    warn.mockRestore()
+  })
+
+  it('warns about a step that cannot move the thumb', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(VSlider, { props: { modelValue: 40, step: 0, label: 'Volume' } })
+    expect(warn.mock.calls.map(String).join(' ')).toContain('step="0"')
     warn.mockRestore()
   })
 
@@ -417,8 +563,8 @@ describe('VSlider — the wrapper-root split', () => {
   it('single mode: no start fraction, which only a range reads', () => {
     const { container } = render(VSlider, { props: { modelValue: 40, label: 'x' } })
     const root = container.querySelector('.v-slider') as HTMLElement
-    expect(root.style.getPropertyValue('--start-fraction')).toBe('')
-    expect(root.style.getPropertyValue('--end-fraction')).toBe('0.4')
+    expect(root.style.getPropertyValue('--slider-start-fraction')).toBe('')
+    expect(root.style.getPropertyValue('--slider-end-fraction')).toBe('0.4')
   })
 
   // The places depend on the bounds and the step alone: moving the value must hand the

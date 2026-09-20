@@ -11,6 +11,7 @@ const t = storyText({
     free: 'Free',
     labelAfter: 'Label after (default)',
     labelBefore: 'Label before',
+    invalidPlan: 'Pick a plan',
     dotRight: 'Dot on the right',
     dotLeft: 'Dot on the left',
     disabled: 'Disabled',
@@ -25,6 +26,7 @@ const t = storyText({
     free: 'Gratuit',
     labelAfter: 'Libellé après (défaut)',
     labelBefore: 'Libellé avant',
+    invalidPlan: 'Choisissez une formule',
     dotRight: 'Pastille à droite',
     dotLeft: 'Pastille à gauche',
     disabled: 'Désactivé',
@@ -42,10 +44,26 @@ const meta = {
   argTypes: {
     labelPosition: { control: 'select', options: ['start', 'end'] },
   },
+  args: {
+    value: 'standard',
+    readonly: false,
+    labelPosition: 'end',
+    spread: false,
+    invalid: false,
+    disabled: false,
+  },
+  render: (args) => ({
+    components: { VRadio },
+    setup: () => ({ args, plan: ref('standard'), t }),
+    template: '<VRadio v-bind="args" v-model="plan" name="plan-default">Standard</VRadio>',
+  }),
 } satisfies Meta<typeof VRadio>
 
 export default meta
 type Story = StoryObj<typeof meta>
+
+/** One button, and the props the table below drives. */
+export const Default: Story = {}
 
 /**
  * The group is native: the same `name` (fallthrough) + the same v-model. Arrow
@@ -105,13 +123,34 @@ export const Spread: Story = {
     setup: () => ({ v: ref('a'), t }),
     template: `
       <div style="display: grid; gap: 8px; max-width: 320px">
-        <VRadio v-model="v" name="spread-demo" value="a" spread>{{ t.dotRight }}</VRadio>
+        <VRadio v-model="v" name="spread-demo" value="a" spread>{{ t.dotLeft }}</VRadio>
         <VRadio v-model="v" name="spread-demo" value="b" spread label-position="start">
-          {{ t.dotLeft }}
+          {{ t.dotRight }}
         </VRadio>
       </div>
     `,
   }),
+}
+
+/**
+ * `invalid` colours the dot in the danger colour and sets `aria-invalid`, on every button
+ * of the group. It survives the pointer, the row's hover steps excluding it.
+ */
+export const Invalid: Story = {
+  render: () => ({
+    components: { VRadio },
+    setup: () => ({ plan: ref(''), t }),
+    template: `
+      <div style="display: grid; gap: 8px; justify-items: start">
+        <VRadio v-model="plan" name="invalid-demo" value="free" invalid>{{ t.invalidPlan }}</VRadio>
+        <VRadio :model-value="'pro'" name="invalid-demo-2" value="pro" invalid>Pro</VRadio>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    for (const dot of canvasElement.querySelectorAll('.v-radio-input'))
+      await expect(dot).toHaveAttribute('aria-invalid', 'true')
+  },
 }
 
 export const Disabled: Story = {

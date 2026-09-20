@@ -25,7 +25,7 @@ export default {
     },
     readonly: {
       title: 'Read-only',
-      text: '<code>readonly</code> shows the state without letting it change. The native attribute does nothing on a checkbox, so the component cancels the click, which covers Space as well. The box stays focusable, is submitted with its form and is announced as read-only.',
+      text: '<code>readonly</code> shows the state without letting it change. The native attribute does nothing on a checkbox, so the component cancels the click, which covers Space as well. The box stays focusable, is submitted with its form and is announced as read-only. It still takes part in constraint validation, though, so <code>readonly</code> with <code>required</code> and nothing ticked leaves a form that cannot be submitted or fixed.',
     },
   },
 

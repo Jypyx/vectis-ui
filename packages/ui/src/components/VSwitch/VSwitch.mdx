@@ -60,7 +60,13 @@ padding the thumb travels in.
 
 `readonly` shows the setting without letting it change. The component cancels the click, which
 also covers Space and a click on the label. The switch stays focusable, is submitted with its form
-and carries `aria-readonly`; an ON switch trades the accent for `--vectis-color-text-muted`.
+and carries `aria-readonly`. Both positions say so on screen: an ON switch trades the accent for
+`--vectis-color-text-muted`, an OFF one sinks to `--vectis-color-surface-sunken` behind a hairline
+ring, the pair a read-only VCheckbox takes for its box.
+
+A read-only switch still takes part in constraint validation, unlike a natively read-only
+field: `readonly` with `required` and the switch off leaves a form the reader cannot submit and
+cannot fix. Validate the model yourself in that case.
 
 <Canvas of={VSwitchStories.ReadOnly} />
 
@@ -82,4 +88,7 @@ the input, not onto the wrapper: the switch takes part in forms normally.
 - The input is hidden with `opacity: 0` (never `display: none`): it stays focusable by keyboard
   (Space toggles it) and submitted with the form.
 - Visible focus through a ring (`--vectis-focus-ring-*`) on the track, never removed.
+- In Windows forced colors the track draws its own edge and an ON switch takes the system
+  `Highlight` pair. A switch is nothing but backgrounds and a shadow, all of which that mode
+  flattens, so without those rules it loses its state and its outline at once.
 - The thumb's transition respects `prefers-reduced-motion`.

@@ -5,7 +5,7 @@ export default {
   examples: {
     range: {
       title: 'Range',
-      text: '<code>range</code> offers two thumbs to pick a span, which makes the value a pair. The thumbs are stopped from crossing, and each is announced as the start or the end of the range.',
+      text: '<code>range</code> offers two thumbs to pick a span, which makes the value a pair. The pair stays ordered, a thumb taken past its sibling pushing it along, and each is announced as the start or the end of the range.',
     },
     minMax: {
       title: 'Min and max',
@@ -41,7 +41,7 @@ export default {
     },
     form: {
       title: 'In a form',
-      text: '<code>name</code>, <code>id</code> and the aria-* are redirected onto the real range input underneath. Naming goes through the <code>label</code> prop, which sets an aria-label, so pick either it or a visible label of your own. A range has no single value to submit: only the end thumb carries the name.',
+      text: '<code>name</code>, <code>id</code> and the aria-* are redirected onto the real range input underneath. Naming goes through the <code>label</code> prop, which sets an aria-label; your own <code>aria-label</code> or <code>aria-labelledby</code> takes precedence over it, and a range then names its two thumbs from whichever you gave. A range has no single value to submit: only the end thumb carries the name. <code>hint</code> draws a line of help under the track and is appended to your own <code>aria-describedby</code> rather than replacing it.',
     },
     sizes: {
       title: 'Field sizes',
@@ -72,6 +72,7 @@ export default {
         disabled: 'Makes the slider unusable.',
         label:
           'What screen readers announce for the slider. It is an accessible name and draws nothing on screen. In range mode the two thumbs are announced as the start and the end of it.',
+        hint: 'A line of help under the track, stating what the numbers mean or where they may go. It is tied to the slider for assistive technology, so it is read out after the name rather than as part of it.',
         orientation: 'Turns the slider upright, with the lowest value at the bottom.',
         inputs:
           'Adds a number field beside the slider for setting the value exactly, one field or one per end in range mode. Sliding is quick but imprecise; this is the way out.',
@@ -81,9 +82,11 @@ export default {
           'A label for every step, in order: a piece of text, or an icon with the words that name it for screen readers. They also become what a screen reader announces in place of the raw number.',
         tooltip: 'Shows the value in a bubble above the thumb while it is being moved or focused.',
         vModel:
-          'The value, and its shape is what puts the slider in range mode: a single number gives one thumb, a pair of them gives two. The pair is always ordered, the thumbs being stopped from crossing.',
+          'The value: a single number, or an ordered pair once <code>range</code> is set. It is that prop and not the shape of this value that decides how many thumbs are drawn. The pair stays ordered whatever the reader does, a thumb taken past its sibling pushing it along.',
       },
       events: {
+        input:
+          'The value is being changed: every step of a drag, and every key that moves a thumb. It carries the whole value, a pair in range mode, and fires for either thumb.',
         change:
           'The reader settled on a value: a thumb was released or moved by a key, or a number field was committed. It carries the whole value, a pair in range mode, and fires for either thumb, where the v-model follows every step of a drag.',
       },

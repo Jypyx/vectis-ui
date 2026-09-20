@@ -6,15 +6,16 @@ import * as VSliderStories from './VSlider.stories'
 # Slider
 
 A slider built on the native `<input type="range">` — keyboard, the ARIA slider role and form
-participation all for free. The JavaScript is limited to the anti-crossing of range mode, the
+participation all for free. The JavaScript is limited to keeping a range ordered, the
 refusal `readonly` asks for, the numeric fields' bridge and deriving the step positions (ticks and
 labels); no browser behaviour is reimplemented.
 
 The track (6px, the `--vectis-control-size-slider-track` token), the fill, the ticks, the labels and
 the bubbles all align on the **thumb's real centre** — which travels `[thumb/2, 100% − thumb/2]`, not
 `[0, 100%]` — through unitless fractions set as custom properties. Clicking the track moves the
-value (a jump + an immediate drag, natively); on hover, the thumb takes an
-`--vectis-color-accent-surface` tinted background.
+value (a jump + an immediate drag, natively); on hover, the thumb mixes a little accent into
+its own white rather than reading a surface token, which would turn dark with the theme and
+flash a white thumb nearly black.
 
 <Canvas of={VSliderStories.Default} />
 
@@ -23,12 +24,14 @@ value (a jump + an immediate drag, natively); on hover, the thumb takes an
 ## Range
 
 `range` superimposes two native inputs (there is no dual-thumb primitive) — only their thumbs
-capture the pointer, and the JS prevents the values from crossing. The v-model becomes a
+capture the pointer, and the JS keeps the pair ordered: a thumb taken past its sibling pushes
+it along, so a range that has closed onto a single value can always be opened again. The v-model becomes a
 `[start, end]` tuple and the accessible labels are suffixed "(start)" / "(end)". Clicking the track
 is disabled in this mode (it would be ambiguous).
 
-`@change` fires once the reader settles on a value, from either thumb, with the whole
-`[start, end]` pair; the v-model follows every step of the drag in between.
+`@input` fires at every step of a drag and `@change` once the reader settles, both from either
+thumb and both carrying the whole `[start, end]` pair. They are declared events rather than
+attributes left to fall through, which would only ever have reached one of the two inputs.
 
 <Canvas of={VSliderStories.Range} />
 
@@ -58,7 +61,8 @@ Non-numeric values through icons (those names come from the consumer's font):
 
 `inputs` adds `<VInput type="number">` fields for precise adjustment: one after the slider in single
 mode, one per bound in range mode. The entry is validated on `change` (blur or Enter), never while
-typing: parse, clamp to the bounds, snap to the step and anti-crossing; an empty or invalid entry
+typing: parse, clamp to the bounds, snap to the last step that fits and push the sibling thumb if
+needed; an empty or invalid entry
 silently reverts to the current value.
 
 <Canvas of={VSliderStories.WithInputs} />
@@ -126,23 +130,32 @@ A **range** has two thumbs and therefore no single value to submit. They go to t
 the component says so in development: bind the model to two inputs of your own when a form has to
 receive both bounds.
 
-The accessible name goes through `label` rather than through `aria-label`, which is what gives
-each thumb of a range a name of its own.
+The accessible name goes through `label`, and an `aria-label` or `aria-labelledby` of your own
+takes precedence over it. Whichever you give is what names each thumb of a range, which is why
+the two are announced as its start and its end rather than as two sliders sharing one name.
 
 `label` **draws nothing**: it is an accessible name, unlike the `label` of VInput and the other
 text fields, which is rendered above the field. A visible caption for the slider belongs to the page
-around it, as it does for VInputOTP.
+around it, as it does for VInputOTP. What the component does draw is `hint`, a line of help under
+the track, tied to the thumb through `aria-describedby` and appended to whatever you pointed at
+yourself.
+
+<Canvas of={VSliderStories.WithHint} />
 
 ## Accessibility
 
-- Always supply `label`: it names the range input(s) (suffixed "(start)" / "(end)" in range mode) as
-  well as the numeric fields.
+- Always name the slider: `label` does it, and so does an `aria-label` or an `aria-labelledby` of
+  your own, which take precedence over the prop. Whichever you use names the range input(s)
+  (suffixed "(start)" / "(end)" in range mode) as well as the numeric fields.
 - With `labels`, `aria-valuetext` translates the numeric value into a step label; the labels' icons
   carry their accessible label (an `aria-label` through VIcon).
 - The tooltip bubbles are `aria-hidden`: the value is already announced by the slider role.
 - Focus is visible through a ring (`--vectis-focus-ring-*`) on the thumb; the bubble also appears on
   keyboard focus.
 - The transitions (the thumb's background, the bubbles) respect `prefers-reduced-motion`.
+- In Windows forced colors the track draws its own edge and the fill takes the system
+  `Highlight`. The bar is painted almost entirely in backgrounds, which that mode flattens to
+  `Canvas`, so without those rules only the thumb's border would be left on screen.
 
 This component's accessible labels come from the design system dictionary: they translate globally
 (see **Foundations › Internationalization**), and the text props stay authoritative for a

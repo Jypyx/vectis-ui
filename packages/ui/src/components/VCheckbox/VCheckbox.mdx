@@ -67,6 +67,10 @@ focusable, is submitted with its form and carries `aria-readonly`. It sinks like
 field (`--vectis-color-surface-sunken`), and a ticked box trades the accent for
 `--vectis-color-text-muted`.
 
+A read-only box still takes part in constraint validation, unlike a natively read-only field:
+`readonly` with `required` and nothing ticked leaves a form the reader cannot submit and
+cannot fix. Validate the model yourself in that case.
+
 <Canvas of={VCheckboxStories.ReadOnly} />
 
 A long label wraps, and the box stays aligned on the first line without being compressed:
@@ -88,4 +92,7 @@ it server-side — it sets `aria-invalid`.
   and submitted with the form.
 - Visible focus through a ring (`--vectis-focus-ring-*`) on the box, never removed.
 - `readonly` keeps the box in the tab order and sets `aria-readonly`.
+- In Windows forced colors a ticked box takes the system `Highlight` pair, the same one a
+  pressed VToggleItem and a selected VChip take: an author background is forced to `Canvas`
+  there, so the fill has to be asked for by name.
 - The transitions respect `prefers-reduced-motion`.

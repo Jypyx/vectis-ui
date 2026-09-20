@@ -21,7 +21,7 @@ export default {
     },
     readonly: {
       title: 'Lecture seule',
-      text: "<code>readonly</code> montre le réglage sans permettre de le changer : un clic ou la barre d'espace sont annulés. L'interrupteur reste focalisable, s'envoie avec son formulaire et est annoncé en lecture seule.",
+      text: "<code>readonly</code> montre le réglage sans permettre de le changer : un clic ou la barre d'espace sont annulés. L'interrupteur reste focalisable, s'envoie avec son formulaire et est annoncé en lecture seule. Il le dit à l'écran dans les deux positions : allumé il échange l'accent contre la couleur sourde, éteint il se creuse derrière un filet.",
     },
   },
 

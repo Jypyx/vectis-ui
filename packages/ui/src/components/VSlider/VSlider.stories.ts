@@ -21,6 +21,7 @@ const t = storyText({
     medium: 'Medium fields (default)',
     large: 'Large fields',
     quota: 'Quota',
+    quotaHint: 'Between 0 and 100 GB, in steps of 5.',
   },
   fr: {
     volume: 'Volume',
@@ -37,6 +38,7 @@ const t = storyText({
     medium: 'Champs moyens (défaut)',
     large: 'Grands champs',
     quota: 'Quota',
+    quotaHint: 'Entre 0 et 100 Go, par pas de 5.',
   },
 })
 
@@ -139,6 +141,26 @@ export const Vertical: Story = {
       </div>
     `,
   }),
+}
+
+/**
+ * `hint` draws a line of help under the track and ties it to the thumb through
+ * `aria-describedby`, appended to whatever the consumer already pointed at.
+ */
+export const WithHint: Story = {
+  render: () => ({
+    components: { VSlider },
+    setup: () => ({ t, value: ref(40) }),
+    template: `
+      <div style="width: 320px">
+        <VSlider v-model="value" :label="t.quota" :hint="t.quotaHint" step="5" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const slider = within(canvasElement).getByRole('slider', { name: 'Quota' })
+    await expect(slider).toHaveAccessibleDescription('Between 0 and 100 GB, in steps of 5.')
+  },
 }
 
 export const WithInputs: Story = {

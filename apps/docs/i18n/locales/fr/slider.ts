@@ -5,7 +5,7 @@ export default {
   examples: {
     range: {
       title: 'Intervalle',
-      text: '<code>range</code> offre deux poignées pour choisir une plage, ce qui fait de la valeur une paire. Les poignées ne peuvent pas se croiser, et chacune est annoncée comme le début ou la fin de la plage.',
+      text: '<code>range</code> offre deux poignées pour choisir une plage, ce qui fait de la valeur une paire. La paire reste ordonnée, une poignée emmenée au-delà de sa voisine la poussant devant elle, et chacune est annoncée comme le début ou la fin de la plage.',
     },
     minMax: {
       title: 'Minimum et maximum',
@@ -41,7 +41,7 @@ export default {
     },
     form: {
       title: 'Dans un formulaire',
-      text: "<code>name</code>, <code>id</code> et les aria-* sont redirigés sur le vrai input range sous-jacent. Le nommage passe par la prop <code>label</code>, qui pose un aria-label : choisissez donc entre elle et un libellé visible à vous. Une plage n'a pas de valeur unique à soumettre : seule la poignée de fin porte le nom.",
+      text: "<code>name</code>, <code>id</code> et les aria-* sont redirigés sur le vrai input range sous-jacent. Le nommage passe par la prop <code>label</code>, qui pose un aria-label ; votre propre <code>aria-label</code> ou <code>aria-labelledby</code> a la priorité sur elle, et une plage nomme alors ses deux poignées à partir de ce que vous avez donné. Une plage n'a pas de valeur unique à soumettre : seule la poignée de fin porte le nom. <code>hint</code> dessine une ligne d'aide sous la piste et s'ajoute à votre propre <code>aria-describedby</code> plutôt que de le remplacer.",
     },
     sizes: {
       title: 'Taille des champs',
@@ -73,6 +73,7 @@ export default {
         disabled: 'Rend le curseur inutilisable.',
         label:
           "Ce que les lecteurs d'écran annoncent pour le curseur. C'est un nom accessible, rien ne s'affiche à l'écran. En mode intervalle, les deux poignées sont annoncées comme le début et la fin de celui-ci.",
+        hint: "Une ligne d'aide sous la piste, qui dit ce que les nombres signifient ou jusqu'où ils peuvent aller. Elle est rattachée au curseur pour les technologies d'assistance, donc lue après le nom plutôt que comme une partie de celui-ci.",
         orientation: 'Dresse le curseur à la verticale, la valeur la plus basse en bas.',
         inputs:
           "Ajoute un champ numérique à côté du curseur pour poser la valeur exactement, un champ ou un par extrémité en mode intervalle. Glisser est rapide mais imprécis ; c'est la porte de sortie.",
@@ -83,9 +84,11 @@ export default {
         tooltip:
           "Affiche la valeur dans une bulle au-dessus de la poignée pendant qu'on la déplace ou qu'elle a le focus.",
         vModel:
-          'La valeur, et sa FORME est ce qui met le curseur en mode intervalle : un nombre unique donne une poignée, une paire en donne deux. La paire est toujours ordonnée, les poignées étant empêchées de se croiser.',
+          "La valeur : un nombre unique, ou une paire ordonnée dès que <code>range</code> est posé. C'est cette prop, et non la forme de cette valeur, qui décide du nombre de poignées. La paire reste ordonnée quoi que fasse le lecteur, une poignée emmenée au-delà de sa voisine la poussant devant elle.",
       },
       events: {
+        input:
+          "La valeur est en train de changer : à chaque pas d'un glissement, et à chaque touche qui déplace une poignée. L'événement porte la valeur entière, une paire en mode intervalle, et part de l'une ou l'autre poignée.",
         change:
           "Le lecteur s'est arrêté sur une valeur : une poignée a été relâchée ou déplacée au clavier, ou un champ numérique a été validé. L'événement porte la valeur entière, une paire en mode intervalle, et part de l'une ou l'autre poignée, là où le v-model suit chaque pas d'un glissement.",
       },

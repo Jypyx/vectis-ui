@@ -19,6 +19,7 @@ const t = storyText({
     wifi: 'Wi-Fi',
     wifiHint: 'Joins known networks automatically.',
     managed: 'Managed by your administrator',
+    managedOff: 'Guest access, managed by your administrator',
   },
   fr: {
     notifications: 'Notifications',
@@ -33,6 +34,7 @@ const t = storyText({
     wifi: 'Wi-Fi',
     wifiHint: 'Rejoint automatiquement les réseaux connus.',
     managed: 'Géré par votre administrateur',
+    managedOff: 'Accès invité, géré par votre administrateur',
   },
 })
 
@@ -92,8 +94,8 @@ export const Spread: Story = {
     setup: () => ({ a: ref(true), b: ref(false), t }),
     template: `
       <div style="display: grid; gap: 8px; max-width: 320px">
-        <VSwitch v-model="a" spread>{{ t.switchRight }}</VSwitch>
-        <VSwitch v-model="b" spread label-position="start">{{ t.switchLeft }}</VSwitch>
+        <VSwitch v-model="a" spread>{{ t.switchLeft }}</VSwitch>
+        <VSwitch v-model="b" spread label-position="start">{{ t.switchRight }}</VSwitch>
       </div>
     `,
   }),
@@ -157,12 +159,21 @@ export const WithHint: Story = {
   },
 }
 
-/** `readonly` keeps the switch focusable and announced, and refuses the change. */
+/**
+ * `readonly` keeps the switch focusable and announced, and refuses the change. Both
+ * positions say so on screen: an off switch sinks the way a read-only checkbox does, an
+ * on switch trades the accent for the muted colour.
+ */
 export const ReadOnly: Story = {
   render: () => ({
     components: { VSwitch },
-    setup: () => ({ on: ref(true), t }),
-    template: '<VSwitch v-model="on" readonly :label="t.managed" />',
+    setup: () => ({ on: ref(true), off: ref(false), t }),
+    template: `
+      <div style="display: grid; gap: 8px">
+        <VSwitch v-model="on" readonly :label="t.managed" />
+        <VSwitch v-model="off" readonly :label="t.managedOff" />
+      </div>
+    `,
   }),
   play: async ({ canvasElement }) => {
     const sw = within(canvasElement).getByRole('switch', { name: 'Managed by your administrator' })

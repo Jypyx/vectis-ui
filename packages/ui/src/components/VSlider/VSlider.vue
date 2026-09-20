@@ -4,7 +4,7 @@
  * A value chosen by sliding a thumb along a track, optionally a range between two.
  *
  * Underneath is a native `<input type="range">`, which brings the keyboard, the ARIA and the
- * form behaviour. The JS covers only what it cannot: stopping the two values crossing —
+ * form behaviour. The JS covers only what it cannot: keeping the pair of a range ordered —
  * there is no native two-thumb control, so a range is two superimposed — refusing a change
  * when `readonly`, which a range input has no native form of, feeding the optional number
  * fields, and computing the positions of the ticks and labels.
@@ -15,19 +15,25 @@
  * everything meant to line up with it has to follow that same run.
  */
 
-import { computed, inject, ref, watch } from 'vue'
+import { computed, inject, ref, watch, watchEffect } from 'vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
 import { inputGroupKey } from '../VInput/context'
 
+import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useControlShape } from '../../composables/useControlShape'
+import { useFieldIds } from '../../composables/useFieldIds'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { isDev } from '../../utils/env'
 import { clamp } from '../../utils/number'
 import { useMessages } from '../../i18n/state'
 
+/**
+ * What one step of the track is called: a piece of text, or an icon paired with the words
+ * that name it, which is what a screen reader reads in place of the raw number.
+ */
 export type SliderLabel = string | { icon: IconSource; label: string }
 
 /** The value of a slider: one number, or an ordered pair of them in range mode. */
@@ -75,11 +81,17 @@ interface SliderProps {
    * end of it.
    */
   label?: string
+  /**
+   * A line of help under the track, stating what the numbers mean or where they may go. It
+   * is tied to the slider for assistive technology, so it is read out after the name rather
+   * than as part of it.
+   */
+  hint?: string
   /** Turns the slider upright, with the lowest value at the bottom. */
   orientation?: SliderOrientation
   /**
-   * Adds a number field beside the slider for setting the value exactly — one, or one
-   * per end in range mode. Sliding is quick but imprecise; this is the way out.
+   * Adds a number field beside the slider for setting the value exactly: one, or one per
+   * end in range mode. Sliding is quick but imprecise; this is the way out.
    */
   inputs?: boolean
   /**
@@ -88,7 +100,7 @@ interface SliderProps {
    */
   ticks?: boolean
   /**
-   * A label for every step, in order — a piece of text, or an icon with the words that
+   * A label for every step, in order: a piece of text, or an icon with the words that
    * name it for screen readers. They also become what a screen reader announces in
    * place of the raw number.
    */
@@ -107,6 +119,7 @@ const props = withDefaults(defineProps<SliderProps>(), {
   invalid: false,
   size: 'md',
   label: undefined,
+  hint: undefined,
   orientation: 'horizontal',
   inputs: false,
   ticks: false,
@@ -115,13 +128,21 @@ const props = withDefaults(defineProps<SliderProps>(), {
 })
 
 /**
- * The value, and its SHAPE is what puts the slider in range mode: a single number — 0 to
- * begin with — gives one thumb, a pair of them gives two. The pair is always ordered, the
- * thumbs being stopped from crossing.
+ * The value: a single number, 0 to begin with, or an ordered pair once `range` is set. It
+ * is that prop and not the shape of this value that decides how many thumbs are drawn.
+ * The pair stays ordered whatever the reader does, a thumb taken past its sibling pushing
+ * it along rather than stopping against it.
  */
 const model = defineModel<SliderValue>({ default: 0 })
 
 const emit = defineEmits<{
+  /**
+   * The value is BEING changed: every step of a drag, and every key that moves a thumb.
+   * It carries the whole value, a pair in range mode, and fires for either thumb. It is
+   * declared rather than left to fall through, because a range is two native controls and
+   * an attribute only ever reaches one of them.
+   */
+  input: [value: SliderValue]
   /**
    * The reader has SETTLED on a value: a thumb was released or moved by a key, or a number
    * field was committed. It carries the whole value, a pair in range mode, and fires for
@@ -166,17 +187,23 @@ const thumbValue = (which: Thumb) => (which === 'start' ? startValue.value : end
  */
 const frac = (v: number) => clamp((v - props.min) / (props.max - props.min || 1), 0, 1)
 
-// @core — the ONE place a thumb is written, so what stops the two values crossing exists
-// once for the thumbs and the number fields alike. A range is two native controls laid over
-// one another, and there is no dual-thumb control to inherit this behaviour from. It returns
+// @core — the ONE place a thumb is written, so what keeps the pair ordered exists once for
+// the thumbs and the number fields alike. A range is two native controls laid over one
+// another, and there is no dual-thumb control to inherit this behaviour from. It returns
 // what was written, which is what each caller reads back: a model that lags a parent
 // `v-model` would still hold the value from before.
+//
+// TRAP — the thumb being held PUSHES its sibling; it must not stop against it. Two thumbs
+// resting on the same value are one thumb as far as the pointer is concerned, the end one
+// being last in the DOM and therefore the only one it can reach — so a range stopped at
+// `[100, 100]` could only ever be raised, and at the maximum it could not move at all. The
+// pair stays ordered either way; what changes is which thumb gives way.
 function writeThumb(which: Thumb, n: number): SliderValue {
   const next: SliderValue = !props.range
     ? n
     : which === 'start'
-      ? [Math.min(n, endValue.value), endValue.value]
-      : [startValue.value, Math.max(n, startValue.value)]
+      ? [n, Math.max(n, endValue.value)]
+      : [Math.min(n, startValue.value), n]
   model.value = next
   return next
 }
@@ -196,7 +223,9 @@ function onThumbInput(which: Thumb, event: Event) {
     return
   }
   // Written back to the DOM as well: a thumb dragged past its sibling stops against it.
-  el.value = String(writtenFor(writeThumb(which, Number(el.value)), which))
+  const next = writeThumb(which, Number(el.value))
+  el.value = String(writtenFor(next, which))
+  emit('input', next)
 }
 
 // @keyboard @core
@@ -232,7 +261,8 @@ function onThumbChange(which: Thumb, event: Event) {
   if (props.readonly) return
   const value = Number((event.target as HTMLInputElement).value)
   if (!props.range) emit('change', value)
-  else emit('change', which === 'start' ? [value, endValue.value] : [startValue.value, value])
+  else if (which === 'start') emit('change', [value, Math.max(value, endValue.value)])
+  else emit('change', [Math.min(value, startValue.value), value])
 }
 
 /**
@@ -240,7 +270,17 @@ function onThumbChange(which: Thumb, event: Event) {
  * not divide evenly by the step: the native control stops at the last step that fits,
  * short of the maximum, and the ticks have to agree with it.
  */
-const stepCount = computed(() => Math.floor((props.max - props.min) / props.step + 1e-9))
+const stepCount = computed(() =>
+  props.step > 0 ? Math.floor((props.max - props.min) / props.step + 1e-9) : 0,
+)
+
+/**
+ * The highest value a thumb can actually stop on, which is the last whole step and not
+ * necessarily the maximum: with `min=0 max=95 step=10` the native control stops at 90.
+ */
+const lastStop = computed(() =>
+  props.step > 0 ? props.min + stepCount.value * props.step : props.max,
+)
 
 const showTicks = computed(
   () =>
@@ -281,19 +321,28 @@ function labelTextAt(value: number): string {
    comes from the dictionary, which is also where it is changed.
 
    With a single thumb there is nothing to distinguish: that thumb IS the value, so it
-   simply takes the consumer's label, and is left unnamed when none was given. The
-   generic fallback applies to the NUMBER FIELD alone, which cannot go unnamed — a bare
-   field in a form has to say what it holds. */
+   simply takes the resolved label, and is left unnamed when none was given. The
+   generic fallback applies to the NUMBER FIELD alone, which cannot go unnamed: a bare
+   field in a form has to say what it holds.
+
+   TRAP — the name has to be RESOLVED against the consumer's attributes rather than read
+   off the prop. The `:aria-label` below is bound AFTER the forwarded attributes, which is
+   what lets a range give its two thumbs distinct names; bound from a bare `props.label`
+   it ALSO overwrote an `aria-label` the consumer had written, with `undefined`, and
+   `mergeProps` copies the key all the same. `useAriaLabel` is that resolution: it hands
+   back the consumer's own name when there is one, and nothing at all under an
+   `aria-labelledby`, which names the thumb by itself. */
 const m = useMessages()
+const resolvedLabel = useAriaLabel(() => props.label)
 const startLabel = computed(() =>
-  props.label ? m.value.slider.rangeStart(props.label) : m.value.slider.start,
+  resolvedLabel.value ? m.value.slider.rangeStart(resolvedLabel.value) : m.value.slider.start,
 )
 const endLabel = computed(() =>
-  props.label ? m.value.slider.rangeEnd(props.label) : m.value.slider.end,
+  resolvedLabel.value ? m.value.slider.rangeEnd(resolvedLabel.value) : m.value.slider.end,
 )
-const thumbEndLabel = computed(() => (props.range ? endLabel.value : props.label))
+const thumbEndLabel = computed(() => (props.range ? endLabel.value : resolvedLabel.value))
 const fieldEndLabel = computed(() =>
-  props.range ? endLabel.value : (props.label ?? m.value.slider.value),
+  props.range ? endLabel.value : (resolvedLabel.value ?? m.value.slider.value),
 )
 
 const startValueText = computed(() =>
@@ -315,20 +364,52 @@ const endValueText = computed(() => (props.labels ? labelTextAt(endValue.value) 
 defineOptions({ inheritAttrs: false })
 const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
+// The hint is APPENDED to whatever the consumer already pointed at rather than replacing
+// it, which is why the binding below sits after the forwarded attributes, as on every
+// other field of the design system.
+const { hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
+
 // @devwarn
+/*
+ * Every guard here describes something that fails SILENTLY. They sit in an effect, so a
+ * bound that only becomes wrong on a later render is still caught, and each sentence is
+ * given once per instance: the same warning repeated on every keystroke is how a warning
+ * stops being read (the `useFileField` arrangement).
+ */
 if (isDev) {
-  if ((props.ticks || props.labels) && stepCount.value > 50)
-    console.warn(`[VSlider] ${stepCount.value} steps — ticks/labels not rendered past 50.`)
-  if (props.labels && props.labels.length !== stepCount.value + 1)
-    console.warn(
-      `[VSlider] ${props.labels.length} labels for ${stepCount.value + 1} steps — one label per step expected.`,
-    )
-  if (props.range && attrs.name !== undefined)
-    console.warn(
-      `[VSlider] name="${String(attrs.name)}" on a range: only the end thumb carries it, so the form receives one value of the two. Bind the model to two inputs of your own instead.`,
-    )
+  // Keyed by a short id rather than by the sentence: each of these embeds a count, so the
+  // same guard reported twice would read as two different messages and warn again.
+  const warned = new Set<string>()
+  const warn = (id: string, message: string) => {
+    if (warned.has(id)) return
+    warned.add(id)
+    console.warn(`[VSlider] ${message}`)
+  }
+  watchEffect(() => {
+    if (props.step <= 0)
+      warn(
+        'step',
+        `step="${props.step}" cannot move a thumb: the arrow keys do nothing and a value typed into a field is committed as it stands. Give a positive step.`,
+      )
+    if ((props.ticks || props.labels) && stepCount.value > 50)
+      warn(
+        'ticks',
+        `${stepCount.value} steps: no tick is drawn past 50, the comb being unreadable.`,
+      )
+    if (props.labels && props.labels.length !== stepCount.value + 1)
+      warn(
+        'labels',
+        `${props.labels.length} labels for ${stepCount.value + 1} steps: one label per step expected.`,
+      )
+    if (props.range && attrs.name !== undefined)
+      warn(
+        'name',
+        `name="${String(attrs.name)}" on a range: only the end thumb carries it, so the form receives one value of the two. Bind the model to two inputs of your own instead.`,
+      )
+  })
 }
 
+// @core
 // The text held by the number fields, kept apart from the slider's own value.
 //
 // It is typed as text OR a number because these are number fields, whose value Vue
@@ -344,6 +425,7 @@ watch(startValue, (v) => {
 })
 watch(endValue, (v) => (endFieldText.value = String(v)))
 
+// @core
 /**
  * Takes what was typed in a field and makes it the value — but only once the reader has
  * finished, on leaving the field or on Enter. Reading it as they type would clamp the
@@ -364,9 +446,18 @@ function commitField(which: Thumb) {
   // Brought onto the nearest step. The rounding that follows removes the noise decimal
   // steps leave behind — a tenth cannot be represented exactly, so 0.1 × 3 comes out as
   // 0.30000000000000004.
+  //
+  // TRAP — the ceiling is the last step that FITS, never `max` itself. A native range
+  // stops there (that is what `stepCount` counts), so clipped to a `max` the step does not
+  // reach, the model held a value the thumb could not: the browser sanitized its input back
+  // down, and the number, the thumb and the fill then said three different things. A step
+  // that cannot move anything leaves the clamped value alone rather than dividing by it.
   const clamped = clamp(parsed, props.min, props.max)
-  let value = props.min + Math.round((clamped - props.min) / props.step) * props.step
-  value = Math.min(props.max, Math.round(value * 1e10) / 1e10)
+  const snapped =
+    props.step > 0
+      ? props.min + Math.round((clamped - props.min) / props.step) * props.step
+      : clamped
+  const value = Math.min(lastStop.value, Math.round(snapped * 1e10) / 1e10)
   const previous = thumbValue(which)
   const next = writeThumb(which, value)
   // Emitted only when the value MOVED, as a native range emits nothing for a key that
@@ -410,8 +501,8 @@ defineExpose({
     :style="[
       rootStyle,
       {
-        '--start-fraction': range ? String(frac(startValue)) : undefined,
-        '--end-fraction': String(frac(endValue)),
+        '--slider-start-fraction': range ? String(frac(startValue)) : undefined,
+        '--slider-end-fraction': String(frac(endValue)),
       },
     ]"
   >
@@ -461,14 +552,19 @@ defineExpose({
           @change="onThumbChange('start', $event)"
         />
         <!-- The consumer's attributes come FIRST, so what the component decides for
-             itself — the bounds, the value, the disabled state and the thumb's own
-             accessible name — cannot be overwritten by one of them. Naming a slider
-             goes through the `label` prop, which is what gives each thumb of a range a
-             name of its own. -->
+             itself — the bounds, the value and the disabled state — cannot be
+             overwritten by one of them, and so that an ARIA state the consumer sets is
+             not erased by an `undefined` of ours. `aria-valuetext` is one of those: the
+             component has one to say only when `labels` was given.
+
+             The accessible NAME is the exception, and it is bound after on purpose: a
+             range has two thumbs and needs a distinct word for each. It reads a name
+             already resolved against these same attributes, so nothing is lost. -->
         <input
           ref="endThumbEl"
           :aria-invalid="invalid || undefined"
           :aria-readonly="readonly || undefined"
+          :aria-valuetext="endValueText"
           v-bind="forwardedAttrs"
           type="range"
           class="v-slider-input v-slider-input-end"
@@ -478,7 +574,7 @@ defineExpose({
           :disabled="resolvedDisabled"
           :value="endValue"
           :aria-label="thumbEndLabel"
-          :aria-valuetext="endValueText"
+          :aria-describedby="describedBy"
           @keydown="onThumbKeydown"
           @input="onThumbInput('end', $event)"
           @change="onThumbChange('end', $event)"
@@ -522,6 +618,7 @@ defineExpose({
       :aria-label="fieldEndLabel"
       @change="commitField('end')"
     />
+    <span v-if="hint" :id="hintId" class="v-slider-hint">{{ hint }}</span>
   </div>
 </template>
 
@@ -536,7 +633,7 @@ defineExpose({
     align-items: center;
     column-gap: var(--vectis-space-2);
     row-gap: var(--vectis-space-1);
-    width: 100%;
+    inline-size: 100%;
     font-family: var(--vectis-text-family);
   }
 
@@ -613,7 +710,7 @@ defineExpose({
   }
 
   .v-slider-fill {
-    --fill-fraction: var(--end-fraction);
+    --fill-fraction: var(--slider-end-fraction);
     position: absolute;
     inset-block: 0;
     inset-inline-start: 0;
@@ -622,9 +719,11 @@ defineExpose({
   }
 
   .v-slider[data-range] .v-slider-fill {
-    --fill-fraction: var(--start-fraction);
+    --fill-fraction: var(--slider-start-fraction);
     inset-inline-start: var(--slider-at);
-    inline-size: calc((100% - var(--slider-thumb)) * (var(--end-fraction) - var(--start-fraction)));
+    inline-size: calc(
+      (100% - var(--slider-thumb)) * (var(--slider-end-fraction) - var(--slider-start-fraction))
+    );
   }
 
   .v-slider-tick {
@@ -776,11 +875,11 @@ defineExpose({
   }
 
   .v-slider-tooltip-start {
-    --fill-fraction: var(--start-fraction);
+    --fill-fraction: var(--slider-start-fraction);
   }
 
   .v-slider-tooltip-end {
-    --fill-fraction: var(--end-fraction);
+    --fill-fraction: var(--slider-end-fraction);
   }
 
   .v-slider:has(.v-slider-input-start:active) .v-slider-tooltip-start,
@@ -810,7 +909,11 @@ defineExpose({
        their own; this reserves enough room for either kind, a small line of text or an
        icon. */
     min-block-size: var(--vectis-icon-size-md);
+    /* The pair travels together, as it does in every `[data-size]` block of
+       control-size.css: the size applies to every source, the optical size only to the
+       ligature, and setting one without the other draws a 20px glyph cut for 24. */
     --vectis-icon-size: var(--vectis-icon-size-md);
+    --vectis-icon-opsz: 20;
     font-size: var(--vectis-text-caption-size);
     color: var(--vectis-color-text-muted);
   }
@@ -829,15 +932,34 @@ defineExpose({
     white-space: nowrap;
   }
 
+  /* The hint takes no area of its own: it spans every column and is AUTO-PLACED, which
+     drops it into an implicit row under whichever of the eleven zone templates is in force.
+     Given a row in each of them instead, the `row-gap` would open under every slider that
+     has no hint at all. */
+  .v-slider-hint {
+    grid-column: 1 / -1;
+    font-size: var(--vectis-text-caption-size);
+    line-height: var(--vectis-text-caption-leading);
+    color: var(--vectis-color-text-muted);
+  }
+
+  .v-slider[data-disabled] .v-slider-hint {
+    color: var(--vectis-color-text-subtle);
+  }
+
   .v-slider-field.v-input {
     inline-size: var(--vectis-control-size-slider-field);
   }
 
-  .v-slider-field-start {
+  /* Compounded with `.v-input` for the same reason as the width above: these land on an
+     element VInput's own sheet styles, and at (0,1,0) they would TIE with `.v-input`. They
+     set a `grid-area`, which VInput does not, so nothing is wrong today; the point is that
+     one of the three rules on this element was hardened and two were not. */
+  .v-slider-field-start.v-input {
     grid-area: field-start;
   }
 
-  .v-slider-field-end {
+  .v-slider-field-end.v-input {
     grid-area: field-end;
   }
 
@@ -949,6 +1071,56 @@ defineExpose({
     --slider-thumb-shadow: none;
     --slider-thumb-cursor: not-allowed;
     cursor: not-allowed;
+  }
+
+  /* Windows forced colors erase every author colour, and the slider is painted almost
+     entirely in backgrounds: the track, the fill and the ticks all flatten to `Canvas` and
+     the bar disappears, leaving a thumb whose border is the only thing left on screen. The
+     track draws its own edge as an inset ring here, the fill takes the system Highlight
+     pair the rest of the design system uses for a selected state, and the ticks fall back
+     to the text colour, inverted over the fill the way they already are over the accent.
+
+     (0,4,0) is enough: nothing in this sheet reaches past (0,3,0). */
+  @media (forced-colors: active) {
+    .v-slider .v-slider-track {
+      forced-color-adjust: none;
+      background: Canvas;
+      box-shadow: inset 0 0 0 var(--vectis-control-border-width) CanvasText;
+    }
+
+    .v-slider .v-slider-fill {
+      forced-color-adjust: none;
+      background: Highlight;
+    }
+
+    .v-slider .v-slider-tick {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+
+    .v-slider .v-slider-tick[data-filled] {
+      background: HighlightText;
+    }
+
+    .v-slider .v-slider-input {
+      forced-color-adjust: none;
+      --slider-thumb-bg: Canvas;
+      --slider-thumb-border: CanvasText;
+      --slider-thumb-shadow: none;
+    }
+
+    .v-slider[data-disabled] .v-slider-track {
+      box-shadow: inset 0 0 0 var(--vectis-control-border-width) GrayText;
+    }
+
+    .v-slider[data-disabled] .v-slider-fill,
+    .v-slider[data-disabled] .v-slider-tick {
+      background: GrayText;
+    }
+
+    .v-slider[data-disabled] .v-slider-input {
+      --slider-thumb-border: GrayText;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -21,7 +21,7 @@ export default {
     },
     readonly: {
       title: 'Lecture seule',
-      text: '<code>readonly</code>, posé sur chaque bouton du groupe, laisse la sélection où elle est. Le composant annule le clic, et les flèches sont couvertes aussi, puisque le navigateur sélectionne le bouton suivant par un clic : le focus se déplace, la sélection non.',
+      text: "<code>readonly</code>, posé sur chaque bouton du groupe, laisse la sélection où elle est. Le composant annule le clic, et les flèches sont couvertes aussi, puisque le navigateur sélectionne le bouton suivant par un clic : le focus se déplace, la sélection non. Aucun <code>aria-readonly</code> n'est écrit, ARIA l'autorisant sur un <code>radiogroup</code> et pas sur un <code>radio</code> : posez-le sur l'élément qui nomme la question, sinon rien n'annonce l'état. Et un bouton en lecture seule participe toujours à la validation de contrainte, donc <code>readonly</code> avec <code>required</code> et rien de sélectionné laisse un formulaire impossible à envoyer comme à corriger.",
     },
   },
 

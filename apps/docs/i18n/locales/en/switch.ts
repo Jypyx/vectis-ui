@@ -21,7 +21,7 @@ export default {
     },
     readonly: {
       title: 'Read-only',
-      text: '<code>readonly</code> shows the setting without letting it change: a click or the Space key is cancelled. The switch stays focusable, is submitted with its form and is announced as read-only.',
+      text: '<code>readonly</code> shows the setting without letting it change: a click or the Space key is cancelled. The switch stays focusable, is submitted with its form and is announced as read-only. It says so on screen either way round, an on switch trading the accent for the muted colour and an off one sinking behind a hairline ring.',
     },
   },
 

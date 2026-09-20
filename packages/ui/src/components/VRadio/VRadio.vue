@@ -174,12 +174,16 @@ defineExpose({
   }
 
   /* The state painting, rule for rule the same as VCheckbox's with its own classes: keep the
-     two ALIGNED. Every state below but the hovers weighs (0,3,0), so their ORDER arbitrates
-     them: checked, read-only, invalid, then disabled last. The two hovers exclude every state
-     they must not repaint, so no order argument reaches them. */
+     two ALIGNED. The states below weigh (0,3,0), bar the read-only base at (0,2,0), so their
+     ORDER arbitrates them: checked, read-only, invalid, then disabled last.
+
+     The two hovers sit at (0,7,0) and therefore beat every one of them on specificity, order
+     or no order — which is why they have to EXCLUDE by hand each state they must not repaint.
+     Forgetting the invalid pair is what once rubbed the danger border out under the pointer,
+     on a control whose whole point at that moment is to look wrong. */
   .v-radio:not([data-readonly])
     .v-choice-row:hover
-    .v-radio-input:not(:disabled, :checked)
+    .v-radio-input:not(:disabled, :checked, :user-invalid, [aria-invalid='true'])
     + .v-radio-dot {
     border-color: color-mix(
       in oklab,
@@ -195,14 +199,14 @@ defineExpose({
 
   .v-radio:not([data-readonly])
     .v-choice-row:hover
-    .v-radio-input:not(:disabled):is(:checked)
+    .v-radio-input:not(:disabled, :user-invalid, [aria-invalid='true']):checked
     + .v-radio-dot {
     background: var(--vectis-color-accent-hover);
     border-color: var(--vectis-color-accent-hover);
   }
 
   /* Read-only sinks like a read-only field, and a selected control trades the accent for the
-     muted text colour: still plainly on, no longer inviting a click. The mark takes the
+     muted text colour: still plainly on, no longer inviting a click. The inner disc takes the
      surface colour, which contrasts with that fill in both themes, where white would vanish
      against the light grey of the dark theme. `:where()` keeps both rules at the weight of
      the states they sit between. */
@@ -226,6 +230,25 @@ defineExpose({
     background: var(--vectis-color-surface-muted);
     border-color: var(--vectis-color-border);
     color: var(--vectis-color-text-subtle);
+  }
+
+  @media (forced-colors: active) {
+    /* Windows forced colors erase every author colour: a `background` becomes `Canvas` and a
+     `border-color` becomes `CanvasText`, so a selected radio loses its inner disc outright, that disc being
+     a `background` on a `background` where a checkbox has a `stroke` that survives. The system
+     Highlight pair is what says "selected" here, as it does on a pressed VToggleItem, a
+     selected VChip and the current VPagination page.
+
+     The class is repeated to (0,8,0) so the row's own hover rules, which reach (0,7,0),
+     cannot repaint it: `forced-color-adjust: none` takes the forcing off this element, and
+     a hover left winning would then paint its REAL grey over the system colour. */
+    .v-radio-input.v-radio-input.v-radio-input.v-radio-input.v-radio-input:checked:not(:disabled)
+      + .v-radio-dot {
+      forced-color-adjust: none;
+      background: Highlight;
+      border-color: Highlight;
+      color: HighlightText;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
