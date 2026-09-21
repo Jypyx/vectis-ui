@@ -8,14 +8,22 @@
  *
  * Hence `.click()` and not `showPicker()` — both need a transient user activation, but
  * `showPicker()` THROWS without one where `.click()` is merely inert — and hence
- * `resetNative()` on every path: without it, re-picking the SAME file after a clear fires no
- * `change` at all and that file becomes unreachable.
+ * `syncNative()` on every path, which writes the selection back into the input so the form
+ * submits it, and so re-picking a file that left the selection is a change again.
  *
  * Everything the two components did identically lives here, so the two cannot drift: the
  * attributes of the hidden input, the screening of what comes in, the removal of one file and
  * the emptying of all of them, and the development warnings both of them owe the integrator.
  */
-import { computed, getCurrentInstance, ref, watchEffect, type ComputedRef, type Ref } from 'vue'
+import {
+  computed,
+  getCurrentInstance,
+  ref,
+  watch,
+  watchEffect,
+  type ComputedRef,
+  type Ref,
+} from 'vue'
 
 import { isDev } from '../utils/env'
 import { screenFiles, type FileRejection } from '../utils/file'
@@ -96,15 +104,36 @@ export function useFileField(options: FileFieldOptions) {
     )
   })
 
+  // @core
   /**
-   * TRAP — picking the SAME file again after a clear or a removal fires no `change` at all:
-   * as far as the input is concerned its value never changed, and that file becomes
-   * unreachable with nothing to show for it. Emptying it on every path is what keeps it
-   * selectable.
+   * Writes the selection back into the hidden input, which is what the FORM reads: `name`,
+   * `form` and `required` land there, and an input left holding the last batch the dialog
+   * produced (or emptied) would submit that rather than the selection, or nothing at all.
+   * A `FileList` cannot be built, but a `DataTransfer` hands one out.
+   *
+   * TRAP — it also keeps every file that LEFT the selection pickable again. The input holds
+   * exactly the selection, so choosing a file that was cleared, removed or refused differs
+   * from what it holds and fires `change`; left holding it, the dialog would answer the
+   * same file with no event at all.
    */
-  function resetNative() {
-    if (fileEl.value) fileEl.value.value = ''
+  function syncNative() {
+    const el = fileEl.value
+    if (!el) return
+    // @fallback
+    // An environment without `DataTransfer` (jsdom) can only empty the input,
+    // which keeps a file pickable again and leaves the form without it.
+    if (typeof DataTransfer === 'undefined') {
+      el.value = ''
+      return
+    }
+    const transfer = new DataTransfer()
+    for (const file of model.value) transfer.items.add(file)
+    el.files = transfer.files
   }
+
+  // A value set from outside, a consumer emptying the list after an upload, reaches the
+  // input the same way.
+  watch(model, syncNative, { flush: 'post' })
 
   /**
    * The single entry into the model: the dialog and a drop both arrive here.
@@ -126,10 +155,15 @@ export function useFileField(options: FileFieldOptions) {
 
     for (const rejection of rejected) emit('reject', rejection)
 
-    resetNative()
+    // The dialog has just written ITS batch into the input, whatever happens to it here.
+    syncNative()
     if (accepted.length === 0) return
 
+    // A single file replaced by another has left the selection as surely as one taken out
+    // by its cross, and `remove` is how an upload already under way for it is cancelled.
+    const replaced = props.multiple ? undefined : model.value[0]
     model.value = [...current, ...accepted]
+    if (replaced && replaced !== model.value[0]) emit('remove', replaced, 0)
     emit('change', model.value)
   }
 
@@ -141,7 +175,7 @@ export function useFileField(options: FileFieldOptions) {
    * Everything the hidden input is bound with, the consumer's form attributes included. It
    * is taken out of the tab order and hidden from screen readers, which leaves the visible
    * control as the single stop and the single announcement; it stays disabled only when the
-   * component is — a read-only one still submits what it holds.
+   * component is, since a read-only one still submits what it holds (`syncNative`).
    */
   const nativeInputAttrs = computed(() => ({
     ...Object.fromEntries(
@@ -177,7 +211,7 @@ export function useFileField(options: FileFieldOptions) {
     if (!file || !enabled.value) return undefined
 
     model.value = model.value.filter((_, i) => i !== index)
-    resetNative()
+    syncNative()
     emit('remove', file, index)
     emit('change', model.value)
     return file
@@ -186,7 +220,7 @@ export function useFileField(options: FileFieldOptions) {
   /** Empties the selection, and the hidden input with it. */
   function clear() {
     model.value = []
-    resetNative()
+    syncNative()
     options.onClear?.()
     emit('change', model.value)
   }
@@ -212,7 +246,7 @@ export function useFileField(options: FileFieldOptions) {
         warn('`maxFiles` ignored without `multiple`: single mode already caps at one file.')
       if (options.forwardedAttrs.value.required !== undefined)
         warn(
-          '`required` lands on the hidden file input, which is not focusable: the browser blocks submission with no visible message. Validate the v-model yourself and use the `invalid` prop.',
+          '`required` lands on the hidden file input: the browser does block an empty submission, but its message points at an input nobody can see. Validate the v-model yourself and use the `invalid` prop.',
         )
       for (const message of options.warnings?.() ?? []) if (message) warn(message)
     })

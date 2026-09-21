@@ -42,10 +42,12 @@ import type { TimePickerAllowed } from '../VTimePicker/limits'
 import {
   formatTime,
   formatTimeDisplay,
-  formatTimeMask,
   hourCycleFor,
   isValidTime,
   parseTime,
+} from '../../utils/time'
+import {
+  formatTimeMask,
   parseTimeMask,
   snapMinute,
   timeCaret,
@@ -53,9 +55,10 @@ import {
   timeToMask,
   to12h,
   withMeridiem,
-} from '../../utils/time'
-import type { Meridiem, TimeOption } from '../../utils/time'
-import { timeMatches } from './search'
+} from '../../utils/clock'
+import type { Meridiem } from '../../utils/time'
+import type { TimeOption } from '../../utils/clock'
+import { readWrittenTime, timeMatches } from './search'
 import { isDev } from '../../utils/env'
 import { hostWarnsKey } from '../../utils/hostWarns'
 import { digitsOf } from '../../utils/text'
@@ -77,8 +80,11 @@ export type TimeInputMode = 'picker' | 'input' | 'list'
 
 /** What the `#footer` slot receives. */
 export interface TimeInputFooterSlotProps {
+  /** Writes the time on the clock into the value, then closes. */
   confirm: () => void
+  /** Closes and drops the time on the clock, the value left as it was. */
   cancel: () => void
+  /** The same as `cancel`, under the name VDateInput's footer uses. */
   close: () => void
 }
 
@@ -354,20 +360,17 @@ if (isDev) {
       props.pickerIcon !== scheduleIcon ? 'pickerIcon' : [],
       props.pickerIconLabel ? 'pickerIconLabel' : [],
     )
+    const isAre = inert.length > 1 ? 'are' : 'is'
     if (isList.value && inert.length > 0)
       console.warn(
-        `[VTimeInput] ${inert.join(', ')} ${inert.length > 1 ? 'are' : 'is'} ignored in "list" mode: the list draws its own chevron.`,
+        `[VTimeInput] ${inert.join(', ')} ${isAre} ignored in "list" mode: the list draws its own chevron.`,
       )
     // A field one types into without the picker has no end icon either, as in VDateInput.
     // A read-only field is left out: it is a state that comes and goes, not a configuration
     // to correct.
-    const iconless = ([] as string[]).concat(
-      props.pickerIcon !== scheduleIcon ? 'pickerIcon' : [],
-      props.pickerIconLabel ? 'pickerIconLabel' : [],
-    )
-    if (typing.value && !props.showPicker && iconless.length > 0)
+    if (typing.value && !props.showPicker && inert.length > 0)
       console.warn(
-        `[VTimeInput] ${iconless.join(', ')} ${iconless.length > 1 ? 'are' : 'is'} ignored without showPicker: a field one types into has no clock icon unless it offers the clock.`,
+        `[VTimeInput] ${inert.join(', ')} ${isAre} ignored without showPicker: a field one types into has no clock icon unless it offers the clock.`,
       )
     const problem = limitsProblem(limits.value)
     if (problem) console.warn(`[VTimeInput] ${problem}`)
@@ -480,10 +483,13 @@ const {
   // carries on.
   openOnFocus: () => typing.value,
   onOpen: () => {
-    // Only the picker works on a draft; the list writes its choice straight away.
-    if (!hasPanel.value) return
     const parts = modelParts.value
     if (parts) pickerDraft.value = formatTime(parts.hour, parts.minute)
+    // A clock opened BESIDE a field one types into starts empty: it opened because the
+    // field took the focus, not because a time was asked for, and a draft set to the
+    // current time would hand its half of the day to the digits about to be typed, so
+    // "0930" typed in the afternoon would become 21:30.
+    else if (typing.value) pickerDraft.value = null
     else {
       // Opening on the current time when none is set. Reading the clock is safe here:
       // this runs from a handler, hence in a browser, never during a render — and it is
@@ -513,6 +519,24 @@ function confirm() {
 
 /** Cancel: the draft is simply dropped with the panel. */
 const cancel = closeAndFocus
+
+// @a11y
+// TRAP — the popup wiring is spread OVER the forwarded attributes, never bound as four
+// attributes after them. A binding written after `v-bind` wins even when it is
+// `undefined`, so a field with no panel would erase the consumer's own `role` or
+// `aria-controls`; spread, the wiring carries no key at all when there is no panel, and
+// wins over the consumer's when there is one, which is what a combobox needs.
+const inputAttrs = computed(() =>
+  hasPanel.value
+    ? {
+        ...fieldAttrs.value,
+        role: 'combobox',
+        'aria-haspopup': 'dialog',
+        'aria-expanded': open.value,
+        'aria-controls': panelId,
+      }
+    : fieldAttrs.value,
+)
 
 /*
  * Emptying the value, called by the field as it emits its clear event. The focus is taken
@@ -584,6 +608,9 @@ const {
   readValue: () => model.value,
   writeValue: (time) => {
     model.value = time
+    // With the clock open beside the field, it follows what is typed: otherwise OK would
+    // write the clock's time back over the one the reader has just typed.
+    if (open.value && hasPanel.value) pickerDraft.value = time
   },
   maxDigits: () => 4,
   format: formatTimeMask,
@@ -592,7 +619,8 @@ const {
   toMask: (time) => timeToMask(time, resolvedFormat.value),
 })
 
-// @keyboard — what the mask's keys mean for a time: typing anything that is not a digit,
+// @keyboard
+// What the mask's keys mean for a time: typing anything that is not a digit,
 // the separator included so that "9:30" can be typed exactly as it reads, completes the
 // hour with a leading zero and moves on to the minutes; the down arrow is the one explicit
 // way from the field into the picker.
@@ -617,7 +645,11 @@ function onFieldKeydown(event: KeyboardEvent) {
  * even in a field showing a 12-hour clock. Anything else contributes its digits alone.
  */
 function onFieldPaste(event: ClipboardEvent) {
-  onPaste(event, (pasted) => (isValidTime(pasted) ? pasted : null))
+  onPaste(event, (pasted) =>
+    isValidTime(pasted)
+      ? pasted
+      : readWrittenTime(pasted, resolvedFormat.value, currentMeridiem.value),
+  )
 }
 
 /*
@@ -755,6 +787,8 @@ defineExpose({
     :style="rootStyle"
     :data-open="open ? '' : undefined"
     :data-mode="resolvedMode"
+    :data-disabled="resolvedDisabled ? '' : undefined"
+    :data-readonly="readonly ? '' : undefined"
     @focusout="onRootFocusout"
     @keydown="onRootKeydown"
   >
@@ -796,7 +830,7 @@ defineExpose({
         v-model="fieldModel"
         :inputmode="typing ? 'numeric' : undefined"
         :autocomplete="typing ? 'off' : undefined"
-        v-bind="fieldAttrs"
+        v-bind="inputAttrs"
         :readonly="readonly"
         :no-typing="!typing"
         :label="label"
@@ -815,10 +849,6 @@ defineExpose({
         :loading-text="loadingText"
         :icon-end="endIcon"
         :icon-end-label="endIconLabel"
-        :role="hasPanel ? 'combobox' : undefined"
-        :aria-haspopup="hasPanel ? 'dialog' : undefined"
-        :aria-expanded="hasPanel ? open : undefined"
-        :aria-controls="hasPanel ? panelId : undefined"
         @click:icon-end="toggleFromIcon"
         @clear="clearValue"
         @focus="onFieldFocus"
@@ -921,7 +951,9 @@ defineExpose({
     font-family: var(--vectis-text-family);
   }
 
-  .v-time-input-control {
+  /* The pointer says "this opens a panel", which a read-only or disabled field no longer
+     does: the VFileInput gating. */
+  .v-time-input:not([data-disabled]):not([data-readonly]) .v-time-input-control {
     cursor: pointer;
   }
 
@@ -945,7 +977,7 @@ defineExpose({
   /* A field one types into shows the text cursor rather than the pointer a clickable
      control shows. Its figures are also given equal widths: with proportional ones the
      text shifts as digits are typed, and the caret appears to jitter. */
-  .v-time-input[data-mode='input'] .v-time-input-control {
+  .v-time-input[data-mode='input']:not([data-disabled]):not([data-readonly]) .v-time-input-control {
     cursor: text;
   }
 
@@ -998,13 +1030,8 @@ defineExpose({
      same room on a page and in a panel. The picker brings its own layout too — the gap
      between its parts and the centring of the face — so nothing of that is declared here.
 
-     TRAP — NO `display` here, and that is not an omission. The column layout comes from
-     `.v-panel`, which is (0,1,0) and therefore loses to `.v-overlay:not(:popover-open)`, the
-     guard that hides a closed popover. This selector is (0,2,0): declaring a display on it
-     would TIE with that guard, and a tie between two sheets is settled by whichever the
-     consumer's bundler put last. The symptom when the component wins is silent and nasty —
-     the closed panel keeps its box, invisible at `opacity: 0` and fixed over the page, and
-     swallows every click that lands on it.
+     NO `display` here either: the column layout is `.v-panel`'s, and a panel declaring
+     its own is what the doubled-class `.v-overlay` guard exists to overrule.
 
      The selector compounds two classes VPopover puts on the same element, because the
      padding is also declared by the shared panel class: at equal specificity the winner
@@ -1013,14 +1040,13 @@ defineExpose({
   .v-popover-panel.v-time-input-panel {
     width: max-content;
     padding: 0;
-    color: var(--vectis-color-text);
   }
 
   /* The list form is a VCombobox and takes everything from it — this is the one
      declaration that does not belong to a combobox in general.
 
      A column of times read down the panel is a column of FIGURES, and proportional ones
-     slide the colon from row to row. The selector is (0,2,0) against the panel's own
+     slide the colon from row to row. The selector is (0,3,0) against the panel's own
      (0,1,0), so it wins on specificity and not on the order the consumer's bundler
      happens to give the two sheets. */
   .v-time-input[data-mode='list'] .v-combobox-panel {

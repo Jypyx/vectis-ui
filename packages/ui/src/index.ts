@@ -253,8 +253,13 @@ export type {
    them — the `TimePickerAllowed` arrangement, and what lets one handler serve both. */
 export type { FileRejectReason, FileRejection } from './utils/file'
 export { default as VFilePicker } from './components/VFilePicker/VFilePicker.vue'
-export type { FilePickerPreview, FilePickerRow } from './components/VFilePicker/VFilePicker.vue'
-export type { FileKind } from './components/VFilePicker/fileKind'
+export type {
+  FilePickerBrowseSlotProps,
+  FilePickerPreview,
+  FilePickerRemoveSlotProps,
+  FilePickerRow,
+} from './components/VFilePicker/VFilePicker.vue'
+export type { FilePickerKind } from './components/VFilePicker/fileKind'
 export { default as VCarousel } from './components/VCarousel/VCarousel.vue'
 export type {
   CarouselControls,

@@ -1,6 +1,7 @@
 // @core
 /**
- * How a search matches a row of VTimeInput's list.
+ * How VTimeInput reads a time out of free text: a search matching a row of its list, and a
+ * pasted time read as a whole.
  *
  * It sits in the component's folder rather than in `utils/time.ts` for two reasons. There
  * is one consumer, so it fails that folder's admission rule — the `VCombobox/infiniteScroll`
@@ -11,7 +12,9 @@
  * Pure, so it is testable without a mount — which matters here, since what makes the rule
  * worth having is the handful of entries it must and must not accept.
  */
-import { parseTime } from '../../utils/time'
+import { formatTime, parseTime } from '../../utils/time'
+import { to24h } from '../../utils/clock'
+import type { Meridiem } from '../../utils/time'
 import { digitsOf, normalizeText, pad2 } from '../../utils/text'
 
 /** Everything but the letters, so that "9:30 PM" and "pm" can be compared as words. */
@@ -60,4 +63,39 @@ export function timeMatches(label: string, value: string, query: string): boolea
 
   const letters = lettersOf(q)
   return !letters || lettersOf(label).includes(letters)
+}
+
+const WRITTEN_TIME_RE = /^(\d{1,2})\s*[:.hH]\s*(\d{2})\s*(?:([aApP])\.?\s*[mM]?\.?)?$/
+
+/**
+ * A pasted time read as a whole, in canonical `HH:mm`, or `null` for anything the digits
+ * alone should handle.
+ *
+ * It takes a time written the way people write one rather than only the canonical form:
+ * an unpadded hour (`9:30`), a dot or an `h` between the two (`19.05`, `9h30`) and an
+ * AM/PM marker in any of its spellings (`9:30 PM`, `9:30pm`, `12:15 a.m.`). Read by its
+ * digits alone, `9:30` would become the mask `93:0`.
+ *
+ * An hour the marker does not settle is read on the clock on display: a 12-hour clock
+ * puts `9:30` in the half of the day the field is showing, where `19:05` can only ever be
+ * the evening, whatever clock is shown.
+ */
+export function readWrittenTime(
+  text: string,
+  format: '12h' | '24h',
+  meridiem: Meridiem,
+): string | null {
+  const match = WRITTEN_TIME_RE.exec(text.trim())
+  if (!match) return null
+  const hour = Number(match[1])
+  const minute = Number(match[2])
+  if (minute > 59) return null
+  const marker = match[3]?.toUpperCase()
+  if (marker) {
+    if (hour < 1 || hour > 12) return null
+    return formatTime(to24h(hour, marker === 'P' ? 'PM' : 'AM'), minute)
+  }
+  if (hour > 23) return null
+  if (format === '12h' && hour >= 1 && hour <= 12) return formatTime(to24h(hour, meridiem), minute)
+  return formatTime(hour, minute)
 }

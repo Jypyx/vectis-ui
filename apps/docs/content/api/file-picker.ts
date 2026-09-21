@@ -13,10 +13,10 @@ export default {
         { name: 'subtitle', type: 'string' },
         { name: 'icon', type: 'IconSource', default: 'cloud_upload' },
         { name: 'hideBrowse', type: 'boolean', default: 'false' },
-        { name: 'browseLabel', type: 'string' },
+        { name: 'browseText', type: 'string' },
         { name: 'preview', type: 'FilePickerPreview', values: "false | 'bottom' | 'end'", default: 'false' },
         { name: 'hideThumbnails', type: 'boolean', default: 'false' },
-        { name: 'typeIcons', type: 'Partial<Record<FileKind, IconSource>>' },
+        { name: 'typeIcons', type: 'Partial<Record<FilePickerKind, IconSource>>' },
         { name: 'removeIcon', type: 'IconSource', default: 'close' },
         { name: 'multiple', type: 'boolean', default: 'false' },
         { name: 'accept', type: 'string' },
@@ -39,10 +39,10 @@ export default {
         { name: 'icon', type: '{}' },
         { name: 'title', type: '{}' },
         { name: 'subtitle', type: '{}' },
-        { name: 'browse', type: '{ open: () => void; disabled: boolean; }' },
+        { name: 'browse', type: 'FilePickerBrowseSlotProps' },
         { name: 'item', type: 'FilePickerRow' },
         { name: 'thumbnail', type: 'FilePickerRow' },
-        { name: 'remove', type: '{ file: File; index: number; remove: () => void; removeLabel: string; }' },
+        { name: 'remove', type: 'FilePickerRemoveSlotProps' },
       ],
     },
   ],
@@ -55,16 +55,32 @@ export default {
 }`,
     },
     {
-      name: 'FileKind',
-      definition: `export type FileKind =
+      name: 'FilePickerBrowseSlotProps',
+      definition: `export interface FilePickerBrowseSlotProps {
+  open: () => void
+  disabled: boolean
+}`,
+    },
+    {
+      name: 'FilePickerKind',
+      definition: `export type FilePickerKind =
   'image' | 'pdf' | 'audio' | 'video' | 'archive' | 'spreadsheet' | 'code' | 'file'`,
+    },
+    {
+      name: 'FilePickerRemoveSlotProps',
+      definition: `export interface FilePickerRemoveSlotProps {
+  file: File
+  index: number
+  remove: () => void
+  removeLabel: string
+}`,
     },
     {
       name: 'FilePickerRow',
       definition: `export interface FilePickerRow {
   file: File
   index: number
-  kind: FileKind
+  kind: FilePickerKind
   thumbnail: string | undefined
   icon: IconSource
   sizeText: string

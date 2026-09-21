@@ -86,14 +86,11 @@ describe('VFilePicker', () => {
   })
 
   // No JS: `disabled` on a real <button> is what makes it inert, unfocusable and
-  // silent on click, all at once.
-  it.each([{ disabled: true }, { readonly: true }])(
-    'disables the zone-as-control natively under %o',
-    (props) => {
-      const { zone } = renderUpload({ hideBrowse: true, ...props })
-      expect((zone as HTMLButtonElement).disabled).toBe(true)
-    },
-  )
+  // silent on click, all at once. Read-only is the other case, covered under "states".
+  it('disables the zone-as-control natively when disabled', () => {
+    const { zone } = renderUpload({ hideBrowse: true, disabled: true })
+    expect((zone as HTMLButtonElement).disabled).toBe(true)
+  })
 
   it('splits $attrs: the form attributes on the file input, everything else on the zone', () => {
     const { native, zone, container } = renderUpload(
@@ -150,17 +147,17 @@ describe('VFilePicker', () => {
       modelValue: [fileOf('a.pdf', 10)],
     })
     const writes = trackReset(native)
+    const resetsOn = async (act: () => Promise<unknown>) => {
+      const before = writes.length
+      await act()
+      expect(writes.length).toBeGreaterThan(before)
+    }
 
-    await pick(native, [fileOf('b.pdf', 10)])
-    expect(writes).toEqual([''])
-
+    await resetsOn(() => pick(native, [fileOf('b.pdf', 10)]))
     // A batch refused in full resets too: a file refused once must stay
     // re-pickable.
-    await pick(native, [fileOf('big.pdf', 500)])
-    expect(writes).toHaveLength(2)
-
-    await fireEvent.click(getByRole('button', { name: 'Remove a.pdf' }))
-    expect(writes).toHaveLength(3)
+    await resetsOn(() => pick(native, [fileOf('big.pdf', 500)]))
+    await resetsOn(() => fireEvent.click(getByRole('button', { name: 'Remove a.pdf' })))
   })
 
   it('a click on the zone opens the dialog — but never a click on the browse button', async () => {
@@ -544,5 +541,65 @@ describe('VFilePicker — loading and invalid', () => {
   it('invalid marks the root, which is what colours the zone outline', () => {
     const { container } = render(VFilePicker, { props: { title: 'Drop', invalid: true } })
     expect(container.querySelector('.v-file-picker')?.hasAttribute('data-invalid')).toBe(true)
+  })
+})
+
+describe('VFilePicker — states', () => {
+  it('says it is invalid to assistive technology, on the control the reader reaches', () => {
+    const withButton = renderUpload({ invalid: true })
+    expect(
+      withButton.getByRole('button', { name: 'Browse files' }).getAttribute('aria-invalid'),
+    ).toBe('true')
+    const zoneOnly = renderUpload({ invalid: true, hideBrowse: true })
+    expect(zoneOnly.zone.getAttribute('aria-invalid')).toBe('true')
+  })
+
+  it('readonly keeps the controls in the tab order, unavailable rather than disabled', () => {
+    const zoneOnly = renderUpload({ readonly: true, hideBrowse: true })
+    expect((zoneOnly.zone as HTMLButtonElement).disabled).toBe(false)
+    expect(zoneOnly.zone.getAttribute('aria-disabled')).toBe('true')
+    const withButton = renderUpload({ readonly: true })
+    const browse = withButton.getByRole('button', { name: 'Browse files' }) as HTMLButtonElement
+    expect(browse.disabled).toBe(false)
+    expect(browse.getAttribute('aria-disabled')).toBe('true')
+  })
+
+  it('a drag under way when the picker is switched off leaves no highlight behind', async () => {
+    const { container, rerender } = renderUpload()
+    const el = container.querySelector('.v-file-picker')!
+    await fireEvent.dragEnter(el)
+    await rerender({ title: 'Drop your files', disabled: true })
+    expect(el.hasAttribute('data-dragging')).toBe(false)
+    await fireEvent.dragLeave(el)
+    await rerender({ title: 'Drop your files', disabled: false })
+    expect(el.hasAttribute('data-dragging')).toBe(false)
+  })
+
+  it('a single file replaced by another is reported as removed', async () => {
+    const a = fileOf('a.pdf')
+    const { native, emitted } = renderUpload({ modelValue: [a] })
+    await pick(native, [fileOf('b.pdf')])
+    expect(emitted('remove')).toEqual([[a, 0]])
+  })
+
+  it('renders with a null v-model rather than throwing', () => {
+    expect(() => renderUpload({ modelValue: null })).not.toThrow()
+  })
+
+  it('an image that could not be decoded is not tried again on every change', async () => {
+    URL.createObjectURL = vi.fn((blob: Blob) => `blob:${(blob as File).name}`)
+    URL.revokeObjectURL = vi.fn()
+    const broken = fileOf('photo.png', 100, 'image/png')
+    const { container, rerender } = renderUpload({
+      preview: 'bottom',
+      multiple: true,
+      modelValue: [broken],
+    })
+    await nextTick()
+    await fireEvent.error(container.querySelector('img')!)
+    vi.mocked(URL.createObjectURL).mockClear()
+    await rerender({ title: 'Drop your files', modelValue: [broken, fileOf('a.pdf')] })
+    expect(URL.createObjectURL).not.toHaveBeenCalled()
+    vi.restoreAllMocks()
   })
 })

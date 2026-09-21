@@ -105,16 +105,22 @@ control being one of the ways the value is written.
 
 `disabled` takes the clock out of use: the face leaves the tab order, both numerals become
 disabled buttons, and the hand, its centre and the numerals grey out through the colour tokens.
+Nothing reaches it any more, a pointer or a face focused through `focus()` included.
 
 <Canvas of={VTimePickerStories.States} />
 
 ## Accessibility
 
+- `label` names the whole clock, a `role="group"`, and **draws nothing**: unlike a field's, it is
+  an accessible name alone.
 - The face is a single **`role="slider"`**, and it is the only focusable element in it. The numerals
   around it are `aria-hidden` visual markers: they are reached by the pointer's angle rather than one
   cell at a time, so the whole spoken value has to be carried by that one element — `aria-valuenow`,
   `aria-valuemin`, `aria-valuemax` and a localized `aria-valuetext`.
-- Its accessible name follows the step, "Hour" or "Minutes".
+- Its accessible name follows the step, "Hour" or "Minutes". On a 12-hour clock the spoken hour
+  carries its half of the day ("9 o'clock PM"), the AM/PM control not being on the slider's way.
+- The two large numerals are named with the figure they show first ("09, Select hour"), so a
+  speech-input user can say what they see.
 - `aria-valuemin` and `aria-valuemax` describe the CLOCK rather than the restrictions, which have
   no range to state once `allowedHours` may leave holes in it. What a restriction does to the
   keyboard is skip: the arrows move to the next value that can be chosen, and hold still when there
@@ -123,7 +129,10 @@ disabled buttons, and the hand, its centre and the numerals grey out through the
   name alone is not reliably announced. Putting the clock back on the hour through `reset()` stays
   silent, because that is not something the reader did.
 - The keyboard is a slider's: arrows step, `Home` and `End` go to the ends, `PageUp`/`PageDown` move
-  the minutes by five, and `Enter` moves from the hour to the minutes and then confirms.
+  the minutes by at least five, and `Enter` moves from the hour to the minutes and then confirms.
+  The minutes step along the grid `minuteStep` draws: from a value off it, 9:07 on a quarter-hour
+  clock, the down arrow goes to 9:00 and the up arrow to 9:15.
+- A press at the very centre of the face aims at nothing: there is no angle to read there.
 - The arrows are **not** flipped in a right-to-left page, and neither is the face: clockwise means
   the same thing everywhere. Only the half-day control follows the reading direction.
 - The selected numeral is listed in the axe contrast exclusions, and that is a tool limitation

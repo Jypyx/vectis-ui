@@ -52,7 +52,7 @@ export default {
           "Si les heures sont montrées sur une horloge de 12 ou de 24 heures. Omise, la langue du lecteur décide, ce qui est presque toujours ce que l'on veut.",
         mode: "La forme que prend le champ : saisissable, en mode <code>picker</code> où l'horloge est la seule voie d'entrée et se trouve donc forcée, ou une LISTE d'heures à intervalle fixe, où une horloge n'aurait aucun sens. C'est une autre question que <code>readonly</code>, qui gèle le champ par toutes les voies à la fois.",
         showPicker:
-          "Propose le sélecteur à côté d'un champ saisissable : une icône en fin de champ, et un panneau qu'elle ouvre. Elle est laissée indéfinie plutôt que mise à faux, ce qui distingue « non fournie » d'un refus explicite.",
+          "Propose le sélecteur à côté d'un champ saisissable : une icône en fin de champ, et un panneau qui s'ouvre au focus. L'horloge suit ce qui est saisi et, sans valeur, s'ouvre vide. Cela ne signifie rien en mode <code>picker</code>, où l'horloge est imposée, ni en mode <code>list</code>, où la liste tient lieu de panneau.",
         minuteStep:
           "L'intervalle entre deux heures qui peuvent être choisies. Il s'applique au sélecteur, aux flèches et aux lignes de la liste.",
         min: "L'heure la plus tôt que l'on puisse choisir, incluse, en chaîne canonique sur 24 heures. Le sélecteur et la liste retirent tous deux ce qu'elle exclut, et une heure saisie en dehors rend le champ invalide.",

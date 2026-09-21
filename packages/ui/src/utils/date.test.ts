@@ -4,23 +4,25 @@ import {
   addDays,
   addMonths,
   buildMonthGrid,
-  caretAfterDigits,
   clampISO,
   compareISO,
-  dateMaskFor,
-  formatDateMask,
   formatDisplayRange,
   isDateAllowed,
-  isoToMask,
   isValidISO,
   isWithin,
-  maskPlaceholder,
-  monthNames,
-  monthNamesCompact,
-  parseDateMask,
+  isoOf,
   parseISO,
   weekdayNames,
 } from './date'
+import {
+  caretAfterDigits,
+  dateMaskFor,
+  formatDateMask,
+  isoToMask,
+  maskPlaceholder,
+  parseDateMask,
+} from '../components/VDateInput/mask'
+import { monthName, monthNames, monthNamesCompact } from '../components/VDatePicker/names'
 
 describe('utils/date', () => {
   it('validates and parses an ISO in local time (no UTC drift)', () => {
@@ -176,5 +178,38 @@ describe('buildMonthGrid', () => {
     for (const cell of cells) expect(cell.day).toBe(parseISO(cell.iso)!.getDate())
     expect(cells[0]).toEqual({ iso: '2026-06-01', day: 1, adjacent: null })
     expect(cells.at(-1)).toEqual({ iso: '2026-07-12', day: 12, adjacent: 'next' })
+  })
+})
+
+describe('utils/date — names and far years', () => {
+  it('the compact month names never repeat, and stay as they were where they did not', () => {
+    for (const locale of ['vi-VN', 'et-EE', 'cs-CZ', 'lt-LT', 'el-GR', 'hy-AM', 'mn-MN']) {
+      expect([locale, new Set(monthNamesCompact(locale)).size]).toEqual([locale, 12])
+    }
+    expect(monthNamesCompact('en-US').slice(0, 6)).toEqual([
+      'Jan.',
+      'Feb.',
+      'Mar.',
+      'Apr.',
+      'May',
+      'June',
+    ])
+  })
+
+  it('names the months of the Gregorian calendar whatever the locale calendar is', () => {
+    const gregorian = new Intl.DateTimeFormat('fa-IR', {
+      month: 'long',
+      calendar: 'gregory',
+      timeZone: 'UTC',
+    }).format(Date.UTC(2021, 0, 1))
+    expect(monthNames('fa-IR')[0]).toBe(gregorian)
+    expect(monthName('fa-IR', 0)).toBe(gregorian)
+    expect(monthName('en-US-u-ca-islamic', 0)).toBe('January')
+  })
+
+  it('reads and writes a year below 1000 as it is', () => {
+    expect(parseISO('0050-01-01')?.getFullYear()).toBe(50)
+    expect(isoOf(999, 0, 10)).toBe('0999-01-10')
+    expect(isValidISO('0050-01-01')).toBe(true)
   })
 })

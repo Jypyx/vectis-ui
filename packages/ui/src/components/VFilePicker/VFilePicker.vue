@@ -43,9 +43,29 @@ import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useLocale, useMessages } from '../../i18n/state'
 import { isDev } from '../../utils/env'
 import { fileKey, formatBytes, type FileRejection } from '../../utils/file'
-import { fileKind, type FileKind } from './fileKind'
+import { fileKind, type FilePickerKind } from './fileKind'
 
-/** Where the files taken are listed — under the zone, beside it, or nowhere. */
+/** What the `#browse` slot receives. */
+export interface FilePickerBrowseSlotProps {
+  /** Opens the file dialog; a button of your own has no other way to. */
+  open: () => void
+  /** Whether the picker is disabled, for your button to follow. */
+  disabled: boolean
+}
+
+/** What the `#remove` slot receives. */
+export interface FilePickerRemoveSlotProps {
+  /** The file the row stands for. */
+  file: File
+  /** Its position in the selection. */
+  index: number
+  /** Takes the file out of the selection, the only way to. */
+  remove: () => void
+  /** The ready-made accessible name of the control, the file's name included. */
+  removeLabel: string
+}
+
+/** Where the files taken are listed: under the zone, beside it, or nowhere. */
 export type FilePickerPreview = false | 'bottom' | 'end'
 
 /**
@@ -58,13 +78,13 @@ export interface FilePickerRow {
   /** Its position in the list. */
   index: number
   /** What kind of file it is, as worked out from its type or its extension. */
-  kind: FileKind
+  kind: FilePickerKind
   /**
    * The address of its image thumbnail, when there is one.
    *
-   * It is absent on the server AND on the browser's first render — those addresses only
-   * exist in a browser, and creating them during the first render would make the two
-   * markups differ — and absent as well for anything the browser fails to decode. Fall
+   * It is absent on the server AND on the browser's first render, since those addresses
+   * only exist in a browser and creating them during the first render would make the two
+   * markups differ. It is absent as well for anything the browser fails to decode. Fall
    * back to the icon in that case.
    */
   thumbnail: string | undefined
@@ -82,7 +102,7 @@ interface FilePickerProps {
    * with no instruction is just a rectangle.
    *
    * Note that this prop shadows the HTML attribute of the same name on the component
-   * itself, an accepted trade-off — a tooltip on a drop zone would be redundant anyway.
+   * itself, an accepted trade-off: a tooltip on a drop zone would be redundant anyway.
    */
   title: string
   /** A second line under it, for the constraints in plain words: kinds, sizes, how many. */
@@ -96,10 +116,13 @@ interface FilePickerProps {
    * reacts to clicks.
    */
   hideBrowse?: boolean
-  /** The wording of the browse button. It falls back to the design system dictionary. */
-  browseLabel?: string
   /**
-   * Where the files taken are listed: under the zone, or beside it — beside folds back
+   * The wording drawn on the browse button, which is also its accessible name. It falls
+   * back to the design system dictionary.
+   */
+  browseText?: string
+  /**
+   * Where the files taken are listed: under the zone, or beside it. Beside folds back
    * underneath when the COMPONENT is narrow, following the width it was given rather
    * than the width of the window.
    *
@@ -108,7 +131,7 @@ interface FilePickerProps {
    */
   preview?: FilePickerPreview
   /**
-   * Shows the kind icon for every file in that list, images included — the way out when
+   * Shows the kind icon for every file in that list, images included: the way out when
    * a list holds many images, or very large ones.
    *
    * Left out, an image is shown as a thumbnail: it is given a temporary address, created
@@ -117,7 +140,7 @@ interface FilePickerProps {
    */
   hideThumbnails?: boolean
   /** Replaces the icon of one or more kinds of file. */
-  typeIcons?: Partial<Record<FileKind, IconSource>>
+  typeIcons?: Partial<Record<FilePickerKind, IconSource>>
   /** The icon of the button removing a file from the list. */
   removeIcon?: IconSource
   /** Allows several files to be taken. With one only, every extra file is turned away. */
@@ -127,7 +150,7 @@ interface FilePickerProps {
    *
    * It is applied TWICE, and it has to be: as an attribute, which is what filters the
    * system's file dialog, and again in code, which is the only thing that can filter a
-   * DROPPED file — the attribute has no say over a drop.
+   * DROPPED file, the attribute having no say over a drop.
    */
   accept?: string
   /** The largest ONE file may be, in bytes. */
@@ -138,15 +161,19 @@ interface FilePickerProps {
   maxFiles?: number
   /** Makes the zone unusable, greyed out through the colour tokens. */
   disabled?: boolean
-  /** Shows what was taken without allowing it to change: no dialog, no drop, no removal. */
+  /**
+   * Shows what was taken without allowing it to change: no dialog, no drop, no removal. Its
+   * buttons stay reachable from the keyboard, announced as unavailable.
+   */
   readonly?: boolean
   /**
-   * Marks the zone as invalid, which colours its outline. It is for a rule of your own:
-   * nothing here is checked by the browser, the real input being hidden.
+   * Marks the zone as invalid, which colours its outline and is announced on the control
+   * the reader reaches. It is for a rule of your own: nothing here is checked by the browser,
+   * the real input being hidden.
    */
   invalid?: boolean
   /**
-   * Shows a spinner in place of the zone icon — while an upload is under way, typically.
+   * Shows a spinner in place of the zone icon, typically while an upload is under way.
    * It says that something is happening and changes nothing else: files can still be
    * dropped and the dialog still opens. `disabled` and `readonly` are the props that cut
    * those off.
@@ -165,7 +192,7 @@ const props = withDefaults(defineProps<FilePickerProps>(), {
   subtitle: undefined,
   icon: () => cloudUploadIcon,
   hideBrowse: false,
-  browseLabel: undefined,
+  browseText: undefined,
   preview: false,
   hideThumbnails: false,
   typeIcons: undefined,
@@ -214,9 +241,9 @@ defineSlots<{
    * The browse button. Call the `open` it receives: without it a button of your own
    * could no longer open the file dialog at all.
    */
-  browse?(props: { open: () => void; disabled: boolean }): unknown
+  browse?(props: FilePickerBrowseSlotProps): unknown
   /**
-   * A WHOLE row of the list — the way out for a row showing its own upload progress. It
+   * A WHOLE row of the list, the way out for a row showing its own upload progress. It
    * receives everything the standard row was given, so nothing has to be worked out
    * again.
    */
@@ -229,19 +256,21 @@ defineSlots<{
   /**
    * The control that removes a row. Two of the values it receives are not optional in
    * practice: `remove` is the only thing that can take the file out, and `removeLabel` is
-   * the ready-made accessible name — including the file's own — without which the button
+   * the ready-made accessible name, the file's own included, without which the button
    * would be announced as nothing at all.
    */
-  remove?(props: { file: File; index: number; remove: () => void; removeLabel: string }): unknown
+  remove?(props: FilePickerRemoveSlotProps): unknown
 }>()
 
+// `get` reads an explicit `null` as the empty list: the default applies only to a model
+// that was never given, and `files = ref(null)` is a common start in untyped code.
 /**
- * Always a LIST of files, whether or not several are allowed — never a file on its own.
+ * Always a LIST of files, whether or not several are allowed, and never a file on its own.
  * The shape of the value does not depend on a prop, so a consumer never has to narrow a
  * union TypeScript has no way of discriminating. With a single file it is simply a list
  * of at most one.
  */
-const model = defineModel<File[]>({ default: () => [] })
+const model = defineModel<File[]>({ default: () => [], get: (files) => files ?? [] })
 
 const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
@@ -273,7 +302,8 @@ const {
   props,
   emit,
   forwardedAttrs,
-  // @a11y @devwarn — the name a consumer gives a plain container is ignored by assistive
+  // @a11y @devwarn
+  // The name a consumer gives a plain container is ignored by assistive
   // technology, and axe reports it, so this one fails SILENTLY at runtime too. Behind
   // `isDev`, which a production build folds to false, so the message is dropped.
   warnings: isDev
@@ -293,7 +323,7 @@ const showList = computed(() => props.preview !== false && model.value.length > 
  * Which icon stands for which kind of file. A consumer overrides it entry by entry, so
  * replacing one icon does not mean restating the other seven.
  */
-const KIND_ICONS: Record<FileKind, IconSource> = {
+const KIND_ICONS: Record<FilePickerKind, IconSource> = {
   image: imageIcon,
   pdf: pictureAsPdfIcon,
   audio: audioFileIcon,
@@ -304,7 +334,8 @@ const KIND_ICONS: Record<FileKind, IconSource> = {
   file: descriptionIcon,
 }
 
-const iconForKind = (kind: FileKind): IconSource => props.typeIcons?.[kind] ?? KIND_ICONS[kind]
+const iconForKind = (kind: FilePickerKind): IconSource =>
+  props.typeIcons?.[kind] ?? KIND_ICONS[kind]
 
 function onZoneClick(event: MouseEvent) {
   // The browse button already handles its own click, and that click also reaches the
@@ -391,7 +422,9 @@ function syncThumbnails() {
   // created at all. This gate — and not a warning — is what makes the default
   // configuration cost strictly nothing.
   const wanted = new Set(
-    !props.hideThumbnails && props.preview !== false ? model.value.filter(isThumbable) : [],
+    !props.hideThumbnails && props.preview !== false
+      ? model.value.filter((file) => isThumbable(file) && !undecodable.has(file))
+      : [],
   )
 
   for (const [file, url] of thumbUrls) {
@@ -415,9 +448,18 @@ function dropThumbnail(file: File) {
   if (!url) return
   URL.revokeObjectURL(url)
   thumbUrls.delete(file)
+  undecodable.add(file)
 }
 
-// @ssr — the addresses are created in the browser only; the server and the browser's
+/**
+ * The files whose image failed once. They are still in the selection, so without this
+ * `syncThumbnails` would hand each of them a new address on every change of the list, only
+ * for the `<img>` to fail again. Weak, so a file that leaves takes its entry with it.
+ */
+const undecodable = new WeakSet<File>()
+
+// @ssr
+// The addresses are created in the browser only; the server and the browser's
 // first render both show the kind icon, so the two markups agree.
 onMounted(syncThumbnails)
 /*
@@ -464,11 +506,11 @@ const rows = computed<{ key: number; row: FilePickerRow; removeLabel: string }[]
 )
 
 defineExpose({
-  /** Moves the focus to the browse control — the button, or the zone when it is one. */
+  /** Moves the focus to the browse control: the button, or the zone when it is one. */
   focus: (options?: FocusOptions) => focusTarget()?.focus(options),
   /**
-   * Opens the file dialog. It only works when called from something the reader did — a
-   * click, a key press: browsers refuse to open a file dialog by themselves.
+   * Opens the file dialog. It only works when called from something the reader did, a
+   * click or a key press: browsers refuse to open a file dialog by themselves.
    */
   open: openPicker,
   /**
@@ -508,11 +550,13 @@ defineExpose({
            markup, and unreachable by keyboard. -->
       <component
         :is="hideBrowse ? 'button' : 'div'"
-        v-bind="zoneAttrs"
         ref="zoneEl"
+        :aria-invalid="hideBrowse && invalid ? 'true' : undefined"
+        :aria-disabled="hideBrowse && readonly ? 'true' : undefined"
+        v-bind="zoneAttrs"
         class="v-file-picker-zone"
         :type="hideBrowse ? 'button' : undefined"
-        :disabled="hideBrowse && !interactive ? true : undefined"
+        :disabled="hideBrowse && disabled ? true : undefined"
         @click="onZoneClick"
       >
         <span class="v-file-picker-icon">
@@ -546,14 +590,19 @@ defineExpose({
           <span class="v-file-picker-separator">{{ m.filePicker.or }}</span>
 
           <slot name="browse" :open="openPicker" :disabled="!interactive">
+            <!-- Read-only leaves it reachable, as every read-only control of the design
+                 system is: unavailable rather than disabled. The invalid state is said on
+                 it, the control the reader reaches, the zone being a plain container. -->
             <VButton
               class="v-file-picker-browse"
               variant="outline"
               tone="neutral"
-              :disabled="!interactive"
+              :disabled="disabled"
+              :aria-disabled="readonly ? 'true' : undefined"
+              :aria-invalid="invalid ? 'true' : undefined"
               @click="openPicker"
             >
-              {{ browseLabel ?? m.filePicker.browse }}
+              {{ browseText ?? m.filePicker.browse }}
             </VButton>
           </slot>
         </template>
@@ -667,7 +716,10 @@ defineExpose({
     cursor: pointer;
   }
 
-  .v-file-picker:not([data-disabled]):not([data-readonly]) .v-file-picker-zone:hover {
+  /* Not over an invalid zone: at (0,5,0) this rule outranks the invalid one below, and the
+     pointer would paint the accent over the one cue that says something is wrong. */
+  .v-file-picker:not([data-disabled]):not([data-readonly]):not([data-invalid])
+    .v-file-picker-zone:hover {
     --file-picker-border-color: var(--vectis-color-accent);
   }
 

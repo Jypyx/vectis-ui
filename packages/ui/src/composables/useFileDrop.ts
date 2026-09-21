@@ -42,20 +42,23 @@ export function useFileDrop(
     if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy'
   }
 
+  // TRAP — the depth comes back down whether or not files are accepted: a component
+  // disabled mid-drag that ignored the leave would keep counting one enter too many, and
+  // show the highlight again, for good, the day it was switched back on.
   function onDragLeave() {
-    if (!enabled()) return
     depth.value = Math.max(0, depth.value - 1)
   }
 
   function onDrop(event: DragEvent) {
+    depth.value = 0
     if (!enabled()) return
     event.preventDefault()
-    depth.value = 0
     onFiles([...(event.dataTransfer?.files ?? [])])
   }
 
   return {
-    dragging: computed(() => depth.value > 0),
+    // Read against `enabled` too, so switching the component off drops the highlight at once.
+    dragging: computed(() => depth.value > 0 && enabled()),
     onDragEnter,
     onDragOver,
     onDragLeave,

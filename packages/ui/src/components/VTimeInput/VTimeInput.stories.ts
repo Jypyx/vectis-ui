@@ -179,7 +179,7 @@ export const DialSelection: Story = {
     // hour 3 = a quarter turn; releasing moves on to the minutes step
     tapDial(face, 3 / 12)
     await waitFor(() =>
-      expect(canvas.getByRole('button', { name: 'Select hour' })).toHaveTextContent('03'),
+      expect(canvas.getByRole('button', { name: /Select hour$/ })).toHaveTextContent('03'),
     )
     await waitFor(() => expect(canvas.getByRole('slider')).toHaveAccessibleName('Minutes'))
 
@@ -207,7 +207,7 @@ export const InnerRing: Story = {
     await userEvent.click(canvas.getByRole('combobox', { name: 'Time' }))
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
     const face = canvasElement.querySelector('.v-time-picker-face') as HTMLElement
-    const hourCell = () => canvas.getByRole('button', { name: 'Select hour' })
+    const hourCell = () => canvas.getByRole('button', { name: /Select hour$/ })
 
     // midnight: the twelve o'clock position, inner ring (half the radius)
     tapDial(face, 0, 0.44)
@@ -414,7 +414,7 @@ export const Cancellation: Story = {
     const face = canvasElement.querySelector('.v-time-picker-face') as HTMLElement
     tapDial(face, 10 / 12)
     await waitFor(() =>
-      expect(canvas.getByRole('button', { name: 'Select hour' })).toHaveTextContent('10'),
+      expect(canvas.getByRole('button', { name: /Select hour$/ })).toHaveTextContent('10'),
     )
     await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }))
     await waitFor(() => expect(canvas.getByTestId('value')).toHaveTextContent('09:15'))
@@ -606,7 +606,7 @@ export const ClickInTheVoid: Story = {
     const face = canvasElement.querySelector('.v-time-picker-face') as HTMLElement
     tapDial(face, 10 / 12)
     await waitFor(() =>
-      expect(canvas.getByRole('button', { name: 'Select hour' })).toHaveTextContent('10'),
+      expect(canvas.getByRole('button', { name: /Select hour$/ })).toHaveTextContent('10'),
     )
 
     // a click on the panel ITSELF and not on one of its controls: userEvent dispatches on
@@ -615,7 +615,7 @@ export const ClickInTheVoid: Story = {
     await userEvent.click(panel)
     await expect(panel.matches(':popover-open')).toBe(true)
     // the draft survived: closing here would have abandoned it
-    await expect(canvas.getByRole('button', { name: 'Select hour' })).toHaveTextContent('10')
+    await expect(canvas.getByRole('button', { name: /Select hour$/ })).toHaveTextContent('10')
 
     // OK commits as usual
     await userEvent.click(canvas.getByRole('button', { name: 'OK' }))

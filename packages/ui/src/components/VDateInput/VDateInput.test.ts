@@ -592,3 +592,49 @@ describe('VDateInput — picker mode is not drawn read-only', () => {
     expect(container.querySelector('.v-input')!.hasAttribute('data-readonly')).toBe(true)
   })
 })
+
+describe('VDateInput — the field shell', () => {
+  const isOpen = (container: Element) =>
+    container.querySelector('.v-date-input-panel')?.hasAttribute('data-popover-open') ?? false
+
+  it('an Enter on one of the field buttons is that button business, not a request for the panel', async () => {
+    const { container } = render(VDateInput, {
+      props: { mode: 'picker', modelValue: JUNE, clearable: true },
+    })
+    const cross = container.querySelector('button[aria-label="Clear date"]') as HTMLElement
+    for (const key of ['Enter', 'ArrowDown']) {
+      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })
+      cross.dispatchEvent(event)
+      await nextTick()
+      // Cancelled, the Enter would never become the click that clears the field.
+      expect(event.defaultPrevented).toBe(false)
+      expect(isOpen(container)).toBe(false)
+    }
+  })
+
+  it('keeps a consumer role and popup ARIA when there is no panel to describe', () => {
+    const { container } = render(VDateInput, {
+      props: { modelValue: JUNE },
+      attrs: { role: 'spinbutton', 'aria-haspopup': 'grid', 'aria-controls': 'results' },
+    })
+    const input = container.querySelector('input') as HTMLInputElement
+    expect(input.getAttribute('role')).toBe('spinbutton')
+    expect(input.getAttribute('aria-haspopup')).toBe('grid')
+    expect(input.getAttribute('aria-controls')).toBe('results')
+  })
+
+  it('a panel whose field loses it while open is closed, and does not come back by itself', async () => {
+    const { container, rerender } = render(VDateInput, {
+      props: { mode: 'picker', modelValue: JUNE },
+    })
+    await fireEvent.click(container.querySelector('.v-date-input-control') as HTMLElement)
+    await nextTick()
+    expect(isOpen(container)).toBe(true)
+    await rerender({ readonly: true })
+    await nextTick()
+    expect(container.querySelector('.v-date-input')?.hasAttribute('data-open')).toBe(false)
+    await rerender({ readonly: false })
+    await nextTick()
+    expect(isOpen(container)).toBe(false)
+  })
+})

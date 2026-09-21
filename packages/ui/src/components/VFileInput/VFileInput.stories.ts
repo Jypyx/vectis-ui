@@ -304,6 +304,40 @@ export const DragAndDrop: Story = {
 }
 
 /**
+ * In a native `<form>`: `name` lands on the hidden file input, which the component keeps
+ * holding exactly the selection, so a plain submission carries every file chosen, the
+ * ones added by a second pick or a drop included.
+ */
+export const InAForm: Story = {
+  args: { multiple: true, clearable: true },
+  render: (args) => ({
+    components: { VFileInput },
+    setup: () => ({ args, t, files: ref<File[]>([]) }),
+    template: `
+      <form style="width: 340px" @submit.prevent>
+        <VFileInput v-bind="args" v-model="files" name="attachments" :label="t.attachments" />
+      </form>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const form = canvasElement.querySelector('form')!
+    const submitted = () =>
+      new FormData(form)
+        .getAll('attachments')
+        .map((entry) => (entry as File).name)
+        .filter(Boolean)
+
+    drop(canvasElement, [fileOf('a.pdf', 100, 'application/pdf')])
+    await waitFor(() => expect(submitted()).toEqual(['a.pdf']))
+    drop(canvasElement, [fileOf('b.pdf', 100, 'application/pdf')])
+    await waitFor(() => expect(submitted()).toEqual(['a.pdf', 'b.pdf']))
+
+    await fireEvent.click(within(canvasElement).getByRole('button', { name: 'Clear files' }))
+    await waitFor(() => expect(submitted()).toEqual([]))
+  },
+}
+
+/**
  * The whole point of the `File[]` model: the component displays, the parent
  * previews. Nothing is uploaded, nothing is read for you — `File` objects come
  * out exactly as the browser handed them over.

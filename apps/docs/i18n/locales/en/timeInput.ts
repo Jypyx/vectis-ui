@@ -52,7 +52,7 @@ export default {
           "Whether times are shown on a 12- or a 24-hour clock. Left out, the reader's language decides, which is almost always what one wants.",
         mode: 'Which form the field takes: one that can be typed into, a <code>picker</code> one where the clock is the only way in, so the clock is forced on there, or a list of times at a fixed interval, where a clock would make no sense. It is a different question from <code>readonly</code>, which freezes the field by every route at once.',
         showPicker:
-          'Offers the picker beside a field one can type into: an icon at the end of the field, and a panel it opens. It is left undefined rather than set to off, which is what distinguishes "not given" from an explicit refusal.',
+          'Offers the picker beside a field one can type into: an icon at the end of the field, and a panel that opens on focus. The clock follows what is typed, and with no value it opens empty. It means nothing in <code>picker</code> mode, where the clock is forced on, nor in <code>list</code> mode, where the list is the panel.',
         minuteStep:
           'The interval between two times that can be chosen. It applies to the picker, to the arrow keys and to the rows of the list.',
         min: 'The earliest time that can be chosen, inclusive, as a canonical 24-hour string. The picker and the list both leave out what it rules out, and a time typed past it makes the field invalid.',

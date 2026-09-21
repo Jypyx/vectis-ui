@@ -42,18 +42,27 @@ export type FileInputDisplay = 'chip' | 'text'
 
 /** What the `#chip` slot receives. */
 export interface FileInputChipSlotProps {
+  /** The file the chip stands for. */
   file: File
+  /** Its position in the selection. */
   index: number
+  /** Its name, already shortened in the middle so the extension survives. */
   label: string
+  /** Takes the file out of the selection, the only way to. */
   remove: () => void
+  /** The chip size worked out to sit inside the field, one step below it. */
   size: ChipSize
+  /** Whether the chip takes its compact height, to catch up below the smallest step. */
   compact: boolean
 }
 
 /** What the `#counter` slot receives. */
 export interface FileInputCounterSlotProps {
+  /** How many files are selected. */
   count: number
+  /** Their total size, in bytes. */
   bytes: number
+  /** The sentence the counter shows by default, already translated. */
   text: string
 }
 
@@ -228,13 +237,15 @@ defineSlots<{
   counter?(props: FileInputCounterSlotProps): unknown
 }>()
 
+// `get` reads an explicit `null` as the empty list: the default applies only to a model
+// that was never given, and `files = ref(null)` is a common start in untyped code.
 /**
  * Always a LIST of files, whether or not several are allowed, and never a file on its own.
  * The shape of the value does not depend on a prop, so a consumer never has to narrow a
  * union TypeScript has no way of discriminating. With a single file it is simply a list
  * of at most one.
  */
-const model = defineModel<File[]>({ default: () => [] })
+const model = defineModel<File[]>({ default: () => [], get: (files) => files ?? [] })
 
 const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 

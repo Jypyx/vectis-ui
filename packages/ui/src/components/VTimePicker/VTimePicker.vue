@@ -10,7 +10,7 @@
  *
  * Nothing native covers choosing a value by angle, so the JS does two things — turning a
  * point on the face into a time (the face measured once, then pure trigonometry in
- * `utils/time`) and implementing a slider's keyboard.
+ * `utils/clock`) and implementing a slider's keyboard.
  *
  * Everything one SEES is CSS: the numerals are placed around the circle and the hand turned,
  * both from one unitless turn fraction set inline.
@@ -26,20 +26,19 @@ import VButton from '../VButton/VButton.vue'
 import VToggle from '../VToggle/VToggle.vue'
 import type { ToggleModelValue } from '../VToggle/VToggle.vue'
 import VToggleItem from '../VToggle/VToggleItem.vue'
+import { formatTime, hourCycleFor, parseTime } from '../../utils/time'
 import {
+  DIAL_DEAD_ZONE,
   DIAL_INNER_THRESHOLD,
   angleToIndex,
   dialIndexToHour24,
   distanceFraction,
-  formatTime,
   hour24ToDial,
-  hourCycleFor,
   hourWithMeridiem,
-  parseTime,
   snapMinute,
   to12h,
   to24h,
-} from '../../utils/time'
+} from '../../utils/clock'
 import type { HourFormat, Meridiem } from '../../utils/time'
 import {
   allowedMinutesFor,
@@ -47,6 +46,7 @@ import {
   isHourAllowed,
   isTimeAllowed,
   limitsProblem,
+  minuteGrid,
   minuteInterval,
   nearestAllowedMinute,
   resolveLimits,
@@ -58,6 +58,7 @@ import { hostWarnsKey } from '../../utils/hostWarns'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages, useResolvedLocale } from '../../i18n/state'
 
+/** Whether the face shows a 12- or a 24-hour clock. */
 export type TimePickerFormat = HourFormat
 
 /** Which of the two halves of a time is being adjusted. */
@@ -71,7 +72,7 @@ interface TimePickerProps {
   format?: TimePickerFormat
   /**
    * A BCP 47 locale, which decides the clock. It TAKES PRECEDENCE over the design
-   * system's global locale and falls back to it — which is why it has no literal default:
+   * system's global locale and falls back to it, which is why it has no literal default:
    * `undefined` has to stay recognizable for the global locale to have its chance.
    */
   locale?: string
@@ -107,7 +108,7 @@ interface TimePickerProps {
   /**
    * Shows the time without letting it be changed. The face keeps its focus and the two
    * numerals still switch between the hour and the minutes, so the value can be read in
-   * full — which is what separates it from `disabled`.
+   * full. That is what separates it from `disabled`.
    */
   readonly?: boolean
   /**
@@ -135,17 +136,17 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
  * The time, always as a 24-hour "HH:mm" string whatever clock is displayed. A consumer
  * therefore never has to know which clock the reader's language uses.
  *
- * With no value at all the clock shows midnight. It is deliberately NOT the current time:
- * reading the clock while rendering would make a page drawn on a server disagree with the
- * same page in the browser. A component that wants to open on the current time sets it
- * from a handler — which is exactly what VTimeInput does.
+ * With no value at all the clock shows midnight, or noon once PM has been chosen. It is
+ * deliberately NOT the current time: reading the clock while rendering would make a page
+ * drawn on a server disagree with the same page in the browser. A component that wants to
+ * open on the current time sets it from a handler, which is what VTimeInput does.
  */
 const model = defineModel<string | null>({ default: null })
 
 const emit = defineEmits<{
   /**
    * The reader has FINISHED, carrying the time as it stands: the minutes were settled from
-   * the keyboard. Releasing the pointer does not count — on a clock face, letting go of the
+   * the keyboard. Releasing the pointer does not count: on a clock face, letting go of the
    * hand is how one stops adjusting it, not how one confirms. VTimeInput listens to it to
    * commit its draft and close its panel.
    */
@@ -153,12 +154,13 @@ const emit = defineEmits<{
 }>()
 
 defineSlots<{
-  /** A strip at the foot of the clock — the place for actions such as Cancel and OK. */
+  /** A strip at the foot of the clock, the place for actions such as Cancel and OK. */
   footer?(): unknown
 }>()
 
 const m = useMessages()
-// @a11y — a roleless box cannot carry an accessible name (axe: aria-prohibited-attr),
+// @a11y
+// A roleless box cannot carry an accessible name (axe: aria-prohibited-attr),
 // so the root is a named group: the VCarousel viewport arrangement.
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.timePicker.label)
 const resolvedLocale = useResolvedLocale(() => props.locale)
@@ -199,7 +201,16 @@ if (isDev && !inject(hostWarnsKey, false)) {
 /** Which of the two is being adjusted. It starts on the hour and moves on by itself. */
 const step = ref<TimePickerStep>('hour')
 
-const parts = computed(() => parseTime(model.value) ?? { hour: 0, minute: 0 })
+// With no value the clock shows the first hour of the half of the day chosen so far, which
+// is midnight until PM is picked. It is also the hour a time started from the MINUTES is
+// written with, so that choice is not lost when the reader begins there.
+const parts = computed(
+  () =>
+    parseTime(model.value) ?? {
+      hour: resolvedFormat.value === '12h' ? to24h(12, pendingMeridiem.value) : 0,
+      minute: 0,
+    },
+)
 const hour = computed(() => parts.value.hour)
 const minute = computed(() => parts.value.minute)
 
@@ -416,7 +427,8 @@ const meridiemAvailable = computed<Record<Meridiem, boolean>>(() => ({
   PM: firstAllowed(12, (i) => to24h(i, 'PM'), isAvailableHour) !== null,
 }))
 
-// @a11y — the entire spoken value of the face. The numerals are hidden from screen
+// @a11y
+// The entire spoken value of the face. The numerals are hidden from screen
 // readers, so these four attributes are the ONLY thing assistive technology has: what the
 // value is, what its bounds are, and how to say it.
 const ariaValueNow = computed(() => {
@@ -429,11 +441,15 @@ const ariaValueMin = computed(() =>
 const ariaValueMax = computed(() =>
   step.value === 'minute' ? 59 : resolvedFormat.value === '12h' ? 12 : 23,
 )
-const ariaValueText = computed(() =>
-  step.value === 'minute'
-    ? m.value.timePicker.minutesValue(minute.value)
-    : m.value.timePicker.hourValue(ariaValueNow.value),
-)
+// On a 12-hour face the half of the day is spoken with the hour: the AM/PM control is not
+// on the slider's way, and "9 o'clock" alone is two different times.
+const ariaValueText = computed(() => {
+  const m_ = m.value.timePicker
+  if (step.value === 'minute') return m_.minutesValue(minute.value)
+  const spoken = m_.hourValue(ariaValueNow.value)
+  if (resolvedFormat.value === '24h') return spoken
+  return `${spoken} ${currentMeridiem.value === 'PM' ? m_.pm : m_.am}`
+})
 
 /**
  * A step has been settled: after the hour come the minutes, and after the minutes the
@@ -469,12 +485,16 @@ let landed = false
  */
 function applyPoint(event: PointerEvent): boolean {
   const face = faceEl.value
-  if (!face) return false
+  // A disabled clock aims at nothing, so no step is moved on either: its header buttons
+  // are disabled for the same reason.
+  if (!face || props.disabled) return false
   // Measuring the face is safe here: this runs from a handler, hence in a browser, never
   // during a render.
   const rect = face.getBoundingClientRect()
   const dx = event.clientX - (rect.left + rect.width / 2)
   const dy = event.clientY - (rect.top + rect.height / 2)
+  // `<=` so that the exact centre is refused even on a face measured at zero.
+  if (Math.hypot(dx, dy) <= DIAL_DEAD_ZONE * (rect.width / 2)) return false
   if (step.value === 'minute') {
     // The step's own snapping stands: a point between two markers has always been pulled
     // to the one it is nearest. What it is pulled to still has to BE on the face.
@@ -496,11 +516,11 @@ function applyPoint(event: PointerEvent): boolean {
 }
 
 function onPointerdown(event: PointerEvent) {
-  // Capturing the pointer is what keeps the drag alive when it wanders off the face.
-  //
-  // @fallback — it is wrapped because a pointer event fired by a TEST refers to no real
-  // pointer, and the call then throws. Failing to capture merely means the drag stops at
-  // the edge, which no test is checking.
+  // @fallback
+  // Capturing the pointer is what keeps the drag alive when it wanders off the face. It
+  // is wrapped because a pointer event fired by a TEST refers to no real pointer, and the
+  // call then throws. Failing to capture merely means the drag stops at the edge, which
+  // no test is checking.
   try {
     faceEl.value?.setPointerCapture(event.pointerId)
   } catch {
@@ -526,7 +546,8 @@ function onPointercancel() {
   dragging.value = false
 }
 
-// @keyboard @a11y — the keyboard a slider is expected to have.
+// @keyboard @a11y
+// The keyboard a slider is expected to have.
 /*
  * Every key below walks until it finds something it MAY land on, rather than stopping at
  * the first thing it may not: with scattered hours a key that stopped would die at the
@@ -564,21 +585,38 @@ function edgeHour(edge: 'first' | 'last'): number | null {
 }
 
 /**
- * The minute a key lands on: the one it asked for when the hour allows it, and otherwise
- * the next one the same way round that it does.
+ * The minute a key lands on: the first step of the grid at least `distance` minutes away,
+ * that way round, and then the next one the hour allows.
+ *
+ * It walks the GRID rather than adding a step and rounding: from a minute off the grid,
+ * 09:07 on a quarter-hour face, rounding sent the down arrow to :45 and let PageUp round
+ * straight back to where it started. Past the end of the hour it wraps, onto the grid's own
+ * first step, which is also what keeps a step that does not divide sixty on its grid.
  */
-function minuteFrom(start: number, direction: number): number | null {
-  const interval = minuteInterval(props.minuteStep)
-  const allowed = (candidate: number) => isTimeAllowed(hour.value, candidate, limits.value)
-  if (allowed(start)) return start
+function minuteToward(direction: 1 | -1, distance: number): number | null {
+  const grid = minuteGrid(props.minuteStep)
+  const target = (((minute.value + direction * distance) % 60) + 60) % 60
+  const n = grid.length
+  // The first step at or past the target that way round, the grid's own end when none is.
+  let start = direction > 0 ? 0 : n - 1
+  for (let k = 0; k < n; k += 1) {
+    const i = direction > 0 ? k : n - 1 - k
+    if (direction > 0 ? grid[i]! >= target : grid[i]! <= target) {
+      start = i
+      break
+    }
+  }
   return firstAllowed(
-    Math.ceil(60 / interval),
-    (i) => snapMinute(start + direction * i * interval, interval),
-    allowed,
+    n,
+    (i) => grid[(((start + direction * (i - 1)) % n) + n) % n]!,
+    (candidate) => isTimeAllowed(hour.value, candidate, limits.value),
   )
 }
 
 function onKeydown(event: KeyboardEvent) {
+  // The face of a disabled clock is out of the tab order, but `focus()` can still put the
+  // focus there: nothing it is sent may move the step on or confirm.
+  if (props.disabled) return
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault()
     settleStep('keyboard')
@@ -600,14 +638,9 @@ function onKeydown(event: KeyboardEvent) {
     event.preventDefault()
     return
   }
-  if (delta)
-    setMinute(
-      minuteFrom(snapMinute(minute.value + delta * props.minuteStep, props.minuteStep), delta),
-    )
-  else if (event.key === 'PageUp')
-    setMinute(minuteFrom(snapMinute(minute.value + 5, props.minuteStep), 1))
-  else if (event.key === 'PageDown')
-    setMinute(minuteFrom(snapMinute(minute.value - 5, props.minuteStep), -1))
+  if (delta) setMinute(minuteToward(delta, 1))
+  else if (event.key === 'PageUp') setMinute(minuteToward(1, 5))
+  else if (event.key === 'PageDown') setMinute(minuteToward(-1, 5))
   // The list is built in these two branches alone: the arrows walk to a neighbour and never
   // need the whole of it.
   else if (event.key === 'Home') setMinute(allowedMinutesFor(hour.value, limits.value)[0] ?? null)
@@ -656,7 +689,7 @@ defineExpose({
           size="lg"
           :tone="step === 'hour' ? 'accent' : 'neutral'"
           :aria-pressed="step === 'hour' ? 'true' : 'false'"
-          :aria-label="m.timePicker.selectHour"
+          :aria-label="`${displayHourText}, ${m.timePicker.selectHour}`"
           :disabled="disabled"
           @click="setStep('hour')"
         >
@@ -669,7 +702,7 @@ defineExpose({
           size="lg"
           :tone="step === 'minute' ? 'accent' : 'neutral'"
           :aria-pressed="step === 'minute' ? 'true' : 'false'"
-          :aria-label="m.timePicker.selectMinutes"
+          :aria-label="`${pad2(minute)}, ${m.timePicker.selectMinutes}`"
           :disabled="disabled"
           @click="setStep('minute')"
         >
@@ -781,18 +814,26 @@ defineExpose({
      "large numeral" look alone — the width and the type; the height, the states, the
      focus ring and the transitions all come from the button itself.
 
+     The type is the `heading-1` recipe taken WHOLE, and the colon the `heading-2` one:
+     read in halves, a consumer repointing `--vectis-text-heading-1-weight` would move every
+     heading but these two numerals.
+
      The selector is qualified by an attribute that button always renders, which is what
      makes it win whatever order the two sheets end up in. */
   .v-time-picker-cell[data-size] {
     width: var(--control-height);
     font-size: var(--vectis-text-heading-1-size);
-    font-weight: var(--vectis-text-heading-2-weight);
+    font-weight: var(--vectis-text-heading-1-weight);
+    line-height: var(--vectis-text-heading-1-leading);
+    letter-spacing: var(--vectis-text-heading-1-tracking);
     /* Figures of equal width, so that going from "11" to "00" does not shift the cell. */
     font-variant-numeric: tabular-nums;
   }
 
   .v-time-picker-sep {
     font-size: var(--vectis-text-heading-2-size);
+    font-weight: var(--vectis-text-heading-2-weight);
+    line-height: var(--vectis-text-heading-2-leading);
     color: var(--vectis-color-text);
     user-select: none;
   }
@@ -821,7 +862,7 @@ defineExpose({
        hand both read it, and the inner circle redefines it for itself.
 
        TRAP — this is coupled to the threshold that decides which of the two circles a
-       point belongs to, in `utils/time`. Changing one without the other makes the face
+       point belongs to, in `utils/clock`. Changing one without the other makes the face
        answer with the wrong ring, and no test can catch it: the unit tests measure
        nothing. */
     --dial-radius: calc(

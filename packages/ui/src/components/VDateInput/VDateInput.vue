@@ -30,18 +30,20 @@ import type {
   DatePickerRange,
 } from '../VDatePicker/VDatePicker.vue'
 import {
-  caretAfterDigits,
   compareISO,
-  dateMaskFor,
   formatDateDisplay,
-  formatDateMask,
   formatDisplayRange,
   isDateAllowed,
   isValidISO,
+} from '../../utils/date'
+import {
+  caretAfterDigits,
+  dateMaskFor,
+  formatDateMask,
   isoToMask,
   maskPlaceholder,
   parseDateMask,
-} from '../../utils/date'
+} from './mask'
 import { digitsOf } from '../../utils/text'
 import { resolveMatcher } from '../../utils/matcher'
 import { isDev } from '../../utils/env'
@@ -69,6 +71,7 @@ export type DateInputMode = 'picker' | 'input'
 
 /** What the `#footer` slot receives. */
 export interface DateInputFooterSlotProps {
+  /** Closes the panel and hands the focus back to the field. */
   close: () => void
 }
 
@@ -401,6 +404,24 @@ const {
   openOnFocus: () => typing.value,
 })
 
+// @a11y
+// TRAP — the popup wiring is spread OVER the forwarded attributes, never bound as four
+// attributes after them. A binding written after `v-bind` wins even when it is
+// `undefined`, so a field with no panel would erase the consumer's own `role` or
+// `aria-controls`; spread, the wiring carries no key at all when there is no panel, and
+// wins over the consumer's when there is one, which is what a combobox needs.
+const inputAttrs = computed(() =>
+  hasPanel.value
+    ? {
+        ...fieldAttrs.value,
+        role: 'combobox',
+        'aria-haspopup': 'dialog',
+        'aria-expanded': open.value,
+        'aria-controls': panelId,
+      }
+    : fieldAttrs.value,
+)
+
 const hasValue = computed(() => {
   if (props.selection === 'multiple') return Array.isArray(model.value) && model.value.length > 0
   if (props.selection === 'range') {
@@ -511,7 +532,8 @@ function padCurrentField(el: HTMLInputElement) {
   }
 }
 
-// @keyboard — what the mask's keys mean for a date: a separator completes the field being
+// @keyboard
+// What the mask's keys mean for a date: a separator completes the field being
 // typed, and the down arrow is the one explicit way from the field into the calendar.
 function onFieldKeydown(event: KeyboardEvent) {
   onMaskKeydown(event, {
@@ -615,6 +637,8 @@ defineExpose({
     :style="rootStyle"
     :data-open="open ? '' : undefined"
     :data-mode="resolvedMode"
+    :data-disabled="resolvedDisabled ? '' : undefined"
+    :data-readonly="readonly ? '' : undefined"
     @focusout="onFocusout"
     @keydown="onKeydown"
   >
@@ -632,7 +656,7 @@ defineExpose({
         v-model="fieldModel"
         :inputmode="typing ? 'numeric' : undefined"
         :autocomplete="typing ? 'off' : undefined"
-        v-bind="fieldAttrs"
+        v-bind="inputAttrs"
         :readonly="readonly"
         :no-typing="!typing"
         :label="label"
@@ -651,10 +675,6 @@ defineExpose({
         :loading-text="loadingText"
         :icon-end="endIcon"
         :icon-end-label="endIconLabel"
-        :role="hasPanel ? 'combobox' : undefined"
-        :aria-haspopup="hasPanel ? 'dialog' : undefined"
-        :aria-expanded="hasPanel ? open : undefined"
-        :aria-controls="hasPanel ? panelId : undefined"
         @click:icon-end="toggleFromIcon"
         @clear="clearValue"
         @focus="onFieldFocus"
@@ -721,8 +741,9 @@ defineExpose({
     font-family: var(--vectis-text-family);
   }
 
-  .v-date-input-control {
-    display: block;
+  /* The pointer says "this opens a panel", which a read-only or disabled field no longer
+     does: the VFileInput gating. */
+  .v-date-input:not([data-disabled]):not([data-readonly]) .v-date-input-control {
     cursor: pointer;
   }
 
@@ -738,7 +759,7 @@ defineExpose({
   /* Input mode: the field is editable, and the <input>'s text caret takes over from the
      control's `pointer` (which signals "this opens a panel"). The mask has a fixed width:
      tabular figures, otherwise the caret jitters from one digit to the next. */
-  .v-date-input[data-mode='input'] .v-date-input-control {
+  .v-date-input[data-mode='input']:not([data-disabled]):not([data-readonly]) .v-date-input-control {
     cursor: text;
   }
 

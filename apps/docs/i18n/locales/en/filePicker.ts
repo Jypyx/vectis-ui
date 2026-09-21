@@ -51,8 +51,8 @@ export default {
         icon: 'The large icon at the top of the zone.',
         hideBrowse:
           'Hides the separator and the browse button under the instruction. That changes the nature of the zone: it then becomes the control itself, a real button, so Enter, Space and the focus come from the platform rather than from a container that merely reacts to clicks.',
-        browseLabel:
-          'The wording of the browse button. It falls back to the design system dictionary.',
+        browseText:
+          'The wording drawn on the browse button, which is also its accessible name. It falls back to the design system dictionary.',
         preview:
           'Where the files taken are listed: under the zone, or beside it, which folds back underneath when the component is narrow, following the width it was given rather than the width of the window. By default nothing is listed at all.',
         hideThumbnails:
@@ -68,9 +68,9 @@ export default {
         maxFiles: 'How many files may be taken at most.',
         disabled: 'Makes the zone unusable, greyed out through the colour tokens.',
         readonly:
-          'Shows what was taken without allowing it to change: no dialog, no drop, no removal.',
+          'Shows what was taken without allowing it to change: no dialog, no drop, no removal. Its buttons stay reachable from the keyboard, announced as unavailable.',
         invalid:
-          'Marks the zone as invalid, which colours its outline. It is for a rule of your own: nothing here is checked by the browser, the real input being hidden.',
+          'Marks the zone as invalid, which colours its outline and is announced on the control the reader reaches. It is for a rule of your own: nothing here is checked by the browser, the real input being hidden.',
         loading:
           'Shows a spinner in place of the zone icon, while an upload is under way typically. It says that something is happening and changes nothing else: files can still be dropped and the dialog still opens.',
         loadingText:

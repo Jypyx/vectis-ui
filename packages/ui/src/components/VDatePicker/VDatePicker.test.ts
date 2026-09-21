@@ -326,3 +326,139 @@ describe('VDatePicker — development warnings', () => {
     warn.mockRestore()
   })
 })
+
+describe('VDatePicker — reading and walking', () => {
+  const grid = (container: Element) => container.querySelector('[role="grid"]') as HTMLElement
+  const day = (container: Element, n: number) =>
+    [...container.querySelectorAll<HTMLElement>('.v-date-picker-day')].find(
+      (b) =>
+        b.tagName === 'BUTTON' &&
+        !b.hasAttribute('data-outside') &&
+        b.textContent?.trim().startsWith(String(n)),
+    )!
+
+  it('titles the grid the way the language writes a month and its year', () => {
+    const { container } = render(VDatePicker, { props: { modelValue: JUNE, locale: 'ja-JP' } })
+    expect(grid(container).getAttribute('aria-label')).toBe('2026年6月')
+  })
+
+  it('unticking the earliest date of a list leaves the month on screen alone', async () => {
+    // A parent v-model, played by the listener handing the value straight back.
+    const parent: { rerender?: (props: object) => Promise<void> } = {}
+    const { container, rerender } = render(VDatePicker, {
+      props: {
+        selection: 'multiple' as const,
+        modelValue: ['2026-02-05', '2026-03-10'],
+        'onUpdate:modelValue': (v: unknown) => void parent.rerender?.({ modelValue: v }),
+      },
+    })
+    parent.rerender = rerender
+    const before = grid(container).getAttribute('aria-label')
+    expect(before).toBe('February 2026')
+    await fireEvent.click(day(container, 5))
+    await nextTick()
+    expect(grid(container).getAttribute('aria-label')).toBe(before)
+  })
+
+  it('still follows a list replaced from outside', async () => {
+    const { container, rerender } = render(VDatePicker, {
+      props: { selection: 'multiple', modelValue: ['2026-02-05'] },
+    })
+    await rerender({ modelValue: ['2026-05-01'] })
+    expect(grid(container).getAttribute('aria-label')).toBe('May 2026')
+  })
+
+  it('gives the events of a day to its accessible name', () => {
+    const { container } = render(VDatePicker, {
+      props: { modelValue: JUNE, events: [{ date: '2026-06-15', label: 'Team review' }] },
+    })
+    expect(day(container, 15).textContent).toContain('Team review')
+  })
+
+  it('a previewed range end is drawn, not announced as selected', async () => {
+    const { container } = render(VDatePicker, {
+      props: { selection: 'range', modelValue: { start: '2026-06-10', end: null } },
+    })
+    const twentieth = day(container, 20)
+    await fireEvent.pointerEnter(twentieth)
+    expect(twentieth.hasAttribute('data-selected')).toBe(true)
+    expect(twentieth.parentElement!.getAttribute('aria-selected')).toBe('false')
+    expect(day(container, 10).parentElement!.getAttribute('aria-selected')).toBe('true')
+  })
+
+  it('the months view walks over the months the bounds rule out', async () => {
+    const { container } = render(VDatePicker, {
+      props: { modelValue: '2026-06-10', min: '2026-05-01', max: '2026-07-31' },
+    })
+    await fireEvent.click(container.querySelectorAll('.v-date-picker-view-toggle')[0]!)
+    await nextTick()
+    const view = container.querySelector('.v-date-picker-view') as HTMLElement
+    const focusable = () => view.querySelector('[tabindex="0"]')?.id.split('-m-')[1]
+    keydown(view, 'ArrowDown')
+    await nextTick()
+    expect(focusable()).toBe('5')
+    keydown(view, 'ArrowRight')
+    await nextTick()
+    expect(focusable()).toBe('6')
+  })
+
+  it('leaves a key held with Alt, Ctrl or Meta to the browser', () => {
+    const { container } = render(VDatePicker, { props: { modelValue: JUNE } })
+    for (const mod of ['altKey', 'ctrlKey', 'metaKey']) {
+      const event = new KeyboardEvent('keydown', {
+        key: 'ArrowLeft',
+        bubbles: true,
+        cancelable: true,
+        [mod]: true,
+      })
+      grid(container).dispatchEvent(event)
+      expect([mod, event.defaultPrevented]).toEqual([mod, false])
+    }
+  })
+})
+
+describe('VDatePicker — hydration', () => {
+  it('a month read from the clock is redrawn when the browser clock is in another one', async () => {
+    const { createSSRApp } = await import('vue')
+    const { renderToString } = await import('vue/server-renderer')
+    vi.useFakeTimers({ toFake: ['Date'] })
+    try {
+      // The server renders in September, the browser opens the page on 1 October: a
+      // prerendered page, or a server a timezone behind its visitor.
+      vi.setSystemTime(new Date(2026, 8, 30, 23))
+      const html = await renderToString(createSSRApp(VDatePicker))
+      vi.setSystemTime(new Date(2026, 9, 1, 9))
+      const host = document.createElement('div')
+      host.innerHTML = html
+      document.body.append(host)
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const app = createSSRApp(VDatePicker)
+      app.mount(host)
+      await nextTick()
+      await nextTick()
+      const fresh = document.createElement('div')
+      document.body.append(fresh)
+      const { createApp } = await import('vue')
+      createApp(VDatePicker).mount(fresh)
+      await nextTick()
+      const norm = (s: string) =>
+        s
+          .replace(/v-\d+/g, 'ID')
+          .replace(/<!--[\s\S]*?-->/g, '')
+          .replace(/ style=""/g, '')
+      const a = norm(host.innerHTML)
+      const b = norm(fresh.innerHTML)
+      // Hydration patches text but not attributes: left as it was, the month button read
+      // "Oct." on screen and "September" to a screen reader.
+      expect(a).toBe(b)
+      app.unmount()
+      host.remove()
+      fresh.remove()
+      warn.mockRestore()
+      error.mockRestore()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+})

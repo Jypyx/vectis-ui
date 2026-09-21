@@ -14,7 +14,7 @@ const panelOpen = (container: Element) =>
   container.querySelector('.v-time-input-panel')?.hasAttribute('data-popover-open') === true
 
 const hourCell = (container: Element) =>
-  container.querySelector('button[aria-label="Select hour"]') as HTMLButtonElement
+  container.querySelector('.v-time-picker-cell') as HTMLButtonElement
 
 describe('VTimeInput — default', () => {
   it('is a masked input field, with no picker and no popup ARIA', async () => {
@@ -886,5 +886,125 @@ describe('VTimeInput — picker mode is not drawn read-only', () => {
       props: { mode: 'picker', label: 'When', readonly: true },
     })
     expect(container.querySelector('.v-input')!.hasAttribute('data-readonly')).toBe(true)
+  })
+})
+
+describe('VTimeInput — the field shell', () => {
+  it('an Enter on the AM/PM button is that button business, not a request for the panel', async () => {
+    const { container } = render(VTimeInput, {
+      props: { modelValue: '07:00', format: '12h', showPicker: true },
+    })
+    const button = container.querySelector('.v-time-input-meridiem') as HTMLElement
+    for (const key of ['Enter', 'ArrowDown']) {
+      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })
+      button.dispatchEvent(event)
+      await nextTick()
+      expect(event.defaultPrevented).toBe(false)
+      expect(panelOpen(container)).toBe(false)
+    }
+  })
+
+  it('keeps a consumer role and popup ARIA when there is no panel to describe', () => {
+    const { container } = render(VTimeInput, {
+      props: { modelValue: '07:00' },
+      attrs: { role: 'spinbutton', 'aria-haspopup': 'grid', 'aria-controls': 'results' },
+    })
+    const input = container.querySelector('input') as HTMLInputElement
+    expect(input.getAttribute('role')).toBe('spinbutton')
+    expect(input.getAttribute('aria-haspopup')).toBe('grid')
+    expect(input.getAttribute('aria-controls')).toBe('results')
+  })
+
+  it('a panel whose field loses it while open is closed, and does not come back by itself', async () => {
+    const { container, rerender } = render(VTimeInput, {
+      props: { mode: 'picker', modelValue: '07:00' },
+    })
+    await openPanel(container)
+    expect(panelOpen(container)).toBe(true)
+    await rerender({ readonly: true })
+    await nextTick()
+    expect(container.querySelector('.v-time-input')?.hasAttribute('data-open')).toBe(false)
+    await rerender({ readonly: false })
+    await nextTick()
+    expect(panelOpen(container)).toBe(false)
+  })
+})
+
+describe('VTimeInput — typing beside the clock', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    // An afternoon: the clock would open on a PM time if it opened on the current one.
+    vi.setSystemTime(new Date(2026, 6, 27, 14, 5))
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('reads typed digits in the half of the day the field is in, and OK keeps what was typed', async () => {
+    const { container, emitted } = render(VTimeInput, {
+      props: { modelValue: null, format: '12h', showPicker: true },
+    })
+    const input = container.querySelector('input') as HTMLInputElement
+    await fireEvent.focus(input)
+    await nextTick()
+    expect(panelOpen(container)).toBe(true)
+    await type(input, '0930')
+    expect(emitted('update:modelValue')?.at(-1)).toEqual(['09:30'])
+    const ok = [...container.querySelectorAll('.v-time-input-panel button')].find(
+      (b) => b.textContent?.trim() === 'OK',
+    ) as HTMLElement
+    await fireEvent.click(ok)
+    expect(emitted('update:modelValue')?.at(-1)).toEqual(['09:30'])
+  })
+
+  it('a time typed while the clock is open moves the clock with it', async () => {
+    const { container } = render(VTimeInput, {
+      props: { modelValue: '07:00', format: '24h', showPicker: true },
+    })
+    const input = container.querySelector('input') as HTMLInputElement
+    await fireEvent.focus(input)
+    await nextTick()
+    await type(input, '1145')
+    await nextTick()
+    expect(hourCell(container).textContent?.trim()).toBe('11')
+  })
+})
+
+describe('VTimeInput — pasting', () => {
+  const paste = async (input: HTMLInputElement, text: string) => {
+    await fireEvent.focus(input)
+    await fireEvent.paste(input, { clipboardData: { getData: () => text } })
+  }
+
+  it('takes a time written the way people write it, not only the canonical form', async () => {
+    const cases: [string, '12h' | '24h', string][] = [
+      ['9:30', '24h', '09:30'],
+      ['9:30', '12h', '09:30'],
+      ['9:30 PM', '12h', '21:30'],
+      ['9:30pm', '24h', '21:30'],
+      ['12:15 a.m.', '12h', '00:15'],
+      ['19.05', '12h', '19:05'],
+    ]
+    for (const [text, format, expected] of cases) {
+      const { container, emitted, unmount } = render(VTimeInput, {
+        props: { modelValue: null, format },
+      })
+      await paste(container.querySelector('input') as HTMLInputElement, text)
+      expect([text, format, emitted('update:modelValue')?.at(-1)]).toEqual([
+        text,
+        format,
+        [expected],
+      ])
+      unmount()
+    }
+  })
+
+  it('leaves anything else to the digits', async () => {
+    const { container, emitted } = render(VTimeInput, {
+      props: { modelValue: null, format: '24h' },
+    })
+    const input = container.querySelector('input') as HTMLInputElement
+    await paste(input, '25:99')
+    expect(emitted('update:modelValue')).toBeUndefined()
   })
 })

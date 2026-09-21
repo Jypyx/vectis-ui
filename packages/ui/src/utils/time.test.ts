@@ -1,19 +1,21 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  formatTimeDisplay,
+  formatTime,
+  hourCycleFor,
+  isValidTime,
+  minutesOf,
+  parseTime,
+} from './time'
+import {
   DIAL_INNER_THRESHOLD,
   angleToIndex,
   dialIndexToHour24,
   distanceFraction,
-  formatTimeDisplay,
-  formatTime,
   formatTimeMask,
   hour24ToDial,
-  hourCycleFor,
   hourWithMeridiem,
-  isValidTime,
-  minutesOf,
-  parseTime,
   parseTimeMask,
   snapMinute,
   timeCaret,
@@ -22,7 +24,7 @@ import {
   withMeridiem,
   to12h,
   to24h,
-} from './time'
+} from './clock'
 
 describe('isValidTime / parseTime / formatTime', () => {
   it('accepts the 00:00 and 23:59 bounds', () => {

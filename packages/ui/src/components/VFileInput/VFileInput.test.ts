@@ -1,5 +1,5 @@
 import { fireEvent, render } from '@testing-library/vue'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { CHIP_NAME_MAX, truncateMiddle } from './truncate'
 import VFileInput from './VFileInput.vue'
@@ -160,6 +160,8 @@ describe('VFileInput', () => {
   })
 
   it('resets the native input on every path — selection, refusal, removal, clear', async () => {
+    // jsdom has no `DataTransfer`, so the input is emptied rather than synced (the
+    // form-facing half is the "form sees the selection" block below).
     const { native, container, getByRole, rerender } = renderPicker({
       multiple: true,
       display: 'chip',
@@ -167,22 +169,23 @@ describe('VFileInput', () => {
       clearable: true,
     })
     const writes = trackReset(native)
+    const resetsOn = async (act: () => Promise<unknown>) => {
+      const before = writes.length
+      await act()
+      expect(writes.length).toBeGreaterThan(before)
+      expect(writes.every((w) => w === '')).toBe(true)
+    }
 
-    await pick(native, [fileOf('a.pdf', 10)])
-    expect(writes).toEqual([''])
-
+    await resetsOn(() => pick(native, [fileOf('a.pdf', 10)]))
     // A batch refused in full resets too: a file refused once must stay
     // re-pickable.
-    await pick(native, [fileOf('big.pdf', 500)])
-    expect(writes).toHaveLength(2)
+    await resetsOn(() => pick(native, [fileOf('big.pdf', 500)]))
 
     await rerender({ modelValue: [fileOf('a.pdf', 10)], multiple: true, display: 'chip' })
-    await fireEvent.click(getByRole('button', { name: 'Remove a.pdf' }))
-    expect(writes).toHaveLength(3)
+    await resetsOn(() => fireEvent.click(getByRole('button', { name: 'Remove a.pdf' })))
 
     await rerender({ modelValue: [fileOf('a.pdf', 10)], multiple: true, display: 'chip' })
-    await fireEvent.click(container.querySelector('.v-input-clear')!)
-    expect(writes).toHaveLength(4)
+    await resetsOn(() => fireEvent.click(container.querySelector('.v-input-clear')!))
   })
 
   it('display="chip": one chip per file, a named remove button, an empty field value', async () => {
@@ -566,5 +569,76 @@ describe('VFileInput — its field is not drawn read-only', () => {
       props: { modelValue: [], label: 'Files', readonly: true },
     })
     expect(container.querySelector('.v-input')!.hasAttribute('data-readonly')).toBe(true)
+  })
+})
+
+describe('VFileInput — the form sees the selection', () => {
+  /** jsdom has no `DataTransfer`: a list is all the component asks of one. */
+  class FakeTransfer {
+    list: File[] = []
+    items = { add: (file: File) => this.list.push(file) }
+    get files() {
+      return fileListOf(this.list)
+    }
+  }
+  beforeEach(() => {
+    vi.stubGlobal('DataTransfer', FakeTransfer)
+  })
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  /** The hidden input's `files`: what the dialog puts there, then what the component writes. */
+  function holdFiles(native: HTMLInputElement) {
+    const state = { picked: null as FileList | null, held: fileListOf([]) }
+    Object.defineProperty(native, 'files', {
+      configurable: true,
+      get: () => state.picked ?? state.held,
+      set: (list: FileList) => {
+        state.held = list
+        state.picked = null
+      },
+    })
+    const names = () => [...state.held].map((file) => file.name)
+    const choose = async (files: File[]) => {
+      state.picked = fileListOf(files)
+      await fireEvent.change(native)
+    }
+    return { names, choose }
+  }
+
+  it('holds every file of the selection, the ones picked before included', async () => {
+    const { native, rerender } = renderPicker({ multiple: true })
+    const input = holdFiles(native)
+    await input.choose([fileOf('a.pdf')])
+    expect(input.names()).toEqual(['a.pdf'])
+    await input.choose([fileOf('b.pdf')])
+    expect(input.names()).toEqual(['a.pdf', 'b.pdf'])
+    // A value set from outside reaches it too.
+    await rerender({ modelValue: [] })
+    expect(input.names()).toEqual([])
+  })
+
+  it('a batch refused in full leaves the input holding the selection, not the refused file', async () => {
+    const { native } = renderPicker({ multiple: true, maxSize: 100, modelValue: [fileOf('a.pdf')] })
+    const input = holdFiles(native)
+    await input.choose([fileOf('big.pdf', 500)])
+    expect(input.names()).toEqual(['a.pdf'])
+  })
+})
+
+describe('VFileInput — replacing and robustness', () => {
+  it('a single file replaced by another is reported as removed', async () => {
+    const a = fileOf('a.pdf')
+    const { native, emitted } = renderPicker({ modelValue: [a] })
+    await pick(native, [fileOf('b.pdf')])
+    expect(emitted('remove')).toEqual([[a, 0]])
+    expect(pickedNames(emitted('update:modelValue')!)).toEqual(['b.pdf'])
+  })
+
+  it('renders with a null v-model rather than throwing', () => {
+    expect(() =>
+      render(VFileInput, { props: { modelValue: null as unknown as File[] } }),
+    ).not.toThrow()
   })
 })

@@ -19,10 +19,10 @@
 
 import type { FileCandidate } from '../../utils/file'
 
-export type FileKind =
+export type FilePickerKind =
   'image' | 'pdf' | 'audio' | 'video' | 'archive' | 'spreadsheet' | 'code' | 'file'
 
-const MIME_KINDS: Record<string, FileKind> = {
+const MIME_KINDS: Record<string, FilePickerKind> = {
   'application/pdf': 'pdf',
   'application/zip': 'archive',
   'application/x-zip-compressed': 'archive',
@@ -43,7 +43,7 @@ const MIME_KINDS: Record<string, FileKind> = {
   'application/javascript': 'code',
 }
 
-const EXTENSION_KINDS: Record<string, FileKind> = {
+const EXTENSION_KINDS: Record<string, FilePickerKind> = {
   avif: 'image',
   bmp: 'image',
   gif: 'image',
@@ -108,7 +108,7 @@ const EXTENSION_KINDS: Record<string, FileKind> = {
 }
 
 /** Works out which kind a file belongs to. */
-export function fileKind(file: FileCandidate): FileKind {
+export function fileKind(file: FileCandidate): FilePickerKind {
   const type = file.type.toLowerCase()
 
   // The whole families first: matching on the family covers every image, audio and
@@ -132,5 +132,5 @@ export function fileKind(file: FileCandidate): FileKind {
  * INHERIT: a file named `x.constructor` would get a function back, and the component would
  * look its icon up with it. Only a table's own keys are kinds.
  */
-const lookup = (table: Record<string, FileKind>, key: string): FileKind | undefined =>
+const lookup = (table: Record<string, FilePickerKind>, key: string): FilePickerKind | undefined =>
   Object.hasOwn(table, key) ? table[key] : undefined

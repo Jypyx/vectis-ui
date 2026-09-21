@@ -100,14 +100,17 @@ name.
 ## States
 
 `disabled` greys the zone through tokens — never through opacity — and makes dialog and drop inert.
-`readonly` keeps the selection on screen but takes every way of changing it away.
+`readonly` keeps the selection on screen but takes every way of changing it away. Its buttons stay
+in the tab order, announced as unavailable (`aria-disabled`), as every read-only control of the
+design system does, where `disabled` takes them out.
 
 <Canvas of={VFilePickerStories.States} />
 
 `loading` is deliberately the opposite of those two: purely visual, a spinner in place of the zone
 icon while an upload is under way, with the dialog and the drop left working. `invalid` colours
-the zone's outline by redefining the very variable the drag highlight uses, so the two states can
-never disagree about what colour that border is.
+the zone's outline, the pointer never repainting it, and is said to assistive technology through
+`aria-invalid` on the control the reader reaches: the browse button, or the zone itself under
+`hideBrowse`.
 
 ## What this component does not have
 
@@ -115,8 +118,6 @@ never disagree about what colour that border is.
   xs–xl height scale, as `VAccordion` does. Its dimensions come from dedicated tokens.
 - **No way to switch dropping off.** A component whose whole function is to be a drop zone cannot
   stop being one without its visuals lying; `disabled` and `readonly` cover the real need.
-- **No `invalid` prop.** There is no field to carry `aria-invalid`, and refusals already surface
-  through `reject`.
 
 ## Accessibility
 

@@ -66,11 +66,15 @@ Entry rules:
 - `Backspace` on the colon erases the digit preceding it,
 - an incomplete or impossible entry ("25:00") **silently reverts** to the current value on
   leaving the field; emptying the field sets the value to `null`,
-- `Enter` confirms and closes, so it does not submit the surrounding form.
+- `Enter` confirms and closes, so it does not submit the surrounding form,
+- a pasted time is read as a whole when it is written the way people write one ("9:30",
+  "9:30 PM", "19.05"); anything else contributes its digits alone.
 
 `showPicker` adds the end-of-field icon and the picker: the panel then opens on focus
 **without taking focus**, typing carries on in the field, and the `down arrow` stays the
-explicit route to the picker.
+explicit route to the picker. The clock follows what is typed, and with no value it opens
+empty rather than on the current time, so the digits are read in the half of the day the
+field shows.
 
 `pickerIcon` replaces that icon and only that one: `mode="list"` is a VCombobox and takes
 its chevron, its cross and their wording from there. `clearable`'s cross sits **to the left**

@@ -19,7 +19,7 @@ import { formatTime } from '../../utils/time'
 
 /**
  * Which values are ALLOWED: the list of them, or a rule answering for one. The polarity is
- * the opposite of `DatePickerMatcher`, which names what is excluded — hence a name that
+ * the opposite of `DatePickerMatcher`, which names what is excluded, hence a name that
  * says so rather than a shared suffix.
  */
 export type TimePickerAllowed = number[] | ((value: number) => boolean)
@@ -88,7 +88,7 @@ const minuteGrids = new Map<number, readonly number[]>()
  * every render, so rebuilding it per call allocated for nothing. The list is shared:
  * read-only.
  */
-function minuteGrid(step: number): readonly number[] {
+export function minuteGrid(step: number): readonly number[] {
   return memo(minuteGrids, step, () => {
     const interval = minuteInterval(step)
     const grid: number[] = []

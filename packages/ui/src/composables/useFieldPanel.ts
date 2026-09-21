@@ -1,4 +1,4 @@
-import { provide, ref, useId } from 'vue'
+import { provide, ref, useId, watch } from 'vue'
 import type { Ref } from 'vue'
 
 import { NO_BUTTON_GROUP, buttonGroupKey } from '../components/VButton/context'
@@ -90,6 +90,17 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
     options.onClose?.()
   }
 
+  // @core
+  // TRAP — a panel refused WHILE it is open (the field turned read-only or disabled, the
+  // picker switched off) is unmounted by its `v-if`, and an unmounted popover sends no
+  // `toggle` to bring `open` back down. The model then stays true, and the next time the
+  // panel is mounted VPopover's mount replay shows it again with nobody having asked.
+  watch(options.disabled, (refused) => {
+    if (!refused || !open.value) return
+    closePanel()
+    open.value = false
+  })
+
   // @a11y
   /*
    * TRAP — handing the focus back to the field is what makes a field that opens ON FOCUS
@@ -137,10 +148,17 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
     else openPanel(true)
   }
 
+  /**
+   * Whether an event started on one of the controls the field holds: the clear cross, the
+   * AM/PM word, a clickable icon, or a button of the consumer's own in a slot. What happens
+   * there is that control's business, for the pointer and the keyboard alike.
+   */
+  const fromOwnControl = (event: Event) =>
+    !!(event.target as HTMLElement | null)?.closest?.('button, a[href]')
+
   function onControlClick(event: MouseEvent) {
-    // A click on one of the field's own buttons is that button's business: reacting here
-    // too would open the panel the clear cross has just given a reason to close.
-    if ((event.target as HTMLElement).closest('.v-input-action')) return
+    // Reacting here too would open the panel the clear cross has just given a reason to close.
+    if (fromOwnControl(event)) return
     openPanel()
   }
 
@@ -176,10 +194,14 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
     }
     // TRAP — a key already consumed INSIDE the panel is ignored. An Enter that selected a
     // day has just CLOSED the panel, and without the guard would reopen it as it bubbles.
+    // TRAP — the same goes for a key typed on one of the field's own buttons. Its Enter is
+    // what becomes the click that clears the field or flips the half of the day: cancelled
+    // here to open the panel, the button would never be pressed from the keyboard at all.
     if (
       (event.key === 'ArrowDown' || event.key === 'Enter') &&
       !open.value &&
-      !event.defaultPrevented
+      !event.defaultPrevented &&
+      !fromOwnControl(event)
     ) {
       event.preventDefault()
       // Opened from the KEYBOARD the panel always takes focus, whatever `openOnFocus` says:

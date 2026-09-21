@@ -15,7 +15,8 @@
  */
 import { bench, describe } from 'vitest'
 
-import { formatTimeDisplay, hourCycleFor, parseTime, snapMinute, timeList } from './time'
+import { formatTimeDisplay, hourCycleFor, parseTime } from './time'
+import { snapMinute, timeList } from './clock'
 
 const LOCALE = 'en-US'
 

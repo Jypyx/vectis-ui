@@ -95,7 +95,7 @@ export const TwentyFourHour: Story = {
     // the step, so by now the face is already showing the minutes.
     tapDial(face, 9 / 12, 0.44)
     await waitFor(() =>
-      expect(canvas.getByRole('button', { name: 'Select hour' })).toHaveTextContent('21'),
+      expect(canvas.getByRole('button', { name: /Select hour$/ })).toHaveTextContent('21'),
     )
   },
 }
@@ -161,7 +161,7 @@ export const MinuteStep: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole('button', { name: 'Select minutes' }))
+    await userEvent.click(canvas.getByRole('button', { name: /Select minutes$/ }))
     expect(canvasElement.querySelectorAll('.v-time-picker-number')).toHaveLength(4)
     const face = faceOf(canvasElement)
     // A point between two markers is pulled back to the nearest quarter.
@@ -216,7 +216,7 @@ export const Restrictions: Story = {
     await waitFor(() => expect(canvasElement.textContent).toContain('09:30'))
     expect(face.getAttribute('aria-label')).toBe('Hour')
 
-    await userEvent.click(canvas.getByRole('button', { name: 'Select minutes' }))
+    await userEvent.click(canvas.getByRole('button', { name: /Select minutes$/ }))
     // Half past and a quarter to are all that is left of nine o'clock, and they are all
     // the face prints.
     await waitFor(() =>

@@ -58,7 +58,8 @@ it by mere presence: `<VDatePicker show-adjacent-days />`. `selectAdjacentDays` 
 
 ## Events
 
-`events` (`{ date, color?, label? }[]`) displays up to three coloured dots under a date.
+`events` (`{ date, color?, label? }[]`) displays up to three coloured dots under a date. The dots
+are hidden from assistive technology, so each `label` is spoken with the day instead.
 
 <Canvas of={VDatePickerStories.Events} />
 
@@ -107,13 +108,18 @@ the selection included.
 
 ## Accessibility
 
-- The days grid is a `role="grid"` named by the month and the year; the column headers carry the
-  full day name (`aria-label`).
+- `label` names the whole picker, a `role="group"`, and **draws nothing**: unlike a field's, it is
+  an accessible name alone. Two calendars side by side need one each.
+- The days grid is a `role="grid"` named by the month and the year, in the order the language
+  writes them ("June 2026", "2026年6月"); the column headers carry the full day name
+  (`aria-label`), and the month cells their full month name.
 - **Roving tabindex**: a single cell is tabbable; the selection and "today" are signalled by
-  `aria-selected` and `aria-current="date"`.
+  `aria-selected` and `aria-current="date"`. `aria-selected` reports the value itself: the end a
+  range preview draws under the pointer or the focus is not announced as selected.
 - **Keyboard**: arrows (± 1 day / ± 1 week), `Home`/`End` (the week's bounds), `PageUp`/`PageDown`
   (± 1 month, `Shift` → ± 1 year), `Enter`/`Space` (selection). The month and year views are
-  navigable with the arrows too.
+  navigable with the arrows too, which step over the months the bounds rule out. A key held with
+  `Alt`, `Ctrl` or `Meta` is left to the browser.
 - The visible focus uses the design system's standard focus ring; every transition respects
   `prefers-reduced-motion`.
 

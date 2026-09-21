@@ -38,11 +38,10 @@ import {
   isoOf,
   isSameISO,
   isValidISO,
-  monthName,
-  monthNamesCompact,
   parseISO,
   weekdayNames,
 } from '../../utils/date'
+import { monthName, monthNames, monthNamesCompact, monthYearName } from './names'
 
 import { PICKER_COLUMNS, dayStep, gridDelta } from './keyboard'
 
@@ -54,6 +53,7 @@ import { clamp } from '../../utils/number'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages, useResolvedLocale } from '../../i18n/state'
 
+/** What a click selects: one date, a period between two, or a list of dates. */
 export type DatePickerSelection = 'single' | 'range' | 'multiple'
 
 /**
@@ -73,7 +73,7 @@ export interface DatePickerEvent {
   date: string
   /** The colour of the dot, as any CSS colour. It is the accent colour by default. */
   color?: string
-  /** A description of the event for assistive technology. */
+  /** A description of the event, spoken as part of the day's accessible name. */
   label?: string
 }
 
@@ -115,7 +115,7 @@ interface DatePickerProps {
   /**
    * A BCP 47 locale, which decides the month and day names and the first day of the
    * week. It TAKES PRECEDENCE over the design system's global locale (`setLocale`)
-   * and falls back to it — which is why it has no literal default here: `undefined`
+   * and falls back to it, which is why it has no literal default here: `undefined`
    * has to stay recognizable for the global locale to have its chance.
    */
   locale?: string
@@ -158,7 +158,7 @@ interface DatePickerProps {
   disabled?: boolean
   /**
    * Shows what is selected without letting it be changed. The calendar can still be
-   * read and walked through — another month, another year — which is what separates it
+   * read and walked through (another month, another year), which is what separates it
    * from `disabled`.
    */
   readonly?: boolean
@@ -205,8 +205,8 @@ const emit = defineEmits<{
 
 defineSlots<{
   /**
-   * Replaces the content of a day cell — to show a price or an availability under the
-   * number, for instance. It receives everything known about that day, including
+   * Replaces the content of a day cell, to show a price or an availability under the
+   * number for instance. It receives everything known about that day, including
    * whether it belongs to the displayed month.
    */
   day?(props: DatePickerDaySlotProps): unknown
@@ -219,7 +219,8 @@ const gridLabelId = useId()
 // The navigation labels have no prop of their own: the dictionary is the single
 // place to change them, globally or per language — see `src/i18n/`.
 const m = useMessages()
-// @a11y — a roleless box cannot carry an accessible name (axe: aria-prohibited-attr),
+// @a11y
+// A roleless box cannot carry an accessible name (axe: aria-prohibited-attr),
 // so the root is a named group: the VCarousel viewport arrangement.
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.datePicker.label)
 const resolvedLocale = useResolvedLocale(() => props.locale)
@@ -243,6 +244,8 @@ const weekdaysLong = computed(() =>
   weekdayNames(resolvedLocale.value, resolvedFirstDay.value, 'long'),
 )
 const monthLabels = computed(() => monthNamesCompact(resolvedLocale.value))
+/** The full names the compact cells are spoken with: "Jan." is not a word to hear. */
+const monthNamesLong = computed(() => monthNames(resolvedLocale.value))
 
 const singleValue = computed(() =>
   props.selection === 'single' && typeof model.value === 'string' && isValidISO(model.value)
@@ -279,8 +282,11 @@ function initialFocus(): string {
   if (listed) return listed
   // With nothing selected, the calendar opens on today, brought back inside the
   // allowed bounds.
+  readTheClock = true
   return clampISO(formatISO(new Date()), props.min, props.max)
 }
+/** Whether the month on display was read from the clock at setup: see `renderEpoch`. */
+let readTheClock = false
 const focusedISO = ref(initialFocus())
 const view = ref<'days' | 'months' | 'years'>('days')
 
@@ -289,15 +295,35 @@ const viewYear = computed(
 )
 const viewMonth0 = computed(() => parseISO(focusedISO.value)?.getMonth() ?? 0)
 const monthLabel = computed(() => monthName(resolvedLocale.value, viewMonth0.value))
-const gridLabel = computed(() => `${monthLabel.value} ${viewYear.value}`)
+const gridLabel = computed(() =>
+  monthYearName(resolvedLocale.value, viewYear.value, viewMonth0.value),
+)
 
 // @ssr
 // Today's date is only read once the component is mounted, hence on the client: the
 // server has no way to know it, and rendering it during setup would make the two
 // markups differ and break hydration.
 const today = ref<string | null>(null)
+
+// @ssr
+/*
+ * TRAP — with nothing selected, the month on display is read from the clock at setup, on
+ * the server and again in the browser, and the two can disagree: a page prerendered in
+ * September and opened in October, or a server a timezone behind its visitor on the last
+ * evening of a month. Hydration then patches the TEXT and keeps the server's ATTRIBUTES, so
+ * the month button said "Oct." on screen and "September" to a screen reader, and the day ids
+ * `focusDay` looks up named days that were not there.
+ *
+ * The header and the grid are therefore keyed on `renderEpoch`, which is bumped once, on
+ * mount, whenever the month came from the clock: both are then built again from the
+ * browser's own state. Nothing on the page can say whether the server agreed (the grid's
+ * own title IS patched, the month button's is not), and rebuilding an empty picker once
+ * costs less than asking. A picker opened on a value is never rebuilt.
+ */
+const renderEpoch = ref(0)
 onMounted(() => {
   today.value = formatISO(new Date())
+  if (readTheClock) renderEpoch.value++
 })
 
 const isDisabledDate = computed(() => resolveMatcher(props.disabledDates))
@@ -327,6 +353,16 @@ const effectiveRange = computed<DatePickerRange>(() => {
   return { start: r.start, end: r.end }
 })
 
+/**
+ * Whether a day is part of the COMMITTED value, which is what `aria-selected` says: the
+ * end a range preview is drawing is not selected yet, and announcing every day the focus
+ * walks over as "selected" would say so.
+ */
+function isCommitted(iso: string): boolean {
+  if (props.selection !== 'range') return isSelected(iso)
+  return isSameISO(iso, rangeValue.value.start) || isSameISO(iso, rangeValue.value.end)
+}
+
 function isSelected(iso: string): boolean {
   if (props.selection === 'single') return isSameISO(iso, singleValue.value)
   if (props.selection === 'multiple') return multipleValues.value.includes(iso)
@@ -354,6 +390,8 @@ type DayCell = {
   inMonth: boolean
   disabled: boolean
   selected: boolean
+  /** Selected in the value itself, the preview left out: what `aria-selected` reports. */
+  committed: boolean
   rangeStart: boolean
   rangeEnd: boolean
   inRange: boolean
@@ -361,6 +399,8 @@ type DayCell = {
   events: DatePickerEvent[]
   /** The events drawn as dots under the number, three at most. */
   dots: DatePickerEvent[]
+  /** The labels of its events, joined, for the day's accessible name. */
+  eventText: string
 }
 
 /**
@@ -393,12 +433,17 @@ const days = computed<DayCell[]>(() =>
       inMonth,
       disabled,
       selected: kind === 'button' && !disabled && isSelected(cell.iso),
+      committed: kind === 'button' && !disabled && isCommitted(cell.iso),
       rangeStart: props.selection === 'range' && isSameISO(cell.iso, effectiveRange.value.start),
       rangeEnd: props.selection === 'range' && isSameISO(cell.iso, effectiveRange.value.end),
       inRange: props.selection === 'range' && isInRange(cell.iso),
       today: isSameISO(cell.iso, today.value),
       events,
       dots: events.length > 3 ? events.slice(0, 3) : events,
+      eventText: events
+        .map((ev) => ev.label)
+        .filter(Boolean)
+        .join(', '),
     }
   }),
 )
@@ -472,7 +517,8 @@ function stepYear(delta: number) {
   goTo(addMonths(focusedISO.value, delta * 12))
 }
 
-// @a11y @core — changing view has to carry the focus onto the cell the new view
+// @a11y @core
+// Changing view has to carry the focus onto the cell the new view
 // opens on. Without that move the focus would stay on a button the view has just
 // removed from the document, and the keyboard would have nowhere to go.
 function toggleView(target: 'months' | 'years') {
@@ -516,6 +562,7 @@ function selectDay(cell: DayCell) {
     const r = rangeValue.value
     next = !r.start || r.end ? { start: cell.iso, end: null } : orderRange(r.start, cell.iso)
   }
+  lastWritten = JSON.stringify(next)
   model.value = next
   // TRAP: emit what was just computed, never `model.value` read back. Under a parent
   // `v-model`, `defineModel` does not update its local copy on write — it waits for the
@@ -528,6 +575,8 @@ function selectDay(cell: DayCell) {
 // lives in `./keyboard`; what stays here is the date that step is applied to, and
 // the focus move that follows.
 function onDaysKeydown(event: KeyboardEvent) {
+  // A key held with a modifier is the browser's or the system's: Alt+Left is Back.
+  if (event.altKey || event.ctrlKey || event.metaKey) return
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault()
     const cell = days.value.find((c) => c.iso === focusedISO.value)
@@ -572,7 +621,9 @@ function onViewKeydown(
   focused: Ref<number>,
   cellEl: (value: number) => HTMLElement | null,
   choose: (value: number) => void,
+  selectable: (value: number) => boolean = () => true,
 ) {
+  if (event.altKey || event.ctrlKey || event.metaKey) return
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault()
     choose(focused.value)
@@ -581,8 +632,14 @@ function onViewKeydown(
   const delta = gridDelta(event.key)
   if (delta === undefined) return
   event.preventDefault()
-  const next = clamp(cells.indexOf(focused.value) + delta, 0, cells.length - 1)
-  focused.value = cells[next] ?? focused.value
+  // A cell the bounds rule out is a DISABLED button, which cannot take the focus: landing
+  // on it would move the tab stop where the focus cannot follow. The walk goes on the same
+  // way round to the next cell that can be chosen, and holds still when there is none.
+  let next = clamp(cells.indexOf(focused.value) + delta, 0, cells.length - 1)
+  while (!selectable(cells[next]!) && next + delta >= 0 && next + delta < cells.length)
+    next += delta
+  if (!selectable(cells[next]!)) return
+  focused.value = cells[next]!
   cellEl(focused.value)?.focus()
 }
 
@@ -598,7 +655,7 @@ function chooseMonth(i: number) {
   if (monthSelectable(i)) chooseYearMonth(viewYear.value, i)
 }
 const onMonthsKeydown = (event: KeyboardEvent) =>
-  onViewKeydown(event, MONTHS, focusedMonth, monthCellEl, chooseMonth)
+  onViewKeydown(event, MONTHS, focusedMonth, monthCellEl, chooseMonth, monthSelectable)
 
 // @a11y
 /*
@@ -645,9 +702,18 @@ const onYearsKeydown = (event: KeyboardEvent) =>
 // Follows a selection changed from the outside: when the leading value lands in
 // another month, the calendar moves to it rather than leaving the reader in front of
 // a grid where nothing is selected.
+//
+// TRAP — only from the OUTSIDE. The picker's own writes change the leading value too:
+// unticking the earliest date of a list makes the next one lead, and following it would
+// throw the reader into another month and drop the focus on `<body>`, the day they were
+// on having left the document. `lastWritten` is the value `selectDay` just wrote, and a
+// model that still reads the same was not changed by anyone else. It is compared as TEXT:
+// a parent v-model hands back a reactive proxy of the array, never the array written.
+let lastWritten: string | undefined
 watch(
   () => [singleValue.value, rangeValue.value.start, multipleValues.value[0]],
   () => {
+    if (lastWritten !== undefined && JSON.stringify(model.value) === lastWritten) return
     const primary = singleValue.value ?? rangeValue.value.start ?? multipleValues.value[0]
     if (primary && isValidISO(primary)) {
       const d = parseISO(primary)!
@@ -708,7 +774,7 @@ defineExpose({
   >
     <!-- The header: the month and the year, each between two chevrons that step it,
          and each opening its own picker view when clicked -->
-    <div class="v-date-picker-header">
+    <div :key="`header-${renderEpoch}`" class="v-date-picker-header">
       <div class="v-date-picker-nav">
         <VIconButton
           :label="m.datePicker.previousMonth"
@@ -782,6 +848,7 @@ defineExpose({
     <!-- Days view -->
     <div
       v-show="view === 'days'"
+      :key="`days-${renderEpoch}`"
       class="v-date-picker-grid"
       role="grid"
       :aria-label="gridLabel"
@@ -804,7 +871,7 @@ defineExpose({
           :key="cell.iso"
           class="v-date-picker-cell"
           role="gridcell"
-          :aria-selected="cell.kind === 'button' ? cell.selected : undefined"
+          :aria-selected="cell.kind === 'button' ? cell.committed : undefined"
           :data-in-range="cell.inRange ? '' : undefined"
           :data-range-start="cell.rangeStart ? '' : undefined"
           :data-range-end="cell.rangeEnd ? '' : undefined"
@@ -829,6 +896,9 @@ defineExpose({
             <slot name="day" v-bind="daySlotProps(cell)">
               <span class="v-date-picker-day-num">{{ cell.day }}</span>
             </slot>
+            <!-- The dots are hidden from assistive technology, so what they stand for is
+                 spoken here, as part of the day's name. -->
+            <span v-if="cell.eventText" class="v-visually-hidden">, {{ cell.eventText }}</span>
             <span v-if="cell.dots.length" class="v-date-picker-dots" aria-hidden="true">
               <span
                 v-for="(ev, ei) in cell.dots"
@@ -869,13 +939,14 @@ defineExpose({
         <button
           v-for="{ name, i } in row"
           :id="`${gridLabelId}-m-${i}`"
-          :key="name"
+          :key="i"
           type="button"
           class="v-date-picker-view-cell"
           role="gridcell"
           :tabindex="i === focusedMonth ? 0 : -1"
           :data-selected="i === viewMonth0 ? '' : undefined"
           :aria-selected="i === viewMonth0 ? 'true' : undefined"
+          :aria-label="monthNamesLong[i]"
           :disabled="disabled || !monthSelectable(i)"
           @click="chooseMonth(i)"
         >
@@ -952,7 +1023,10 @@ defineExpose({
 
   /* A minimum width holds this button steady, so the chevrons on either side do not
      shift as the month or year label changes length. */
-  .v-date-picker-view-toggle {
+  /* Qualified by an attribute the button always renders: `.v-button` sets its own
+     `font-weight` at (0,1,0), and a tie between the two sheets would leave the weight to
+     whichever the consumer's bundler put last. */
+  .v-date-picker-view-toggle[data-size] {
     min-inline-size: var(--vectis-control-size-date-picker-nav-min);
     /* The semibold is state emphasis on the grid's main landmark, not a type role. */
     font-weight: var(--vectis-font-weight-semibold);
@@ -1057,7 +1131,7 @@ defineExpose({
 
   /* Hover belongs to the days one can actually click: not the disabled ones, not the
      already selected ones, and not the neighbouring days rendered as plain spans. */
-  .v-date-picker-day:hover:not([aria-disabled='true']):not([data-selected]):not(
+  .v-date-picker-day:hover:not(:disabled):not([aria-disabled='true']):not([data-selected]):not(
       .v-date-picker-day--static
     ) {
     background: var(--vectis-color-surface-muted);
@@ -1131,9 +1205,10 @@ defineExpose({
 
   .v-date-picker-dots {
     position: absolute;
-    inset-block-end: calc(var(--vectis-space-1) * 0.5);
+    /* Half a dot, below them and between them: the spacing scale has no step that small. */
+    inset-block-end: calc(var(--vectis-control-size-date-picker-dot) / 2);
     display: flex;
-    gap: 2px;
+    gap: calc(var(--vectis-control-size-date-picker-dot) / 2);
   }
   .v-date-picker-dot {
     inline-size: var(--vectis-control-size-date-picker-dot);

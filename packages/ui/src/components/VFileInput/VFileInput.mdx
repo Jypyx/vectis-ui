@@ -118,13 +118,15 @@ spinner when the dictionary's wording is not the right one.
 
 ## Forms
 
-**VFileInput is a v-model component, not a native form control.** Two consequences:
+`name` and `form` land on the hidden input, and the component keeps that input holding exactly
+the selection: a native submission carries every file chosen, the ones added by a second pick or a
+drop included, and none of the ones removed.
 
-- `required` is forwarded to the hidden input, which is not focusable: the browser blocks submission
-  with no visible message. Validate the model yourself and reflect the result through `invalid`. A
-  dev-mode warning says so.
-- Removing a file shrinks the model but not the hidden input's `FileList`, so a native submission
-  could still carry it. Build the `FormData` from the `v-model` instead:
+<Canvas of={VFileInputStories.InAForm} />
+
+`required` lands there too, and the browser does refuse an empty submission, but its message
+points at an input nobody can see. Validate the `v-model` yourself and reflect the result through
+`invalid`; a dev-mode warning says so. Building the request from the model works just as well:
 
 ```js
 const body = new FormData()

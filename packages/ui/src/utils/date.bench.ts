@@ -18,15 +18,9 @@
  */
 import { bench, describe } from 'vitest'
 
-import {
-  buildMonthGrid,
-  dateMaskFor,
-  firstDayOfWeekFor,
-  formatDateDisplay,
-  maskPlaceholder,
-  monthNames,
-  weekdayNames,
-} from './date'
+import { buildMonthGrid, firstDayOfWeekFor, formatDateDisplay, weekdayNames } from './date'
+import { dateMaskFor, maskPlaceholder } from '../components/VDateInput/mask'
+import { monthNames } from '../components/VDatePicker/names'
 
 const LOCALE = 'en-US'
 const ISO = '2021-11-22'

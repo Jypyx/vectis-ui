@@ -6,10 +6,9 @@ import VTimePicker from './VTimePicker.vue'
 
 const face = (container: Element) => container.querySelector('[role="slider"]') as HTMLElement
 
+// The two numerals are named with the figure they show, so they are found by their place.
 const cell = (container: Element, which: 'hour' | 'minute') =>
-  container.querySelector(
-    `button[aria-label="${which === 'hour' ? 'Select hour' : 'Select minutes'}"]`,
-  ) as HTMLButtonElement
+  container.querySelectorAll('.v-time-picker-cell')[which === 'hour' ? 0 : 1] as HTMLButtonElement
 
 const numerals = (container: Element) =>
   [...container.querySelectorAll('.v-time-picker-number')].map((n) => n.textContent!.trim())
@@ -79,7 +78,7 @@ describe('VTimePicker', () => {
     expect(slider.getAttribute('aria-valuenow')).toBe('7')
     expect(slider.getAttribute('aria-valuemin')).toBe('1')
     expect(slider.getAttribute('aria-valuemax')).toBe('12')
-    expect(slider.getAttribute('aria-valuetext')).toBe("7 o'clock")
+    expect(slider.getAttribute('aria-valuetext')).toBe("7 o'clock PM")
     await fireEvent.click(cell(container, 'minute'))
     expect(slider.getAttribute('aria-valuetext')).toBe('35 minutes')
     expect(slider.getAttribute('aria-valuemax')).toBe('59')
@@ -408,5 +407,98 @@ describe('VTimePicker — development warnings', () => {
     render(VTimePicker, { props: { min: '17:00', max: '09:00' } })
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('[VTimePicker] min "17:00"'))
     warn.mockRestore()
+  })
+})
+
+describe('VTimePicker — stepping and guarding', () => {
+  const minutesFace = async (props: Record<string, unknown>) => {
+    const r = render(VTimePicker, { props: { format: '24h', ...props } })
+    await fireEvent.keyDown(face(r.container), { key: 'Enter' })
+    return r
+  }
+
+  it('an arrow from a minute off the grid lands on the next grid step that way round', async () => {
+    const cases: [string, number, string, string][] = [
+      ['09:07', 15, 'ArrowDown', '09:00'],
+      ['09:07', 15, 'ArrowUp', '09:15'],
+      ['09:08', 15, 'ArrowUp', '09:15'],
+      ['09:01', 5, 'ArrowDown', '09:00'],
+      ['09:58', 5, 'ArrowUp', '09:00'],
+      ['09:56', 7, 'ArrowUp', '09:00'],
+    ]
+    for (const [value, minuteStep, key, expected] of cases) {
+      const { container, emitted, unmount } = await minutesFace({ modelValue: value, minuteStep })
+      await fireEvent.keyDown(face(container), { key })
+      expect([value, minuteStep, key, emitted('update:modelValue')?.at(-1)]).toEqual([
+        value,
+        minuteStep,
+        key,
+        [expected],
+      ])
+      unmount()
+    }
+  })
+
+  it('PageUp and PageDown move at least five minutes, whatever the step', async () => {
+    const cases: [string, number, string, string][] = [
+      ['09:15', 15, 'PageUp', '09:30'],
+      ['09:15', 15, 'PageDown', '09:00'],
+      ['09:30', 30, 'PageUp', '09:00'],
+      ['09:10', 10, 'PageDown', '09:00'],
+      ['09:10', 1, 'PageUp', '09:15'],
+    ]
+    for (const [value, minuteStep, key, expected] of cases) {
+      const { container, emitted, unmount } = await minutesFace({ modelValue: value, minuteStep })
+      await fireEvent.keyDown(face(container), { key })
+      expect([value, minuteStep, key, emitted('update:modelValue')?.at(-1)]).toEqual([
+        value,
+        minuteStep,
+        key,
+        [expected],
+      ])
+      unmount()
+    }
+  })
+
+  it('a disabled clock neither moves its step on nor confirms', async () => {
+    const { container, emitted } = render(VTimePicker, {
+      props: { modelValue: '09:15', format: '12h', disabled: true },
+    })
+    await fireEvent.pointerDown(face(container), { clientX: 0, clientY: 100 })
+    await fireEvent.pointerUp(face(container))
+    expect(face(container).getAttribute('aria-label')).toBe('Hour')
+    await fireEvent.keyDown(face(container), { key: 'Enter' })
+    await fireEvent.keyDown(face(container), { key: 'Enter' })
+    expect(emitted('confirm')).toBeUndefined()
+  })
+
+  it('the half of the day chosen on an empty clock reaches a time started from the minutes', async () => {
+    const { container, emitted } = render(VTimePicker, { props: { format: '12h' } })
+    await fireEvent.click(pm(container))
+    await fireEvent.keyDown(face(container), { key: 'Enter' })
+    await fireEvent.keyDown(face(container), { key: 'ArrowUp' })
+    expect(emitted('update:modelValue')?.at(-1)).toEqual(['12:01'])
+  })
+
+  it('a press at the very centre of the face aims at nothing', async () => {
+    const { container, emitted } = render(VTimePicker, {
+      props: { modelValue: '09:00', format: '12h' },
+    })
+    await fireEvent.pointerDown(face(container), { clientX: 0, clientY: 0 })
+    await fireEvent.pointerUp(face(container))
+    expect(emitted('update:modelValue')).toBeUndefined()
+    expect(face(container).getAttribute('aria-label')).toBe('Hour')
+  })
+
+  it('on a 12-hour face the spoken hour says which half of the day it is', () => {
+    const { container } = render(VTimePicker, { props: { modelValue: '21:00', format: '12h' } })
+    expect(face(container).getAttribute('aria-valuetext')).toBe("9 o'clock PM")
+  })
+
+  it('the two large numerals are named with the figure they show', () => {
+    const { container } = render(VTimePicker, { props: { modelValue: '09:30', format: '24h' } })
+    const [hourButton, minuteButton] = container.querySelectorAll('.v-time-picker-cell')
+    expect(hourButton!.getAttribute('aria-label')).toBe('09, Select hour')
+    expect(minuteButton!.getAttribute('aria-label')).toBe('30, Select minutes')
   })
 })

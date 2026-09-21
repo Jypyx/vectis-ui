@@ -51,8 +51,8 @@ export default {
         icon: 'La grande icône en haut de la zone.',
         hideBrowse:
           "Masque le séparateur et le bouton de parcours sous la consigne. Cela change la NATURE de la zone : elle devient alors le contrôle elle-même, un vrai bouton, si bien qu'Entrée, Espace et le focus viennent de la plateforme plutôt que d'un conteneur qui se contente de réagir aux clics.",
-        browseLabel:
-          'Le libellé du bouton de parcours. Il retombe sur le dictionnaire du design system.',
+        browseText:
+          'Le texte affiché sur le bouton de parcours, qui lui sert aussi de nom accessible. Il retombe sur le dictionnaire du design system.',
         preview:
           "Où les fichiers pris sont listés : sous la zone, ou à côté, auquel cas la liste repasse dessous quand le COMPOSANT est étroit, en suivant la largeur qu'on lui a donnée et non celle de la fenêtre. Par défaut, rien n'est listé du tout.",
         hideThumbnails:
@@ -68,9 +68,9 @@ export default {
         maxFiles: 'Combien de fichiers peuvent être pris au plus.',
         disabled: 'Rend la zone inutilisable, grisée par les tokens de couleur.',
         readonly:
-          'Montre ce qui a été pris sans permettre de le changer : ni boîte de dialogue, ni dépôt, ni retrait.',
+          'Montre ce qui a été pris sans permettre de le changer : ni boîte de dialogue, ni dépôt, ni retrait. Ses boutons restent atteignables au clavier, annoncés comme indisponibles.',
         invalid:
-          "Marque la zone comme invalide, ce qui colore son contour. C'est pour une règle à vous : rien ici n'est vérifié par le navigateur, le vrai champ étant masqué.",
+          "Marque la zone comme invalide, ce qui colore son contour et s'annonce sur le contrôle que l'on atteint. C'est pour une règle à vous : rien ici n'est vérifié par le navigateur, le vrai champ étant masqué.",
         loading:
           "Affiche un indicateur à la place de l'icône de la zone, typiquement pendant un envoi. Il dit que quelque chose se passe et ne change rien d'autre : les fichiers peuvent toujours être déposés et la boîte de dialogue s'ouvre encore.",
         loadingText:
