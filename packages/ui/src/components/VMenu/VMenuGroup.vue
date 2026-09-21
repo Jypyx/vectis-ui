@@ -1,14 +1,13 @@
 <script setup lang="ts">
-// @a11y @ssr — the whole script is a single generated id, and it exists only to tie
-// the group to its own label. It matches between server and client by construction,
-// Vue's `useId` guaranteeing exactly that.
 /**
- * A named section inside a menu — "Sort by", "Recent files". The name is announced as
+ * A named section inside a menu: "Sort by", "Recent files". The name is announced as
  * the group's label rather than being read as one more item, and it is plain text: it
  * cannot be chosen, and the arrow keys walk straight past it.
  */
 
-import { useId } from 'vue'
+import { useId, useSlots, watchEffect } from 'vue'
+
+import { isDev } from '../../utils/env'
 
 interface MenuGroupProps {
   /**
@@ -20,7 +19,7 @@ interface MenuGroupProps {
   label?: string
 }
 
-withDefaults(defineProps<MenuGroupProps>(), {
+const props = withDefaults(defineProps<MenuGroupProps>(), {
   label: undefined,
 })
 
@@ -31,7 +30,21 @@ defineSlots<{
   label?(): unknown
 }>()
 
+// @a11y @ssr
+// The generated id ties the group to its own label, and matches between server and
+// client by construction, Vue's `useId` guaranteeing exactly that.
 const labelId = useId()
+
+// @devwarn
+// A group named by neither points its `aria-labelledby` at an empty element, and a
+// screen reader announces an unnamed group with nothing on screen to say so.
+if (isDev) {
+  const slots = useSlots()
+  watchEffect(() => {
+    if (!props.label && !slots.label)
+      console.warn('[VMenuGroup] needs a name: give it a `label` or a `#label` slot.')
+  })
+}
 </script>
 
 <template>

@@ -14,7 +14,7 @@
  * closing.
  */
 
-import { computed, nextTick, onMounted, ref, useAttrs, useId, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, useId, watch } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { close as closeIcon } from '../VIcon/icons/close'
@@ -42,8 +42,8 @@ interface DialogProps {
   width?: number | string
   /**
    * What kind of dialog this is. `alertdialog` is for one that must be answered
-   * explicitly, and it makes screen readers announce it more insistently — see
-   * VDialogAlert, which is exactly that.
+   * explicitly, and it makes screen readers announce it more insistently. VDialogAlert is
+   * exactly that.
    */
   role?: DialogRole
   /**
@@ -195,8 +195,61 @@ onMounted(() => {
 
 // The browser's own close event, whatever caused it, is what brings the model back in
 // step with reality.
-function onClose() {
+//
+// TRAP — only the element on screen may do it. A close event is queued as a TASK, so the
+// one fired by the element a quick close-and-reopen has just replaced arrives after the new
+// element exists, and without the check it closed the dialog that had just opened.
+function onClose(event: Event) {
+  if (event.target !== dialogEl.value) return
   open.value = false
+}
+
+// @core
+// An open dialog removed with its parent (a `v-if`, a route change) runs no close steps,
+// so no close event would come: the model is handed back closed here, or it stayed `true`
+// and the dialog reopened by itself the next time its parent was shown.
+onBeforeUnmount(() => {
+  if (open.value) open.value = false
+})
+
+// @fallback
+/*
+ * `closedby` is what applies `persistentBackdrop` and `persistentEscape`, and Safari does
+ * not implement it: there Escape always closes and the backdrop never does. The two halves
+ * are rebuilt below, and ONLY where the attribute is unknown, so a browser that has it is
+ * never second-guessed. The support is asked at event time: there is no DOM during setup.
+ */
+const closedbyUnsupported = () => !('closedBy' in HTMLDialogElement.prototype)
+
+function onCancel(event: Event) {
+  if (closedbyUnsupported() && closedby.value === 'none') event.preventDefault()
+}
+
+/**
+ * Whether a point lies outside the dialog's box, which is where the backdrop is: a click on
+ * the `::backdrop` is dispatched to the dialog element itself.
+ */
+function outsideBox(event: MouseEvent) {
+  const box = dialogEl.value?.getBoundingClientRect()
+  if (!box) return false
+  return (
+    event.clientX < box.left ||
+    event.clientX > box.right ||
+    event.clientY < box.top ||
+    event.clientY > box.bottom
+  )
+}
+
+// A press that STARTED inside and ended on the backdrop (a text selection dragged past the
+// edge) is not a click on the backdrop, so the press is remembered, not only the release.
+let pressedOnBackdrop = false
+function onPointerdown(event: PointerEvent) {
+  pressedOnBackdrop = event.target === dialogEl.value && outsideBox(event)
+}
+function onBackdropClick(event: MouseEvent) {
+  const onBackdrop = pressedOnBackdrop && event.target === dialogEl.value && outsideBox(event)
+  pressedOnBackdrop = false
+  if (onBackdrop && closedbyUnsupported() && closedby.value === 'any') requestClose()
 }
 
 defineExpose({
@@ -221,13 +274,16 @@ defineExpose({
   <dialog
     v-if="rendered"
     ref="dialogEl"
+    :aria-labelledby="title ? titleId : undefined"
+    :aria-describedby="subtitle ? subtitleId : undefined"
     v-bind="rootAttrs"
     class="v-dialog"
     :style="{ '--dialog-width': cssSize(width) }"
     :role="role === 'alertdialog' ? 'alertdialog' : undefined"
-    :aria-labelledby="title ? titleId : undefined"
-    :aria-describedby="subtitle ? subtitleId : undefined"
     @close="onClose"
+    @cancel="onCancel"
+    @pointerdown="onPointerdown"
+    @click="onBackdropClick"
   >
     <!--
       The header and the footer stay put while only the body scrolls, so the scrollbar
@@ -350,6 +406,9 @@ defineExpose({
     flex: 1 1 auto;
     min-block-size: 0;
     overflow-y: auto;
+    /* A wheel reaching the end of the content stops there rather than scrolling the page
+       behind the modal. */
+    overscroll-behavior: contain;
     display: flex;
     flex-direction: column;
     /* This makes the box something its descendants can ask questions about — namely
@@ -488,6 +547,15 @@ defineExpose({
     .v-dialog,
     .v-dialog::backdrop {
       transition: none;
+    }
+  }
+
+  /* Windows forced colors flattens the dialog's background to Canvas and drops its shadow,
+     which were its only edge: it would float over the page with no boundary at all. An
+     outline draws one without moving the layout by a pixel. */
+  @media (forced-colors: active) {
+    .v-dialog {
+      outline: 1px solid CanvasText;
     }
   }
 }

@@ -370,6 +370,7 @@ export const semantic = {
       'The default height of a surface-shaped VSkeletonLoader: a card, an image (96px)',
     ),
     'size-toast-width': dimension('22rem', 'The default width of a toast'),
+    'size-tooltip-max': dimension('18rem', 'The widest a tooltip grows before it wraps (288px)'),
     'size-dialog-width': dimension(
       '25rem',
       'The default width of VDialog and VDialogAlert (400px), when no `width` is given',

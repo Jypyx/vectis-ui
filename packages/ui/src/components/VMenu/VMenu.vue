@@ -41,7 +41,7 @@ interface MenuProps {
   compact?: boolean
   /**
    * A width for the panel: a number is read as pixels, a string as any CSS length or
-   * keyword — `16rem`, `max-content`. It applies to the menu itself; submenus keep the
+   * keyword (`16rem`, `max-content`). It applies to the menu itself; submenus keep the
    * default width.
    */
   width?: number | string
@@ -63,7 +63,7 @@ withDefaults(defineProps<MenuProps>(), {
 
 /**
  * Whether the menu is showing. It starts closed and is fed BY the panel, so the browser's
- * own dismissal — a click outside, Escape, choosing a command — writes back to it.
+ * own dismissal (a click outside, Escape, choosing a command) writes back to it.
  */
 const open = defineModel<boolean>('open', { default: false })
 
@@ -81,8 +81,8 @@ export type MenuTriggerProps = {
 
 defineSlots<{
   /**
-   * The button that opens the menu. Bind the `triggerProps` it receives onto it —
-   * that is what wires the two together.
+   * The button that opens the menu. Bind the `triggerProps` it receives onto it: that
+   * is what wires the two together.
    */
   trigger(props: { triggerProps: MenuTriggerProps }): unknown
   /** The contents of the menu: VMenuItem, VMenuGroup and VMenuSeparator. */
@@ -103,7 +103,8 @@ const triggerProps = computed<MenuTriggerProps>(() => ({
 // the browser closes a stack of popovers from the outside in.
 provide(menuKey, { closeAll: () => panelRef.value?.close() })
 
-// @a11y — the focus half of the bridge: into the panel when it opens, back to the
+// @a11y
+// The focus half of the bridge: into the panel when it opens, back to the
 // trigger when it closes. Keeping the state in step alone would leave a keyboard user
 // stranded at the top of the page every time a menu opened or closed.
 //

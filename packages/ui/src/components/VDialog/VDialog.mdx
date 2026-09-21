@@ -8,7 +8,9 @@ import * as VDialogStories from './VDialog.stories'
 A blocking modal built on the native `<dialog>` primitive + `showModal()`: the move to the **top
 layer**, `::backdrop`, the **focus trap** and the **inert background** are all native — no JS for
 any of it, and the focus returns to the trigger on closing. The light dismiss (a backdrop click /
-Escape) is declarative too, through the `closedby` attribute. The only behavioural JS is the
+Escape) is declarative too, through the `closedby` attribute, which sets the Chrome/Edge floor at 134. Safari does not implement it yet, so a small fallback runs there alone: it refuses a
+forbidden Escape and closes on a backdrop click (pressed and released outside the box) when that
+is allowed. The other behavioural JS is the
 `v-model:open` ↔ imperative API bridge (`showModal()` and `close()` have no declarative
 equivalent), confined to `onMounted`/`watch`/handlers (SSR-safe).
 

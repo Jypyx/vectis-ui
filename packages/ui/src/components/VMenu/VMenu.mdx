@@ -1,4 +1,4 @@
-﻿import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
 import * as VMenuStories from './VMenu.stories'
 
 <Meta of={VMenuStories} />
@@ -71,8 +71,11 @@ native popover stack handles the light dismiss and the cascading close — openi
 its sibling.
 
 Opening: click, ArrowRight / Enter / Space (focusing the first subitem), or hover after a
-**150 ms intent delay**. ArrowLeft and Escape each close **one level** at a time (focus handed
-back to the parent item); on the root panel, Escape closes the menu.
+**150 ms intent delay**. A click on the parent item only ever opens its submenu, so the hover
+that got there first is not undone by it. ArrowLeft and Escape each close **one level** at a time
+(focus handed back to the parent item); on the root panel, Escape closes the menu. In a
+right-to-left page the submenu opens on the left, and the two arrows swap: ArrowLeft opens it,
+ArrowRight closes it. On a touch screen the hover route is ignored and a tap opens the submenu.
 
 <Canvas of={VMenuStories.Submenus} />
 
@@ -130,8 +133,11 @@ sublabel longer than that is truncated with an ellipsis rather than wrapped, as 
   list from the panel, Down from the top and Up from the bottom.
 - **Roving focus**: no item is in the tab order, the focus being moved from item to item by the
   arrows; Up/Down with wrap-around, disabled items skipped.
-- Keyboard: Enter/Space selects, Escape and ArrowLeft go up one level, Tab closes the whole menu.
-  Closing hands the focus back to the trigger.
+- Keyboard: Enter/Space selects (a link item included), Escape and ArrowLeft go up one level,
+  Tab closes the whole menu. Closing hands the focus back to the trigger. A key held with Alt,
+  Ctrl or Meta is left to the browser, Alt+Left being Back.
+- The `aria-*` attributes you set on an item are kept, and a disabled link item runs none of your
+  click listeners.
 - Native light dismiss (a click outside the menu, a loss of focus) through the Popover API.
 - Hover moves the focus to the hovered item, so there is never more than one highlight; closing a
   submenu on pointerleave is refused while the focus is inside it, so a stray pointer cannot cut

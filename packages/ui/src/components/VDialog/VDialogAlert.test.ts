@@ -69,3 +69,10 @@ describe('VDialogAlert', () => {
     expect(container.querySelector('.v-dialog')).toBeNull()
   })
 })
+
+describe("VDialogAlert — the consumer's attributes", () => {
+  it('an aria-describedby pointing at the message is kept', async () => {
+    const { dialog } = await openHarness({ title: 'Delete?', 'aria-describedby': 'message' })
+    expect(dialog.getAttribute('aria-describedby')).toBe('message')
+  })
+})

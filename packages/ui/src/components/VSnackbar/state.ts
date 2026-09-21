@@ -30,11 +30,12 @@
 import { shallowRef } from 'vue'
 
 import type { IconSource } from '../VIcon/types'
+import { isDev } from '../../utils/env'
 
 /**
  * What a confirmation can mean. There are two, and deliberately no more: a snackbar
  * says either "done" or "that did not work". Success, warning and the accent are
- * STATES, which is a notification's subject — reporting one here would blur the line
+ * STATES, which is a notification's subject: reporting one here would blur the line
  * the two components exist to draw.
  */
 export type SnackbarTone = 'neutral' | 'danger'
@@ -44,7 +45,7 @@ export type SnackbarPlacement = 'bottom-left' | 'bottom-center' | 'bottom-right'
 
 /** Everything one can say when raising a confirmation. */
 export interface SnackbarOptions {
-  /** What the confirmation says. One short sentence — there is no title to frame it. */
+  /** What the confirmation says. One short sentence: there is no title to frame it. */
   message: string
   /** What it means, expressed as a colour: the plain inversion, or the failure colour. */
   tone?: SnackbarTone
@@ -65,8 +66,8 @@ export interface SnackbarOptions {
    * always takes the bar away, so nothing has to be dismissed by hand afterwards.
    */
   action?: () => void
-  /** What that action is called. It falls back to the design system dictionary ("Undo"). */
-  actionLabel?: string
+  /** The word drawn on that action. It falls back to the design system dictionary ("Undo"). */
+  actionText?: string
 }
 
 /**
@@ -87,18 +88,25 @@ let nextId = 0
  * Raises a confirmation, replacing whatever was showing, and hands back an id that
  * `dismissSnackbar` can use to take it away again before its time.
  *
- * The two defaults that belong to the VSnackbar — where the bar appears and how long it
- * stays — are deliberately NOT resolved here: they are read when the bar is rendered, so
+ * The two defaults that belong to the VSnackbar, where the bar appears and how long it
+ * stays, are deliberately NOT resolved here: they are read when the bar is rendered, so
  * the component remains the single source of truth for its own settings.
  */
 export function snackbar(options: SnackbarOptions): number {
+  // @devwarn
+  // The queue is module state, shared by every request a server renders: raised there, it
+  // would reach another reader's page and differ from what the browser hydrates.
+  if (isDev && typeof document === 'undefined')
+    console.warn(
+      '[snackbar] called during a server render: call it from a handler or a lifecycle hook that runs in the browser.',
+    )
   const id = nextId++
   current.value = { tone: 'neutral', ...options, id }
   return id
 }
 
 /**
- * Takes a confirmation away, by its id or — called with no argument — whichever one is
+ * Takes a confirmation away, by its id or, called with no argument, whichever one is
  * showing.
  *
  * Passing an id is not a formality: it is checked against the bar actually on screen, and

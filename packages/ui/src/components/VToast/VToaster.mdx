@@ -105,11 +105,14 @@ emptying fades out.
 
 ## Accessibility
 
-- Role per toast: `role="alert"` (interruptive) for `danger`/`warning`, `role="status"` (polite)
-  otherwise — the announcement of a stack's first polite toast may be missed by some screen readers
-  (the live region is born with its content); `alert`s are announced on insertion.
-- Each stack is a `role="region"` landmark named by the `label` prop ("Notifications"); the cross
-  receives `closeLabel` ("Close").
+- Every toast is announced through two live regions VToaster renders once, outside the stacks:
+  interruptive (`role="alert"`) for `danger`/`warning`, polite (`role="status"`) otherwise. A card
+  is created with its message, and a live region inserted along with its text is not reliably
+  announced, which is why the cards themselves carry no live role.
+- Each stack is a `role="region"` landmark named by the `label` prop ("Notifications"), numbered
+  when two corners are open at once so a screen reader can tell them apart; the cross receives
+  `closeLabel` ("Close"). Closing a toast from its cross hands the focus to the next cross of the
+  same corner, or back to where it was before the stack.
 - The focus is never stolen: a toast appears without interrupting the current input.
 - Timers pause on hover and while the keyboard is inside a stack; the animations respect `prefers-reduced-motion`.
 

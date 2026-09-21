@@ -1,4 +1,4 @@
-﻿import { fireEvent, render } from '@testing-library/vue'
+import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, nextTick, ref } from 'vue'
 
@@ -796,5 +796,146 @@ describe('VMenuItem — tone', () => {
     // The default is written out too: a union is always mirrored, where a boolean would
     // only appear when true.
     expect(getByRole('menuitem', { name: 'Rename' }).dataset.tone).toBe('neutral')
+  })
+})
+
+describe("VMenuItem — the consumer's attributes", () => {
+  it('a consumer aria-current, aria-disabled or aria-haspopup is kept', () => {
+    const { getByText } = renderHarness(`
+      <VMenu>
+        <template #trigger="{ triggerProps }"><button v-bind="triggerProps">Go</button></template>
+        <VMenuItem label="Home" href="/home" aria-current="page" />
+        <VMenuItem label="Soon" aria-disabled="true" />
+        <VMenuItem label="Share" aria-haspopup="dialog" />
+      </VMenu>
+    `)
+    const item = (label: string) => getByText(label).closest('.v-menu-item')!
+    expect(item('Home').getAttribute('aria-current')).toBe('page')
+    expect(item('Soon').getAttribute('aria-disabled')).toBe('true')
+    expect(item('Share').getAttribute('aria-haspopup')).toBe('dialog')
+  })
+
+  it("a disabled link runs none of the consumer's click listeners", async () => {
+    const track = vi.fn()
+    const { getByText } = renderHarness(
+      `
+      <VMenu>
+        <template #trigger="{ triggerProps }"><button v-bind="triggerProps">Go</button></template>
+        <VMenuItem label="Docs" href="/docs" disabled @click="track" @click.once="track" />
+      </VMenu>
+    `,
+      vi.fn(),
+      () => ({ track }),
+    )
+    await fireEvent.click(getByText('Docs').closest('.v-menu-item')!)
+    expect(track).not.toHaveBeenCalled()
+  })
+})
+
+describe('VMenu — touch, direction and modifiers', () => {
+  const template = `
+    <div :dir="dir">
+      <VMenu>
+        <template #trigger="{ triggerProps }">
+          <button data-testid="trigger" v-bind="triggerProps">Actions</button>
+        </template>
+        <VMenuItem label="Docs" href="/docs" />
+        <VMenuItem label="Export">
+          <template #submenu>
+            <VMenuItem label="PDF" />
+          </template>
+        </VMenuItem>
+      </VMenu>
+    </div>
+  `
+  const setup = (dir = 'ltr') => {
+    const utils = renderHarness(template, vi.fn(), () => ({ dir }))
+    const panels = () => [...utils.container.querySelectorAll<HTMLElement>('[role="menu"]')]
+    const parent = utils.getByRole('menuitem', { name: 'Export', hidden: true })
+    return { ...utils, panels, parent }
+  }
+  const pointer = (type: string, pointerType: string) => {
+    const event = new Event(type)
+    Object.defineProperty(event, 'pointerType', { value: pointerType })
+    return event
+  }
+
+  it('a tap does not arm the hover timer that would close the submenu it opens', async () => {
+    vi.useFakeTimers()
+    try {
+      const { container, panels, parent } = setup()
+      await openMenu(container)
+      // A tap: enter, leave, then the click that opens the submenu natively.
+      parent.dispatchEvent(pointer('pointerenter', 'touch'))
+      parent.dispatchEvent(pointer('pointerleave', 'touch'))
+      panels()[1]!.showPopover()
+      vi.advanceTimersByTime(SUBMENU_HOVER_DELAY + 10)
+      expect(panels()[1]!.hasAttribute('data-popover-open')).toBe(true)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('a click on a parent item only ever opens its submenu', () => {
+    const { parent } = setup()
+    expect(parent.getAttribute('popovertargetaction')).toBe('show')
+  })
+
+  it('in a right-to-left page the arrow pointing at the submenu opens it, and the other closes it', async () => {
+    const { container, panels, parent } = setup('rtl')
+    await openMenu(container)
+    parent.focus()
+    parent.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+    await nextTick()
+    expect(panels()[1]!.hasAttribute('data-popover-open')).toBe(false)
+    parent.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }))
+    await nextTick()
+    expect(panels()[1]!.hasAttribute('data-popover-open')).toBe(true)
+    const inner = document.activeElement as HTMLElement
+    inner.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+    await nextTick()
+    expect(panels()[1]!.hasAttribute('data-popover-open')).toBe(false)
+  })
+
+  it('a key held with Alt, Ctrl or Meta is left to the browser', async () => {
+    const { container, panels, parent } = setup()
+    await openMenu(container)
+    parent.focus()
+    const open = new KeyboardEvent('keydown', {
+      key: 'ArrowRight',
+      altKey: true,
+      bubbles: true,
+      cancelable: true,
+    })
+    parent.dispatchEvent(open)
+    expect(open.defaultPrevented).toBe(false)
+    expect(panels()[1]!.hasAttribute('data-popover-open')).toBe(false)
+  })
+
+  it('Space activates a link item, as it does a button', async () => {
+    const { container, getByRole } = setup()
+    await openMenu(container)
+    const link = getByRole('menuitem', { name: 'Docs', hidden: true })
+    const clicked = vi.fn()
+    link.addEventListener('click', (e) => {
+      e.preventDefault()
+      clicked()
+    })
+    const space = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true })
+    link.dispatchEvent(space)
+    expect(space.defaultPrevented).toBe(true)
+    expect(clicked).toHaveBeenCalledOnce()
+  })
+
+  it('a group named by nothing is reported in development', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    renderHarness(`
+      <VMenu>
+        <template #trigger="{ triggerProps }"><button v-bind="triggerProps">Go</button></template>
+        <VMenuGroup><VMenuItem label="A" /></VMenuGroup>
+      </VMenu>
+    `)
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('[VMenuGroup]'))
+    warn.mockRestore()
   })
 })

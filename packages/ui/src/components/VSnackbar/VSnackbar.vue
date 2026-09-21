@@ -19,11 +19,12 @@
  * disappears on a clock can be read and acted on (WCAG 2.2.1).
  */
 
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 
 import { usePopover } from '../../composables/usePopover'
 import { useTimer } from '../../composables/useTimer'
 import { useAriaLabel } from '../../composables/useAriaLabel'
+import { useLiveAnnouncer } from '../../composables/useLiveAnnouncer'
 import { useMessages } from '../../i18n/state'
 import VButton from '../VButton/VButton.vue'
 import VIcon from '../VIcon/VIcon.vue'
@@ -39,10 +40,10 @@ interface SnackbarProps {
    */
   duration?: number
   /**
-   * What the single action is called, when the confirmation does not name it. It falls
-   * back to the design system dictionary.
+   * The word drawn on the single action, when the confirmation does not give one. It is
+   * also the button's accessible name, and falls back to the design system dictionary.
    */
-  actionLabel?: string
+  actionText?: string
   /**
    * What screen readers announce for the confirmation area itself, which is a landmark of
    * the page. It falls back to the design system dictionary.
@@ -55,19 +56,20 @@ const props = withDefaults(defineProps<SnackbarProps>(), {
   /* Shorter than a notification's five seconds. A confirmation is one short sentence
      about something the reader has just done, so they already know what it says. */
   duration: 4000,
-  actionLabel: undefined,
+  actionText: undefined,
   label: undefined,
 })
+
+// The component renders the host AND its two live regions, so the consumer's attributes are
+// put on the host explicitly rather than left to a root that no longer exists.
+defineOptions({ inheritAttrs: false })
 
 const m = useMessages()
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.snackbar.label)
 
 const placement = computed(() => current.value?.placement ?? props.placement)
-/* A failure interrupts whatever a screen reader is saying; a plain confirmation waits for
-   a pause, the reader having asked for the action it reports. */
-const role = computed(() => (current.value?.tone === 'danger' ? 'alert' : 'status'))
-const actionLabel = computed(
-  () => current.value?.actionLabel ?? props.actionLabel ?? m.value.snackbar.action,
+const actionText = computed(
+  () => current.value?.actionText ?? props.actionText ?? m.value.snackbar.action,
 )
 const icon = computed(() => (current.value?.icon ? iconProps(current.value.icon) : undefined))
 
@@ -104,6 +106,9 @@ function arm() {
  * It runs once on mount, which is what makes a confirmation raised before this component
  * existed appear all the same, and after that on every change.
  */
+const { polite, assertive, announce } = useLiveAnnouncer()
+let lastAnnounced: number | undefined
+
 function sync() {
   cancel()
   // TRAP — with no bar left, nothing can still be hovered or focused, so both flags are
@@ -112,6 +117,18 @@ function sync() {
   // removed element would leave `focused` standing: every later confirmation would then
   // stay on screen for good, far from the gesture that caused it.
   if (!current.value) hovered = focused = false
+  // TRAP — a REPLACEMENT removes the focused action too (the card is keyed on the bar), and
+  // the same engine leaves `focused` standing: the new bar then never left. The toaster's
+  // test, where the focus actually is, is the one that holds in both cases.
+  else if (!hostEl.value?.contains(document.activeElement)) focused = false
+  // @a11y
+  // Said through the live regions rendered once beside the host: the card is created WITH
+  // its message, and a region inserted along with its text is not reliably announced. A
+  // failure interrupts; a plain confirmation waits for a pause.
+  if (current.value && current.value.id !== lastAnnounced) {
+    lastAnnounced = current.value.id
+    announce(current.value.message, current.value.tone === 'danger')
+  }
   // Showing and hiding are safe to call on a container already in that state, the guards
   // living in the popover plumbing — so there is no need to remember which it is in.
   if (current.value) show()
@@ -125,12 +142,14 @@ function sync() {
  * is told to show itself.
  */
 watch(current, sync, { flush: 'post' })
-// @ssr — a watcher does not run during the server render, so a confirmation raised before
+// @ssr
+// A watcher does not run during the server render, so a confirmation raised before
 // this component mounted would never be picked up. Running the same synchronization on
 // mount is what brings it in.
 onMounted(sync)
 
-// @a11y — WCAG 2.2.1: something that disappears on a clock has to be holdable, or a slow
+// @a11y
+// WCAG 2.2.1: something that disappears on a clock has to be holdable, or a slow
 // reader simply never finishes it — and here they would also never reach the button.
 /*
  * Resting the pointer on the bar suspends its countdown, and so does moving the keyboard
@@ -150,6 +169,15 @@ function hold(which: 'pointer' | 'focus') {
   cancel()
 }
 
+// Where the focus came from when it entered the bar, to hand it back once the action has
+// taken the bar, and the focused button with it, away.
+let cameFrom: HTMLElement | null = null
+function onFocusIn(event: FocusEvent) {
+  const from = event.relatedTarget as HTMLElement | null
+  if (from && !hostEl.value?.contains(from)) cameFrom = from
+  hold('focus')
+}
+
 function release(which: 'pointer' | 'focus') {
   if (which === 'pointer') hovered = false
   else focused = false
@@ -161,14 +189,28 @@ function release(which: 'pointer' | 'focus') {
 function runAction() {
   const bar = current.value
   if (!bar) return
-  bar.action?.()
-  dismissSnackbar(bar.id)
+  const hadFocus = !!hostEl.value?.contains(document.activeElement)
+  try {
+    bar.action?.()
+  } finally {
+    // Even when the action throws: the error reaches the application, and the bar it
+    // answered does not stay on screen, a permanent one for good.
+    dismissSnackbar(bar.id)
+    // @a11y
+    // The focused button leaves with the bar; the focus goes back where it came from
+    // rather than falling to `<body>`.
+    if (hadFocus)
+      void nextTick(() => {
+        if (cameFrom?.isConnected && !current.value) cameFrom.focus()
+      })
+  }
 }
 </script>
 
 <template>
   <div
     ref="hostEl"
+    v-bind="$attrs"
     class="v-overlay v-snackbar-host"
     popover="manual"
     :data-placement="placement"
@@ -176,7 +218,7 @@ function runAction() {
     :aria-label="ariaLabel"
     @pointerenter="hold('pointer')"
     @pointerleave="release('pointer')"
-    @focusin="hold('focus')"
+    @focusin="onFocusIn"
     @focusout="release('focus')"
     @beforetoggle="syncShown"
     @toggle="syncShown"
@@ -186,7 +228,6 @@ function runAction() {
       :key="current.id"
       class="v-banner v-snackbar v-tone"
       :data-tone="current.tone"
-      :role="role"
     >
       <VIcon v-if="icon" class="v-snackbar-icon" v-bind="icon" />
       <p class="v-banner-text v-snackbar-message">{{ current.message }}</p>
@@ -198,10 +239,12 @@ function runAction() {
         size="sm"
         @click="runAction"
       >
-        {{ actionLabel }}
+        {{ actionText }}
       </VButton>
     </div>
   </div>
+  <span class="v-visually-hidden" role="status">{{ polite }}</span>
+  <span class="v-visually-hidden" role="alert">{{ assertive }}</span>
 </template>
 
 <style>
@@ -303,7 +346,7 @@ function runAction() {
        margins deducted. */
     max-inline-size: min(
       var(--vectis-control-size-snackbar-max),
-      calc(100vw - 2 * var(--vectis-space-4))
+      calc(100dvi - 2 * var(--vectis-space-4))
     );
   }
 
@@ -329,6 +372,15 @@ function runAction() {
      nothing at all — it would be a declaration that does no work. */
   .v-snackbar-icon {
     --vectis-icon-size: var(--vectis-icon-size-md);
+  }
+
+  /* Windows forced colors flattens the bar's background to Canvas and drops its shadow,
+     which were its only edge: it would float over the page with no boundary at all. An
+     outline draws one without moving the layout by a pixel. */
+  @media (forced-colors: active) {
+    .v-snackbar {
+      outline: 1px solid CanvasText;
+    }
   }
 }
 </style>

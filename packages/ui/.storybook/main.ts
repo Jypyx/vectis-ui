@@ -26,7 +26,7 @@ const config: StorybookConfig = {
   viteFinal: async (config) => {
     config.build = {
       ...config.build,
-      cssTarget: ['chrome125', 'edge125', 'safari26', 'firefox147'],
+      cssTarget: ['chrome134', 'edge134', 'safari26', 'firefox147'],
     }
     return config
   },

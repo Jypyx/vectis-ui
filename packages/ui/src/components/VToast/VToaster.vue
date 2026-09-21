@@ -16,13 +16,14 @@
  * disappears on a clock can be read and closed (WCAG 2.2.1).
  */
 
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import { usePopover } from '../../composables/usePopover'
 import VToast from './VToast.vue'
 import { dismissToast, toasts, type ToastItem, type ToastPlacement } from './state'
 
 import { useAriaLabel } from '../../composables/useAriaLabel'
+import { useLiveAnnouncer } from '../../composables/useLiveAnnouncer'
 import { useMessages } from '../../i18n/state'
 
 interface ToasterProps {
@@ -159,6 +160,16 @@ function startTimer(item: ToastItem) {
 function sync() {
   const alive = new Set(toasts.map((item) => item.id))
   for (const id of timers.keys()) if (!alive.has(id)) stopTimer(id)
+  for (const id of announced) if (!alive.has(id)) announced.delete(id)
+  for (const item of toasts) {
+    if (announced.has(item.id)) continue
+    announced.add(item.id)
+    // A failure or a warning interrupts what is being read; anything else waits.
+    announce(
+      [item.title, item.message].filter(Boolean).join('. '),
+      item.tone === 'danger' || item.tone === 'warning',
+    )
+  }
 
   for (const placement of PLACEMENTS) {
     const stackEl = stacks.get(placement)?.el.value
@@ -192,12 +203,14 @@ function sync() {
  * in the page before its container is told to show itself.
  */
 watch(groups, sync, { flush: 'post' })
-// @ssr — a watcher does not run during the server render, so a notification raised
+// @ssr
+// A watcher does not run during the server render, so a notification raised
 // before this component mounted would never be picked up. Running the same
 // synchronization on mount is what brings it in.
 onMounted(sync)
 
-// @a11y — WCAG 2.2.1: something that disappears on a clock has to be holdable, or a
+// @a11y
+// WCAG 2.2.1: something that disappears on a clock has to be holdable, or a
 // slow reader simply never finishes it.
 /*
  * Resting the pointer on a corner suspends its countdowns, and so does moving the keyboard
@@ -221,6 +234,58 @@ function release(placement: ToastPlacement, which: 'pointer' | 'focus') {
   for (const item of groups.value.get(placement) ?? []) startTimer(item)
 }
 
+// @a11y
+// Every notification is said through two live regions rendered once, outside the stacks
+// (composables/useLiveAnnouncer): a card is created WITH its message, and a live region
+// inserted along with its text is not reliably announced.
+const { polite, assertive, announce } = useLiveAnnouncer()
+const announced = new Set<number>()
+
+// @a11y
+/*
+ * A notification closed from its own cross takes the focused button with it, which would
+ * drop the focus on `<body>`: it goes to the next cross of the same corner, or back to
+ * where it was before the reader entered the corner. `cameFrom` is that element, taken
+ * from the `focusin` that entered it.
+ */
+const cameFrom = new Map<ToastPlacement, HTMLElement>()
+
+function onStackFocusIn(placement: ToastPlacement, event: FocusEvent) {
+  const from = event.relatedTarget as HTMLElement | null
+  const stackEl = stacks.get(placement)?.el.value
+  if (from && !stackEl?.contains(from)) cameFrom.set(placement, from)
+  hold(placement, 'focus')
+}
+
+function closeFromCross(id: number) {
+  const item = toasts.find((entry) => entry.id === id)
+  const placement = item ? effectivePlacement(item) : undefined
+  const stackEl = placement ? stacks.get(placement)?.el.value : null
+  const hadFocus = !!stackEl?.contains(document.activeElement)
+  dismissToast(id)
+  if (!hadFocus || !placement) return
+  void nextTick(() => {
+    const next = stackEl?.querySelector<HTMLElement>('.v-toast-close')
+    const back = cameFrom.get(placement)
+    if (next) next.focus()
+    else if (back?.isConnected) back.focus()
+  })
+}
+
+/*
+ * Two corners open at once are two landmarks, and two landmarks under one name are two
+ * areas a screen reader cannot tell apart (axe `landmark-unique`). The name is then
+ * numbered, in the order the corners are listed; alone on the page a corner keeps it bare.
+ */
+const openPlacements = computed(() =>
+  PLACEMENTS.filter((placement) => (groups.value.get(placement)?.length ?? 0) > 0),
+)
+function stackLabel(placement: ToastPlacement) {
+  const open = openPlacements.value
+  if (open.length < 2) return ariaLabel.value
+  return `${ariaLabel.value} (${open.indexOf(placement) + 1})`
+}
+
 /* The queue lives outside this component and survives it being unmounted and mounted
    again; only the countdowns are cleared here, and they are started afresh next time. */
 onBeforeUnmount(() => {
@@ -238,10 +303,10 @@ onBeforeUnmount(() => {
     popover="manual"
     :data-placement="p"
     role="region"
-    :aria-label="ariaLabel"
+    :aria-label="stackLabel(p)"
     @pointerenter="hold(p, 'pointer')"
     @pointerleave="release(p, 'pointer')"
-    @focusin="hold(p, 'focus')"
+    @focusin="onStackFocusIn(p, $event)"
     @focusout="release(p, 'focus')"
     @beforetoggle="syncStack(p, $event)"
     @toggle="syncStack(p, $event)"
@@ -251,9 +316,11 @@ onBeforeUnmount(() => {
       :key="item.id"
       :item="item"
       :close-label="resolvedCloseLabel"
-      @close="dismissToast($event)"
+      @close="closeFromCross"
     />
   </div>
+  <span class="v-visually-hidden" role="status">{{ polite }}</span>
+  <span class="v-visually-hidden" role="alert">{{ assertive }}</span>
 </template>
 
 <style>

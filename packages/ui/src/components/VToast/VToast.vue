@@ -13,6 +13,8 @@
 
 import { computed } from 'vue'
 
+import { cssSize } from '../../utils/css'
+
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import { check_circle as checkCircleIcon } from '../VIcon/icons/check_circle'
@@ -40,10 +42,6 @@ const emit = defineEmits<{
   close: [id: number]
 }>()
 
-const role = computed(() =>
-  props.item.tone === 'danger' || props.item.tone === 'warning' ? 'alert' : 'status',
-)
-
 const DEFAULT_ICONS: Record<ToastTone, IconSource> = {
   neutral: notificationsIcon,
   accent: infoIcon,
@@ -68,8 +66,7 @@ const icon = computed(() =>
     class="v-banner v-toast v-tone"
     :data-tone="item.tone"
     :data-variant="item.variant"
-    :role="role"
-    :style="item.width ? { '--toast-width': item.width } : undefined"
+    :style="item.width !== undefined ? { '--toast-width': cssSize(item.width) } : undefined"
   >
     <VIcon v-if="icon" class="v-toast-icon" v-bind="icon" />
     <div class="v-banner-text v-toast-body">
@@ -105,10 +102,10 @@ const icon = computed(() =>
        one short sentence, and a control that would sit in a corner otherwise.) */
     align-items: flex-start;
     padding: var(--vectis-space-3) var(--vectis-space-4);
-    width: var(--toast-width, var(--vectis-control-size-toast-width));
+    inline-size: var(--toast-width, var(--vectis-control-size-toast-width));
     /* On a narrow screen the card is never wider than the viewport, the stack's own
        margins deducted. */
-    max-width: calc(100vw - 2 * var(--vectis-space-4));
+    max-inline-size: calc(100dvi - 2 * var(--vectis-space-4));
   }
 
   /* The tone table itself lives in styles/tones.css, in a layer below the components,
@@ -182,6 +179,15 @@ const icon = computed(() =>
     /* The heavier weight marks the title against its own message, which is emphasis
        rather than a typographic role — hence a font token read directly. */
     font-weight: var(--vectis-font-weight-semibold);
+  }
+
+  /* Windows forced colors flattens the solid card's background to Canvas and drops its
+     shadow, which were its only edge (the soft card carries a border): it would float over
+     the page with no boundary at all. An outline draws one without moving the layout. */
+  @media (forced-colors: active) {
+    .v-toast[data-variant='solid'] {
+      outline: 1px solid CanvasText;
+    }
   }
 }
 </style>

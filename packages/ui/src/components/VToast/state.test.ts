@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { dismissToast, toast, toasts } from './state'
 
@@ -63,5 +63,24 @@ describe('toast (module state)', () => {
     toast({ message: 'Two' })
     dismissToast()
     expect(toasts).toHaveLength(0)
+  })
+})
+
+describe('toast() and snackbar() on a server', () => {
+  it('say so in development, the queue being shared by every request', async () => {
+    const { snackbar, dismissSnackbar } = await import('../VSnackbar/state')
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    vi.stubGlobal('document', undefined)
+    try {
+      toast({ message: 'A' })
+      snackbar({ message: 'B' })
+    } finally {
+      vi.unstubAllGlobals()
+    }
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('[toast]'))
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('[snackbar]'))
+    warn.mockRestore()
+    dismissToast()
+    dismissSnackbar()
   })
 })

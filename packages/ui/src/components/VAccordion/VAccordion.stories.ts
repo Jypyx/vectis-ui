@@ -13,7 +13,7 @@ const t = storyText({
     howToTheme: 'How do I customize the theme?',
     howToThemeBody: 'Redefine any --vectis-* custom property on :root or on a subtree.',
     whichBrowsers: 'Which browsers are supported?',
-    whichBrowsersBody: 'Modern browsers: Chrome/Edge 125+, Safari 26+.',
+    whichBrowsersBody: 'Modern browsers: Chrome/Edge 134+, Safari 26+.',
     first: 'First',
     firstBody: 'Content of the first panel.',
     second: 'Second',
@@ -54,7 +54,7 @@ const t = storyText({
     howToThemeBody:
       "Redéfinissez n'importe quelle custom property --vectis-* sur :root ou un sous-arbre.",
     whichBrowsers: 'Quels navigateurs sont supportés ?',
-    whichBrowsersBody: 'Les navigateurs modernes : Chrome/Edge 125+, Safari 26+.',
+    whichBrowsersBody: 'Les navigateurs modernes : Chrome/Edge 134+, Safari 26+.',
     first: 'Premier',
     firstBody: 'Contenu du premier panneau.',
     second: 'Second',

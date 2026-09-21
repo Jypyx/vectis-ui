@@ -1,4 +1,4 @@
-﻿/*
+/*
  * The shared plumbing of every floating element (VPopover, VMenu, VTooltip…). Two classes,
  * set together: `.v-overlay`, the foundation of every popover and of the toast stacks, and
  * `.v-floating`, anchoring and placement.

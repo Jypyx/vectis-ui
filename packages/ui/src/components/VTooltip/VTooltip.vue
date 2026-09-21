@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 /**
  * A short explanation appearing beside an element on hover or keyboard focus. A VPopover in
  * `mode="manual"`, a tooltip having its own rules about when to appear and when to go.
@@ -8,9 +8,12 @@
  * focus, a press on the trigger, and Escape — which must dismiss without moving the focus
  * (WCAG 1.4.13).
  *
- * Four ways out, each covering what the others do not: the pointer leaves, the focus leaves,
- * Escape, or the trigger is PRESSED — that last for a trigger opening a panel, where the
- * tooltip would otherwise stand over what it just opened.
+ * It stays as long as EITHER the pointer rests on it (the trigger or the bubble) or the
+ * keyboard focus is on the trigger, and goes when both have left, after a short grace the
+ * pointer needs to cross the gap onto the bubble (WCAG 1.4.13: hoverable, persistent).
+ * Two more ways out: Escape, heard from anywhere on the page while it shows and spent on
+ * it, and the trigger being PRESSED, for a trigger opening a panel, where the tooltip would
+ * otherwise stand over what it just opened.
  *
  * Positioning is pure CSS with no generated id: the wrapper names itself as the anchor and
  * confines that name to its own subtree. The confinement is essential — a shown panel moves
@@ -22,7 +25,7 @@
  * DESCRIBES.
  */
 
-import { ref, useId } from 'vue'
+import { computed, onBeforeUnmount, ref, useId } from 'vue'
 
 import VPopover from '../VPopover/VPopover.vue'
 
@@ -31,7 +34,18 @@ import { isKeyboardFocus } from '../../utils/focus'
 
 /** Which side of the element the tooltip appears on. */
 export type TooltipPlacement =
-  'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'right'
+  | 'top'
+  | 'top-start'
+  | 'top-end'
+  | 'bottom'
+  | 'bottom-start'
+  | 'bottom-end'
+  | 'left'
+  | 'left-start'
+  | 'left-end'
+  | 'right'
+  | 'right-start'
+  | 'right-end'
 
 /** What the described element has to carry: the link to the tooltip that describes it. */
 export type TooltipTriggerProps = {
@@ -48,8 +62,8 @@ interface TooltipProps {
   placement?: TooltipPlacement
   /**
    * How long the pointer must rest on the element before the tooltip appears, in
-   * milliseconds. Keyboard focus opens it at once — the intent is not in doubt there
-   * — and a delay of 0 disables the wait entirely.
+   * milliseconds. Keyboard focus opens it at once, the intent being in no doubt there,
+   * and a delay of 0 disables the wait entirely.
    */
   delay?: number
 }
@@ -62,16 +76,15 @@ const props = withDefaults(defineProps<TooltipProps>(), {
 
 defineSlots<{
   /**
-   * The element the tooltip describes. Bind the `triggerProps` it receives onto it —
-   * that is what ties the two together for assistive technology — and make sure it is
-   * something that can take focus, or keyboard users will never see the tooltip.
+   * The element the tooltip describes. Bind the `triggerProps` it receives onto it, which
+   * is what ties the two together for assistive technology, and make sure it is something
+   * that can take focus, or keyboard users will never see the tooltip.
    */
   default(props: { triggerProps: TooltipTriggerProps }): unknown
   /**
    * Content richer than a plain string: formatting, a keyboard shortcut, an icon. It
-   * must stay NON-interactive. The tooltip closes as soon as the pointer leaves the
-   * element, so a link or a button inside could never be reached, and the description
-   * is flattened to plain text for screen readers anyway. Content one can interact
+   * must stay NON-interactive: the description is flattened to plain text for screen
+   * readers, and nothing inside can be reached from the keyboard. Content one can interact
    * with belongs in a panel that stays open, such as VMenu.
    */
   content?(): unknown
@@ -93,6 +106,18 @@ const popoverRef = ref<InstanceType<typeof VPopover> | null>(null)
 // when the component goes away.
 const timer = useTimer()
 
+/**
+ * How long a tooltip the pointer has left waits before going: the time to cross the gap
+ * between the trigger and the bubble, which the margin leaves empty and which no pointer
+ * event covers. The bubble is a DOM descendant of the wrapper, so reaching it counts as
+ * coming back and cancels the close.
+ */
+const LEAVE_GRACE = 100
+
+// The two reasons it is showing. It goes only once neither holds.
+let hovered = false
+let focused = false
+
 // @core
 function show(immediate = false) {
   // A delay of 0 runs the callback synchronously — the design system's convention,
@@ -103,6 +128,28 @@ function show(immediate = false) {
 function hide() {
   timer.cancel()
   popoverRef.value?.close()
+}
+
+function onPointerEnter() {
+  hovered = true
+  show()
+}
+
+function onPointerLeave() {
+  hovered = false
+  if (focused) return
+  timer.start(() => popoverRef.value?.close(), LEAVE_GRACE)
+}
+
+function onPointerDown() {
+  hovered = false
+  focused = false
+  hide()
+}
+
+function onFocusOut() {
+  focused = false
+  if (!hovered) hide()
 }
 
 // @a11y
@@ -119,15 +166,42 @@ function hide() {
  * cannot live here alone.
  */
 function onFocusIn(event: FocusEvent) {
-  if (isKeyboardFocus(event.target)) show(true)
+  if (!isKeyboardFocus(event.target)) return
+  focused = true
+  show(true)
 }
 
-// @keyboard @a11y — Escape must dismiss a tooltip opened by hover or focus without
-// moving the focus anywhere (WCAG 1.4.13): content appearing on hover has to be
-// dismissible, for a magnifier user whose view it may be covering.
-function onKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') hide()
+// @keyboard @a11y
+// Escape must dismiss a tooltip opened by hover or focus without moving the focus anywhere
+// (WCAG 1.4.13), for a magnifier user whose view it may be covering. It is heard on the
+// DOCUMENT while the tooltip shows, since a hovered tooltip rarely holds the focus, and it
+// is SPENT on it: inside a VDialog the same key would otherwise also be the dialog's close
+// request.
+function onDocumentKeydown(event: KeyboardEvent) {
+  if (event.key !== 'Escape' || event.defaultPrevented) return
+  event.preventDefault()
+  hovered = false
+  focused = false
+  hide()
 }
+
+const listening = ref(false)
+function onOpenChange(open: boolean) {
+  if (open === listening.value) return
+  listening.value = open
+  if (open) document.addEventListener('keydown', onDocumentKeydown)
+  else document.removeEventListener('keydown', onDocumentKeydown)
+}
+onBeforeUnmount(() => onOpenChange(false))
+
+defineExpose({
+  /** Shows the tooltip at once, without the hover delay. */
+  show: () => show(true),
+  /** Hides the tooltip. */
+  close: hide,
+  /** The tooltip bubble. */
+  el: computed(() => popoverRef.value?.el ?? null),
+})
 </script>
 
 <template>
@@ -150,12 +224,11 @@ function onKeydown(event: KeyboardEvent) {
   -->
   <span
     class="v-tooltip"
-    @pointerenter="show()"
-    @pointerleave="hide"
-    @pointerdown="hide"
+    @pointerenter="onPointerEnter"
+    @pointerleave="onPointerLeave"
+    @pointerdown="onPointerDown"
     @focusin="onFocusIn"
-    @focusout="hide"
-    @keydown="onKeydown"
+    @focusout="onFocusOut"
   >
     <slot :trigger-props="{ 'aria-describedby': tooltipId }" />
     <VPopover
@@ -167,6 +240,7 @@ function onKeydown(event: KeyboardEvent) {
       bare
       role="tooltip"
       class="v-tooltip-panel"
+      @update:open="onOpenChange"
     >
       <slot name="content">{{ text }}</slot>
     </VPopover>
@@ -205,8 +279,11 @@ function onKeydown(event: KeyboardEvent) {
      component sheets is decided by the order the consumer's bundler happens to
      produce, which is nobody's decision. */
   .v-popover-panel.v-tooltip-panel {
-    width: max-content;
-    max-width: min(18rem, calc(100vw - var(--vectis-space-8)));
+    inline-size: max-content;
+    max-inline-size: min(
+      var(--vectis-control-size-tooltip-max),
+      calc(100dvi - var(--vectis-space-8))
+    );
     padding: var(--vectis-space-1) var(--vectis-space-2);
     /* The tooltip is painted against the page rather than with it: a dark surface in
        both themes, darker still in the dark one, so it reads as an overlay whatever
@@ -215,13 +292,22 @@ function onKeydown(event: KeyboardEvent) {
     color: var(--vectis-color-text-on-inverse);
     border: none;
     /* The control radius capped at half the height of a ONE-line bubble, the row recipe
-       of VSideNavigationItem: a tooltip wraps past its max-width, and under a pill
+       of VSideNavigationItem: a tooltip wraps past its max-inline-size, and under a pill
        override a two-line bubble would otherwise round to half of its own height. */
     border-radius: min(var(--vectis-radius-interactive), calc(0.5lh + var(--vectis-space-1)));
     box-shadow: var(--vectis-shadow-sm);
     font-family: var(--vectis-text-family);
     font-size: var(--vectis-text-caption-size);
     line-height: var(--vectis-text-caption-leading);
+  }
+
+  /* Windows forced colors flattens the bubble's background to Canvas and drops its shadow,
+     which were its only edge: it would float over the page with no boundary at all. An
+     outline draws one without moving the layout by a pixel. */
+  @media (forced-colors: active) {
+    .v-popover-panel.v-tooltip-panel {
+      outline: 1px solid CanvasText;
+    }
   }
 }
 </style>

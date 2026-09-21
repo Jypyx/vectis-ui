@@ -165,7 +165,7 @@ export default defineConfig({
      * de-optimization the paragraph above measures. It stays a MINIFICATION floor, so it
      * follows the README rather than the other way round.
      */
-    cssTarget: ['chrome125', 'edge125', 'safari26', 'firefox147'],
+    cssTarget: ['chrome134', 'edge134', 'safari26', 'firefox147'],
     // A consumer stepping into vectis-ui otherwise lands in renamed identifiers with
     // nothing mapping back to the SFC.
     sourcemap: true,

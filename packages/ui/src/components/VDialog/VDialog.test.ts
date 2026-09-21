@@ -204,3 +204,91 @@ describe('VDialogAlert — the imperative API', () => {
     expect(holder.value?.el).toBeNull()
   })
 })
+
+describe("VDialog — the consumer's attributes", () => {
+  it('a consumer aria-labelledby and aria-describedby are kept', async () => {
+    const { dialog } = await openHarness({
+      'aria-labelledby': 'my-title',
+      'aria-describedby': 'my-body',
+    })
+    expect(dialog.getAttribute('aria-labelledby')).toBe('my-title')
+    expect(dialog.getAttribute('aria-describedby')).toBe('my-body')
+  })
+
+  it('they win over the title and subtitle the component names it with', async () => {
+    const { dialog } = await openHarness({
+      title: 'Title',
+      subtitle: 'Subtitle',
+      'aria-labelledby': 'my-title',
+      'aria-describedby': 'my-body',
+    })
+    expect(dialog.getAttribute('aria-labelledby')).toBe('my-title')
+    expect(dialog.getAttribute('aria-describedby')).toBe('my-body')
+  })
+})
+
+describe('VDialog — closing, the model and a browser without closedby', () => {
+  it('a close event from the element it replaced does not close a dialog just reopened', async () => {
+    const { open, dialog: old } = await openHarness()
+    open.value = false
+    await flush()
+    open.value = true
+    await flush()
+    // What the browser does: the old element's close event arrives in a later task.
+    old.dispatchEvent(new Event('close'))
+    await nextTick()
+    expect(open.value).toBe(true)
+  })
+
+  it('unmounted while open, it hands the model back closed', async () => {
+    const { open, unmount } = await openHarness()
+    unmount()
+    expect(open.value).toBe(false)
+  })
+
+  describe('where closedby is not implemented', () => {
+    // jsdom has no `closedBy`, which is exactly the browser this fallback is for.
+    const escape = () => new Event('cancel', { cancelable: true })
+
+    it('a refused Escape is cancelled', async () => {
+      const { dialog } = await openHarness({ persistentBackdrop: true, persistentEscape: true })
+      const event = escape()
+      dialog.dispatchEvent(event)
+      expect(event.defaultPrevented).toBe(true)
+    })
+
+    it('an allowed Escape is left to the browser', async () => {
+      const { dialog } = await openHarness()
+      const event = escape()
+      dialog.dispatchEvent(event)
+      expect(event.defaultPrevented).toBe(false)
+    })
+
+    const pointer = (type: string, x: number) =>
+      new MouseEvent(type, { bubbles: true, clientX: x, clientY: x })
+
+    it('a click on the backdrop closes a dialog that allows it', async () => {
+      const { dialog, open } = await openHarness()
+      // jsdom lays nothing out: the dialog's box is empty, so any point is outside it.
+      dialog.dispatchEvent(pointer('pointerdown', 5))
+      dialog.dispatchEvent(pointer('click', 5))
+      await flush()
+      expect(open.value).toBe(false)
+    })
+
+    it('but not one that is persistent, nor a press that started inside', async () => {
+      const persistent = await openHarness({ persistentBackdrop: true })
+      persistent.dialog.dispatchEvent(pointer('pointerdown', 5))
+      persistent.dialog.dispatchEvent(pointer('click', 5))
+      await flush()
+      expect(persistent.open.value).toBe(true)
+
+      const dragged = await openHarness()
+      const inside = dragged.dialog.firstElementChild as HTMLElement
+      inside.dispatchEvent(pointer('pointerdown', 5))
+      dragged.dialog.dispatchEvent(pointer('click', 5))
+      await flush()
+      expect(dragged.open.value).toBe(true)
+    })
+  })
+})

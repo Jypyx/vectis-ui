@@ -304,6 +304,17 @@ export const WithoutSurface: Story = {
       </div>
     `,
   }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button'))
+    const panel = canvasElement.querySelector<HTMLElement>('.v-popover-panel')!
+    await waitFor(() => expect(panel.matches(':popover-open')).toBe(true))
+    // None of the browser's own [popover] decoration survives on a bare panel.
+    const style = getComputedStyle(panel)
+    await expect(style.borderTopStyle).toBe('none')
+    await expect(style.paddingTop).toBe('0px')
+    await expect(style.backgroundColor).toBe('rgba(0, 0, 0, 0)')
+  },
 }
 
 /**

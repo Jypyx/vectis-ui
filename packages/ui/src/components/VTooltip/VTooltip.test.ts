@@ -47,6 +47,8 @@ describe('VTooltip', () => {
     expect(panel.hasAttribute('data-popover-open')).toBe(true)
 
     wrapper.dispatchEvent(new Event('pointerleave'))
+    // After the short grace that lets the pointer cross onto the bubble.
+    vi.advanceTimersByTime(100)
     expect(panel.hasAttribute('data-popover-open')).toBe(false)
 
     // delay cancelled: entering then leaving before it fires must open nothing
@@ -114,5 +116,75 @@ describe('VTooltip', () => {
     wrapper.dispatchEvent(new Event('pointerdown'))
     vi.advanceTimersByTime(500)
     expect(panel.hasAttribute('data-popover-open')).toBe(false)
+  })
+})
+
+describe('VTooltip — WCAG 1.4.13', () => {
+  beforeEach(() => vi.useFakeTimers())
+  afterEach(() => vi.useRealTimers())
+
+  const setup = () => {
+    const utils = render(Harness)
+    const wrapper = utils.container.querySelector('.v-tooltip') as HTMLElement
+    const panel = utils.container.querySelector('[role="tooltip"]') as HTMLElement
+    const trigger = utils.getByTestId('trigger')
+    const isOpen = () => panel.hasAttribute('data-popover-open')
+    const hover = () => {
+      wrapper.dispatchEvent(new Event('pointerenter'))
+      vi.advanceTimersByTime(400)
+    }
+    const keyboardFocus = () => {
+      vi.spyOn(trigger, 'matches').mockReturnValue(true)
+      trigger.dispatchEvent(new Event('focusin', { bubbles: true }))
+    }
+    return { ...utils, wrapper, panel, trigger, isOpen, hover, keyboardFocus }
+  }
+
+  it('Escape dismisses a hovered tooltip wherever the focus is, and is spent on it', () => {
+    const { isOpen, hover } = setup()
+    hover()
+    expect(isOpen()).toBe(true)
+    const escape = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })
+    document.body.dispatchEvent(escape)
+    expect(isOpen()).toBe(false)
+    // Spent: a surrounding dialog must not take the same key as a request to close.
+    expect(escape.defaultPrevented).toBe(true)
+  })
+
+  it('an Escape with no tooltip showing is left alone', () => {
+    setup()
+    const escape = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })
+    document.body.dispatchEvent(escape)
+    expect(escape.defaultPrevented).toBe(false)
+  })
+
+  it('stays while the keyboard focus is on the trigger, whatever the pointer does', () => {
+    const { wrapper, isOpen, keyboardFocus } = setup()
+    keyboardFocus()
+    wrapper.dispatchEvent(new Event('pointerenter'))
+    wrapper.dispatchEvent(new Event('pointerleave'))
+    vi.advanceTimersByTime(500)
+    expect(isOpen()).toBe(true)
+  })
+
+  it('stays while the pointer is on it, whatever the focus does', () => {
+    const { trigger, isOpen, hover, keyboardFocus } = setup()
+    hover()
+    keyboardFocus()
+    trigger.dispatchEvent(new Event('focusout', { bubbles: true }))
+    vi.advanceTimersByTime(500)
+    expect(isOpen()).toBe(true)
+  })
+
+  it('can be hovered: the pointer crossing the gap onto the tooltip does not close it', () => {
+    const { wrapper, isOpen, hover } = setup()
+    hover()
+    // Leaving the trigger, then entering the tooltip, a DOM descendant of the wrapper.
+    wrapper.dispatchEvent(new Event('pointerleave'))
+    vi.advanceTimersByTime(50)
+    expect(isOpen()).toBe(true)
+    wrapper.dispatchEvent(new Event('pointerenter'))
+    vi.advanceTimersByTime(500)
+    expect(isOpen()).toBe(true)
   })
 })

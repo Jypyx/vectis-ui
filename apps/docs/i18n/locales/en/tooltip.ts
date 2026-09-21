@@ -21,7 +21,7 @@ export default {
     },
     richContent: {
       title: 'Rich content',
-      text: 'The <code>#content</code> slot wins over the <code>text</code> prop when both are given. It has to stay non-interactive: the tooltip closes as soon as the pointer leaves the trigger, and the description is flattened to plain text for a screen reader.',
+      text: 'The <code>#content</code> slot wins over the <code>text</code> prop when both are given. It has to stay non-interactive: nothing inside can be reached from the keyboard, and the description is flattened to plain text for a screen reader.',
     },
   },
 
@@ -38,7 +38,7 @@ export default {
         default:
           'The element the tooltip describes. Bind the <code>triggerProps</code> it receives onto it, which is what ties the two together for assistive technology, and make sure it is something that can take focus, or keyboard users will never see the tooltip.',
         content:
-          'Content richer than a plain string: formatting, a keyboard shortcut, an icon. It must stay non-interactive. The tooltip closes as soon as the pointer leaves the element, so a link or a button inside could never be reached, and the description is flattened to plain text for screen readers anyway. Content one can interact with belongs in a panel that stays open, such as VMenu.',
+          'Content richer than a plain string: formatting, a keyboard shortcut, an icon. It must stay non-interactive: the description is flattened to plain text for screen readers, and nothing inside can be reached from the keyboard. Content one can interact with belongs in a panel that stays open, such as VMenu.',
       },
     },
   },

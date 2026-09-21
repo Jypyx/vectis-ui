@@ -62,7 +62,7 @@
      widening the card. */
   .v-banner-text {
     flex: 1;
-    min-width: 0;
+    min-inline-size: 0;
     overflow-wrap: anywhere;
   }
 

@@ -36,7 +36,7 @@ describe('snackbar state', () => {
       duration: 0,
       placement: 'bottom-left',
       action,
-      actionLabel: 'Restore',
+      actionText: 'Restore',
     })
     expect(current.value).toMatchObject({
       message: 'Gone',
@@ -45,7 +45,7 @@ describe('snackbar state', () => {
       duration: 0,
       placement: 'bottom-left',
       action,
-      actionLabel: 'Restore',
+      actionText: 'Restore',
     })
   })
 

@@ -2,7 +2,7 @@
 import { VButton, snackbar } from 'vectis-ui'
 
 function remove() {
-  snackbar({ message: 'Message deleted.', actionLabel: 'Undo', action: () => {} })
+  snackbar({ message: 'Message deleted.', actionText: 'Undo', action: () => {} })
 }
 </script>
 

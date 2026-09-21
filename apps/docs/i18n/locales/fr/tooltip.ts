@@ -21,7 +21,7 @@ export default {
     },
     richContent: {
       title: 'Contenu riche',
-      text: "Le slot <code>#content</code> l'emporte sur la prop <code>text</code> quand les deux sont donnés. Il doit rester non interactif : l'infobulle se ferme dès que le pointeur quitte le déclencheur, et la description est aplatie en texte simple pour un lecteur d'écran.",
+      text: "Le slot <code>#content</code> l'emporte sur la prop <code>text</code> quand les deux sont donnés. Il doit rester non interactif : rien à l'intérieur n'est atteignable au clavier, et la description est aplatie en texte simple pour un lecteur d'écran.",
     },
   },
 
@@ -38,7 +38,7 @@ export default {
         default:
           "L'élément que l'infobulle décrit. Liez les <code>triggerProps</code> qu'il reçoit dessus, ce qui relie les deux pour les technologies d'assistance, et assurez-vous qu'il puisse prendre le focus, sans quoi les utilisateurs au clavier ne verront jamais l'infobulle.",
         content:
-          "Un contenu plus riche qu'une simple chaîne : une mise en forme, un raccourci clavier, une icône. Il doit rester non interactif. L'infobulle se ferme dès que le pointeur quitte l'élément, donc un lien ou un bouton à l'intérieur ne pourrait jamais être atteint, et la description est de toute façon aplatie en texte brut pour les lecteurs d'écran. Un contenu manipulable appartient à un panneau qui reste ouvert, comme VMenu.",
+          "Un contenu plus riche qu'une simple chaîne : une mise en forme, un raccourci clavier, une icône. Il doit rester non interactif : la description est aplatie en texte brut pour les lecteurs d'écran, et rien à l'intérieur n'est atteignable au clavier. Un contenu manipulable appartient à un panneau qui reste ouvert, comme VMenu.",
       },
     },
   },

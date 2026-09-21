@@ -28,6 +28,7 @@ import { usePopover } from '../../composables/usePopover'
 import { menuInvoker, menuKey } from './context'
 import type { MenuPanelPlacement, MenuSize } from './context'
 import { arrowNavigate } from '../../utils/arrowNav'
+import { isRtl } from '../../utils/direction'
 import { cssSize } from '../../utils/css'
 
 interface MenuPanelProps {
@@ -135,12 +136,17 @@ function onKeydown(event: KeyboardEvent) {
   // A keystroke inside a submenu passes through every panel containing it on its way
   // up, so only the panel the focused item DIRECTLY belongs to acts on it.
   if (!panel || (event.target as Element).closest('[role="menu"]') !== panel) return
+  // A key held with a modifier is the browser's: Alt+Left is Back.
+  if (event.altKey || event.ctrlKey || event.metaKey) return
 
   if (event.key === 'Tab') {
     menu.closeAll()
     return
   }
-  if (event.key === 'Escape' || (props.submenu && event.key === 'ArrowLeft')) {
+  // The arrow pointing BACK at the parent closes a submenu: the right one in a
+  // right-to-left page, where the submenu opened on the left.
+  const back = isRtl(panel) ? 'ArrowRight' : 'ArrowLeft'
+  if (event.key === 'Escape' || (props.submenu && event.key === back)) {
     // Escape closes THIS level and no more. The `preventDefault` matters: left to
     // itself the browser would close the popover on its own, without handing the
     // focus back to the item that opened it — and our own hide() would already have
@@ -240,7 +246,7 @@ defineExpose({
      variables directly. Only what is specific to a dropdown menu stays below. */
   .v-menu {
     min-inline-size: var(--vectis-control-size-menu-min);
-    max-inline-size: min(var(--vectis-control-size-menu-max), calc(100vw - var(--vectis-space-8)));
+    max-inline-size: min(var(--vectis-control-size-menu-max), calc(100dvi - var(--vectis-space-8)));
   }
 
   /* The panel is focusable, but only ever from code — its `tabindex` is -1, so the Tab

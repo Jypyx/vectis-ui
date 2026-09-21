@@ -130,3 +130,28 @@ describe('usePopover', () => {
     expect(shown.value).toBe(false)
   })
 })
+
+describe('usePopover — a refused show', () => {
+  it('a close in between cancels the retry the refusal queued', async () => {
+    const { el, showPopover } = popoverEl()
+    showPopover.mockImplementationOnce(() => {
+      throw new DOMException('busy', 'InvalidStateError')
+    })
+    const { show, hide } = usePopover(el)
+    show()
+    hide()
+    await Promise.resolve()
+    expect(showPopover).toHaveBeenCalledTimes(1)
+  })
+
+  it('without one, the retry still opens the panel', async () => {
+    const { el, showPopover } = popoverEl()
+    showPopover.mockImplementationOnce(() => {
+      throw new DOMException('busy', 'InvalidStateError')
+    })
+    const { show } = usePopover(el)
+    show()
+    await Promise.resolve()
+    expect(showPopover).toHaveBeenCalledTimes(2)
+  })
+})

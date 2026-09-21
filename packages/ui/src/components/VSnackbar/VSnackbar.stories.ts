@@ -137,7 +137,7 @@ export const Tones: Story = {
         <VButton
           variant="outline"
           tone="danger"
-          @click="snackbar({ tone: 'danger', message: t.saveFailed, action: () => {}, actionLabel: t.retry })"
+          @click="snackbar({ tone: 'danger', message: t.saveFailed, action: () => {}, actionText: t.retry })"
         >
           {{ t.failing }}
         </VButton>

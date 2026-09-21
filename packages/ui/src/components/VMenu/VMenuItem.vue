@@ -3,8 +3,9 @@
  * One command in a menu. The panel moves the focus between items, and choosing one closes
  * the whole menu, submenus included.
  *
- * With an `href` it becomes a link, made inert by hand when disabled — a link has no
- * `disabled` attribute, so the address is removed and `aria-disabled` says why.
+ * With an `href` it becomes a link, made inert through `useInertLink` when disabled: a
+ * link has no `disabled` attribute, so the address is removed, `aria-disabled` says why
+ * and the consumer's click listeners are dropped (an `<a>` without `href` still clicks).
  *
  * With the `#submenu` slot it becomes the trigger of a nested panel rendered INSIDE the
  * parent one. That nesting is what buys the submenu behaviour from the browser: the panels
@@ -12,12 +13,16 @@
  * sibling.
  *
  * The JS covers only the two openings the browser does not: the keyboard, and a hover held
- * long enough to show it was meant. A click already opens it natively.
+ * long enough to show it was meant. A click already opens it natively, and ONLY opens it
+ * (`popovertargetaction="show"`): the hover has usually opened it a moment before the
+ * click lands, and the default toggle would shut what the reader was reaching for.
  */
 
-import { inject, ref, useId } from 'vue'
+import { inject, ref, useAttrs, useId } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
+import { useInertLink } from '../../composables/useInertLink'
+import { isRtl } from '../../utils/direction'
 import { iconProps } from '../VIcon/iconProps'
 import { chevron_right as chevronRightIcon } from '../VIcon/icons/chevron_right'
 import type { IconSource } from '../VIcon/types'
@@ -45,13 +50,13 @@ interface MenuItemProps {
   /** An icon after the label, in the same forms. The `#end` slot replaces it. */
   iconEnd?: IconSource
   /**
-   * Marks this item as the one currently in effect — the chosen sort order, the
-   * active view. It is coloured and announced as such.
+   * Marks this item as the one currently in effect: the chosen sort order, the active
+   * view. It is coloured and announced as such.
    */
   selected?: boolean
   /**
-   * What the command means, in colour. `danger` marks it destructive — deleting
-   * something belongs there — and `neutral`, the default, is every other command.
+   * What the command means, in colour. `danger` marks it destructive (deleting something
+   * belongs there), and `neutral`, the default, is every other command.
    *
    * A row is an action, so it takes the vocabulary of one: the same word on the same
    * prop as a VButton, rather than a boolean of its own. There is no `accent` here,
@@ -101,8 +106,8 @@ const slots = defineSlots<{
   /** Free content after the label, which takes the place of `iconEnd`. */
   end?(): unknown
   /**
-   * The contents of a submenu — items, groups and separators, this component
-   * included, so menus may nest as deep as needed.
+   * The contents of a submenu: items, groups and separators, this component included,
+   * so menus may nest as deep as needed.
    */
   submenu?(): unknown
 }>()
@@ -115,6 +120,13 @@ function hasSubmenu() {
 function tag() {
   return !hasSubmenu() && props.href !== undefined ? ('a' as const) : ('button' as const)
 }
+
+const attrs = useAttrs()
+const link = useInertLink({
+  href: () => (hasSubmenu() ? undefined : props.href),
+  inert: () => props.disabled,
+  attrs: () => attrs,
+})
 
 const menu = inject(menuKey, null)
 
@@ -137,8 +149,23 @@ const itemEl = ref<HTMLElement | null>(null)
 // Opening a submenu from the keyboard, which the browser's own toggle does not cover
 // — it only reacts to a click.
 function onKeydown(event: KeyboardEvent) {
-  if (!hasSubmenu() || props.disabled) return
-  if (!['ArrowRight', 'Enter', ' '].includes(event.key)) return
+  // A key held with a modifier is the browser's: Alt+Right is Forward.
+  if (event.altKey || event.ctrlKey || event.metaKey) return
+  // @keyboard @a11y
+  // A menu item is activated by Space as well as Enter, and a LINK answers Enter alone:
+  // Space would scroll the page instead.
+  if (!hasSubmenu()) {
+    if (event.key === ' ' && tag() === 'a') {
+      event.preventDefault()
+      itemEl.value?.click()
+    }
+    return
+  }
+  if (props.disabled) return
+  // The submenu opens towards the end of the line, so the arrow that points at it is the
+  // one that opens it: the left one in a right-to-left page.
+  const toward = isRtl(itemEl.value) ? 'ArrowLeft' : 'ArrowRight'
+  if (![toward, 'Enter', ' '].includes(event.key)) return
   // The button's native activation has to be stopped: it would fire a click of its
   // own, and that click would toggle the panel shut again right behind the opening
   // below.
@@ -154,8 +181,12 @@ function onKeydown(event: KeyboardEvent) {
 const hoverTimer = useTimer()
 
 // @a11y @core
-function onPointerEnter() {
-  if (props.disabled) return
+// TRAP — a TOUCH tap sends `pointerenter` and `pointerleave` before its `click`, so the
+// leave below armed the close and the submenu the tap opened shut 150 ms later. Hover
+// intent means nothing to a finger: only a pointer that can hover takes this route, the
+// tap opening the submenu natively through the click.
+function onPointerEnter(event: PointerEvent) {
+  if (props.disabled || event.pointerType === 'touch') return
   // Hovering also moves the focus, so that the mouse and the keyboard never highlight
   // two different items at once — in a menu there is only ever one current item.
   itemEl.value?.focus({ preventScroll: true })
@@ -163,11 +194,12 @@ function onPointerEnter() {
   hoverTimer.start(() => subPanel.value?.show(itemEl.value ?? undefined), SUBMENU_HOVER_DELAY)
 }
 
-// @a11y @core — the test on where the focus currently is, is the accessibility half:
+// @a11y @core
+// The test on where the focus currently is, is the accessibility half:
 // a pointer drifting off the item must not close a submenu a keyboard user is
 // standing inside.
-function onPointerLeave() {
-  if (!hasSubmenu()) return
+function onPointerLeave(event: PointerEvent) {
+  if (!hasSubmenu() || event.pointerType === 'touch') return
   hoverTimer.start(() => {
     if (subPanel.value?.el?.contains(document.activeElement)) return
     subPanel.value?.close()
@@ -179,21 +211,22 @@ function onPointerLeave() {
   <component
     :is="tag()"
     ref="itemEl"
-    v-bind="$attrs"
+    :aria-disabled="link.isInertLink.value ? 'true' : undefined"
+    :aria-current="selected ? 'true' : undefined"
+    :aria-haspopup="hasSubmenu() ? 'menu' : undefined"
+    :aria-expanded="hasSubmenu() ? subOpen : undefined"
+    :aria-controls="hasSubmenu() ? subId : undefined"
+    v-bind="link.attrs.value"
     role="menuitem"
     tabindex="-1"
     class="v-menu-item"
     :type="tag() === 'button' ? 'button' : undefined"
     :disabled="tag() === 'button' ? disabled : undefined"
-    :href="tag() === 'a' && !disabled ? href : undefined"
-    :aria-disabled="tag() === 'a' && disabled ? 'true' : undefined"
+    :href="link.linkHref.value"
     :data-tone="tone"
     :data-selected="selected ? '' : undefined"
-    :aria-current="selected ? 'true' : undefined"
-    :aria-haspopup="hasSubmenu() ? 'menu' : undefined"
-    :aria-expanded="hasSubmenu() ? subOpen : undefined"
-    :aria-controls="hasSubmenu() ? subId : undefined"
     :popovertarget="hasSubmenu() ? subId : undefined"
+    :popovertargetaction="hasSubmenu() ? 'show' : undefined"
     @click="onClick"
     @keydown="onKeydown"
     @pointerenter="onPointerEnter"
@@ -357,6 +390,26 @@ function onPointerLeave() {
   .v-menu-item:is([data-selected], [data-tone='danger'], :disabled, [aria-disabled='true'])
     :is(.v-menu-item-icon, .v-menu-item-sublabel) {
     color: inherit;
+  }
+
+  /* Windows forced colors. The highlight is a background, which the mode forces to Canvas:
+     the row under the focus would look exactly like the others, and a keyboard user would
+     lose their place (WCAG 2.4.7). An outline inside the row takes its place. The selected
+     row, also drawn by its tint alone, takes the system selection pair, the rule the
+     selected controls of the actions family follow; the class is doubled to stay above
+     its (0,3,0) hover and focus rules. */
+  @media (forced-colors: active) {
+    .v-menu-item:focus,
+    .v-menu-item[aria-expanded='true'] {
+      outline: var(--vectis-focus-ring-width) solid Highlight;
+      outline-offset: calc(-1 * var(--vectis-focus-ring-width));
+    }
+
+    .v-menu-item.v-menu-item[data-selected] {
+      forced-color-adjust: none;
+      background-color: Highlight;
+      color: HighlightText;
+    }
   }
 }
 </style>

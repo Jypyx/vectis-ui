@@ -10,7 +10,7 @@ export default {
       name: 'VTooltip',
       props: [
         { name: 'text', type: 'string' },
-        { name: 'placement', type: 'TooltipPlacement', values: "'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'right'", default: "'top'" },
+        { name: 'placement', type: 'TooltipPlacement', values: "'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end' | 'right' | 'right-start' | 'right-end'", default: "'top'" },
         { name: 'delay', type: 'number', default: '300' },
       ],
       slots: [
@@ -26,5 +26,8 @@ export default {
   'aria-describedby': string
 }`,
     },
+  ],
+  cssVars: [
+    { name: '--vectis-control-size-tooltip-max', value: '18rem' },
   ],
 } satisfies PageApi

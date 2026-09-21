@@ -21,8 +21,11 @@ automatic bridge at mount.
 
 ## Opening on focus
 
-Hover opens after `delay` (300ms by default); **keyboard focus opens immediately** and Escape
-closes without moving focus — in line with WCAG 1.4.13 (dismissable, hoverable, persistent).
+Hover opens after `delay` (300ms by default); **keyboard focus opens immediately**. The tooltip
+then stays as long as the pointer rests on the trigger **or on the tooltip itself**, or the
+keyboard focus stays on the trigger, and Escape dismisses it from anywhere on the page without
+moving the focus, in line with WCAG 1.4.13 (dismissible, hoverable, persistent). That Escape is
+spent on the tooltip: inside a VDialog it does not also close the dialog.
 
 <Canvas of={VTooltipStories.OpenOnFocus} />
 
@@ -49,8 +52,8 @@ opposite side — with no JS at all:
 ## Rich content
 
 The `#content` slot wins over the `text` prop. Reserved for **non-interactive** content
-(formatting, `<kbd>`, icons): the tooltip closes as soon as the pointer leaves the trigger, and
-`aria-describedby` flattens the content to text — a link or a button would be unreachable there.
+(formatting, `<kbd>`, icons): `aria-describedby` flattens the content to text, and nothing inside
+can be reached from the keyboard, so a link or a button there would be out of reach.
 For interactive content, use VPopover.
 
 <Canvas of={VTooltipStories.RichContent} />
@@ -61,11 +64,17 @@ A long text wraps within the panel's maximum width:
 
 <Canvas of={VTooltipStories.LongText} />
 
+## Exposed methods
+
+`show()` opens the tooltip at once, without the hover delay, `close()` hides it, and `el` is the
+bubble: the same three every overlay of the design system answers to.
+
 ## Accessibility
 
 - `role="tooltip"` + an `aria-describedby` set on the trigger through `triggerProps`: the content
   is announced when focus is taken.
-- Keyboard focus: immediate opening (with no delay), closing through Escape or focus loss. It is
+- Keyboard focus: immediate opening (with no delay), closing through Escape, or once both the
+  focus and the pointer have left. It is
   the **keyboard** focus specifically, read from `:focus-visible`: a focus given by a click, or
   handed back to the trigger by a panel that is closing, opens nothing. Otherwise dismissing a
   menu would raise the tooltip over a page the reader has moved on from.

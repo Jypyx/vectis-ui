@@ -118,12 +118,12 @@ const layersCode = `/* The order the library declares, for reference. */
 
 const buildCode = `// vite.config.ts: the browsers Vectis UI is written for
 export default defineConfig({
-  build: { cssTarget: ['chrome125', 'edge125', 'safari26', 'firefox147'] },
+  build: { cssTarget: ['chrome134', 'edge134', 'safari26', 'firefox147'] },
 })
 
 // nuxt.config.ts: the same value, one level down
 export default defineNuxtConfig({
-  vite: { build: { cssTarget: ['chrome125', 'edge125', 'safari26', 'firefox147'] } },
+  vite: { build: { cssTarget: ['chrome134', 'edge134', 'safari26', 'firefox147'] } },
 })`
 </script>
 

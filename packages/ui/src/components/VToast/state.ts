@@ -17,12 +17,15 @@
 import { reactive } from 'vue'
 
 import type { IconSource } from '../VIcon/types'
+import { isDev } from '../../utils/env'
 
+/** What a notification reports: nothing in particular, information, a success, a failure or a warning. */
 export type ToastTone = 'neutral' | 'accent' | 'success' | 'danger' | 'warning'
 
 /** How strongly a notification is painted: a tinted background with a border, or the full colour. */
 export type ToastVariant = 'soft' | 'solid'
 
+/** The corner of the screen a notification appears in. */
 export type ToastPlacement =
   'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
 
@@ -54,10 +57,10 @@ export interface ToastOptions {
    */
   hideClose?: boolean
   /**
-   * How wide it is, as a CSS length. It is never allowed past the width of the
-   * viewport, margins included.
+   * How wide it is: a number of pixels or any CSS length. It is never allowed past the
+   * width of the viewport, margins included.
    */
-  width?: string
+  width?: number | string
 }
 
 /**
@@ -80,12 +83,19 @@ let nextId = 0
  * Raises a notification, and hands back an id that `dismissToast` can use to take it
  * away again before its time.
  *
- * The two defaults that belong to the VToaster — where notifications appear and how
- * long they stay — are deliberately NOT resolved here: they are read when the
+ * The two defaults that belong to the VToaster, where notifications appear and how
+ * long they stay, are deliberately NOT resolved here: they are read when the
  * notification is rendered, so the toaster remains the single source of truth for its
  * own settings.
  */
 export function toast(options: ToastOptions): number {
+  // @devwarn
+  // The queue is module state, shared by every request a server renders: raised there, it
+  // would reach another reader's page and differ from what the browser hydrates.
+  if (isDev && typeof document === 'undefined')
+    console.warn(
+      '[toast] called during a server render: call it from a handler or a lifecycle hook that runs in the browser.',
+    )
   const id = nextId++
   toasts.push({ tone: 'neutral', variant: 'soft', hideClose: false, ...options, id })
   return id

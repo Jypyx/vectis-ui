@@ -23,7 +23,7 @@ import { VButton, snackbar } from 'vectis-ui'
         snackbar({
           tone: 'danger',
           message: 'Could not save your changes.',
-          actionLabel: 'Retry',
+          actionText: 'Retry',
           action: () => {},
         })
       "

@@ -71,7 +71,7 @@ theme, light on a dark one, with no override of its own.
 `action` is a callback; without one the bar carries no button at all. Running it always takes the
 bar away, so nothing has to be dismissed afterwards.
 
-`actionLabel` names it — "Undo" by default, from the design system dictionary. It is a `ghost`
+`actionText` names it — "Undo" by default, from the design system dictionary. It is a `ghost`
 `VButton`, recoloured to the surrounding text colour so that it reads on either tone in either
 theme.
 
@@ -126,10 +126,11 @@ does hook to it.
 
 ## Accessibility
 
-- `role="alert"` (interruptive) on the `danger` tone, `role="status"` (polite) otherwise — the
-  reader asked for the action a plain confirmation reports, so it waits for a pause. The
-  announcement of the first polite bar may be missed by some screen readers, the live region being
-  born with its content; `alert`s are announced on insertion.
+- Every bar is announced through two live regions rendered once beside the container:
+  interruptive (`role="alert"`) on the `danger` tone, polite (`role="status"`) otherwise, the
+  reader having asked for the action a plain confirmation reports. The bar itself carries no live
+  role: it is created with its message, and a region born with its text is not reliably announced.
+- Once the action has run, the focus goes back where it was before it entered the bar.
 - The container is a `role="region"` landmark named by the `label` prop ("Confirmation") — a
   different word from the notifications', so a page carrying both offers two areas a screen reader
   can tell apart.

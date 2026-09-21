@@ -194,3 +194,51 @@ describe('VToaster', () => {
     expect(stack.getAttribute('aria-label')).toBe('Alerts')
   })
 })
+
+describe('VToaster — announcing and focus', () => {
+  beforeEach(() => {
+    dismissToast()
+    vi.useFakeTimers()
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('announces every notification through a live region that was already there', async () => {
+    const { container } = render(VToaster)
+    const polite = container.querySelector(".v-visually-hidden[role='status']") as HTMLElement
+    const urgent = container.querySelector(".v-visually-hidden[role='alert']") as HTMLElement
+    expect(polite.textContent).toBe('')
+    toast({ title: 'Saved', message: 'Your changes are safe.' })
+    for (let i = 0; i < 3; i++) await nextTick()
+    expect(polite.textContent).toBe('Saved. Your changes are safe.')
+    toast({ message: 'Disk full', tone: 'danger' })
+    for (let i = 0; i < 3; i++) await nextTick()
+    expect(urgent.textContent).toBe('Disk full')
+    expect(container.querySelector('.v-toast')?.hasAttribute('role')).toBe(false)
+  })
+
+  it('closing one from the keyboard hands the focus to the next cross', async () => {
+    const { container } = render(VToaster)
+    toast({ message: 'A' })
+    toast({ message: 'B' })
+    await nextTick()
+    const [first, second] = container.querySelectorAll<HTMLElement>('.v-toast-close')
+    first!.focus()
+    first!.click()
+    await nextTick()
+    await nextTick()
+    expect(document.activeElement).toBe(second)
+  })
+
+  it('two corners open at once are two regions a screen reader can tell apart', async () => {
+    const { container } = render(VToaster)
+    toast({ message: 'A' })
+    toast({ message: 'B', placement: 'top-left' })
+    await nextTick()
+    const names = [...container.querySelectorAll('.v-toast-stack[data-popover-open]')].map((s) =>
+      s.getAttribute('aria-label'),
+    )
+    expect(new Set(names).size).toBe(2)
+  })
+})

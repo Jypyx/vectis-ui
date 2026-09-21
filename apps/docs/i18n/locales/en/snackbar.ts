@@ -40,8 +40,8 @@ export default {
           'Which end of the bottom edge confirmations appear at, unless one of them asks for another.',
         duration:
           'How long a confirmation stays, in milliseconds, unless it asks for something else. A confirmation given 0 stays until it is replaced or taken away by hand.',
-        actionLabel:
-          'What the single action is called, when the confirmation does not name it. It falls back to the design system dictionary.',
+        actionText:
+          "The word drawn on the single action, when the confirmation does not give one. It is also the button's accessible name, and falls back to the design system dictionary.",
         label:
           'What screen readers announce for the confirmation area itself, which is a landmark of the page. It falls back to the design system dictionary.',
       },

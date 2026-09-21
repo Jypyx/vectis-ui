@@ -93,9 +93,9 @@ Vectis UI targets recent browsers only:
 
 | Chrome / Edge | Safari | Firefox |
 | ------------- | ------ | ------- |
-| 125+          | 26+    | 147+    |
+| 134+          | 26+    | 147+    |
 
-CSS anchor positioning is used without a JavaScript fallback, which is what sets this floor. Some effects, like entry animations, are progressive enhancements and simply don't play on engines that lack them.
+Two features set this floor: CSS anchor positioning, used without a JavaScript fallback, and the `closedby` attribute of `<dialog>` (Chrome 134), which keeps a modal open on Escape or on a click outside when it should be. Safari does not implement `closedby` yet, and a small script stands in for it there. Some effects, like entry animations, are progressive enhancements and simply don't play on engines that lack them.
 
 If your bundler targets older browsers, it may rewrite part of the library's CSS during minification. Set `build.cssTarget` to the versions above in your Vite (or Nuxt) config to keep it intact.
 

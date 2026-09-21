@@ -1,4 +1,4 @@
-﻿import type { Meta, StoryObj } from '@storybook/vue3-vite'
+import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 
 import { builtinIcons as icons } from '../VIcon/icons'

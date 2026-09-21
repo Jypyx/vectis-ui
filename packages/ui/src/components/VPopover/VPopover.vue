@@ -97,7 +97,7 @@ interface PopoverProps {
   /**
    * Stops the panel being narrower than whatever it is anchored to. It is a FLOOR, so a
    * panel with a width of its own still grows past it rather than being clamped to the
-   * trigger — which is what a list of long labels under a short field wants.
+   * trigger, which is what a list of long labels under a short field wants.
    */
   matchTrigger?: boolean
 }
@@ -259,6 +259,24 @@ defineExpose({
    */
   .v-popover-panel {
     position-anchor: var(--popover-anchor-name);
+  }
+
+  /*
+   * A `bare` panel is bare of the BROWSER's decoration too. The UA sheet gives every
+   * `[popover]` a border, a padding, a Canvas background and `overflow: auto`, and `.v-panel`
+   * is what normally overrides them: without it they came back, a solid line and a white box
+   * around content promised "no background, no border".
+   *
+   * TRAP — `:where()` keeps this at (0,1,0). A bare consumer restyles its panel through the
+   * `.v-popover-panel.v-x-panel` compound (VTooltip), at (0,2,0), which must win; a (0,2,0)
+   * rule here would tie with it across two sheets.
+   */
+  .v-popover-panel:where(:not(.v-panel)) {
+    border: none;
+    padding: 0;
+    background: none;
+    color: inherit;
+    overflow: visible;
   }
 
   /*

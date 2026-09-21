@@ -198,8 +198,8 @@ const a11yStats = [
  * `alt` carries the name because nothing else does: the logo IS the label here.
  */
 const browsers = [
-  { name: 'Chrome', version: '125+', logo: chromeLogo },
-  { name: 'Edge', version: '125+', logo: edgeLogo },
+  { name: 'Chrome', version: '134+', logo: chromeLogo },
+  { name: 'Edge', version: '134+', logo: edgeLogo },
   { name: 'Safari', version: '26+', logo: safariLogo },
   { name: 'Firefox', version: '147+', logo: firefoxLogo },
 ]

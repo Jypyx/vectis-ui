@@ -65,12 +65,19 @@ export function usePopover(el: Readonly<Ref<HTMLElement | null>>) {
     try {
       panel.showPopover(source ? { source } : undefined)
     } catch {
-      if (retry) queueMicrotask(() => attempt(source, false))
+      // TRAP — a close asked for before the microtask runs must win: the retry checks
+      // that no `hide` came in between, or it would reopen a panel just closed.
+      const asked = generation
+      if (retry) queueMicrotask(() => asked === generation && attempt(source, false))
     }
   }
 
+  /** Bumped by every close, so a retry queued before it knows it was overtaken. */
+  let generation = 0
+
   /** Closes the panel. */
   function hide() {
+    generation += 1
     if (shown.value) el.value?.hidePopover()
   }
 
@@ -103,7 +110,8 @@ export function usePopoverModel(
     else hide()
   })
 
-  // @ssr — a watcher does not run during the server render, so a panel asked to be open
+  // @ssr
+  // A watcher does not run during the server render, so a panel asked to be open
   // from the start would never be told to open. Replaying the initial state on mount is
   // what covers that case.
   onMounted(() => {

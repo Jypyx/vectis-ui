@@ -17,14 +17,14 @@ const renderToast = (overrides: Partial<ToastItem> = {}) =>
   render(VToast, { props: { item: makeItem(overrides), closeLabel: 'Close' } })
 
 describe('VToast (internal card)', () => {
-  it('role="status" (polite) except danger/warning, which take role="alert"', () => {
+  // The announcement belongs to VToaster's permanent live regions: a card created with its
+  // message is no live region of its own, or it would announce twice, or not at all.
+  it('carries no live role of its own', () => {
     // several renders in the same test: the attribute is read on each root
     const roleOf = (tone: ToastItem['tone']) =>
       (renderToast({ tone }).container.firstElementChild as HTMLElement).getAttribute('role')
-    expect(roleOf('neutral')).toBe('status')
-    expect(roleOf('success')).toBe('status')
-    expect(roleOf('danger')).toBe('alert')
-    expect(roleOf('warning')).toBe('alert')
+    for (const tone of ['neutral', 'success', 'danger', 'warning'] as const)
+      expect(roleOf(tone)).toBeNull()
   })
 
   it('sets data-tone and data-variant for the CSS', () => {

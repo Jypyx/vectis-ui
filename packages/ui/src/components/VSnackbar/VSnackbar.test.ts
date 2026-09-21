@@ -7,6 +7,11 @@ import { current, dismissSnackbar, snackbar } from './state'
 
 const getHost = (container: Element) => container.querySelector('.v-snackbar-host') as HTMLElement
 
+/** The post-flush sync, then the tick the announcer writes on. */
+async function settle() {
+  for (let i = 0; i < 3; i++) await nextTick()
+}
+
 describe('VSnackbar', () => {
   beforeEach(() => {
     dismissSnackbar()
@@ -34,14 +39,16 @@ describe('VSnackbar', () => {
 
   it('announces politely by default and interrupts on the danger tone', async () => {
     const { container } = render(VSnackbar)
+    const said = (role: string) =>
+      container.querySelector(`.v-visually-hidden[role='${role}']`)?.textContent
 
     snackbar({ message: 'Saved' })
-    await nextTick()
-    expect(container.querySelector('.v-snackbar')?.getAttribute('role')).toBe('status')
+    await settle()
+    expect(said('status')).toBe('Saved')
 
     snackbar({ message: 'Failed', tone: 'danger' })
-    await nextTick()
-    expect(container.querySelector('.v-snackbar')?.getAttribute('role')).toBe('alert')
+    await settle()
+    expect(said('alert')).toBe('Failed')
   })
 
   it('mirrors the tone as data-tone for the CSS', async () => {
@@ -83,14 +90,14 @@ describe('VSnackbar', () => {
     await nextTick()
     expect(getByRole('button', { name: 'Undo' })).toBeTruthy()
 
-    snackbar({ message: 'Deleted', duration: 0, action: () => {}, actionLabel: 'Restore' })
+    snackbar({ message: 'Deleted', duration: 0, action: () => {}, actionText: 'Restore' })
     await nextTick()
     expect(getByRole('button', { name: 'Restore' })).toBeTruthy()
     expect(queryByRole('button', { name: 'Undo' })).toBeNull()
   })
 
-  it('the actionLabel prop replaces the dictionary default', async () => {
-    const { getByRole } = render(VSnackbar, { props: { actionLabel: 'Revert' } })
+  it('the actionText prop replaces the dictionary default', async () => {
+    const { getByRole } = render(VSnackbar, { props: { actionText: 'Revert' } })
     snackbar({ message: 'Deleted', duration: 0, action: () => {} })
     await nextTick()
     expect(getByRole('button', { name: 'Revert' })).toBeTruthy()
@@ -272,5 +279,83 @@ describe('VSnackbar', () => {
     const host = getHost(container)
     expect(host.getAttribute('role')).toBe('region')
     expect(host.getAttribute('aria-label')).toBe('Confirmations')
+  })
+})
+
+describe('VSnackbar — announcing, focus and robustness', () => {
+  beforeEach(() => {
+    dismissSnackbar()
+    vi.useFakeTimers()
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  const region = (container: Element, role: 'status' | 'alert') =>
+    container.querySelector(`.v-visually-hidden[role='${role}']`) as HTMLElement
+
+  it('announces each bar through a live region that was already there', async () => {
+    const { container } = render(VSnackbar)
+    const polite = region(container, 'status')
+    const urgent = region(container, 'alert')
+    // Present, and empty, before anything is raised: a region inserted along with its
+    // text is not announced.
+    expect(polite.textContent).toBe('')
+    snackbar({ message: 'Saved' })
+    await settle()
+    expect(polite.textContent).toBe('Saved')
+    snackbar({ message: 'Failed', tone: 'danger' })
+    await settle()
+    expect(urgent.textContent).toBe('Failed')
+    // The card itself is no live region any more: it would announce twice, or not at all.
+    expect(container.querySelector('.v-snackbar')?.hasAttribute('role')).toBe(false)
+  })
+
+  it('a bar replacing the one the focus was in still leaves on time', async () => {
+    const { container } = render(VSnackbar)
+    snackbar({ message: 'One', action: () => {}, duration: 1000 })
+    await nextTick()
+    const button = container.querySelector('.v-snackbar-action') as HTMLElement
+    button.focus()
+    await fireEvent.focusIn(button)
+    snackbar({ message: 'Two', duration: 1000 })
+    await nextTick()
+    await nextTick()
+    vi.advanceTimersByTime(1100)
+    expect(current.value).toBeNull()
+  })
+
+  it('an action that throws still takes the bar away', async () => {
+    const errors: unknown[] = []
+    render(VSnackbar, { global: { config: { errorHandler: (e) => void errors.push(e) } } })
+    snackbar({
+      message: 'Deleted',
+      action: () => {
+        throw new Error('boom')
+      },
+    })
+    await nextTick()
+    const button = document.querySelector('.v-snackbar-action') as HTMLElement
+    button.click()
+    // The error still reaches the application, and the bar is gone all the same.
+    expect(errors).toHaveLength(1)
+    expect(current.value).toBeNull()
+  })
+
+  it('the focus goes back where it was once the action has run', async () => {
+    const before = document.createElement('button')
+    document.body.append(before)
+    const { container } = render(VSnackbar)
+    snackbar({ message: 'Deleted', action: () => {} })
+    await nextTick()
+    const action = container.querySelector('.v-snackbar-action') as HTMLElement
+    before.focus()
+    action.focus()
+    await fireEvent.focusIn(action, { relatedTarget: before })
+    action.click()
+    await nextTick()
+    await nextTick()
+    expect(document.activeElement).toBe(before)
+    before.remove()
   })
 })

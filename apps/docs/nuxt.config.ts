@@ -249,7 +249,7 @@ export default defineNuxtConfig({
        * mirroring, silently and in the built artefact alone. This site documents that trap
        * on its Theming page; naming the floor here is what keeps it from shipping it.
        */
-      cssTarget: ['chrome125', 'edge125', 'safari26', 'firefox147'],
+      cssTarget: ['chrome134', 'edge134', 'safari26', 'firefox147'],
     },
     ssr: {
       // Every component module of the library carries `import './VX.css'`. Externalised, Node

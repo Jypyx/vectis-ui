@@ -203,6 +203,7 @@ const COMPONENT_DIMENSIONS: { slugs: DocsSlug[]; prefixes: string[] }[] = [
   { slugs: ['tabs'], prefixes: ['size-tab-'] },
   { slugs: ['time-picker'], prefixes: ['size-time-picker-'] },
   { slugs: ['toast'], prefixes: ['size-toast-'] },
+  { slugs: ['tooltip'], prefixes: ['size-tooltip-'] },
 ]
 
 export const componentGroups: TokenRowGroup[] = COMPONENT_DIMENSIONS.map(({ slugs, prefixes }) => ({
