@@ -90,6 +90,29 @@ describe('VCombobox', () => {
     expect(input.value).toBe('France')
   })
 
+  // The panel fades out rather than vanishing: a list springing back to every option at
+  // the moment of choosing is seen growing during that fade.
+  it('keeps the filtered list while closing, and offers the whole list again on reopening', async () => {
+    const { getByRole, container } = renderCombobox()
+    const input = getByRole('combobox') as HTMLInputElement
+    const labels = () =>
+      [...container.querySelectorAll('[role="option"] .v-combobox-option-label')].map((o) =>
+        o.textContent?.trim(),
+      )
+
+    await fireEvent.update(input, 'bel')
+    await fireEvent.keyDown(input, { key: 'Enter' })
+    expect(input.getAttribute('aria-expanded')).toBe('false')
+    expect(labels()).toEqual(['Belgium'])
+
+    await fireEvent.click(input)
+    expect(labels()).toEqual(['France', 'Belgium', 'Réunion', 'Monaco'])
+
+    await fireEvent.update(input, 'fra')
+    await fireEvent.keyDown(input, { key: 'Escape' })
+    expect(labels()).toEqual(['France'])
+  })
+
   it('reopening in single mode does not filter on the chosen value (the full list, filtering on typing)', async () => {
     const { getByRole, container } = renderCombobox({ modelValue: 'fr' })
     const input = getByRole('combobox') as HTMLInputElement

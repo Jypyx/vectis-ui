@@ -490,6 +490,13 @@ const normalizedLabelOf = (option: ComboboxOption) => normalizedOf(option, optio
 // the list.
 const searchTerm = computed(() => (typed.value ? query.value.trim() : ''))
 
+// TRAP — closing empties `searchTerm` (the typing flag drops) in the same tick as it hides
+// the panel, but the panel fades out rather than vanishing. Filtered on the live term, the
+// list would spring back to every option during that fade, and the panel grow under the
+// pointer that just chose. The term in force is therefore frozen here on every close and
+// released on the next opening; `null` means the panel is live and follows the search.
+const closedTerm = ref<string | null>(null)
+
 // The options that survive the search, flat and in the order they are shown. This is
 // what the keyboard counts through: blocks and separators do not appear in it, which is
 // exactly why the arrows never stop on one.
@@ -497,7 +504,7 @@ const filtered = computed(() => {
   const matcher = props.filter
   const list = allOptions.value
   if (matcher === false) return list
-  const q = searchTerm.value
+  const q = closedTerm.value ?? searchTerm.value
   if (!q) return list
   if (typeof matcher === 'function') return list.filter((o) => matcher(o, q))
   const needle = normalizeText(q)
@@ -791,6 +798,7 @@ watch(activeIndex, (index) => {
 // rather than guarded in each handler.
 function openPanel() {
   if (resolvedDisabled.value || props.readonly || open.value) return
+  closedTerm.value = null
   open.value = true
   const list = filtered.value
   const selectedIdx = list.findIndex((o) => !o.disabled && selectedSet.value.has(o.value))
@@ -819,6 +827,7 @@ function closePanel() {
   // A page that never arrived — a request that failed — must not leave the paging
   // frozen for good, so the lock is released here.
   infiniteScroll.reset()
+  closedTerm.value = searchTerm.value
   open.value = false
   activeIndex.value = -1
   typed.value = false
@@ -912,6 +921,8 @@ function select(option: ComboboxOption) {
   // Remembered immediately: the option may vanish from the list — on the next search —
   // before the parent has even passed the new value back down.
   optionCache.set(option.value, option)
+  // Read before the typing flag drops, which empties the term (see `closedTerm`).
+  if (!props.multiple) closedTerm.value = searchTerm.value
   typed.value = false
   if (props.multiple) {
     model.value = toggleValue(selectedValues.value, option.value)
