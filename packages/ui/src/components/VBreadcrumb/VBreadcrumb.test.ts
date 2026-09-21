@@ -145,4 +145,30 @@ describe('VBreadcrumb', () => {
       expect(queryByRole('button')).toBeNull()
     })
   })
+
+  describe('robustness', () => {
+    it('ignores the query and the hash of the current path', () => {
+      const { getByRole } = render(VBreadcrumb, {
+        props: { items, currentPath: '/projects/vectis/?tab=2#top' },
+      })
+      expect(getByRole('link', { name: 'Vectis' }).getAttribute('aria-current')).toBe('page')
+    })
+
+    it('marks a current page folded into the menu', () => {
+      const long: BreadcrumbItem[] = [
+        { label: 'Home', href: '/' },
+        { label: 'Projects', href: '/projects' },
+        { label: 'Vectis', href: '/projects/vectis' },
+        { label: 'Docs', href: '/projects/vectis/docs' },
+        { label: 'Intro', href: '/projects/vectis/docs/intro' },
+      ]
+      const { container } = render(VBreadcrumb, {
+        props: { items: long, maxItems: 3, currentPath: '/projects' },
+      })
+      const folded = [...container.querySelectorAll('[role="menuitem"]')].find(
+        (el) => el.textContent?.trim() === 'Projects',
+      )
+      expect(folded?.getAttribute('aria-current')).toBe('page')
+    })
+  })
 })

@@ -277,6 +277,18 @@ in development when it sees both.
 
 <Canvas of={VCarouselStories.EdgeCases} />
 
+A `v-model` set from outside the positions the carousel can rest on (an index past the last page,
+a negative one) is brought back into range.
+
+## Nested carousels
+
+A carousel can sit inside another's slide. Each one reads its own slides only, and each root resets
+the effect and the jump it hands down, so the inner one neither counts as part of the outer track
+nor plays the outer's transition. The keys typed inside a slide belong to what holds the focus
+there.
+
+<Canvas of={VCarouselStories.Nested} />
+
 ## Accessibility
 
 - The root is a `role="region"` with a translated `aria-roledescription`, named by `label`; a
@@ -291,13 +303,18 @@ in development when it sees both.
   also what makes the track the keyboard target: the arrows move one slide and Home/End jump to
   the ends. A focused scroll container does move on the arrows by itself, but the browser scrolls
   it a fixed pixel step that mandatory snapping immediately undoes, so the component handles them.
+  Only keys pressed on the track itself are taken: a field, a tab list or a slider inside a slide
+  keeps its own.
+- When the previous or next button disables itself under the keyboard focus (the first or last
+  page reached), the focus moves to the other button rather than falling back to the page.
 - The indicators are ordinary buttons named "N of M", the current one marked with `aria-current`.
   Their hit area is 24px even though the dot is 8px.
 - Autoplay ships no control of its own, so if you enable it, add a stop control by binding
   `autoplay` to `0` — see above. With `loop` the rotation never ends on its own, so that control is
   required rather than advisable.
-- A visually hidden `role="status"` announces the position — and stays silent while autoplay
-  rotates, because narrating an auto-rotating carousel floods the screen reader.
+- A visually hidden `role="status"` announces the position. It is `aria-live="off"` while
+  autoplay rotates, because narrating an auto-rotating carousel floods the screen reader, and its
+  text keeps following the slides, so pausing the rotation by hovering announces nothing.
 - `controlsVisibility="hover"` hides the pair with an opacity, so the buttons keep their place in
   the tab order and in the accessibility tree; keyboard focus anywhere in the carousel brings them
   back, and

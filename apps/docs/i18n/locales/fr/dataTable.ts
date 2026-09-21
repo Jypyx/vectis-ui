@@ -57,7 +57,7 @@ export default {
     },
     responsive: {
       title: 'Conteneurs étroits',
-      text: "<code>responsive</code> décide de ce que fait un conteneur trop étroit pour les colonnes : défiler latéralement, ou transformer chaque ligne en carte avec ses en-têtes de colonnes répétés à l'intérieur.",
+      text: "<code>responsive</code> décide de ce que fait un conteneur trop étroit pour les colonnes : défiler latéralement, ou transformer chaque ligne en carte avec ses en-têtes de colonnes répétés à l'intérieur. En cartes, la ligne d'en-têtes est hors de vue : ses boutons de tri et sa case « tout sélectionner » quittent l'ordre de tabulation avec elle.",
     },
     serverSide: {
       title: 'Côté serveur',
@@ -92,7 +92,7 @@ export default {
         emptyText:
           "Ce qui est dit quand il n'y a aucune ligne à montrer. Il retombe sur le dictionnaire du design system.",
         title:
-          "Un titre au-dessus du tableau, à gauche de sa barre d'outils. Il masque l'attribut HTML du même nom sur le composant lui-même, compromis accepté : une infobulle sur tout un tableau serait de peu d'usage.",
+          "Un titre au-dessus du tableau, à gauche de sa barre d'outils. Sans <code>caption</code>, il nomme aussi le tableau pour les lecteurs d'écran. Il masque l'attribut HTML du même nom sur le composant lui-même, compromis accepté : une infobulle sur tout un tableau serait de peu d'usage.",
         searchable: "Ajoute un champ de recherche à la barre d'outils.",
         searchPlaceholder:
           'Ce que dit ce champ quand il est vide. Il retombe sur le dictionnaire du design system.',
@@ -124,23 +124,23 @@ export default {
         selectionText:
           "Comment la sélection est résumée dans le pied. Elle ne dit rien du tout quand rien n'est sélectionné, et retombe sur le dictionnaire du design system.",
         selectRowLabel:
-          "Ce comme quoi la case d'une ligne est annoncée. « Sélectionner la ligne » ne dit rien à un utilisateur de lecteur d'écran sur QUELLE ligne : cela vaut donc la peine de fournir quelque chose venu de la ligne elle-même. Elle retombe sur le dictionnaire du design system.",
+          "Ce comme quoi la case d'une ligne est annoncée. « Sélectionner la ligne » ne dit rien à un utilisateur de lecteur d'écran sur QUELLE ligne : cela vaut donc la peine de fournir quelque chose venu de la ligne elle-même. <code>index</code> est la position de la ligne dans tout le tableau, à partir de 0, et non dans la page. Elle retombe sur le dictionnaire du design system, qui numérote les lignes à partir de 1.",
         serverSide:
           "Confie la recherche, le tri et la pagination à un serveur : les lignes sont affichées telles qu'elles arrivent, et chaque changement de ce qui est demandé est rapporté pour que le serveur puisse y répondre.",
         vModelSort:
           "Selon quelle colonne les lignes sont triées, et dans quel sens. Rien n'est trié au départ. Cela peut être piloté de l'extérieur ou simplement laissé au tableau, qui le pose au clic sur les en-têtes ; le changer ne renvoie pas le lecteur à la première page.",
         vModelPage:
-          'La page affichée, comptée à partir de 1. Rechercher ou changer la taille de page y renvoie à la première. Elle est bornée par dérivation plutôt que réécrite : une page au-delà de la dernière affiche donc simplement la dernière.',
+          "La page affichée, comptée à partir de 1. Rechercher ou changer la taille de page, depuis le menu ou de l'extérieur, y renvoie à la première. Elle est bornée par dérivation plutôt que réécrite : une page au-delà de la dernière affiche donc simplement la dernière.",
         vModelPerPage:
           "Combien de lignes une page contient. Toute valeur supérieure à zéro active la pagination : en passer une sans la lier suffit donc à l'activer.",
         vModelSelected:
-          "Les lignes sélectionnées, sous les identités que <code>rowKey</code> leur donne, jamais les objets de ligne eux-mêmes. Rien n'est sélectionné au départ, et une sélection SURVIT à un changement de page : la case d'en-tête ne couvre que la page visible, et c'est pourquoi elle peut être indéterminée.",
+          "Les lignes sélectionnées, sous les identités que <code>rowKey</code> leur donne, jamais les objets de ligne eux-mêmes. Rien n'est sélectionné au départ, et une sélection SURVIT à un changement de page : la case d'en-tête ne couvre que la page visible, et c'est pourquoi elle peut être indéterminée. Le pied compte cette liste telle qu'elle est, identités de lignes qui ne sont plus affichées comprises.",
         vModelSearch:
           "Ce qui est saisi dans le champ de recherche, vide au départ. Seules les colonnes déclarées sont cherchées, sans tenir compte des accents ni de la casse ; en mode serveur rien n'est filtré ici et le terme est rapporté à la place.",
       },
       events: {
         updateParams:
-          'Ce qui est demandé au tableau, en mode serveur : la recherche, le tri, la page et la taille de page. Il part à chaque changement et jamais au montage.',
+          'Ce qui est demandé au tableau, en mode serveur : la recherche, le tri, la page et la taille de page. Il part à chaque changement et jamais au montage, et une valeur égale transmise à nouveau ne demande rien.',
       },
       slots: {
         title: "Le côté gauche de la barre d'outils, qui remplace la prop <code>title</code>.",

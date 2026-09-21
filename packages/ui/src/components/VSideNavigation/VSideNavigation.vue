@@ -30,8 +30,8 @@ export type SideNavigationSize = 'sm' | 'md'
 
 interface SideNavigationProps {
   /**
-   * What screen readers announce for this navigation. A page often has several — a
-   * main one, a sidebar, a footer — and this is what tells them apart. It falls back
+   * What screen readers announce for this navigation. A page often has several (a
+   * main one, a sidebar, a footer) and this is what tells them apart. It falls back
    * to the design system dictionary.
    */
   label?: string
@@ -139,7 +139,10 @@ function reachable(el: HTMLElement, root: HTMLElement): boolean {
  */
 function onKeydown(event: KeyboardEvent) {
   const root = rootEl.value
-  if (!root) return
+  if (!root || event.defaultPrevented) return
+  // Only a key pressed ON a row: a field or a menu in a row's `#end` slot is a descendant
+  // too, and its caret or its own list must keep the arrows and Home/End.
+  if (!(event.target as Element | null)?.matches(ROW_SELECTOR)) return
   arrowNavigate(
     event,
     root,

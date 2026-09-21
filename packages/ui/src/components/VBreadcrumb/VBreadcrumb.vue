@@ -34,8 +34,8 @@ export interface BreadcrumbItem {
    */
   href: string
   /**
-   * An icon placed before the label: a Material Symbols Rounded name, an icon URL,
-   * or an explicit render (`{ src: '/logo.svg' }`, `{ component }`…).
+   * An icon placed before the label: an icon name, or an explicit render
+   * (`{ src: '/logo.svg' }`, `{ component }`…). A string is always a name.
    */
   icon?: IconSource
 }
@@ -50,12 +50,13 @@ interface BreadcrumbProps {
   label?: string
   /**
    * The address of the page being displayed. The segment whose `href` matches it is
-   * the current one; a trailing slash on either side makes no difference.
+   * the current one, even when it is folded into the menu. A trailing slash, a query and
+   * a hash on either side make no difference, so a router's full path can be passed as is.
    */
   currentPath?: string
   /**
    * The icon drawn between two segments: an icon name, or an explicit render,
-   * exactly like an item's `icon`.
+   * exactly like an item's `icon`. It is mirrored in a right-to-left page.
    */
   separatorIcon?: IconSource
   /**
@@ -85,11 +86,13 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.breadcrumb.label)
 const resolvedEllipsisLabel = computed(() => props.ellipsisLabel ?? m.value.breadcrumb.ellipsis)
 
 /**
- * Drops a trailing slash so that `/docs` and `/docs/` compare as the same page; the
- * root `/` is left alone. Pure string handling, hence safe to run on the server.
+ * Drops the query, the hash and a trailing slash, so that `/docs`, `/docs/` and a
+ * router's full path `/docs?tab=2#intro` compare as the same page; the root `/` is left
+ * alone. Pure string handling, hence safe to run on the server.
  */
 function normalize(path: string): string {
-  return path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path
+  const bare = path.replace(/[?#].*$/, '')
+  return bare.length > 1 && bare.endsWith('/') ? bare.slice(0, -1) : bare
 }
 
 // Normalized once per change of the prop rather than once per segment on every render.
@@ -97,8 +100,9 @@ const normalizedCurrent = computed(() =>
   props.currentPath === undefined ? undefined : normalize(props.currentPath),
 )
 
-// @a11y — this is what feeds `aria-current="page"`, the only marker telling
-// assistive technology where the trail ends.
+// @a11y
+// This is what feeds `aria-current="page"`, the only marker telling assistive technology
+// where the trail ends, the folded segments of the menu included.
 function isCurrent(item: BreadcrumbItem): boolean {
   return normalizedCurrent.value !== undefined && normalize(item.href) === normalizedCurrent.value
 }
@@ -138,6 +142,8 @@ const visibleItems = computed(() =>
               :href="hidden.href"
               :label="hidden.label"
               :icon-start="hidden.icon"
+              :selected="isCurrent(hidden)"
+              :aria-current="isCurrent(hidden) ? 'page' : undefined"
             />
           </VMenu>
         </li>

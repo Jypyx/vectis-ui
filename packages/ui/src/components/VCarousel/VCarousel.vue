@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// @keyboard @a11y @ssr @core — the DS's densest script; every block below carries
-// its own tag.
+// @keyboard @a11y @ssr @core
+// The DS's densest script; every block below carries its own tag.
 /**
  * Content the reader moves through one screenful at a time — images, cards, text — across
  * the page or down it.
@@ -63,8 +63,52 @@ import { useSlotNodes } from '../../composables/useSlotNodes'
 import { useTimer } from '../../composables/useTimer'
 import { useMessages } from '../../i18n/state'
 
+/** How one slide gives way to the next: sliding, fading in place, or scaling down. */
 export type CarouselEffect = 'slide' | 'fade' | 'scale'
+/** Whether the carousel scrolls across the page or down it. */
 export type CarouselOrientation = 'horizontal' | 'vertical'
+
+/** What the `#controls` slot receives. */
+export interface CarouselControlsSlotProps {
+  /** Moves one position back. */
+  previous: () => void
+  /** Moves one position forward. */
+  next: () => void
+  /** Whether there is no position before this one (always false when looping). */
+  atStart: boolean
+  /** Whether there is no position after this one (always false when looping). */
+  atEnd: boolean
+  /** The current position, from 0. */
+  index: number
+  /** How many slides there are. */
+  count: number
+  /** How many positions the carousel can actually rest on, which is usually fewer. */
+  pageCount: number
+  /** Which way it scrolls: a bar of your own cannot choose its icons without knowing. */
+  orientation: CarouselOrientation
+}
+
+/** What the `#indicators` slot receives. */
+export interface CarouselIndicatorsSlotProps {
+  /** The current position, from 0. */
+  index: number
+  /** How many slides there are. */
+  count: number
+  /** How many positions there are: render one control per position, not per slide. */
+  pageCount: number
+  /** Moves to a position. */
+  goTo: (index: number) => void
+  /** Which way the carousel scrolls. */
+  orientation: CarouselOrientation
+}
+
+/** What the `#indicator` slot receives. */
+export interface CarouselIndicatorSlotProps {
+  /** The position this dot stands for, from 0. */
+  index: number
+  /** Whether it is the current one. */
+  active: boolean
+}
 /** Where the position dots go: nowhere, over the slides, or after them. */
 export type CarouselIndicators = false | 'inside' | 'outside'
 /** Where the previous and next buttons go: nowhere, over the slides, or beside them. */
@@ -105,7 +149,7 @@ interface CarouselProps {
    * How one slide gives way to the next, driven by the scroll itself. Sliding means no
    * animation at all.
    *
-   * Fading requires ONE slide at a time and no peek — it works by holding each slide in
+   * Fading requires ONE slide at a time and no peek: it works by holding each slide in
    * place while the scroll moves under it, which only lands correctly when a slide fills
    * the view exactly. Asked for otherwise, it falls back to sliding rather than degrading.
    */
@@ -124,7 +168,7 @@ interface CarouselProps {
    *
    * Nothing is cloned to achieve it: the real track goes back to the beginning. Being a
    * move of more than one page, it goes there at once and plays the transition on
-   * arrival, rather than rewinding past every slide in between — unless `noJump` puts
+   * arrival, rather than rewinding past every slide in between, unless `noJump` puts
    * that rewind back.
    *
    * It has no effect where there is only one position to rest on, and the buttons stay
@@ -137,7 +181,7 @@ interface CarouselProps {
    * there. Off by default: a dot five pages away lands at once and plays the transition
    * once, on arrival.
    *
-   * Turn it on when the travel is the point — a short carousel where watching the track
+   * Turn it on when the travel is the point: a short carousel where watching the track
    * run past says something about how far the reader has moved. Every route is covered,
    * the dots, the Home and End keys and a `loop` carousel coming back round, so the
    * component moves the way it did before there was a shortcut at all.
@@ -148,14 +192,14 @@ interface CarouselProps {
   noJump?: boolean
   /**
    * How long each slide is shown before the next one, in milliseconds; zero means it does
-   * not advance by itself. It stops at the last page unless the carousel loops — in which
-   * case it goes round for as long as the page is open — pauses while the pointer rests on
+   * not advance by itself. It stops at the last page unless the carousel loops (in which
+   * case it goes round for as long as the page is open), pauses while the pointer rests on
    * it or the KEYBOARD focus is inside it, and never runs at all for a reader who has asked
    * for less motion.
    *
    * The component deliberately renders NO pause button. This prop is reactive and setting
    * it to zero cancels the timer at once, so a stop control is a one-line binding on your
-   * side — and it is worth adding: the guideline asks for a way to stop content that moves
+   * side, and it is worth adding: the guideline asks for a way to stop content that moves
    * on its own, and hover and focus leave a touch user with none. Looping makes that
    * binding MANDATORY rather than advisable, the movement no longer ending on its own.
    */
@@ -221,51 +265,34 @@ const props = withDefaults(defineProps<CarouselProps>(), {
 defineSlots<{
   /**
    * The slides. How many there are is read from what this slot RENDERS, so a `v-for` is
-   * perfectly fine — but the slot must not depend on something only true in a browser, or
+   * perfectly fine, but the slot must not depend on something only true in a browser, or
    * the server and the client would count differently.
    */
   default(): unknown
   /**
-   * Replaces the previous and next buttons entirely, their placement included — so custom
+   * Replaces the previous and next buttons entirely, their placement included: custom
    * content positions itself, and the visibility setting no longer applies to it.
    */
-  controls?(props: {
-    previous: () => void
-    next: () => void
-    atStart: boolean
-    atEnd: boolean
-    index: number
-    /** How many slides there are. */
-    count: number
-    /** How many positions the carousel can actually rest on, which is usually fewer. */
-    pageCount: number
-    /** Which way it scrolls — a bar of your own cannot choose its icons without knowing. */
-    orientation: CarouselOrientation
-  }): unknown
+  controls?(props: CarouselControlsSlotProps): unknown
   /**
    * Replaces the whole bar of dots.
    *
-   * TRAP — render one control per POSITION and not per slide. A position past the last one
-   * cannot be reached, so a bar built on the number of slides offers dots that scroll
-   * nowhere. The slide count is passed as well, for wording such as "3 of 8".
+   * Render one control per POSITION (`pageCount`) and not per slide. A position past the
+   * last one cannot be reached, so a bar built on the number of slides offers dots that
+   * scroll nowhere. The slide count is passed as well, for wording such as "3 of 8".
    */
-  indicators?(props: {
-    index: number
-    count: number
-    pageCount: number
-    goTo: (index: number) => void
-    orientation: CarouselOrientation
-  }): unknown
+  indicators?(props: CarouselIndicatorsSlotProps): unknown
   /**
    * Replaces what is drawn INSIDE one dot. The button itself, and everything that makes it
    * announce and behave correctly, stays the design system's.
    */
-  indicator?(props: { index: number; active: boolean }): unknown
+  indicator?(props: CarouselIndicatorSlotProps): unknown
 }>()
 
 /**
  * Which slide is current: the first one fully visible when several fit at once, which is
- * also the position the carousel has come to rest on.
+ * also the position the carousel has come to rest on. A value outside the positions the
+ * carousel can rest on is brought back into range.
  */
 const model = defineModel<number>({ default: 0 })
 
@@ -342,6 +369,19 @@ provide(carouselKey, {
 const jumpPhase = ref<'a' | 'b'>()
 const jumpDirection = ref(1)
 
+/*
+ * The one-shot is taken off once it has played. Left on the root, it would play again on
+ * every slide mounted LATER (a lazy page, a re-keyed list): an animation starts when its
+ * element is created with a name, and in `fade` the newcomers would flash in from zero.
+ * The next jump restarts it all the same, a change from no name to one being a change.
+ */
+function onAnimationEnd(event: AnimationEvent) {
+  if (!event.animationName.startsWith('v-carousel-jump-')) return
+  // Its own slides only: a nested carousel's animation bubbles through here as well.
+  const owner = (event.target as Element | null)?.closest('.v-carousel')
+  if (owner === event.currentTarget) jumpPhase.value = undefined
+}
+
 const rootStyle = computed<StyleValue>(() => ({
   '--carousel-per-view': String(props.itemsPerView),
   '--carousel-item-min': cssSize(props.itemMinSize),
@@ -406,7 +446,7 @@ let readBack = false
  * a frame later, and a consumer is free to have changed the slides in between.
  */
 function deltaTo(port: HTMLElement, index: number) {
-  const slide = port.querySelector<HTMLElement>(`[data-carousel-index='${index}']`)
+  const slide = port.querySelector<HTMLElement>(`:scope > [data-carousel-index='${index}']`)
   if (!slide) return
   const target = slide.getBoundingClientRect()
   // The VIEWPORT's rect, not the stage's: every DOM read in this component is
@@ -525,6 +565,14 @@ const measuredPages = ref<number>()
  */
 const SLACK = 2
 
+/*
+ * TRAP — the slides are the viewport's CHILDREN, never its descendants. A carousel placed
+ * in a slide carries the same attribute on its own slides, and a descendant query then
+ * reads the inner slide 0 as the outer slide 1: the step measures 0, the page count and the
+ * read-back freeze, and "next" scrolls to the inner slide.
+ */
+const SLIDES = ':scope > [data-carousel-index]'
+
 /**
  * Reads the scroller ONCE and answers both questions from the same numbers: how many
  * positions it can rest on, and which one it rests on now. Computing them apart is exactly
@@ -569,7 +617,7 @@ const SLACK = 2
  * bias with nothing to report it.
  */
 function measure(port: HTMLElement) {
-  const boxes = port.querySelectorAll<HTMLElement>('[data-carousel-index]')
+  const boxes = port.querySelectorAll<HTMLElement>(SLIDES)
   const first = boxes[0]?.getBoundingClientRect()
   const second = boxes[1]?.getBoundingClientRect()
   const last = boxes[boxes.length - 1]?.getBoundingClientRect()
@@ -657,27 +705,36 @@ const slideKeys = computed(() =>
  * on the cross axis, so the area ratio equals the scroll-axis ratio and a slide becoming
  * fully visible really does cross 1.0.
  */
-watch(
-  [viewportEl, slideKeys],
-  ([port], _previous, onCleanup) => {
-    // @fallback
-    // IntersectionObserver exists neither in SSR nor in jsdom: `scrollend` still
-    // measures there, and the whole loop is verified in the browser (play functions).
-    if (!port || typeof IntersectionObserver === 'undefined') return
-    const observer = new IntersectionObserver(
-      () => {
-        measure(port)
-        // The request has arrived, so there is nothing left to protect. This is also
-        // the ONLY exit when the browser clamps a programmatic scroll to no movement
-        // at all — `scrollend` never fires there.
-        if (observedIndex.value === model.value) settling.value = false
-      },
-      { root: port, threshold: [0, 0.25, 0.5, 0.75, 1] },
-    )
-    for (const slide of port.querySelectorAll('[data-carousel-index]')) observer.observe(slide)
-    onCleanup(() => observer.disconnect())
-  },
-  { flush: 'post' },
+/*
+ * TRAP — started in `onMounted`, and so are the two watches further down that read the
+ * page count. A watch evaluates its source at once, and every one of these reaches the
+ * slot through `slides`: at setup that is a slot call outside the render, which Vue warns
+ * about for every slot passed as a function (a render function, JSX). By the time the
+ * component is mounted the render has read the slot and the computed answers from cache.
+ */
+onMounted(() =>
+  watch(
+    [viewportEl, slideKeys],
+    ([port], _previous, onCleanup) => {
+      // @fallback
+      // IntersectionObserver exists neither in SSR nor in jsdom: `scrollend` still
+      // measures there, and the whole loop is verified in the browser (play functions).
+      if (!port || typeof IntersectionObserver === 'undefined') return
+      const observer = new IntersectionObserver(
+        () => {
+          measure(port)
+          // The request has arrived, so there is nothing left to protect. This is also
+          // the ONLY exit when the browser clamps a programmatic scroll to no movement
+          // at all — `scrollend` never fires there.
+          if (observedIndex.value === model.value) settling.value = false
+        },
+        { root: port, threshold: [0, 0.25, 0.5, 0.75, 1] },
+      )
+      for (const slide of port.querySelectorAll(SLIDES)) observer.observe(slide)
+      onCleanup(() => observer.disconnect())
+    },
+    { flush: 'post', immediate: true },
+  ),
 )
 
 // Watching `settling` as well as the reading is the whole point of making it a ref:
@@ -738,6 +795,25 @@ function goTo(index: number) {
    */
   model.value = looping.value ? ((index % pages) + pages) % pages : clamp(index, 0, pages - 1)
 }
+// @core
+/*
+ * A model the PARENT writes is brought into range too, since `goTo` only guards the
+ * component's own moves. Out of range, no dot is current, the live region announces a
+ * slide that does not exist, and past the last page `settling` never comes back down: the
+ * browser clamps the scroll to no movement, so no `scrollend` arrives to lower it.
+ */
+onMounted(() =>
+  watch(
+    [model, pageCount],
+    ([index, pages]) => {
+      if (pages === 0) return
+      const bounded = Number.isFinite(index) ? clamp(Math.round(index), 0, pages - 1) : 0
+      if (bounded !== index) model.value = bounded
+    },
+    { immediate: true },
+  ),
+)
+
 const previous = () => goTo(model.value - 1)
 const next = () => goTo(model.value + 1)
 
@@ -757,6 +833,9 @@ const next = () => goTo(model.value + 1)
 function onKeydown(event: KeyboardEvent) {
   const port = viewportEl.value
   if (!port || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
+  // A key typed INSIDE a slide belongs to what holds the focus there: a caret in a field,
+  // a nested VTabs or VSlider, another carousel. Only the viewport itself is ours.
+  if (event.target !== event.currentTarget || event.defaultPrevented) return
 
   if (event.key === 'Home' || event.key === 'End') {
     event.preventDefault()
@@ -777,6 +856,27 @@ function onKeydown(event: KeyboardEvent) {
   const rtl = !isVertical.value && isRtl(port)
   goTo(model.value + (rtl ? -step : step))
 }
+
+// @a11y
+/*
+ * A control that disables itself under the keyboard focus would drop it on `<body>`. It is
+ * handed to the opposite control, or to the viewport when both ends are reached (a single
+ * page). Started on mount, like the watches above. The DEFAULT `pre` timing is the point: the buttons are still enabled when this
+ * runs, and a disabled one can take no focus (the VTabs scroll buttons).
+ */
+onMounted(() =>
+  watch([atStart, atEnd], ([start, end], [wasStart, wasEnd]) => {
+    const port = viewportEl.value
+    const stage = port?.parentElement
+    if (!port || !stage) return
+    const [back, forward] = stage.querySelectorAll<HTMLElement>(
+      ':scope > .v-carousel-controls > .v-carousel-control',
+    )
+    const active = document.activeElement
+    if (start && !wasStart && active === back) (end ? port : forward)?.focus()
+    else if (end && !wasEnd && active === forward) (start ? port : back)?.focus()
+  }),
+)
 
 const { start, cancel } = useTimer()
 const hovered = ref(false)
@@ -805,17 +905,22 @@ const rotating = computed(
 )
 
 // `immediate`: without it the first delay would only be armed by a LATER change,
-// so an autoplay that nobody touches would never advance at all.
-watch(
-  [rotating, model],
-  () => {
-    cancel()
-    if (rotating.value) start(next, props.autoplay)
-  },
-  { immediate: true },
+// so an autoplay that nobody touches would never advance at all. Started on MOUNT: a
+// server render never unmounts, so a timer armed there would outlive the request and
+// fire `next` on a dead instance.
+onMounted(() =>
+  watch(
+    [rotating, model],
+    () => {
+      cancel()
+      if (rotating.value) start(next, props.autoplay)
+    },
+    { immediate: true },
+  ),
 )
 
-// @a11y @ssr — WCAG 2.2.2. Client-only: the server has no `matchMedia`.
+// @a11y @ssr
+// WCAG 2.2.2. Client-only: the server has no `matchMedia`.
 /*
  * The DS's second browser-preference read (after VHotkeys' `navigator`), and it
  * is not redundant with the CSS media query: that one stops a transition, never a
@@ -835,19 +940,31 @@ onBeforeUnmount(() => releaseMotionQuery?.())
 
 // @a11y
 /*
- * Announced only at rest: narrating an auto-rotating carousel floods the screen
- * reader (APG). The region itself stays mounted — a live container inserted at
- * the same time as its text is not announced (the VDataTable footer rule).
+ * Announced only at rest: narrating an auto-rotating carousel floods the screen reader, so
+ * the region is `aria-live="off"` while it rotates (APG). The TEXT always follows the model:
+ * emptied while rotating instead, a hover that pauses the rotation would write it back and
+ * be announced with nothing having moved. The region itself stays mounted, a live
+ * container inserted at the same time as its text not being announced (the VDataTable
+ * footer rule).
  */
 const liveMessage = computed(() =>
-  rotating.value || count.value === 0 ? '' : m.value.carousel.slide(model.value + 1, count.value),
+  count.value === 0 ? '' : m.value.carousel.slide(model.value + 1, count.value),
 )
 
 // @devwarn
 if (isDev) {
+  // Once per instance each: the loop warning names the very binding it recommends, and
+  // that binding re-runs this effect on every pause and resume.
+  const warned = new Set<string>()
+  const warn = (id: string, message: string) => {
+    if (warned.has(id)) return
+    warned.add(id)
+    console.warn(message)
+  }
   watchEffect(() => {
     if (props.effect !== resolvedEffect.value)
-      console.warn(
+      warn(
+        'fade',
         props.itemsPerView > 1
           ? '[VCarousel] `fade` needs one item per view: over a single view timeline every slide is counter-translated onto the same spot, so they would pile up. Downgraded to `slide`.'
           : '[VCarousel] `fade` and `peek` are mutually exclusive: the counter-translate parks every slide over the viewport, so the peeked strip is covered. Downgraded to `slide`.',
@@ -861,15 +978,18 @@ if (isDev) {
      * this component would have to render for everyone.
      */
     if (props.loop && props.autoplay > 0)
-      console.warn(
+      warn(
+        'loop',
         '[VCarousel] `loop` with `autoplay` rotates for as long as the page is open, so WCAG 2.2.2 asks for a way to stop it. Bind `autoplay` to 0 from a control of your own.',
       )
     if (isVertical.value && props.height === undefined)
-      console.warn(
+      warn(
+        'height',
         '[VCarousel] a vertical carousel needs a `height`: a percentage flex-basis has no definite reference on the block axis. Falling back to --vectis-control-size-carousel-block.',
       )
     if (!Number.isInteger(props.itemsPerView) || props.itemsPerView < 1)
-      console.warn(
+      warn(
+        'itemsPerView',
         `[VCarousel] \`itemsPerView\` must be an integer ≥ 1, got ${props.itemsPerView}.`,
       )
   })
@@ -893,6 +1013,7 @@ if (isDev) {
     @pointerleave="hovered = false"
     @focusin="focused = isKeyboardFocus($event.target)"
     @focusout="focused = false"
+    @animationend="onAnimationEnd"
   >
     <!--
       The stage holds the viewport and the controls — and NOTHING else. The indicator bar is a sibling on purpose: inside this box it
@@ -999,7 +1120,9 @@ if (isDev) {
       </div>
     </slot>
 
-    <span class="v-visually-hidden" role="status">{{ liveMessage }}</span>
+    <span class="v-visually-hidden" role="status" :aria-live="rotating ? 'off' : 'polite'">{{
+      liveMessage
+    }}</span>
   </div>
 </template>
 
@@ -1031,6 +1154,15 @@ if (isDev) {
     --carousel-jump-scale: 1;
     --carousel-jump-shift: 0%;
     --carousel-jump-dir: 1;
+
+    /*
+     * TRAP — both names are re-set on EVERY root, to `none`, because a custom property
+     * inherits: a carousel placed inside another's slide would otherwise play its host's
+     * effect and replay its host's jump. Each effect and each jump phase below sets them
+     * again on the root that carries the attribute.
+     */
+    --carousel-effect-name: none;
+    --carousel-jump-name: none;
 
     /* A true gutter, which is what --vectis-space-* is for. */
     --carousel-gap: var(--vectis-space-3);
@@ -1100,9 +1232,10 @@ if (isDev) {
    * The scroll axis is physical, so RTL mirrors the transforms — and ONLY the
    * transforms: flex-basis and the logical `scroll-snap-type` keyword handle
    * themselves. One sign flips the fade counter-translate. Scoped to
-   * `horizontal`: the block axis does not flip.
+   * `horizontal`: the block axis does not flip. `:dir()` and not a `[dir]` ancestor, so
+   * an LTR subtree inside an RTL page reads its own direction.
    */
-  [dir='rtl'] .v-carousel[data-orientation='horizontal'] {
+  .v-carousel[data-orientation='horizontal']:dir(rtl) {
     --carousel-dir: -1;
   }
 
@@ -1133,7 +1266,7 @@ if (isDev) {
    * `flex-grow` and not `flex: 1`: the shorthand's `0` basis, together with the
    * min-size floors above, lets an auto-sized flex container collapse it.
    */
-  .v-carousel[data-orientation='vertical'] .v-carousel-stage {
+  .v-carousel[data-orientation='vertical'] > .v-carousel-stage {
     flex-grow: 1;
   }
 
@@ -1165,7 +1298,7 @@ if (isDev) {
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  .v-carousel[data-orientation='vertical'] .v-carousel-viewport {
+  .v-carousel[data-orientation='vertical'] > .v-carousel-stage > .v-carousel-viewport {
     flex-direction: column;
     scroll-snap-type: block mandatory;
     /*
@@ -1309,11 +1442,17 @@ if (isDev) {
    * each inner finds ITS OWN slide although they all share the ident.
    */
   @supports (view-timeline-name: --v) and (animation-range: cover) {
-    .v-carousel:not([data-effect='slide']) .v-carousel-slide {
+    .v-carousel:not([data-effect='slide'])
+      > .v-carousel-stage
+      > .v-carousel-viewport
+      > .v-carousel-slide {
       view-timeline: --carousel-view inline;
     }
 
-    .v-carousel[data-orientation='vertical']:not([data-effect='slide']) .v-carousel-slide {
+    .v-carousel[data-orientation='vertical']:not([data-effect='slide'])
+      > .v-carousel-stage
+      > .v-carousel-viewport
+      > .v-carousel-slide {
       view-timeline: --carousel-view block;
     }
 
@@ -1448,7 +1587,7 @@ if (isDev) {
     transition: opacity var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .v-carousel[data-orientation='vertical'] .v-carousel-controls {
+  .v-carousel[data-orientation='vertical'] > .v-carousel-stage > .v-carousel-controls {
     flex-direction: column;
   }
 
@@ -1460,10 +1599,12 @@ if (isDev) {
    * does not swallow a drag over the slides.
    *
    * Enumerated rather than a bare `[data-controls]`: a third placement has to opt in
-   * by hand (the VTabs `:is()` rule). ORDER IS LOAD-BEARING — the per-placement blocks
-   * below are (0,3,0) like this one.
+   * by hand (the VTabs `:is()` rule). ORDER IS LOAD-BEARING: the per-placement blocks
+   * below are (0,5,0) like this one.
    */
-  .v-carousel:is([data-controls='inside'], [data-controls='outside']) .v-carousel-controls {
+  .v-carousel:is([data-controls='inside'], [data-controls='outside'])
+    > .v-carousel-stage
+    > .v-carousel-controls {
     position: absolute;
     inset: 0;
     align-items: center;
@@ -1471,7 +1612,7 @@ if (isDev) {
     pointer-events: none;
   }
 
-  .v-carousel[data-controls='inside'] .v-carousel-controls {
+  .v-carousel[data-controls='inside'] > .v-carousel-stage > .v-carousel-controls {
     inset: var(--vectis-space-2);
   }
 
@@ -1484,11 +1625,13 @@ if (isDev) {
    * insets are equal so the box is direction-symmetric, and `space-between` puts
    * `previous` at the inline START — the right-hand side in RTL, where it belongs.
    */
-  .v-carousel[data-controls='outside'] .v-carousel-controls {
+  .v-carousel[data-controls='outside'] > .v-carousel-stage > .v-carousel-controls {
     inset-inline: calc(-1 * var(--carousel-outset));
   }
 
-  .v-carousel[data-orientation='vertical'][data-controls='outside'] .v-carousel-controls {
+  .v-carousel[data-orientation='vertical'][data-controls='outside']
+    > .v-carousel-stage
+    > .v-carousel-controls {
     inset-inline: 0;
     inset-block: calc(-1 * var(--carousel-outset));
   }
@@ -1512,12 +1655,14 @@ if (isDev) {
    * and would strand exactly the users this protects.
    */
   @media (hover: hover) {
-    .v-carousel[data-controls-visibility='hover'] .v-carousel-controls {
+    .v-carousel[data-controls-visibility='hover'] > .v-carousel-stage > .v-carousel-controls {
       opacity: 0;
     }
 
-    .v-carousel[data-controls-visibility='hover']:hover .v-carousel-controls,
-    .v-carousel[data-controls-visibility='hover']:has(:focus-visible) .v-carousel-controls {
+    .v-carousel[data-controls-visibility='hover']:hover > .v-carousel-stage > .v-carousel-controls,
+    .v-carousel[data-controls-visibility='hover']:has(:focus-visible)
+      > .v-carousel-stage
+      > .v-carousel-controls {
       opacity: 1;
     }
   }
@@ -1533,7 +1678,7 @@ if (isDev) {
     justify-content: center;
   }
 
-  .v-carousel[data-orientation='vertical'] .v-carousel-indicators {
+  .v-carousel[data-orientation='vertical'] > .v-carousel-indicators {
     flex-direction: column;
   }
 
@@ -1543,7 +1688,7 @@ if (isDev) {
    * media to spend on six 8px marks. The legibility moves into the dots instead
    * (see below), where it costs their own footprint and nothing more.
    */
-  .v-carousel[data-indicators='inside'] .v-carousel-indicators {
+  .v-carousel[data-indicators='inside'] > .v-carousel-indicators {
     position: absolute;
     inset-block-end: var(--vectis-space-3);
     inset-inline: 0;
@@ -1551,7 +1696,7 @@ if (isDev) {
     inline-size: fit-content;
   }
 
-  .v-carousel[data-orientation='vertical'][data-indicators='inside'] .v-carousel-indicators {
+  .v-carousel[data-orientation='vertical'][data-indicators='inside'] > .v-carousel-indicators {
     inset-block: 0;
     inset-inline: auto var(--vectis-space-3);
     block-size: fit-content;
@@ -1603,7 +1748,10 @@ if (isDev) {
     background: var(--vectis-color-accent);
   }
 
-  .v-carousel[data-orientation='vertical'] .v-carousel-indicator[aria-current] .v-carousel-dot {
+  .v-carousel[data-orientation='vertical']
+    > .v-carousel-indicators
+    > .v-carousel-indicator[aria-current]
+    .v-carousel-dot {
     inline-size: var(--vectis-control-size-carousel-indicator);
     block-size: var(--vectis-control-size-carousel-indicator-active);
   }
@@ -1622,14 +1770,46 @@ if (isDev) {
    * Translucency is safe on a dot: it holds no text, so `color-contrast` never runs on it.
    * What the ring answers is WCAG 1.4.11, on any backdrop rather than on a judged one.
    */
-  .v-carousel[data-indicators='inside'] .v-carousel-dot {
+  .v-carousel[data-indicators='inside'] > .v-carousel-indicators .v-carousel-dot {
     background: color-mix(in oklab, var(--vectis-color-text-on-accent) 55%, transparent);
     box-shadow: 0 0 0 1px color-mix(in oklab, var(--vectis-color-surface-inverse) 45%, transparent);
   }
 
-  .v-carousel[data-indicators='inside'] .v-carousel-indicator:hover .v-carousel-dot,
-  .v-carousel[data-indicators='inside'] .v-carousel-indicator[aria-current] .v-carousel-dot {
+  .v-carousel[data-indicators='inside']
+    > .v-carousel-indicators
+    > .v-carousel-indicator:hover
+    .v-carousel-dot,
+  .v-carousel[data-indicators='inside']
+    > .v-carousel-indicators
+    > .v-carousel-indicator[aria-current]
+    .v-carousel-dot {
     background: var(--vectis-color-text-on-accent);
+  }
+
+  /*
+   * Forced colours flatten a background to `Canvas` and drop every shadow, and a dot is
+   * made of nothing else: left alone, every dot and the current page's pill vanish. Each
+   * dot draws its own edge and the current one the system selection colour. The class is
+   * repeated to (0,6,0) so these rules outrank the `inside` pair above whatever the state.
+   */
+  @media (forced-colors: active) {
+    .v-carousel-indicator
+      .v-carousel-dot.v-carousel-dot.v-carousel-dot.v-carousel-dot.v-carousel-dot {
+      forced-color-adjust: none;
+      background: Canvas;
+      box-shadow: inset 0 0 0 1px CanvasText;
+    }
+
+    .v-carousel-indicator:hover
+      .v-carousel-dot.v-carousel-dot.v-carousel-dot.v-carousel-dot.v-carousel-dot {
+      box-shadow: inset 0 0 0 1px Highlight;
+    }
+
+    .v-carousel-indicator[aria-current]
+      .v-carousel-dot.v-carousel-dot.v-carousel-dot.v-carousel-dot.v-carousel-dot {
+      background: Highlight;
+      box-shadow: none;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

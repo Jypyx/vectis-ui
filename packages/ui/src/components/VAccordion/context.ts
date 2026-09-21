@@ -19,4 +19,9 @@ export interface AccordionContext {
   collapseIcon: IconSource | undefined
 }
 
-export const accordionKey: InjectionKey<AccordionContext> = Symbol('v-accordion')
+/**
+ * `null` is what an item provides to its own content: an item placed straight inside
+ * another one must not join the outer group, since opening it would then close the section
+ * that holds it.
+ */
+export const accordionKey: InjectionKey<AccordionContext | null> = Symbol('v-accordion')

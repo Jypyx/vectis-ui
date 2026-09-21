@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, nextTick } from 'vue'
 import type { Ref } from 'vue'
 
 /**
@@ -6,9 +6,9 @@ import type { Ref } from 'vue'
  * VAccordionItem and VSideNavigationItem. Bind `openAttr` to `:open`, `onToggle` to `@toggle`
  * and `onSummaryClick` to the `<summary>`'s `@click`.
  *
- * The element is the source of truth and the `v-model:open` is fed BY it. Left unbound (the
- * model's `null`), the value handed to `:open` never changes, so Vue never patches the element
- * back and the native toggling stays sovereign.
+ * The element is the source of truth and the `v-model:open` is fed BY it. Left unbound, the
+ * model follows the element, so Vue never has anything to patch back and the native toggling
+ * stays sovereign.
  *
  * `defaultOpen` is read ONCE, here, and never again: it is an initial state, so a prop changed
  * later must not close a section the reader has opened. Read inside the computed instead, a
@@ -25,8 +25,19 @@ export function useDetailsOpen(
   // The toggle event does not bubble, which is convenient: listening on the element itself
   // cannot pick up a nested `<details>` opening inside it.
   function onToggle(event: Event) {
-    const value = (event.target as HTMLDetailsElement).open
-    if (open.value !== value) open.value = value
+    const element = event.target as HTMLDetailsElement
+    const value = element.open
+    if (open.value === value) return
+    open.value = value
+    /*
+     * TRAP — a CONTROLLED model may refuse the change (`:open="false"` and no handler, or one
+     * that says no). Nothing then moves in the props, so Vue has nothing to patch, and the
+     * element would stay open under a model that says closed. It is put back once the
+     * parent has answered.
+     */
+    void nextTick(() => {
+      if (open.value !== null && element.open !== open.value) element.open = open.value
+    })
   }
 
   // @a11y @core

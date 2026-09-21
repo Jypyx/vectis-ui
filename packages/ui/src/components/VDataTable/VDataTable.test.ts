@@ -277,8 +277,8 @@ describe('VDataTable', () => {
     )
     const { container, getByRole } = render(Harness)
 
-    // page 2 → Vectis / Éclair visible; one row checked → a rowKey identity
-    await fireEvent.click(getByRole('checkbox', { name: 'Select row 1' }))
+    // page 2 → Vectis / Éclair visible; row 3 of the table checked → a rowKey identity
+    await fireEvent.click(getByRole('checkbox', { name: 'Select row 3' }))
     expect(selected.value).toEqual(['Vectis'])
     expect(container.querySelector('tbody tr')?.hasAttribute('data-selected')).toBe(true)
 
@@ -469,5 +469,240 @@ describe('VDataTable', () => {
     const wrapper = container.querySelector('.v-data-table') as HTMLElement
     expect(wrapper.style.blockSize).toBe('')
     expect(container.querySelector('.v-data-table-scroller')?.hasAttribute('style')).toBe(false)
+  })
+
+  describe('logic', () => {
+    const DATE_COLUMNS = [{ key: 'd', label: 'Date', sortable: true }]
+
+    it('sorts Date values by time, not by their weekday', async () => {
+      const rows = [
+        { d: new Date(2026, 0, 5) },
+        { d: new Date(2026, 0, 3) },
+        { d: new Date(2026, 0, 1) },
+      ]
+      const { container } = render(VDataTable, {
+        props: { columns: DATE_COLUMNS, rows, sort: { key: 'd', direction: 'asc' as const } },
+      })
+      const days = [...container.querySelectorAll('tbody td')].map(
+        (td) => td.textContent?.match(/Jan 0(\d)/)?.[1],
+      )
+      expect(days).toEqual(['1', '3', '5'])
+    })
+
+    it('sorts numbers written as text by value, negatives and decimals included', () => {
+      const rows = [{ v: '1.5' }, { v: '-10' }, { v: 1.25 }, { v: '-5' }]
+      const { container } = render(VDataTable, {
+        props: {
+          columns: [{ key: 'v', label: 'V', sortable: true }],
+          rows,
+          sort: { key: 'v', direction: 'asc' as const },
+        },
+      })
+      expect(firstColumnCells(container)).toEqual(['-10', '-5', '1.25', '1.5'])
+    })
+
+    it('serverSide: a response changing the total emits no request', async () => {
+      const { emitted, rerender } = render(VDataTable, {
+        props: { columns: COLUMNS, rows: [], serverSide: true, page: 3, perPage: 10 },
+      })
+      await rerender({
+        columns: COLUMNS,
+        rows: ROWS,
+        serverSide: true,
+        page: 3,
+        perPage: 10,
+        total: 100,
+      })
+      await nextTick()
+      expect(emitted('update:params')).toBeUndefined()
+    })
+
+    it('serverSide: a search typed and erased within the debounce asks for nothing', async () => {
+      vi.useFakeTimers()
+      const { getByRole, emitted } = render(VDataTable, {
+        props: {
+          columns: COLUMNS,
+          rows: ROWS,
+          serverSide: true,
+          searchable: true,
+          page: 3,
+          perPage: 3,
+          total: 30,
+        },
+      })
+      const field = getByRole('searchbox')
+      await fireEvent.update(field, 'a')
+      await fireEvent.update(field, '')
+      vi.advanceTimersByTime(500)
+      await nextTick()
+      expect(emitted('update:params')).toBeUndefined()
+      expect(emitted('update:page')).toBeUndefined()
+    })
+
+    it('serverSide: an equal sort handed down again asks for nothing', async () => {
+      const { emitted, rerender } = render(VDataTable, {
+        props: {
+          columns: COLUMNS,
+          rows: ROWS,
+          serverSide: true,
+          sort: { key: 'name', direction: 'asc' as const },
+        },
+      })
+      await rerender({
+        columns: COLUMNS,
+        rows: ROWS,
+        serverSide: true,
+        sort: { key: 'name', direction: 'asc' as const },
+      })
+      await nextTick()
+      expect(emitted('update:params')).toBeUndefined()
+    })
+
+    it('warns when rowKey names no scalar field, or two rows share one', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      render(VDataTable, {
+        props: {
+          columns: COLUMNS,
+          rows: [{ name: 'A' }, { name: 'A' }, { count: 1 }],
+          rowKey: 'name',
+          selectable: true,
+        },
+      })
+      const text = warn.mock.calls.flat().join(' ')
+      expect(text).toMatch(/rowKey/)
+      expect(text).toMatch(/twice|duplicate/i)
+    })
+
+    it('the master box refuses an empty page and a loading table', async () => {
+      const { getByRole, emitted, rerender } = render(VDataTable, {
+        props: { columns: COLUMNS, rows: [], rowKey: 'name', selectable: true },
+      })
+      const master = getByRole('checkbox', { name: 'Select all' }) as HTMLInputElement
+      expect(master.disabled).toBe(true)
+      await rerender({
+        columns: COLUMNS,
+        rows: ROWS,
+        rowKey: 'name',
+        selectable: true,
+        loading: true,
+      })
+      expect(master.disabled).toBe(true)
+      expect(emitted('update:selected')).toBeUndefined()
+    })
+
+    it('an outside change of perPage goes back to page 1', async () => {
+      const page = ref(3)
+      const perPage = ref(1)
+      const Harness = harness(
+        () => ({ columns: COLUMNS, rows: ROWS_MANY, page, perPage }),
+        '<VDataTable :columns="columns" :rows="rows" v-model:page="page" v-model:per-page="perPage" />',
+      )
+      render(Harness)
+      perPage.value = 2
+      await nextTick()
+      await nextTick()
+      expect(page.value).toBe(1)
+    })
+
+    it('says nothing about the selection at zero, even with selectionText', () => {
+      const { container } = render(VDataTable, {
+        props: {
+          columns: COLUMNS,
+          rows: ROWS,
+          rowKey: 'name',
+          selectable: true,
+          selectionText: (n: number) => `${n} picked`,
+        },
+      })
+      expect(container.textContent).not.toContain('0 picked')
+    })
+
+    it('survives a null search model', () => {
+      expect(() =>
+        render(VDataTable, {
+          props: {
+            columns: COLUMNS,
+            rows: ROWS,
+            searchable: true,
+            search: null as unknown as string,
+          },
+        }),
+      ).not.toThrow()
+    })
+  })
+
+  describe('accessibility', () => {
+    it('is named by its title when it has no caption', () => {
+      const { container } = render(VDataTable, {
+        props: { columns: COLUMNS, rows: ROWS, title: 'Projects' },
+      })
+      const table = container.querySelector('table') as HTMLTableElement
+      const id = table.getAttribute('aria-labelledby')
+      expect(id).toBeTruthy()
+      expect(container.querySelector(`[id="${id}"]`)?.textContent?.trim()).toBe('Projects')
+    })
+
+    it('leaves the naming to a caption, or to the consumer', () => {
+      const withCaption = render(VDataTable, {
+        props: { columns: COLUMNS, rows: ROWS, title: 'Projects', caption: 'All projects' },
+      })
+      expect(withCaption.container.querySelector('table')?.hasAttribute('aria-labelledby')).toBe(
+        false,
+      )
+      const withLabel = render(VDataTable, {
+        props: { columns: COLUMNS, rows: ROWS, title: 'Projects' },
+        attrs: { 'aria-label': 'Mine' },
+      })
+      const table = withLabel.container.querySelector('table')
+      expect(table?.getAttribute('aria-label')).toBe('Mine')
+      expect(table?.hasAttribute('aria-labelledby')).toBe(false)
+    })
+
+    it('numbers the row checkboxes across the whole table, not per page', () => {
+      const selectRowLabel = vi.fn((_row: unknown, index: number) => `Row #${index}`)
+      const { getByRole } = render(VDataTable, {
+        props: {
+          columns: COLUMNS,
+          rows: ROWS_MANY,
+          rowKey: 'name',
+          selectable: true,
+          page: 2,
+          perPage: 2,
+        },
+      })
+      expect(getByRole('checkbox', { name: 'Select row 3' })).toBeTruthy()
+      const custom = render(VDataTable, {
+        props: {
+          columns: COLUMNS,
+          rows: ROWS_MANY,
+          rowKey: 'name',
+          selectable: true,
+          page: 2,
+          perPage: 2,
+          selectRowLabel,
+        },
+      })
+      expect(custom.getByRole('checkbox', { name: 'Row #2' })).toBeTruthy()
+    })
+
+    it('writes a sortable heading a second time, as text, for the stacked layout', () => {
+      const { container } = render(VDataTable, {
+        props: { columns: COLUMNS, rows: ROWS, responsive: 'stack' },
+      })
+      const copies = [...container.querySelectorAll('th .v-data-table-stack-label')]
+      expect(copies.map((el) => el.textContent?.trim())).toEqual(['Name', 'Total'])
+    })
+  })
+
+  it('exposes the <table> as el', async () => {
+    const table = ref<{ el: HTMLTableElement | null } | null>(null)
+    const { container } = render(
+      harness(
+        () => ({ columns: COLUMNS, rows: ROWS, table }),
+        '<VDataTable ref="table" :columns="columns" :rows="rows" />',
+      ),
+    )
+    await nextTick()
+    expect(table.value?.el).toBe(container.querySelector('table'))
   })
 })

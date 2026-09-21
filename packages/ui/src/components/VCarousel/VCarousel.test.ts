@@ -810,7 +810,7 @@ describe('VCarousel', () => {
     it('the live region stays silent while it rotates', () => {
       vi.useFakeTimers()
       const { container } = mount({ autoplay: 1000 })
-      expect(container.querySelector('[role="status"]')?.textContent).toBe('')
+      expect(container.querySelector('[role="status"]')?.getAttribute('aria-live')).toBe('off')
     })
   })
 
@@ -970,6 +970,153 @@ describe('VCarousel', () => {
       expect(container.querySelector('.v-carousel-control')?.getAttribute('aria-label')).toBe(
         'Diapositive précédente',
       )
+    })
+  })
+
+  describe('robustness', () => {
+    it('leaves the keys of the content of a slide alone', async () => {
+      const { container, model } = mount({
+        slides:
+          '<VCarouselItem><input value="abc" /></VCarouselItem><VCarouselItem>B</VCarouselItem>',
+      })
+      const input = container.querySelector('input') as HTMLInputElement
+      const right = new KeyboardEvent('keydown', {
+        key: 'ArrowRight',
+        bubbles: true,
+        cancelable: true,
+      })
+      input.dispatchEvent(right)
+      const end = new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true })
+      input.dispatchEvent(end)
+      await nextTick()
+      expect(right.defaultPrevented).toBe(false)
+      expect(end.defaultPrevented).toBe(false)
+      expect(model.value).toBe(0)
+    })
+
+    it('still takes the arrows on the viewport itself', async () => {
+      const { container, model } = mount()
+      const port = container.querySelector('.v-carousel-viewport') as HTMLElement
+      await fireEvent.keyDown(port, { key: 'ArrowRight' })
+      expect(model.value).toBe(1)
+    })
+
+    it('reads its own slides only, never those of a nested carousel', async () => {
+      const { container, model } = mount({
+        slides: `
+          <VCarouselItem><VCarousel label="Inner"><VCarouselItem>i0</VCarouselItem><VCarouselItem>i1</VCarouselItem></VCarousel></VCarouselItem>
+          <VCarouselItem>B</VCarouselItem>`,
+      })
+      const port = container.querySelector('.v-carousel-viewport') as HTMLElement
+      const scrollBy = vi.fn()
+      port.scrollBy = scrollBy
+      port.getBoundingClientRect = () => ({ left: 0, top: 0 }) as DOMRect
+      const inner = container.querySelectorAll(
+        '.v-carousel .v-carousel [data-carousel-index="1"]',
+      )[0] as HTMLElement
+      inner.getBoundingClientRect = () => ({ left: 50, top: 0 }) as DOMRect
+      const outer = port.querySelector(':scope > [data-carousel-index="1"]') as HTMLElement
+      outer.getBoundingClientRect = () => ({ left: 400, top: 0 }) as DOMRect
+
+      model.value = 1
+      await nextTick()
+      await nextTick()
+      expect(scrollBy).toHaveBeenCalledWith({ left: 400, top: 0 })
+    })
+
+    it('clamps a model the parent sets outside the pages', async () => {
+      const { model } = mount({ initial: 7 })
+      await nextTick()
+      expect(model.value).toBe(2)
+      model.value = -3
+      await nextTick()
+      await nextTick()
+      expect(model.value).toBe(0)
+    })
+
+    it('hands the focus on when a control disables itself under it', async () => {
+      const { container } = mount({ initial: 1 })
+      const [previous, next] = [
+        ...container.querySelectorAll<HTMLButtonElement>('.v-carousel-control'),
+      ]
+      next?.focus()
+      await fireEvent.click(next as HTMLElement)
+      await nextTick()
+      expect(next?.disabled).toBe(true)
+      expect(document.activeElement).toBe(previous)
+
+      await fireEvent.click(previous as HTMLElement)
+      await fireEvent.click(previous as HTMLElement)
+      await nextTick()
+      expect(previous?.disabled).toBe(true)
+      expect(document.activeElement).toBe(next)
+    })
+
+    it('arms no autoplay timer on the server', async () => {
+      const { createSSRApp } = await import('vue')
+      const { renderToString } = await import('vue/server-renderer')
+      const timeout = vi.spyOn(globalThis, 'setTimeout')
+      const app = createSSRApp({
+        components: { VCarousel, VCarouselItem },
+        template:
+          '<VCarousel :autoplay="3000"><VCarouselItem>A</VCarouselItem><VCarouselItem>B</VCarouselItem></VCarousel>',
+      })
+      await renderToString(app)
+      expect(timeout.mock.calls.filter(([, delay]) => delay === 3000)).toHaveLength(0)
+      timeout.mockRestore()
+    })
+
+    it('reads its slot inside the render only (no Vue warning)', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      render(
+        defineComponent(
+          () => () =>
+            h(VCarousel, { label: 'G' }, { default: () => [h(VCarouselItem, () => 'A')] }),
+        ),
+      )
+      expect(warn.mock.calls.flat().join(' ')).not.toMatch(/outside of the render function/)
+      warn.mockRestore()
+    })
+
+    it('keeps the live text still on hover and silences it while rotating', async () => {
+      vi.useFakeTimers()
+      const { container } = mount({ autoplay: 1000 })
+      const status = container.querySelector('[role="status"]') as HTMLElement
+      await nextTick()
+      expect(status.getAttribute('aria-live')).toBe('off')
+      const before = status.textContent
+      await fireEvent.pointerEnter(container.querySelector('.v-carousel') as HTMLElement)
+      expect(status.textContent).toBe(before)
+      expect(status.getAttribute('aria-live')).toBe('polite')
+    })
+
+    it('gives each dev warning once, however often the props move', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const { autoplay } = mount({ attrs: 'loop', autoplay: 5000 })
+      autoplay.value = 0
+      await nextTick()
+      autoplay.value = 5000
+      await nextTick()
+      expect(warn.mock.calls.filter(([m]) => String(m).includes('WCAG 2.2.2'))).toHaveLength(1)
+      warn.mockRestore()
+    })
+
+    it('drops the jump one-shot once it has played', async () => {
+      const { container } = mount()
+      const root = container.querySelector('.v-carousel') as HTMLElement
+      layout(container, { step: 300, offset: 0, clientWidth: 300, scrollWidth: 900 }).scrollBy =
+        vi.fn()
+      await fireEvent.click(indicatorsOf(container)[2] as HTMLElement)
+      await nextTick()
+      expect(root.dataset.jump).toBeDefined()
+      const effect = container.querySelector('.v-carousel-effect') as HTMLElement
+      const ended = new Event('animationend', { bubbles: true }) as Event & {
+        animationName: string
+      }
+      Object.defineProperty(ended, 'animationName', { value: 'v-carousel-jump-a' })
+      effect.dispatchEvent(ended)
+      await nextTick()
+      expect(root.dataset.jump).toBeUndefined()
     })
   })
 })

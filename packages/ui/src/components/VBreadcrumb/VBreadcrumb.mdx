@@ -21,8 +21,8 @@ one being hidden in CSS (`:first-child`).
 ## Separator
 
 `separatorIcon` (default `chevron_right`) accepts an icon name **or** an explicit render
-(`{ src: '/chevron.svg' }`): a string is always a name, never a guessed URL. RTL note: a
-directional icon does not flip automatically.
+(`{ src: '/chevron.svg' }`): a string is always a name, never a guessed URL. In a right-to-left
+page the separator is mirrored, so give one that points forward in left-to-right reading.
 
 <Canvas of={VBreadcrumbStories.IconSeparator} />
 
@@ -30,8 +30,8 @@ directional icon does not flip automatically.
 
 ## Item icons
 
-`icon` on an item places an icon before its label — the same name/URL contract as the
-separator. The icons follow the size and the colour of the text through the `--vectis-icon-size`
+`icon` on an item places an icon before its label, with the same contract as the separator: a
+name, or an explicit render. The icons follow the size and the colour of the text through the `--vectis-icon-size`
 context.
 
 <Canvas of={VBreadcrumbStories.WithIcons} />
@@ -47,7 +47,7 @@ to the trigger.
 
 ## Edge cases
 
-Long labels are truncated with an ellipsis, and the list wraps when needed:
+Long labels wrap rather than being cut, and the list wraps onto a second line when needed:
 
 <Canvas of={VBreadcrumbStories.LongLabels} />
 

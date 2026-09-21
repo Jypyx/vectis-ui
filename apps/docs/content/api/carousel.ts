@@ -31,9 +31,9 @@ export default {
       ],
       slots: [
         { name: 'default', type: '{}' },
-        { name: 'controls', type: '{ previous: () => void; next: () => void; atStart: boolean; atEnd: boolean; index: number; count: number; pageCount: number; orientation: CarouselOrientation; }' },
-        { name: 'indicators', type: '{ index: number; count: number; pageCount: number; goTo: (index: number) => void; orientation: CarouselOrientation; }' },
-        { name: 'indicator', type: '{ index: number; active: boolean; }' },
+        { name: 'controls', type: 'CarouselControlsSlotProps' },
+        { name: 'indicators', type: 'CarouselIndicatorsSlotProps' },
+        { name: 'indicator', type: 'CarouselIndicatorSlotProps' },
       ],
     },
     {
@@ -52,6 +52,36 @@ export default {
       definition: `export interface BuiltinIcon {
   name: string
   paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'CarouselControlsSlotProps',
+      definition: `export interface CarouselControlsSlotProps {
+  previous: () => void
+  next: () => void
+  atStart: boolean
+  atEnd: boolean
+  index: number
+  count: number
+  pageCount: number
+  orientation: CarouselOrientation
+}`,
+    },
+    {
+      name: 'CarouselIndicatorSlotProps',
+      definition: `export interface CarouselIndicatorSlotProps {
+  index: number
+  active: boolean
+}`,
+    },
+    {
+      name: 'CarouselIndicatorsSlotProps',
+      definition: `export interface CarouselIndicatorsSlotProps {
+  index: number
+  count: number
+  pageCount: number
+  goTo: (index: number) => void
+  orientation: CarouselOrientation
 }`,
     },
     {

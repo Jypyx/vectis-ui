@@ -770,12 +770,16 @@ export const Jump: Story = {
       `v-carousel-fade, v-carousel-jump-${phase}`,
     )
 
-    // A step keeps its travel, so it arms no one-shot and leaves the phase where it was.
+    // A step keeps its travel, so it arms no one-shot: the phase never flips. (The one
+    // that played is taken off when it ends, so the attribute may be gone by now.)
     await userEvent.click(canvas.getByRole('button', { name: '5 of 6' }))
     await waitFor(async () => {
       await expect(Math.abs(port.scrollLeft - 4 * step)).toBeLessThan(2)
     })
-    await expect(root).toHaveAttribute('data-jump', phase as string)
+    await expect(root.getAttribute('data-jump')).not.toBe(phase === 'a' ? 'b' : 'a')
+    await waitFor(async () => {
+      await expect(root).not.toHaveAttribute('data-jump')
+    })
   },
 }
 
@@ -987,5 +991,76 @@ export const EdgeCases: Story = {
     const canvas = within(canvasElement)
     await expect(canvas.getByRole('button', { name: 'Previous slide' })).toBeDisabled()
     await expect(canvas.getByRole('button', { name: 'Next slide' })).toBeDisabled()
+  },
+}
+
+/**
+ * A carousel inside another's slide. Each one reads its OWN slides (the viewport's
+ * children, never its descendants) and each root re-sets the effect and jump names, so the
+ * inner one neither measures as part of the outer track nor plays the outer's effect.
+ *
+ * It also drives the outer controls from the keyboard to the end: the `next` button
+ * disables itself under the focus, which is handed to `previous` rather than dropped.
+ */
+export const Nested: Story = {
+  render: () => ({
+    components: { VCarousel, VCarouselItem },
+    setup: () => ({ slideStyle: SLIDE_STYLE, t }),
+    template: `
+      <VCarousel effect="fade" label="Outer">
+        <VCarouselItem>
+          <VCarousel label="Inner">
+            <VCarouselItem v-for="hue in [160, 200]" :key="hue">
+              <div :style="slideStyle + 'background: oklch(0.45 0.15 ' + hue + ');'">{{ t.slide }}</div>
+            </VCarouselItem>
+          </VCarousel>
+        </VCarouselItem>
+        <VCarouselItem v-for="hue in [280, 340]" :key="hue">
+          <div :style="slideStyle + 'background: oklch(0.45 0.15 ' + hue + ');'">{{ t.slide }}</div>
+        </VCarouselItem>
+      </VCarousel>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const outer = canvasElement.querySelector('.v-carousel') as HTMLElement
+    const inner = outer.querySelector('.v-carousel') as HTMLElement
+    const port = outer.querySelector(
+      ':scope > .v-carousel-stage > .v-carousel-viewport',
+    ) as HTMLElement
+    const controls = within(
+      outer.querySelector(':scope > .v-carousel-stage > .v-carousel-controls') as HTMLElement,
+    )
+    const bar = within(outer.querySelector(':scope > .v-carousel-indicators') as HTMLElement)
+
+    // The inner carousel does not inherit the outer `fade`.
+    const innerEffect = inner.querySelector('.v-carousel-effect') as HTMLElement
+    await expect(getComputedStyle(innerEffect).animationName.split(',')[0]?.trim()).toBe('none')
+
+    const next = controls.getByRole('button', { name: 'Next slide' })
+    next.focus()
+    await userEvent.keyboard('{Enter}')
+    await waitFor(
+      async () => {
+        await expect(bar.getByRole('button', { name: '2 of 3' })).toHaveAttribute(
+          'aria-current',
+          'true',
+        )
+        // The OUTER slide 2 leads the port, not the inner slide 2.
+        const slide = port.querySelector(':scope > [data-carousel-index="1"]') as HTMLElement
+        await expect(
+          Math.abs(slide.getBoundingClientRect().left - port.getBoundingClientRect().left),
+        ).toBeLessThan(2)
+      },
+      { timeout: 3000 },
+    )
+
+    await userEvent.keyboard('{Enter}')
+    await waitFor(
+      async () => {
+        await expect(next).toBeDisabled()
+        await expect(controls.getByRole('button', { name: 'Previous slide' })).toHaveFocus()
+      },
+      { timeout: 3000 },
+    )
   },
 }

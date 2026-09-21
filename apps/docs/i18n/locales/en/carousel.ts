@@ -73,7 +73,7 @@ export default {
         label:
           'What screen readers announce for the carousel as a whole. Give a distinct one to every carousel on a page: this is a landmark, and two landmarks bearing the same name cannot be told apart by someone navigating between them.',
         vModel:
-          'Which slide is current: the first one fully visible when several fit at once, which is also the position the carousel has come to rest on.',
+          'Which slide is current: the first one fully visible when several fit at once, which is also the position the carousel has come to rest on. A value outside the positions the carousel can rest on is brought back into range.',
       },
       slots: {
         default:

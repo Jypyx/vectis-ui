@@ -73,7 +73,7 @@ export default {
         label:
           "Ce que les lecteurs d'écran annoncent pour le carrousel dans son ensemble. Donnez-en un DISTINCT à chaque carrousel d'une page : c'est un point de repère, et deux points de repère portant le même nom sont indiscernables pour qui navigue entre eux.",
         vModel:
-          "Quelle diapositive est courante : la première entièrement visible quand plusieurs tiennent à la fois, ce qui est aussi la position où le carrousel s'est arrêté.",
+          "Quelle diapositive est courante : la première entièrement visible quand plusieurs tiennent à la fois, ce qui est aussi la position où le carrousel s'est arrêté. Une valeur hors des positions où le carrousel peut s'arrêter y est ramenée.",
       },
       slots: {
         default:

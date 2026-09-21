@@ -24,8 +24,9 @@ export default {
         label:
           "Le nom que les lecteurs d'écran annoncent pour cette navigation. Il retombe sur le dictionnaire du design system, dans la langue courante.",
         currentPath:
-          "L'adresse de la page affichée. Le segment dont le <code>href</code> lui correspond est le segment courant ; une barre oblique finale d'un côté ou de l'autre ne change rien.",
-        separatorIcon: "L'icône dessinée entre deux segments.",
+          "L'adresse de la page affichée. Le segment dont le <code>href</code> lui correspond est le segment courant, même replié dans le menu. Une barre oblique finale, une requête ou une ancre d'un côté ou de l'autre ne changent rien : le chemin complet d'un routeur peut être passé tel quel.",
+        separatorIcon:
+          "L'icône dessinée entre deux segments. Elle est retournée dans une page de droite à gauche.",
         maxItems:
           "La longueur au-delà de laquelle le fil se replie : il ne reste que le premier segment, un bouton de points de suspension et les deux derniers, le bouton ouvrant un menu qui liste les seuls segments masqués. En dessous de 3 il n'y aurait plus rien à replier : 3 est donc le minimum effectif.",
         ellipsisLabel:

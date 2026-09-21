@@ -16,7 +16,7 @@
  * code, and the root is a flex column in which only the scroller stretches.
  */
 
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, useSlots, watch, watchEffect } from 'vue'
 import type { StyleValue } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
@@ -47,6 +47,9 @@ import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useTimer } from '../../composables/useTimer'
 import { useLocale, useMessages } from '../../i18n/state'
 
+/** How a column's content is aligned. */
+export type DataTableColumnAlign = 'start' | 'center' | 'end'
+
 /** One column of the table. */
 export interface DataTableColumn {
   /** Which field of a row it shows, and the name its slots are addressed by. */
@@ -55,8 +58,8 @@ export interface DataTableColumn {
   label: string
   /** Lets the reader sort by this column. */
   sortable?: boolean
-  /** How its content is aligned — numbers usually belong at the end. */
-  align?: 'start' | 'center' | 'end'
+  /** How its content is aligned. Numbers usually belong at the end. */
+  align?: DataTableColumnAlign
 }
 
 /** Which way a column is sorted: A to Z, or Z to A. */
@@ -64,7 +67,9 @@ export type DataTableSortDirection = 'asc' | 'desc'
 
 /** Which column the table is sorted by, and in which direction. */
 export interface DataTableSort {
+  /** The `key` of the column the rows are ordered by. */
   key: string
+  /** Which way they are ordered. */
   direction: DataTableSortDirection
 }
 
@@ -77,11 +82,48 @@ export type DataTableRowId = string | number
  * the same keys once serialized into a request.
  */
 export interface DataTableParams {
+  /** The page asked for, from 1. */
   page: number
+  /** How many rows a page holds, `null` when the table is not paginated. */
   perPage: number | null
+  /** The `key` of the sorted column, `null` when the rows are not sorted. */
   sortKey: string | null
+  /** Which way they are sorted, `null` when they are not. */
   sortDirection: DataTableSortDirection | null
+  /** The committed search, empty when nothing is searched for. */
   search: string
+}
+
+/** What the `cell-<key>` slots receive. */
+export interface DataTableCellSlotProps<Row extends Record<string, unknown>> {
+  /** The row the cell belongs to. */
+  row: Row
+  /** The value of the column's field in that row. */
+  value: unknown
+  /** The column the cell belongs to. */
+  column: DataTableColumn
+}
+
+/** What the `head-<key>` slots receive. */
+export interface DataTableHeadSlotProps {
+  /** The column the heading belongs to. */
+  column: DataTableColumn
+}
+
+/** What the `#empty` slot receives. */
+export interface DataTableEmptySlotProps {
+  /** The search that produced the empty result, empty when nothing was searched for. */
+  search: string
+}
+
+/** The rows on show, as `rangeText` receives them, counted from 1. */
+export interface DataTableRange {
+  /** The position of the first row on show. */
+  start: number
+  /** The position of the last row on show. */
+  end: number
+  /** How many rows there are in all. */
+  total: number
 }
 
 /** How much decoration the table carries. */
@@ -135,9 +177,10 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   /**
    * A title above the table, on the left of its toolbar.
    *
+   * With no `caption` it also names the table for screen readers.
+   *
    * Note that this prop shadows the HTML attribute of the same name on the component
-   * itself, an accepted trade-off — a tooltip over a whole table would be of little
-   * use.
+   * itself, an accepted trade-off: a tooltip over a whole table would be of little use.
    */
   title?: string
   /** Adds a search field to the toolbar. */
@@ -188,10 +231,10 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
    * range be right when the table only ever holds one page.
    */
   total?: number
-  /** Shows which rows are being looked at — "1–10 of 42" — in the footer. */
+  /** Shows which rows are being looked at ("1–10 of 42") in the footer. */
   showRange?: boolean
   /** Rephrases that range. It falls back to the design system dictionary. */
-  rangeText?: (range: { start: number; end: number; total: number }) => string
+  rangeText?: (range: DataTableRange) => string
   /** Adds a checkbox to every row, and one in the heading to take the whole page. */
   selectable?: boolean
   /**
@@ -207,7 +250,8 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   /**
    * What a row's checkbox is announced as. "Select row" tells a screen reader user
    * nothing about WHICH row, so this is worth supplying with something from the row
-   * itself. It falls back to the design system dictionary.
+   * itself. `index` is the row's position in the whole table, from 0, not in the page.
+   * It falls back to the design system dictionary, which numbers the rows from 1.
    */
   selectRowLabel?: (row: Row, index: number) => string
   /**
@@ -286,9 +330,10 @@ const perPage = defineModel<number | undefined>('perPage', { default: undefined 
  * reports both as `null`, being a request body rather than a model.
  */
 /**
- * The selected rows, as the identities `rowKey` gives them — never the row objects
+ * The selected rows, as the identities `rowKey` gives them, never the row objects
  * themselves. Nothing is selected to begin with, and a selection SURVIVES a change of page:
  * the header checkbox covers the visible page alone, which is why it can be indeterminate.
+ * The footer counts this list as it stands, identities of rows no longer shown included.
  */
 const selected = defineModel<DataTableRowId[]>('selected', { default: () => [] })
 /**
@@ -301,7 +346,8 @@ const search = defineModel<string>('search', { default: '' })
 const emit = defineEmits<{
   /**
    * What the table is now being asked for, when a server is answering: the page, the
-   * page size, the sort or the search has changed — the last one after its delay.
+   * page size, the sort or the search has changed, the last one after its delay. An equal
+   * value handed down again asks for nothing.
    *
    * Nothing is emitted when the component appears: fetching the first page is the
    * consumer's own business, and emitting would make every table fetch twice.
@@ -311,13 +357,9 @@ const emit = defineEmits<{
 
 defineSlots<{
   /** What a cell of a given column shows: a slot named after that column's key. */
-  [name: `cell-${string}`]: (scope: {
-    row: Row
-    value: unknown
-    column: DataTableColumn
-  }) => unknown
+  [name: `cell-${string}`]: (scope: DataTableCellSlotProps<Row>) => unknown
   /** What a column's heading shows: a slot named after that column's key. */
-  [name: `head-${string}`]: (scope: { column: DataTableColumn }) => unknown
+  [name: `head-${string}`]: (scope: DataTableHeadSlotProps) => unknown
   /** The left side of the toolbar, replacing the `title` prop. */
   title?(): unknown
   /** What the table shows while its rows are loading, replacing the spinner and its text. */
@@ -326,14 +368,39 @@ defineSlots<{
    * What the table shows when there is no row to show, replacing `emptyText`. It receives the
    * search that produced the empty result, empty when nothing was searched for.
    */
-  empty?(scope: { search: string }): unknown
+  empty?(scope: DataTableEmptySlotProps): unknown
 }>()
 
 // `class` and `style` stay on the wrapper, where a consumer expects to place the
 // component; everything else — an id, the aria-* — goes to the `<table>` itself, the only
 // element they validly describe.
 defineOptions({ inheritAttrs: false })
-const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
+const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
+const slots = useSlots()
+
+// A template ref on the component reaches the wrapper, a layout box; the `<table>` is where
+// the consumer's attributes land and what they describe.
+const tableEl = ref<HTMLTableElement | null>(null)
+defineExpose({
+  /** The `<table>` element, where the consumer's attributes land. */
+  el: tableEl,
+})
+
+// @a11y
+/*
+ * The title names the table when nothing else does. A caption already does, and so does a
+ * consumer's own `aria-label` or `aria-labelledby`, which a reference to the title would
+ * override. Bound BEFORE the forwarded attributes, like every state the component owns.
+ */
+const titleId = useId()
+const tableLabelledBy = computed(() =>
+  props.caption ||
+  !(props.title || slots.title) ||
+  attrs['aria-label'] !== undefined ||
+  attrs['aria-labelledby'] !== undefined
+    ? undefined
+    : titleId,
+)
 
 // @devwarn
 if (isDev) {
@@ -341,6 +408,35 @@ if (isDev) {
     console.warn(
       '[VDataTable] `selectable` without `rowKey` — index-based identities are corrupted by sorting, filtering and pagination.',
     )
+  /*
+   * A key that is missing, or not a string or a number, turns into the same text on every
+   * row ("undefined"), and two rows sharing a key share an identity: ticking one ticks them
+   * all, and the rows' own `:key`s collide. Once per instance and per kind.
+   */
+  const warned = new Set<string>()
+  watchEffect(() => {
+    const key = props.rowKey
+    if (!key) return
+    const seen = new Set<unknown>()
+    for (const row of props.rows) {
+      const value = row[key]
+      if (typeof value !== 'string' && typeof value !== 'number') {
+        if (!warned.has('type')) {
+          warned.add('type')
+          console.warn(
+            `[VDataTable] \`rowKey\` "${key}" is missing or is not a string or a number on some rows: those rows share one identity.`,
+          )
+        }
+      } else if (seen.has(value)) {
+        if (!warned.has('duplicate')) {
+          warned.add('duplicate')
+          console.warn(
+            `[VDataTable] \`rowKey\` "${key}" holds the value "${value}" twice: rows are told apart by it, so it must be unique.`,
+          )
+        }
+      } else seen.add(value)
+    }
+  })
 }
 
 /*
@@ -371,7 +467,7 @@ const normalizedCell = (row: Row, key: string) => normalizedOf(row, String(row[k
 
 const filteredRows = computed(() => {
   if (props.serverSide || !props.searchable) return props.rows
-  const needle = normalizeText(search.value.trim())
+  const needle = normalizeText((search.value ?? '').trim())
   if (!needle) return props.rows
   return props.rows.filter((row) =>
     props.columns.some((column) => normalizedCell(row, column.key).includes(needle)),
@@ -392,14 +488,27 @@ const filteredRows = computed(() => {
  */
 const collator = computed(() => new Intl.Collator(vectisLocale.value, { numeric: true }))
 
+/*
+ * What a cell is compared by. A `Date` by its instant: as text it collates on `toString()`,
+ * which opens with the WEEKDAY, so Monday the 5th sorted before Saturday the 3rd. A number
+ * written as text by its value: the collator's `numeric` option reads digit runs and
+ * nothing else, so it put "-5" before "-10" and "1.5" before "1.25".
+ */
+const NUMERIC_TEXT = /^\s*[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?\s*$/i
+function sortKey(value: unknown): unknown {
+  if (value instanceof Date) return value.getTime()
+  if (typeof value === 'string' && NUMERIC_TEXT.test(value)) return Number(value)
+  return value
+}
+
 const sortedRows = computed(() => {
   const current = sort.value
   if (!current || props.serverSide) return filteredRows.value
   const factor = current.direction === 'asc' ? 1 : -1
   const compare = collator.value.compare
   return [...filteredRows.value].sort((a, b) => {
-    const av = a[current.key]
-    const bv = b[current.key]
+    const av = sortKey(a[current.key])
+    const bv = sortKey(b[current.key])
     if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * factor
     return compare(String(av ?? ''), String(bv ?? '')) * factor
   })
@@ -433,8 +542,8 @@ function toggleSort(key: string) {
   else sort.value = null
 }
 
-// @a11y — only the column actually sorted carries the attribute. Setting it on every
-// heading would have a screen reader announce "not sorted" on each one in turn, drowning
+// @a11y
+// Only the column actually sorted carries the attribute. Setting it on every heading would have a screen reader announce "not sorted" on each one in turn, drowning
 // the single piece of information that matters: which column the order comes from.
 function ariaSort(column: DataTableColumn): 'ascending' | 'descending' | undefined {
   if (sort.value?.key !== column.key) return undefined
@@ -469,6 +578,9 @@ const committedSearch = ref(search.value)
 const searchTimer = useTimer()
 
 function commitSearch() {
+  // A term typed and erased inside the debounce is no new search: going back to page 1
+  // and asking the server again would be a request for what is already on screen.
+  if (search.value === committedSearch.value) return
   committedSearch.value = search.value
   page.value = 1
 }
@@ -485,8 +597,14 @@ watch(search, () => {
 const emptySearch = computed(() => (props.serverSide ? committedSearch.value : search.value))
 
 // What the table is asking for, as one value.
+/*
+ * TRAP — `page` is the MODEL, never the clamped `currentPage`. The clamp reads `total`,
+ * which is the server's own answer: read here, a response that changed the total would move
+ * the parameters and ask for the page again, and a consumer clearing `total` while it loads
+ * would send the reader back to page 1.
+ */
 const params = computed<DataTableParams>(() => ({
-  page: currentPage.value,
+  page: page.value,
   perPage: perPage.value ?? null,
   sortKey: sort.value?.key ?? null,
   sortDirection: sort.value?.direction ?? null,
@@ -496,8 +614,11 @@ const params = computed<DataTableParams>(() => ({
 // Committing a search and going back to the first page happen one after the other, but
 // both land in the same flush, so this runs ONCE on the final values — never two requests
 // for what the reader experienced as a single action.
-watch(params, (value) => {
-  if (props.serverSide) emit('update:params', value)
+// Compared by value: a parent handing down an equal `sort` object is no new request.
+watch(params, (value, previous) => {
+  if (!props.serverSide) return
+  if (JSON.stringify(value) === JSON.stringify(previous)) return
+  emit('update:params', value)
 })
 
 // The selection. The heading checkbox covers the rows currently VISIBLE and not the whole
@@ -524,7 +645,13 @@ function toggleRow(id: DataTableRowId) {
 
 // It only ever touches the rows on screen, so what was selected on the other pages
 // survives moving between them.
+// Refused with no row on screen, or while the rows on screen are the PREVIOUS ones behind
+// the loading state: ticked there, it stayed ticked with nothing selected, or selected rows
+// the reader could not see.
+const masterDisabled = computed(() => visibleIds.value.length === 0 || props.loading)
+
 function toggleMaster() {
+  if (masterDisabled.value) return
   const ids = visibleIds.value
   if (allVisibleSelected.value) {
     const visible = new Set(ids)
@@ -535,19 +662,25 @@ function toggleMaster() {
   }
 }
 
-// @a11y — without this every checkbox in the column would be announced identically, and
-// a screen reader user would have no way of knowing which row they were about to select.
+// @a11y
+// Without this every checkbox in the column would be announced identically, and a screen
+// reader user would have no way of knowing which row they were about to select.
 function rowSelectLabel(row: Row, index: number): string {
-  // The dictionary is given the position as a HUMAN would count it, from one, while the
-  // prop keeps the position as code counts it — changing that would break every consumer
-  // already using it.
-  return props.selectRowLabel?.(row, index) ?? m.value.dataTable.selectRow(index + 1)
+  // The position in the WHOLE table, or every page would have its own "Select row 1". The
+  // dictionary counts from one as a human does, the prop from zero as code does.
+  const position = (paginated.value ? (currentPage.value - 1) * (perPage.value ?? 0) : 0) + index
+  return props.selectRowLabel?.(row, position) ?? m.value.dataTable.selectRow(position + 1)
 }
 
 function setPerPage(option: number) {
   perPage.value = option
-  page.value = 1
 }
+
+// Whoever changes it, the menu or the parent: the page the reader was on no longer starts
+// on the same row, so it goes back to the first one.
+watch(perPage, () => {
+  page.value = 1
+})
 
 const colCount = computed(() => props.columns.length + (props.selectable ? 1 : 0))
 
@@ -562,8 +695,8 @@ const colCount = computed(() => props.columns.length + (props.selectable ? 1 : 0
  */
 const selectionSummary = computed(() => {
   const count = selected.value.length
-  if (props.selectionText) return props.selectionText(count)
   if (count === 0) return ''
+  if (props.selectionText) return props.selectionText(count)
   return m.value.dataTable.selection(count)
 })
 
@@ -600,7 +733,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     :data-selectable="selectable ? '' : undefined"
   >
     <div v-if="title || $slots.title || searchable" class="v-data-table-toolbar">
-      <VTypography as="div" variant="heading-4" class="v-data-table-title">
+      <VTypography :id="titleId" as="div" variant="heading-4" class="v-data-table-title">
         <slot name="title">{{ title }}</slot>
       </VTypography>
       <VInput
@@ -620,7 +753,12 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     <!-- Only the table itself scrolls; the toolbar above and the footer below stay
          where they are. -->
     <div class="v-data-table-scroller">
-      <table class="v-data-table-table" v-bind="forwardedAttrs">
+      <table
+        ref="tableEl"
+        class="v-data-table-table"
+        :aria-labelledby="tableLabelledBy"
+        v-bind="forwardedAttrs"
+      >
         <caption v-if="caption" class="v-data-table-caption">
           {{
             caption
@@ -632,9 +770,13 @@ const heightStyle = computed<StyleValue | undefined>(() =>
               <VCheckbox
                 :model-value="allVisibleSelected"
                 :indeterminate="masterIndeterminate"
+                :disabled="masterDisabled"
                 :aria-label="resolvedSelectAllLabel"
                 @update:model-value="toggleMaster"
               />
+              <!-- Its hidden box would leave the heading EMPTY in the stacked layout (axe
+                   empty-table-header), so it keeps its name as text there. -->
+              <span class="v-data-table-stack-label">{{ resolvedSelectAllLabel }}</span>
             </th>
             <th
               v-for="column in columns"
@@ -656,6 +798,11 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                      the heading itself. -->
                 <VIcon class="v-data-table-sort-icon" v-bind="iconProps(sortIconFor(column))" />
               </button>
+              <!-- The heading as plain text, shown to screen readers in the STACKED layout
+                   only, where the button above is hidden: see the stack rules. -->
+              <span v-if="column.sortable" class="v-data-table-stack-label">{{
+                column.label
+              }}</span>
               <template v-else>
                 <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>
               </template>
@@ -942,6 +1089,10 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   /* The checkbox column is reduced to the width of its content. A table lays its columns
      out automatically, so asking for no width at all is what makes it take the least
      possible. */
+  .v-data-table-stack-label {
+    display: none;
+  }
+
   .v-data-table-table .v-data-table-select {
     inline-size: 0;
   }
@@ -954,6 +1105,16 @@ const heightStyle = computed<StyleValue | undefined>(() =>
      that makes a selected row keep its tint on both odd and even rows. */
   .v-data-table[data-selectable] tbody tr[data-selected] {
     background-color: var(--vectis-color-accent-surface);
+  }
+
+  /* Forced colours flatten both tints to `Canvas`: the stripes are only a reading aid, but
+     a selected row would be told apart by its checkbox alone. It draws an inward outline in
+     the system selection colour, which the mode keeps. */
+  @media (forced-colors: active) {
+    .v-data-table[data-selectable] tbody tr[data-selected] {
+      outline: var(--vectis-focus-ring-width) solid Highlight;
+      outline-offset: calc(-1 * var(--vectis-focus-ring-width));
+    }
   }
 
   /* TRAP — a frozen heading relies on the opaque background every `th` already carries: the
@@ -1076,6 +1237,20 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       margin: -1px;
       overflow: hidden;
       clip-path: inset(50%);
+    }
+
+    /*
+     * The heading row is out of sight, so its CONTROLS leave the tab order with it: a sort
+     * button or a "select all" box the keyboard lands on and nobody can see. `visibility`
+     * is what takes a control out of the tab order in CSS, and it takes it out of the
+     * accessibility tree too, so a sortable heading hands its name to a plain text copy.
+     */
+    .v-data-table[data-responsive='stack'] .v-data-table-head :is(.v-data-table-sort, .v-checkbox) {
+      visibility: hidden;
+    }
+
+    .v-data-table[data-responsive='stack'] .v-data-table-stack-label {
+      display: inline;
     }
 
     .v-data-table[data-responsive='stack'] tbody tr {

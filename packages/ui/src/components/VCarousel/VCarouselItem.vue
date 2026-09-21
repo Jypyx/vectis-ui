@@ -32,7 +32,7 @@ interface CarouselItemProps {
 const props = withDefaults(defineProps<CarouselItemProps>(), { index: 0 })
 
 defineSlots<{
-  /** The slide's content — an image, a card, free text. */
+  /** The slide's content: an image, a card, free text. */
   default(): unknown
 }>()
 

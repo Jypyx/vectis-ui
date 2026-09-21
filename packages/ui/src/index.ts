@@ -170,6 +170,11 @@ export type { HotkeysPlatform } from './components/VHotkeys/platform'
 export { default as VDataTable } from './components/VDataTable/VDataTable.vue'
 export type {
   DataTableColumn,
+  DataTableColumnAlign,
+  DataTableCellSlotProps,
+  DataTableHeadSlotProps,
+  DataTableEmptySlotProps,
+  DataTableRange,
   DataTableSort,
   DataTableSortDirection,
   DataTableRowId,
@@ -263,7 +268,10 @@ export type { FilePickerKind } from './components/VFilePicker/fileKind'
 export { default as VCarousel } from './components/VCarousel/VCarousel.vue'
 export type {
   CarouselControls,
+  CarouselControlsSlotProps,
   CarouselControlsVisibility,
+  CarouselIndicatorSlotProps,
+  CarouselIndicatorsSlotProps,
   CarouselEffect,
   CarouselIndicators,
   CarouselOrientation,

@@ -1,6 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
-import { defineComponent, nextTick, ref } from 'vue'
+import { defineComponent, h, nextTick, ref } from 'vue'
 
 import VAccordion from './VAccordion.vue'
 import VAccordionItem from './VAccordionItem.vue'
@@ -150,5 +150,31 @@ describe('VAccordion', () => {
     }
     expect(clickOn(first as Element)).toBe(true)
     expect(clickOn(second as Element)).toBe(false)
+  })
+
+  describe('robustness', () => {
+    it('closes the element again when a controlled model refuses to open', async () => {
+      const { container } = renderWith('', ':open="false" @update:open="() => {}"')
+      const details = container.querySelector('details') as HTMLDetailsElement
+      details.open = true
+      await fireEvent(details, new Event('toggle'))
+      await nextTick()
+      await nextTick()
+      expect(details.open).toBe(false)
+    })
+
+    it('an item nested in another item does not join the outer group', () => {
+      const { container } = render(VAccordion, {
+        slots: {
+          default: () =>
+            h(VAccordionItem, { title: 'Outer' }, () =>
+              h(VAccordionItem, { title: 'Inner' }, () => 'x'),
+            ),
+        },
+      })
+      const [outer, inner] = [...container.querySelectorAll('details')]
+      expect(outer?.getAttribute('name')).toBeTruthy()
+      expect(inner?.hasAttribute('name')).toBe(false)
+    })
   })
 })

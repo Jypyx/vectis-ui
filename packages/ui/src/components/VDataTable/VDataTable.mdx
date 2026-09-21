@@ -126,7 +126,9 @@ wrapped onto two lines.
 `responsive="scroll"` (the default) scrolls the table horizontally — the header and the footer stay
 put, only the table moves. `responsive="stack"` turns each row into a card under 640px of
 **container** (a container query, no measuring JS): the headers are re-injected in front of each
-cell through `data-label`, and the selection box opens the card.
+cell through `data-label`, and the selection box opens the card. The heading row is then out of
+sight, so its sort buttons and its "select all" box leave the tab order with it; each heading stays
+in the table as text, where it still names its column for a screen reader.
 
 <Canvas of={VDataTableStories.ResponsiveStack} />
 
@@ -148,12 +150,15 @@ cell through `data-label`, and the selection box opens the card.
 ## Accessibility
 
 - A native table: `caption` (a dedicated prop), `scope="col"` on the headers, `aria-sort` set on the
-  sorted `<th>`; the sort trigger is a real `<button>`.
+  sorted `<th>`; the sort trigger is a real `<button>`. Without a caption, the `title` names the
+  table through `aria-labelledby`, unless you name it yourself.
 - The attributes passed through fallthrough (`aria-describedby`, `id`…) land on the `<table>`;
   `class` and `style` stay on the root.
 - A selected row: a `data-selected` marker and **not** `aria-selected` — that attribute is invalid on
   a `row` of `role="table"` (it is reserved for grids); the accessible state is carried by the
-  checked box. The boxes get their name through `selectAllLabel` and `selectRowLabel`.
+  checked box. The boxes get their name through `selectAllLabel` and `selectRowLabel`; a row is
+  numbered by its position in the whole table, so page 2 does not start again at "Select row 1".
+- The "select all" box is disabled while no row is on screen and while the table is loading.
 - The "X–Y of Z" text is in `aria-live="polite"`: page changes are announced.
 - Every default label comes from the design system dictionary and is overridable through props
   (`searchLabel`, `perPageText`, `selectAllLabel`…).

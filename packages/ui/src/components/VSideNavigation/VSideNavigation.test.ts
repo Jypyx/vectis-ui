@@ -1,6 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
-import { defineComponent, nextTick, ref } from 'vue'
+import { defineComponent, h, nextTick, ref } from 'vue'
 
 import VSideNavigation from './VSideNavigation.vue'
 import VSideNavigationGroup from './VSideNavigationGroup.vue'
@@ -399,35 +399,33 @@ describe('VSideNavigation', () => {
 
     it('the arrows move the focus both ways and skip disabled items', async () => {
       const { container } = renderNav(LINKS)
-      const nav = container.querySelector('nav')!
       // [One, Two (disabled), Three, Hidden] — "Four" is a branch, hence a <summary>,
       // not an <a>.
       const [one, , three] = [...container.querySelectorAll<HTMLElement>('a.v-side-nav-action')]
 
       one!.focus()
-      await fireEvent.keyDown(nav, { key: 'ArrowDown' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' })
       expect(document.activeElement).toBe(three)
-      await fireEvent.keyDown(nav, { key: 'ArrowUp' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'ArrowUp' })
       expect(document.activeElement).toBe(one)
-      await fireEvent.keyDown(nav, { key: 'Home' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'Home' })
       expect(document.activeElement).toBe(one)
     })
 
     it('the items of a collapsed branch are ignored, and the run wraps around', async () => {
       const { container } = renderNav(LINKS)
-      const nav = container.querySelector('nav')!
       const one = container.querySelector<HTMLElement>('a.v-side-nav-action')!
       const hidden = container.querySelector<HTMLElement>('.v-side-nav-children a')!
 
       one.focus()
-      await fireEvent.keyDown(nav, { key: 'End' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'End' })
       expect(document.activeElement).not.toBe(hidden)
 
       // once open, the same row becomes the last stop of the run again
       container.querySelector('details')!.open = true
-      await fireEvent.keyDown(nav, { key: 'End' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'End' })
       expect(document.activeElement).toBe(hidden)
-      await fireEvent.keyDown(nav, { key: 'ArrowDown' })
+      await fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' })
       expect(document.activeElement).toBe(one)
     })
   })
@@ -442,5 +440,91 @@ describe('VSideNavigationItem — label', () => {
     expect(getByText('Overview')).not.toBeNull()
     expect(getByText('Reports')).not.toBeNull()
     expect(queryByText('Ignored')).toBeNull()
+  })
+})
+
+describe('VSideNavigationItem — robustness', () => {
+  it('redraws a slot the parent adds or replaces later', async () => {
+    const show = ref(false)
+    const { container } = renderNav(
+      `<VSideNavigationItem href="/a">A<template v-if="show" #sublabel>SUB</template></VSideNavigationItem>`,
+      '',
+      { show },
+    )
+    show.value = true
+    await nextTick()
+    await nextTick()
+    expect(container.querySelector('.v-side-nav-sublabel')?.textContent).toBe('SUB')
+  })
+
+  it('redraws a label captured by a render function', async () => {
+    const label = ref('L0')
+    const Parent = defineComponent(() => () => {
+      const text = label.value
+      return h(VSideNavigation, null, {
+        default: () => h(VSideNavigationItem, { href: '/a' }, { default: () => text }),
+      })
+    })
+    const { container } = render(Parent)
+    label.value = 'L1'
+    await nextTick()
+    await nextTick()
+    expect(container.querySelector('.v-side-nav-label')?.textContent).toBe('L1')
+  })
+
+  it('leaves the keys of a control in #end alone', async () => {
+    const { container } = renderNav(`
+      <VSideNavigationItem href="/a">A<template #end><input value="abc" /></template></VSideNavigationItem>
+      <VSideNavigationItem href="/b">B</VSideNavigationItem>
+    `)
+    const input = container.querySelector('input')!
+    input.focus()
+    const home = new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true })
+    input.dispatchEvent(home)
+    expect(home.defaultPrevented).toBe(false)
+    expect(document.activeElement).toBe(input)
+  })
+
+  it('a disabled link drops the consumer click and is still a link', async () => {
+    const onClick = vi.fn()
+    const { container } = renderNav(
+      '<VSideNavigationItem href="/a" disabled @click="onClick">A</VSideNavigationItem>',
+      '',
+      { onClick },
+    )
+    const link = container.querySelector('a.v-side-nav-action') as HTMLElement
+    await fireEvent.click(link)
+    expect(onClick).not.toHaveBeenCalled()
+    expect(link.getAttribute('role')).toBe('link')
+  })
+
+  it("keeps a consumer's own ARIA states", () => {
+    const { container } = renderNav(`
+      <VSideNavigationItem href="/a" aria-current="location">A</VSideNavigationItem>
+      <VSideNavigationItem aria-current="step" tabindex="0">B<template #children><VSideNavigationItem href="/b">B1</VSideNavigationItem></template></VSideNavigationItem>
+    `)
+    expect(container.querySelector('a.v-side-nav-action')?.getAttribute('aria-current')).toBe(
+      'location',
+    )
+    const summary = container.querySelector('summary')
+    expect(summary?.getAttribute('aria-current')).toBe('step')
+    expect(summary?.getAttribute('tabindex')).toBe('0')
+  })
+
+  it('exposes focus and el on the row a leaf or a branch acts through', async () => {
+    const leaf = ref<{ focus: () => void; el: HTMLElement | null } | null>(null)
+    const branch = ref<{ focus: () => void; el: HTMLElement | null } | null>(null)
+    const { container } = renderNav(
+      `<VSideNavigationItem ref="leaf" href="/a">A</VSideNavigationItem>
+       <VSideNavigationItem ref="branch">B<template #children><VSideNavigationItem href="/b">B1</VSideNavigationItem></template></VSideNavigationItem>`,
+      '',
+      { leaf, branch },
+    )
+    await nextTick()
+    const link = container.querySelector('a.v-side-nav-action')
+    expect(leaf.value?.el).toBe(link)
+    leaf.value?.focus()
+    expect(document.activeElement).toBe(link)
+    expect(branch.value?.el).toBe(container.querySelector('summary'))
   })
 })

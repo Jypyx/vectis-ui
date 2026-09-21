@@ -19,7 +19,7 @@
  * VAccordionItem.
  */
 
-import { computed, h, inject, provide, renderSlot, useId, useSlots } from 'vue'
+import { computed, h, inject, onBeforeUpdate, provide, ref, renderSlot, useId, useSlots } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
@@ -28,6 +28,7 @@ import type { IconSource } from '../VIcon/types'
 import { sideNavigationKey } from './context'
 
 import { useDetailsOpen } from '../../composables/useDetailsOpen'
+import { useInertLink } from '../../composables/useInertLink'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 interface SideNavigationItemProps {
@@ -78,28 +79,21 @@ const props = withDefaults(defineProps<SideNavigationItemProps>(), {
   defaultOpen: false,
 })
 
+// TRAP — "not bound" is written as `null` and not `undefined`. A model typed as a plain
+// boolean is declared as such at runtime, and Vue casts an ABSENT boolean prop to `false`,
+// which would silently overwrite `defaultOpen` on every branch. The explicit default disarms that cast.
 /**
- * Whether the branch is open, when the consumer wants to drive or observe it.
- *
- * Left unbound, the browser keeps that state entirely to itself, `defaultOpen` giving
- * only the initial value: the bound value never changes, so Vue never patches the
- * element back, and the native toggling stays sovereign.
- *
- * TRAP — "not bound" is written as `null` and not `undefined`. A model typed as a
- * plain boolean is declared as such at runtime, and Vue casts an ABSENT boolean prop
- * to `false`, which would silently overwrite `defaultOpen` on every branch. Giving it
- * an explicit default disarms that cast.
+ * Whether the branch is open, when the consumer wants to drive or observe it. Left
+ * unbound, the browser keeps that state to itself, `defaultOpen` giving only the initial
+ * value. `null` means unbound.
  */
 const open = defineModel<boolean | null>('open', { default: null })
 
 const emit = defineEmits<{
-  /**
-   * A row WITHOUT subitems was activated, by click or by keyboard.
-   *
-   * TRAP — never declare a `click` emit alongside it. Vue removes a declared event
-   * from the forwarded attributes, and a consumer's own `@click` would then stop
-   * reaching the link entirely.
-   */
+  // TRAP — never declare a `click` emit alongside it. Vue removes a declared event from
+  // the forwarded attributes, and a consumer's own `@click` would then stop reaching the
+  // link entirely.
+  /** A row WITHOUT subitems was activated, by click or by keyboard. */
   select: []
 }>()
 
@@ -114,8 +108,9 @@ defineSlots<{
   /** Free content before the label, which takes the place of `icon`. */
   icon?(): unknown
   /**
-   * Free content at the end of the row, before the chevron — a counter, a badge. On a
-   * BRANCH it must not be focusable (see the introduction).
+   * Free content at the end of the row, before the chevron: a counter, a badge. On a
+   * BRANCH it must not be focusable, a control inside the header being a control nested
+   * inside another.
    */
   end?(): unknown
   /**
@@ -194,21 +189,35 @@ const ariaCurrent = computed(() =>
  * `renderSlot` is what a compiled `<slot>` calls, so each fallback behaves exactly as it
  * would in the template.
  */
-const RowBody = () => [
-  renderSlot(slots, 'icon', {}, () =>
-    props.icon ? [h(VIcon, { class: 'v-side-nav-icon', ...iconProps(props.icon) })] : [],
-  ),
-  h('span', { class: 'v-side-nav-content' }, [
-    h('span', { class: 'v-side-nav-label' }, [
-      renderSlot(slots, 'default', {}, () => [props.label]),
+// @core
+/*
+ * TRAP — the tick is what makes RowBody follow the slots at all. A functional component
+ * declaring no props is never updated by its parent's re-render, and `slots` is not
+ * reactive, so a sublabel added behind a `v-if` or a label captured by a render function
+ * stayed as first drawn. Every re-render of the item (which is what a new slot causes)
+ * bumps it, and reading it is what re-renders RowBody: the `useSlotNodes` device.
+ */
+const slotTick = ref(0)
+onBeforeUpdate(() => slotTick.value++)
+
+const RowBody = () => (
+  void slotTick.value,
+  [
+    renderSlot(slots, 'icon', {}, () =>
+      props.icon ? [h(VIcon, { class: 'v-side-nav-icon', ...iconProps(props.icon) })] : [],
+    ),
+    h('span', { class: 'v-side-nav-content' }, [
+      h('span', { class: 'v-side-nav-label' }, [
+        renderSlot(slots, 'default', {}, () => [props.label]),
+      ]),
+      props.sublabel !== undefined || slots.sublabel
+        ? h('span', { class: 'v-side-nav-sublabel' }, [
+            renderSlot(slots, 'sublabel', {}, () => [props.sublabel]),
+          ])
+        : null,
     ]),
-    props.sublabel !== undefined || slots.sublabel
-      ? h('span', { class: 'v-side-nav-sublabel' }, [
-          renderSlot(slots, 'sublabel', {}, () => [props.sublabel]),
-        ])
-      : null,
-  ]),
-]
+  ]
+)
 
 /*
  * A branch's end slot sits INSIDE the header, so a click there would fold the branch.
@@ -220,14 +229,39 @@ const RowBody = () => [
  * would break its own behaviour — a link would stop navigating. The same filter as in
  * `useFieldPanel`, for the same reason.
  */
+// @core
 function onEndClick(event: MouseEvent) {
   const target = event.target as Element | null
   if (!target?.closest('button, a, input, select, textarea, [tabindex]')) event.preventDefault()
 }
 
+// A template ref on the item reaches the list item, a layout box; what is focused and
+// named is its row: the branch header, or the leaf's link or button.
+const rowEl = ref<HTMLElement | null>(null)
+const actionEl = ref<HTMLElement | null>(null)
+const control = () => (hasChildren.value ? rowEl.value : actionEl.value)
+defineExpose({
+  /** Moves the focus to the row: the branch header, or the leaf's link or button. */
+  focus: (options?: FocusOptions) => control()?.focus(options),
+  /** That element, which is also where the consumer's attributes land. */
+  get el() {
+    return control()
+  },
+})
+
+// @a11y
+// A leaf link has no `disabled`: the address, the consumer's click listeners and the
+// generic role of an `<a>` without `href` are handled by the shared inert link.
+const link = useInertLink({
+  href: () => (tag.value === 'a' ? props.href : undefined),
+  inert: () => props.disabled,
+  attrs: () => forwardedAttrs.value,
+})
+
+// @core
 function onActionClick(event: MouseEvent) {
-  // A disabled button never receives the click at all; a link made inert by hand does,
-  // so it is cancelled here.
+  // A disabled button never receives the click at all; an inert link does, so it is
+  // cancelled here.
   if (props.disabled) {
     event.preventDefault()
     return
@@ -247,13 +281,14 @@ function onActionClick(event: MouseEvent) {
       @toggle="onToggle"
     >
       <summary
-        v-bind="forwardedAttrs"
+        ref="rowEl"
         class="v-side-nav-row"
         :data-current="current ? '' : undefined"
         :data-disabled="disabled ? '' : undefined"
         :aria-current="ariaCurrent"
         :aria-disabled="disabled || undefined"
         :tabindex="disabled ? -1 : undefined"
+        v-bind="forwardedAttrs"
         @click="onSummaryClick"
       >
         <RowBody />
@@ -285,13 +320,14 @@ function onActionClick(event: MouseEvent) {
     >
       <component
         :is="tag"
-        v-bind="forwardedAttrs"
+        ref="actionEl"
         class="v-side-nav-action"
         :type="tag === 'button' ? 'button' : undefined"
         :disabled="tag === 'button' ? disabled : undefined"
-        :href="tag === 'a' && !disabled ? href : undefined"
-        :aria-disabled="tag === 'a' && disabled ? 'true' : undefined"
+        :aria-disabled="link.isInertLink.value ? 'true' : undefined"
         :aria-current="ariaCurrent"
+        v-bind="link.attrs.value"
+        :href="link.linkHref.value"
         @click="onActionClick"
       >
         <RowBody />
@@ -488,7 +524,7 @@ function onActionClick(event: MouseEvent) {
     color: inherit;
   }
 
-  .v-side-nav-row[data-current]:hover {
+  .v-side-nav-row[data-current]:not([data-disabled]):hover {
     /* The current row is already tinted, so its hover deepens that tint rather than
        replacing it with the neutral highlight — the VMenuItem idiom. */
     background: color-mix(
@@ -502,7 +538,7 @@ function onActionClick(event: MouseEvent) {
      where they are without opening every section. The lookup is deliberately a
      descendant one: the page may be several levels down. */
   .v-side-nav-branch:not([open]):has(.v-side-nav-children [aria-current])
-    > .v-side-nav-row:not([data-current]) {
+    > .v-side-nav-row:not([data-current], [data-disabled]) {
     color: var(--vectis-color-accent-text);
   }
 
@@ -518,6 +554,30 @@ function onActionClick(event: MouseEvent) {
   .v-side-nav-row[data-disabled] .v-side-nav-icon,
   .v-side-nav-row[data-disabled] .v-side-nav-sublabel {
     color: inherit;
+  }
+
+  /* Forced colours flatten the current row's tint to `Canvas` and its accent text to
+     `CanvasText`, leaving a slightly bolder label as the only cue, and the mark on a closed
+     branch is a colour alone. The current row takes the system selection pair, repeated to
+     (0,4,0) above its own hover, and the closed branch underlines its label, a decoration
+     the mode keeps. */
+  @media (forced-colors: active) {
+    .v-side-nav-row.v-side-nav-row.v-side-nav-row[data-current] {
+      forced-color-adjust: none;
+      background: Highlight;
+      color: HighlightText;
+    }
+
+    .v-side-nav-row.v-side-nav-row.v-side-nav-row[data-current][data-disabled] {
+      background: Canvas;
+      color: GrayText;
+    }
+
+    .v-side-nav-branch:not([open]):has(.v-side-nav-children [aria-current])
+      > .v-side-nav-row:not([data-current], [data-disabled])
+      .v-side-nav-label {
+      text-decoration: underline;
+    }
   }
 
   /* The disclosure animation, the chevron's rotation or swap and the WebKit marker come

@@ -34,7 +34,7 @@ export default {
         { name: 'perPageText', type: 'string' },
         { name: 'total', type: 'number' },
         { name: 'showRange', type: 'boolean', default: 'false' },
-        { name: 'rangeText', type: '(range: { start: number; end: number; total: number }) => string' },
+        { name: 'rangeText', type: '(range: DataTableRange) => string' },
         { name: 'selectable', type: 'boolean', default: 'false' },
         { name: 'selectAllLabel', type: 'string' },
         { name: 'selectionText', type: '(count: number) => string' },
@@ -52,7 +52,7 @@ export default {
       slots: [
         { name: 'title', type: '{}' },
         { name: 'loading', type: '{}' },
-        { name: 'empty', type: '{ search: string; }' },
+        { name: 'empty', type: 'DataTableEmptySlotProps' },
       ],
     },
   ],
@@ -70,7 +70,17 @@ export default {
   key: string
   label: string
   sortable?: boolean
-  align?: 'start' | 'center' | 'end'
+  align?: DataTableColumnAlign
+}`,
+    },
+    {
+      name: 'DataTableColumnAlign',
+      definition: `export type DataTableColumnAlign = 'start' | 'center' | 'end'`,
+    },
+    {
+      name: 'DataTableEmptySlotProps',
+      definition: `export interface DataTableEmptySlotProps {
+  search: string
 }`,
     },
     {
@@ -81,6 +91,14 @@ export default {
   sortKey: string | null
   sortDirection: DataTableSortDirection | null
   search: string
+}`,
+    },
+    {
+      name: 'DataTableRange',
+      definition: `export interface DataTableRange {
+  start: number
+  end: number
+  total: number
 }`,
     },
     {

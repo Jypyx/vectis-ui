@@ -12,7 +12,7 @@
  * intended fallback.
  */
 
-import { computed, inject } from 'vue'
+import { computed, inject, provide } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
@@ -27,6 +27,9 @@ interface AccordionItemProps {
   /**
    * The heading of the section, the line that stays visible when it is closed. Use
    * the `#title` slot instead when the heading needs markup rather than plain text.
+   *
+   * Note that this prop shadows the HTML attribute of the same name on the component,
+   * so no tooltip can be set through it.
    */
   title?: string
   /**
@@ -65,15 +68,13 @@ const props = withDefaults(defineProps<AccordionItemProps>(), {
   disabled: false,
 })
 
+// TRAP — "not bound" is written as `null` and not `undefined`. A model typed as a plain
+// boolean is declared as such at runtime, and Vue casts an ABSENT boolean prop to `false`,
+// which would silently overwrite `defaultOpen`. The explicit default disarms that cast.
 /**
  * Whether the section is open, when the consumer wants to drive or observe it. Left
  * unbound, the browser keeps that state to itself, `defaultOpen` giving only the initial
- * value.
- *
- * TRAP — "not bound" is written as `null` and not `undefined`. A model typed as a plain
- * boolean is declared as such at runtime, and Vue casts an ABSENT boolean prop to
- * `false`, which would silently overwrite `defaultOpen`. The explicit default disarms
- * that cast.
+ * value. `null` means unbound.
  */
 const open = defineModel<boolean | null>('open', { default: null })
 
@@ -89,6 +90,10 @@ defineSlots<{
 }>()
 
 const accordion = inject(accordionKey, null)
+// The group stops here: an item nested in this one's content without a VAccordion of its
+// own would otherwise share this group's name, and the browser closes every other member
+// of a name group when one opens, the section holding it included.
+provide(accordionKey, null)
 
 /**
  * Both icons are chosen on the enclosing group. The chevron fallback is what keeps

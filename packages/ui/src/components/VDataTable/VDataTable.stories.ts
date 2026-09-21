@@ -451,6 +451,18 @@ export const ResponsiveStack: Story = {
       </div>
     `,
   }),
+  // The heading row is out of sight here, so its sort buttons and "select all" box are out
+  // of the tab order too: the first Tab stop is the first row's checkbox.
+  play: async ({ canvasElement }) => {
+    const head = canvasElement.querySelector('.v-data-table-head') as HTMLElement
+    for (const control of head.querySelectorAll('button, input'))
+      await expect(getComputedStyle(control).visibility).toBe('hidden')
+
+    const firstRow = canvasElement.querySelector('tbody input') as HTMLInputElement
+    ;(canvasElement.ownerDocument.body as HTMLElement).focus()
+    await userEvent.tab()
+    await expect(firstRow).toHaveFocus()
+  },
 }
 
 /**

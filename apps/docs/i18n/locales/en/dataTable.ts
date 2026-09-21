@@ -57,7 +57,7 @@ export default {
     },
     responsive: {
       title: 'Narrow containers',
-      text: '<code>responsive</code> decides what a container too narrow for the columns does: scroll sideways, or turn each row into a card with its column headings repeated inside it.',
+      text: '<code>responsive</code> decides what a container too narrow for the columns does: scroll sideways, or turn each row into a card with its column headings repeated inside it. As cards, the heading row is out of sight, so its sort buttons and its "select all" box leave the tab order with it.',
     },
     serverSide: {
       title: 'Server side',
@@ -92,7 +92,7 @@ export default {
         emptyText:
           'What is said when there is no row to show. It falls back to the design system dictionary.',
         title:
-          'A title above the table, on the left of its toolbar. It shadows the HTML attribute of the same name on the component itself, an accepted trade-off: a tooltip over a whole table would be of little use.',
+          'A title above the table, on the left of its toolbar. With no <code>caption</code> it also names the table for screen readers. It shadows the HTML attribute of the same name on the component itself, an accepted trade-off: a tooltip over a whole table would be of little use.',
         searchable: 'Adds a search field to the toolbar.',
         searchPlaceholder:
           'What that field says while empty. It falls back to the design system dictionary.',
@@ -122,23 +122,23 @@ export default {
         selectionText:
           'How the selection is summed up in the footer. It says nothing at all when nothing is selected, and falls back to the design system dictionary.',
         selectRowLabel:
-          'What a row\'s checkbox is announced as. "Select row" tells a screen reader user nothing about which row, so this is worth supplying with something from the row itself. It falls back to the design system dictionary.',
+          'What a row\'s checkbox is announced as. "Select row" tells a screen reader user nothing about which row, so this is worth supplying with something from the row itself. <code>index</code> is the row\'s position in the whole table, from 0, not in the page. It falls back to the design system dictionary, which numbers the rows from 1.',
         serverSide:
           'Hands the searching, the sorting and the paging over to a server: the rows are shown exactly as they arrive, and every change of what is being asked for is reported so the server can answer it.',
         vModelSort:
           'Which column the rows are sorted by, and in which direction. Nothing is sorted to begin with. It may be driven from outside or simply left to the table, which sets it as headers are clicked; changing it does not send the reader back to the first page.',
         vModelPage:
-          'The page being shown, counted from 1. Searching or changing the page size sends it back to the first. It is clamped by derivation rather than written to, so a page beyond the last simply displays the last.',
+          'The page being shown, counted from 1. Searching or changing the page size, from the menu or from outside, sends it back to the first. It is clamped by derivation rather than written to, so a page beyond the last simply displays the last.',
         vModelPerPage:
           'How many rows a page holds. Any value above zero turns the pagination on, so passing one down without binding it is enough to enable it.',
         vModelSelected:
-          'The selected rows, as the identities <code>rowKey</code> gives them, never the row objects themselves. Nothing is selected to begin with, and a selection survives a change of page: the header checkbox covers the visible page alone, which is why it can be indeterminate.',
+          'The selected rows, as the identities <code>rowKey</code> gives them, never the row objects themselves. Nothing is selected to begin with, and a selection survives a change of page: the header checkbox covers the visible page alone, which is why it can be indeterminate. The footer counts this list as it stands, identities of rows no longer shown included.',
         vModelSearch:
           'What is typed in the search field, empty to begin with. Only the declared columns are searched, accent- and case-insensitively; in server mode nothing is filtered here and the term is reported instead.',
       },
       events: {
         updateParams:
-          'What the table is being asked for, in server mode: the search, the sort, the page and the page size. It fires on every change and never on mount.',
+          'What the table is being asked for, in server mode: the search, the sort, the page and the page size. It fires on every change and never on mount, and an equal value handed down again asks for nothing.',
       },
       slots: {
         title: 'The left side of the toolbar, replacing the <code>title</code> prop.',

@@ -94,6 +94,10 @@ removing the item from the tab order.
   toggle the focused panel, and no ARIA attribute to set on the consumer side.
 - A disabled item carries `aria-disabled` and leaves the keyboard path (`tabindex="-1"`): it stays
   readable and announced, but is no longer activable.
+- An item placed inside another item's content, without a `VAccordion` of its own, does not join
+  the outer group: opening it would otherwise close the section that holds it.
+- A `v-model:open` that refuses a change (a handler that leaves the value as it was) puts the
+  section back the way the model says.
 - The expand/collapse icons are decorative (hidden from assistive technologies) — the state
   information is already carried by `<details>`.
 - Every transition (the icon's rotation, the panel's opening) is neutralized under

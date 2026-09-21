@@ -141,9 +141,13 @@ the titles.
   `Enter` and `Space` toggle the focused section, and the content of a collapsed branch leaves both
   the tab order and the accessibility tree.
 - No roving focus: **every visible row is a tab stop**, as in an ordinary list of links. The Up/Down
-  arrows and Home/End move the focus in addition — they only move it, never activate — skipping
-  disabled items and those of a collapsed branch.
+  arrows and Home/End move the focus in addition (they only move it, never activate), skipping
+  disabled items and those of a collapsed branch. They are taken on a row only: a field or a menu
+  in a row's `#end` slot keeps its own keys.
 - The chevrons are decorative: the state information comes from the `<details>`.
-- A disabled item carries `aria-disabled` and leaves the keyboard path.
+- A disabled item carries `aria-disabled` and leaves the keyboard path. A disabled link loses its
+  address and your click listeners, like every inert link of the design system.
+- In Windows forced colours the current row takes the system selection colours, and a collapsed
+  branch holding the current page underlines its label.
 - Every transition (the chevron's rotation, a branch opening) is neutralized under
   `prefers-reduced-motion`.
