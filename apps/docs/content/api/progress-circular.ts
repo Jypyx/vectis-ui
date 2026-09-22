@@ -13,7 +13,7 @@ export default {
         { name: 'label', type: 'string' },
         { name: 'max', type: 'number', default: '100' },
         { name: 'indeterminate', type: 'boolean', default: 'false' },
-        { name: 'tone', type: 'ProgressCircularTone', values: "'accent' | 'success' | 'warning' | 'danger' | 'neutral'", default: "'accent'" },
+        { name: 'tone', type: 'ProgressCircularTone', values: "'neutral' | 'accent' | 'danger' | 'success' | 'warning'", default: "'accent'" },
         { name: 'color', type: 'string' },
         { name: 'size', type: 'number | string' },
         { name: 'thickness', type: 'number | string' },
@@ -21,8 +21,18 @@ export default {
         { name: 'showValue', type: 'boolean', default: 'false' },
       ],
       slots: [
-        { name: 'default', type: '{ value: number; max: number; percent: number; }' },
+        { name: 'default', type: 'ProgressCircularSlotProps' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'ProgressCircularSlotProps',
+      definition: `export interface ProgressCircularSlotProps {
+  value: number
+  max: number
+  percent: number
+}`,
     },
   ],
   cssVars: [

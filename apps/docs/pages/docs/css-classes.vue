@@ -60,7 +60,7 @@ const layersCode = `@layer vectis.reset, vectis.tokens, vectis.components, vecti
       <DocsProse tag="td" keypath="cssClasses.tone" />
     </tr>
     <tr>
-      <td><code>.v-icon-ligature</code></td>
+      <td><code>.v-icon-symbol</code></td>
       <DocsProse tag="td" keypath="cssClasses.ligature" />
     </tr>
     <tr>

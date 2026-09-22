@@ -1,6 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { nextTick } from 'vue'
+import { KeepAlive, defineComponent, h, nextTick, ref } from 'vue'
 
 import VHotkeys from './VHotkeys.vue'
 import { capLabel, detectPlatform, parseHotkeys, resolveKeys } from './platform'
@@ -37,6 +37,21 @@ describe('parseHotkeys', () => {
     expect(parseHotkeys('')).toEqual([])
   })
 
+  it('warns about a combination with no key, or with two', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    parseHotkeys('ctrl++')
+    parseHotkeys('g+h')
+    expect(warn.mock.calls.map(([m]) => String(m))).toEqual([
+      expect.stringContaining('only modifiers'),
+      expect.stringContaining('more than one key'),
+    ])
+    warn.mockClear()
+    parseHotkeys('ctrl+plus')
+    parseHotkeys('mod+shift+k')
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
+  })
+
   it('the + KEY is the `plus` token', () => {
     expect(parseHotkeys('mod+plus')).toEqual(['mod', 'plus'])
   })
@@ -70,6 +85,19 @@ describe('resolveKeys / capLabel', () => {
       '←',
       '→',
     ])
+  })
+
+  it('a modifier written twice, or mod beside its own key, is shown once', () => {
+    expect(resolveKeys(parseHotkeys('mod+ctrl+k'), 'windows').map((k) => k.token)).toEqual([
+      'mod',
+      'k',
+    ])
+    expect(resolveKeys(parseHotkeys('ctrl+ctrl+k'), 'mac').map((k) => k.token)).toEqual([
+      'ctrl',
+      'k',
+    ])
+    // On a Mac mod is Command, so it and Ctrl are two different keys.
+    expect(resolveKeys(parseHotkeys('mod+ctrl+k'), 'mac')).toHaveLength(3)
   })
 
   it('an unknown token has neither glyph nor word: it falls through to capLabel', () => {
@@ -342,6 +370,76 @@ describe('VHotkeys — listen', () => {
     expect(emitted().trigger).toHaveLength(1)
 
     box.remove()
+  })
+
+  it('a key press another handler already cancelled is left alone', () => {
+    const { emitted } = render(VHotkeys, {
+      props: { keys: 'mod+k', platform: 'windows', listen: true },
+    })
+    const cancel = (event: Event) => event.preventDefault()
+    document.body.addEventListener('keydown', cancel)
+    keydown({ key: 'k', ctrlKey: true }, document.body)
+    document.body.removeEventListener('keydown', cancel)
+    expect(emitted().trigger).toBeUndefined()
+  })
+
+  it('Escape is reported but never cancelled: it stays the close request of dialogs', () => {
+    const { emitted } = render(VHotkeys, {
+      props: { keys: 'esc', platform: 'windows', listen: true },
+    })
+    expect(keydown({ key: 'Escape' }).defaultPrevented).toBe(false)
+    expect(emitted().trigger).toHaveLength(1)
+  })
+
+  it('the key that confirms an IME composition does not fire', () => {
+    const { emitted } = render(VHotkeys, {
+      props: { keys: 'enter', platform: 'windows', listen: true, allowInInput: true },
+    })
+    keydown({ key: 'Enter', isComposing: true })
+    expect(emitted().trigger).toBeUndefined()
+  })
+
+  it('a text field inside a shadow root swallows the shortcut too', () => {
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    const field = document.createElement('input')
+    host.attachShadow({ mode: 'open' }).appendChild(field)
+
+    const { emitted } = render(VHotkeys, {
+      props: { keys: 'k', platform: 'windows', listen: true },
+    })
+    field.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'k', bubbles: true, composed: true, cancelable: true }),
+    )
+    expect(emitted().trigger).toBeUndefined()
+    host.remove()
+  })
+
+  it('a deactivated KeepAlive view stops listening, and starts again once reactivated', async () => {
+    const onTrigger = vi.fn()
+    const shown = ref(true)
+    const Host = defineComponent({
+      setup: () => () =>
+        h(KeepAlive, null, [
+          shown.value
+            ? h(VHotkeys, { keys: 'mod+k', platform: 'windows', listen: true, onTrigger })
+            : h('span'),
+        ]),
+    })
+    render(Host)
+    await nextTick()
+    keydown({ key: 'k', ctrlKey: true })
+    expect(onTrigger).toHaveBeenCalledTimes(1)
+
+    shown.value = false
+    await nextTick()
+    keydown({ key: 'k', ctrlKey: true })
+    expect(onTrigger).toHaveBeenCalledTimes(1)
+
+    shown.value = true
+    await nextTick()
+    keydown({ key: 'k', ctrlKey: true })
+    expect(onTrigger).toHaveBeenCalledTimes(2)
   })
 
   it('the listener follows the prop and is removed on unmount', async () => {

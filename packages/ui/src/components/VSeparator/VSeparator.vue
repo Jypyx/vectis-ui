@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// @a11y — no behavioural JS at all. Choosing an `<hr>` as the root IS the
+// No behavioural JS at all. Choosing an `<hr>` as the root IS the
 // accessibility decision: the `separator` role comes with it, and
 // `aria-orientation` is emitted for the vertical case alone.
 /**

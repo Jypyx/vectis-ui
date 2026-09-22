@@ -68,7 +68,7 @@ export default {
       },
       slots: {
         default:
-          "L'élément auquel le badge appartient. Sans lui, le badge existe seul ; avec lui, le badge est placé à côté de l'élément, ou dans son coin avec <code>overlay</code>.",
+          "L'élément auquel le badge appartient. Sans lui, le badge existe seul ; avec lui, le badge est placé à côté de l'élément, ou dans son coin avec <code>overlay</code>, et il est masqué aux technologies d'assistance : dites le nombre dans le nom de l'élément lui-même.",
       },
     },
   },

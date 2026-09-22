@@ -105,9 +105,18 @@ export const TextAdapted: Story = {
           <VIcon name="favorite" :size="48" />
           <span>{{ t.numericOverrides }}</span>
         </span>
+        <span data-testid="relative" style="font-size: 20px; --vectis-icon-size: 1.5em; display: inline-flex; gap: 8px; align-items: center">
+          <VIcon name="favorite" /> 1.5em
+        </span>
       </div>
     `,
   }),
+  play: async ({ canvasElement }) => {
+    // A relative context size is resolved once, against the text around the icon: 1.5em of
+    // 20px is a 30px box, never 1.5em of an already enlarged font (45px).
+    const icon = within(canvasElement).getByTestId('relative').querySelector('.v-icon')!
+    await expect(Math.round(icon.getBoundingClientRect().width)).toBe(30)
+  },
 }
 
 export const FourSources: Story = {
@@ -201,7 +210,7 @@ export const Filled: Story = {
           </span>
           <span>{{ t.builtinSecondPath }}</span>
         </div>
-        <div style="display: flex; gap: 16px; align-items: center">
+        <div data-testid="ligatures" style="--icon-fill: 1; display: flex; gap: 16px; align-items: center">
           <span v-for="name in ['favorite', 'home', 'settings', 'star']" :key="name" style="display: inline-flex; gap: 8px; align-items: center">
             <VIcon :name="name" :size="24" />
             <VIcon :name="name" :size="24" filled />
@@ -211,6 +220,14 @@ export const Filled: Story = {
       </div>
     `,
   }),
+  play: async ({ canvasElement }) => {
+    // The row carries a host's own `--icon-fill: 1`: an unfilled icon must not inherit it.
+    const [outline, filled] = within(canvasElement)
+      .getByTestId('ligatures')
+      .querySelectorAll<HTMLElement>('.v-icon-symbol')
+    await expect(getComputedStyle(outline!).fontVariationSettings).toContain('"FILL" 0')
+    await expect(getComputedStyle(filled!).fontVariationSettings).toContain('"FILL" 1')
+  },
 }
 
 /**

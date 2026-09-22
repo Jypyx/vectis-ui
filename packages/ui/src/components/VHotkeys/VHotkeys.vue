@@ -17,7 +17,7 @@
  * copy VButton's state rules into it.
  */
 
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue'
 
 import {
   DEFAULT_PLATFORM,
@@ -31,34 +31,36 @@ import {
 import type { HotkeysPlatform } from './platform'
 import { useMessages } from '../../i18n/state'
 
-export type HotkeysVariant = 'soft' | 'outlined' | 'elevated'
+/** How a key cap is drawn. */
+export type HotkeysVariant = 'soft' | 'outline' | 'elevated'
+/** The size of the caps, from the two smallest steps of the control scale. */
 export type HotkeysSize = 'xs' | 'sm'
 
 interface HotkeysProps {
   /**
    * The combination, `+`-separated: `mod+k`, `ctrl+shift+p`, `alt+enter`, `esc`.
-   * Case- and space-insensitive. `mod` is the CROSS-PLATFORM modifier — ⌘ on
+   * Case- and space-insensitive. `mod` is the CROSS-PLATFORM modifier: ⌘ on
    * macOS, Ctrl everywhere else; `meta` is the literal Command/Windows/Super key.
    * Aliases: cmd/command/win/super → meta, control → ctrl, option/opt → alt,
    * return → enter, escape → esc, del → delete, arrowup… → up…. An unknown token
    * is displayed as declared (`k` → K, `f5` → F5). The `+` key is `plus`.
    */
   keys: string
-  /** How a key cap is drawn: tinted, outlined, or raised off the page. */
+  /** How a key cap is drawn: tinted (`soft`), outlined (`outline`), or raised off the page (`elevated`). */
   variant?: HotkeysVariant
   /**
    * Draws the whole combination as a SINGLE key rather than as several: the decoration
    * moves from each cap to the shortcut as a whole, so the separator ends up inside
-   * the key instead of between two of them. It is purely visual — the markup and the
+   * the key instead of between two of them. It is purely visual: the markup and the
    * announced name are identical either way.
    */
   attached?: boolean
-  /** The size of the caps, `xs` by default — a shortcut is chrome beside other text. */
+  /** The size of the caps, `xs` by default: a shortcut is chrome beside other text. */
   size?: HotkeysSize
   /** Takes 4px off the height, leaving the padding and the text as they are. */
   compact?: boolean
   /**
-   * Forces the keyboard's OS instead of detecting it — for a deterministic
+   * Forces the keyboard's OS instead of detecting it, for a deterministic
    * rendering (stories, tests, a table showing all three) or a host that already
    * knows (Electron, Tauri, a server reading the User-Agent).
    */
@@ -76,8 +78,8 @@ interface HotkeysProps {
   listen?: boolean
   /**
    * While listening, lets the browser go on doing whatever the combination normally
-   * does. Left out, the browser is stopped — which is the entire point of taking over
-   * something like ⌘K.
+   * does. Left out, the browser is stopped, which is the entire point of taking over
+   * something like ⌘K. Escape is never stopped: it has to stay the close request of dialogs.
    */
   allowDefault?: boolean
   /**
@@ -150,6 +152,7 @@ const spoken = computed(() =>
 )
 const resolvedLabel = computed(() => props.label ?? m.value.hotkeys.label(spoken.value))
 
+// @core
 /* A plain variable and not a reactive one: nothing renders it, and making it reactive
    would cause renders for no reason — the same reasoning as in `useTimer`.
 
@@ -179,9 +182,17 @@ function onKeydown(event: KeyboardEvent) {
      reopen the consumer's palette a dozen times a second; only the first press
      counts. */
   if (!props.listen || event.repeat) return
-  if (!props.allowInInput && isEditableTarget(event.target)) return
+  /* A key another handler has already dealt with (a menu's arrow, a field's Enter) is not
+     a shortcut any more. And the Enter that confirms an input method's candidate is the
+     end of a word being typed, not a command. */
+  if (event.defaultPrevented || event.isComposing) return
+  /* The document sees a key typed inside a shadow root as coming from the shadow HOST, a
+     plain element: the field itself is the first entry of the composed path. */
+  if (!props.allowInInput && isEditableTarget(event.composedPath()[0] ?? event.target)) return
   if (!matchesEvent(event, tokens.value, platform.value)) return
-  if (!props.allowDefault) event.preventDefault()
+  /* TRAP — Escape is never cancelled. A cancelled Escape is not turned into a close request,
+     so every open dialog and light-dismiss popover on the page would stop closing on it. */
+  if (!props.allowDefault && !tokens.value.includes('esc')) event.preventDefault()
   emit('trigger', event)
 }
 
@@ -193,6 +204,12 @@ watch(
   (on) => (on ? attach() : detach()),
 )
 onBeforeUnmount(detach)
+/* A view kept alive by <KeepAlive> is never unmounted, only put aside: its shortcut must
+   stop with it, or a hidden page would go on answering the keyboard. */
+onDeactivated(detach)
+onActivated(() => {
+  if (props.listen) attach()
+})
 </script>
 
 <template>
@@ -282,7 +299,7 @@ onBeforeUnmount(detach)
     --hotkeys-shadow: none;
   }
 
-  .v-hotkeys[data-variant='outlined'] {
+  .v-hotkeys[data-variant='outline'] {
     --hotkeys-bg: transparent;
     --hotkeys-border: color-mix(in oklab, currentcolor, transparent 70%);
     --hotkeys-shadow: none;
@@ -327,6 +344,15 @@ onBeforeUnmount(detach)
      caps, and at the same weight as them it competes with what it separates. */
   .v-hotkeys-separator {
     color: color-mix(in oklab, currentcolor, transparent 40%);
+  }
+
+  /* Forced colours flatten the tint and drop the shadow, which is all a soft or an
+     elevated cap is made of. Every variant takes the edge of the outlined one, in the
+     system text colour. At (0,2,0) and later in the sheet, this beats the variant rules. */
+  @media (forced-colors: active) {
+    .v-hotkeys[data-variant] {
+      --hotkeys-border: CanvasText;
+    }
   }
 }
 </style>

@@ -110,6 +110,9 @@ underneath: pass it to `ringColor`.
 ## Accessibility
 
 - The badge is a plain `<span>`: no interactive role wrongly announced.
+- Beside a target (the default slot), the badge is `aria-hidden`: a bare "3" read after a button
+  says nothing, so put the count in the target's own name ("Notifications, 3 unread"). A
+  standalone badge stays readable.
 - The badge carries only a counter or an icon — for a **textual** status, prefer a `VChip` (whose
   role that is).
 - In `dot` mode, the information rests on colour alone (invisible to screen readers): provide

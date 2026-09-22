@@ -120,7 +120,7 @@ const descriptions: Record<DescribedToken, string> = {
   '--vectis-control-size-progress-linear-thickness':
     "L'épaisseur par défaut de la barre de VProgressLinear (4px)",
   '--vectis-control-size-progress-linear-length':
-    "La longueur par défaut d'un VProgressLinear vertical (surchargeable via `height`)",
+    "La longueur par défaut d'un VProgressLinear vertical, que remplace une hauteur posée sur la barre",
   '--vectis-control-size-progress-circular-diameter': 'Le diamètre par défaut de VProgressCircular',
   '--vectis-control-size-progress-circular-thickness':
     "L'épaisseur de trait par défaut de VProgressCircular (4px)",

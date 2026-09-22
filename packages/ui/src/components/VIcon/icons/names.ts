@@ -44,7 +44,7 @@ const NAMES = [
   'warning',
 ] as const
 
-/** The icon names the DS renders itself — the contract of a consumer resolver. */
+/** The icon names the DS renders itself: the contract of a consumer resolver. */
 export type IconName = (typeof NAMES)[number]
 
 /**

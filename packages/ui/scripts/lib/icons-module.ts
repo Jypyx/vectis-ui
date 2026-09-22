@@ -7,7 +7,7 @@
  *
  * ONE FILE PER ICON, and that is the whole point of the layout. A single table
  * indexed by a string at runtime has no key a bundler can prove reachable, so every
- * consumer used to ship all 34 drawings as soon as anything rendered a VIcon at all —
+ * consumer would ship all 34 drawings as soon as anything rendered a VIcon at all:
  * 3.5 kB gzip, more than half the weight of a lone button. Separate modules make the
  * cost proportional by construction, with no dependence on a bundler's willingness to
  * drop an unused binding from a module it is keeping anyway. It is also what keeps
@@ -29,6 +29,57 @@ const header = (revision: string) => `/*
  * Apache-2.0 licence © Google.
  */`
 
+/* The words a module cannot export a `const` under. Only the lowercase ones can match
+   a Material icon name, which is all this table needs to hold. */
+const RESERVED_WORDS = new Set([
+  'await',
+  'break',
+  'case',
+  'catch',
+  'class',
+  'const',
+  'continue',
+  'debugger',
+  'default',
+  'delete',
+  'do',
+  'else',
+  'enum',
+  'export',
+  'extends',
+  'false',
+  'finally',
+  'for',
+  'function',
+  'if',
+  'implements',
+  'import',
+  'in',
+  'instanceof',
+  'interface',
+  'let',
+  'new',
+  'null',
+  'package',
+  'private',
+  'protected',
+  'public',
+  'return',
+  'static',
+  'super',
+  'switch',
+  'this',
+  'throw',
+  'true',
+  'try',
+  'typeof',
+  'var',
+  'void',
+  'while',
+  'with',
+  'yield',
+])
+
 /**
  * The generated tree, keyed by its path under `src/components/VIcon/icons/`. The
  * caller writes it; nothing here touches the filesystem.
@@ -40,6 +91,14 @@ export function renderIconsModules(
 ): Record<string, string> {
   const files: Record<string, string> = {}
   const names = entries.map(([name]) => name)
+  /* Each name becomes an exported binding, so a Material name that is not a valid
+     identifier (`3d_rotation`) or is a reserved word (`delete`) would write a module that
+     does not parse. Refused here, with the name, rather than at the next typecheck. */
+  for (const name of names) {
+    if (!/^[a-z_][a-z0-9_]*$/.test(name) || RESERVED_WORDS.has(name)) {
+      throw new Error(`[icons] "${name}" cannot be an exported binding: rename it or alias it.`)
+    }
+  }
 
   files['viewBox.ts'] = `${header(revision)}
 
@@ -57,7 +116,7 @@ const NAMES = [
 ${names.map((name) => `  ${quote(name)},`).join('\n')}
 ] as const
 
-/** The icon names the DS renders itself — the contract of a consumer resolver. */
+/** The icon names the DS renders itself: the contract of a consumer resolver. */
 export type IconName = (typeof NAMES)[number]
 
 /**
@@ -96,7 +155,7 @@ ${names.map((name) => `  ${name},`).join('\n')}
  * Every icon at once, for the places that legitimately want the whole set: the
  * gallery in the stories, the documentation site, the tests.
  *
- * NOTHING the library ships imports this barrel — a component imports the two or
+ * NOTHING the library ships imports this barrel: a component imports the two or
  * three icon modules it draws, by name. Importing it from a component would pull all
  * ${entries.length} drawings back into every consumer's bundle and undo the split.
  */

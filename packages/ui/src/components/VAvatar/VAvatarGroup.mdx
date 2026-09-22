@@ -54,7 +54,8 @@ pass the appropriate colour to `ringColor`.
 
 ## Accessibility
 
-- The group is a `role="group"` container.
+- The group is a `role="group"` container, named by `label` (a consumer `aria-label` or
+  `aria-labelledby` wins over it).
 - Each avatar keeps its own semantics (image, `role="img"` + `aria-label`, or interactive).
 - The default aggregate displays "+X"; for an explicit phrasing ("3 other members"), use the
   `#overflow` slot with a dedicated `aria-label`.

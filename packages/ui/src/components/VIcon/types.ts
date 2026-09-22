@@ -6,13 +6,13 @@ import type { Component } from 'vue'
  * changing every resolver's signature.
  */
 export interface IconContext {
-  /** Whether the caller asked for the filled form — VIcon's prop, VButton's `iconFilled`. */
+  /** Whether the caller asked for the filled form: VIcon's prop, VButton's `iconFilled`. */
   filled: boolean
 }
 
 /**
  * One of the icons the design system ships with: its canonical NAME together with the
- * drawing that goes with it, `[outline, filled?]` on the Material Symbols grid — the
+ * drawing that goes with it, `[outline, filled?]` on the Material Symbols grid. The
  * second path is only there when filling actually changes the geometry.
  *
  * The name travelling WITH the drawing is the whole point of the shape. A component's
@@ -44,7 +44,7 @@ export interface BuiltinIcon {
 export type IconRender =
   /** SVG path data. Without a `viewBox` it is read on the Material Symbols grid. */
   | { path: string; viewBox?: string }
-  /** A Vue component whose root is a SINGLE `<svg>` — that is the sizing contract. */
+  /** A Vue component whose root is a SINGLE `<svg>`: that is the sizing contract. */
   | { component: Component; props?: Record<string, unknown> }
   /** An image, whether a sprite, a data URL or a file. */
   | { src: string }
@@ -58,7 +58,7 @@ export type IconRender =
  * guesswork: a plain string is ALWAYS a name, and an image or a component is
  * declared explicitly as an object, `{ src: '/logo.svg' }`.
  *
- * That is what allows any naming convention — `mdi:close`, `fa6-solid:xmark` — to
+ * That is what allows any naming convention (`mdi:close`, `fa6-solid:xmark`) to
  * reach the resolver intact, where a heuristic would have taken it for an address.
  *
  * A `BuiltinIcon` imported from `vectis-ui/icons` is accepted too, and behaves

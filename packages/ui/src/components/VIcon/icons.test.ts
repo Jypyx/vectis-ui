@@ -56,7 +56,7 @@ describe('built-in icon registry', () => {
     expect(ICON_VIEW_BOX).toBe('0 -960 960 960')
   })
 
-  it.each(Object.entries(builtinIcons))('%s : paths exploitables', (_nom, icon) => {
+  it.each(Object.entries(builtinIcons))('%s: usable paths', (_name, icon) => {
     expect(icon.paths.length).toBeGreaterThanOrEqual(1)
     expect(icon.paths.length).toBeLessThanOrEqual(2)
     for (const d of icon.paths) {
@@ -66,14 +66,14 @@ describe('built-in icon registry', () => {
     }
   })
 
-  it.each(Object.entries(builtinIcons))('%s : porte son propre nom', (nom, icon) => {
+  it.each(Object.entries(builtinIcons))('%s: carries its own name', (name, icon) => {
     // The name travelling with the drawing is what reaches the consumer's resolver —
     // a component imports the binding and never restates the name. A generator slip
     // here would route the resolver to the wrong icon with nothing to show for it.
-    expect(icon.name).toBe(nom)
+    expect(icon.name).toBe(name)
   })
 
-  it('expose le jeu de noms seul, aligné sur le registre', () => {
+  it('exposes the name set alone, aligned with the registry', () => {
     // `classIconResolver` asks the SET rather than the icons, so that a consumer who
     // wired in their own library ships no Material path at all. The two are generated
     // side by side, and nothing else would notice them drifting apart.
@@ -85,14 +85,14 @@ describe('built-in icon registry', () => {
     // icons (chevrons, arrows, close, check…) have identical FILL 0 and FILL 1.
     // The registry is typed in literals (`as const`): without this widening, TS
     // considers the comparison impossible and refuses to compile the test.
-    const registre: Record<string, { readonly paths: readonly string[] }> = builtinIcons
-    const doublons = Object.entries(registre).filter(
+    const registry: Record<string, { readonly paths: readonly string[] }> = builtinIcons
+    const duplicates = Object.entries(registry).filter(
       ([, { paths }]) => paths.length === 2 && paths[0] === paths[1],
     )
-    expect(doublons).toEqual([])
+    expect(duplicates).toEqual([])
 
     // And the de-duplication did not flatten everything: the filled icons exist.
-    const avecVariante = Object.values(builtinIcons).filter((icon) => icon.paths.length === 2)
-    expect(avecVariante.length).toBeGreaterThan(0)
+    const withFilled = Object.values(builtinIcons).filter((icon) => icon.paths.length === 2)
+    expect(withFilled.length).toBeGreaterThan(0)
   })
 })

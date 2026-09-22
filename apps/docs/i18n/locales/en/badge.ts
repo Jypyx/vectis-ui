@@ -68,7 +68,7 @@ export default {
       },
       slots: {
         default:
-          'The element the badge belongs to. Without it the badge stands on its own; with it, the badge is placed beside the element, or in its corner under <code>overlay</code>.',
+          "The element the badge belongs to. Without it the badge stands on its own; with it, the badge is placed beside the element, or in its corner under <code>overlay</code>, and is hidden from assistive technology: say the count in the element's own name.",
       },
     },
   },

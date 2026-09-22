@@ -71,6 +71,14 @@ describe('VBadge', () => {
     expect(at99.querySelector('.v-badge')!.textContent).toBe('99')
   })
 
+  it('a count is a whole number, zero or more; one that is not a number is not drawn', () => {
+    const text = (count: number) =>
+      render(VBadge, { props: { count } }).container.querySelector('.v-badge')!.textContent
+    expect(text(3.7)).toBe('3')
+    expect(text(-4)).toBe('0')
+    expect(text(Number.NaN)).toBe('')
+  })
+
   it('icon: data-icon-only, .v-icon rendered, wins over count', () => {
     const { container } = render(VBadge, { props: { icon: 'notifications', count: 3 } })
     const badge = container.querySelector('.v-badge')!
@@ -100,6 +108,19 @@ describe('VBadge', () => {
     expect(host.hasAttribute('data-overlay')).toBe(false)
     expect(getByText('Messages')).toBeTruthy()
     expect(host.lastElementChild!.classList.contains('v-badge')).toBe(true)
+  })
+
+  it('beside a target the pill is hidden from assistive technology; standalone it is read', () => {
+    const hosted = render(VBadge, {
+      props: { count: 3 },
+      slots: { default: '<button type="button">Notifications, 3 unread</button>' },
+    })
+    const host = hosted.container.querySelector('.v-badge-host')!
+    expect(host.getAttribute('aria-hidden')).toBeNull()
+    expect(host.querySelector('.v-badge')!.getAttribute('aria-hidden')).toBe('true')
+
+    const standalone = render(VBadge, { props: { count: 3 } })
+    expect(standalone.container.querySelector('.v-badge')!.getAttribute('aria-hidden')).toBeNull()
   })
 
   it('overlay: data-overlay set on the host', () => {

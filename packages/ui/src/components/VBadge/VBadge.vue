@@ -10,6 +10,10 @@
  * whether a target element was given at all, capping the counter at "99+", and
  * handing the two colours a consumer may choose to the stylesheet as
  * `--custom-color` and `--badge-ring-color`.
+ *
+ * Beside a target the pill is `aria-hidden`: read on its own, "3" means nothing, and the
+ * target is what a reader reaches, so the count belongs in the target's own name
+ * ("Notifications, 3 unread") where it would otherwise be announced twice.
  */
 import { computed, h } from 'vue'
 import type { FunctionalComponent } from 'vue'
@@ -20,8 +24,11 @@ import type { IconSource } from '../VIcon/types'
 
 import { customColorStyle } from '../../utils/css'
 
+/** How strongly the badge is painted: the full colour, or a tint of it. */
 export type BadgeVariant = 'solid' | 'soft'
+/** What the badge means, in colour. */
 export type BadgeTone = 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
+/** The corner an overlaid badge is pinned to. */
 export type BadgeOverlayPosition = 'top' | 'bottom'
 
 interface BadgeProps {
@@ -58,7 +65,7 @@ interface BadgeProps {
    */
   icon?: IconSource
   /**
-   * Reduces the badge to a 10px dot with no content — the discreet way to signal
+   * Reduces the badge to a 10px dot with no content, the discreet way to signal
    * that something is new without saying how much.
    */
   dot?: boolean
@@ -69,8 +76,8 @@ interface BadgeProps {
   overlay?: boolean
   /**
    * Which corner an `overlay` badge is pinned to: the top one by default, the
-   * bottom one for a marker that belongs at the foot of its target — a presence dot
-   * under an avatar, for instance. The horizontal side follows the reading
+   * bottom one for a marker that belongs at the foot of its target, such as a presence dot
+   * under an avatar. The horizontal side follows the reading
    * direction and is not configurable. It does nothing without `overlay`.
    */
   overlayPosition?: BadgeOverlayPosition
@@ -107,7 +114,8 @@ const props = withDefaults(defineProps<BadgeProps>(), {
 const slots = defineSlots<{
   /**
    * The element the badge belongs to. Without it the badge stands on its own; with
-   * it, the badge is placed beside the element, or in its corner under `overlay`.
+   * it, the badge is placed beside the element, or in its corner under `overlay`, and is
+   * hidden from assistive technology: say the count in the element's own name.
    */
   default?(): unknown
 }>()
@@ -118,10 +126,16 @@ function hasTarget() {
   return slots.default !== undefined
 }
 
-/** The counter as it is actually displayed: anything past 99 becomes "99+". */
-const displayCount = computed(() =>
-  props.count !== undefined && props.count > 99 ? '99+' : props.count,
-)
+/**
+ * The counter as it is actually displayed: a whole number, zero or more, and anything past 99
+ * becomes "99+". A count that is not a number (a division by a total not yet known) draws
+ * nothing rather than the word "NaN".
+ */
+const displayCount = computed(() => {
+  const count = props.count
+  if (count === undefined || !Number.isFinite(count)) return undefined
+  return count > 99 ? '99+' : Math.max(0, Math.trunc(count))
+})
 
 /*
  * The pill itself, written once. The template has two roots — one wrapping a target, one
@@ -132,7 +146,7 @@ const Pill: FunctionalComponent = () =>
   h(
     'span',
     {
-      class: 'v-badge v-tone',
+      class: 'v-badge v-tone v-variant',
       'data-variant': props.variant,
       'data-tone': props.tone,
       'data-custom': props.color !== undefined ? '' : undefined,
@@ -166,7 +180,7 @@ Pill.props = []
     :data-overlay-position="overlayPosition"
   >
     <slot />
-    <Pill />
+    <Pill aria-hidden="true" />
   </span>
   <Pill v-else />
 </template>
@@ -180,6 +194,10 @@ Pill.props = []
     gap: var(--vectis-space-2); /* the space between the target and the badge, in inline mode */
   }
 
+  /* The pill is painted by the shared `.v-variant` rules (styles/variants.css) over the
+     tone table (`.v-tone`), both set in the template: `solid` is the tone's full colour,
+     `soft` its tint with the text in the tone's own colour. A custom colour is the table's
+     `[data-custom]` row, in styles/tones.css. */
   .v-badge {
     --vectis-icon-size: var(--vectis-icon-size-sm);
     --vectis-icon-opsz: 20;
@@ -187,11 +205,6 @@ Pill.props = []
        component can make since CSS cannot read what its parent paints. The `ringColor`
        prop overrides it inline for a badge sitting on anything else. */
     --badge-ring-color: var(--vectis-color-surface);
-    /* The pill is the tone's solid pair, read from the shared table (`.v-tone`, set in the
-       template). Its neutral is the text/surface inversion, which is what lets the
-       fallback text and contrast-color() agree in both themes. */
-    --badge-bg: var(--tone-bg-solid);
-    --badge-text-fallback: var(--tone-text-solid);
 
     display: inline-flex;
     align-items: center;
@@ -202,44 +215,28 @@ Pill.props = []
     min-width: var(--vectis-control-size-badge-h);
     padding-inline: var(--vectis-space-1);
     border-radius: var(--vectis-radius-pill);
-    background: var(--badge-bg);
     font-family: var(--vectis-text-family);
     font-size: var(--vectis-text-caption-size);
     font-weight: var(--vectis-text-control-weight);
     line-height: var(--vectis-text-control-leading);
-    color: var(--badge-text-fallback);
   }
 
+  /* On a solid pill the text picks black or white against whatever the fill ended up
+     with, where the function exists; elsewhere it keeps the table's `--tone-text-solid`.
+     TRAP — the class is compounded to (0,3,0): `.v-variant[data-variant='solid']` sets
+     `color` at (0,2,0) from another sheet, and a tie would be settled by sheet order. The
+     soft pill keeps the tone's own text colour, which says the tone where black or white
+     would not. */
   @supports (color: contrast-color(red)) {
-    .v-badge {
-      color: contrast-color(var(--badge-bg));
+    .v-badge.v-variant[data-variant='solid'] {
+      color: contrast-color(var(--tone-bg-solid));
     }
   }
 
-  /* A custom colour replaces the tone: at (0,2,0) it beats the base rule's mapping
-     whatever the order the two are written in. */
-  .v-badge[data-custom] {
-    --badge-bg: var(--custom-color);
-    --badge-text-fallback: var(--vectis-color-text-on-accent);
-  }
-
-  /* The soft pair of the same table. The text is the tone's own colour rather than
-     contrast-color(): the black or white that function picks reads on a pale tint, but
-     says nothing of the tone. At (0,3,0) it beats the `@supports` rule above whatever
-     the order. A dot is left out: with no content, a soft dot is a pale disc on the
-     page, which a presence marker cannot afford. */
-  .v-badge[data-variant='soft']:not([data-dot]) {
-    --badge-bg: var(--tone-bg-soft);
-
-    color: var(--tone-text-tinted);
-  }
-
-  /* A custom colour's soft pair, derived as VChip derives its own, so the same value
-     gives a soft chip and a soft badge the same tint in both themes. */
-  .v-badge[data-variant='soft'][data-custom]:not([data-dot]) {
-    --badge-bg: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 85%);
-
-    color: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 30%);
+  /* A dot is always solid: with no content, a soft dot is a pale disc on the page, which a
+     presence marker cannot afford. (0,3,0), above the soft variant's background. */
+  .v-badge.v-variant[data-dot] {
+    background: var(--tone-bg-solid);
   }
 
   .v-badge[data-icon-only] {
@@ -293,6 +290,21 @@ Pill.props = []
      physical property and knows nothing about direction. */
   .v-badge-host[data-overlay]:dir(rtl) > .v-badge {
     --badge-overlay-x: -25%;
+  }
+
+  /* Forced colours repaint the background as Canvas and drop the ring, a shadow: the pill
+     loses its shape, and a dot, which has nothing else, disappears altogether. The pill
+     gets an edge, and the dot is filled in the text colour. */
+  @media (forced-colors: active) {
+    .v-badge {
+      outline: var(--vectis-control-border-width) solid CanvasText;
+      outline-offset: calc(-1 * var(--vectis-control-border-width));
+    }
+
+    .v-badge.v-variant[data-dot] {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
   }
 }
 </style>

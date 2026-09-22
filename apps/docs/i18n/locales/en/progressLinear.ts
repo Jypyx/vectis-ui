@@ -33,7 +33,7 @@ export default {
     },
     orientation: {
       title: 'Orientation',
-      text: '<code>orientation</code> set to <code>vertical</code> fills the bar from the bottom up and takes the height of whatever holds it. The text copies stay horizontal.',
+      text: '<code>orientation</code> set to <code>vertical</code> fills the bar from the bottom up, in a right-to-left page as well. Its length is a token, 10rem by default, which a height of your own replaces. The text copies stay horizontal.',
     },
   },
 

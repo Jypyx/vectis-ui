@@ -33,6 +33,7 @@ const t = storyText({
     thickSquareBar: 'Thick square bar',
     withText: 'With text',
     indeterminate: 'Indeterminate',
+    rightToLeft: 'Right to left',
     upload: 'Upload',
     zero: 'Zero',
     complete: 'Complete',
@@ -68,6 +69,7 @@ const t = storyText({
     thickSquareBar: 'Barre épaisse carrée',
     withText: 'Avec texte',
     indeterminate: 'Indéterminé',
+    rightToLeft: 'De droite à gauche',
     upload: 'Envoi',
     zero: 'Zéro',
     complete: 'Complet',
@@ -276,9 +278,26 @@ export const Vertical: Story = {
         <VProgressLinear orientation="vertical" :value="30" :thickness="20" shape="square" tone="warning" :label="t.thickSquareBar" />
         <VProgressLinear orientation="vertical" :value="60" :thickness="32" style="height: 200px" show-value :label="t.withText" />
         <VProgressLinear orientation="vertical" indeterminate :thickness="12" :label="t.indeterminate" />
+        <div dir="rtl">
+          <VProgressLinear orientation="vertical" :value="30" :thickness="32" show-value :label="t.rightToLeft" />
+        </div>
       </div>
     `,
   }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Upright, a bar fills from the bottom in BOTH reading directions: a right-to-left
+    // page flips the inline axis of a vertical writing mode, which is what put the fill
+    // at the top.
+    for (const name of ['Default', 'Right to left']) {
+      const bar = canvas.getByRole('progressbar', { name })
+      const fill = bar.querySelector('.v-progress-linear-fill') as HTMLElement
+      const track = bar.getBoundingClientRect()
+      const drawn = fill.getBoundingClientRect()
+      await expect(Math.abs(drawn.bottom - track.bottom)).toBeLessThan(1)
+      await expect(drawn.top - track.top).toBeGreaterThan(1)
+    }
+  },
 }
 
 /** The progress animation plays on every change of value. */

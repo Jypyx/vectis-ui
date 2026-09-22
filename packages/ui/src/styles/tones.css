@@ -89,4 +89,19 @@
     --tone-bg-soft: var(--vectis-color-surface-muted);
     --tone-border-soft: var(--vectis-color-border-strong);
   }
+
+  /* A colour of the consumer's own (`color`, sent inline as `--custom-color` with
+     `data-custom`) replaces whichever tone is set. Every value is derived from that one
+     colour mixed with the theme's own surface and text, so the same value reads in the
+     light theme and in the dark one. The text on the full colour is a fixed white: its
+     contrast is the consumer's to check, where `contrast-color()` does not pick it.
+     Same specificity as the tone rows and written after them in this same sheet, so it
+     wins over them without any bundle order involved. A component that needs more rows
+     (VChip's hover and border steps) adds them in its own sheet. */
+  .v-tone[data-custom] {
+    --tone-bg-solid: var(--custom-color);
+    --tone-text-solid: var(--vectis-color-text-on-accent);
+    --tone-text-tinted: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 30%);
+    --tone-bg-soft: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 85%);
+  }
 }

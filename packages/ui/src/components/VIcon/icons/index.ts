@@ -84,7 +84,7 @@ export {
  * Every icon at once, for the places that legitimately want the whole set: the
  * gallery in the stories, the documentation site, the tests.
  *
- * NOTHING the library ships imports this barrel — a component imports the two or
+ * NOTHING the library ships imports this barrel: a component imports the two or
  * three icon modules it draws, by name. Importing it from a component would pull all
  * 34 drawings back into every consumer's bundle and undo the split.
  */

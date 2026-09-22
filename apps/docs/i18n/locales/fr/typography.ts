@@ -13,7 +13,7 @@ export default {
     },
     tags: {
       title: 'La balise rendue',
-      text: "Chaque variante rend déjà une balise sensée, h1 à h4 pour les titres et <code>p</code> ou <code>span</code> pour le reste. <code>as</code> sert aux cas où le sens et l'apparence divergent, et tout le reste traverse jusqu'à cette balise.",
+      text: "Chaque variante rend déjà une balise sensée, h1 à h4 pour les titres, <code>code</code> pour le code et <code>p</code> ou <code>span</code> pour le reste. <code>as</code> sert aux cas où le sens et l'apparence divergent, et tout le reste traverse jusqu'à cette balise.",
     },
     truncate: {
       title: 'Tronquer sur une ligne',

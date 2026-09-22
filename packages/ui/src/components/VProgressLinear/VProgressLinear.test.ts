@@ -179,6 +179,50 @@ describe('VProgressLinear', () => {
     expect(root.firstElementChild!.classList.contains('v-progress-linear-fill')).toBe(true)
   })
 
+  it('a NaN value is read as zero: no NaN reaches ARIA, the style or the text', () => {
+    const { getByRole, container } = render(VProgressLinear, {
+      props: { value: Number.NaN, showValue: true },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(getByRole('progressbar').getAttribute('aria-valuenow')).toBe('0')
+    expect(container.innerHTML).not.toContain('NaN')
+  })
+
+  it('a max that is not a finite number falls back to 100', () => {
+    for (const max of [Number.NaN, Number.POSITIVE_INFINITY]) {
+      const { container } = render(VProgressLinear, {
+        props: { value: 50, max },
+        attrs: { 'aria-label': 'x' },
+      })
+      const bar = container.querySelector('[role=progressbar]')!
+      expect(bar.getAttribute('aria-valuemax')).toBe('100')
+      expect(bar.getAttribute('aria-valuenow')).toBe('50')
+    }
+  })
+
+  it('the written percentage reads 100% only when complete and 0% only when empty', () => {
+    const text = (value: number) =>
+      render(VProgressLinear, {
+        props: { value, showValue: true },
+        attrs: { 'aria-label': 'x' },
+      })
+        .container.querySelector('.v-progress-linear-text')
+        ?.textContent?.trim()
+    expect(text(99.6)).toBe('99%')
+    expect(text(0.4)).toBe('1%')
+    expect(text(100)).toBe('100%')
+    expect(text(0)).toBe('0%')
+    expect(text(42.4)).toBe('42%')
+  })
+
+  it('a negative thickness is refused rather than written as an invalid length', () => {
+    const { container } = render(VProgressLinear, {
+      props: { value: 10, thickness: -3 },
+      attrs: { 'aria-label': 'x' },
+    })
+    expect(styleOf(container)).not.toContain('--progress-thickness')
+  })
+
   it('showValue: the percentage is rounded and derived from max', () => {
     const { container } = render(VProgressLinear, {
       props: { value: 1, max: 3, showValue: true },

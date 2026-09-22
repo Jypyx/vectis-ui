@@ -18,6 +18,24 @@ describe('VAvatar', () => {
     expect(getByRole('img').getAttribute('alt')).toBe('Ada Lovelace')
   })
 
+  it('initials: whole characters, stray spaces ignored', () => {
+    const initials = (name: string) =>
+      render(VAvatar, { props: { name } }).container.querySelector('.v-avatar-initials')!
+        .textContent
+    expect(initials('😀 Smile')).toBe('😀S')
+    expect(initials('  Ada   Lovelace ')).toBe('AL')
+    expect(initials('ada')).toBe('A')
+  })
+
+  it('an image that failed before the component mounted falls back to the initials', () => {
+    const complete = vi.spyOn(HTMLImageElement.prototype, 'complete', 'get').mockReturnValue(true)
+    const { getByText } = render(VAvatar, {
+      props: { src: 'https://example.test/broken.png', name: 'Grace Hopper' },
+    })
+    complete.mockRestore()
+    return Promise.resolve().then(() => expect(getByText('GH')).toBeTruthy())
+  })
+
   it('falls back to the initials when the image fails', async () => {
     const { getByRole, getByText } = render(VAvatar, {
       props: { src: 'https://example.test/broken.png', name: 'Grace Hopper' },
@@ -86,6 +104,57 @@ describe('VAvatar', () => {
     const { container } = render(VAvatar, { props: { icon: 'star' } })
     const el = container.querySelector('.v-avatar') as HTMLElement
     expect(el.getAttribute('role')).toBeNull()
+  })
+
+  it('a consumer aria-label wins over the name, and survives a picture', () => {
+    const named = render(VAvatar, {
+      props: { name: 'Ada Lovelace', clickable: true },
+      attrs: { 'aria-label': 'Open the profile' },
+    })
+    expect(named.getByRole('button').getAttribute('aria-label')).toBe('Open the profile')
+
+    const pictured = render(VAvatar, {
+      props: { src: 'https://example.test/a.png', clickable: true },
+      attrs: { 'aria-label': 'Open the profile' },
+    })
+    expect(pictured.getAllByRole('button')[0]?.getAttribute('aria-label')).toBe('Open the profile')
+  })
+
+  it('a static avatar named only by a consumer aria-label is an image', () => {
+    const { container } = render(VAvatar, {
+      attrs: { 'aria-label': '3 more members' },
+      slots: { default: () => '+3' },
+    })
+    const el = container.querySelector('.v-avatar') as HTMLElement
+    expect(el.getAttribute('role')).toBe('img')
+    expect(el.getAttribute('aria-label')).toBe('3 more members')
+  })
+
+  it('aria-labelledby removes the name the component would give', () => {
+    const { container } = render(VAvatar, {
+      props: { name: 'Ada Lovelace', clickable: true },
+      attrs: { 'aria-labelledby': 'elsewhere' },
+    })
+    expect(container.querySelector('.v-avatar')?.getAttribute('aria-label')).toBeNull()
+  })
+
+  it('a consumer aria-disabled is kept', () => {
+    const { getByRole } = render(VAvatar, {
+      props: { name: 'Ada', clickable: true },
+      attrs: { 'aria-disabled': 'true' },
+    })
+    expect(getByRole('button').getAttribute('aria-disabled')).toBe('true')
+  })
+
+  it('warns once about an interactive avatar with no accessible name', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(VAvatar, { props: { src: 'https://example.test/a.png', clickable: true } })
+    expect(warn.mock.calls.filter(([m]) => String(m).includes('[VAvatar]'))).toHaveLength(1)
+    warn.mockClear()
+    render(VAvatar, { props: { name: 'Ada', clickable: true } })
+    render(VAvatar, { props: { clickable: true }, slots: { default: () => '+3' } })
+    expect(warn.mock.calls.filter(([m]) => String(m).includes('[VAvatar]'))).toHaveLength(0)
+    warn.mockRestore()
   })
 })
 

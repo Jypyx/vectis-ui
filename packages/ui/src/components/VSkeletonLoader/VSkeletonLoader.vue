@@ -16,8 +16,11 @@ import { computed } from 'vue'
 import { useMessages } from '../../i18n/state'
 import { cssSize } from '../../utils/css'
 
+/** What the silhouette stands for, which sets its corners and how it is sized. */
 export type SkeletonLoaderShape = 'text' | 'control' | 'pill' | 'circle' | 'surface'
+/** How the silhouette says it is loading: a sweep, a slow pulse, or nothing. */
 export type SkeletonLoaderAnimation = 'wave' | 'pulse' | 'none'
+/** The step of the control size scale a control-shaped silhouette takes. */
 export type SkeletonLoaderSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 interface SkeletonLoaderProps {
@@ -27,9 +30,9 @@ interface SkeletonLoaderProps {
    *
    * - `text` follows the typography around it, so several silhouettes occupy exactly
    *   as many lines as the text they replace;
-   * - `control` takes the height of a control of the given size — a button, a field;
-   * - `pill` is that same height with fully rounded ends — a chip, a badge;
-   * - `circle` is that height in both dimensions — an avatar, a round icon button;
+   * - `control` takes the height of a control of the given size: a button, a field;
+   * - `pill` is that same height with fully rounded ends: a chip, a badge;
+   * - `circle` is that height in both dimensions: an avatar, a round icon button;
    * - `surface` is a card or an image, with a height of its own.
    */
   shape?: SkeletonLoaderShape
@@ -43,7 +46,7 @@ interface SkeletonLoaderProps {
   compact?: boolean
   /**
    * The width: a number is read as pixels, and anything else as a CSS length of your
-   * own — `'100%'`, `'12ch'`. Left out, the silhouette takes all the width available.
+   * own, such as `'100%'` or `'12ch'`. Left out, the silhouette takes all the width available.
    */
   width?: number | string
   /** The height, read the same way. It wins over the shape and the size. */
@@ -72,8 +75,8 @@ interface SkeletonLoaderProps {
    */
   announce?: boolean
   /**
-   * What is announced, which also IMPLIES announcing. Prefer something situated —
-   * "Loading the results" — since a generic word is the reason the default is silence.
+   * What is announced, which also IMPLIES announcing. Prefer something situated, such as
+   * "Loading the results", since a generic word is the reason the default is silence.
    * It falls back to the design system dictionary.
    */
   label?: string
@@ -95,22 +98,25 @@ const props = withDefaults(defineProps<SkeletonLoaderProps>(), {
 // A guard against two silent bugs: asked for zero lines the component would render
 // NOTHING at all — an invisible skeleton nobody notices is missing — and a fractional
 // count would produce a surprising number of them.
-const count = computed(() => Math.max(1, Math.trunc(props.lines)))
+const count = computed(() =>
+  Number.isFinite(props.lines) ? Math.max(1, Math.trunc(props.lines)) : 1,
+)
 
 // @a11y — silent by default, since a dozen silhouettes must not produce a dozen
 // announcements. Supplying a label counts as asking to be announced, otherwise that
 // prop would sit there doing nothing.
-const announced = computed(() => props.announce || props.label !== undefined)
+// An empty label is no label: it would otherwise open a live region with nothing in it.
+const announced = computed(() => props.announce || Boolean(props.label))
 
 const m = useMessages()
 // TRAP — the dictionary must never be read directly in the body of `setup`: the value
 // would be captured once and would stop following a later change of language.
-const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
+const resolvedLabel = computed(() => props.label || m.value.common.loading)
 </script>
 
 <template>
   <span
-    class="v-skeleton v-control"
+    class="v-skeleton-loader v-control"
     :data-shape="shape"
     :data-size="size"
     :data-compact="compact ? '' : undefined"
@@ -120,8 +126,8 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     :aria-hidden="announced ? undefined : 'true'"
     :style="{
       '--custom-color': color,
-      '--skeleton-w': cssSize(width),
-      '--skeleton-h': cssSize(height),
+      '--skeleton-loader-w': cssSize(width),
+      '--skeleton-loader-h': cssSize(height),
     }"
   >
     <!--
@@ -136,7 +142,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
       nobody can reach.
     -->
     <span v-if="announced" class="v-visually-hidden">{{ resolvedLabel }}</span>
-    <span v-for="n in count" :key="n" class="v-skeleton-item" />
+    <span v-for="n in count" :key="n" class="v-skeleton-loader-item" />
   </span>
 </template>
 
@@ -147,11 +153,11 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * and the dimension props overwrite them inline — which always wins over a rule
    * targeting the same element, so no specificity contest is possible.
    */
-  .v-skeleton {
+  .v-skeleton-loader {
     /* The grey has a token of its own. No existing colour role holds the right value in
        BOTH themes: the muted surface is too pale in the light one for the pulse to be
        visible at all, and the border colour has the right tone but the wrong meaning. */
-    --skeleton-base: var(--vectis-color-surface-skeleton);
+    --skeleton-loader-base: var(--vectis-color-surface-skeleton);
     /*
      * The highlight is DERIVED from the grey rather than named: the same colour, a little
      * lighter. A lightness STEP is what makes one declaration correct in both themes, where
@@ -159,45 +165,47 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
      * light and LIGHTER than it in dark, so a fixed target would lighten in one and darken in
      * the other. It also follows a custom `color` with nothing else to set.
      */
-    --skeleton-highlight: oklch(from var(--skeleton-base) calc(l + 0.06) c h);
-    --skeleton-h: var(--control-height);
+    --skeleton-loader-highlight: oklch(from var(--skeleton-loader-base) calc(l + 0.06) c h);
+    --skeleton-loader-h: var(--control-height);
     /* The corner a CONTROL-sized silhouette takes, whatever height this instance ends up
        with: a browser scales down a radius it cannot fit, so min() gives a silhouette that
        grew the same reduction a control-tall one already gets. It resolves to the token
        itself at the shipped 6px.
 
-       TRAP — the cap is NOT calc(var(--skeleton-h) / 2), which looks like the closer unit
-       and is the wrong one twice over: --skeleton-h is a flex BASIS on an item that grows
+       TRAP — the cap is NOT calc(var(--skeleton-loader-h) / 2), which looks like the closer unit
+       and is the wrong one twice over: --skeleton-loader-h is a flex BASIS on an item that grows
        to fill a taller parent (see below), and the `height` prop overwrites it inline. Two
        equally tall silhouettes would then round differently depending on how they got
        there. */
-    --skeleton-radius: min(var(--vectis-radius-interactive), calc(var(--control-height) / 2));
-    --skeleton-gap: var(--vectis-space-2);
+    --skeleton-loader-radius: min(
+      var(--vectis-radius-interactive),
+      calc(var(--control-height) / 2)
+    );
+    --skeleton-loader-gap: var(--vectis-space-2);
     display: flex;
     flex-direction: column;
-    gap: var(--skeleton-gap);
+    gap: var(--skeleton-loader-gap);
   }
 
   /* A custom colour wins by specificity rather than by order, being one step more
-     specific than the rule above — unlike VProgressLinear's tones, which all sit at the
-     same level and depend on their sequence. */
-  .v-skeleton[data-custom] {
-    --skeleton-base: var(--custom-color);
+     specific than the rule above. */
+  .v-skeleton-loader[data-custom] {
+    --skeleton-loader-base: var(--custom-color);
   }
 
-  .v-skeleton-item {
+  .v-skeleton-loader-item {
     /* The animation's overlay is positioned against this box. */
     position: relative;
     /* The height from the shape table is a DEFAULT: inside a parent that has a height
        of its own, the silhouette grows to fill it — a card fills its slot. */
     flex: 1 1 auto;
-    inline-size: var(--skeleton-w, 100%);
-    block-size: var(--skeleton-h);
+    inline-size: var(--skeleton-loader-w, 100%);
+    block-size: var(--skeleton-loader-h);
     /* Clipped rather than hidden: hiding the overflow would turn every silhouette into
        a scroll container, for nothing. */
     overflow: clip;
-    border-radius: var(--skeleton-radius);
-    background: var(--skeleton-base);
+    border-radius: var(--skeleton-loader-radius);
+    background: var(--skeleton-loader-base);
   }
 
   /*
@@ -210,16 +218,16 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * whose lines are set tighter than its font size, where the gap would otherwise go
    * negative.
    */
-  .v-skeleton[data-shape='text'] {
-    --skeleton-h: 1em;
-    --skeleton-radius: var(--vectis-radius-pill);
-    --skeleton-gap: max(0px, calc(1lh - 1em));
-    padding-block: calc(var(--skeleton-gap) / 2);
+  .v-skeleton-loader[data-shape='text'] {
+    --skeleton-loader-h: 1em;
+    --skeleton-loader-radius: var(--vectis-radius-pill);
+    --skeleton-loader-gap: max(0px, calc(1lh - 1em));
+    padding-block: calc(var(--skeleton-loader-gap) / 2);
   }
 
   /* A line of text keeps the height its typography gives it: unlike the other shapes it
      neither stretches in a tall parent nor squashes in a short one. */
-  .v-skeleton[data-shape='text'] .v-skeleton-item {
+  .v-skeleton-loader[data-shape='text'] .v-skeleton-loader-item {
     flex: none;
   }
 
@@ -229,13 +237,15 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * applies from two lines up — a single line is not a paragraph — and the proportion
    * is taken from the EFFECTIVE width, so it still works under a `width` prop.
    */
-  .v-skeleton[data-shape='text'] .v-skeleton-item + .v-skeleton-item:last-child {
-    --skeleton-last-line: 0.6;
-    inline-size: calc(var(--skeleton-w, 100%) * var(--skeleton-last-line));
+  .v-skeleton-loader[data-shape='text']
+    .v-skeleton-loader-item
+    + .v-skeleton-loader-item:last-child {
+    --skeleton-loader-last-line: 0.6;
+    inline-size: calc(var(--skeleton-loader-w, 100%) * var(--skeleton-loader-last-line));
   }
 
-  .v-skeleton[data-shape='pill'] {
-    --skeleton-radius: var(--vectis-radius-pill);
+  .v-skeleton-loader[data-shape='pill'] {
+    --skeleton-loader-radius: var(--vectis-radius-pill);
   }
 
   /*
@@ -246,17 +256,17 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * whole width, and aligning to the start stops the silhouette from being stretched
    * sideways — which is what keeps the circle round.
    */
-  .v-skeleton[data-shape='circle'] {
-    --skeleton-radius: var(--vectis-radius-pill);
+  .v-skeleton-loader[data-shape='circle'] {
+    --skeleton-loader-radius: var(--vectis-radius-pill);
     display: inline-flex;
     align-items: start;
   }
 
-  .v-skeleton[data-shape='circle'] .v-skeleton-item {
+  .v-skeleton-loader[data-shape='circle'] .v-skeleton-loader-item {
     /* Left to the content rather than set to the full width, so that the ratio is what
        decides. An explicit `width` still takes over, and then knowingly gives an
        oval. */
-    inline-size: var(--skeleton-w, auto);
+    inline-size: var(--skeleton-loader-w, auto);
     aspect-ratio: 1;
   }
 
@@ -266,13 +276,14 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * default from a token, which the `height` prop overrides, as does any consumer style
    * (theirs sits outside our layers and therefore wins).
    */
-  .v-skeleton[data-shape='surface'] {
-    --skeleton-h: var(--vectis-control-size-skeleton-surface);
-    --skeleton-radius: var(--vectis-radius-surface);
+  .v-skeleton-loader[data-shape='surface'] {
+    --skeleton-loader-h: var(--vectis-control-size-skeleton-surface);
+    --skeleton-loader-radius: var(--vectis-radius-surface);
   }
 
   /* The overlay both animations paint on, laid over the whole silhouette. */
-  .v-skeleton:is([data-animation='wave'], [data-animation='pulse']) .v-skeleton-item::after {
+  .v-skeleton-loader:is([data-animation='wave'], [data-animation='pulse'])
+    .v-skeleton-loader-item::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -287,9 +298,10 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * derived colour gives the same direction in both, and it is still only an opacity
    * being animated, so it costs no layout.
    */
-  .v-skeleton[data-animation='pulse'] .v-skeleton-item::after {
-    background-color: var(--skeleton-highlight);
-    animation: v-skeleton-pulse var(--vectis-duration-1500) var(--vectis-ease-in-out) infinite;
+  .v-skeleton-loader[data-animation='pulse'] .v-skeleton-loader-item::after {
+    background-color: var(--skeleton-loader-highlight);
+    animation: v-skeleton-loader-pulse var(--vectis-duration-1500) var(--vectis-ease-in-out)
+      infinite;
   }
 
   /*
@@ -304,21 +316,24 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
    * reversed between the two, that component drawing one bar where a page may hold a dozen
    * skeletons, so a compositor-only movement is not negotiable here.
    */
-  .v-skeleton[data-animation='wave'] .v-skeleton-item::after {
-    background-image: linear-gradient(90deg, transparent, var(--skeleton-highlight), transparent);
-    animation: v-skeleton-wave var(--vectis-duration-1500) linear infinite;
+  .v-skeleton-loader[data-animation='wave'] .v-skeleton-loader-item::after {
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      var(--skeleton-loader-highlight),
+      transparent
+    );
+    animation: v-skeleton-loader-wave var(--vectis-duration-1500) linear infinite;
   }
 
   /* Scoped to the wave: the pulse uses the same overlay, but its run is symmetric in
      time, so reversing it would change nothing at all. */
-  .v-skeleton[data-animation='wave']:dir(rtl) .v-skeleton-item::after {
+  .v-skeleton-loader[data-animation='wave']:dir(rtl) .v-skeleton-loader-item::after {
     animation-direction: reverse;
   }
 
-  /* These keyframes serve this component alone, so they stay in its own stylesheet.
-     Only the spin shared by VSpinner and VProgressCircular is declared globally, in
-     styles/utilities.css. */
-  @keyframes v-skeleton-pulse {
+  /* These keyframes serve this component alone, so they stay in its own stylesheet. */
+  @keyframes v-skeleton-loader-pulse {
     from,
     to {
       opacity: 0;
@@ -329,7 +344,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     }
   }
 
-  @keyframes v-skeleton-wave {
+  @keyframes v-skeleton-loader-wave {
     from {
       translate: -100% 0;
     }
@@ -350,10 +365,23 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
      * TRAP — this has exactly the specificity of the two rules it overrides, so its position
      * at the END of the sheet is the whole of what makes it win.
      */
-    .v-skeleton:is([data-animation='wave'], [data-animation='pulse']) .v-skeleton-item::after {
+    .v-skeleton-loader:is([data-animation='wave'], [data-animation='pulse'])
+      .v-skeleton-loader-item::after {
       background-image: none;
-      background-color: var(--skeleton-highlight);
-      animation: v-skeleton-pulse var(--vectis-duration-5000) var(--vectis-ease-in-out) infinite;
+      background-color: var(--skeleton-loader-highlight);
+      animation: v-skeleton-loader-pulse var(--vectis-duration-5000) var(--vectis-ease-in-out)
+        infinite;
+    }
+  }
+
+  /* Forced colours repaint the silhouette as Canvas, the page itself: the placeholder
+     vanishes. It is drawn in GrayText, and the pulse or the wave in Canvas over it, so the
+     loading cue survives as well as the shape. */
+  @media (forced-colors: active) {
+    .v-skeleton-loader-item {
+      --skeleton-loader-highlight: Canvas;
+      forced-color-adjust: none;
+      background: GrayText;
     }
   }
 }

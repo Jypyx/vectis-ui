@@ -393,9 +393,12 @@ const {
        1em, coincides with this one — VSpinner then draws its ring inside it at the
        proportion Material Symbols gives `progress_activity`, which is what makes the
        spinner and the icon it replaces read at the same size. */
-    inline-size: var(--vectis-icon-size);
-    block-size: var(--vectis-icon-size);
     font-size: var(--vectis-icon-size);
+    /* 1em of the line above rather than the variable again: a relative icon size would
+       otherwise be resolved twice, once against the button's text and once against this
+       box's own enlarged font-size. */
+    inline-size: 1em;
+    block-size: 1em;
     flex: none;
     display: inline-flex;
     align-items: center;

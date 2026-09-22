@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// @core — the only JS is deriving the default tag from the variant.
 /**
  * The design system's text element. Rather than setting a size here and a weight
  * there, the writer names the ROLE the text plays — a heading, a caption, a label —
@@ -13,6 +12,7 @@
  */
 import { computed } from 'vue'
 
+/** The role a text plays, each with its complete typographic recipe. */
 export type TypographyVariant =
   | 'display'
   | 'heading-1'
@@ -29,31 +29,32 @@ export type TypographyVariant =
   | 'overline'
   | 'code'
 
+/** The colour of a text; `default` sets none and inherits. */
 export type TypographyTone =
   'default' | 'muted' | 'subtle' | 'accent' | 'danger' | 'success' | 'warning' | 'on-inverse'
 
 interface TypographyProps {
   /**
    * The role this text plays, which selects a complete recipe of typographic
-   * tokens — size, weight, line height and, where the role calls for it, letter
+   * tokens: size, weight, line height and, where the role calls for it, letter
    * spacing and a monospaced family.
    */
   variant?: TypographyVariant
   /**
    * The HTML tag to render. Each variant already has a sensible default (h1 to h4,
-   * p, span, code), so this is for the cases where the meaning and the look differ —
+   * p, span, code), so this is for the cases where the meaning and the look differ:
    * a subtitle that is really an `h2`, or a label attached to a field.
    */
   as?: string
   /**
    * The colour of the text. `default` sets none at all, so the text inherits from
-   * whatever surrounds it — which is what lets the same component be used on an
+   * whatever surrounds it, which is what lets the same component be used on an
    * inverted surface or inside a coloured toast.
    */
   tone?: TypographyTone
   /**
    * Cuts the text to one line and ends it with an ellipsis. The element needs a
-   * width to be cut against — being a block, or a flex item — otherwise there is
+   * width to be cut against (being a block, or a flex item), otherwise there is
    * nothing to overflow and the text simply stays whole.
    */
   truncate?: boolean
@@ -133,6 +134,16 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
        already coloured context, an inverted surface or a tinted toast. */
     color: var(--typography-color, inherit);
     overflow-wrap: break-word;
+  }
+
+  /* TRAP — the colour variable inherits like any other, so without this reset a `default`
+     VTypography nested in a toned one took the OUTER tone's colour instead of the colour of
+     whatever sits between them. `initial` makes it guaranteed-invalid, which is what lets
+     the fallback above apply. At zero specificity, so the tone rules below and the sheets
+     that route a colour through the variable (VDataTable's title, VFilePicker's subtitle)
+     win over it whatever order the sheets land in. */
+  :where(.v-typography) {
+    --typography-color: initial;
   }
 
   .v-typography[data-variant='display'] {

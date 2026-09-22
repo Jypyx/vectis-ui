@@ -355,7 +355,7 @@ export const semantic = {
     ),
     'size-progress-linear-length': dimension(
       '10rem',
-      'The default length of a vertical VProgressLinear (overridable through `height`)',
+      'The default length of a vertical VProgressLinear, which a height set on the bar replaces',
     ),
     'size-progress-circular-diameter': dimension(
       '3rem',

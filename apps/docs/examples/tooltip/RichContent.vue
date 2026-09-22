@@ -22,7 +22,7 @@ import { VButton, VHotkeys, VTooltip, VTypography } from 'vectis-ui'
              set. -->
         <span class="shortcut">
           Shortcut
-          <VHotkeys keys="mod+k" variant="outlined" />
+          <VHotkeys keys="mod+k" variant="outline" />
         </span>
       </div>
     </template>

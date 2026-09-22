@@ -1,17 +1,5 @@
 /* DS utilities — the strongest layer: wins over the components. */
 
-/*
- * Continuous rotation, shared by VSpinner and VProgressCircular (each sets its
- * own duration from a token). @keyframes are GLOBAL: they are not arbitrated like
- * declarations, so a layer has no effect here — hence this definition outside any
- * layer, once for the whole DS.
- */
-@keyframes v-spin {
-  to {
-    transform: rotate(1turn);
-  }
-}
-
 @layer vectis.utilities {
   /*
    * The native control a component draws its own chrome for: the checkbox behind its box,

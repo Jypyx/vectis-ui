@@ -34,6 +34,8 @@ export default {
           "Applique la densité réduite à chaque avatar du groupe. Contrairement à la taille, elle se cumule : un avatar ne peut pas s'en retirer dans un groupe compact.",
         ringColor:
           "La couleur de l'anneau dessiné autour de chaque disque. Elle vaut par défaut le fond de la page, et c'est ce qui fait lire l'anneau comme un écart entre deux avatars.",
+        label:
+          "Le nom accessible du groupe, par exemple « Membres du projet » : une rangée de visages ne dit pas d'elle-même qui sont ces personnes. Votre propre <code>aria-label</code> ou <code>aria-labelledby</code> l'emporte sur lui.",
       },
       slots: {
         default: 'Les VAvatar à empiler.',

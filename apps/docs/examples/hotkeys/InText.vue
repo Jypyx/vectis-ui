@@ -51,7 +51,7 @@ const COMMANDS = [
     <!-- And inside the control the shortcut is a second route to. -->
     <VButton variant="outline" tone="neutral" class="search">
       Search the docs
-      <VHotkeys keys="mod+k" variant="outlined" />
+      <VHotkeys keys="mod+k" variant="outline" />
     </VButton>
   </div>
 </template>

@@ -13,7 +13,7 @@ const permissive = ref(0)
     <!-- No platform is pinned, so the caps show what this keyboard has and the matcher
          answers to the same thing: a Mac reader presses Command, everyone else Ctrl. -->
     <p class="line">
-      <VHotkeys keys="mod+k" variant="outlined" listen @trigger="opened++" />
+      <VHotkeys keys="mod+k" variant="outline" listen @trigger="opened++" />
       <VTypography as="span">Press it anywhere on the page. Fired {{ opened }} times.</VTypography>
     </p>
 
@@ -21,7 +21,7 @@ const permissive = ref(0)
          which is the whole point of taking over a combination it already uses. Here
          both happen: the count goes up and the browser opens its save dialog. -->
     <p class="line">
-      <VHotkeys keys="mod+s" variant="outlined" listen allow-default @trigger="saved++" />
+      <VHotkeys keys="mod+s" variant="outline" listen allow-default @trigger="saved++" />
       <VTypography as="span" tone="muted">
         With allowDefault, the browser still saves the page. Fired {{ saved }} times.
       </VTypography>
@@ -30,12 +30,12 @@ const permissive = ref(0)
     <VInput label="Type in here, then press the shortcut below" class="field" />
 
     <p class="line">
-      <VHotkeys keys="mod+j" variant="outlined" listen @trigger="strict++" />
+      <VHotkeys keys="mod+j" variant="outline" listen @trigger="strict++" />
       <VTypography as="span">Quiet while a field has the focus: {{ strict }}</VTypography>
     </p>
 
     <p class="line">
-      <VHotkeys keys="mod+j" variant="outlined" listen allow-in-input @trigger="permissive++" />
+      <VHotkeys keys="mod+j" variant="outline" listen allow-in-input @trigger="permissive++" />
       <VTypography as="span">With allowInInput, it fires there too: {{ permissive }}</VTypography>
     </p>
   </div>

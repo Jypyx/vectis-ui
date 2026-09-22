@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
+import { expect, within } from 'storybook/test'
 
 import { storyText } from '../../stories/storyText'
 import VTypography from './VTypography.vue'
@@ -126,9 +127,22 @@ export const Tones: Story = {
           </div>
           <VTypography v-else :tone="tone">{{ tone }} — {{ t.pangramShort }}</VTypography>
         </template>
+        <VTypography tone="danger">
+          danger —
+          <span data-testid="recoloured" style="color: var(--vectis-color-accent-text)">
+            <VTypography as="span" variant="code">default</VTypography>
+          </span>
+        </VTypography>
       </div>
     `,
   }),
+  play: async ({ canvasElement }) => {
+    // The default tone inherits the colour of what holds it, even inside a toned
+    // VTypography: the tone's variable must not reach it past the element in between.
+    const holder = within(canvasElement).getByTestId('recoloured')
+    const inner = holder.querySelector('.v-typography') as HTMLElement
+    await expect(getComputedStyle(inner).color).toBe(getComputedStyle(holder).color)
+  },
 }
 
 /**

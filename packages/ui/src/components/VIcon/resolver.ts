@@ -11,16 +11,24 @@
  * handles, and settable from any `.ts` file — a Nuxt plugin, `main.ts` — without a
  * component being involved.
  */
+
 import { shallowRef, type Component } from 'vue'
 
 import { builtinIconNames, type IconName } from './icons/names'
 import type { IconContext, IconRender } from './types'
 
+/* A lookup by name that answers only for the table's OWN keys: `aliases['constructor']` would
+   otherwise hand back a function from Object.prototype, and the "I do not know this name"
+   contract (`undefined`) would break for any name that happens to be one of its members. */
+function own<T>(table: Record<string, T> | undefined, name: string): T | undefined {
+  return table !== undefined && Object.hasOwn(table, name) ? table[name] : undefined
+}
+
 /**
  * Turns an icon name into a description of what to draw. Answering `undefined` means
  * "I do not know this name", and not "draw nothing": VIcon then falls back to the
  * built-in icons, and after that to the ligature font. That distinction is what
- * makes a PARTIAL mapping usable — map the five names you care about and let the
+ * makes a PARTIAL mapping usable: map the five names you care about and let the
  * rest be.
  */
 export type IconResolver = (name: string, ctx: IconContext) => IconRender | undefined
@@ -38,7 +46,7 @@ const resolver = shallowRef<IconResolver | undefined>(undefined)
  * Installs the resolver every VIcon will consult, or removes it when passed
  * `undefined`.
  *
- * Call it at MODULE level — from a Nuxt plugin or from `main.ts` — and never inside
+ * Call it at MODULE level (from a Nuxt plugin or from `main.ts`) and never inside
  * a component's `setup()`. Two traps follow from where the state lives. On a server
  * it belongs to the process rather than to a request, which is right for
  * configuration and wrong for anything varying per visitor. And installing it on the
@@ -55,7 +63,7 @@ export function resolveIcon(name: string, ctx: IconContext): IconRender | undefi
 }
 
 /**
- * A resolver for a LIGATURE font — Material Symbols in any of its variants, or an
+ * A resolver for a LIGATURE font: Material Symbols in any of its variants, or an
  * IcoMoon build made that way. It answers to every name, since the font itself
  * decides what it recognizes.
  *
@@ -66,7 +74,7 @@ export function resolveIcon(name: string, ctx: IconContext): IconRender | undefi
  */
 export function ligatureIconResolver(options: { aliases?: IconAliases } = {}): IconResolver {
   const { aliases } = options
-  return (name) => ({ text: aliases?.[name] ?? name })
+  return (name) => ({ text: own(aliases, name) ?? name })
 }
 
 /**
@@ -90,7 +98,7 @@ export function classIconResolver(options: {
 }): IconResolver {
   const { aliases, className, strict = true } = options
   return (name, ctx) => {
-    const mapped = aliases?.[name]
+    const mapped = own(aliases, name)
     // The SET of names, never the icons themselves: this asks whether the design
     // system ships the name, and reaching for the drawings to answer it would make a
     // consumer who wired in their OWN icon library download all 34 Material paths.
@@ -114,7 +122,7 @@ export function componentIconResolver(options: {
 }): IconResolver {
   const { components, props } = options
   return (name, ctx) => {
-    const component = components[name]
+    const component = own<Component>(components, name)
     return component ? { component, props: props?.(name, ctx.filled) } : undefined
   }
 }

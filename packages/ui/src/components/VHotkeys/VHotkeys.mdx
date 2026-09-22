@@ -82,7 +82,7 @@ documentation table that wants to show all three side by side.
 
 ## Variants and sizes
 
-`soft` (the default), `outlined` and `elevated`: tinted, outlined, raised. They stay three values
+`soft` (the default), `outline` and `elevated`: tinted, outlined, raised. They stay three values
 of one variant rather than a variant plus an elevation flag, since a `<kbd>` is not interactive and
 so has no state for an elevation to combine with. There is no `tone` prop either — a keyboard
 shortcut is chrome, never data of the reader's.
@@ -150,15 +150,30 @@ Modifiers are matched **exactly**, never "at least": `mod+k` deliberately stays 
   in an `<input>`, a `<textarea>`, a `<select>` or a `contenteditable`. Non-text inputs — a
   checkbox, a radio, a button — never count as a text field.
 - Operating-system auto-repeat is ignored, so holding the combination down emits once.
+- A key press another handler has already cancelled (`preventDefault`) is left alone, and so is the
+  Enter that confirms an input method's candidate.
+- **Escape is reported but never cancelled**, `allow-default` or not: a cancelled Escape is not a
+  close request, so every open dialog and popover on the page would stop closing on it.
+- A field inside a shadow root (a web component's input) counts as a text field too.
+- Inside `<KeepAlive>`, a deactivated view stops listening and starts again when it comes back.
 
 <Canvas of={VHotkeysStories.Listening} />
 
 <Canvas of={VHotkeysStories.ListeningInInput} />
 
-> Matching is done on `event.key`, which is layout-dependent for shifted non-letters: `shift+1`
-> arrives as `!` on a US layout and as `&` on a French one. `event.code` would fix that case and
-> break a worse one — it names the _physical_ key, so `mod+a` would have to be declared `KeyQ` on
-> AZERTY. Prefer letter and named-key shortcuts.
+> Matching is done on `event.key`, which already carries what Shift and Option did to the key,
+> while the modifiers are compared exactly. Three consequences:
+>
+> - A symbol typed with Shift never matches on its own: `?` arrives with Shift held, and
+>   `shift+/` arrives as `?`. The one spelling that fires is `shift+?`, which displays as such.
+> - A layout changes what a shifted key reports: `shift+1` arrives as `!` on a US layout and as
+>   `&` on a French one, where the digit itself needs Shift, so `mod+1` never fires on AZERTY.
+> - On macOS, Option composes a character: `alt+k` arrives as `˚`, so an `alt` + letter shortcut
+>   does not fire there.
+>
+> `event.code` would fix those cases and break a worse one: it names the _physical_ key, so `mod+a`
+> would have to be declared `KeyQ` on AZERTY. Prefer letter and named-key shortcuts, with `mod`,
+> `ctrl` or `shift`.
 
 ## Accessibility
 

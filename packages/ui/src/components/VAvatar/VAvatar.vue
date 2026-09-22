@@ -16,7 +16,7 @@
  * into it first, and a plain fallthrough would overwrite them.
  */
 
-import { computed, inject, ref, useAttrs, watch } from 'vue'
+import { computed, inject, onMounted, ref, useAttrs, useSlots, useTemplateRef, watch } from 'vue'
 import type { StyleValue } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
@@ -24,9 +24,12 @@ import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 import { AVATAR_DEFAULT_SIZE, avatarGroupKey } from './context'
 
+import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useInertLink } from '../../composables/useInertLink'
 import { customColorStyle } from '../../utils/css'
+import { isDev } from '../../utils/env'
 
+/** The diameter of the disc, from the control size scale. */
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 interface AvatarProps {
@@ -43,13 +46,14 @@ interface AvatarProps {
   /**
    * The person's full name. It does three things at once: it names the avatar for assistive
    * technology, its initials are what shows when there is no picture and no icon, and it is
-   * the seed the automatic colour is derived from — so the same person keeps the same colour
+   * the seed the automatic colour is derived from, so the same person keeps the same colour
    * everywhere.
    */
   name?: string
   /**
-   * The accessible name, when it should not simply be `name` — an avatar standing for a team
-   * rather than a person, say. It wins over `name`.
+   * The accessible name, when it should not simply be `name`: an avatar standing for a team
+   * rather than a person, say. It wins over `name`, and a consumer `aria-label` wins over it.
+   * On a picture it is the image's `alt` text.
    */
   alt?: string
   /**
@@ -132,8 +136,8 @@ const {
 const isInteractive = computed(() => isLink.value || props.clickable)
 const tag = computed(() => (isLink.value ? 'a' : props.clickable ? 'button' : 'span'))
 
-// @fallback — the image failed to load: the initials take over, so an avatar is
-// never an empty box.
+// @core
+// The image failed to load: the initials take over, so an avatar is never an empty box.
 const failed = ref(false)
 watch(
   () => props.src,
@@ -143,17 +147,39 @@ watch(
 )
 const showImage = computed(() => Boolean(props.src) && !failed.value)
 
-const accessibleName = computed(() => props.alt ?? props.name)
+/* TRAP — on a server-rendered page the browser may give up on the picture BEFORE hydration
+   attaches `@error`, and that event is never sent again: the disc would stay an empty
+   circle. A picture already settled with no pixels at mount is one that failed. */
+const imageEl = useTemplateRef<HTMLImageElement>('image')
+onMounted(() => {
+  const img = imageEl.value
+  if (img?.complete && img.naturalWidth === 0) failed.value = true
+})
 
+// @a11y
+/*
+ * The name bound on the root: a consumer `aria-labelledby` removes it, a consumer `aria-label`
+ * replaces it, and otherwise it is `alt`, then `name`. A picture on show carries that name as
+ * its own `alt`, so the root then names itself only with what the consumer wrote.
+ */
+const ariaLabel = useAriaLabel(() => (showImage.value ? undefined : (props.alt ?? props.name)))
+const named = computed(() => ariaLabel.value !== undefined || attrs['aria-labelledby'] != null)
+
+// @core
 const initials = computed(() => {
   if (!props.name) return ''
+  /* Whole characters, not UTF-16 halves: `part[0]` of "😀" is a lone surrogate, drawn as a
+     replacement box. And `toUpperCase` rather than its locale-aware sibling, whose answer
+     depends on the runtime's locale, which the server and the browser need not share. */
   return props.name
     .split(/\s+/)
+    .filter(Boolean)
     .slice(0, 2)
-    .map((part) => part[0]?.toLocaleUpperCase() ?? '')
+    .map((part) => [...part][0]?.toUpperCase() ?? '')
     .join('')
 })
 
+// @core
 /*
  * Auto hue: a pure JS hash of the name → an OKLCH hue (0–359). Only the hue is
  * inline (a unitless scalar); the CSS composes background/text with L/C fixed per
@@ -175,13 +201,28 @@ const hue = computed(() => {
 })
 const isAuto = computed(() => props.color === undefined && hue.value !== null)
 
+// @a11y
 // A static avatar with no picture is an image named by `alt`/`name`. Anything else keeps the
 // role that arrived in the attributes — `link` on an inert link, a consumer's own otherwise.
 const role = computed(() =>
-  !isInteractive.value && !showImage.value && accessibleName.value
+  !isInteractive.value && !showImage.value && named.value
     ? 'img'
     : (passedAttrs.value.role as string | undefined),
 )
+
+// @devwarn
+// A button or a link named by nothing: no `name`, no `alt`, no `aria-*` and no slot text. A
+// picture alone does not count, its `alt` coming from the same two props.
+if (isDev) {
+  const slots = useSlots()
+  onMounted(() => {
+    if (isInteractive.value && !named.value && !props.alt && !props.name && !slots.default) {
+      console.warn(
+        '[VAvatar] a clickable or linked avatar needs an accessible name: set `name`, `alt` or `aria-label`.',
+      )
+    }
+  })
+}
 
 const rootStyle = computed<StyleValue>(() => [
   customColorStyle(props.color) ??
@@ -193,6 +234,7 @@ const rootStyle = computed<StyleValue>(() => [
 <template>
   <component
     :is="tag"
+    :aria-disabled="isInertLink ? 'true' : undefined"
     v-bind="passedAttrs"
     class="v-avatar v-control"
     :style="rootStyle"
@@ -203,12 +245,12 @@ const rootStyle = computed<StyleValue>(() => [
     :href="linkHref"
     :type="tag === 'button' ? 'button' : undefined"
     :disabled="tag === 'button' ? disabled : undefined"
-    :aria-disabled="isInertLink ? 'true' : undefined"
     :role="role"
-    :aria-label="!showImage ? accessibleName : undefined"
+    :aria-label="ariaLabel"
   >
     <img
       v-if="showImage"
+      ref="image"
       class="v-avatar-image"
       :src="src"
       :alt="alt ?? name ?? ''"
@@ -323,6 +365,16 @@ const rootStyle = computed<StyleValue>(() => [
   @media (prefers-reduced-motion: reduce) {
     .v-avatar {
       transition: none;
+    }
+  }
+
+  /* Forced colours repaint the disc as Canvas and drop the separation ring, a shadow, so
+     an avatar has no edge and the discs of a group run into one another. The outline gives
+     each disc its circle back; the focus ring, at (0,2,0), still wins over it. */
+  @media (forced-colors: active) {
+    .v-avatar {
+      outline: var(--vectis-control-border-width) solid CanvasText;
+      outline-offset: calc(-1 * var(--vectis-control-border-width));
     }
   }
 }

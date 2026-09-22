@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// @core — no behavioural JS at all: value normalization and the display string.
 /**
  * A bar filling up as something progresses. The element rendered IS the track, and the
  * whole geometry follows from a single number set on it — the fraction filled, with no
@@ -19,7 +18,7 @@ import { useMessages } from '../../i18n/state'
 import { px } from '../../utils/css'
 
 /** What the progress means, in colour. */
-export type ProgressLinearTone = 'accent' | 'success' | 'warning' | 'danger' | 'neutral'
+export type ProgressLinearTone = 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
 
 /** How the track and the fill end. */
 export type ProgressLinearShape = 'rounded' | 'square'
@@ -29,6 +28,16 @@ export type ProgressLinearValuePosition = 'start' | 'center' | 'end'
 
 /** Which way the bar fills. */
 export type ProgressLinearOrientation = 'horizontal' | 'vertical'
+
+/** What the default slot receives. */
+export interface ProgressLinearSlotProps {
+  /** The value, brought back into the range. */
+  value: number
+  /** The bound, zero or more. */
+  max: number
+  /** How far along it is, as a percentage and unrounded. */
+  percent: number
+}
 
 interface ProgressLinearProps {
   /** How far along it is. Anything outside the range is brought back into it. */
@@ -57,7 +66,7 @@ interface ProgressLinearProps {
   color?: string
   /**
    * How thick the bar is, always IN PIXELS: `12` and `'12'` both give 12px. It is 4px
-   * by default — bear in mind that showing text inside a bar that thin needs an
+   * by default, and showing text inside a bar that thin needs an
    * explicit thickness.
    */
   thickness?: number | string
@@ -95,11 +104,11 @@ defineSlots<{
   /**
    * What to write inside the bar instead of the percentage.
    *
-   * TRAP — it is rendered TWICE, once over the empty track and once over the filled
-   * part in a colour that contrasts with it, each copy cut at the fill's edge. So
-   * whatever it renders must be pure: anything with a side effect would happen twice.
+   * It is rendered TWICE, once over the empty track and once over the filled part in a
+   * colour that contrasts with it, each copy cut at the fill's edge. So whatever it renders
+   * must be pure: anything with a side effect would happen twice.
    */
-  default?(props: { value: number; max: number; percent: number }): unknown
+  default?(props: ProgressLinearSlotProps): unknown
 }>()
 
 /* The percent sign, and the non-breaking space French puts before it where English puts
@@ -217,14 +226,6 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
     transition: inline-size var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
-  /* A custom colour replaces the tone: at (0,2,0) it beats the base rule's mapping
-     whatever the order the two are written in. */
-  .v-progress-linear[data-custom] {
-    --progress-fill: var(--custom-color);
-    --progress-track: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 85%);
-    --progress-text-fallback: var(--vectis-color-text-on-accent);
-  }
-
   /* The text inside the bar, in two copies laid over the same box — the track's own,
      which is why a cut expressed as a fraction of it lands exactly on the fill's edge.
      Bear in mind that the default 4px thickness cannot hold text at all: showing any
@@ -325,6 +326,16 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
     inset-inline-end: 0;
   }
 
+  /* TRAP — a right-to-left page reverses the inline axis of a vertical writing mode too:
+     `vertical-lr` then runs from the bottom up, so the far end anchored above is the TOP.
+     The fill goes back to the start of the axis, which is now the bottom. Without this
+     rule the bar fills downwards, and the clip of the text, which assumes a fill rising
+     from the bottom, paints each copy over the wrong ground. */
+  .v-progress-linear[data-orientation='vertical']:dir(rtl) .v-progress-linear-fill {
+    inset-inline-start: 0;
+    inset-inline-end: auto;
+  }
+
   /* The text now stacks along the vertical axis, whose start is the zero end — the
      bottom of the bar. */
   .v-progress-linear[data-orientation='vertical'] .v-progress-linear-text {
@@ -392,10 +403,17 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
      are simply read backwards, which changes nothing else BECAUSE the easing curve is
      symmetric; an asymmetric one would need a second set of keyframes.
 
-     Nothing is needed for a right-to-left page: the logical inset already follows the
-     reading direction. */
+     A horizontal right-to-left page needs nothing: the logical inset already follows the
+     reading direction. A vertical one does, below. */
   .v-progress-linear[data-orientation='vertical'][data-indeterminate] .v-progress-linear-fill {
     animation-direction: reverse;
+  }
+
+  /* On a right-to-left page the vertical axis already runs upwards (see the trap above),
+     so the keyframes are read forwards again. */
+  .v-progress-linear[data-orientation='vertical'][data-indeterminate]:dir(rtl)
+    .v-progress-linear-fill {
+    animation-direction: normal;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -408,6 +426,31 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
        happening, which is the one thing it exists to say. */
     .v-progress-linear[data-indeterminate] .v-progress-linear-fill {
       animation-duration: var(--vectis-duration-5000);
+    }
+  }
+
+  /* Windows forced colours repaint every background as Canvas, which takes the track and
+     the fill away together and leaves a floating figure at best. The bar is drawn in the
+     system colours instead, the VSlider pair: an edge in CanvasText for the track, the
+     Highlight pair for the fill and the text over it. `forced-color-adjust` inherits, so
+     both copies of the text are given their colour here too. */
+  @media (forced-colors: active) {
+    .v-progress-linear {
+      forced-color-adjust: none;
+      background: Canvas;
+      box-shadow: inset 0 0 0 var(--vectis-control-border-width) CanvasText;
+    }
+
+    .v-progress-linear-fill {
+      background: Highlight;
+    }
+
+    .v-progress-linear-text {
+      color: CanvasText;
+    }
+
+    .v-progress-linear-text[data-on-fill] {
+      color: HighlightText;
     }
   }
 }

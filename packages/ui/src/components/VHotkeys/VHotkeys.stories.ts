@@ -65,7 +65,7 @@ const meta = {
   title: 'Components/Hotkeys',
   component: VHotkeys,
   argTypes: {
-    variant: { control: 'select', options: ['soft', 'outlined', 'elevated'] },
+    variant: { control: 'select', options: ['soft', 'outline', 'elevated'] },
     size: { control: 'select', options: ['xs', 'sm'] },
     platform: { control: 'select', options: [undefined, 'mac', 'windows', 'linux', 'other'] },
     attached: { control: 'boolean' },
@@ -99,11 +99,11 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-/** `soft` (the default), `outlined` and `elevated` mirror the neutral tone of VButton. */
+/** `soft` (the default), `outline` and `elevated` mirror the neutral tone of VButton. */
 export const Variants: Story = {
   render: () => ({
     components: { VHotkeys },
-    setup: () => ({ variants: ['soft', 'outlined', 'elevated'] }),
+    setup: () => ({ variants: ['soft', 'outline', 'elevated'] }),
     template: `
       <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center">
         <VHotkeys v-for="variant in variants" :key="variant" :variant="variant" keys="mod+shift+k" />
@@ -148,7 +148,7 @@ export const Platforms: Story = {
 export const Attached: Story = {
   render: () => ({
     components: { VHotkeys },
-    setup: () => ({ t, variants: ['soft', 'outlined', 'elevated'] }),
+    setup: () => ({ t, variants: ['soft', 'outline', 'elevated'] }),
     template: `
       <div style="display: grid; grid-template-columns: repeat(3, max-content); gap: 16px 32px; align-items: center; justify-items: start">
         <span style="font: inherit; opacity: 0.7">{{ t.detachedRow }}</span>
@@ -221,7 +221,7 @@ export const Sizes: Story = {
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
           <VButton size="sm">{{ t.buttonLabel }}</VButton>
           <VChip size="sm">{{ t.chipLabel }}</VChip>
-          <VHotkeys keys="mod+k" size="sm" variant="outlined" platform="windows" />
+          <VHotkeys keys="mod+k" size="sm" variant="outline" platform="windows" />
           <span style="font: inherit; opacity: 0.7">{{ t.sameHeight }}</span>
         </div>
       </div>
@@ -252,7 +252,7 @@ export const KeyGallery: Story = {
     }),
     template: `
       <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center">
-        <VHotkeys v-for="combo in combos" :key="combo" :keys="combo" variant="outlined" />
+        <VHotkeys v-for="combo in combos" :key="combo" :keys="combo" variant="outline" />
       </div>
     `,
   }),
@@ -318,7 +318,7 @@ export const InContext: Story = {
         </div>
         <VButton variant="outline" style="justify-content: space-between">
           {{ t.searchHint }}
-          <VHotkeys keys="mod+k" variant="outlined" />
+          <VHotkeys keys="mod+k" variant="outline" />
         </VButton>
       </div>
     `,

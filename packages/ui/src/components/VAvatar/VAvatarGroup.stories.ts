@@ -17,10 +17,12 @@ const NAMES = [
 
 const t = storyText({
   en: {
+    team: 'Project members',
     moreMembers: (count: number) => `${count} more members`,
     otherMembers: (count: number) => `${count} other members`,
   },
   fr: {
+    team: 'Membres du projet',
     moreMembers: (count: number) => `${count} membres de plus`,
     otherMembers: (count: number) => `${count} autres membres`,
   },
@@ -87,7 +89,7 @@ export const CustomOverflow: Story = {
     components: { VAvatarGroup, VAvatar },
     setup: () => ({ names: NAMES, t }),
     template: `
-      <VAvatarGroup :max="3">
+      <VAvatarGroup :max="3" :label="t.team">
         <VAvatar v-for="n in names" :key="n" :name="n" />
         <template #overflow="{ count }">
           <VAvatar clickable :aria-label="t.moreMembers(count)">+{{ count }}</VAvatar>
@@ -95,6 +97,12 @@ export const CustomOverflow: Story = {
       </VAvatarGroup>
     `,
   }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByRole('group', { name: 'Project members' })).toBeInTheDocument()
+    // The consumer's name reaches the button: the "+3" text alone would say nothing.
+    await expect(canvas.getByRole('button', { name: '3 more members' })).toBeInTheDocument()
+  },
 }
 
 /**
@@ -135,6 +143,7 @@ export const WithTooltips: Story = {
   play: async ({ canvasElement }) => {
     // hovering the +X aggregate → a tooltip listing the hidden members
     const overflow = within(canvasElement).getByText('+2')
+    await expect(overflow).toHaveAccessibleName('2 other members')
     await userEvent.hover(overflow)
     await waitFor(() => expect(within(document.body).getByText(/Barbara Liskov/)).toBeVisible())
   },

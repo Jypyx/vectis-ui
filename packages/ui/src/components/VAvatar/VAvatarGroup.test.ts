@@ -18,6 +18,34 @@ describe('VAvatarGroup', () => {
     expect(discs(container)).toHaveLength(3)
   })
 
+  it('label names the group; a consumer aria-label wins, aria-labelledby removes it', () => {
+    const labelled = render(VAvatarGroup, {
+      props: { label: 'Project members' },
+      slots: { default: () => avatars(['Ada']) },
+    })
+    expect(labelled.container.querySelector('[role=group]')?.getAttribute('aria-label')).toBe(
+      'Project members',
+    )
+
+    const overridden = render(VAvatarGroup, {
+      props: { label: 'Project members' },
+      attrs: { 'aria-label': 'Reviewers' },
+      slots: { default: () => avatars(['Ada']) },
+    })
+    expect(overridden.container.querySelector('[role=group]')?.getAttribute('aria-label')).toBe(
+      'Reviewers',
+    )
+
+    const referenced = render(VAvatarGroup, {
+      props: { label: 'Project members' },
+      attrs: { 'aria-labelledby': 'heading' },
+      slots: { default: () => avatars(['Ada']) },
+    })
+    const group = referenced.container.querySelector('[role=group]')
+    expect(group?.getAttribute('aria-label')).toBeNull()
+    expect(group?.getAttribute('aria-labelledby')).toBe('heading')
+  })
+
   it('truncates at `max` and renders the +N aggregate', () => {
     const { container } = render(VAvatarGroup, {
       props: { max: 2 },
@@ -40,6 +68,15 @@ describe('VAvatarGroup', () => {
   it('`max: 0` shows every avatar, as documented', () => {
     const { container } = render(VAvatarGroup, {
       props: { max: 0 },
+      slots: { default: () => avatars(['Ada', 'Linus', 'Grace']) },
+    })
+    expect(discs(container)).toHaveLength(3)
+    expect(container.textContent).not.toContain('+')
+  })
+
+  it('a negative `max` is no limit, like 0', () => {
+    const { container } = render(VAvatarGroup, {
+      props: { max: -1 },
       slots: { default: () => avatars(['Ada', 'Linus', 'Grace']) },
     })
     expect(discs(container)).toHaveLength(3)

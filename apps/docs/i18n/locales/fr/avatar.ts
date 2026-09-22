@@ -43,7 +43,7 @@ export default {
         src: "La photo à afficher. Elle est préférée à tout le reste, et une image qui échoue à se charger passe la main à l'icône ou aux initiales plutôt que de laisser un trou.",
         icon: "L'icône à afficher quand il n'y a pas de photo. Elle passe avant les initiales : un avatar à qui on donne une icône et un nom montre l'icône.",
         name: "Le nom complet. Il fait trois choses à la fois : il nomme l'avatar pour les technologies d'assistance, ses initiales sont ce qui s'affiche sans photo ni icône, et il est la graine dont la couleur automatique est dérivée.",
-        alt: "Le nom accessible, quand il ne doit pas être simplement le nom : un avatar représentant une équipe plutôt qu'une personne, par exemple. Il l'emporte sur <code>name</code>.",
+        alt: "Le nom accessible, quand il ne doit pas être simplement le nom : un avatar représentant une équipe plutôt qu'une personne, par exemple. Il l'emporte sur <code>name</code>, et votre propre <code>aria-label</code> l'emporte sur lui. Sur une photo, c'est le texte <code>alt</code> de l'image.",
         color:
           'Une couleur à vous, en hexadécimal, en nom CSS ou en <code>oklch()</code>. Elle remplace la teinte autrement dérivée de <code>name</code>, et le texte posé dessus est toujours blanc : une couleur claire reste donc à votre charge.',
         size: "Le diamètre du disque, tiré de l'échelle de tailles partagée par tous les contrôles. Omise dans un VAvatarGroup, elle prend celle du groupe ; seul, l'avatar est en <code>md</code>.",

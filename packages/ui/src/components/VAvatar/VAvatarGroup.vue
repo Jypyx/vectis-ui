@@ -22,7 +22,14 @@ import VAvatar from './VAvatar.vue'
 import type { AvatarSize } from './VAvatar.vue'
 import { AVATAR_DEFAULT_SIZE, avatarGroupKey } from './context'
 
+import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useSlotNodes } from '../../composables/useSlotNodes'
+
+/** What the `#overflow` slot receives. */
+export interface AvatarGroupOverflowSlotProps {
+  /** How many avatars are hidden beyond `max`. */
+  count: number
+}
 
 interface AvatarGroupProps {
   /**
@@ -45,6 +52,11 @@ interface AvatarGroupProps {
    * background, which is what makes the ring read as a gap between two avatars.
    */
   ringColor?: string
+  /**
+   * The accessible name of the group, e.g. "Project members". A row of faces does not say on
+   * its own who these people are. A consumer `aria-label` or `aria-labelledby` wins over it.
+   */
+  label?: string
 }
 
 const props = withDefaults(defineProps<AvatarGroupProps>(), {
@@ -52,7 +64,10 @@ const props = withDefaults(defineProps<AvatarGroupProps>(), {
   size: undefined,
   compact: false,
   ringColor: undefined,
+  label: undefined,
 })
+
+const ariaLabel = useAriaLabel(() => props.label)
 
 defineSlots<{
   /** The VAvatars to stack. */
@@ -61,7 +76,7 @@ defineSlots<{
    * Replaces the "+X" disc that stands for the avatars beyond `max`. It receives
    * `count`, the number of avatars being hidden.
    */
-  overflow?(props: { count: number }): unknown
+  overflow?(props: AvatarGroupOverflowSlotProps): unknown
 }>()
 
 provide(avatarGroupKey, {
@@ -74,9 +89,11 @@ provide(avatarGroupKey, {
 })
 
 const items = useSlotNodes()
-// `max: 0` means "no limit", as documented: a truthiness test, never `!= null`, which would
-// slice everything away and sum the whole group into the "+X" disc.
-const visibleItems = computed(() => (props.max ? items.value.slice(0, props.max) : items.value))
+// `max: 0` means "no limit", as documented, and so does a negative one: `slice(0, -1)` would
+// drop the LAST avatar and sum it into a "+1" disc.
+const visibleItems = computed(() =>
+  props.max !== undefined && props.max > 0 ? items.value.slice(0, props.max) : items.value,
+)
 const overflowCount = computed(() => items.value.length - visibleItems.value.length)
 
 // A functional component is the only way to render VNodes that have already been
@@ -99,6 +116,7 @@ const resolvedGroupSize = computed<AvatarSize>(() => props.size ?? AVATAR_DEFAUL
   <div
     class="v-avatar-group v-control"
     role="group"
+    :aria-label="ariaLabel"
     :style="rootStyle"
     :data-size="resolvedGroupSize"
     :data-compact="compact ? '' : undefined"

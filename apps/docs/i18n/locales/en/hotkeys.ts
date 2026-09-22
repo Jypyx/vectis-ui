@@ -31,11 +31,11 @@ export default {
     },
     inText: {
       title: 'In text and in components',
-      text: 'A cap takes its size from the text around it. Its usual homes are the end of a menu row, a tooltip, and the control the shortcut is a second route to.',
+      text: 'A cap takes its size from the <code>size</code> scale, <code>xs</code> by default, and sits on the middle of the line around it. Its usual homes are the end of a menu row, a tooltip, and the control the shortcut is a second route to.',
     },
     listening: {
       title: 'Listening',
-      text: '<code>listen</code> makes the component watch for the combination it shows and emit <code>trigger</code>. Modifiers are matched exactly, so <code>mod+k</code> and <code>mod+shift+k</code> can both exist. <code>allowDefault</code> keeps the browser binding, and <code>allowInInput</code> lets the shortcut fire while the reader is typing in a field.',
+      text: '<code>listen</code> makes the component watch for the combination it shows and emit <code>trigger</code>. Modifiers are matched exactly, so <code>mod+k</code> and <code>mod+shift+k</code> can both exist. <code>allowDefault</code> keeps the browser binding, and <code>allowInInput</code> lets the shortcut fire while the reader is typing in a field. Escape is reported but never cancelled, so it still closes dialogs. Matching reads the character the key produced: a symbol typed with Shift (<code>?</code>), a digit on an AZERTY layout and an Option + letter on macOS do not match, so prefer letters and named keys.',
     },
   },
 
@@ -55,7 +55,7 @@ export default {
         listen:
           "Actually listens for the combination and reports it. It is off by default: a component whose job is to display a shortcut must not capture the page's keyboard without being asked.",
         allowDefault:
-          'While listening, lets the browser go on doing whatever the combination normally does. Left out, the browser is stopped, which is the entire point of taking a combination over.',
+          'While listening, lets the browser go on doing whatever the combination normally does. Left out, the browser is stopped, which is the entire point of taking a combination over. Escape is never stopped: it has to stay the close request of dialogs.',
         allowInInput:
           'While listening, fires even when the reader is typing in a field. It is off by default, so a shortcut cannot fire in the middle of a sentence.',
         label:

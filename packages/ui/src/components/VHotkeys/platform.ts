@@ -22,6 +22,7 @@
 
 import { isDev } from '../../utils/env'
 
+/** The system a keyboard belongs to, which decides its symbols and some of its words. */
 export type HotkeysPlatform = 'mac' | 'windows' | 'linux' | 'other'
 
 /**
@@ -66,8 +67,9 @@ export interface ResolvedKey {
 // @ssr
 /**
  * What a SERVER renders, and therefore what the browser's FIRST render must be as
- * well. It shares its words with Windows and Linux — Ctrl, Alt, Shift — so only a Mac
- * visitor pays a single frame of "Ctrl" before it is corrected to ⌘.
+ * well. It shares Ctrl, Alt and Shift with Windows and Linux, so a Mac visitor pays a
+ * single frame of "Ctrl" before it is corrected to ⌘. The literal `meta` key is the one
+ * word it shares with Linux alone: a Windows visitor sees "Super" for a frame before "Win".
  */
 export const DEFAULT_PLATFORM: HotkeysPlatform = 'other'
 
@@ -197,8 +199,23 @@ export function parseHotkeys(keys: string): string[] {
     .map((token) => token.trim().toLowerCase())
     .filter(Boolean)
     .map((token) => ALIASES[token] ?? token)
-  if (isDev && tokens.length === 0) {
-    console.warn(`[VHotkeys] \`keys\` is empty: "${keys}" declares no key.`)
+  if (isDev) {
+    const pressed = tokens.filter((token) => !isModifier(token)).length
+    if (tokens.length === 0) {
+      console.warn(`[VHotkeys] \`keys\` is empty: "${keys}" declares no key.`)
+    } else if (pressed === 0) {
+      /* `ctrl++` reads as Ctrl and the + key, but the second + is a separator: the key
+         itself is written `plus`. */
+      console.warn(
+        `[VHotkeys] \`keys\` holds only modifiers: "${keys}" never fires. The + key is written \`plus\`.`,
+      )
+    } else if (pressed > 1) {
+      /* A shortcut is modifiers and ONE key: `g+h` is not a sequence, and only its first
+         key would ever be matched. */
+      console.warn(
+        `[VHotkeys] \`keys\` names more than one key: "${keys}" is matched on the first alone.`,
+      )
+    }
   }
   return tokens
 }
@@ -234,7 +251,17 @@ function wordOf(token: string, platform: HotkeysPlatform): HotkeysWord | undefin
  * on it and the dictionary entry naming it, where either exists.
  */
 export function resolveKeys(tokens: string[], platform: HotkeysPlatform): ResolvedKey[] {
-  return tokens.map((token) => ({
+  /* A modifier named twice is one key held down: `ctrl+ctrl+k`, or `mod+ctrl+k` away from a
+     Mac, where `mod` IS Ctrl. Drawn twice it would read as a chord of two keys. */
+  const held = new Set<string>()
+  const once = tokens.filter((token) => {
+    if (!isModifier(token)) return true
+    const key = token === 'mod' ? (platform === 'mac' ? 'meta' : 'ctrl') : token
+    if (held.has(key)) return false
+    held.add(key)
+    return true
+  })
+  return once.map((token) => ({
     token,
     glyph: (platform === 'mac' ? MAC_GLYPHS[token] : undefined) ?? GLYPHS[token],
     word: wordOf(token, platform),
@@ -274,7 +301,7 @@ export function matchesEvent(
 
 // @keyboard — what `allowInInput` is asked about: a shortcut must not fire in the
 // middle of someone typing a sentence.
-export function isEditableTarget(target: EventTarget | null): boolean {
+export function isEditableTarget(target: EventTarget | null | undefined): boolean {
   if (!(target instanceof HTMLElement)) return false
   if (target.isContentEditable) return true
   const tag = target.tagName

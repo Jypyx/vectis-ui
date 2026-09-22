@@ -84,23 +84,23 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   play: async ({ canvasElement }) => {
-    const item = canvasElement.querySelector('.v-skeleton-item')!
+    const item = canvasElement.querySelector('.v-skeleton-loader-item')!
 
     // Wiring canary: jsdom sees neither pseudo-elements nor keyframes. Goes red if
     // the animation is renamed, mis-layered, or if the ::after disappears.
     await waitFor(() =>
-      expect(getComputedStyle(item, '::after').animationName).toBe('v-skeleton-wave'),
+      expect(getComputedStyle(item, '::after').animationName).toBe('v-skeleton-loader-wave'),
     )
 
     // Relative colour syntax canary: were `oklch(from …)` unsupported,
-    // `--skeleton-highlight` would be invalid at computed-value time, the whole
+    // `--skeleton-loader-highlight` would be invalid at computed-value time, the whole
     // declaration would go with it (it contains a var()) and the gradient would fall
     // back to `none` — an invisible band, with no console error at all.
     await expect(getComputedStyle(item, '::after').backgroundImage).not.toBe('none')
 
     // The last line of a paragraph is shortened: that detail is what reads as a
     // "block of text" rather than a "table".
-    const items = canvasElement.querySelectorAll('.v-skeleton-item')
+    const items = canvasElement.querySelectorAll('.v-skeleton-loader-item')
     const first = items[0]!.getBoundingClientRect().width
     const last = items[items.length - 1]!.getBoundingClientRect().width
     await expect(last).toBeLessThan(first)
@@ -129,7 +129,7 @@ export const Shapes: Story = {
   }),
   play: async ({ canvasElement }) => {
     // one silhouette per shape, in the order of the `shapes` array
-    const items = canvasElement.querySelectorAll('.v-skeleton-item')
+    const items = canvasElement.querySelectorAll('.v-skeleton-loader-item')
 
     // the circle transfers its width from its height
     const circle = items[3]!.getBoundingClientRect()
@@ -160,13 +160,13 @@ export const Animations: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    const [wave, pulse, none] = canvasElement.querySelectorAll('.v-skeleton-item')
+    const [wave, pulse, none] = canvasElement.querySelectorAll('.v-skeleton-loader-item')
 
     // Both animations share the layer and LIGHTEN: a pulse rendered through the
     // silhouette's opacity would fade towards the page background, hence darken in a
     // dark theme. The pulse's layer is a flat fill.
     await waitFor(() =>
-      expect(getComputedStyle(pulse!, '::after').animationName).toBe('v-skeleton-pulse'),
+      expect(getComputedStyle(pulse!, '::after').animationName).toBe('v-skeleton-loader-pulse'),
     )
     await expect(getComputedStyle(pulse!, '::after').backgroundImage).toBe('none')
     await expect(getComputedStyle(wave!, '::after').backgroundImage).not.toBe('none')
@@ -295,12 +295,14 @@ export const ProgressiveReplacement: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await expect(canvasElement.querySelectorAll('.v-skeleton-item').length).toBeGreaterThan(0)
+    await expect(canvasElement.querySelectorAll('.v-skeleton-loader-item').length).toBeGreaterThan(
+      0,
+    )
 
     // `userEvent.click` and not the DOM's own `.click()`, which returns void: the
     // `await` in front of it was awaiting nothing, so the story raced its own state.
     await userEvent.click(canvas.getByRole('button', { name: 'Load' }))
-    await waitFor(() => expect(canvasElement.querySelector('.v-skeleton')).toBeNull())
+    await waitFor(() => expect(canvasElement.querySelector('.v-skeleton-loader')).toBeNull())
   },
 }
 

@@ -13,11 +13,20 @@ export default {
         { name: 'size', type: 'AvatarSize', values: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'ringColor', type: 'string' },
+        { name: 'label', type: 'string' },
       ],
       slots: [
         { name: 'default', type: '{}' },
-        { name: 'overflow', type: '{ count: number; }' },
+        { name: 'overflow', type: 'AvatarGroupOverflowSlotProps' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'AvatarGroupOverflowSlotProps',
+      definition: `export interface AvatarGroupOverflowSlotProps {
+  count: number
+}`,
     },
   ],
 } satisfies PageApi

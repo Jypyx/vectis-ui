@@ -17,12 +17,12 @@ export default {
     },
     rendering: {
       title: "D'où vient le dessin",
-      text: 'Une icône peut venir de cinq endroits, interrogés dans un ordre fixe, et le premier qui répond est celui qui est dessiné :',
+      text: 'Le dessin est cherché dans un ordre fixe, et la première source qui répond est celle qui est dessinée :',
       order: [
         "<code>render</code>, une description explicite de ce qu'il faut dessiner : des données de tracé SVG, un composant, une image, ou la classe d'une police.",
         "<code>src</code>, l'adresse d'une image.",
         '<code>name</code>, proposé à votre résolveur en premier, puis au dessin que porte une icône de la bibliothèque, puis à une police à ligatures.',
-        "Le slot par défaut, un SVG en ligne, atteint quand ni <code>name</code> ni <code>src</code> n'ont été donnés.",
+        "Le slot par défaut, un SVG en ligne, atteint quand ni <code>render</code>, ni <code>src</code>, ni <code>name</code> n'ont été donnés.",
       ],
       moreBefore:
         "L'ordre est le contrat : votre résolveur passe avant les dessins de la bibliothèque, et un résolveur qui ne répond rien pour un nom donné le rend au lieu de laisser un trou, ce qui rend utilisable une correspondance partielle. Une simple chaîne n'est jamais qu'un nom, jamais une adresse. Brancher un jeu, et la liste de ce que la bibliothèque embarque, sont tous deux sur",

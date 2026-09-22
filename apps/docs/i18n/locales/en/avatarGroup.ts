@@ -34,6 +34,8 @@ export default {
           'Applies the reduced density to every avatar inside. Unlike the size it is cumulative: an avatar cannot opt back out of a compact group.',
         ringColor:
           'The colour of the ring drawn around each disc. It defaults to the page background, which is what makes the ring read as a gap between two avatars.',
+        label:
+          'The accessible name of the group, such as "Project members": a row of faces does not say on its own who these people are. An <code>aria-label</code> or <code>aria-labelledby</code> of yours wins over it.',
       },
       slots: {
         default: 'The VAvatars to stack.',

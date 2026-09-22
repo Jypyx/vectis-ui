@@ -20,7 +20,7 @@ import type { IconSource } from '../VIcon/types'
 import { isDev } from '../../utils/env'
 
 /** What a notification reports: nothing in particular, information, a success, a failure or a warning. */
-export type ToastTone = 'neutral' | 'accent' | 'success' | 'danger' | 'warning'
+export type ToastTone = 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
 
 /** How strongly a notification is painted: a tinted background with a border, or the full colour. */
 export type ToastVariant = 'soft' | 'solid'

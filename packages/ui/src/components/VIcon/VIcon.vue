@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// @core
 /**
  * An icon, whatever the host application's icons are made of. The real work is deciding
  * WHERE the drawing comes from, asked in a fixed order: `render`, then `src`, then `name` —
@@ -32,13 +31,13 @@ interface IconProps {
    * Which icon to draw. A plain string is a name: it is offered to the consumer's
    * resolver and then left to the icon font as a ligature. One of the design
    * system's own icons, imported from `vectis-ui/icons`, carries its drawing with
-   * it — the resolver is still asked first, and the drawing is what answers when
+   * it: the resolver is still asked first, and the drawing is what answers when
    * nothing else does.
    */
   name?: string | BuiltinIcon
   /**
-   * An explicit description of what to draw — an image, a component, a path, a class
-   * — which wins over everything else. This is the route every `IconSource` prop of
+   * An explicit description of what to draw (an image, a component, a path, a class),
+   * which wins over everything else. This is the route every `IconSource` prop of
    * the design system takes when it is given something other than a plain name.
    */
   render?: IconRender
@@ -46,8 +45,8 @@ interface IconProps {
   src?: string
   /**
    * A size in pixels, as a number or a numeric string. Left out, or given something that
-   * is not a number, the icon takes the size its context imposes — a button sets one for
-   * the icons inside it — and failing that 1em, which makes it follow the surrounding
+   * is not a number, the icon takes the size its context imposes (a button sets one for
+   * the icons inside it), and failing that 1em, which makes it follow the surrounding
    * text.
    */
   size?: number | string
@@ -83,7 +82,7 @@ const props = withDefaults(defineProps<IconProps>(), {
 })
 
 defineSlots<{
-  /** An inline SVG, used when neither `src` nor `name` was given. */
+  /** An inline SVG, used when none of `render`, `src` and `name` was given. */
   default?(): unknown
 }>()
 
@@ -140,7 +139,7 @@ const resolved = computed<Resolved | undefined>(() => {
 
   const { paths } = props.name
   // A second path is only stored when filling actually changes the drawing, so most
-  // icons have one path and fall back to it (see icons.ts).
+  // icons have one path and fall back to it (see the `BuiltinIcon` type).
   const path = (props.filled ? paths[1] : undefined) ?? paths[0]
   return { kind: 'path', path, viewBox: ICON_VIEW_BOX }
 })
@@ -204,10 +203,13 @@ const resolved = computed<Resolved | undefined>(() => {
     align-items: center;
     justify-content: center;
     flex: none;
-    inline-size: var(--icon-size);
-    block-size: var(--icon-size);
-    /* a ligature is text, so it is the font-size that sizes it */
+    /* A ligature is text, so it is the font-size that sizes it, and the box follows as 1em.
+       TRAP — the box must NOT read `--icon-size` again: an `em` there resolves against
+       this element's own font-size, already enlarged by the line below, so a context size
+       of 1.5em drew a box of 2.25em around a glyph of 1.5em. */
     font-size: var(--icon-size);
+    inline-size: 1em;
+    block-size: 1em;
   }
 
   /* When the icon font has not loaded, a ligature shows as its own name in plain
@@ -220,6 +222,10 @@ const resolved = computed<Resolved | undefined>(() => {
   }
 
   .v-icon-symbol {
+    /* Declared here and not only under `[data-filled]`: a custom property inherits, so a
+       host application setting `--icon-fill` on an ancestor would otherwise fill every
+       icon below it. */
+    --icon-fill: 0;
     font-family: var(--vectis-font-family-icon);
     font-weight: var(--vectis-font-weight-regular);
     font-style: normal;
@@ -233,7 +239,7 @@ const resolved = computed<Resolved | undefined>(() => {
        literally here rather than taken from tokens — the same tolerance as the
        opacities. */
     font-variation-settings:
-      'FILL' var(--icon-fill, 0),
+      'FILL' var(--icon-fill),
       'wght' 400,
       'GRAD' 0,
       'opsz' var(--icon-opsz);

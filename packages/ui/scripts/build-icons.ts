@@ -1,5 +1,5 @@
 /**
- * Generates `src/components/VIcon/icons.ts`: the SVG paths of the icons the DS
+ * Generates `src/components/VIcon/icons/`, one module per icon: the SVG paths of the icons the DS
  * renders ITSELF by default, exact replicas of Material Symbols Rounded
  * (wght 400 · GRAD 0 · opsz 24). This registry is what makes the design system
  * usable with no icon font at all.

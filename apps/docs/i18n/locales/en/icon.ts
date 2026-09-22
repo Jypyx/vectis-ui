@@ -17,12 +17,12 @@ export default {
     },
     rendering: {
       title: 'Where the drawing comes from',
-      text: 'An icon can come from five places, asked in a fixed order, and the first that answers is the one drawn:',
+      text: 'The drawing is looked for in a fixed order, and the first source that answers is the one drawn:',
       order: [
         "<code>render</code>, an explicit description of what to draw: SVG path data, a component, an image, or a font's own class.",
         '<code>src</code>, the address of an image.',
         '<code>name</code>, offered to your resolver first, then to the drawing a library icon carries, then to a ligature font.',
-        'The default slot, an inline SVG, reached when neither <code>name</code> nor <code>src</code> was given.',
+        'The default slot, an inline SVG, reached when none of <code>render</code>, <code>src</code> and <code>name</code> was given.',
       ],
       moreBefore:
         "The order is the contract: your resolver comes before the library's own drawings, and one answering nothing for a given name hands it back rather than leaving a gap, which is what makes a partial mapping usable. A plain string is only ever a name, never an address. Wiring a set in, and the list of what the library ships, are both on",

@@ -15,7 +15,7 @@ const SEPARATORS = [
 <template>
   <div class="grid">
     <template v-for="separator in SEPARATORS" :key="separator.label">
-      <VHotkeys keys="mod+shift+k" :separator="separator.value" variant="outlined" />
+      <VHotkeys keys="mod+shift+k" :separator="separator.value" variant="outline" />
       <VTypography variant="caption" tone="muted">{{ separator.label }}</VTypography>
     </template>
   </div>

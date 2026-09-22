@@ -148,7 +148,7 @@ const docsHome = computed(() => localePath('/docs/installation'))
               <VHotkeys
                 keys="mod+k"
                 size="xs"
-                variant="outlined"
+                variant="outline"
                 attached
                 listen
                 @trigger="openSearch"

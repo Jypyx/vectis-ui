@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// @core — no behavioural JS at all: value normalization and the display string.
 /**
  * Progress drawn as a ring, an SVG whose geometry is described entirely in CSS with no JS
  * computing anything.
@@ -19,10 +18,20 @@ import { useMessages } from '../../i18n/state'
 import { px } from '../../utils/css'
 
 /** What the progress means, in colour. */
-export type ProgressCircularTone = 'accent' | 'success' | 'warning' | 'danger' | 'neutral'
+export type ProgressCircularTone = 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
 
 /** How the arc ends. */
 export type ProgressCircularShape = 'rounded' | 'square'
+
+/** What the default slot receives. */
+export interface ProgressCircularSlotProps {
+  /** The value, brought back into the range. */
+  value: number
+  /** The bound, zero or more. */
+  max: number
+  /** How far along it is, as a percentage and unrounded. */
+  percent: number
+}
 
 interface ProgressCircularProps {
   /** How far along it is. Anything outside the range is brought back into it. */
@@ -76,10 +85,10 @@ const props = withDefaults(defineProps<ProgressCircularProps>(), {
 
 defineSlots<{
   /**
-   * What to put in the middle of the ring instead of the percentage — a count of files,
+   * What to put in the middle of the ring instead of the percentage: a count of files,
    * an icon, a shortened figure.
    */
-  default?(props: { value: number; max: number; percent: number }): unknown
+  default?(props: ProgressCircularSlotProps): unknown
 }>()
 
 /* The percent sign, and the non-breaking space French puts before it where English puts
@@ -207,13 +216,6 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
     stroke-linecap: butt;
   }
 
-  /* A custom colour replaces the tone: at (0,2,0) it beats the base rule's mapping
-     whatever the order the two are written in. */
-  .v-progress-circular[data-custom] {
-    --progress-fill: var(--custom-color);
-    --progress-track: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 85%);
-  }
-
   .v-progress-circular-label {
     display: flex;
     align-items: center;
@@ -242,7 +244,7 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
      1.5s they only realign every third turn; the slowed-down pair below is 3s and 5s, so
      every fifth. Keep any change to those four values out of a whole-number ratio. */
   .v-progress-circular[data-indeterminate] .v-progress-circular-svg {
-    animation: v-spin var(--vectis-duration-1000) linear infinite;
+    animation: v-progress-circular-spin var(--vectis-duration-1000) linear infinite;
   }
 
   .v-progress-circular[data-indeterminate] .v-progress-circular-bar {
@@ -251,9 +253,17 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
     transition: none;
   }
 
+  /* The turn of the whole ring. VSpinner writes the same one under its own name: shared
+     in the core sheet it cost every consumer the bytes, where the two copies only meet in
+     an application that loads both components. */
+  @keyframes v-progress-circular-spin {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+
   /* Both ends of the arc move, so it lengthens, shortens and travels around the circle
-     at once. The spin it rides on is the shared one from styles/utilities.css; only
-     these keyframes, which belong to this component alone, stay here. */
+     at once. */
   @keyframes v-progress-circular-dash {
     0% {
       stroke-dasharray: 5 100;
@@ -284,6 +294,27 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
 
     .v-progress-circular[data-indeterminate] .v-progress-circular-bar {
       animation-duration: var(--vectis-duration-5000);
+    }
+  }
+
+  /* An SVG keeps its authored colours under Windows forced colours, so the ring would
+     stay pale indigo on a system palette. It is drawn in the system colours instead: the
+     remaining part in GrayText, the progress in Highlight. */
+  @media (forced-colors: active) {
+    .v-progress-circular {
+      forced-color-adjust: none;
+    }
+
+    .v-progress-circular-track {
+      stroke: GrayText;
+    }
+
+    .v-progress-circular-bar {
+      stroke: Highlight;
+    }
+
+    .v-progress-circular-label {
+      color: CanvasText;
     }
   }
 }

@@ -16,9 +16,9 @@ const PLATFORMS: { value: HotkeysPlatform; label: string }[] = [
     <template v-for="platform in PLATFORMS" :key="platform.value">
       <VTypography variant="caption" tone="muted">{{ platform.label }}</VTypography>
       <div class="keys">
-        <VHotkeys keys="mod+k" :platform="platform.value" variant="outlined" />
-        <VHotkeys keys="meta+shift+enter" :platform="platform.value" variant="outlined" />
-        <VHotkeys keys="alt+backspace" :platform="platform.value" variant="outlined" />
+        <VHotkeys keys="mod+k" :platform="platform.value" variant="outline" />
+        <VHotkeys keys="meta+shift+enter" :platform="platform.value" variant="outline" />
+        <VHotkeys keys="alt+backspace" :platform="platform.value" variant="outline" />
       </div>
     </template>
   </div>

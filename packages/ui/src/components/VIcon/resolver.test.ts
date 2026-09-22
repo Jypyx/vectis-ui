@@ -25,6 +25,17 @@ const Lucide = (props: Record<string, unknown>) => h('svg', { 'data-testid': 'lu
 const iconOf = (props: Record<string, unknown>) => render(VIcon, { props }).container
 
 describe('setIconResolver', () => {
+  it('the factories never answer a name from Object.prototype', () => {
+    const ctx = { filled: false }
+    expect(ligatureIconResolver({ aliases: {} })('constructor', ctx)).toEqual({
+      text: 'constructor',
+    })
+    expect(classIconResolver({ aliases: {}, className: (n) => `i-${n}` })('toString', ctx)).toEqual(
+      { class: 'i-toString' },
+    )
+    expect(componentIconResolver({ components: {} })('constructor', ctx)).toBeUndefined()
+  })
+
   it('comes BEFORE the built-in registry', () => {
     setIconResolver(() => ({ text: 'xmark' }))
     const container = iconOf({ name: 'close' })

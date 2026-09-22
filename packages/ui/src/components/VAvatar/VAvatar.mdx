@@ -91,9 +91,11 @@ focusable — make it `clickable` (a button).
 
 ## Accessibility
 
-- **Name fallback, non-interactive**: the avatar carries `role="img"` + `aria-label` (`alt` wins
-  over `name`). The visible initials/icon are `aria-hidden`.
+- **Name fallback, non-interactive**: the avatar carries `role="img"` + `aria-label`. The name is
+  resolved `aria-labelledby` > `aria-label` > `alt` > `name`. The visible initials/icon are
+  `aria-hidden`.
 - **With neither name nor image**: decorative — no role wrongly announced.
 - **Image**: the alternative text is carried by the `<img>`'s `alt` (`alt` or `name`).
-- **Interactive** (`<a>`/`<button>`): the accessible name comes from `aria-label`; no superfluous
-  `role="img"`.
+- **Interactive** (`<a>`/`<button>`): named by the same cascade, or by the picture's `alt`; no
+  superfluous `role="img"`. A clickable or linked avatar with no name at all gets a warning in
+  development.

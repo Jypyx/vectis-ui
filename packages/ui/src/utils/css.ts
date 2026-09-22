@@ -2,7 +2,7 @@
 /**
  * A dimension always in pixels: `12` and `'12'` both give `12px`.
  *
- * Anything non-numeric yields `undefined` rather than a custom property CSS cannot read —
+ * Anything non-numeric, or negative, yields `undefined` rather than a custom property CSS cannot read —
  * an invalid value breaks the geometry outright, where nothing at all lets the component's
  * own default apply.
  *
@@ -13,7 +13,7 @@
 export function px(v: number | string | undefined): string | undefined {
   if (v === undefined) return undefined
   const n = typeof v === 'number' ? v : v.trim() === '' ? Number.NaN : Number(v)
-  return Number.isFinite(n) ? `${n}px` : undefined
+  return Number.isFinite(n) && n >= 0 ? `${n}px` : undefined
 }
 
 // @core

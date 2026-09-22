@@ -9,12 +9,12 @@ const SIZES: HotkeysSize[] = ['xs', 'sm']
 <template>
   <div class="row">
     <div v-for="size in SIZES" :key="size" class="cell">
-      <VHotkeys keys="mod+k" :size="size" variant="outlined" />
+      <VHotkeys keys="mod+k" :size="size" variant="outline" />
       <VTypography variant="caption" tone="muted">{{ size }}</VTypography>
     </div>
 
     <div v-for="size in SIZES" :key="`${size}-compact`" class="cell">
-      <VHotkeys keys="mod+k" :size="size" compact variant="outlined" />
+      <VHotkeys keys="mod+k" :size="size" compact variant="outline" />
       <VTypography variant="caption" tone="muted">{{ size }} compact</VTypography>
     </div>
   </div>

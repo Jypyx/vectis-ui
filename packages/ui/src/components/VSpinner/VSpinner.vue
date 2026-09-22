@@ -87,17 +87,33 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
       color-mix(in oklab, currentcolor, transparent 75%);
     border-block-start-color: currentcolor;
     border-radius: var(--vectis-radius-pill);
-    animation: v-spin var(--vectis-duration-1000) linear infinite;
+    animation: v-spinner-spin var(--vectis-duration-1000) linear infinite;
   }
 
-  /* The `v-spin` keyframes live in styles/utilities.css, shared with
-     VProgressCircular. Keyframes are global names rather than declarations arbitrated
-     by the cascade, so they sit outside any layer and are declared once for the whole
-     design system. */
+  /* Written here and not shared with VProgressCircular's identical turn: in the core sheet
+     it cost every consumer the bytes, and the two copies only meet in an application that
+     loads both components. The name carries the component, since keyframe names are global. */
+  @keyframes v-spinner-spin {
+    to {
+      transform: rotate(1turn);
+    }
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .v-spinner-circle {
       animation-duration: var(--vectis-duration-3000);
+    }
+  }
+
+  /* Forced colours paint every side of a border in the same system colour, which turns
+     the ring into a uniform circle whose rotation can no longer be seen. The track is
+     drawn in GrayText and the moving quarter keeps the forced text colour, which
+     `currentcolor` still reads here since only the circle opts out of the forcing. */
+  @media (forced-colors: active) {
+    .v-spinner-circle {
+      forced-color-adjust: none;
+      border-color: GrayText;
+      border-block-start-color: currentcolor;
     }
   }
 }

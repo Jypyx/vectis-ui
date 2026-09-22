@@ -13,7 +13,7 @@ export default {
     },
     tags: {
       title: 'The tag it renders',
-      text: 'Each variant already renders a sensible tag, h1 to h4 for the headings and <code>p</code> or <code>span</code> for the rest. <code>as</code> is for the cases where the meaning and the look part ways, and everything else falls through to that tag.',
+      text: 'Each variant already renders a sensible tag, h1 to h4 for the headings, <code>code</code> for code and <code>p</code> or <code>span</code> for the rest. <code>as</code> is for the cases where the meaning and the look part ways, and everything else falls through to that tag.',
     },
     truncate: {
       title: 'Truncating to one line',

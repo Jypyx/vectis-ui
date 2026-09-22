@@ -4,12 +4,12 @@ import { describe, expect, it } from 'vitest'
 import VSkeletonLoader from './VSkeletonLoader.vue'
 
 /** Root of the component (it carries the variant table and the dimensions). */
-const rootOf = (container: Element) => container.querySelector('.v-skeleton') as HTMLElement
+const rootOf = (container: Element) => container.querySelector('.v-skeleton-loader') as HTMLElement
 
 /** Inline style of the root (the custom properties are set there). */
 const styleOf = (container: Element) => rootOf(container).getAttribute('style') ?? ''
 
-const itemsOf = (container: Element) => container.querySelectorAll('.v-skeleton-item')
+const itemsOf = (container: Element) => container.querySelectorAll('.v-skeleton-loader-item')
 
 describe('VSkeletonLoader', () => {
   it('defaults: text shape, md size, wave animation, a single silhouette', () => {
@@ -45,6 +45,13 @@ describe('VSkeletonLoader', () => {
 
     await rerender({ lines: 3.7 })
     expect(itemsOf(container)).toHaveLength(3)
+
+    // Math.max(1, NaN) is NaN, which renders nothing at all.
+    await rerender({ lines: Number.NaN })
+    expect(itemsOf(container)).toHaveLength(1)
+
+    await rerender({ lines: Number.POSITIVE_INFINITY })
+    expect(itemsOf(container)).toHaveLength(1)
   })
 
   it('shape and animation are reflected as data-*', async () => {
@@ -67,17 +74,17 @@ describe('VSkeletonLoader', () => {
 
   it('width/height: a number → px, a CSS string as-is, absent → no custom property', async () => {
     const { container, rerender } = render(VSkeletonLoader)
-    expect(styleOf(container)).not.toContain('--skeleton-w')
-    expect(styleOf(container)).not.toContain('--skeleton-h')
+    expect(styleOf(container)).not.toContain('--skeleton-loader-w')
+    expect(styleOf(container)).not.toContain('--skeleton-loader-h')
 
     await rerender({ width: 200, height: 48 })
-    expect(styleOf(container)).toContain('--skeleton-w: 200px')
-    expect(styleOf(container)).toContain('--skeleton-h: 48px')
+    expect(styleOf(container)).toContain('--skeleton-loader-w: 200px')
+    expect(styleOf(container)).toContain('--skeleton-loader-h: 48px')
 
     // a free unit, unlike `px()`: the string is not interpreted
     await rerender({ width: '100%', height: '12ch' })
-    expect(styleOf(container)).toContain('--skeleton-w: 100%')
-    expect(styleOf(container)).toContain('--skeleton-h: 12ch')
+    expect(styleOf(container)).toContain('--skeleton-loader-w: 100%')
+    expect(styleOf(container)).toContain('--skeleton-loader-h: 12ch')
     expect(styleOf(container)).not.toContain('NaN')
   })
 
@@ -112,15 +119,26 @@ describe('VSkeletonLoader', () => {
     expect(getByRole('status').textContent).toContain('Loading the results…')
   })
 
+  it('an empty label is no label: silent, or the dictionary under announce', () => {
+    const silent = render(VSkeletonLoader, { props: { label: '' } })
+    expect(rootOf(silent.container).getAttribute('aria-hidden')).toBe('true')
+    expect(silent.queryByRole('status')).toBeNull()
+
+    const announced = render(VSkeletonLoader, { props: { label: '', announce: true } })
+    expect(announced.getByRole('status').textContent).toContain('Loading…')
+  })
+
   it('the hidden label is rendered BEFORE the silhouettes', () => {
-    // The `.v-skeleton-item + .v-skeleton-item:last-child` selector depends on it: a
+    // The `.v-skeleton-loader-item + .v-skeleton-loader-item:last-child` selector depends on it: a
     // label rendered last would stop the last line being shortened without any other
     // test going red.
     const { container } = render(VSkeletonLoader, { props: { announce: true, lines: 3 } })
     const first = rootOf(container).firstElementChild as HTMLElement
 
     expect(first.classList.contains('v-visually-hidden')).toBe(true)
-    expect(rootOf(container).lastElementChild?.classList.contains('v-skeleton-item')).toBe(true)
+    expect(rootOf(container).lastElementChild?.classList.contains('v-skeleton-loader-item')).toBe(
+      true,
+    )
   })
 
   it('fallthrough: the consumer class, id and style coexist with the custom properties', () => {
@@ -131,9 +149,9 @@ describe('VSkeletonLoader', () => {
     const root = rootOf(container)
 
     expect(root.classList.contains('my-class')).toBe(true)
-    expect(root.classList.contains('v-skeleton')).toBe(true)
+    expect(root.classList.contains('v-skeleton-loader')).toBe(true)
     expect(root.getAttribute('id')).toBe('loading')
     expect(styleOf(container)).toContain('margin-block: 8px')
-    expect(styleOf(container)).toContain('--skeleton-w: 120px')
+    expect(styleOf(container)).toContain('--skeleton-loader-w: 120px')
   })
 })

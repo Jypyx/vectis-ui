@@ -311,19 +311,13 @@ defineExpose({
      those of a custom colour, and they win over the shared table by LAYER rather than
      by order, so no bundling can change the outcome. */
 
-  /* A custom colour replaces the tone entirely. Every shade it needs is derived from
-     that one colour mixed with the theme's own surface and text, so the same value
-     produces a legible chip in the light theme and in the dark one, with nothing to
-     rebuild. */
+  /* A custom colour replaces the tone entirely. The shared table derives the four values
+     every adopter reads (styles/tones.css, `.v-tone[data-custom]`); the chip adds the
+     three only it paints, its hover and active steps and its outline, from the same colour
+     mixed with the theme's own text and surface. */
   .v-chip[data-custom] {
-    --tone-bg-solid: var(--custom-color);
     --tone-bg-solid-hover: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 8%);
     --tone-bg-solid-active: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 14%);
-    /* Fixed white, whatever the colour: on a fully coloured chip the contrast of the
-       text is the consumer's to check, as it is in VBadge. */
-    --tone-text-solid: var(--vectis-color-text-on-accent);
-    --tone-text-tinted: color-mix(in oklab, var(--custom-color), var(--vectis-color-text) 30%);
-    --tone-bg-soft: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 85%);
     --tone-border-soft: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 60%);
   }
 

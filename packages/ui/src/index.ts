@@ -133,6 +133,7 @@ export type { BadgeVariant, BadgeTone, BadgeOverlayPosition } from './components
 export { default as VAvatar } from './components/VAvatar/VAvatar.vue'
 export type { AvatarSize } from './components/VAvatar/VAvatar.vue'
 export { default as VAvatarGroup } from './components/VAvatar/VAvatarGroup.vue'
+export type { AvatarGroupOverflowSlotProps } from './components/VAvatar/VAvatarGroup.vue'
 export { default as VSpinner } from './components/VSpinner/VSpinner.vue'
 export { default as VSkeletonLoader } from './components/VSkeletonLoader/VSkeletonLoader.vue'
 export type {
@@ -189,6 +190,7 @@ export { default as VProgressCircular } from './components/VProgressCircular/VPr
 export type {
   ProgressCircularTone,
   ProgressCircularShape,
+  ProgressCircularSlotProps,
 } from './components/VProgressCircular/VProgressCircular.vue'
 export { default as VProgressLinear } from './components/VProgressLinear/VProgressLinear.vue'
 export type {
@@ -196,6 +198,7 @@ export type {
   ProgressLinearShape,
   ProgressLinearValuePosition,
   ProgressLinearOrientation,
+  ProgressLinearSlotProps,
 } from './components/VProgressLinear/VProgressLinear.vue'
 export { default as VSlider } from './components/VSlider/VSlider.vue'
 export type {

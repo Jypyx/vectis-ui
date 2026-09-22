@@ -13,7 +13,7 @@ export default {
         { name: 'label', type: 'string' },
         { name: 'max', type: 'number', default: '100' },
         { name: 'indeterminate', type: 'boolean', default: 'false' },
-        { name: 'tone', type: 'ProgressLinearTone', values: "'accent' | 'success' | 'warning' | 'danger' | 'neutral'", default: "'accent'" },
+        { name: 'tone', type: 'ProgressLinearTone', values: "'neutral' | 'accent' | 'danger' | 'success' | 'warning'", default: "'accent'" },
         { name: 'color', type: 'string' },
         { name: 'thickness', type: 'number | string' },
         { name: 'shape', type: 'ProgressLinearShape', values: "'rounded' | 'square'", default: "'rounded'" },
@@ -22,8 +22,18 @@ export default {
         { name: 'orientation', type: 'ProgressLinearOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },
       ],
       slots: [
-        { name: 'default', type: '{ value: number; max: number; percent: number; }' },
+        { name: 'default', type: 'ProgressLinearSlotProps' },
       ],
+    },
+  ],
+  types: [
+    {
+      name: 'ProgressLinearSlotProps',
+      definition: `export interface ProgressLinearSlotProps {
+  value: number
+  max: number
+  percent: number
+}`,
     },
   ],
   cssVars: [

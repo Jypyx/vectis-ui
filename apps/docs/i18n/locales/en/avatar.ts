@@ -43,7 +43,7 @@ export default {
         src: 'The picture to show. It is preferred above everything else, and an image that fails to load hands over to the icon or the initials rather than leaving a gap.',
         icon: 'The icon to show when there is no picture. It comes before the initials, so an avatar given both an icon and a name shows the icon.',
         name: 'The full name. It does three things at once: it names the avatar for assistive technology, its initials are what shows when there is no picture and no icon, and it is the seed the automatic colour is derived from.',
-        alt: 'The accessible name, when it should not simply be the name: an avatar standing for a team rather than a person, say. It wins over <code>name</code>.',
+        alt: "The accessible name, when it should not simply be the name: an avatar standing for a team rather than a person, say. It wins over <code>name</code>, and an <code>aria-label</code> of yours wins over it. On a picture it is the image's <code>alt</code> text.",
         color:
           'A colour of your own, as hex, a CSS name or <code>oklch()</code>. It replaces the hue otherwise derived from <code>name</code>, and the text on it is always white, so a light colour is yours to check.',
         size: "The diameter of the disc, from the size scale shared by every control. Left out inside a VAvatarGroup it takes the group's size; on its own it is <code>md</code>.",

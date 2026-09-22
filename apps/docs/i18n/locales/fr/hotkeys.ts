@@ -31,11 +31,11 @@ export default {
     },
     inText: {
       title: 'Dans le texte et dans les composants',
-      text: "Une touche prend la taille du texte qui l'entoure. Ses places habituelles sont la fin d'une ligne de menu, une infobulle, et le contrôle dont le raccourci est un second chemin.",
+      text: "Une touche prend sa taille dans l'échelle <code>size</code>, <code>xs</code> par défaut, et se place au milieu de la ligne qui l'entoure. Ses places habituelles sont la fin d'une ligne de menu, une infobulle, et le contrôle dont le raccourci est un second chemin.",
     },
     listening: {
       title: 'Écoute',
-      text: "<code>listen</code> fait guetter au composant la combinaison qu'il affiche et émettre <code>trigger</code>. Les modificateurs sont comparés exactement, si bien que <code>mod+k</code> et <code>mod+shift+k</code> peuvent coexister. <code>allowDefault</code> conserve le raccourci du navigateur, et <code>allowInInput</code> laisse le raccourci se déclencher pendant une saisie dans un champ.",
+      text: "<code>listen</code> fait guetter au composant la combinaison qu'il affiche et émettre <code>trigger</code>. Les modificateurs sont comparés exactement, si bien que <code>mod+k</code> et <code>mod+shift+k</code> peuvent coexister. <code>allowDefault</code> conserve le raccourci du navigateur, et <code>allowInInput</code> laisse le raccourci se déclencher pendant une saisie dans un champ. Échap est signalé mais jamais annulé, il ferme donc toujours les dialogues. La comparaison lit le caractère produit par la touche : un symbole tapé avec Maj (<code>?</code>), un chiffre sur un clavier AZERTY et Option + lettre sur macOS ne correspondent pas, préférez donc les lettres et les touches nommées.",
     },
   },
 
@@ -55,7 +55,7 @@ export default {
         listen:
           "Écoute réellement la combinaison et la rapporte. Désactivé par défaut : un composant dont le métier est d'afficher un raccourci ne doit pas capturer le clavier de la page sans qu'on le lui demande.",
         allowDefault:
-          "Pendant l'écoute, laisse le navigateur continuer de faire ce que la combinaison fait normalement. Sans lui, le navigateur est arrêté, ce qui est tout l'intérêt de reprendre une combinaison.",
+          "Pendant l'écoute, laisse le navigateur continuer de faire ce que la combinaison fait normalement. Sans lui, le navigateur est arrêté, ce qui est tout l'intérêt de reprendre une combinaison. Échap n'est jamais arrêté : il doit rester la demande de fermeture des dialogues.",
         allowInInput:
           "Pendant l'écoute, se déclenche même quand le lecteur est en train de saisir dans un champ. Désactivé par défaut, pour qu'un raccourci ne parte pas au milieu d'une phrase.",
         label:
