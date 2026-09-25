@@ -7,7 +7,7 @@
  * called one value at a time. What each cache holds is the helper's own business; the
  * get-or-build around it is the same everywhere, and written here once.
  *
- * `undefined` is the miss marker, so a builder must never return it — none does, every entry
+ * `undefined` is the miss marker, so a builder must never return it. None does, every entry
  * being an object, a string or a number.
  */
 export function memo<K, V>(cache: Map<K, V>, key: K, build: () => V): V {

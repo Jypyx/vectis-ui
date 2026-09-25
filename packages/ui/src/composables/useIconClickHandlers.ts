@@ -29,13 +29,13 @@ export function iconClickHandlers(): { start: boolean; end: boolean } {
 }
 
 /**
- * The start-icon listener a field COMPOSED on top of VInput — VCombobox, VDateInput,
- * VTimeInput, VFileInput — binds onto that inner VInput, ready to spread beside the
+ * The start-icon listener a field COMPOSED on top of VInput: VCombobox, VDateInput,
+ * VTimeInput, VFileInput, binds onto that inner VInput, ready to spread beside the
  * consumer's attributes. Call it during setup: it reads the component's own vnode.
  *
  * Each of those fields declares `click:icon-start` as its own event, which puts it in the API
  * tables and takes it out of `$attrs`, hence out of what is forwarded: the listener has to be
- * bound by hand. And it has to follow what the consumer actually wrote — bound unconditionally,
+ * bound by hand. It has to follow what the consumer actually wrote: bound unconditionally,
  * VInput would read a handler on every instance and turn a decorative icon into a focusable
  * button nobody asked for. So it is `undefined` when there is nothing to relay.
  */

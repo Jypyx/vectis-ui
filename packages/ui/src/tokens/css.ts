@@ -14,7 +14,7 @@ export interface FlatToken {
 
 /**
  * Walks the nested groups and returns one entry per token, each carrying the name of the
- * custom property it will become — the path through the groups, joined with dashes and
+ * custom property it will become: the path through the groups, joined with dashes and
  * prefixed so that nothing collides with an application's own variables.
  */
 export function flattenTokens(group: TokenGroup, prefix: string[] = []): FlatToken[] {

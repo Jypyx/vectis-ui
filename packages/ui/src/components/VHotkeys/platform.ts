@@ -26,7 +26,7 @@ import { isDev } from '../../utils/env'
 export type HotkeysPlatform = 'mac' | 'windows' | 'linux' | 'other'
 
 /**
- * The dictionary entries naming a key, and only those — the sentence framing the
+ * The dictionary entries naming a key, and only those: the sentence framing the
  * shortcut is not one of them.
  *
  * The list is written out here rather than derived from the dictionary's own type,
@@ -80,7 +80,7 @@ export const DEFAULT_PLATFORM: HotkeysPlatform = 'other'
  * still the only one Firefox and Safari provide.
  *
  * The modern one is missing from TypeScript's own definitions, so it is described by a
- * type declared LOCALLY rather than added to the global ones — the latter would leak
+ * type declared LOCALLY rather than added to the global ones: the latter would leak
  * out into every consumer's compilation.
  */
 export function detectPlatform(): HotkeysPlatform {
@@ -191,7 +191,7 @@ const NON_TEXT_INPUT_TYPES = new Set([
 /**
  * Reads a combination as it was written and returns its keys in canonical form:
  * `'mod+k'` and `' Mod + K '` both give the same two. Empty segments are dropped, so a
- * trailing separator is harmless — and the `+` KEY itself is written `plus`.
+ * trailing separator is harmless, and the `+` KEY itself is written `plus`.
  */
 export function parseHotkeys(keys: string): string[] {
   const tokens = keys
@@ -227,7 +227,7 @@ function isModifier(token: string): boolean {
 
 /**
  * How a key nobody has a word or a symbol for is printed: as it was written, merely
- * capitalized — `k` becomes K, `f5` becomes F5, and a slash stays a slash.
+ * capitalized: `k` becomes K, `f5` becomes F5, and a slash stays a slash.
  */
 export function capLabel(token: string): string {
   return token.charAt(0).toUpperCase() + token.slice(1)

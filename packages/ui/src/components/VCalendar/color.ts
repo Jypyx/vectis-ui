@@ -38,7 +38,7 @@ const HUES = 360
  * A stable hue, 0 to 359, for an event that carries no colour of its own.
  *
  * The hash is the usual djb2 walk over the id written out as text, so a numeric id and the
- * string of the same digits agree — which matters because an id makes the round trip
+ * string of the same digits agree. This matters because an id makes the round trip
  * through a consumer's JSON and may well come back as the other one.
  */
 export function hueOf(id: CalendarEventId): number {

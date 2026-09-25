@@ -21,7 +21,7 @@
  *
  * WHAT THE CORE COSTS, and why it is what it is. `core.css` carries every shared recipe —
  * the tone table and the four ways of painting it, the control size scale, the panel, the
- * banner, the field action, the choice chassis, the group label, the disclosure and the
+ * banner, the field action, the choice chassis, the disclosure and the
  * hidden input — so a consumer who imports one component downloads all of them. That is a
  * deliberate trade against the alternative, which is the same recipe written out in two or
  * three component sheets and free to drift between them on the next token change. Adding a

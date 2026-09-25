@@ -1,7 +1,7 @@
 // @core
 /**
- * Turns the design system's "which entries are unavailable" props — `disabledDates`,
- * `disabledPages` and their kind, each accepting a list OR a predicate — into one
+ * Turns the design system's "which entries are unavailable" props: `disabledDates`,
+ * `disabledPages` and their kind, each accepting a list OR a predicate, into one
  * function to ask, so components need not care which they were handed.
  *
  * Resolve it ONCE inside a `computed`, never per value: the list becomes a `Set` here, so

@@ -63,7 +63,7 @@ const maskCache = new Map<string, DateMask>()
  *
  * The calendar and the numbering system are FORCED to Gregorian and Latin digits.
  * Without that, `fa-IR` answers with a Persian year (1400 rather than 2021) and
- * `ar-EG` with Arabic-Indic digits — two things a numeric field could neither
+ * `ar-EG` with Arabic-Indic digits: two things a numeric field could neither
  * display nor read back. An invalid locale throws, and the answer then falls back to
  * day/month/year separated by "/".
  */
@@ -114,7 +114,7 @@ function buildDateMask(locale: string): DateMask {
 
 /**
  * Lays a run of digits out as masked text. The separator appears AS SOON AS the field
- * before it is full — typing "22" already gives "22/" — so the reader sees their
+ * before it is full: typing "22" already gives "22/", so the reader sees their
  * progress without ever having to type a separator themselves.
  *
  * This has a consequence the component must honour: pressing Backspace on such a
@@ -155,7 +155,7 @@ export interface ParseMaskOptions {
    * elsewhere the following separator already tells the two apart.
    *
    * Leaving it out refuses any year shorter than four digits, and that is the mode
-   * used while the reader types — so that "26", passed through on the way to "2026",
+   * used while the reader types, so that "26", passed through on the way to "2026",
    * is never committed as a year of its own.
    */
   yearPivot?: number
@@ -163,7 +163,7 @@ export interface ParseMaskOptions {
 
 /**
  * Reads masked text back into an ISO date, or returns `null` when the text is
- * incomplete, holds too many digits, or names a day that does not exist — 31
+ * incomplete, holds too many digits, or names a day that does not exist: 31
  * February passes every length check and is caught by the round trip `isValidISO`
  * performs.
  *
@@ -245,7 +245,7 @@ const IDEOGRAPHIC = /[\p{sc=Han}\p{sc=Hangul}\p{sc=Hiragana}\p{sc=Katakana}]/u
  * French, "tt.mm.jjjj" in German, "дд/мм/гггг" in Russian.
  *
  * Each letter is the first letter of the field's own name in that language, taken
- * from `Intl.DisplayNames` — which lands on the attested convention of every
+ * from `Intl.DisplayNames`, which lands on the attested convention of every
  * alphabetic script without a table to maintain. It falls back to the Latin letters
  * when that part of `Intl` is missing, or when the script is ideographic and the
  * repetition would mean nothing.

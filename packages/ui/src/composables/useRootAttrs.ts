@@ -17,7 +17,7 @@ type ClassBinding = false | null | undefined | string | Record<string, unknown> 
  * `aria-*` land on a decorative wrapper, where the form ignores them and assistive
  * technology never finds them.
  *
- * `defineOptions({ inheritAttrs: false })` stays in the SFC — it is a compilation option.
+ * `defineOptions({ inheritAttrs: false })` stays in the SFC: it is a compilation option.
  * `attrs` is returned whole for the components that need to read one back: a consumer `id`
  * that must beat the generated one, a `describedby` to merge rather than replace.
  */

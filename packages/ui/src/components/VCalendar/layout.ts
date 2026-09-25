@@ -109,10 +109,10 @@ export function windowOf(startHour: number, endHour: number): TimeWindow {
 /**
  * Minutes since midnight back into an `HH:mm` string.
  *
- * TRAP — the value is held one minute short of midnight rather than allowed to reach it.
+ * TRAP: the value is held one minute short of midnight rather than allowed to reach it.
  * A day's last moment is 1440 in this arithmetic, but `24:00` is not a time any of the
- * design system's helpers accept (`isValidTime` rejects it), and the alternative — writing
- * `00:00` on the following day — would turn an ordinary evening appointment into one that
+ * design system's helpers accept (`isValidTime` rejects it). Writing
+ * `00:00` on the following day would turn an ordinary evening appointment into one that
  * runs past midnight, which every gesture then treats differently. One minute is invisible at
  * every zoom this component offers; an event that changed kind under the pointer is not.
  */
@@ -129,8 +129,8 @@ export function minutesAt(time: string | undefined, fallback: number): number {
 /**
  * The weekdays a calendar shows, in reading order.
  *
- * The array does double duty: it says which days are VISIBLE — `[1,2,3,4,5]` hides the
- * weekend everywhere — and its first entry is the day a week starts on. Given nothing, the
+ * The array does double duty: it says which days are VISIBLE: `[1,2,3,4,5]` hides the
+ * weekend everywhere, and its first entry is the day a week starts on. Given nothing, the
  * seven days rotated to `firstDayOfWeek`, which the calendar takes from its prop of that
  * name or from the locale.
  */
@@ -163,7 +163,7 @@ export function isVisibleDay(iso: string, weekdays: readonly number[]): boolean 
  * The first visible day at or after `iso` (or at or before it, going backwards).
  *
  * The loop is bounded at seven because a non-empty weekday list always contains one of any
- * seven consecutive days — the bound is a guard against an empty list, never a real limit.
+ * seven consecutive days: the bound is a guard against an empty list, never a real limit.
  */
 export function snapToVisibleDay(
   iso: string,
@@ -213,7 +213,7 @@ export function columnCount(view: CalendarView, customDays: number): number {
  * `day`, `4days` and `custom` run forward from the anchor over the visible days alone, so
  * a four-day view of a Monday-to-Friday calendar shows four WORKING days rather than four
  * calendar ones. `week` shows the week the anchor falls in, starting on `weekdays[0]`.
- * `month` returns every day of the anchor's month that is visible — the grid that renders
+ * `month` returns every day of the anchor's month that is visible: the grid that renders
  * them cuts them back into weeks itself.
  *
  * `year` returns an empty list on purpose: that view is twelve month names, not a row of
@@ -261,7 +261,7 @@ export function visibleDays(
 /**
  * Where Previous and Next land.
  *
- * TRAP — the day-shaped views step over VISIBLE days, not calendar ones. Stepping by one
+ * TRAP: the day-shaped views step over VISIBLE days, not calendar ones. Stepping by one
  * calendar day from a Friday in a Monday-to-Friday calendar would land on a Saturday the
  * grid does not draw; the view would then show the same week it already showed, and the
  * button would look broken with nothing in the console to say why.
@@ -301,8 +301,8 @@ export function visibleRange(
 /**
  * How long an event lasts, in minutes, counting the days between its dates.
  *
- * A time that is not one reads as the far end of its day — midnight for a start, the next
- * midnight for an end — so a malformed event errs towards being long, and towards the band.
+ * A time that is not one reads as the far end of its day: midnight for a start, the next
+ * midnight for an end, so a malformed event errs towards being long, and towards the band.
  */
 export function durationOf(times: CalendarEventTimes): number {
   return (
@@ -321,8 +321,8 @@ export function spansMidnight(times: CalendarEventTimes): boolean {
  * Whether an event belongs in the band above the grid rather than in a day's column.
  *
  * A day's column holds up to twenty-four hours, so an event running past midnight for less
- * than that is drawn as two cards — the evening in one column, the early morning in the next —
- * and only one lasting a whole day or more becomes a bar. Exactly twenty-four hours is a bar:
+ * than that is drawn as two cards, the evening in one column and the early morning in the next.
+ * Only one lasting a whole day or more becomes a bar. Exactly twenty-four hours is a bar:
  * two cards covering the same hours of two columns would read as two events.
  *
  * An event whose end comes before its start has no column to go in either, so it goes to the
@@ -362,9 +362,9 @@ export interface EventSegment {
 }
 
 /**
- * Cuts the timed events into the boxes the day columns draw. All-day events produce none —
- * they are the band's business — and so does an event whose day is not on show or whose
- * hours fall entirely outside the window.
+ * Cuts the timed events into the boxes the day columns draw. All-day events produce none;
+ * they belong in the band. Nor does an event whose day is not on show or whose hours fall
+ * entirely outside the window.
  *
  * `minDuration` is applied HERE, by stretching the end, so that `packDayColumn` below sees
  * ordinary intervals and can stay a plain interval algorithm. Were the minimum applied
@@ -433,7 +433,7 @@ export function timedSegments(
 export interface PlacedSegment extends EventSegment {
   /** Which column of its cluster it sits in, counted from zero. */
   column: number
-  /** How many columns it takes up — more than one when the room beside it is free. */
+  /** How many columns it takes up: more than one when the room beside it is free. */
   span: number
   /** How many columns its cluster has. It is what both of the above are read against. */
   columns: number
@@ -442,7 +442,7 @@ export interface PlacedSegment extends EventSegment {
 /**
  * Shares one day's width out between the events happening at the same time.
  *
- * Three passes. First the segments are cut into CLUSTERS — runs joined by overlap, where an
+ * Three passes. First the segments are cut into CLUSTERS: runs joined by overlap, where an
  * event starting after everything before it has finished begins a new one. That is what
  * stops a crowded morning from squeezing a lone afternoon meeting into a sliver. Then,
  * inside a cluster, each event takes the first column whose last occupant has already
@@ -451,13 +451,13 @@ export interface PlacedSegment extends EventSegment {
  * nothing in the next column overlaps it, so a single event never leaves a gap it could
  * have filled.
  *
- * The order is fixed — by start, then longest first, then by id — so the same list always
+ * The order is fixed by start, then longest first, then by id, so the same list always
  * produces the same picture. Without the id to break the last tie, two events at the same
  * time for the same length would swap places whenever the array was re-sorted, and the
  * whole day would appear to shuffle for no reason.
  *
- * Overlap is strictly `a.start < b.end && b.start < a.end`, so events that merely touch —
- * one ending exactly as the next begins — share a column instead of splitting the width.
+ * Overlap is strictly `a.start < b.end && b.start < a.end`, so events that merely touch
+ * (one ending exactly as the next begins) share a column instead of splitting the width.
  */
 export function packDayColumn(segments: readonly EventSegment[]): PlacedSegment[] {
   const sorted = [...segments].sort(
@@ -529,8 +529,8 @@ export type { MonthCell }
 /**
  * The month view, cut into weeks.
  *
- * It keeps the fixed six rows `buildMonthGrid` produces — padded with the neighbouring
- * months — so the grid is the same height whichever month is on show and the page does not
+ * It keeps the fixed six rows `buildMonthGrid` produces: padded with the neighbouring
+ * months, so the grid is the same height whichever month is on show and the page does not
  * jump as one steps through the year. Each row is then filtered down to the visible
  * weekdays, which is what makes a Monday-to-Friday month five columns wide rather than
  * seven with two blanks.
@@ -587,12 +587,12 @@ export function coversDay(event: CalendarEvent, iso: string): boolean {
  *
  * WHY ONE PASS RATHER THAN A FILTER PER DAY. The month view needs all 42 squares filled, and
  * filtering and sorting the list once per square walks the whole event list 42 times and sorts
- * it 42 times — `cells × events`, with a sort each. Measured on the bench: 7.8 ms per render at
+ * it 42 times: `cells × events`, with a sort each. Measured on the bench: 7.8 ms per render at
  * 2000 events, and the month view rebuilds it every time a drag carries a chip onto another
  * day, so that is roughly half a frame spent rebuilding lists the gesture left alone.
  *
  * Here each event is placed once, into the days it actually covers, and each day is sorted
- * once — `events × span + cells × k log k`. The walk is bounded to the grid on both ends, so
+ * once: `events × span + cells × k log k`. The walk is bounded to the grid on both ends, so
  * an event running from last year costs its visible part and nothing more.
  */
 export function eventsByDay<T extends CalendarEvent>(
@@ -695,8 +695,8 @@ export interface AllDaySpan {
  * one day on the Friday and one on the following Monday, because those are the two days it
  * actually covers on screen.
  *
- * The rows are the same greedy pass the day columns use — each bar takes the first row
- * whose last bar has already ended — and the ordering is fixed, longest first at equal
+ * The rows are the same greedy pass the day columns use: each bar takes the first row
+ * whose last bar has already ended, and the ordering is fixed, longest first at equal
  * starts, so the band cannot reshuffle when the array is re-sorted.
  */
 export function packAllDay(
@@ -765,7 +765,7 @@ export interface GridGeometry {
  * and what moment that height stands for.
  *
  * Both answers are brought back inside the grid, so a pointer dragged past an edge keeps
- * producing the nearest sensible value rather than none — which is what makes a drag that
+ * producing the nearest sensible value rather than none. That is what makes a drag that
  * wanders off the component behave as the user expects instead of stopping dead.
  */
 export function pointToCell(
@@ -792,14 +792,14 @@ export function snapToSlot(minutes: number, step: number): number {
   return clamp(Math.round(minutes / size) * size, 0, MINUTES_PER_DAY)
 }
 
-/** Rounds a moment DOWN to the step containing it — where a drawn slot begins. */
+/** Rounds a moment DOWN to the step containing it: where a drawn slot begins. */
 export function floorToSlot(minutes: number, step: number): number {
   const size = step > 0 ? step : 1
   return clamp(Math.floor(minutes / size) * size, 0, MINUTES_PER_DAY)
 }
 
 /**
- * How many whole days an event covers beyond its first — zero for one that starts and ends
+ * How many whole days an event covers beyond its first: zero for one that starts and ends
  * on the same day, two for a trip from Monday to Wednesday.
  */
 export function daySpan(times: CalendarEventTimes): number {
@@ -815,7 +815,7 @@ export function daySpan(times: CalendarEventTimes): number {
  * This is the counterpart of `timeGrid.ts`'s `moveEvent`, and the two must not be confused: that one is for
  * a timed move INSIDE a single day and deliberately collapses `end` onto `start`, so putting
  * a three-day trip through it would silently squash it into one Tuesday. This one is for the
- * whole-day gestures — an all-day bar dragged along the band, a chip dragged across a month —
+ * whole-day gestures (an all-day bar dragged along the band, a chip dragged across a month),
  * where the times are carried along untouched and only the dates move.
  */
 export function moveEventToDay(origin: CalendarEventTimes, target: string): CalendarEventTimes {
@@ -840,7 +840,7 @@ function columnAt(x: number, geometry: GridGeometry, rtl: boolean): number {
   return clamp(columnSize > 0 ? Math.floor(offset / columnSize) : 0, 0, columns - 1)
 }
 
-/** The measurements of a month grid — the same struct, with rows where a time window was. */
+/** The measurements of a month grid: the same struct, with rows where a time window was. */
 export interface MonthGeometry extends GridGeometry {
   rows: number
 }
@@ -849,7 +849,7 @@ export interface MonthGeometry extends GridGeometry {
  * Turns a point on the screen into a square of the month.
  *
  * The block axis is a ROW here rather than a moment, which is the whole difference from
- * `pointToCell` — the inline half is the same arithmetic, RTL flip included. It is sound
+ * `pointToCell`: the inline half is the same arithmetic, RTL flip included. It is sound
  * because every week of a month is drawn the same height: the rows share what space there is
  * and a day too full for its box clips rather than growing.
  */
@@ -876,7 +876,7 @@ export function pointToMonthCell(
  * edge, 1 for the end one, nothing in between.
  *
  * It answers in READING order, so the start edge is the left one normally and the right one
- * in a right-to-left page — which is what makes "hold at the edge to go back" mean the same
+ * in a right-to-left page. That makes "hold at the edge to go back" mean the same
  * thing in both.
  */
 export function inlineEdgeAt(
@@ -916,7 +916,7 @@ export function blockEdgeAt(
 }
 
 /**
- * Whether a point falls inside a box — how a drag decides, on release, whether it is over the
+ * Whether a point falls inside a box: how a drag decides, on release, whether it is over the
  * calendar at all or over the toolbar, or over the page beside it.
  *
  * It takes the box as the browser MEASURED it, and never the `GridGeometry` the rest of this file
@@ -929,10 +929,10 @@ export function blockEdgeAt(
  * The edges COUNT as inside: a rect is a pair of floats on a screen that may be scaled by a
  * fraction, and an exclusive boundary would refuse a drop that looked, and was, on target.
  *
- * TRAP — a box that measures nothing contains EVERYTHING. That is the same answer `inlineEdgeAt`
+ * TRAP: a box that measures nothing contains EVERYTHING. That is the same answer `inlineEdgeAt`
  * and `blockEdgeAt` give a box of no size, and for the same reason: with no measurement there is
  * no outside to be on. Take a zero-size box literally instead and the calendar refuses every drop
- * wherever nothing has been laid out — in a hidden tab, before the first frame, and in jsdom,
+ * wherever nothing has been laid out: in a hidden tab, before the first frame, and in jsdom,
  * which measures nothing at all and where all but a handful of the drag tests would go red at
  * once.
  */
@@ -964,7 +964,7 @@ export function timesOf(event: CalendarEvent): CalendarEventTimes {
  *
  * It is what a drag asks before it writes its preview. A slot is a quarter of an hour, some
  * sixteen pixels at the default hour height, so most pointer moves land on the times already
- * shown — and the gesture state is deeply reactive, so an EQUAL but new object would still
+ * shown, and the gesture state is deeply reactive, so an EQUAL but new object would still
  * re-run the whole layout and re-render every cell of the grid for a picture that did not
  * change.
  */

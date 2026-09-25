@@ -26,7 +26,7 @@ export function to12h(hour24: number): { hour: number; meridiem: Meridiem } {
 
 /**
  * The way back: an hour read off a 12-hour clock face, plus the half of the day it is in,
- * gives the hour on the 24-hour clock — 12 in the morning is 0, 12 in the afternoon is 12.
+ * gives the hour on the 24-hour clock: 12 in the morning is 0, 12 in the afternoon is 12.
  */
 export function to24h(hour12: number, meridiem: Meridiem): number {
   const base = hour12 % 12 // Twelve is the zero of the cycle, not its top.
@@ -84,7 +84,7 @@ export function distanceFraction(dx: number, dy: number, radius: number): number
  * How close to the centre a pointer must land to be aiming at the INNER ring, the one
  * holding the small hours of a 24-hour dial: the halfway mark between the two rings.
  *
- * TRAP — the number is DERIVED from the dial tokens. A 256px dial with 48px numerals puts
+ * TRAP: the number is DERIVED from the dial tokens. A 256px dial with 48px numerals puts
  * the rings' centres at 104px and 56px from the middle, whose midpoint is 0.625 of the
  * radius. Change either token without changing this and the threshold no longer separates
  * the two rings: a tap near the boundary quietly sets the wrong hour.
@@ -96,7 +96,7 @@ export const DIAL_INNER_THRESHOLD = 0.625
  * at all (`atan2(0, 0)` answers half a turn, which would set six o'clock), and the centre dot
  * drawn there is not a numeral.
  *
- * TRAP — derived from the same tokens as the threshold above: the inner ring's numerals
+ * TRAP: derived from the same tokens as the threshold above: the inner ring's numerals
  * start 32px from the middle (56px less half a 48px numeral), 0.25 of the radius, so the
  * dead zone stops short of them. Grow it past 0.25 and the inner small hours lose their
  * inner half to it.
@@ -133,7 +133,7 @@ export interface TimeOption {
  * It knows nothing of the restrictions: VTimeInput filters the rows it offers, so the list
  * itself stays one table per step and locale.
  *
- * A nonsensical step — zero, a fraction, more than an hour — falls back to hourly, so the
+ * A nonsensical step (zero, a fraction, more than an hour) falls back to hourly, so the
  * list stays FINITE even when the component's warning about it was ignored.
  */
 export function timeList(step: number, locale: string, format: HourFormat): TimeOption[] {
@@ -156,7 +156,7 @@ const TIME_SEPARATOR = ':'
 
 /**
  * Lays a run of typed digits out as a time. The colon appears AS SOON AS the hour is
- * complete — typing "09" already gives "09:" — exactly as a date's separators do.
+ * complete: typing "09" already gives "09:", exactly as a date's separators do.
  */
 export function formatTimeMask(digits: string): string {
   const all = digitsOf(digits).slice(0, 4)

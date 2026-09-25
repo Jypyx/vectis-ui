@@ -1,7 +1,7 @@
 /**
  * The types the design system's components pass BETWEEN them and that belong to none of them.
  *
- * A type is normally named after whatever owns it — `ButtonTone` for VButton,
+ * A type is normally named after whatever owns it: `ButtonTone` for VButton,
  * `DatePickerRange` for the component that defines its shape, `FileRejection` for the module
  * that produces it. This file is for the case where nothing does: an item's value is shared
  * by a tab, a toggle item, a radio button and a combobox option, and naming it after any one of the three

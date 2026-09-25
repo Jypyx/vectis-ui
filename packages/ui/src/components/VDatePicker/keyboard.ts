@@ -36,7 +36,7 @@ export type DayStep = { days: number } | { months: number }
 
 /**
  * The step a key produces in the days view, given the key itself, whether Shift is
- * held, and how far the focused date sits from the start of its week — the last
+ * held, and how far the focused date sits from the start of its week: the last
  * being what Home and End need in order to land on the right day. Returning
  * `undefined` means the key is none of this table's business, and the event must be
  * left alone.
@@ -81,8 +81,8 @@ export function dayStep(
  * a flat index over a grid `PICKER_COLUMNS` wide. `undefined` again means the key is
  * not this table's business.
  *
- * Home and End are deliberately absent: both views are bounded — twelve months, a
- * year range fixed by `min` and `max` — and the component clamps whatever comes out,
+ * Home and End are deliberately absent: both views are bounded: twelve months, a
+ * year range fixed by `min` and `max`, and the component clamps whatever comes out,
  * so there is no wrapping behaviour left to define.
  */
 export function gridDelta(key: string): number | undefined {

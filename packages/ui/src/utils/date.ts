@@ -196,7 +196,7 @@ const firstDayCache = new Map<string, number>()
 // @fallback @ssr
 /**
  * The day the week starts on in a given locale, from 0 for Sunday to 6 for Saturday
- * — Sunday in the United States, Monday in most of Europe, Saturday in much of the
+ *: Sunday in the United States, Monday in most of Europe, Saturday in much of the
  * Middle East. It comes from `Intl.Locale`, whose own numbering runs from 1 for
  * Monday to 7 for Sunday.
  *
@@ -270,7 +270,7 @@ function formatterFor(locale: string, options: Intl.DateTimeFormatOptions): Intl
 }
 
 /**
- * A date written out for the reader, in the conventions of their locale — this is
+ * A date written out for the reader, in the conventions of their locale: this is
  * what VDateInput shows in its field. An unparsable date yields an empty string
  * rather than a broken one.
  */

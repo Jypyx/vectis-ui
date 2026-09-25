@@ -43,7 +43,6 @@ const CORE_CLASSES: ReadonlySet<string> = new Set([
   '.v-field-counter',
   '.v-field-meta',
   '.v-floating',
-  '.v-group-label',
   '.v-hidden-input',
   '.v-overlay',
   '.v-panel',

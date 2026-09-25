@@ -8,7 +8,7 @@
  * engine that throws on a pseudo-class it cannot parse; the keyboard is the careful answer
  * there, being the one that keeps a component reachable.
  *
- * TRAP for the tests — jsdom is NOT that environment. It parses `:focus-visible` happily and
+ * TRAP for the tests: jsdom is NOT that environment. It parses `:focus-visible` happily and
  * answers `false` for everything, a genuinely focused element included, so the `catch` never
  * runs and every test silently takes the pointer branch. Stub `matches` on the element being
  * asked; what that locks is that the component ASKS and branches, never jsdom's answer.

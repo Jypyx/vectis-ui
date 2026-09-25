@@ -8,7 +8,7 @@ import type { VNode } from 'vue'
  *
  * This is what lets a component count its children without a registry they feed at mount.
  * A registry fills up in the browser and stays empty on the server, so the two renders
- * disagree — VAvatarGroup would say "+0" in one and "+3" in the other. Reading the slot
+ * disagree: VAvatarGroup would say "+0" in one and "+3" in the other. Reading the slot
  * happens while the parent renders, which is the same on both sides.
  *
  * Components never call it on a slot directly: they go through `composables/useSlotNodes`,

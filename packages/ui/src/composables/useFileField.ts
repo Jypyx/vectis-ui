@@ -59,7 +59,7 @@ export interface FileFieldEmit {
 }
 
 export interface FileFieldOptions {
-  /** The component's value — always a list of files, whether one or several are allowed. */
+  /** The component's value: always a list of files, whether one or several are allowed. */
   model: Ref<File[]>
   props: FileFieldProps
   emit: FileFieldEmit

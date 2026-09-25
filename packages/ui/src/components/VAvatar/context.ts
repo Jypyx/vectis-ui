@@ -26,8 +26,8 @@ export interface AvatarGroupContext {
 
 /**
  * The size of an avatar that neither names one nor sits in a group that does. VAvatar and
- * VAvatarGroup both read it — the group sets `--control-height` at its own level, for the
- * overlap — so the two cannot disagree on what an unsized avatar measures.
+ * VAvatarGroup both read it: the group sets `--control-height` at its own level, for the
+ * overlap, so the two cannot disagree on what an unsized avatar measures.
  */
 export const AVATAR_DEFAULT_SIZE: AvatarSize = 'md'
 

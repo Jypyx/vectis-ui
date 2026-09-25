@@ -28,7 +28,7 @@ export function navigableItems(container: HTMLElement, selector: string): HTMLEl
 }
 
 /**
- * Moves focus for the arrows and Home/End, and reports whether it took the key —
+ * Moves focus for the arrows and Home/End, and reports whether it took the key.
  * `preventDefault` is applied only when it did, leaving the caller free otherwise.
  *
  * The ends wrap. With nothing in the list focused, any arrow starts at the beginning.

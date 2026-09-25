@@ -38,8 +38,8 @@ interface ClearableOptions {
 
 /**
  * Whether a field offers its cross: it asks for one, it can be used and changed, and it holds
- * something. The fields composed on top of VInput — VCombobox, VDateInput, VTimeInput,
- * VFileInput — hold their value somewhere other than the text, so they work out `filled`
+ * something. The fields composed on top of VInput: VCombobox, VDateInput, VTimeInput,
+ * VFileInput, hold their value somewhere other than the text, so they work out `filled`
  * themselves and hand VInput the result as `clearVisible`; the other terms are the same for
  * every field and are written here once.
  *

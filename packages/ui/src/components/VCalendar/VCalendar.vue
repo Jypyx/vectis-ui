@@ -113,14 +113,14 @@ export interface CalendarProps {
   /** How many events a day of the month view shows before it starts counting the rest. */
   monthEventLimit?: number
   /**
-   * Stops events being moved and stretched — by dragging them, and with the keyboard. They
+   * Stops events being moved and stretched, by dragging or with the keyboard. They
    * stay readable and clickable, and nothing else.
    */
   readonly?: boolean
   /**
    * Freezes the whole calendar: nothing can be moved, created or opened, no other period
    * can be reached, and everything greys out through the colour tokens. The cards leave the
-   * tab order, the grid keeps its own so the agenda can still be read — which is what
+   * tab order, the grid keeps its own so the agenda can still be read. That is what
    * separates this from `readonly`, where only the editing stops.
    */
   disabled?: boolean
@@ -195,13 +195,13 @@ const date = defineModel<string>('date', { default: () => todayISO() })
  * because dragging and resizing write back to it: the calendar rearranges what it is given
  * and hands the new list back, never mutating the one it received.
  *
- * Opening an event for editing stays with the consumer — this component reads and
+ * Opening an event for editing stays with the consumer: this component reads and
  * rearranges, and never creates or deletes: a slot drawn out is reported, not added.
  */
 const events = defineModel<E[]>('events', { default: () => [] })
 
 const emit = defineEmits<{
-  /** A card was clicked or activated — the cue to open an editor of your own. */
+  /** A card was clicked or activated: the cue to open an editor of your own. */
   'event-activate': [event: E]
   /**
    * An empty part of the grid was activated, at this day and this time. A day of the month
@@ -516,7 +516,7 @@ defineExpose({
   el: regionEl,
   /** Goes back to the current day, exactly as the Today button does. */
   today: goToToday,
-  /** Moves back one view — a week, a month, a year — exactly as the toolbar's arrow does. */
+  /** Moves back one view (a week, a month or a year), exactly as the toolbar's arrow does. */
   previous: () => step(-1),
   /** Moves forward one view. */
   next: () => step(1),

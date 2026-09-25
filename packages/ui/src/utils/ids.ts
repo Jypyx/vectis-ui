@@ -1,6 +1,6 @@
 // @a11y
 /**
- * An IDREF list — the value of `aria-describedby` or `aria-labelledby` — assembled from
+ * An IDREF list: the value of `aria-describedby` or `aria-labelledby`: assembled from
  * references that may each be absent. The empty ones are dropped by TRUTHINESS, so an empty
  * string contributes nothing, and a list left with no reference at all is `undefined`, which
  * removes the attribute instead of writing an empty one.

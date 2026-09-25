@@ -48,7 +48,7 @@ export interface CalendarEventProps<T> {
    * is about to return to where the faded echo shows it started.
    *
    * It is separate from `dragging` rather than folded into it because a refused card is ALSO
-   * being dragged — the two are orthogonal, and the stylesheet reads both. Named for what the
+   * being dragged: the two are orthogonal, and the stylesheet reads both. Named for what the
    * card knows, which is that its drop will not be taken; a card knows nothing of a view it
    * might be outside of.
    */

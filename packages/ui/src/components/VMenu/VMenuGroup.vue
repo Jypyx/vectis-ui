@@ -49,7 +49,7 @@ if (isDev) {
 
 <template>
   <div role="group" class="v-menu-group" :aria-labelledby="labelId">
-    <span :id="labelId" class="v-menu-group-label v-group-label"
+    <span :id="labelId" class="v-menu-group-label"
       ><slot name="label">{{ label }}</slot></span
     >
     <slot />
@@ -62,6 +62,18 @@ if (isDev) {
     display: flex;
     flex-direction: column;
     gap: var(--vectis-space-1);
+  }
+
+  .v-menu-group-label {
+    display: flex;
+    align-items: center;
+    min-block-size: var(--control-height);
+    padding-block: var(--vectis-space-1);
+    padding-inline: var(--control-padding-inline);
+    font-size: var(--vectis-text-overline-size);
+    font-weight: var(--vectis-text-overline-weight);
+    letter-spacing: var(--vectis-text-overline-tracking);
+    color: var(--vectis-color-text-muted);
   }
 }
 </style>

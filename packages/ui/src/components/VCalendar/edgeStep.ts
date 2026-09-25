@@ -26,14 +26,14 @@ import { useTimer } from '../../composables/useTimer'
  * Long enough that aiming at the edge column never pages by accident, short enough that
  * deliberately holding there does not feel broken. It is a matter of feel rather than of
  * correctness, so it is tuned by eye and exposed as `edgeStepDelay` for anyone who disagrees
- * — which is also why no test pins the number itself.
+ *, which is also why no test pins the number itself.
  */
 export const EDGE_STEP_DELAY = 800
 
 /**
  * How wide the edge zone is, in pixels.
  *
- * TRAP — this number is the twin of `--vectis-control-size-calendar-edge`, the width of the
+ * TRAP: this number is the twin of `--vectis-control-size-calendar-edge`, the width of the
  * band the stylesheet lights up to show that paging is coming. They describe the same strip:
  * moving one without the other leaves the calendar paging from somewhere other than where it
  * said it would, with nothing anywhere to point at it. The same arrangement as
@@ -58,7 +58,7 @@ export interface EdgeStep {
 
 /**
  * `delay` is a getter rather than a number so a consumer can turn paging off mid-drag by
- * binding it to zero — the reactive-prop-as-switch shape VCarousel's `autoplay` uses.
+ * binding it to zero: the reactive-prop-as-switch shape VCarousel's `autoplay` uses.
  */
 export function useEdgeStep(
   onStep: (direction: EdgeDirection) => void,

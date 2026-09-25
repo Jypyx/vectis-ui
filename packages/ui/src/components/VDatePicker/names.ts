@@ -34,7 +34,7 @@ const MONTH_LONG = { month: 'long', calendar: 'gregory', timeZone: 'UTC' } as co
  * `[...n]` rather than indexed, so that an accented or non-Latin character counts as
  * one character and is never cut in half.
  *
- * TRAP — the cut is not safe everywhere. Vietnamese writes every month "Tháng N", so all
+ * TRAP: the cut is not safe everywhere. Vietnamese writes every month "Tháng N", so all
  * twelve come out "Thá.", and Estonian, Czech, Lithuanian or Greek lose a pair; the months
  * view then shows identical cells. When the cut repeats itself, the language's own short
  * names are used instead, which CLDR keeps distinct.

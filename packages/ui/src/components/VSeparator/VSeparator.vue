@@ -9,7 +9,7 @@
  *
  * It carries no content slot and no spacing prop, on purpose. A divider with a label
  * in the middle is really a heading that happens to have a rule, and the space
- * around a rule belongs to the layout placing it — the same rule VTypography
+ * around a rule belongs to the layout placing it: the same rule VTypography
  * follows.
  */
 /** Which way the rule runs. */

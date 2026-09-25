@@ -6,7 +6,7 @@ import type { ChipSize } from '../components/VChip/VChip.vue'
  *
  * A chip is one step below its field, so a row of them does not push the field taller. Below
  * the lowest step of each pair there is no smaller size left, and `compact` makes up the
- * difference instead — which is why an `sm` field forces it and an `md` one, already having
+ * difference instead, which is why an `sm` field forces it and an `md` one, already having
  * room, does not pass its own through.
  *
  * The HEIGHT is what earns the module its place. The field must force its `<input>` to the

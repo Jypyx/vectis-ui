@@ -22,7 +22,7 @@ export const SUBMENU_HOVER_DELAY = 150
 
 // @a11y
 /**
- * Finds the element that opens a given panel — which is both what the panel positions
+ * Finds the element that opens a given panel. It is both what the panel positions
  * itself against and where the focus must return when it closes.
  *
  * It is found by searching the document rather than kept as a reference, because the

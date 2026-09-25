@@ -39,7 +39,7 @@ export function parseAccept(accept?: string): string[] {
  * The list may be handed over already read by `parseAccept`, which is what a batch does:
  * screening a hundred dropped files would otherwise split the same string a hundred times.
  *
- * TRAP — `file.type` is the browser's GUESS and is often empty (an unknown extension, some
+ * TRAP: `file.type` is the browser's GUESS and is often empty (an unknown extension, some
  * Linux setups). A list written only in MIME types then turns away a perfectly good file,
  * which is why the docs ask for extensions alongside: `image/*,.heic`, not `image/*` alone.
  */
@@ -109,7 +109,7 @@ function formatterFor(locale: string, step: number): Intl.NumberFormat {
 
 /**
  * A file size as a reader expects it: 1 200 000 gives "1.2 MB" in English, "1,2 Mo" in
- * French. Nothing here is translatable — `Intl` knows the unit names and the decimal mark.
+ * French. Nothing here is translatable: `Intl` knows the unit names and the decimal mark.
  *
  * SI base 1000, which is what the unit names `Intl` prints actually mean. The computing
  * convention of 1024 would show a 1024-byte file as "1.02 kB", a discrepancy no reader can
@@ -143,7 +143,7 @@ export function formatBytes(bytes: number, locale: string): string {
  * VFileInput and VFilePicker screen a batch through the same `screenFiles` below, so the
  * two report the same thing and the type is declared ONCE, here, rather than copied into
  * each of them under a name of its own. It is the `TimePickerAllowed` arrangement: the type
- * lives beside the rule that produces it, and `index.ts` is what makes it public — the
+ * lives beside the rule that produces it, and `index.ts` is what makes it public. The
  * MODULE stays internal, and a handler written for one of the two components can be
  * handed to the other.
  */

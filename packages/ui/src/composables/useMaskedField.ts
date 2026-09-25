@@ -13,7 +13,7 @@ import { computed, ref, watch, type Ref, type WritableComputedRef } from 'vue'
 import { digitsOf } from '../utils/text'
 
 export interface MaskedFieldOptions<T extends string> {
-  /** The real input, which is written to directly — see below. */
+  /** The real input, which is written to directly: see below. */
   fieldEl: Ref<HTMLInputElement | null>
   /** Whether the field can be typed into at all. Everything here is inert when it cannot. */
   typing: () => boolean
@@ -46,7 +46,7 @@ export interface MaskedFieldOptions<T extends string> {
   /** Writes a value as masked text, and nothing at all for no value. */
   toMask: (value: T | null) => string
   /**
-   * Whether a value the reader has finished typing may be taken — within the bounds, not
+   * Whether a value the reader has finished typing may be taken: within the bounds, not
    * one of the excluded days. Everything is acceptable by default.
    */
   acceptable?: (value: T) => boolean
@@ -55,7 +55,7 @@ export interface MaskedFieldOptions<T extends string> {
 /** What a component adds to the mask's own keys. */
 export interface MaskedKeyHooks {
   /**
-   * A key that is not a digit was typed — a separator, most often. Its character never
+   * A key that is not a digit was typed: a separator, most often. Its character never
    * reaches the field; what it MEANS is the component's: a date pads the field being typed
    * and moves on to the next, a time pads the hour.
    */
@@ -74,7 +74,7 @@ export interface MaskedField<T extends string> {
   /** The text currently in the field while it is being typed into. */
   draft: Ref<string>
   /**
-   * TRAP — bind with `v-model` and NEVER `:model-value`. Without an `onUpdate:modelValue`
+   * TRAP: bind with `v-model` and NEVER `:model-value`. Without an `onUpdate:modelValue`
    * listener, `useModel` keeps an internal copy of the RAW typed text and rewrites it on the
    * next patch, erasing the mask exactly when the masked text did NOT change: a rejected
    * character, or a digit past the last. Both components lock it with a test.
@@ -95,7 +95,7 @@ export interface MaskedField<T extends string> {
   onKeydown: (event: KeyboardEvent, hooks: MaskedKeyHooks) => void
   /**
    * The handler for the field's paste event. `recognize` reads the pasted text as a WHOLE
-   * value when it is one — a date in ISO form, a canonical time — and answers nothing
+   * value when it is one (a date in ISO form or a canonical time) and answers nothing
    * otherwise, in which case only the digits of what was pasted are taken.
    */
   onPaste: (event: ClipboardEvent, recognize: (pasted: string) => T | null) => void

@@ -27,7 +27,7 @@ export interface UseFieldPanelOptions {
    * through it, so a component never has to repeat the condition per handler.
    */
   disabled: () => boolean
-  /** Moves the focus INTO the open panel — where in it is the component's business. */
+  /** Moves the focus INTO the open panel: where in it is the component's business. */
   focusInPanel: () => void
   /** What the component needs to do as the panel opens: prepare a draft, reset a step. */
   onOpen?: () => void
@@ -51,7 +51,7 @@ export interface UseFieldPanelOptions {
  * return. This is exactly that minimum; what is particular to either component arrives
  * through `onOpen`/`onClose`.
  *
- * TRAP — the panel is WRITTEN imperatively and READ back by model. Bind `open` as
+ * TRAP: the panel is WRITTEN imperatively and READ back by model. Bind `open` as
  * `v-model:open` so the DOM feeds it, but the write must stay synchronous: the `rAF` that
  * moves focus assumes the panel is already open when it is armed, and the model would put
  * a tick in between.

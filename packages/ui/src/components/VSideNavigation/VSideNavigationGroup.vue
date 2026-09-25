@@ -41,7 +41,7 @@ const labelId = useId()
 
 <template>
   <li class="v-side-nav-group">
-    <span :id="labelId" class="v-side-nav-group-label v-group-label"
+    <span :id="labelId" class="v-side-nav-group-label"
       ><slot name="label">{{ label }}</slot></span
     >
     <ul class="v-side-nav-group-list" :aria-labelledby="labelId">
@@ -58,23 +58,22 @@ const labelId = useId()
   }
 
   /*
-   * The whole recipe comes from `.v-group-label` (styles/group-label.css). The one thing
-   * this level changes is where the heading starts, since a section sits at the depth of
-   * the rows it names.
-   *
    * TRAP — the indent repeats the rows' computation rather than sharing a variable with
-   * them, and it has to: a custom property is substituted on the element that DECLARES it,
-   * so a shared one set higher up would be frozen at level zero.
-   *
-   * The selector COMPOUNDS the two classes: on its own it would sit at equal specificity
-   * with the shared rule in another sheet, and which one a consumer's bundler puts last is
-   * not ours to decide.
+   * them: a custom property set higher up would be frozen at level zero when substituted.
    */
-  .v-group-label.v-side-nav-group-label {
+  .v-side-nav-group-label {
+    display: flex;
+    align-items: center;
+    min-block-size: var(--control-height);
+    padding-block: var(--vectis-space-1);
     padding-inline: calc(
         var(--control-padding-inline) + var(--side-nav-level, 0) * var(--side-nav-indent)
       )
       var(--control-padding-inline);
+    font-size: var(--vectis-text-overline-size);
+    font-weight: var(--vectis-text-overline-weight);
+    letter-spacing: var(--vectis-text-overline-tracking);
+    color: var(--vectis-color-text-muted);
   }
 }
 </style>

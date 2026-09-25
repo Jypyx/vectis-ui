@@ -28,7 +28,7 @@ const labelId = useId()
 
 <template>
   <div role="group" class="v-combobox-group" :aria-labelledby="labelId">
-    <span :id="labelId" class="v-combobox-group-label v-group-label">{{ label }}</span>
+    <span :id="labelId" class="v-combobox-group-label">{{ label }}</span>
     <slot />
   </div>
 </template>
@@ -44,6 +44,18 @@ const labelId = useId()
     flex: none;
     flex-direction: column;
     gap: var(--vectis-space-1);
+  }
+
+  .v-combobox-group-label {
+    display: flex;
+    align-items: center;
+    min-block-size: var(--control-height);
+    padding-block: var(--vectis-space-1);
+    padding-inline: var(--control-padding-inline);
+    font-size: var(--vectis-text-overline-size);
+    font-weight: var(--vectis-text-overline-weight);
+    letter-spacing: var(--vectis-text-overline-tracking);
+    color: var(--vectis-color-text-muted);
   }
 }
 </style>

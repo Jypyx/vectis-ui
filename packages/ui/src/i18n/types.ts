@@ -2,7 +2,7 @@
  * Every user-facing word the library can say, in one place: what a translator works from and
  * what a consumer overrides.
  *
- * Depth EXACTLY 2 — namespace, then leaf. A leaf is finished text, or a TS function when
+ * Depth EXACTLY 2: namespace, then leaf. A leaf is finished text, or a TS function when
  * something has to be slotted in. There is deliberately no template language and no plural
  * engine: a parameterized message IS a hand-written function whose signature is the
  * contract, so a translation that forgets an argument does not compile, and a plural is a
@@ -66,7 +66,7 @@ export interface Messages {
     /** The "rows per page" button, which shows both the wording and the number in force. */
     perPageValue: (label: string, value: number) => string
     selectAll: string
-    /** The row number is the one a reader counts, starting at one — the caller adds it. */
+    /** The row number is the one a reader counts, starting at one: the caller adds it. */
     selectRow: (index: number) => string
     selection: (count: number) => string
     range: (range: { start: number; end: number; total: number }) => string
@@ -87,14 +87,14 @@ export interface Messages {
     label: string
     /**
      * The single action a snackbar offers, when the caller does not name it. It means
-     * taking back what was just done — not cancelling a form, which is `common.cancel`
+     * taking back what was just done: not cancelling a form, which is `common.cancel`
      * and is a different word in several languages.
      */
     action: string
   }
   inputOTP: {
     label: string
-    /** The box number is the one a reader counts, starting at one — the caller adds it. */
+    /** The box number is the one a reader counts, starting at one: the caller adds it. */
     slot: (index: number, total: number) => string
   }
   slider: {
@@ -121,8 +121,8 @@ export interface Messages {
     label: string
   }
   /**
-   * The keys of a keyboard shortcut, in WORDS. The symbols themselves — ⌘ ⌃ ⌥ ⇧ ↵ ⌫ ⌦ ⇥
-   * ↑ ↓ ← → — are not here: they are engraved on the hardware and the same in every
+   * The keys of a keyboard shortcut, in WORDS. The symbols (⌘ ⌃ ⌥ ⇧ ↵ ⌫ ⌦ ⇥
+   * ↑ ↓ ← →) are not here: they are engraved on the hardware and the same in every
    * language, so they live with the component.
    *
    * Every entry below is the SPOKEN form. Where a symbol exists it wins on screen, and
@@ -203,7 +203,7 @@ export interface Messages {
     meridiemValue: (value: string) => string
     /**
      * The grey template shown in an empty field, "hh:mm". It is translatable because those
-     * letters are the initials of WORDS — unlike the colon between them, which is the same
+     * letters are the initials of WORDS, unlike the colon between them, which is the same
      * everywhere and lives with the time helpers.
      */
     maskPlaceholder: string
@@ -220,7 +220,7 @@ export interface Messages {
     clear: string
     /**
      * The WORD of the counter, and only that. The total size that follows is written out
-     * by the browser, and the brackets around it belong to neither — punctuation everyone
+     * by the browser, and the brackets around it belong to neither: punctuation everyone
      * shares.
      */
     files: (count: number) => string
@@ -232,7 +232,7 @@ export interface Messages {
     browse: string
     /**
      * The word standing between "drop your files here" and that button. It is a WORD, so
-     * it is translated — unlike the two rules on either side of it, which are drawn.
+     * it is translated, unlike the two rules on either side of it, which are drawn.
      */
     or: string
     /** What the list of chosen files is called. */
@@ -252,11 +252,11 @@ export interface Messages {
     roleDescription: string
     /** And the same for one slide. */
     slideRoleDescription: string
-    /** What the scrolling area itself is called — it can be reached with the Tab key. */
+    /** What the scrolling area itself is called: it can be reached with the Tab key. */
     slides: string
     /**
      * What a slide is called, and its dot with it. The number is the one a reader counts,
-     * starting at one — the caller adds it. It carries the WORD "of", which is why it is
+     * starting at one: the caller adds it. It carries the WORD "of", which is why it is
      * here where the table's bare "3/8" counter is not.
      */
     slide: (index: number, total: number) => string
@@ -269,7 +269,7 @@ export interface Messages {
   /**
    * The calendar. Two groups of words that read very differently: the toolbar, which a
    * reader SEES, and everything from `eventRoleDescription` down, which only a screen
-   * reader ever says — the same caution as the carousel's role description applies, since
+   * reader ever says: the same caution as the carousel's role description applies, since
    * an untranslated one goes wrong with no visible symptom at all.
    *
    * The navigation labels are per view rather than one word plus a unit: "Previous" needs

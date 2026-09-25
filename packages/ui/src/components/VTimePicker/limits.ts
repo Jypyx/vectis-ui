@@ -25,7 +25,7 @@ import { formatTime } from '../../utils/time'
 export type TimePickerAllowed = number[] | ((value: number) => boolean)
 
 /**
- * The restrictions in force, resolved ONCE — the matchers already turned into functions,
+ * The restrictions in force, resolved ONCE: the matchers already turned into functions,
  * and the interval the minutes are reachable on carried alongside them, since whether an
  * hour has anything left in it depends on that too.
  */
@@ -59,7 +59,7 @@ const allowEverything = () => true
  * functions here, an allowed LIST becoming a `Set` on the way, so no lookup rescans it.
  *
  * `resolveMatcher` answers "is this one of them", which is exactly what an allowed list
- * asks of it — but a prop that is ABSENT has to allow everything, where the helper's own
+ * asks of it, but a prop that is ABSENT has to allow everything, where the helper's own
  * empty case answers no. That inversion is the one thing it cannot be left to do.
  */
 export function resolveLimits(props: TimeLimitProps): TimeLimits {
@@ -102,7 +102,7 @@ export function minuteGrid(step: number): readonly number[] {
 /**
  * Whether the restrictions allow a time.
  *
- * TRAP — the bounds are compared as STRINGS. That works only because a canonical time is
+ * TRAP: the bounds are compared as STRINGS. That works only because a canonical time is
  * zero-padded and fixed-width, which makes '09:30' < '17:00' order the way the clock does;
  * hand it a value that never went through `formatTime` and the comparison is quietly wrong.
  */

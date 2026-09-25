@@ -55,7 +55,7 @@ export const isGhostId = (id: CalendarEventId) => String(id).startsWith(GHOST_PR
  * The id a card belongs to, read back off the DOM.
  *
  * An id may be a NUMBER and an attribute is always text, so a numeric one has to be turned
- * back into one — otherwise every card of a numerically-keyed calendar would look up as a
+ * back into one: otherwise every card of a numerically-keyed calendar would look up as a
  * miss and nothing would drag. Which of the two it is, is settled by asking the map that
  * holds the originals rather than by guessing from the text.
  */
@@ -68,7 +68,7 @@ export function cardIdOf(card: HTMLElement, has: (id: CalendarEventId) => boolea
  * A grid's measured box as the pure geometry wants it: plain numbers, no element.
  *
  * `inlineStart` is the edge the first column starts at, which is the RIGHT one in a
- * right-to-left page — which is also why containment never goes through this, see
+ * right-to-left page. This is also why containment never goes through this, see
  * `pointWithin`.
  */
 export function gridGeometryOf(rect: DOMRect, columns: number, rtl: boolean): GridGeometry {
@@ -96,19 +96,19 @@ export interface GestureBase {
   originX: number
   originY: number
   /**
-   * Where the pointer last was. Two things move the calendar UNDER a still pointer — paging at
-   * an edge, and auto-scrolling — and each has to work out afresh what the pointer is now over.
+   * Where the pointer last was. Two things move the calendar UNDER a still pointer: paging at
+   * an edge, and auto-scrolling. Each has to work out afresh what the pointer is now over.
    */
   lastX: number
   lastY: number
   /** Whether it moved past the threshold, which is what separates a drag from a click. */
   moved: boolean
   /**
-   * Whether the pointer is off the calendar altogether — over the toolbar, or over the page
+   * Whether the pointer is off the calendar altogether: over the toolbar, or over the page
    * beside it. Letting go there abandons the gesture whole and writes nothing.
    *
    * A KEYBOARD grab can never set it, and structurally rather than by a guard: `onPointermove`
-   * is the only writer, and it returns on the id mismatch first — a grab's `pointerId` is null,
+   * is the only writer, and it returns on the id mismatch first: a grab's `pointerId` is null,
    * which no real pointer's id ever equals.
    */
   outside: boolean
@@ -170,7 +170,7 @@ export interface CalendarGestureOptions<E extends CalendarEvent, G extends Gestu
   onRelease?: () => void
   /**
    * A pointer gesture let go inside the calendar. Returns true when the grid has answered it
-   * itself — a slot drawn out — and nothing is left to drop.
+   * itself, such as a slot drawn out, and nothing is left to drop.
    */
   onLetGo?: (state: G) => boolean
   /** A gesture that moved, committed: the grid reports the new times. */

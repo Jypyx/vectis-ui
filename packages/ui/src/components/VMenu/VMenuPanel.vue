@@ -194,9 +194,9 @@ defineExpose({
   close: hide,
   /** Whether it is open, as the browser last reported it. VMenu's model is checked against it. */
   shown,
-  /** Puts the focus on the first reachable item — the keyboard's way in. */
+  /** Puts the focus on the first reachable item: the keyboard's way in. */
   focusFirst,
-  /** Puts the focus on the panel itself — the pointer's way in, singling out no command. */
+  /** Puts the focus on the panel itself: the pointer's way in, singling out no command. */
   focusPanel,
   /** The panel element, which is the popover. */
   el: panelEl,

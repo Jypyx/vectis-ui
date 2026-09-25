@@ -23,13 +23,13 @@ export type CalendarEventId = string | number
  *
  * The seven fields below are the contract. A consumer needing more of their own writes an
  * interface extending this one and hands it to the component, which carries the type
- * through to the `#event` slot — so extra fields arrive typed rather than as `unknown`.
+ * through to the `#event` slot, so extra fields arrive typed rather than as `unknown`.
  */
 export interface CalendarEvent {
   /**
    * What identifies this event. It must be unique among the events given and stable
    * across renders: it is what the drag writes back to, what gives a card its key, and
-   * what decides the colour of an event that names none — so an event keeps its colour
+   * what decides the colour of an event that names none, so an event keeps its colour
    * as the list is filtered or re-sorted.
    */
   id: CalendarEventId
@@ -37,7 +37,7 @@ export interface CalendarEvent {
   title: string
   /** The day it starts on. */
   start: string
-  /** The day it ends on — the same day as `start` for an ordinary appointment. */
+  /** The day it ends on: the same day as `start` for an ordinary appointment. */
   end: string
   /** When it starts on that day. */
   startTime: string
@@ -52,7 +52,7 @@ export interface CalendarEvent {
    */
   color?: string
   /**
-   * The name of a time zone, shown beside the times as an annotation — "09:00 – 10:00
+   * The name of a time zone, shown beside the times as an annotation: "09:00 – 10:00
    * (Europe/Paris)". It is DISPLAY ONLY: it never moves the card, which is always placed
    * from the dates and times above, read as local time.
    */
@@ -67,7 +67,7 @@ export interface CalendarEvent {
 
 /**
  * Which period the calendar is showing. `custom` is the general case and `4days` a
- * preset on the same machinery — they differ only in where the number of days comes from.
+ * preset on the same machinery: they differ only in where the number of days comes from.
  */
 export type CalendarView = 'day' | '4days' | 'week' | 'month' | 'year' | 'custom'
 

@@ -49,12 +49,12 @@ export type CalendarIntent =
 /**
  * Where the focus is when the key arrives, which is what decides the answer:
  *
- * - `cell` — an empty part of the grid. The arrows travel, Enter creates, Shift and Enter
+ * - `cell`: an empty part of the grid. The arrows travel, Enter creates, Shift and Enter
  *   open the day (a month square's number takes no tab stop, so this is its keyboard route).
- * - `event` — a card, at rest. Space takes hold of it; every other key is the browser's,
+ * - `event`: a card, at rest. Space takes hold of it; every other key is the browser's,
  *   Enter included, which presses the card as a button and so opens the event. Enter is the
  *   one a reader tries first on a button, and `event-activate` has no other keyboard route.
- * - `grabbed` — a card being moved. The arrows now move the EVENT, Enter commits, Escape
+ * - `grabbed`: a card being moved. The arrows now move the EVENT, Enter commits, Escape
  *   puts it back where it was.
  */
 export type CalendarFocus = 'cell' | 'event' | 'grabbed'
@@ -70,7 +70,7 @@ export interface KeyChord {
 
 /**
  * What a key means. Returning nothing says the key is none of this table's business and
- * the event must be left entirely alone — which is what keeps Tab, the browser's own
+ * the event must be left entirely alone. That keeps keeps Tab, the browser's own
  * shortcuts and anything a consumer has bound working.
  *
  * A key held with Alt, Ctrl or Meta is ALWAYS left alone, whatever it is: Alt+Left is the

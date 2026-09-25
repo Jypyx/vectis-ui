@@ -38,7 +38,7 @@ export function roundToSlot(minutes: number, step: number): number {
  * show rather than counted here, so a hidden weekday is never landed on.
  *
  * An event pushed past the end of the window is held against it rather than having its tail
- * cut off — moving something must never change how long it is, which is the other gesture's
+ * cut off: moving something must never change how long it is, which is the other gesture's
  * job.
  */
 export function moveEvent(
@@ -94,7 +94,7 @@ export function resizeEvent(
  * FOUND it rather than off the times being written. An event that ran past midnight when it was
  * taken hold of may go on doing so, or come back inside one day, or cross again: its start may
  * be pushed into the day before or after `day`, and its end lands wherever its length takes it.
- * Any other event is `moveEvent`'s, held inside `day` — so a drag never turns an ordinary
+ * Any other event is `moveEvent`'s, held inside `day`, so a drag never turns an ordinary
  * appointment into an overnight one by accident.
  */
 export function moveTimedEvent(
@@ -139,8 +139,8 @@ export function moveTimedEvent(
  * Where a timed event's end lands when it is dragged or nudged: `endMinutes` counted from the
  * midnight that begins `endDay`.
  *
- * With `crossMidnight` false this is `resizeEvent`, and `endDay` is ignored. With it true — an
- * event that ran past midnight when the gesture began — the end may sit on the event's first
+ * With `crossMidnight` false this is `resizeEvent`, and `endDay` is ignored. With it true: an
+ * event that ran past midnight when the gesture began: the end may sit on the event's first
  * day or on the next one, whichever `endDay` names (anything else is held to the nearer of the
  * two), and it stays at least `minDuration` after the start and short of a whole day after it,
  * so the event never turns into a bar under the pointer.

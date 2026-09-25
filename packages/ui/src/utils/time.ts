@@ -31,7 +31,7 @@ export interface TimeParts {
 
 const TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/
 
-/** Whether something is a time in the canonical form — two digits, a colon, two digits. */
+/** Whether something is a time in the canonical form: two digits, a colon, two digits. */
 export function isValidTime(value: unknown): value is string {
   return typeof value === 'string' && TIME_RE.test(value)
 }
@@ -110,7 +110,7 @@ export function formatTimeDisplay(time: string, locale: string, format: HourForm
   return displayFormatterFor(locale, format).format(Date.UTC(2021, 0, 1, parts.hour, parts.minute))
 }
 
-/** A time as minutes since midnight, `null` if it is not one — its position in a list. */
+/** A time as minutes since midnight, `null` if it is not one: its position in a list. */
 export function minutesOf(time: string | null | undefined): number | null {
   const parts = parseTime(time)
   return parts ? parts.hour * 60 + parts.minute : null

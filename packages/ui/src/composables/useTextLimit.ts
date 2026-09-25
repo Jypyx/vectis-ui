@@ -18,7 +18,7 @@ interface ValidatableControl {
  * turns red once the reader has actually interacted with it, exactly as a native error
  * does; the form refuses to submit; and anyone inspecting the field finds the error where
  * they would look for any other. The price is that the component then owns that error
- * for as long as it is standing — and only then: a message the consumer set (a server
+ * for as long as it is standing, and only then. A message the consumer set (a server
  * verdict) is left alone whenever the soft limit has nothing to say.
  *
  * The effect runs AFTER the render rather than before it, because the reference to the

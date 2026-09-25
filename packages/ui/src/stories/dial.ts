@@ -6,7 +6,7 @@
  * shows up in the sidebar and is run as a test with no render of its own. `src/stories/**`
  * is excluded from the build, so nothing here ships.
  *
- * Two files need it — VTimePicker's own stories and VTimeInput's, which drives the same
+ * Two files need it: VTimePicker's own stories and VTimeInput's, which drives the same
  * face through its panel.
  */
 

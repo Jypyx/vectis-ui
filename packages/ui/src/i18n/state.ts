@@ -95,13 +95,13 @@ function mergeMessages(base: Messages, patch: MessagesInput): Messages {
 /**
  * Chooses the locale the library speaks.
  *
- * Pass a COMPLETE tag — `fr-FR`, `en-GB`, `de-DE` — never a bare language, because it is put
+ * Pass a COMPLETE tag (`fr-FR`, `en-GB`, `de-DE`), never a bare language, because it is put
  * to two uses: it picks the dictionary, where only the subtag matters, and it is what the
  * calendar and the pickers hand to `Intl`, where the region matters a great deal. A bare
- * `en` resolves to no region in particular — a 12-hour clock and weeks starting on Sunday,
+ * `en` resolves to no region in particular: a 12-hour clock and weeks starting on Sunday,
  * which is not British English. Those components also take their own `locale`, which wins.
  *
- * Call it from a module — a Nuxt plugin, `main.ts` — never inside a `setup()`. On a server
+ * Call it from a module such as a Nuxt plugin or `main.ts`, never inside a `setup()`. On a server
  * the choice lives as long as the process, which is right for configuration and wrong for
  * anything belonging to one visitor; setting it client-only makes the server and the client
  * render different languages, and hydration then visibly fails to line up.
@@ -120,13 +120,13 @@ export function setLocale(locale: string): void {
 }
 
 /**
- * Adds or adjusts the words of a LANGUAGE, filed under the subtag alone — `fr`, not `fr-FR`.
+ * Adds or adjusts the words of a LANGUAGE, filed under the subtag alone: `fr`, not `fr-FR`.
  *
  * The one way in, deliberately: enabling the French the library ships and adding a language
  * it does not ship are the SAME gesture.
  *
  * A partial dictionary is fine. What is left out falls back to whatever was registered
- * before, then to the English always carried — never to an empty string. Successive calls
+ * before, then to the English always carried, never to an empty string. Successive calls
  * for one language ADD UP, so registering `fr` then correcting one word keeps the rest.
  * Passing `undefined` removes the override and puts English back as it came.
  */
@@ -148,12 +148,12 @@ export function registerMessages(lang: string, messages: MessagesInput | undefin
 }
 
 /**
- * The dictionary in force. Internal — components read it, it is not public API.
+ * The dictionary in force. Internal: components read it, it is not public API.
  *
  * It hands back the `shallowRef` rather than its contents, which is what makes components
  * ALREADY mounted re-render when `setLocale` is called later.
  *
- * TRAP — reading `.value.x` once in a `setup()` body FREEZES that word. Read it where the
+ * TRAP: reading `.value.x` once in a `setup()` body FREEZES that word. Read it where the
  * read repeats: inside a `computed`, or in the template.
  *
  * The composable shape is deliberate. The day a locale per subtree or per request is needed,

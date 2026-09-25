@@ -36,7 +36,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   /**
-   * The reader asked for this notification to go. The card removes nothing itself —
+   * The reader asked for this notification to go. The card removes nothing itself;
    * the queue belongs to the VToaster.
    */
   close: [id: number]

@@ -30,12 +30,12 @@ const lettersOf = (s: string): string => normalizeText(s).replace(/[^a-z]/g, '')
  * digits and places the separator itself.
  *
  * The digit route is ADDITIVE: it only ever answers what the label route already refused,
- * which is why a plain "30" still returns every half past the hour — that is the substring
+ * which is why a plain "30" still returns every half past the hour: that is the substring
  * search doing its ordinary job, and it is the least surprising thing a search box can do.
  *
  * Three things keep the digit route precise. It matches a run from its START, never inside
  * it, so "035" does not reach 10:35 through the middle of its digits. Every run it compares
- * against is one the reader could have READ — the label as shown, its hour padded and
+ * against is one the reader could have READ: the label as shown, its hour padded and
  * unpadded (the reader pads or not whatever is on screen), and the canonical 24-hour form,
  * so "2130" reaches a row a 12-hour clock writes "9:30 PM". Nothing is synthesized the
  * other way round: reading a 24-hour label as a 12-hour one would make "930" return half

@@ -34,7 +34,7 @@ export interface InfiniteScroll {
   /**
    * Releases the lock that stops two requests overlapping.
    *
-   * It must be called wherever a page that was asked for can no longer arrive — when the
+   * It must be called wherever a page that was asked for can no longer arrive: when the
    * panel closes, above all. Without that, a request which failed would leave the paging
    * frozen for the rest of the session.
    */

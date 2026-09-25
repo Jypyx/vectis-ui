@@ -5,10 +5,10 @@
  * (`invoice.pdf` and `invoice.png`), and the tail is also where the version or
  * date suffixes live.
  *
- * Pure, no Vue — the `VHotkeys/platform.ts` precedent: a single consumer, so it
+ * Pure, no Vue: the `VHotkeys/platform.ts` precedent: a single consumer, so it
  * stays in the component's folder. Deliberately NOT promoted alongside the file
  * helpers of `utils/file.ts`: cutting a string is a lexical operation, not
- * something the FILE domain decides — `utils/text.ts` is where it would go the
+ * something the FILE domain decides: `utils/text.ts` is where it would go the
  * day a second consumer appears.
  */
 
@@ -20,12 +20,12 @@ export const CHIP_NAME_MAX = 20
  * `truncateMiddle('annual_report_2026_final.pdf')` → `annual_rep…_final.pdf`.
  *
  * The result is EXACTLY `max` characters long: the ellipsis takes one of them,
- * and the odd one goes to the head — the start of a name is what makes it
+ * and the odd one goes to the head: the start of a name is what makes it
  * recognizable, the end is what disambiguates it.
  *
  * Counted in CODE POINTS (`[...text]`) and not in UTF-16 units: an emoji in a
  * name would otherwise be cut between its two halves and render as a
- * replacement character. Combining marks stay out of scope — a grapheme
+ * replacement character. Combining marks stay out of scope: a grapheme
  * segmenter for a chip label would be a lot of machinery for a rounding error.
  */
 export function truncateMiddle(text: string, max: number = CHIP_NAME_MAX): string {

@@ -90,7 +90,7 @@ export interface CalendarTimeGridProps<T> {
   /** Today's date, or nothing on the server, where it cannot be known. */
   today: string | null
   /**
-   * The time it is now, in minutes since midnight — again nothing on the server. It is
+   * The time it is now, in minutes since midnight: again nothing on the server. It is
    * passed in rather than read here so that one clock drives every view, and so that a
    * calendar showing no time grid still costs no timer.
    */
@@ -107,7 +107,7 @@ export interface CalendarTimeGridProps<T> {
   edgeStepDelay: number
   /** Whether dragging near the top or bottom scrolls the grid. */
   autoScroll: boolean
-  /** What the grid as a whole is called — the range it is showing. */
+  /** What the grid as a whole is called: the range it is showing. */
   label: string
 }
 

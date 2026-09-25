@@ -15,8 +15,8 @@ export function normalizeText(s: string): string {
 
 // @core
 /**
- * A memory of `normalizeText` results, filed under the object a text belongs to — a table row,
- * a combobox option — and under a field name when one object holds several texts.
+ * A memory of `normalizeText` results, filed under the object a text belongs to: a table row,
+ * a combobox option, and under a field name when one object holds several texts.
  *
  * A filter normalizes the whole list again on every keystroke, and normalizing decomposes,
  * strips and lowercases each string: this is what makes the second keystroke cost a lookup.
@@ -43,7 +43,7 @@ export function createNormalizedCache<K extends object>() {
 }
 
 // @core
-/** A whole number written on two digits, so that 7 becomes "07" — as dates and times are. */
+/** A whole number written on two digits, so that 7 becomes "07": as dates and times are. */
 export function pad2(n: number): string {
   return String(n).padStart(2, '0')
 }

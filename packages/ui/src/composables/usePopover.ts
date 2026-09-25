@@ -87,14 +87,14 @@ export function usePopover(el: Readonly<Ref<HTMLElement | null>>) {
 // @core
 /**
  * The model half of a popover's `v-model:open`, for a component that publishes its open
- * state: a change to the model opens or closes the panel. The other half — writing the
- * DOM's state back into the model — stays with the component, in its own toggle handler,
+ * state: a change to the model opens or closes the panel. The other half: writing the
+ * DOM's state back into the model, stays with the component, in its own toggle handler,
  * because that is where it knows the state has settled.
  *
  * `shown` is a getter so that the state may live in a child: VPopover reads its own
  * `usePopover`, VMenu reads the one VMenuPanel exposes.
  *
- * TRAP — the `value === shown()` guard is what keeps the two directions from chasing each
+ * TRAP: the `value === shown()` guard is what keeps the two directions from chasing each
  * other. A panel the browser has just dismissed writes `false` into the model; without the
  * guard that write would come back here as a request to close a panel already closed.
  */
