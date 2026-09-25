@@ -13,11 +13,11 @@
  * be reached and acted on is the MONTH, whose name carries how many of its days are busy.
  * Choosing a day is what the month and day views are for, and the heading is the way through.
  */
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 import { addDays, addMonths, compareISO, formatDateDisplay, parseISO } from '../../utils/date'
 
-import { monthWeeks, type MonthCell } from './layout'
+import { lastDayOf, monthWeeks, type MonthCell } from './layout'
 import type { CalendarEvent } from './types'
 
 export interface CalendarYearProps<T> {
@@ -29,6 +29,8 @@ export interface CalendarYearProps<T> {
   weekdays: number[]
   today: string | null
   label: string
+  /** Turns the twelve month headings into disabled buttons, out of the tab order. */
+  disabled?: boolean
 }
 
 const props = defineProps<CalendarYearProps<E>>()
@@ -57,7 +59,8 @@ const busyDays = computed(() => {
   for (const event of props.events) {
     if (!parseISO(event.start) || !parseISO(event.end)) continue
     const from = compareISO(event.start, first) > 0 ? event.start : first
-    const to = compareISO(event.end, last) < 0 ? event.end : last
+    const end = lastDayOf(event)
+    const to = compareISO(end, last) < 0 ? end : last
     for (let iso = from; compareISO(iso, to) <= 0; iso = addDays(iso, 1)) days.add(iso)
   }
   return days
@@ -124,14 +127,25 @@ const yearMonths = computed(() => {
     }
   })
 })
+
+const rootEl = ref<HTMLElement | null>(null)
+
+defineExpose({
+  /** Brings the focus onto the first month, the view's first control. */
+  focus: (options?: FocusOptions) =>
+    rootEl.value?.querySelector<HTMLButtonElement>('.v-calendar-year-title')?.focus(options),
+  /** Nothing to scroll to in a year view. */
+  scrollToMinutes: () => {},
+})
 </script>
 
 <template>
-  <div class="v-calendar-year" role="group" :aria-label="label">
+  <div ref="rootEl" class="v-calendar-year" role="group" :aria-label="label">
     <section v-for="entry in yearMonths" :key="entry.month" class="v-calendar-year-month">
       <button
         type="button"
         class="v-calendar-button v-calendar-year-title"
+        :disabled="disabled"
         @click="emit('month-activate', entry.month)"
       >
         {{ entry.name }}
@@ -169,7 +183,10 @@ const yearMonths = computed(() => {
 @layer vectis.components {
   .v-calendar-year {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(var(--vectis-control-size-calendar-year-month), 1fr)
+    );
     gap: var(--vectis-space-4);
     padding: var(--vectis-space-3);
   }

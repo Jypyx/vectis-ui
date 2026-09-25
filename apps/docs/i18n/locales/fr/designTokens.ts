@@ -177,6 +177,16 @@ const descriptions: Record<DescribedToken, string> = {
     'La hauteur au-delà de laquelle le bandeau « toute la journée » de VCalendar défile au lieu de grandir',
   '--vectis-control-size-calendar-now-dot':
     "Le point sur la ligne de l'heure actuelle de VCalendar",
+  '--vectis-control-size-calendar-event-edge':
+    "La largeur du bord d'attaque coloré d'un événement de VCalendar",
+  '--vectis-control-size-calendar-gap':
+    "L'écart que VCalendar laisse entre deux événements, côte à côte dans un jour ou empilés dans un mois",
+  '--vectis-control-size-calendar-grip':
+    'La longueur de la poignée dessinée sur la bande de redimensionnement d’une carte de VCalendar',
+  '--vectis-control-size-calendar-grip-thickness':
+    'L’épaisseur de cette poignée, qui est aussi sa distance au bord inférieur de la carte',
+  '--vectis-control-size-calendar-year-month':
+    'La largeur sous laquelle un mini-mois de la vue année de VCalendar ne descend pas avant que l’année se réorganise',
   '--vectis-control-size-calendar-month-cell':
     "La hauteur minimale d'un jour dans la vue mois de VCalendar",
   '--vectis-control-size-calendar-year-cell':

@@ -217,8 +217,12 @@ export function useFileField(options: FileFieldOptions) {
     return file
   }
 
-  /** Empties the selection, and the hidden input with it. */
+  /**
+   * Empties the selection, and the hidden input with it. Refused where `removeAt` is, and
+   * silent when there is nothing to empty: no `change` for a selection that did not change.
+   */
   function clear() {
+    if (!enabled.value || model.value.length === 0) return
     model.value = []
     syncNative()
     options.onClear?.()

@@ -1,7 +1,7 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 
-import { nextTick, ref } from 'vue'
+import { Fragment, createTextVNode, h, nextTick, ref } from 'vue'
 
 import VChip from './VChip.vue'
 
@@ -263,6 +263,19 @@ describe('VChip — icon-only', () => {
       slots: { default: () => [] },
     })
     expect(container.querySelector('.v-chip')!.hasAttribute('data-icon-only')).toBe(true)
+  })
+
+  // A v-for over nothing renders an empty Fragment, and a template's own spacing a blank text
+  // node: neither is a label, and the chip stays square.
+  it('reads an empty list or blank text in the slot as no label', () => {
+    for (const nodes of [() => [h(Fragment, null, [])], () => [createTextVNode('  ')]]) {
+      const { container, unmount } = render(VChip, {
+        props: { iconStart: 'star', clickable: true },
+        slots: { default: nodes },
+      })
+      expect(container.querySelector('.v-chip')!.hasAttribute('data-icon-only')).toBe(true)
+      unmount()
+    }
   })
 })
 

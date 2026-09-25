@@ -194,9 +194,22 @@ const accessibleName = computed(() =>
      * from — which is what lets the custom block below swap the SOURCE of all three without
      * touching a single rule that consumes them.
      */
-    --calendar-event-face: var(--vectis-color-event-surface);
-    --calendar-event-edge: var(--vectis-color-event-border);
-    --calendar-event-ink: var(--vectis-color-event-text);
+    /*
+     * TRAP — the hue is turned HERE, on the card, and never in the tokens. A token carrying
+     * `var(--vectis-calendar-event-hue)` is resolved on `:root`, where no card has set one,
+     * and every event came out in the fallback hue. Relative colour syntax keeps the token's
+     * lightness and chroma, which are what hold the title's contrast, and takes the hue the
+     * card sets inline, or the token's own (`h`) when none is set.
+     */
+    --calendar-event-face: oklch(
+      from var(--vectis-color-event-surface) l c var(--vectis-calendar-event-hue, h)
+    );
+    --calendar-event-edge: oklch(
+      from var(--vectis-color-event-border) l c var(--vectis-calendar-event-hue, h)
+    );
+    --calendar-event-ink: oklch(
+      from var(--vectis-color-event-text) l c var(--vectis-calendar-event-hue, h)
+    );
 
     /* The handle is placed against this box, so the card has to establish one. */
     position: relative;
@@ -218,7 +231,8 @@ const accessibleName = computed(() =>
     /* The leading edge is what carries the colour at a glance, so it is drawn thicker. It
        is a border and not a background stripe: under Windows forced-colors a background is
        forced to Canvas and vanishes, where a border keeps a colour of its own. */
-    border-inline-start: 3px solid var(--calendar-event-edge);
+    border-inline-start: var(--vectis-control-size-calendar-event-edge) solid
+      var(--calendar-event-edge);
     /* TRAP — the cap is measured against the all-day LANE, the shortest thing this same
        class ever renders, and against nothing else. A browser scales down any radius it
        cannot fit, so a chip already paints half a lane under a large
@@ -288,7 +302,7 @@ const accessibleName = computed(() =>
    * The threshold is a literal because a container query takes no custom properties — the
    * same constraint VPagination's steps are written under.
    */
-  @container (max-height: 3rem) {
+  @container (max-block-size: 3rem) {
     .v-calendar-event[data-layout='block'] .v-calendar-event-body {
       flex-direction: row;
       align-items: center;
@@ -322,7 +336,7 @@ const accessibleName = computed(() =>
    * of a quarter of an hour that stays inside its slot, and it is paid in leading rather than
    * in a card that covers the next one.
    */
-  @container (max-height: 1.5rem) {
+  @container (max-block-size: 1.5rem) {
     .v-calendar-event[data-layout='block'] .v-calendar-event-title,
     .v-calendar-event[data-layout='block'] .v-calendar-event-time {
       line-height: 1;
@@ -427,10 +441,10 @@ const accessibleName = computed(() =>
   .v-calendar-event-handle::after {
     content: '';
     position: absolute;
-    inset-block-end: 2px;
+    inset-block-end: var(--vectis-control-size-calendar-grip-thickness);
     inset-inline-start: 50%;
-    inline-size: var(--vectis-space-4);
-    block-size: 2px;
+    inline-size: var(--vectis-control-size-calendar-grip);
+    block-size: var(--vectis-control-size-calendar-grip-thickness);
     translate: -50% 0;
     border-radius: var(--vectis-radius-pill);
     background: var(--calendar-event-ink);
@@ -518,6 +532,14 @@ const accessibleName = computed(() =>
     .v-calendar-event,
     .v-calendar-event-handle::after {
       transition: none;
+    }
+  }
+
+  /* The resize grip is a background, which forced colors would flatten to Canvas. */
+  @media (forced-colors: active) {
+    .v-calendar-event-handle::after {
+      forced-color-adjust: none;
+      background: CanvasText;
     }
   }
 }

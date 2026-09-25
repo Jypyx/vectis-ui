@@ -165,6 +165,16 @@ const DRAFT_ID = '__vectis-calendar-draft__'
 interface Gesture extends GestureBase {
   kind: 'move' | 'move-days' | 'resize' | 'create'
   /**
+   * How far the arrows have taken a KEYBOARD grab from its origin: days along the days on
+   * show, and minutes moved (the start) and stretched (the end). Every step is worked out from
+   * the origin with these, as every pointer frame is, and never from the step before it: held
+   * against the end of the day a step is written 23:59, and building on that would take a
+   * minute off the event at each press.
+   */
+  keyDays?: number
+  keyStart?: number
+  keyEnd?: number
+  /**
    * How far after the event's start the pointer took hold, in minutes, so the card does not
    * jump under it. Counted across midnight: an event running from 22:00 taken by its morning
    * card at 01:00 is held three hours in.
@@ -214,6 +224,7 @@ const {
   onPointerup,
   onPointercancel,
   onPointerleave,
+  onFocusout,
   onCardKeydown,
   focusCell,
   idOfCard,
@@ -248,10 +259,11 @@ const {
   },
   onDrop: (state) =>
     emit('event-drop', state.id, state.preview, state.kind === 'resize' ? 'resize' : 'move'),
+  // An all-day bar is taken by whole days, the pointer's own gesture on the band.
   grab: (item) =>
-    props.editable && !isAllDayEvent(item)
+    props.editable
       ? initFor({
-          kind: 'move',
+          kind: isAllDayEvent(item) ? 'move-days' : 'move',
           id: item.id,
           origin: timesOf(item),
           pointerId: null,
@@ -654,7 +666,7 @@ function onKeydown(event: KeyboardEvent) {
   const cell = target?.closest<HTMLElement>('.v-calendar-cell')
   if (!cell) return
 
-  const intent = calendarIntent(event.key, event.shiftKey, 'cell', props.slotDuration, isRtl())
+  const intent = calendarIntent(event, 'cell', props.slotDuration, isRtl())
   if (!intent) return
 
   const iso = cell.dataset.iso!
@@ -692,7 +704,8 @@ function onKeydown(event: KeyboardEvent) {
    * (WCAG 2.1.1): the cell carries a day and an hour, and how long the event lasts is a question
    * for the consumer's own form, where the pointer answers it by how far it was drawn.
    */
-  if (intent.kind === 'activate') {
+  // A time grid has no day to open; Shift and Enter report the cell, as Enter does.
+  if (intent.kind === 'activate' || intent.kind === 'openDay') {
     event.preventDefault()
     emit('cell-activate', { date: iso, minutes })
   }
@@ -821,6 +834,15 @@ function onGridPointerdown(event: PointerEvent) {
  * part of the calendar that scroll does not carry. Everything after the press IS shared: the
  * capture, the move, the release, all of them on the scroller both boxes sit in.
  */
+/**
+ * The band's bars answer the same card table as the grid's cards. They sit in the sticky
+ * header, outside the grid whose keydown the cards reach, so the band delegates on its own.
+ */
+function onBandKeydown(event: KeyboardEvent) {
+  const card = (event.target as HTMLElement | null)?.closest<HTMLElement>('.v-calendar-event')
+  if (card) onCardKeydown(event, card)
+}
+
 function onBandPointerdown(event: PointerEvent) {
   endLastGesture()
   if (gesture.value || !props.editable || event.button !== 0) return
@@ -844,6 +866,23 @@ function onBandPointerdown(event: PointerEvent) {
     }),
     rtl,
   )
+}
+
+/**
+ * One arrow press on an all-day bar held by the keyboard: a whole day sideways along the days
+ * on show, nothing else, since a bar has no hours to move through or to stretch.
+ */
+function onBarStep(state: Gesture, step: GrabStep, item: E): boolean {
+  if (step.kind !== 'grabMove' || step.days === 0) return false
+  const keyDays = (state.keyDays ?? 0) + step.days
+  const base = props.days.indexOf(state.origin.start)
+  const column = clamp(base + keyDays, Math.min(base, 0), props.days.length - 1)
+  const next = column < 0 ? state.origin : moveEventToDay(state.origin, props.days[column]!)
+  if (sameTimes(next, state.preview)) return false
+  state.keyDays = keyDays
+  state.preview = next
+  emit('announce', m.value.calendar.movedTo(item.title, timesText(state.preview)))
+  return true
 }
 
 /**
@@ -999,41 +1038,61 @@ function originColumn(state: Gesture): number {
 /**
  * One arrow press on a card held by the keyboard.
  *
- * Each step is applied to the PREVIEW rather than to the origin, so the arrows accumulate the
- * way a reader expects — three presses of Down move three slots, not one. That is the opposite
- * of the pointer, which recomputes from the origin every frame because it always knows where it
- * is; the keyboard only knows how far it has just asked to go.
+ * The arrows accumulate the way a reader expects, three presses of Down moving three slots, but
+ * what accumulates is the DISTANCE (`keyDays`, `keyStart`, `keyEnd`) and the event is worked
+ * out from its origin each time, as the pointer's is every frame. Applied to the preview instead,
+ * a step held against the end of the day built on its 23:59 and the event came back shorter
+ * and off the slot grid.
  */
 function onGrabStep(state: Gesture, step: GrabStep, item: E): boolean {
+  const { origin } = state
+  if (state.kind === 'move-days') return onBarStep(state, step, item)
   // Whether the event may cross midnight is read off where it was taken from, as the pointer's is.
-  const crossMidnight = spansMidnight(state.origin)
-  if (step.kind === 'grabResize') {
-    state.preview = resizeTimedEvent(
-      state.preview,
-      state.preview.end,
-      minutesAt(state.preview.endTime, props.timeWindow.end) + step.minutes,
-      props.slotDuration,
-      props.timeWindow,
-      crossMidnight,
-    )
-  } else {
-    // Sideways is a step along the days ON SHOW, exactly as the pointer's is: date
-    // arithmetic would count the days the calendar is hiding. A vertical step keeps the day,
-    // which an overnight event's start may already have left the days on show for.
-    const iso =
-      step.days === 0
-        ? state.preview.start
-        : (props.days[
-            clamp(props.days.indexOf(state.preview.start) + step.days, 0, props.days.length - 1)
-          ] ?? state.preview.start)
-    state.preview = moveTimedEvent(
-      state.preview,
-      iso,
-      minutesAt(state.preview.startTime, props.timeWindow.start) + step.minutes,
-      props.timeWindow,
-      crossMidnight,
-    )
+  const crossMidnight = spansMidnight(origin)
+  let keyDays = state.keyDays ?? 0
+  let keyStart = state.keyStart ?? 0
+  let keyEnd = state.keyEnd ?? 0
+  if (step.kind === 'grabResize') keyEnd += step.minutes
+  else {
+    keyDays += step.days
+    keyStart += step.minutes
   }
+
+  /*
+   * Sideways is a step along the days ON SHOW, exactly as the pointer's is: date arithmetic
+   * would count the days the calendar is hiding. An overnight event may have been taken by its
+   * morning card with its start on a day off show (index -1): it can then go right, never
+   * further left than where it already is.
+   */
+  const base = props.days.indexOf(origin.start)
+  const column = clamp(base + keyDays, Math.min(base, 0), props.days.length - 1)
+  const day = column < 0 || keyDays === 0 ? origin.start : props.days[column]!
+  const moved = moveTimedEvent(
+    origin,
+    day,
+    minutesAt(origin.startTime, props.timeWindow.start) + keyStart,
+    props.timeWindow,
+    crossMidnight,
+  )
+  const next =
+    keyEnd === 0
+      ? moved
+      : resizeTimedEvent(
+          moved,
+          moved.end,
+          minutesAt(moved.endTime, props.timeWindow.end) + keyEnd,
+          props.slotDuration,
+          props.timeWindow,
+          crossMidnight,
+        )
+
+  // Held against an edge, the press goes nowhere: nothing to announce, nothing to drop, and
+  // nothing kept either, so the next press the other way moves at once.
+  if (sameTimes(next, state.preview)) return false
+  state.keyDays = keyDays
+  state.keyStart = keyStart
+  state.keyEnd = keyEnd
+  state.preview = next
   emit('announce', m.value.calendar.movedTo(item.title, timesText(state.preview)))
   return true
 }
@@ -1144,9 +1203,9 @@ function scrollToMinutes(minutes: number) {
 // is on screen. VCalendarMonth answers the same two, its `scrollToMinutes` being a no-op.
 defineExpose({
   /** Brings the focus onto the cell the grid is currently pointing at. */
-  focus: () => {
+  focus: (options?: FocusOptions) => {
     const cell = tabbable.value
-    if (cell) focusCell(cellId(cell.iso, cell.minutes))
+    if (cell) focusCell(cellId(cell.iso, cell.minutes), false, options)
   },
   /** Scrolls the grid so a given moment of the day sits at the top of the visible area. */
   scrollToMinutes,
@@ -1164,6 +1223,7 @@ defineExpose({
     @pointerup="onPointerup"
     @pointercancel="onPointercancel"
     @pointerleave="onPointerleave"
+    @focusout="onFocusout"
   >
     <div class="v-calendar-head">
       <div class="v-calendar-head-gutter" />
@@ -1194,6 +1254,7 @@ defineExpose({
           :aria-label="m.calendar.allDay"
           :style="{ '--calendar-lanes': String(allDayLanes) }"
           @pointerdown="onBandPointerdown"
+          @keydown="onBandKeydown"
         >
           <VCalendarEvent
             v-for="span in allDay"
@@ -1559,8 +1620,12 @@ defineExpose({
    *
    * A card is therefore never taller than its slot. Fitting the text into a short one is the
    * stylesheet's problem, and VCalendarEvent solves it by asking how tall the card came out.
+   *
+   * TRAP — compounded with `.v-calendar-event`, which sets `position: relative` on the same
+   * element from its own sheet: at an equal (0,1,0) the winner was whichever of the two sheets
+   * the consumer's bundler put last, and every card of the grid fell into normal flow.
    */
-  .v-calendar-block {
+  .v-calendar-event.v-calendar-block {
     position: absolute;
     inset-block-start: calc(var(--calendar-block-start-fraction) * 100%);
     block-size: calc(
@@ -1572,7 +1637,7 @@ defineExpose({
     );
     inline-size: calc(
       var(--calendar-block-span) / var(--calendar-block-columns) / var(--calendar-columns) * 100% -
-        2px
+        var(--vectis-control-size-calendar-gap)
     );
     z-index: 1;
   }
@@ -1606,6 +1671,15 @@ defineExpose({
     margin-inline-start: calc(var(--vectis-control-size-calendar-now-dot) / -2);
     border-radius: var(--vectis-radius-pill);
     background: var(--vectis-color-danger);
+  }
+
+  /* The line is a border, which forced colors keeps; the dot at its start is a background,
+     which it would flatten to Canvas. */
+  @media (forced-colors: active) {
+    .v-calendar-now::before {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
   }
 }
 </style>

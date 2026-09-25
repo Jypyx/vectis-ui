@@ -57,7 +57,9 @@ export function withMeridiem(time: string | null | undefined, meridiem: Meridiem
  * stepping back from 0 with the keyboard passes through -1, which is 59.
  */
 export function snapMinute(minute: number, step: number): number {
-  const snapped = step <= 1 ? Math.round(minute) : Math.round(minute / step) * step
+  // A step is whole minutes: 7.5 divides 60, and wrote `09:7.5` into the model.
+  const size = Math.round(step)
+  const snapped = size <= 1 ? Math.round(minute) : Math.round(minute / size) * size
   return ((snapped % 60) + 60) % 60
 }
 

@@ -119,7 +119,9 @@ show. `#all-day-label` replaces the words beside it.
 An event that runs from one day into the next for **less** than twenty-four hours stays in the
 grid, as a card in each of its two days: the evening in the first column, the early morning in the
 second. The edge where midnight cuts it is dashed, the way a card cropped by `dayStart` or `dayEnd`
-is. One ending at midnight exactly is a single card on its first day.
+is. One ending at midnight exactly is a single card on its first day, and the month view and the
+all-day band count it on that day alone: twenty-four hours from one midnight to the next is one
+day.
 
 The two cards are one event. Dragging either moves both, keeping the length, so the event may go on
 crossing midnight or come back inside one day. Only the morning card carries the strip that changes
@@ -176,7 +178,9 @@ same quantity at every hue rather than something that changes around the colour 
 An event **with** a `color` uses it for its leading edge and for a faint wash of its face. The title
 is never written on top of it, so any value you choose stays readable in both themes.
 
-To pin a hue yourself without naming a colour, set `--vectis-calendar-event-hue` on the card.
+The card sets that hue inline, as `--vectis-calendar-event-hue`, and turns the three
+`--vectis-color-event-*` tokens to it: the tokens are where a theme retunes the lightness and the
+chroma of every event at once.
 
 <Canvas of={VCalendarStories.Colours} />
 
@@ -254,18 +258,23 @@ the weeks you paged through on the way stay paged.
 Every gesture above has a keyboard equivalent, because one that did not would be unreachable for
 anyone who cannot use a pointer.
 
-| key                      | what it does                                                 |
-| ------------------------ | ------------------------------------------------------------ |
-| `Enter` on an empty cell | reports `cell-activate`, the day and hour your form opens on |
-| `Enter` on a card        | presses it, which reports `event-activate`                   |
-| `Space` on a card        | takes hold of the event                                      |
-| arrows, once held        | moves it by a slot, or by a day                              |
-| `Shift` + arrows         | changes when it ends                                         |
-| `Enter` or `Space`       | places it                                                    |
-| `Escape`                 | puts it back where it was                                    |
+| key                        | what it does                                                 |
+| -------------------------- | ------------------------------------------------------------ |
+| `Enter` on an empty cell   | reports `cell-activate`, the day and hour your form opens on |
+| `Shift` + `Enter` on a day | opens that day, in the month view, as its number does        |
+| `Enter` on a card          | presses it, which reports `event-activate`                   |
+| `Space` on a card          | takes hold of the event, an all-day bar included             |
+| arrows, once held          | moves it by a slot, or by a day                              |
+| `Shift` + arrows           | changes when it ends                                         |
+| `Enter` or `Space`         | places it                                                    |
+| `Escape`                   | puts it back where it was                                    |
 
 Drawing a slot out has no keystroke of its own. The keyboard's way to a new event is the cell it
 reports: its day and hour are where your form starts, and the length is chosen there.
+
+Moving the focus to another control, or pressing on the calendar with a pointer, puts a held
+event back as `Escape` does. A move that brings it back where it started writes nothing, so it
+reports no `event-move` either.
 
 Each step is announced, and taking hold does **not** also open the event: `Space` is how a button is
 pressed as well, and the same keystroke would otherwise do both. `Enter` is left to the card so an
@@ -324,8 +333,10 @@ tall as its content, so there is nothing to switch on.
   full, so nothing is lost to a reader who cannot see the row of day names above.
 - **Keyboard**: arrows move by a day and by an hour, `Home`/`End` reach the ends of the row,
   `PageUp`/`PageDown` turn to the previous and next period, `Enter` reports a cell or opens a card,
-  and `Space` takes hold of a card to move it. Every gesture the pointer offers is reachable this
-  way — see the table above.
+  `Shift` + `Enter` opens the focused day of a month (announced through `aria-keyshortcuts`, since
+  the day's number takes no tab stop), and `Space` takes hold of a card to move it. Every gesture
+  the pointer offers is reachable this way — see the table above. A key held with `Alt`, `Ctrl` or
+  `Meta` is left to the browser, so `Alt` + arrow still goes back a page.
 - Every event is a real button, reachable and activatable without a pointer. Each points at one
   shared node describing how it can be moved, rather than repeating the sentence on every card.
 - **The resize strip is not a control.** A button inside a button is invalid HTML and a blocking
@@ -337,6 +348,10 @@ tall as its content, so there is nothing to switch on.
 - **The pointer says nothing**, on a drop, an abandoned one or a creation alike. The announcements
   belong to the keyboard, which has no pointer to show where the event went.
 - A `disabled` calendar reports no cell, from a click or from `Enter`: the grid keeps its tab stop
-  so the agenda can be read, and nothing it holds can be taken up.
+  so the agenda can be read, and nothing it holds can be taken up. In the year view the twelve
+  month headings become disabled buttons.
+- In Windows forced colors, today takes the system selection colours, the paging strip is drawn in
+  `Highlight`, the neighbouring months' days in `GrayText`, and the current-time dot and the resize
+  grip in `CanvasText`: each was painted with a background alone, which that mode removes.
 - The visible focus uses the design system's standard ring, drawn inwards inside the scrolling area
   so it is never cropped; every transition respects `prefers-reduced-motion`.

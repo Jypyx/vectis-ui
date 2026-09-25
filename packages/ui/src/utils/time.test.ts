@@ -260,3 +260,18 @@ describe('withMeridiem', () => {
     expect(hourWithMeridiem(12, 'AM')).toBe(0)
   })
 })
+
+describe('a minute step that is not a whole number', () => {
+  // 7.5 divides 60, and wrote `09:7.5` into the model: a step is read as whole minutes.
+  it('snaps to a whole minute', () => {
+    expect(Number.isInteger(snapMinute(10, 7.5))).toBe(true)
+  })
+})
+
+describe('a 12-hour clock in a language that counts from zero', () => {
+  // Japanese writes the first hour after midnight as 0 on a 12-hour clock, not 12.
+  it('follows the language rather than imposing twelve', () => {
+    expect(formatTimeDisplay('00:05', 'ja-JP', '12h')).toContain('0:05')
+    expect(formatTimeDisplay('00:05', 'en-US', '12h')).toContain('12:05')
+  })
+})

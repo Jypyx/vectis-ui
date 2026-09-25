@@ -92,7 +92,12 @@ export interface TimeWindow {
 
 /** Turns the `dayStart`/`dayEnd` props, given in hours, into the window the rest works in. */
 export function windowOf(startHour: number, endHour: number): TimeWindow {
-  const start = clamp(Math.round(startHour * MINUTES_PER_HOUR), 0, MINUTES_PER_DAY)
+  // The start stops an hour short of midnight, so the hour kept on screen fits in the day.
+  const start = clamp(
+    Math.round(startHour * MINUTES_PER_HOUR),
+    0,
+    MINUTES_PER_DAY - MINUTES_PER_HOUR,
+  )
   const end = clamp(
     Math.round(endHour * MINUTES_PER_HOUR),
     start + MINUTES_PER_HOUR,
@@ -143,7 +148,8 @@ export function normalizeWeekdays(
     }
   }
   if (kept.length > 0) return kept
-  const first = ((Math.trunc(firstDayOfWeek) % 7) + 7) % 7
+  // Monday when the day given is not a number, the fallback `firstDayOfWeekFor` uses too.
+  const first = Number.isFinite(firstDayOfWeek) ? ((Math.trunc(firstDayOfWeek) % 7) + 7) % 7 : 1
   return Array.from({ length: DAYS_PER_WEEK }, (_, i) => (first + i) % 7)
 }
 
@@ -282,9 +288,10 @@ export function visibleRange(
   customDays: number,
 ): { start: string; end: string } {
   if (view === 'year') {
+    // No clock read here: the server and the browser must name the same range.
     const date = parseISO(anchor)
-    const year = date?.getFullYear() ?? new Date().getFullYear()
-    return { start: isoOf(year, 0, 1), end: isoOf(year, 11, 31) }
+    if (!date) return { start: anchor, end: anchor }
+    return { start: isoOf(date.getFullYear(), 0, 1), end: isoOf(date.getFullYear(), 11, 31) }
   }
   const days = visibleDays(anchor, view, weekdays, customDays)
   if (days.length === 0) return { start: anchor, end: anchor }
@@ -551,9 +558,26 @@ export function monthsOfYear(anchor: string): string[] {
   return Array.from({ length: 12 }, (_, month0) => isoOf(year, month0, 1))
 }
 
+/**
+ * The last day an event puts anything on.
+ *
+ * Its `end` date, except for a timed event ending at midnight EXACTLY: it has nothing on
+ * that day, which is why `timedSegments` draws it whole on its first day. Every other view
+ * has to agree, or twenty-four hours from one midnight to the next becomes a two-day bar and
+ * an evening ending at 00:00 is listed on the following day too. An all-day event's dates
+ * are whole days, so its end is kept as it stands.
+ */
+export function lastDayOf(event: CalendarEvent): string {
+  const endsAtMidnight =
+    event.allDay !== true &&
+    compareISO(event.start, event.end) < 0 &&
+    minutesOf(event.endTime) === 0
+  return endsAtMidnight ? addDays(event.end, -1) : event.end
+}
+
 /** Whether an event covers a given day at all, all-day or timed. */
 export function coversDay(event: CalendarEvent, iso: string): boolean {
-  return compareISO(iso, event.start) >= 0 && compareISO(iso, event.end) <= 0
+  return compareISO(iso, event.start) >= 0 && compareISO(iso, lastDayOf(event)) <= 0
 }
 
 /**
@@ -585,8 +609,15 @@ export function eventsByDay<T extends CalendarEvent>(
   const last = days[days.length - 1]!
 
   for (const event of events) {
+    /*
+     * TRAP: the walk below steps from one date to the next through `addDays`, which hands
+     * back a string that is not a date unchanged. A datetime slipped into `start` would never
+     * be stepped past, and the page would hang, on the server as well as in the browser.
+     */
+    if (!parseISO(event.start) || !parseISO(event.end)) continue
+    const end = lastDayOf(event)
     const from = compareISO(event.start, first) > 0 ? event.start : first
-    const to = compareISO(event.end, last) < 0 ? event.end : last
+    const to = compareISO(end, last) < 0 ? end : last
     if (compareISO(from, to) > 0) continue
 
     /*
@@ -603,10 +634,17 @@ export function eventsByDay<T extends CalendarEvent>(
       id: String(event.id),
     }
 
+    // An overnight event has been running since midnight on its second day, so it is ranked
+    // from there, ahead of that morning's appointments, rather than by the evening before.
+    const morning =
+      ranked.allDay === 1 && compareISO(event.start, event.end) < 0
+        ? { ...ranked, minutes: 0 }
+        : ranked
+
     for (let iso = from; compareISO(iso, to) <= 0; iso = addDays(iso, 1)) {
       // A day the weekday filter hides has no bucket, so it is simply skipped: that is what
       // makes a Monday-to-Friday month cost nothing for the weekends it does not show.
-      buckets.get(iso)?.push(ranked)
+      buckets.get(iso)?.push(iso === event.start ? ranked : morning)
     }
   }
 
@@ -685,7 +723,7 @@ export function packAllDay(
       startIndex: first,
       span: last - first + 1,
       continuesBefore: compareISO(event.start, days[first]!) < 0,
-      continuesAfter: compareISO(event.end, days[last]!) > 0,
+      continuesAfter: compareISO(lastDayOf(event), days[last]!) > 0,
       lane: 0,
     })
   }

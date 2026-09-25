@@ -74,7 +74,20 @@ function mergeMessages(base: Messages, patch: MessagesInput): Messages {
     // outside is affected, the object being fresh — but every lookup in it is then wrong,
     // and nothing says so.
     if (FORBIDDEN_KEYS.has(namespace)) continue
-    if (section) out[namespace] = { ...out[namespace], ...section }
+    if (!section) continue
+    /*
+     * A leaf with no word in it is left out, so the one underneath stays. A dictionary read
+     * from JSON can carry a `null`, and one built with `x ?? undefined` an `undefined`:
+     * spread as they stood, they replaced the English and a control was named by nothing.
+     */
+    const words = Object.entries(section).filter(([key, value]) => {
+      const empty = value === undefined || value === null || value === ''
+      if (empty && isDev) {
+        console.warn(`[vectis] registerMessages: “${namespace}.${key}” is empty and was ignored.`)
+      }
+      return !empty
+    })
+    out[namespace] = { ...out[namespace], ...Object.fromEntries(words) }
   }
   return out as unknown as Messages
 }
@@ -170,5 +183,6 @@ export function useLocale(): ShallowRef<string> {
  * returned here, so the two sources are never consulted in a different order somewhere else.
  */
 export function useResolvedLocale(locale: () => string | undefined): ComputedRef<string> {
-  return computed(() => locale() ?? currentLocale.value)
+  // An empty tag is no tag: handed to `Intl` as it stands, it throws a RangeError.
+  return computed(() => locale() || currentLocale.value)
 }

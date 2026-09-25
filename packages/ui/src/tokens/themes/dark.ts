@@ -81,9 +81,9 @@ export const dark = {
      * against a dark ground, and matching the light values would make a wall of events
      * glare.
      */
-    'event-surface': color('oklch(0.3 0.05 var(--vectis-calendar-event-hue, 265))'),
-    'event-border': color('oklch(0.42 0.08 var(--vectis-calendar-event-hue, 265))'),
-    'event-text': color('oklch(0.9 0.06 var(--vectis-calendar-event-hue, 265))'),
+    'event-surface': color('oklch(0.3 0.05 265)'),
+    'event-border': color('oklch(0.42 0.08 265)'),
+    'event-text': color('oklch(0.9 0.06 265)'),
   },
   focus: {
     'ring-color': color('{color.indigo.400}'),

@@ -524,6 +524,12 @@ export const Colours: Story = {
     // what a play function leaves rendered, and this is the calendar's one colour surface.
     const canvas = within(canvasElement)
     await waitFor(() => expect(canvas.getAllByRole('button', { name: /–/ })).toHaveLength(8))
+
+    // Each card turns the event colours to its own hue. Resolved in the tokens instead, the
+    // seven ids below all came out in the same indigo, which jsdom has no styles to notice.
+    const auto = canvasElement.querySelectorAll<HTMLElement>('.v-calendar-event:not([data-custom])')
+    const faces = new Set(Array.from(auto, (card) => getComputedStyle(card).backgroundColor))
+    await expect(faces.size).toBe(7)
   },
 }
 

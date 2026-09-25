@@ -111,11 +111,20 @@ export function moveTimedEvent(
 
   const duration = clamp(durationOf(times), 1, MINUTES_PER_DAY - 1)
   const dayShift = Math.floor(startMinutes / MINUTES_PER_DAY)
-  const start = clamp(
-    startMinutes - dayShift * MINUTES_PER_DAY,
-    timeWindow.start,
-    timeWindow.end - 1,
-  )
+  const wanted = startMinutes - dayShift * MINUTES_PER_DAY
+  /*
+   * The start is held inside the window only when it was taken from inside it. An overnight
+   * event may begin after the window closes (a 22:00 shift on a calendar showing 08:00 to
+   * 20:00, whose morning card alone is drawn): pulled into the window, its start jumped hours
+   * and left the slot grid at the first nudge. Left where it was asked to go, it cannot
+   * vanish either, since moving it later lengthens its morning and moving it earlier brings
+   * its evening into view.
+   */
+  const from = minutesAt(times.startTime, timeWindow.start)
+  const start =
+    from >= timeWindow.start && from < timeWindow.end
+      ? clamp(wanted, timeWindow.start, timeWindow.end - 1)
+      : wanted
   const startDay = addDays(day, dayShift)
   const end = start + duration
   return {
@@ -162,7 +171,11 @@ export function resizeTimedEvent(
       start: times.start,
       end: times.start,
       startTime: timeOf(startMinutes),
-      endTime: timeOf(Math.min(end, timeWindow.end)),
+      // The window caps the end, never below the shortest length: a start after the window
+      // closes would otherwise be given an end before it.
+      endTime: timeOf(
+        Math.max(Math.min(end, timeWindow.end), startMinutes + Math.max(minDuration, 1)),
+      ),
     }
   }
   return {

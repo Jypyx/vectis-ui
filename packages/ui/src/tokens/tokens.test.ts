@@ -166,3 +166,20 @@ describe('the dark theme', () => {
     }
   })
 })
+
+/*
+ * A `var()` inside a custom property is resolved where the property is DECLARED, which for
+ * a token is `:root`. A hue read there is the fallback's, and every card that set its own
+ * would still be painted in it. The event colours are therefore plain colours, and the card
+ * turns their hue with relative colour syntax on itself.
+ */
+describe('the calendar event colours', () => {
+  it('carry no custom property, in either theme', () => {
+    for (const group of [semantic.color, dark.color] as TokenGroup[]) {
+      for (const role of ['event-surface', 'event-border', 'event-text']) {
+        const token = group[role]
+        expect(token && isToken(token) && String(token.$value)).not.toContain('var(')
+      }
+    }
+  })
+})

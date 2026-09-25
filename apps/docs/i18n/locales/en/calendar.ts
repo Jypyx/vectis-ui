@@ -21,7 +21,7 @@ export default {
     },
     allDay: {
       title: 'All-day events',
-      text: '<code>allDay</code> puts an event in the band above the grid, where an event lasting 24 hours or more already goes. One running past midnight for less than that stays in the grid, as a card in each of its two days.',
+      text: '<code>allDay</code> puts an event in the band above the grid, where an event lasting 24 hours or more already goes. One running past midnight for less than that stays in the grid, as a card in each of its two days. One ending at midnight exactly belongs to its first day alone.',
     },
     overlapping: {
       title: 'Overlapping events',

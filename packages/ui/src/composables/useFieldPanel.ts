@@ -1,4 +1,4 @@
-import { provide, ref, useId, watch } from 'vue'
+import { onBeforeUnmount, provide, ref, useId, watch } from 'vue'
 import type { Ref } from 'vue'
 
 import { NO_BUTTON_GROUP, buttonGroupKey } from '../components/VButton/context'
@@ -73,6 +73,18 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
   // selector carries — a floating panel is not a segment of the row that opened it.
   provide(buttonGroupKey, NO_BUTTON_GROUP)
 
+  /*
+   * The frame the focus is moved in, kept so it can be called off. A panel closed inside that
+   * frame (Escape at once, the field disabled, a consumer closing it) would otherwise have the
+   * focus pulled into it once shut, taken from the field it had just been handed back to.
+   */
+  let focusFrame = 0
+
+  function cancelFocusFrame() {
+    if (focusFrame) cancelAnimationFrame(focusFrame)
+    focusFrame = 0
+  }
+
   function openPanel(moveFocus = !openOnFocus()) {
     if (options.disabled() || open.value) return
     options.onOpen?.()
@@ -80,15 +92,24 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
     // @a11y
     // A `manual` popover moves focus nowhere, so it is moved by hand — a frame later,
     // the panel not being painted yet, and nothing invisible can take focus.
-    if (moveFocus) requestAnimationFrame(() => options.focusInPanel())
+    if (moveFocus) {
+      cancelFocusFrame()
+      focusFrame = requestAnimationFrame(() => {
+        focusFrame = 0
+        options.focusInPanel()
+      })
+    }
   }
 
   /** Closes the panel and leaves the focus where it is: the focus has already gone elsewhere. */
   function closePanel() {
+    cancelFocusFrame()
     if (!open.value) return
     options.panelRef.value?.close()
     options.onClose?.()
   }
+
+  onBeforeUnmount(cancelFocusFrame)
 
   // @core
   // TRAP — a panel refused WHILE it is open (the field turned read-only or disabled, the

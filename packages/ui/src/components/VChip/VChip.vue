@@ -15,7 +15,7 @@
  * splits the consumer's attributes between the pill and the element that acts.
  */
 
-import { Comment, computed, onMounted, ref, useAttrs } from 'vue'
+import { computed, onMounted, ref, useAttrs } from 'vue'
 import type { StyleValue, VNode } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
@@ -31,6 +31,7 @@ import { useInertLink } from '../../composables/useInertLink'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { customColorStyle } from '../../utils/css'
 import { isDev } from '../../utils/env'
+import { flattenSlot } from '../../utils/vnode'
 
 /** How much visual weight the chip carries. */
 export type ChipVariant = 'soft' | 'solid' | 'outline'
@@ -197,7 +198,7 @@ const showCheck = computed(() => props.check && props.selectable && selected.val
  */
 function iconOnly() {
   return (
-    !(slots.default?.() as VNode[] | undefined)?.some((node) => node.type !== Comment) &&
+    flattenSlot(slots.default?.() as VNode[] | undefined).length === 0 &&
     !!(slots.start || slots.end || props.iconStart || props.iconEnd)
   )
 }

@@ -79,6 +79,11 @@ describe('the time window', () => {
   it('never lets the window run past the end of the day', () => {
     expect(windowOf(0, 48).end).toBe(1440)
   })
+
+  it('pulls a start in the last hour back, so the window still ends at midnight', () => {
+    expect(windowOf(23.5, 24)).toEqual({ start: 1380, end: 1440 })
+    expect(windowOf(24, 24)).toEqual({ start: 1380, end: 1440 })
+  })
 })
 
 describe('timeOf', () => {
@@ -115,6 +120,10 @@ describe('normalizeWeekdays', () => {
 
   it('falls back to the locale week when nothing survives', () => {
     expect(normalizeWeekdays([12, -1], 1)).toEqual(WEEK_FROM_MONDAY)
+  })
+
+  it('starts on Monday when the first day it is given is not a number', () => {
+    expect(normalizeWeekdays(undefined, Number.NaN)).toEqual(WEEK_FROM_MONDAY)
   })
 })
 
@@ -248,6 +257,11 @@ describe('visibleRange', () => {
       start: '2026-01-01',
       end: '2026-12-31',
     })
+  })
+
+  // A pure helper reads no clock: the server and the browser must name the same range.
+  it('names the anchor itself when the year view is given no date', () => {
+    expect(visibleRange('nope', 'year', ALL_DAYS, 4)).toEqual({ start: 'nope', end: 'nope' })
   })
 })
 
@@ -661,10 +675,75 @@ describe('eventsByDay', () => {
   it('has no day to fill when given none', () => {
     expect(eventsByDay([event({ id: 'a' })], []).size).toBe(0)
   })
+
+  /*
+   * A datetime slipped into `start` is an easy mistake to make, and the walk from one date
+   * to the next never moves past a string that is not a date. It must be left out rather
+   * than hang the page, on the server as much as in the browser.
+   */
+  it('leaves out an event whose dates are not dates', () => {
+    const byDay = eventsByDay(
+      [event({ id: 'bad', start: '2026-06-10T10:00', end: '2026-06-10T11:00' })],
+      days,
+    )
+    expect([...byDay.values()].every((list) => list.length === 0)).toBe(true)
+  })
+
+  it('files an event ending at midnight exactly on its first day alone', () => {
+    const late = event({
+      id: 'late',
+      start: WEDNESDAY,
+      end: '2026-06-11',
+      startTime: '22:00',
+      endTime: '00:00',
+    })
+    const byDay = eventsByDay([late], days)
+    expect(byDay.get(WEDNESDAY)?.map((e) => e.id)).toEqual(['late'])
+    expect(byDay.get('2026-06-11')).toEqual([])
+  })
+
+  /*
+   * On its second day an overnight event has been running since that day's midnight, so it
+   * is ranked from there, ahead of the morning's appointments.
+   */
+  it('ranks the morning part of an overnight event from midnight', () => {
+    const nine = event({
+      id: 'nine',
+      start: '2026-06-11',
+      end: '2026-06-11',
+      startTime: '09:00',
+      endTime: '10:00',
+    })
+    const night = event({
+      id: 'night',
+      start: WEDNESDAY,
+      end: '2026-06-11',
+      startTime: '22:00',
+      endTime: '02:00',
+    })
+    expect(
+      eventsByDay([nine, night], days)
+        .get('2026-06-11')
+        ?.map((e) => e.id),
+    ).toEqual(['night', 'nine'])
+  })
 })
 
 describe('packAllDay', () => {
   const days = [MONDAY, '2026-06-09', WEDNESDAY, '2026-06-11', FRIDAY]
+
+  // Twenty-four hours from one midnight to the next is ONE day: nothing happens on the second.
+  it('gives a bar ending at midnight exactly no column on the day it ends', () => {
+    const whole = event({
+      id: 'day',
+      start: MONDAY,
+      end: '2026-06-09',
+      startTime: '00:00',
+      endTime: '00:00',
+    })
+    const [span] = packAllDay([whole], days)
+    expect(span).toMatchObject({ startIndex: 0, span: 1, continuesAfter: false })
+  })
 
   it('gives a one-day event a single column', () => {
     const [span] = packAllDay([event({ id: 'a', allDay: true })], days)

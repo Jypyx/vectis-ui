@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { Fragment, createCommentVNode, createTextVNode, h } from 'vue'
 
 import { toggleValue } from './array'
-import { px } from './css'
+import { cssSize, px } from './css'
 import { joinIds } from './ids'
 import { resolveMatcher } from './matcher'
 import { clamp } from './number'
@@ -142,5 +142,17 @@ describe('joinIds', () => {
 
   it('is undefined rather than an empty string when nothing is left', () => {
     expect(joinIds(undefined, '', false)).toBeUndefined()
+  })
+})
+
+describe('cssSize on what is not a size', () => {
+  // A computed width gone wrong must leave the component's own default in force, as px does.
+  it('gives nothing for a number that is not a finite, positive one, or for an empty string', () => {
+    expect(cssSize(Number.NaN)).toBeUndefined()
+    expect(cssSize(Number.POSITIVE_INFINITY)).toBeUndefined()
+    expect(cssSize(-5)).toBeUndefined()
+    expect(cssSize('')).toBeUndefined()
+    expect(cssSize(0)).toBe('0px')
+    expect(cssSize('50%')).toBe('50%')
   })
 })

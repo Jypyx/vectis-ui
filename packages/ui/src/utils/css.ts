@@ -22,11 +22,14 @@ export function px(v: number | string | undefined): string | undefined {
  * untouched — `50%`, `20vw`, `max-content`.
  *
  * Unlike `px` above, the string is deliberately not examined: CSS judges it, and one it
- * cannot parse falls back to whatever the component declares for itself.
+ * cannot parse falls back to whatever the component declares for itself. A NUMBER is judged
+ * here, as `px` judges one: a width computed as `NaN` or below zero, and an empty string,
+ * give nothing rather than a declaration CSS drops, so the component's own default applies.
  */
 export function cssSize(v: number | string | undefined): string | undefined {
-  if (v === undefined) return undefined
-  return typeof v === 'number' ? `${v}px` : v
+  if (v === undefined || v === '') return undefined
+  if (typeof v === 'string') return v
+  return Number.isFinite(v) && v >= 0 ? `${v}px` : undefined
 }
 
 // @core

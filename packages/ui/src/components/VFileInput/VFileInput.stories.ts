@@ -264,7 +264,7 @@ export const Accept: Story = {
       fileOf('notes.txt', 500, 'text/plain'),
     ])
 
-    await waitFor(() => expect(canvas.getByText('1 file (500 byte)')).toBeInTheDocument())
+    await waitFor(() => expect(canvas.getByText('1 file (500 bytes)')).toBeInTheDocument())
     await expect(canvas.getByText(/notes\.txt/)).toBeInTheDocument()
   },
 }

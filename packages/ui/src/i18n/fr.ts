@@ -10,7 +10,9 @@
  *     setLocale('fr-FR')
  *
  * TRAP — the curly apostrophes below are part of the text. Some tests assert these strings
- * letter for letter, and a straight apostrophe is a different character.
+ * letter for letter, and a straight apostrophe is a different character. The same goes for
+ * the no-break space (`\u00A0`) before a colon or a percent sign, which French typography
+ * requires; `i18n.test.ts` checks both over the whole dictionary.
  */
 
 import type { Messages } from './types'
@@ -37,7 +39,7 @@ export const fr: Messages = {
     next: 'Onglets suivants',
   },
   breadcrumb: {
-    label: "Fil d'Ariane",
+    label: 'Fil d’Ariane',
     ellipsis: 'Afficher les pages intermédiaires',
   },
   sideNavigation: { label: 'Navigation' },
@@ -51,7 +53,7 @@ export const fr: Messages = {
     searchLabel: 'Rechercher dans le tableau',
     searchPlaceholder: 'Rechercher…',
     perPage: 'Lignes par page',
-    perPageValue: (label, value) => `${label} : ${value}`,
+    perPageValue: (label, value) => `${label}\u00A0: ${value}`,
     selectAll: 'Tout sélectionner',
     selectRow: (index) => `Sélectionner la ligne ${index}`,
     selection: (count) =>
@@ -97,7 +99,7 @@ export const fr: Messages = {
     down: 'Flèche bas',
     left: 'Flèche gauche',
     right: 'Flèche droite',
-    label: (keys) => `Raccourci clavier : ${keys}`,
+    label: (keys) => `Raccourci clavier\u00A0: ${keys}`,
   },
   datePicker: {
     label: 'Sélecteur de date',
@@ -106,7 +108,7 @@ export const fr: Messages = {
     previousYear: 'Année précédente',
     nextYear: 'Année suivante',
     monthPicker: 'Choix du mois',
-    yearPicker: "Choix de l'année",
+    yearPicker: 'Choix de l’année',
   },
   dateInput: {
     clear: 'Effacer la date',
@@ -114,7 +116,7 @@ export const fr: Messages = {
     pickerLabel: 'Choisir une date',
   },
   timePicker: {
-    label: "Sélecteur d'heure",
+    label: 'Sélecteur d’heure',
     meridiem: 'AM ou PM',
     am: 'AM',
     pm: 'PM',
@@ -124,16 +126,17 @@ export const fr: Messages = {
     choosingMinutes: 'Sélection des minutes',
     hour: 'Heure',
     minutes: 'Minutes',
-    hourValue: (hour) => `${hour} heures`,
-    minutesValue: (minute) => `${minute} minutes`,
+    // Singular below two, as French counts: 0 heure, 1 minute, 2 minutes.
+    hourValue: (hour) => `${hour} ${hour < 2 ? 'heure' : 'heures'}`,
+    minutesValue: (minute) => `${minute} ${minute < 2 ? 'minute' : 'minutes'}`,
   },
   timeInput: {
-    clear: "Effacer l'heure",
+    clear: 'Effacer l’heure',
     openPicker: 'Ouvrir le sélecteur d’heure',
     pickerLabel: 'Choisir une heure',
-    meridiemValue: (value) => `AM ou PM : ${value}`,
+    meridiemValue: (value) => `AM ou PM\u00A0: ${value}`,
     maskPlaceholder: 'hh:mm',
-    unavailable: "Cette heure n'est pas disponible.",
+    unavailable: 'Cette heure n’est pas disponible.',
   },
   fileInput: {
     openPicker: 'Choisir des fichiers',
@@ -162,7 +165,7 @@ export const fr: Messages = {
   calendar: {
     label: 'Calendrier',
     roleDescription: 'calendrier',
-    today: "Aujourd'hui",
+    today: 'Aujourd’hui',
     view: 'Affichage',
     viewDay: 'Jour',
     view4Days: '4 jours',
@@ -180,7 +183,7 @@ export const fr: Messages = {
     nextYear: 'Année suivante',
     previousPeriod: 'Période précédente',
     nextPeriod: 'Période suivante',
-    allDay: 'Journée',
+    allDay: 'Toute la journée',
     moreEvents: (count) => `+${count} autre${count > 1 ? 's' : ''}`,
     openDay: (day) => `Ouvrir le ${day}`,
     untitled: '(Sans titre)',
@@ -190,7 +193,8 @@ export const fr: Messages = {
     grabbed:
       'Évènement saisi. Utilisez les flèches pour le déplacer, Entrée ou Espace pour le poser, Échap pour annuler.',
     dropped: 'Évènement posé.',
-    reverted: "Déplacement annulé. L'évènement est revenu à sa place.",
-    movedTo: (title, when) => `${title} déplacé au ${when}.`,
+    reverted: 'Déplacement annulé. L’évènement est revenu à sa place.',
+    // A noun rather than a participle, which would agree with a title of any gender.
+    movedTo: (title, when) => `Déplacement de ${title}\u00A0: ${when}.`,
   },
 }

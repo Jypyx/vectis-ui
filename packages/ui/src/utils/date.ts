@@ -36,21 +36,23 @@ const ISO_RE = /^\d{4}-\d{2}-\d{2}$/
  * reformat, and only a value that survives the round trip unchanged is accepted.
  */
 export function isValidISO(iso: unknown): iso is string {
-  if (typeof iso !== 'string' || !ISO_RE.test(iso)) return false
-  const d = parseISO(iso)
-  return d !== null && formatISO(d) === iso
+  return typeof iso === 'string' && parseISO(iso) !== null
 }
 
 /**
  * Turns an ISO string into a `Date` set at local midnight, or returns `null` when
  * the string is not one. Every caller here has to handle that `null`: the bounds a
  * consumer passes are raw strings and may be anything.
+ *
+ * TRAP: the shape is not enough. The `Date` constructor rolls an impossible day over
+ * rather than refusing it (`2026-02-31` is March 3rd), so the date is written back and
+ * compared: a day the month does not have reads as no date at all.
  */
 export function parseISO(iso: string | null | undefined): Date | null {
   if (typeof iso !== 'string' || !ISO_RE.test(iso)) return null
   const parts = iso.split('-')
   const date = localDate(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]))
-  return Number.isNaN(date.getTime()) ? null : date
+  return Number.isNaN(date.getTime()) || formatISO(date) !== iso ? null : date
 }
 
 /**
@@ -296,5 +298,8 @@ export function formatDisplayRange(
   const b = parseISO(end)
   if (!a || !b) return ''
   const fmt = formatterFor(locale, options)
-  return compareISO(start, end) === 0 ? fmt.format(a) : fmt.formatRange(a, b)
+  const order = compareISO(start, end)
+  if (order === 0) return fmt.format(a)
+  // A range handed over the wrong way round is written in order rather than as "26 – 19".
+  return order < 0 ? fmt.formatRange(a, b) : fmt.formatRange(b, a)
 }

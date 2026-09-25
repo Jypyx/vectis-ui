@@ -18,7 +18,7 @@
  * calendrical decision lives in `layout.ts`, pure, because jsdom lays nothing out and that is
  * the only place any of it can be tested.
  */
-import { computed, onMounted, ref, useId } from 'vue'
+import { computed, onMounted, ref, useId, watch } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
 import VIcon from '../VIcon/VIcon.vue'
@@ -31,6 +31,7 @@ import VMenuItem from '../VMenu/VMenuItem.vue'
 import VTypography from '../VTypography/VTypography.vue'
 
 import { useAriaLabel } from '../../composables/useAriaLabel'
+import { useLiveAnnouncer } from '../../composables/useLiveAnnouncer'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useTimer } from '../../composables/useTimer'
 import { firstDayOfWeekFor, formatDateDisplay, formatDisplayRange } from '../../utils/date'
@@ -47,6 +48,7 @@ import {
   monthsOfYear,
   normalizeWeekdays,
   stepAnchor,
+  sameTimes,
   timeOf,
   timesOf,
   todayISO,
@@ -174,13 +176,18 @@ defineOptions({ inheritAttrs: false })
 /** Which span the calendar is showing. It opens on the week. */
 const view = defineModel<CalendarView>('view', { default: 'week' })
 
+// @ssr
 /*
- * @ssr — the anchor is read from the clock at setup, so the server and the client can in
+ * The anchor is read from the clock at setup, so the server and the client can in
  * principle disagree across a midnight boundary. That is the trade VDatePicker already
  * makes for the month it opens on, and it is a safer one here: what the anchor decides is
  * a whole WEEK or month, which is the same on both sides for all but a few seconds a day.
  * Today's date, which marks a single column, is a different matter and is read below in
  * `onMounted` where the server cannot see it at all.
+ */
+/**
+ * The day the calendar is anchored on, as `YYYY-MM-DD`: the view shows the week, month or
+ * year holding it. It opens on today.
  */
 const date = defineModel<string>('date', { default: () => todayISO() })
 /**
@@ -203,7 +210,8 @@ const emit = defineEmits<{
   'cell-activate': [cell: CalendarCell]
   /**
    * An event was dragged or nudged somewhere else. It carries the event as it now stands and
-   * where it came from, so undoing it needs no copy of your own.
+   * where it came from, so undoing it needs no copy of your own. A gesture that ends where it
+   * began reports nothing.
    */
   'event-move': [event: E, previous: CalendarEventTimes]
   /** An event's end was dragged or nudged, in the same two parts. */
@@ -276,12 +284,29 @@ function tick() {
   clock.start(tick, Math.max(1000, (60 - at.getSeconds()) * 1000))
 }
 
+/** Scrolls the time grid on show to `scrollTime`. */
+function scrollToStart() {
+  const at = minutesOf(props.scrollTime)
+  if (at !== null) gridRef.value?.scrollToMinutes(at)
+}
+
 onMounted(() => {
   today.value = todayISO()
   if (!props.hideCurrentTime) tick()
-  const at = minutesOf(props.scrollTime)
-  if (at !== null) gridRef.value?.scrollToMinutes(at)
+  scrollToStart()
 })
+
+// @core
+// The prop is a switch a consumer may flip after mount: the clock read at mount alone never
+// started when it was turned on later, and went on ticking when it was turned off.
+watch(
+  () => props.hideCurrentTime,
+  (hidden) => {
+    if (!hidden) return tick()
+    clock.cancel()
+    now.value = null
+  },
+)
 
 /**
  * The grid, named by what it exposes rather than by `InstanceType<typeof …>`.
@@ -293,7 +318,18 @@ onMounted(() => {
  * Writing the contract out is also the more honest of the two, since these two methods are
  * the whole of what this component asks of that one.
  */
-const gridRef = ref<{ focus(): void; scrollToMinutes(minutes: number): void } | null>(null)
+const gridRef = ref<{
+  focus(options?: FocusOptions): void
+  scrollToMinutes(minutes: number): void
+} | null>(null)
+
+// @core
+// A time grid that appears after mount, a month switched to a week, opens at `scrollTime`
+// too. Post-flush, so the new grid is rendered and measurable when it is asked to scroll.
+watch(gridRef, scrollToStart, { flush: 'post' })
+
+/** The region, the element a consumer's attributes land on. */
+const regionEl = ref<HTMLElement | null>(null)
 
 /*
  * Which cell holds the tab stop, kept as two refs because the two kinds of view mean
@@ -423,12 +459,16 @@ function openIn(iso: string, target: CalendarView) {
  * first message — a live region that appears at the same moment as its text is not announced
  * at all, which is the trap VDataTable's selection count already documents.
  */
-const announcement = ref('')
+const { polite: announcement, announce: say } = useLiveAnnouncer()
 const uid = useId()
 const hintId = `${uid}-hint`
 
+/*
+ * Through the shared announcer, which empties the region and writes on the next tick: the
+ * same words twice in a row are no change to a live region, and would not be read again.
+ */
 function announce(message: string) {
-  announcement.value = message
+  say(message, false)
 }
 
 /**
@@ -445,6 +485,9 @@ function onEventDrop(id: CalendarEventId, times: CalendarEventTimes, kind: 'move
   if (!current) return
 
   const previous = timesOf(current)
+  // A gesture that ends where it began moved nothing, and a consumer's undo stack must not
+  // gain an entry for it, nor its watchers a new array.
+  if (sameTimes(previous, times)) return
   const next = { ...current, ...times }
   events.value = events.value.map((item) => (item.id === id ? next : item))
   // Written out rather than picking the name with a conditional: the emit signatures are an
@@ -464,8 +507,13 @@ function onSlotCreate(times: CalendarEventTimes) {
 }
 
 defineExpose({
-  /** Brings the focus into the grid, onto the cell it is currently showing. */
-  focus: () => gridRef.value?.focus(),
+  /**
+   * Brings the focus into the view: the cell the grid is showing, or the first month heading
+   * in the year view.
+   */
+  focus: (options?: FocusOptions) => gridRef.value?.focus(options),
+  /** The region, which is where your `id` and `aria-*` attributes land. */
+  el: regionEl,
   /** Goes back to the current day, exactly as the Today button does. */
   today: goToToday,
   /** Moves back one view — a week, a month, a year — exactly as the toolbar's arrow does. */
@@ -488,10 +536,11 @@ defineExpose({
     :data-disabled="disabled ? '' : undefined"
   >
     <section
+      ref="regionEl"
+      :aria-roledescription="m.calendar.roleDescription"
       v-bind="forwardedAttrs"
       class="v-calendar-region"
       :aria-label="ariaLabel"
-      :aria-roledescription="m.calendar.roleDescription"
     >
       <div class="v-calendar-toolbar">
         <div class="v-calendar-nav">
@@ -620,7 +669,9 @@ defineExpose({
 
       <VCalendarYear
         v-else
+        ref="gridRef"
         class="v-calendar-view"
+        :disabled="disabled"
         :months="months"
         :events="events"
         :locale="resolvedLocale"
@@ -841,6 +892,24 @@ defineExpose({
   @media (prefers-reduced-motion: reduce) {
     .v-calendar-button {
       transition: none;
+    }
+  }
+
+  /*
+   * Windows forced colors flattens every background to Canvas, and today and the paging strip
+   * are drawn with nothing else. Today takes the system selection pair, the one every other
+   * "current" mark in the library takes, and the strip takes Highlight.
+   */
+  @media (forced-colors: active) {
+    .v-calendar-view .v-calendar-today {
+      forced-color-adjust: none;
+      background: Highlight;
+      color: HighlightText;
+    }
+
+    .v-calendar-edge-cue[data-edge]::after {
+      forced-color-adjust: none;
+      background: Highlight;
     }
   }
 }

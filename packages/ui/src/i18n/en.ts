@@ -116,7 +116,7 @@ export const en: Messages = {
     hour: 'Hour',
     minutes: 'Minutes',
     hourValue: (hour) => `${hour} o'clock`,
-    minutesValue: (minute) => `${minute} minutes`,
+    minutesValue: (minute) => (minute === 1 ? '1 minute' : `${minute} minutes`),
   },
   timeInput: {
     clear: 'Clear time',

@@ -342,7 +342,7 @@ if (isDev) {
   // about them is said here, under the name the consumer wrote (utils/hostWarns).
   provide(hostWarnsKey, true)
   watchEffect(() => {
-    if (props.minuteStep < 1 || 60 % props.minuteStep !== 0)
+    if (!Number.isInteger(props.minuteStep) || props.minuteStep < 1 || 60 % props.minuteStep !== 0)
       console.warn(`[VTimeInput] minuteStep ${props.minuteStep} — a divisor of 60 is expected.`)
     if (props.mode !== undefined && !MODES.includes(props.mode))
       console.warn(
@@ -576,7 +576,11 @@ watchEffect(
   () => {
     const el = fieldEl.value
     if (!el) return
-    el.setCustomValidity(valueAllowed.value ? '' : m.value.timeInput.unavailable)
+    const own = m.value.timeInput.unavailable
+    if (!valueAllowed.value) el.setCustomValidity(own)
+    // Only the component's own message is taken back: a consumer's verdict written over it,
+    // a server saying the slot is taken, stays until the consumer clears it.
+    else if (el.validationMessage === own) el.setCustomValidity('')
   },
   { flush: 'post' },
 )

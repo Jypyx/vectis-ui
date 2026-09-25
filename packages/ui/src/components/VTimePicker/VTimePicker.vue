@@ -191,7 +191,7 @@ const isAvailableHour = (candidate: number) => availableHours.value.has(candidat
 // Silent inside a host that forwards these props and reports on them itself (utils/hostWarns).
 if (isDev && !inject(hostWarnsKey, false)) {
   watchEffect(() => {
-    if (props.minuteStep < 1 || 60 % props.minuteStep !== 0)
+    if (!Number.isInteger(props.minuteStep) || props.minuteStep < 1 || 60 % props.minuteStep !== 0)
       console.warn(`[VTimePicker] minuteStep ${props.minuteStep} — a divisor of 60 is expected.`)
     const problem = limitsProblem(limits.value)
     if (problem) console.warn(`[VTimePicker] ${problem}`)

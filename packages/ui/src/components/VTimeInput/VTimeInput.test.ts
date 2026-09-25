@@ -404,6 +404,27 @@ describe('VTimeInput — restrictions', () => {
     expect(input.validity.customError).toBe(false)
   })
 
+  /*
+   * The component clears only a message it set itself: a consumer's own verdict, a server
+   * saying the slot is taken, must survive the reader typing an allowed time.
+   */
+  it('leaves a validity message of the consumer own in place', async () => {
+    const { container } = render(VTimeInput, {
+      props: { modelValue: null, format: '24h', min: '09:00', max: '17:00' },
+    })
+    const input = container.querySelector('input') as HTMLInputElement
+    await fireEvent.update(input, '08:30')
+    await fireEvent.blur(input)
+    await nextTick()
+    // The consumer's verdict replaces the component's own.
+    input.setCustomValidity('That slot is taken')
+
+    await fireEvent.update(input, '09:30')
+    await fireEvent.blur(input)
+    await nextTick()
+    expect(input.validationMessage).toBe('That slot is taken')
+  })
+
   it('says nothing of an empty field', async () => {
     const { container } = render(VTimeInput, {
       props: { modelValue: null, format: '24h', allowedMinutes: [0, 30] },

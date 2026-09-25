@@ -21,7 +21,7 @@ export default {
     },
     allDay: {
       title: 'Événements sur la journée',
-      text: '<code>allDay</code> place un événement dans le bandeau au-dessus de la grille, où va déjà un événement de 24 heures ou plus. Celui qui passe minuit en durant moins reste dans la grille, avec une carte dans chacun de ses deux jours.',
+      text: '<code>allDay</code> place un événement dans le bandeau au-dessus de la grille, où va déjà un événement de 24 heures ou plus. Celui qui passe minuit en durant moins reste dans la grille, avec une carte dans chacun de ses deux jours. Celui qui finit à minuit pile n’appartient qu’à son premier jour.',
     },
     overlapping: {
       title: 'Événements qui se chevauchent',

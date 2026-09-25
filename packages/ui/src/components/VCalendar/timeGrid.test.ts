@@ -172,3 +172,39 @@ describe('drawnSlot', () => {
     })
   })
 })
+
+/*
+ * An overnight event may START after the window's end: a calendar showing 08:00 to 20:00 still
+ * draws the morning card of a 22:00 to 10:00 shift. Neither gesture may then pull its start
+ * into the window, or write an end before its start.
+ */
+describe('an overnight event starting after the window', () => {
+  const EVENING = windowOf(8, 20)
+
+  it('moves by what it was asked to, the start staying outside the window', () => {
+    const shift = { start: WEDNESDAY, end: '2026-06-11', startTime: '22:00', endTime: '10:00' }
+    expect(moveTimedEvent(shift, WEDNESDAY, at(22, 15), EVENING, true)).toEqual({
+      start: WEDNESDAY,
+      end: '2026-06-11',
+      startTime: '22:15',
+      endTime: '10:15',
+    })
+  })
+
+  it('never writes an end before the start when stretched back into the first day', () => {
+    const late = { start: WEDNESDAY, end: '2026-06-11', startTime: '22:30', endTime: '01:00' }
+    expect(resizeTimedEvent(late, WEDNESDAY, at(21), 15, windowOf(0, 22), true)).toEqual({
+      start: WEDNESDAY,
+      end: WEDNESDAY,
+      startTime: '22:30',
+      endTime: '22:45',
+    })
+  })
+
+  it('keeps the shortest length when the window ends just after the start', () => {
+    const tight = { start: WEDNESDAY, end: '2026-06-11', startTime: '21:50', endTime: '01:00' }
+    expect(resizeTimedEvent(tight, WEDNESDAY, at(21, 55), 15, windowOf(0, 22), true)).toMatchObject(
+      { endTime: '22:05' },
+    )
+  })
+})

@@ -89,7 +89,9 @@ function displayFormatterFor(locale: string, format: HourFormat): Intl.DateTimeF
       new Intl.DateTimeFormat(locale, {
         hour: 'numeric',
         minute: '2-digit',
-        hourCycle: format === '12h' ? 'h12' : 'h23',
+        // A 12-hour clock takes the language's own: Japanese counts it from 0 (h11), English
+        // from 12 (h12). Imposing h12 wrote 午前12:05 where 午前0:05 is written.
+        ...(format === '12h' ? { hour12: true } : { hourCycle: 'h23' as const }),
         timeZone: 'UTC',
       }),
   )

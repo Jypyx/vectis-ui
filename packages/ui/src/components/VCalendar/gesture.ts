@@ -245,12 +245,47 @@ export function useCalendarGesture<E extends CalendarEvent, G extends GestureBas
    * again. Clearing at the press is what makes the flag unable to outlive its own interaction,
    * and the order is the argument: the click it exists to swallow follows its own `pointerup`
    * with no press in between.
+   *
+   * A key on a card clears it too, for the same reason from the other side: after a CAPTURED
+   * release the browser sends its click to the capture element, which no card handler hears,
+   * so the flag outlives the drag, and the next click a card receives may be the keyboard's,
+   * with no press before it.
    */
   let dragged = false
 
-  /** Closes the books on the previous gesture. Every press handler calls it first. */
+  /**
+   * Closes the books on the previous gesture. Every press handler calls it first.
+   *
+   * A keyboard grab still held is abandoned here, as Escape would abandon it: every press
+   * handler refuses to start while a gesture is live, so a grab left behind froze every
+   * pointer gesture of the grid with nothing on screen to say why.
+   */
   function endLastGesture() {
     dragged = false
+    if (grabbing.value) revertGrab()
+  }
+
+  /** Puts a keyboard grab back where it was taken from, writing nothing, and says so. */
+  function revertGrab() {
+    const state = gesture.value
+    if (!state) return
+    gesture.value = null
+    options.announce(m.value.calendar.reverted)
+    return state
+  }
+
+  /**
+   * A keyboard grab ends when the focus moves on to something else, the toolbar or another
+   * control. Focus that goes NOWHERE is left alone: a card redrawn in another column loses it
+   * that way on every step, and `refocusCard` hands it back.
+   */
+  function onFocusout(event: FocusEvent) {
+    const state = gesture.value
+    const next = event.relatedTarget as HTMLElement | null
+    if (!grabbing.value || !state || !next) return
+    const card = next.closest<HTMLElement>('.v-calendar-event')
+    if (card && card.dataset.eventId === String(state.id)) return
+    revertGrab()
   }
 
   /** Whether the gesture that just ended actually moved; asking lowers the flag. */
@@ -393,7 +428,14 @@ export function useCalendarGesture<E extends CalendarEvent, G extends GestureBas
    * Nothing is written and nothing is announced: the card goes back to where the model still
    * says it is.
    */
-  function onPointercancel() {
+  function onPointercancel(event: PointerEvent) {
+    // Another pointer's cancel, a second finger starting to pan, is not this gesture's. A
+    // keyboard grab carries no pointer id, so no cancel can end it either.
+    if (gesture.value?.pointerId !== event.pointerId) return
+    abandon()
+  }
+
+  function abandon() {
     gesture.value = null
     release()
   }
@@ -408,7 +450,7 @@ export function useCalendarGesture<E extends CalendarEvent, G extends GestureBas
   function onPointerleave(event: PointerEvent) {
     const state = gesture.value
     if (!state || state.pointerId !== event.pointerId || state.moved) return
-    onPointercancel()
+    abandon()
   }
 
   /*
@@ -440,7 +482,9 @@ export function useCalendarGesture<E extends CalendarEvent, G extends GestureBas
    */
   function refocusCard(id: CalendarEventId) {
     void nextTick(() => {
-      const cards = options.measureEl.value?.querySelectorAll<HTMLElement>('.v-calendar-event')
+      // Searched from the view's root: the time grid's all-day bars sit in its sticky header,
+      // outside the box the cells occupy.
+      const cards = options.rootEl.value?.querySelectorAll<HTMLElement>('.v-calendar-event')
       Array.from(cards ?? [])
         .find((card) => card.dataset.eventId === String(id))
         ?.focus()
@@ -448,8 +492,8 @@ export function useCalendarGesture<E extends CalendarEvent, G extends GestureBas
   }
 
   /** Puts the focus on a cell by its id, once the render that made it tabbable has run. */
-  function focusCell(id: string, deferred = false) {
-    const move = () => document.getElementById(id)?.focus()
+  function focusCell(id: string, deferred = false, focusOptions?: FocusOptions) {
+    const move = () => document.getElementById(id)?.focus(focusOptions)
     if (deferred) void nextTick(move)
     else move()
   }
@@ -462,14 +506,15 @@ export function useCalendarGesture<E extends CalendarEvent, G extends GestureBas
    * Without it the grid would offer a gesture the pointer alone could reach (WCAG 2.1.1).
    */
   function onCardKeydown(event: KeyboardEvent, card: HTMLElement) {
+    // Whatever click follows is this key's, never the end of an earlier drag.
+    dragged = false
     const item = options.eventOf(idOfCard(card))
     if (!item) return
 
     const held = grabbing.value && gesture.value?.id === item.id
     const state = held ? gesture.value! : null
     const intent = calendarIntent(
-      event.key,
-      event.shiftKey,
+      event,
       held ? 'grabbed' : 'event',
       options.slotMinutes(),
       state?.rtl ?? isRtl(),
@@ -510,8 +555,7 @@ export function useCalendarGesture<E extends CalendarEvent, G extends GestureBas
     }
 
     if (intent.kind === 'cancel') {
-      gesture.value = null
-      options.announce(m.value.calendar.reverted)
+      revertGrab()
       refocusCard(state.id)
     }
   }
@@ -553,6 +597,7 @@ export function useCalendarGesture<E extends CalendarEvent, G extends GestureBas
     onPointerup,
     onPointercancel,
     onPointerleave,
+    onFocusout,
     onCardKeydown,
     refocusCard,
     focusCell,

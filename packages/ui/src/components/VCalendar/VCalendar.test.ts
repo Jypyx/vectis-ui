@@ -1,6 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { nextTick } from 'vue'
+import { defineComponent, nextTick, ref } from 'vue'
 
 import VCalendar from './VCalendar.vue'
 import { EDGE_STEP_DELAY } from './edgeStep'
@@ -324,6 +324,24 @@ describe('the events', () => {
 })
 
 describe('the keyboard', () => {
+  it('leaves a key held with Alt, Ctrl or Meta to the browser', async () => {
+    for (const view of ['week', 'month']) {
+      const { container, unmount } = mount({ view, views: ['week', 'month', 'day'] })
+      const cell = container.querySelector('.v-calendar-cell[tabindex="0"]')!
+      for (const init of [{ altKey: true }, { ctrlKey: true }, { metaKey: true }]) {
+        const key = new KeyboardEvent('keydown', {
+          key: 'ArrowLeft',
+          bubbles: true,
+          cancelable: true,
+          ...init,
+        })
+        cell.dispatchEvent(key)
+        expect(key.defaultPrevented).toBe(false)
+      }
+      unmount()
+    }
+  })
+
   /*
    * A scrolling region has to hold something reachable by Tab — `tabindex="-1"` does not
    * count for axe's `scrollable-region-focusable`. So exactly one cell must always be
@@ -471,6 +489,39 @@ describe('the current-time line', () => {
     await nextTick()
     expect(container.querySelector('.v-calendar-now')).toBeNull()
   })
+
+  // A settings switch may turn it on after mount; the clock read at mount alone never started.
+  it('appears when it is turned on after the calendar mounted', async () => {
+    const iso = new Date()
+    const todayISO = `${iso.getFullYear()}-${String(iso.getMonth() + 1).padStart(2, '0')}-${String(iso.getDate()).padStart(2, '0')}`
+    const { container, rerender } = mount({ view: 'day', date: todayISO, hideCurrentTime: true })
+    await nextTick()
+    await rerender({ hideCurrentTime: false })
+    await nextTick()
+    expect(container.querySelector('.v-calendar-now')).not.toBeNull()
+  })
+
+  /*
+   * `scrollTime` was applied once, in `onMounted`: a calendar opened on its month and switched
+   * to a week then opened at midnight, the working day off screen.
+   */
+  it('scrolls a time grid that appears later to the scroll time', async () => {
+    const height = vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(2400)
+    try {
+      const { container, rerender } = mount({
+        view: 'month',
+        views: ['month', 'week'],
+        scrollTime: '08:00',
+      })
+      await nextTick()
+      await rerender({ view: 'week' })
+      await nextTick()
+      const grid = container.querySelector('.v-calendar-time-grid') as HTMLElement
+      expect(grid.scrollTop).toBeGreaterThan(0)
+    } finally {
+      height.mockRestore()
+    }
+  })
 })
 
 describe('the month view', () => {
@@ -507,6 +558,13 @@ describe('the month view', () => {
     expect(getByText('+2 more')).toBeTruthy()
   })
 
+  // A limit below zero shows no chip rather than inventing hidden ones on every empty square.
+  it('reads a negative event limit as zero', () => {
+    const { container } = month({ events: [event({ id: 'one' })], monthEventLimit: -1 })
+    expect(container.querySelectorAll('.v-calendar-month-more')).toHaveLength(1)
+    expect(container.querySelector('.v-calendar-month-more')?.textContent?.trim()).toBe('+1 more')
+  })
+
   /*
    * A day OTHER than the anchor, deliberately: writing the value a model already holds
    * emits nothing, so choosing the 10th here would prove only that Vue deduplicates.
@@ -517,6 +575,20 @@ describe('the month view', () => {
     await fireEvent.click(cell.querySelector('.v-calendar-month-day')!)
     expect(emitted('update:date')?.at(-1)).toEqual(['2026-06-15'])
     expect(emitted('update:view')?.at(-1)).toEqual(['day'])
+  })
+
+  /*
+   * The number and the "+N more" line take no tab stop, so the keyboard needs a key of its own
+   * to open the focused day: Enter already reports the cell, the way to a new event.
+   */
+  it('opens the focused day on Shift and Enter', async () => {
+    const { container, emitted } = month()
+    const cell = container.querySelector('.v-calendar-month-cell[data-iso="2026-06-15"]')!
+    expect(cell.getAttribute('aria-keyshortcuts')).toBe('Shift+Enter')
+    await fireEvent.keyDown(cell, { key: 'Enter', shiftKey: true })
+    expect(emitted('update:date')?.at(-1)).toEqual(['2026-06-15'])
+    expect(emitted('update:view')?.at(-1)).toEqual(['day'])
+    expect(emitted('cell-activate')).toBeUndefined()
   })
 
   /*
@@ -607,6 +679,7 @@ describe('dragging in the month view', () => {
 
   it('reports a move once, on release', async () => {
     const { container, emitted } = month({ events: [event({ id: 'a' })] })
+    layOut(container, '.v-calendar-month-grid')
     const chip = container.querySelector('.v-calendar-event')!
     pointer(chip, 'pointerdown', { clientX: 100, clientY: 100 })
     pointer(chip, 'pointermove', { clientX: 300, clientY: 200 })
@@ -620,6 +693,7 @@ describe('dragging in the month view', () => {
     const { container, emitted } = month({
       events: [event({ id: 'a', start: '2026-06-09', end: '2026-06-11' })],
     })
+    layOut(container, '.v-calendar-month-grid')
     const chip = container.querySelector('.v-calendar-event')!
     pointer(chip, 'pointerdown', { clientX: 100, clientY: 100 })
     pointer(chip, 'pointermove', { clientX: 300, clientY: 200 })
@@ -691,6 +765,7 @@ describe('moving an event with the keyboard, in the month view', () => {
     const { container, emitted } = await held()
     expect(container.querySelector('[data-grabbed]')).not.toBeNull()
     expect(emitted('event-activate')).toBeUndefined()
+    await nextTick()
     expect(container.querySelector('[role="status"]')!.textContent).toContain('Event held')
   })
 
@@ -699,6 +774,7 @@ describe('moving an event with the keyboard, in the month view', () => {
     await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'ArrowDown' })
     // A row IS a week here, which is the month's own reading of the same key table: one press
     // of Down moves the 10th to the 17th, not to the 11th.
+    await nextTick()
     expect(container.querySelector('[role="status"]')!.textContent).toContain('June 17')
   })
 
@@ -710,11 +786,22 @@ describe('moving an event with the keyboard, in the month view', () => {
     expect(container.querySelector('[data-grabbed]')).toBeNull()
   })
 
+  // A move that comes back to its own day moved nothing, and an undo stack must not gain it.
+  it('writes nothing when the chip is put back on its own day', async () => {
+    const { container, emitted } = await held()
+    await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'ArrowRight' })
+    await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'ArrowLeft' })
+    await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'Enter' })
+    expect(emitted('event-move')).toBeUndefined()
+    expect(emitted('update:events')).toBeUndefined()
+  })
+
   it('puts the event back on Escape, writing nothing', async () => {
     const { container, emitted } = await held()
     await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'ArrowRight' })
     await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'Escape' })
     expect(emitted('event-move')).toBeUndefined()
+    await nextTick()
     expect(container.querySelector('[role="status"]')!.textContent).toContain('cancelled')
   })
 
@@ -801,8 +888,22 @@ function pointer(el: Element, type: string, init: PointerEventInit = {}) {
 }
 
 describe('dragging an event', () => {
-  const drag = (props: Record<string, unknown> = {}) =>
-    mount({ view: 'day', dayStart: 8, dayEnd: 18, events: [event({ id: 'a' })], ...props })
+  /*
+   * Laid out, so a drag really lands somewhere else: a release where the event began writes
+   * nothing, and jsdom measures every box at zero, where every drag ends where it began.
+   */
+  const drag = (props: Record<string, unknown> = {}) => {
+    const utils = mount({
+      view: 'day',
+      dayStart: 8,
+      dayEnd: 18,
+      events: [event({ id: 'a' })],
+      ...props,
+    })
+    layOut(utils.container, '.v-calendar-columns')
+    layOut(utils.container, '.v-calendar-time-grid')
+    return utils
+  }
 
   it('writes nothing until the pointer is let go', async () => {
     const { container, emitted } = drag()
@@ -820,7 +921,40 @@ describe('dragging an event', () => {
     pointer(card, 'pointerdown', { clientX: 100, clientY: 100 })
     pointer(card, 'pointermove', { clientX: 100, clientY: 200 })
     await nextTick()
-    expect(container.querySelector('.v-calendar-event')!.getAttribute('data-dragging')).toBe('')
+    // The event itself, not the echo it leaves at its old place.
+    const moved = container.querySelector('.v-calendar-event:not([data-ghost])')!
+    expect(moved.getAttribute('data-dragging')).toBe('')
+  })
+
+  /*
+   * After a captured release the browser sends its click to the CAPTURE element, never to the
+   * card, so the flag that swallows that click stays up. The next click a card receives may be
+   * the keyboard's, with no press before it to clear the flag: pressing Enter on an event after
+   * dragging one opened nothing.
+   */
+  it('still opens an event from the keyboard after a drag', async () => {
+    const { container, emitted } = drag()
+    const card = container.querySelector('.v-calendar-event') as HTMLElement
+    pointer(card, 'pointerdown', { clientX: 100, clientY: 100 })
+    pointer(card, 'pointermove', { clientX: 100, clientY: 300 })
+    pointer(card, 'pointerup', { clientX: 100, clientY: 300 })
+    await nextTick()
+    const moved = container.querySelector('.v-calendar-event') as HTMLElement
+    await fireEvent.keyDown(moved, { key: 'Enter' })
+    await fireEvent.click(moved)
+    expect(emitted('event-activate')).toHaveLength(1)
+  })
+
+  // A second finger panning must not take the first one's drag away.
+  it('ignores the cancel of another pointer', async () => {
+    const { container, emitted } = drag()
+    const card = container.querySelector('.v-calendar-event')!
+    pointer(card, 'pointerdown', { clientX: 100, clientY: 100 })
+    pointer(card, 'pointermove', { clientX: 100, clientY: 300 })
+    pointer(card, 'pointercancel', { pointerId: 2 })
+    pointer(card, 'pointerup', { clientX: 100, clientY: 300 })
+    await nextTick()
+    expect(emitted('event-move')).toHaveLength(1)
   })
 
   it('writes the model exactly once, on release', async () => {
@@ -1038,6 +1172,8 @@ describe('dragging an event', () => {
       view: 'week',
       events: [event({ id: 'a', allDay: true })],
     })
+    layOut(container, '.v-calendar-columns')
+    layOut(container, '.v-calendar-time-grid')
     const bar = container.querySelector('.v-calendar-bar')!
     pointer(bar, 'pointerdown', { clientX: 100, clientY: 20 })
     pointer(bar, 'pointermove', { clientX: 300, clientY: 20 })
@@ -1055,6 +1191,8 @@ describe('dragging an event', () => {
       view: 'week',
       events: [event({ id: 'a', start: '2026-06-09', end: '2026-06-11' })],
     })
+    layOut(container, '.v-calendar-columns')
+    layOut(container, '.v-calendar-time-grid')
     const bar = container.querySelector('.v-calendar-bar')!
     pointer(bar, 'pointerdown', { clientX: 100, clientY: 20 })
     pointer(bar, 'pointermove', { clientX: 300, clientY: 20 })
@@ -1070,6 +1208,8 @@ describe('dragging an event', () => {
       readonly: true,
       events: [event({ id: 'a', allDay: true })],
     })
+    layOut(container, '.v-calendar-columns')
+    layOut(container, '.v-calendar-time-grid')
     const bar = container.querySelector('.v-calendar-bar')!
     pointer(bar, 'pointerdown', { clientX: 100, clientY: 20 })
     pointer(bar, 'pointermove', { clientX: 300, clientY: 20 })
@@ -1162,6 +1302,8 @@ describe('the echo left behind while dragging', () => {
 
   it('leaves one behind for an all-day bar as well', async () => {
     const { container } = mount({ view: 'week', events: [event({ id: 'a', allDay: true })] })
+    layOut(container, '.v-calendar-columns')
+    layOut(container, '.v-calendar-time-grid')
     const bar = container.querySelector('.v-calendar-bar')!
     pointer(bar, 'pointerdown', { clientX: 100, clientY: 20 })
     pointer(bar, 'pointermove', { clientX: 300, clientY: 20 })
@@ -1459,6 +1601,17 @@ describe('paging by holding at an edge', () => {
     await nextTick()
     // The end edge, so the week after the one it started on.
     expect(emitted('update:date')?.at(-1)).toEqual(['2026-06-17'])
+  })
+
+  // Zero turns paging off, and a consumer may bind it to zero while the drag is held there.
+  it('stops paging once the delay is turned off during the hold', async () => {
+    const { emitted, rerender } = dragging()
+    vi.advanceTimersByTime(EDGE_STEP_DELAY)
+    await nextTick()
+    await rerender({ edgeStepDelay: 0 })
+    vi.advanceTimersByTime(EDGE_STEP_DELAY * 4)
+    await nextTick()
+    expect(emitted('update:date')).toHaveLength(1)
   })
 
   it('pages backwards from the other edge', async () => {
@@ -1963,6 +2116,7 @@ describe('moving an event with the keyboard', () => {
     const { container, emitted } = await held()
     expect(container.querySelector('[data-grabbed]')).not.toBeNull()
     expect(emitted('event-activate')).toBeUndefined()
+    await nextTick()
     expect(container.querySelector('[role="status"]')!.textContent).toContain('Event held')
   })
 
@@ -1983,6 +2137,7 @@ describe('moving an event with the keyboard', () => {
   it('moves by a slot on the vertical arrows, and announces where it is', async () => {
     const { container } = await held({ slotDuration: 15 })
     await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'ArrowDown' })
+    await nextTick()
     expect(container.querySelector('[role="status"]')!.textContent).toContain('9:15 AM')
   })
 
@@ -1995,6 +2150,7 @@ describe('moving an event with the keyboard', () => {
     for (let i = 0; i < 3; i++) {
       await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'ArrowDown' })
     }
+    await nextTick()
     expect(container.querySelector('[role="status"]')!.textContent).toContain('9:45 AM')
   })
 
@@ -2004,6 +2160,7 @@ describe('moving an event with the keyboard', () => {
       key: 'ArrowDown',
       shiftKey: true,
     })
+    await nextTick()
     expect(container.querySelector('[role="status"]')!.textContent).toContain('10:15 AM')
   })
 
@@ -2048,12 +2205,107 @@ describe('moving an event with the keyboard', () => {
     await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'Escape' })
     expect(emitted('update:events')).toBeUndefined()
     expect(emitted('event-move')).toBeUndefined()
+    await nextTick()
     expect(container.querySelector('[role="status"]')!.textContent).toContain('cancelled')
+  })
+
+  it('writes nothing when the event is put back where it was taken from', async () => {
+    const { container, emitted } = await held()
+    await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'ArrowDown' })
+    await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'ArrowUp' })
+    await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'Enter' })
+    expect(emitted('event-move')).toBeUndefined()
+    expect(emitted('update:events')).toBeUndefined()
+  })
+
+  /*
+   * Held against the end of the day, a step is written 23:59 rather than 24:00. Taking the
+   * next step from THAT would cost a minute a press, and the event would come back shorter and
+   * off the slot grid. Every step is worked out from where the event was taken instead.
+   */
+  it('comes back from the end of the day whole and on the slot grid', async () => {
+    const { container, emitted } = await held({
+      dayStart: 0,
+      dayEnd: 24,
+      slotDuration: 15,
+      events: [event({ id: 'a', title: 'Standup', startTime: '22:00', endTime: '23:00' })],
+    })
+    for (let i = 0; i < 8; i++) {
+      await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'ArrowDown' })
+    }
+    for (let i = 0; i < 2; i++) {
+      await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'ArrowUp' })
+    }
+    await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'Enter' })
+    const [next] = emitted('event-move')!.at(-1) as [CalendarEvent]
+    expect(next).toMatchObject({ startTime: '22:30', endTime: '23:30' })
+  })
+
+  it('says nothing for a step that goes nowhere', async () => {
+    const { container } = await held({
+      events: [event({ id: 'a', title: 'Standup', startTime: '08:00', endTime: '09:00' })],
+    })
+    await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'ArrowUp' })
+    await nextTick()
+    expect(container.querySelector('[role="status"]')!.textContent).toContain('Event held')
+  })
+
+  /*
+   * A grab is held until Enter, Space or Escape. Leaving it behind when the reader moves on
+   * left every pointer gesture refusing to start, the card still lifted, with no way to tell.
+   */
+  it('lets go of the grab when the focus moves on to something else', async () => {
+    const { container } = await held()
+    const card = container.querySelector('[data-grabbed]')!
+    const elsewhere = container.querySelector('.v-calendar-toolbar button')!
+    card.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: elsewhere }))
+    await nextTick()
+    expect(container.querySelector('[data-grabbed]')).toBeNull()
+    await nextTick()
+    expect(container.querySelector('[role="status"]')!.textContent).toContain('cancelled')
+  })
+
+  // A card redrawn in another column loses the focus to nothing, and is handed it back.
+  it('keeps the grab when the focus goes nowhere', async () => {
+    const { container } = await held()
+    const card = container.querySelector('[data-grabbed]')!
+    card.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }))
+    await nextTick()
+    expect(container.querySelector('[data-grabbed]')).not.toBeNull()
+  })
+
+  it('gives way to a pointer that takes hold of an event', async () => {
+    const { container, emitted } = await held()
+    const card = container.querySelector('.v-calendar-event')!
+    pointer(card, 'pointerdown', { clientX: 100, clientY: 100 })
+    pointer(card, 'pointermove', { clientX: 100, clientY: 300 })
+    pointer(card, 'pointerup', { clientX: 100, clientY: 300 })
+    await nextTick()
+    expect(emitted('event-move')).toHaveLength(1)
+    expect(container.querySelector('[data-grabbed]')).toBeNull()
   })
 
   it('leaves a card alone when the calendar is read-only', async () => {
     const { container } = await held({ readonly: true })
     expect(container.querySelector('[data-grabbed]')).toBeNull()
+  })
+
+  /*
+   * The pointer moves an all-day bar by whole days; the keyboard has to reach the same gesture,
+   * and the hint every card points at says so.
+   */
+  it('moves an all-day bar by whole days, from the keyboard', async () => {
+    const { container, emitted } = mount({
+      view: 'week',
+      events: [event({ id: 'a', title: 'Offsite', allDay: true })],
+    })
+    const bar = container.querySelector('.v-calendar-bar') as HTMLElement
+    await fireEvent.keyDown(bar, { key: ' ' })
+    expect(container.querySelector('.v-calendar-bar[data-grabbed]')).not.toBeNull()
+    await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'ArrowRight' })
+    await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'Enter' })
+    const [moved] = emitted('event-move')!.at(-1) as [CalendarEvent]
+    expect(moved).toMatchObject({ start: '2026-06-11', end: '2026-06-11' })
   })
 
   /*
@@ -2089,6 +2341,12 @@ describe('the region', () => {
     expect(region.getAttribute('aria-roledescription')).toBe('calendar')
   })
 
+  it("keeps a role description of the consumer's own", () => {
+    const { getByRole } = mount({ 'aria-roledescription': 'planning board' })
+    const region = getByRole('region', { name: 'Schedule' })
+    expect(region.getAttribute('aria-roledescription')).toBe('planning board')
+  })
+
   it('falls back to the dictionary when the consumer names nothing', () => {
     const { getByRole } = render(Calendar, { props: { date: WEDNESDAY } })
     expect(getByRole('region', { name: 'Calendar' })).toBeTruthy()
@@ -2105,5 +2363,42 @@ describe('the region', () => {
     expect(root.classList.contains('mine')).toBe(true)
     expect(root.getAttribute('id')).toBeNull()
     expect(root.querySelector('.v-calendar-region')!.getAttribute('id')).toBe('schedule')
+  })
+})
+
+describe('a disabled year view', () => {
+  // Pointer events are off on a disabled calendar, the keyboard is not: the months have to be
+  // real disabled buttons, or twelve dead controls stay in the tab order.
+  it('disables every month when the calendar is disabled', () => {
+    const { container } = mount({ view: 'year', views: ['year', 'month'], disabled: true })
+    const titles = [...container.querySelectorAll('.v-calendar-year-title')]
+    expect(titles).toHaveLength(12)
+    expect(titles.every((title) => (title as HTMLButtonElement).disabled)).toBe(true)
+  })
+})
+
+describe('what it exposes', () => {
+  const calendar = ref<{ el: HTMLElement | null; focus(options?: FocusOptions): void } | null>(null)
+  const Host = defineComponent({
+    components: { VCalendar: VCalendar as object },
+    props: { view: { type: String, default: 'week' } },
+    setup: () => ({ calendar, views: ['week', 'year'] }),
+    template:
+      '<VCalendar ref="calendar" label="Schedule" date="2026-06-10" :view="view" :views="views" />',
+  })
+
+  // The region is where the id and the ARIA attributes a consumer writes land.
+  it('hands over the region as el', async () => {
+    const { container } = render(Host)
+    await nextTick()
+    expect(calendar.value?.el).toBe(container.querySelector('.v-calendar-region'))
+  })
+
+  // The year view has no grid, and focus() used to do nothing there.
+  it('focuses the first month in the year view', async () => {
+    const { container } = render(Host, { props: { view: 'year' } })
+    await nextTick()
+    calendar.value?.focus({ preventScroll: true })
+    expect(document.activeElement).toBe(container.querySelector('.v-calendar-year-title'))
   })
 })

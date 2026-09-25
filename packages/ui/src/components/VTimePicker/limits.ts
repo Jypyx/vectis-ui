@@ -77,7 +77,9 @@ export function resolveLimits(props: TimeLimitProps): TimeLimits {
  * minute, which is what `snapMinute` reads it as.
  */
 export function minuteInterval(step: number): number {
-  return step > 1 ? step : 1
+  // Whole minutes, as `snapMinute` reads it: a fractional step would put 7.5 on the face.
+  const size = Math.round(step)
+  return size > 1 ? size : 1
 }
 
 const minuteGrids = new Map<number, readonly number[]>()

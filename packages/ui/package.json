@@ -64,7 +64,7 @@
     "icons": "tsx scripts/build-icons.ts",
     "prebuild": "pnpm run tokens",
     "build": "vite build",
-    "postbuild": "tsx scripts/check-css-split.ts && tsx scripts/bench-size.ts",
+    "postbuild": "tsx scripts/check-css-split.ts && tsx scripts/check-dev-warnings.ts && tsx scripts/bench-size.ts",
     "//bench": "Runtime timings, deliberately OUTSIDE the checkpoint and never gating: a benchmark on a shared runner measures the runner. The SIZE gate is the deterministic half and runs in postbuild.",
     "bench": "vitest bench --run",
     "bench:size": "tsx scripts/bench-size.ts",

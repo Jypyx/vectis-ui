@@ -99,7 +99,9 @@ function formatterFor(locale: string, step: number): Intl.NumberFormat {
       new Intl.NumberFormat(locale, {
         style: 'unit',
         unit: UNITS[step]!,
-        unitDisplay: 'short',
+        // The byte rung is spelled out, plural included: CLDR's short English name for a
+        // byte is the word "byte" itself, which printed "999 byte".
+        unitDisplay: step === 0 ? 'long' : 'short',
         maximumFractionDigits: digitsFor(step),
       }),
   )

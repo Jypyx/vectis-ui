@@ -8,7 +8,13 @@ import VSpinner from '../components/VSpinner/VSpinner.vue'
 
 import { en } from './en'
 import { fr } from './fr'
-import { DEFAULT_LOCALE, registerMessages, setLocale, useMessages } from './state'
+import {
+  DEFAULT_LOCALE,
+  registerMessages,
+  setLocale,
+  useMessages,
+  useResolvedLocale,
+} from './state'
 import type { Messages } from './types'
 
 // The state is module-level (like VToast/state.ts and VIcon/resolver.ts): it
@@ -266,5 +272,65 @@ describe('locale of the date components', () => {
     expect(de.getByRole('button', { name: 'Previous month' })).toBeTruthy()
     // …but the month comes from Intl and does follow the tag.
     expect(monthToggle(de)).toBe('März')
+  })
+})
+
+/*
+ * A dictionary loaded from JSON can carry a `null`, and one built with `x ?? undefined` an
+ * `undefined`: laid over English as they stood, every clear cross lost its name. An override
+ * only replaces a word with another word.
+ */
+describe('an override with a hole in it', () => {
+  it('keeps the English word where the override gives none', () => {
+    const holes = { common: { clear: undefined, loading: '', dismiss: null } }
+    registerMessages('en', holes as unknown as Parameters<typeof registerMessages>[1])
+    setLocale('en-US')
+    const common = useMessages().value.common
+    expect(common.clear).toBe(en.common.clear)
+    expect(common.loading).toBe(en.common.loading)
+    expect(common.dismiss).toBe(en.common.dismiss)
+  })
+})
+
+describe('the spoken value of the clock', () => {
+  it('says one minute, and one hour, in the singular', () => {
+    expect(en.timePicker.minutesValue(1)).toBe('1 minute')
+    expect(en.timePicker.minutesValue(5)).toBe('5 minutes')
+    expect(fr.timePicker.minutesValue(0)).toBe('0 minute')
+    expect(fr.timePicker.minutesValue(1)).toBe('1 minute')
+    expect(fr.timePicker.minutesValue(30)).toBe('30 minutes')
+    expect(fr.timePicker.hourValue(0)).toBe('0 heure')
+    expect(fr.timePicker.hourValue(1)).toBe('1 heure')
+    expect(fr.timePicker.hourValue(9)).toBe('9 heures')
+  })
+})
+
+/*
+ * French typography, as the dictionary itself claims it: a no-break space before a colon as
+ * before a percent sign, and one apostrophe throughout, the typographic one.
+ */
+describe('the French dictionary', () => {
+  const strings = Object.values(fr).flatMap((section) =>
+    Object.values(section as Record<string, unknown>).map((value) =>
+      typeof value === 'function'
+        ? String((value as (...a: unknown[]) => string)(2, 3))
+        : String(value),
+    ),
+  )
+
+  it('puts a no-break space before every colon', () => {
+    for (const text of strings) expect(text).not.toMatch(/ :/)
+  })
+
+  it('writes every apostrophe as the typographic one', () => {
+    for (const text of strings) expect(text).not.toContain("'")
+  })
+})
+
+describe('useResolvedLocale', () => {
+  // An empty tag is no tag: handed to Intl as it stands, it throws a RangeError.
+  it('reads an empty locale as none given', () => {
+    setLocale('fr-FR')
+    expect(useResolvedLocale(() => '').value).toBe('fr-FR')
   })
 })

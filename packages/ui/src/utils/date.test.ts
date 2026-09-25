@@ -162,6 +162,28 @@ describe('utils/date — input mask', () => {
   })
 })
 
+describe('parseISO', () => {
+  /*
+   * `new Date(2026, 1, 31)` is March 3rd: the constructor rolls an impossible day over
+   * rather than refusing it. A date that does not exist must read as no date at all, or a
+   * picker handed `2026-02-31` displays a day nobody gave it.
+   */
+  it('refuses a day the month does not have instead of rolling it over', () => {
+    expect(parseISO('2026-02-31')).toBeNull()
+    expect(parseISO('2026-13-01')).toBeNull()
+    expect(parseISO('2026-06-00')).toBeNull()
+  })
+
+  it('still reads a real date, a leap day included', () => {
+    expect(parseISO('2028-02-29')?.getDate()).toBe(29)
+    expect(parseISO('2027-02-29')).toBeNull()
+  })
+
+  it('moves nothing through addDays when the date is impossible', () => {
+    expect(addDays('2026-02-31', 0)).toBe('2026-02-31')
+  })
+})
+
 describe('isDateAllowed', () => {
   it('asks the bounds and the exclusion together', () => {
     const excluded = (iso: string) => iso === '2026-06-12'
@@ -211,5 +233,14 @@ describe('utils/date — names and far years', () => {
     expect(parseISO('0050-01-01')?.getFullYear()).toBe(50)
     expect(isoOf(999, 0, 10)).toBe('0999-01-10')
     expect(isValidISO('0050-01-01')).toBe(true)
+  })
+})
+
+describe('formatDisplayRange given its ends the wrong way round', () => {
+  it('writes the range in order rather than a nonsense span', () => {
+    const options = { day: 'numeric', month: 'short', year: 'numeric' } as const
+    expect(formatDisplayRange('2026-06-26', '2026-06-19', 'en-US', options)).toBe(
+      formatDisplayRange('2026-06-19', '2026-06-26', 'en-US', options),
+    )
   })
 })

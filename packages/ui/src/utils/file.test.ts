@@ -47,9 +47,11 @@ describe('matchesAccept', () => {
 
 describe('formatBytes', () => {
   it.each([
-    [0, '0 byte'],
+    // The byte rung spells its unit out, in the plural where the language has one: CLDR's
+    // short English name for a byte is the word "byte" itself, which read "999 byte".
+    [0, '0 bytes'],
     [1, '1 byte'],
-    [999, '999 byte'],
+    [999, '999 bytes'],
     [1000, '1 kB'],
     [1_200_000, '1.2 MB'],
     [2_500_000_000, '2.5 GB'],
@@ -67,8 +69,8 @@ describe('formatBytes', () => {
   })
 
   it('falls back to zero rather than producing a nonsensical size', () => {
-    expect(formatBytes(Number.NaN, 'en-US')).toBe('0 byte')
-    expect(formatBytes(-10, 'en-US')).toBe('0 byte')
+    expect(formatBytes(Number.NaN, 'en-US')).toBe('0 bytes')
+    expect(formatBytes(-10, 'en-US')).toBe('0 bytes')
   })
 })
 

@@ -93,9 +93,16 @@ export function useEdgeStep(
     pending.value = edge
 
     const fire = () => {
+      // The delay is asked again on every step: bound to zero while the drag is held against
+      // the edge, paging stops before the next page rather than after it.
+      const next = delay()
+      if (next <= 0) {
+        pending.value = null
+        return
+      }
       onStep(edge)
       // Re-armed, so holding against the edge keeps paging rather than stopping after one.
-      timer.start(fire, wait)
+      timer.start(fire, next)
     }
     timer.start(fire, wait)
   }

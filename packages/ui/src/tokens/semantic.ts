@@ -115,9 +115,9 @@ export const semantic = {
      *
      * These are the one place in the design system where a colour is DATA rather than a
      * role: which hue an event takes is derived from its id (see `VCalendar/color.ts`),
-     * and it arrives here through `--vectis-calendar-event-hue`, a per-instance input the
-     * component sets on each card. That is why they are written out rather than aliased to
-     * a palette — there is no palette to point at, only a wheel.
+     * and each card turns these colours to its own hue. That is why they are written out
+     * rather than aliased to a palette — there is no palette to point at, only a wheel. The
+     * hue written here, 265, is the one a card falls back to.
      *
      * WHAT MAKES THEM READABLE, and what must not be changed casually. Only the HUE
      * varies; the lightness and the chroma below are fixed, and in OKLCH lightness is
@@ -127,22 +127,21 @@ export const semantic = {
      * of every event in the calendar at once. The same pair is restated in `themes/dark.ts`
      * with the roles swapped end for end.
      *
-     * A custom property substitutes at the point it is USED, not where it is declared, so
-     * the hue each card sets is what these resolve against — the trick `VSkeletonLoader`
-     * uses for its highlight.
+     * TRAP — they are plain colours, with no `var()` in them. A custom property is resolved
+     * where it is DECLARED, which for a token is `:root`: a hue read there is the fallback's,
+     * and every card would be painted in it whatever hue it set. The card keeps the lightness
+     * and the chroma and swaps the hue itself, with relative colour syntax, in
+     * `VCalendarEvent.vue`.
      */
     'event-surface': color(
-      'oklch(0.95 0.045 var(--vectis-calendar-event-hue, 265))',
+      'oklch(0.95 0.045 265)',
       'The face of a calendar event that carries no color of its own',
     ),
     'event-border': color(
-      'oklch(0.85 0.08 var(--vectis-calendar-event-hue, 265))',
+      'oklch(0.85 0.08 265)',
       'The edge of that calendar event, and the bar marking its leading side',
     ),
-    'event-text': color(
-      'oklch(0.4 0.11 var(--vectis-calendar-event-hue, 265))',
-      'The title of that calendar event',
-    ),
+    'event-text': color('oklch(0.4 0.11 265)', 'The title of that calendar event'),
   },
   /**
    * The typography, described by role rather than by measurement: a heading, a subtitle,
@@ -460,6 +459,26 @@ export const semantic = {
       "The height past which VCalendar's all-day band scrolls instead of growing",
     ),
     'size-calendar-now-dot': dimension('0.625rem', "The dot on VCalendar's current-time line"),
+    'size-calendar-event-edge': dimension(
+      '3px',
+      'The width of the coloured leading edge of a VCalendar event',
+    ),
+    'size-calendar-gap': dimension(
+      '0.125rem',
+      'The gap VCalendar keeps between two events, side by side in a day or stacked in a month',
+    ),
+    'size-calendar-grip': dimension(
+      '1rem',
+      "The length of the grip drawn on a VCalendar card's resize strip",
+    ),
+    'size-calendar-grip-thickness': dimension(
+      '2px',
+      "The thickness of that grip, which is also its distance from the card's bottom edge",
+    ),
+    'size-calendar-year-month': dimension(
+      '13rem',
+      "The narrowest a mini-month of VCalendar's year view gets before the year reflows",
+    ),
     /*
      * Sized so the default `monthEventLimit` of three chips AND the "+N more" line beneath
      * them fit without being clipped: 136px, less the padding, the border and the 32px day

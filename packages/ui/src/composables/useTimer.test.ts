@@ -1,6 +1,6 @@
 import { render } from '@testing-library/vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { defineComponent, h } from 'vue'
+import { KeepAlive, defineComponent, h, nextTick, ref } from 'vue'
 
 import { useTimer } from './useTimer'
 
@@ -77,5 +77,37 @@ describe('useTimer', () => {
     unmount()
     vi.advanceTimersByTime(500)
     expect(fn).not.toHaveBeenCalled()
+  })
+})
+
+/*
+ * A component kept alive is deactivated rather than unmounted, so a timer cancelled on
+ * unmount alone went on firing off screen: a carousel kept rotating on a page the reader had
+ * left. It is held while the component is away, and armed again when it comes back.
+ */
+describe('useTimer inside KeepAlive', () => {
+  beforeEach(() => vi.useFakeTimers())
+  afterEach(() => vi.useRealTimers())
+
+  it('holds a pending delay while deactivated, and resumes it when shown again', async () => {
+    const fired = vi.fn()
+    const shown = ref(true)
+    const Timed = {
+      setup() {
+        useTimer().start(fired, 1000)
+        return () => h('div')
+      },
+    }
+    render({ setup: () => () => h(KeepAlive, null, shown.value ? [h(Timed)] : []) })
+
+    shown.value = false
+    await nextTick()
+    vi.advanceTimersByTime(5000)
+    expect(fired).not.toHaveBeenCalled()
+
+    shown.value = true
+    await nextTick()
+    vi.advanceTimersByTime(1000)
+    expect(fired).toHaveBeenCalledTimes(1)
   })
 })

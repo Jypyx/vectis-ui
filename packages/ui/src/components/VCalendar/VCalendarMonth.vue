@@ -164,12 +164,17 @@ const {
   onPointerup,
   onPointercancel,
   onPointerleave,
+  onFocusout,
   onCardKeydown,
   focusCell,
   idOfCard,
   cardState,
 } = useCalendarGesture<E, Gesture>({
   events: () => props.events,
+  // The finished gesture and the weeks it was measured against are not kept past it.
+  onRelease: () => {
+    lastApplied = null
+  },
   eventOf: (id): E | undefined => eventsById.value.get(id),
   // Measured against the ROOT and not against `gridEl`, whose rect leaves out the row of
   // weekday names above it.
@@ -263,7 +268,8 @@ interface Chip {
 const dayEvents = computed(() => {
   const map = new Map<string, { shown: Chip[]; hidden: number }>()
   const textOf = timeTextOf.value
-  const limit = props.monthEventLimit
+  // Below zero, a limit would count hidden events on every empty square.
+  const limit = Math.max(0, props.monthEventLimit)
   for (const [iso, all] of byDay.value) {
     const shown = all.length > limit ? all.slice(0, limit) : all
     map.set(iso, {
@@ -311,7 +317,7 @@ function onKeydown(event: KeyboardEvent) {
   const cell = target?.closest<HTMLElement>('.v-calendar-month-cell')
   if (!cell) return
 
-  const intent = calendarIntent(event.key, event.shiftKey, 'cell', 1, isRtl())
+  const intent = calendarIntent(event, 'cell', 1, isRtl())
   if (!intent) return
 
   const iso = cell.dataset.iso!
@@ -340,6 +346,12 @@ function onKeydown(event: KeyboardEvent) {
   if (intent.kind === 'period') {
     event.preventDefault()
     emit('step', intent.delta)
+    return
+  }
+
+  if (intent.kind === 'openDay') {
+    event.preventDefault()
+    emit('day-activate', iso)
     return
   }
 
@@ -430,7 +442,8 @@ function onGrabStep(state: Gesture, step: GrabStep, item: E): boolean {
   const days = flat.value
   const from = days.indexOf(state.preview.start)
   const target = days[clamp(from + dayStep(step.days, step.minutes), 0, days.length - 1)]
-  if (!target) return false
+  // Held against the grid's edge, the press goes nowhere: nothing to announce or to drop.
+  if (!target || target === state.preview.start) return false
   state.preview = moveEventToDay(state.preview, target)
   emit('announce', m.value.calendar.movedTo(item.title, longDay(state.preview.start)))
   return true
@@ -463,8 +476,8 @@ function onGridClick(event: MouseEvent) {
 // asking which is on screen. A month has no hours, hence the empty `scrollToMinutes`.
 defineExpose({
   /** Brings the focus onto the day the grid is currently pointing at. */
-  focus: () => {
-    if (tabbable.value) focusCell(cellId(tabbable.value))
+  focus: (options?: FocusOptions) => {
+    if (tabbable.value) focusCell(cellId(tabbable.value), false, options)
   },
   /** Nothing to scroll to in a month view. */
   scrollToMinutes: () => {},
@@ -477,11 +490,12 @@ defineExpose({
     class="v-calendar-month"
     :data-outside="gesture?.outside ? '' : undefined"
     :style="{ '--calendar-columns': String(weekdayNames.length) }"
+    @focusout="onFocusout"
   >
     <div class="v-calendar-month-head" aria-hidden="true">
       <span
-        v-for="name in weekdayNames"
-        :key="name"
+        v-for="(name, index) in weekdayNames"
+        :key="index"
         class="v-calendar-weekday v-calendar-month-weekday"
       >
         {{ name }}
@@ -518,6 +532,7 @@ defineExpose({
           :data-adjacent="cell.adjacent ?? undefined"
           :tabindex="tabbable === cell.iso ? 0 : -1"
           :aria-label="longDay(cell.iso)"
+          aria-keyshortcuts="Shift+Enter"
         >
           <button
             type="button"
@@ -609,7 +624,7 @@ defineExpose({
   .v-calendar-month-cell {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--vectis-control-size-calendar-gap);
     overflow: hidden;
     padding: var(--vectis-space-1);
   }
@@ -668,6 +683,16 @@ defineExpose({
   .v-calendar-month-more:hover {
     color: var(--vectis-color-text);
     text-decoration: underline;
+  }
+
+  /* The neighbouring months' days are told apart by a tint forced colors removes: grey text
+     keeps them apart. */
+  @media (forced-colors: active) {
+    .v-calendar-month-cell[data-adjacent] {
+      forced-color-adjust: none;
+      background: Canvas;
+      color: GrayText;
+    }
   }
 }
 </style>

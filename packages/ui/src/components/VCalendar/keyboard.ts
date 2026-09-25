@@ -35,6 +35,8 @@ export type CalendarIntent =
   | { kind: 'period'; delta: -1 | 1 }
   /** Take up what is focused: report an empty cell, or commit a move under way. */
   | { kind: 'activate' }
+  /** Open the focused day, which only a month square offers. */
+  | { kind: 'openDay' }
   /** Take hold of a card, so the arrows move it. */
   | { kind: 'grab' }
   /** Abandon a move under way and put the event back. */
@@ -47,7 +49,8 @@ export type CalendarIntent =
 /**
  * Where the focus is when the key arrives, which is what decides the answer:
  *
- * - `cell` — an empty part of the grid. The arrows travel, Enter creates.
+ * - `cell` — an empty part of the grid. The arrows travel, Enter creates, Shift and Enter
+ *   open the day (a month square's number takes no tab stop, so this is its keyboard route).
  * - `event` — a card, at rest. Space takes hold of it; every other key is the browser's,
  *   Enter included, which presses the card as a button and so opens the event. Enter is the
  *   one a reader tries first on a button, and `event-activate` has no other keyboard route.
@@ -56,21 +59,36 @@ export type CalendarIntent =
  */
 export type CalendarFocus = 'cell' | 'event' | 'grabbed'
 
+/** The part of a keyboard event the table reads; a `KeyboardEvent` is one. */
+export interface KeyChord {
+  key: string
+  shiftKey?: boolean
+  altKey?: boolean
+  ctrlKey?: boolean
+  metaKey?: boolean
+}
+
 /**
  * What a key means. Returning nothing says the key is none of this table's business and
  * the event must be left entirely alone — which is what keeps Tab, the browser's own
  * shortcuts and anything a consumer has bound working.
  *
+ * A key held with Alt, Ctrl or Meta is ALWAYS left alone, whatever it is: Alt+Left is the
+ * browser's Back and Ctrl+Home scrolls the page, and answering them here also cancelled them.
+ * Shift is part of the table.
+ *
  * `rtl` is passed in rather than read here: which way is "forward" is a property of the
  * document, and a pure table has no business consulting one.
  */
 export function calendarIntent(
-  key: string,
-  shiftKey: boolean,
+  chord: KeyChord,
   focus: CalendarFocus,
   slotMinutes: number,
   rtl: boolean,
 ): CalendarIntent | undefined {
+  if (chord.altKey || chord.ctrlKey || chord.metaKey) return undefined
+  const { key } = chord
+  const shiftKey = chord.shiftKey === true
   const step = slotMinutes > 0 ? slotMinutes : 1
   // The inline arrows follow the reading direction; the block ones never do, because down
   // is later in the day in every script.
@@ -120,6 +138,7 @@ export function calendarIntent(
     case 'PageDown':
       return { kind: 'period', delta: 1 }
     case 'Enter':
+      return shiftKey ? { kind: 'openDay' } : { kind: 'activate' }
     case ' ':
       return { kind: 'activate' }
     default:
