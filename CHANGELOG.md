@@ -2,6 +2,52 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.9.0] - 2026-09-25
+
+This release improves keyboard interaction, accessibility, native form participation and SSR behaviour across the component library. It also aligns several public names. The renames below ship without compatibility aliases.
+
+### Upgrading from 0.8.x
+
+Renamed types fail typechecking. Renamed props can instead fall through as HTML attributes and silently stop working, so search templates and component bindings for the old names, including their kebab-case forms.
+
+| Component or API                                                   | Before                    | After                   |
+| ------------------------------------------------------------------ | ------------------------- | ----------------------- |
+| VInput, VTextarea, VDateInput, VTimeInput, VFileInput, VFilePicker | `loadingLabel`            | `loadingText`           |
+| VPagination                                                        | `prevLabel` / `nextLabel` | `prevText` / `nextText` |
+| VTabs                                                              | `grow`                    | `fullWidth`             |
+| VFilePicker                                                        | `browseLabel`             | `browseText`            |
+| VSnackbar and `snackbar()` options                                 | `actionLabel`             | `actionText`            |
+| Exported type                                                      | `FileKind`                | `FilePickerKind`        |
+| VHotkeys `variant` and `HotkeysVariant`                            | `outlined`                | `outline`               |
+
+Other integration changes:
+
+- **VSlider `@input` now receives the value**, a number or a `[start, end]` pair, instead of a native DOM event. Replace handlers reading `event.target.value` with handlers accepting that value. Both thumbs emit it. In range mode, moving a thumb past its sibling now pushes the sibling instead of stopping against it.
+- **VDataTable `selectRowLabel(row, index)` receives the index across all pages**, still zero-based, instead of the index within the current page. Changing `perPage` from the parent resets the page to 1. Server-side `update:params` uses the requested page and ignores equivalent parameter updates; changing the response total no longer produces another request. A custom `selectionText` is no longer called for an empty selection.
+- **VSkeletonLoader CSS hooks are renamed**: `.v-skeleton` becomes `.v-skeleton-loader`, and `.v-skeleton-item` becomes `.v-skeleton-loader-item`. Update custom selectors and DOM tests that use them. Its private CSS variables and animation names also use the `skeleton-loader` prefix.
+- **Chrome and Edge support starts at 134**, up from 125. Safari 26+ and Firefox 147+ remain the documented minimums. Update a custom bundler `cssTarget` accordingly.
+
+### Added
+
+- VPagination `selectedVariant`, VSlider `hint`, VAvatarGroup `label`, and VInput `noTyping`.
+- `start` and `end` slots on VTab and VToggleItem, exported slot-prop types, and additional public focus methods and element references.
+- Numeric pixel widths in `ToastOptions.width`, alongside CSS length strings.
+- A tooltip maximum-width token and dedicated calendar dimension tokens. No generated public token is removed.
+- A bilingual Design tokens reference in the documentation.
+
+### Fixed
+
+- Fields preserve consumer ARIA attributes and validation messages. VCombobox follows external values, keeps filtered results during its closing animation, and handles paging, clearing and disabled or read-only transitions consistently.
+- VInputOTP participates in native forms, keeps entered codes contiguous and emits `complete` only when the value changes into a full code. File inputs synchronize their native file selection for form submission and emit `remove` when replacing a single file.
+- Menus, tabs, navigation, date and time pickers improve keyboard handling and focus management. VTooltip stays available while hovered or focused and can be dismissed with Escape. VDialog includes a fallback for browsers without `closedby` support.
+- Toasts and snackbars use persistent live regions, restore focus after dismissal and handle replacement timers and throwing actions. Timers and keyboard listeners respect KeepAlive deactivation.
+- VCarousel handles nested slides, external model bounds, focus handoff and SSR lifecycle correctly. VDataTable sorts dates and numeric strings correctly and prevents selection of unavailable rows.
+- VCalendar restores per-event hues, validates event dates, handles overnight and midnight boundaries, and stabilizes keyboard moves and drag gestures. It supports day activation and all-day keyboard moves and avoids emitting unchanged drops.
+- Forced-colors rendering is improved across the library. Progress values, skeleton line counts, avatar overflow and locale overrides handle invalid or empty values more consistently.
+- Published builds retain development warnings. Shared utility and stylesheet changes reduce shipped code and core CSS without changing package entrypoints.
+
+**Full diff:** [v0.8.1...v0.9.0](https://github.com/Jypyx/vectis-ui/compare/v0.8.1...v0.9.0)
+
 ## [0.8.1] - 2026-09-16
 
 No change to the library code. The README shown on npm is rewritten: a short introduction, a quick start, browser support, and links to the documentation at <https://vectis-ui.com>, this changelog and the license.
