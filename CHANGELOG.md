@@ -2,6 +2,23 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.10.0] - 2026-09-27
+
+### Upgrading from 0.9.x
+
+- **VSlider `inputs` is now a placement**, typed `SliderInputs` (`false | 'ends' | 'top' | 'bottom'`), instead of a boolean. Replace a bare `inputs` or `:inputs="true"` with `inputs="ends"`, which draws the fields at the ends of the track as before. At runtime `true` still renders the fields at the ends and logs a development warning. The TypeScript types reject it.
+
+### Added
+
+- VSlider `inputs="top"` and `inputs="bottom"` give the number fields a row of their own above or below the track, each field at the edge of the value it holds. On a vertical slider they sit on its start and end sides. The fields are rendered in the order they appear on screen, so the tab order follows the layout. The `SliderInputs` type is exported.
+- VCombobox `hideExpandIcon` leaves the chevron out, for a combobox used as a search field with suggestions. The list still opens on focus and the spinner still shows while loading.
+
+### Fixed
+
+- VInput with pinned end controls, the arrangement VCombobox and VFileInput use, reserves room for the controls actually rendered. A lone clear cross now takes the end slot.
+
+**Full diff:** [v0.9.1...v0.10.0](https://github.com/Jypyx/vectis-ui/compare/v0.9.1...v0.10.0)
+
 ## [0.9.1] - 2026-09-27
 
 ### Added
