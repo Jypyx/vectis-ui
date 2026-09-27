@@ -2,6 +2,18 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.10.1] - 2026-09-27
+
+### Changed
+
+- VCheckbox, VRadio and VSwitch set their label in the regular weight (400) instead of medium (500). The text reads as an option to choose rather than as the name of a field.
+
+### Added
+
+- The `choice` text role, read by VCheckbox, VRadio and VSwitch: `--vectis-text-choice-size`, `--vectis-text-choice-weight` and `--vectis-text-choice-leading`. Override `--vectis-text-choice-weight` to set the weight of their labels without changing the other components that use the `label` role.
+
+**Full diff:** [v0.10.0...v0.10.1](https://github.com/Jypyx/vectis-ui/compare/v0.10.0...v0.10.1)
+
 ## [0.10.0] - 2026-09-27
 
 ### Upgrading from 0.9.x
