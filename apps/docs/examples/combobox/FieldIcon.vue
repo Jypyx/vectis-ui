@@ -48,6 +48,17 @@ function switchOrder() {
       placeholder="Search a topic"
       @click:icon-start="switchOrder"
     />
+
+    <!-- Without the chevron, the field reads as a search box with suggestions. -->
+    <VCombobox
+      v-model="topic"
+      :options="options"
+      :icon-start="search"
+      hide-expand-icon
+      clearable
+      label="Search field"
+      placeholder="Search a topic"
+    />
   </div>
 </template>
 

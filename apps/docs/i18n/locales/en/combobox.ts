@@ -37,7 +37,7 @@ export default {
     },
     fieldIcon: {
       title: 'Field icon',
-      text: '<code>iconStart</code> displays an icon at the beginning of the field. <code>iconStartLabel</code> provides an accessible label if the icon is made interactive.',
+      text: '<code>iconStart</code> displays an icon at the beginning of the field. <code>iconStartLabel</code> provides an accessible label if the icon is made interactive. <code>hideExpandIcon</code> leaves the chevron out, for a field that reads as a search box with suggestions: the list still opens on focus, and the clear cross takes the end of the field.',
     },
     icons: {
       title: 'Option icons',
@@ -87,6 +87,8 @@ export default {
         iconStartLabel: 'What the start icon does, in words, once it is clickable.',
         expandIcon:
           'The chevron at the end of the field, which turns as the list opens. Clicking it while the list is open closes the list. It is decoration all the same: the field itself opens the list and Escape closes it from the keyboard, so the chevron is hidden from screen readers and takes no label.',
+        hideExpandIcon:
+          'Leaves the chevron out, for a field that reads as a search box with suggestions rather than as a list to pick from. The list still opens as the field takes the focus, and the spinner still shows while loading.',
         clearable: 'Offers a cross that empties both the selection and the search.',
         clearLabel:
           'What that cross does, in words. It falls back to the design system dictionary.',

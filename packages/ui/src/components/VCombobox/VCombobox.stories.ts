@@ -564,6 +564,40 @@ export const FieldIcon: Story = {
 }
 
 /**
+ * `hideExpandIcon` leaves the chevron out, for a field that reads as a search box with
+ * suggestions. The clear cross then takes the end slot itself, and the field reserves the
+ * room of that one control only.
+ */
+export const SearchField: Story = {
+  args: { iconStart: 'search', hideExpandIcon: true, clearable: true },
+  render: (args) => ({
+    components: { VCombobox },
+    setup: () => ({ args, t, value: ref('fr') }),
+    template: `
+      <div style="width: 320px">
+        <VCombobox v-bind="args" v-model="value" :label="t.searchCountry" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const field = canvasElement.querySelector('.v-input-field') as HTMLElement
+    await expect(field.querySelector('.v-combobox-chevron')).toBeNull()
+    // Measured on the glyph, the inset's own unit: alone, the cross sits on the field's
+    // padding edge rather than one slot short of it, where the chevron would have been.
+    const style = getComputedStyle(field)
+    const glyph = field.querySelector('.v-input-clear .v-icon')!.getBoundingClientRect()
+    const edge =
+      field.getBoundingClientRect().right -
+      parseFloat(style.borderInlineEndWidth) -
+      parseFloat(style.paddingInlineStart)
+    await expect(Math.abs(edge - glyph.right)).toBeLessThan(1)
+    // and the text stops before it
+    const input = field.querySelector('input')!.getBoundingClientRect()
+    await expect(input.right).toBeLessThanOrEqual(glyph.left)
+  },
+}
+
+/**
  * Sizes `sm` (32px), `md` (40px, the default) and `lg` (48px), combinable with
  * `compact` (-4px). In multiple mode, the Chips stay one step below the field: `xs`
  * (24px) up to `md`, `sm` (32px) at `lg` — the catch-up below the lowest step of each

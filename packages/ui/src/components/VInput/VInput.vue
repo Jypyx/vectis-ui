@@ -578,19 +578,25 @@ defineExpose({
      between two of them — and reads the same two variables as the insets below, so the room
      reserved and the glyphs it protects cannot drift apart.
 
-     Whether the cross takes its room is read off the markup (`:has`): the cross is rendered
-     exactly when there is something to clear, so the padding cannot disagree with it.
+     Which of the two take their room is read off the markup (`:has`): the cross is rendered
+     exactly when there is something to clear, and the end icon only when there is one (a
+     VCombobox with `hideExpandIcon` has none), so the padding cannot disagree with either.
+     VInput's own loading spinner counts as the end icon it replaces.
 
      The centring is a translation kept SEPARATE from `rotate`, which VCombobox's chevron
      turns when its panel opens. */
   .v-input-end-pinned .v-input-field {
     position: relative;
+  }
+
+  .v-input-end-pinned .v-input-field:has(> :is(.v-input-clear, .v-input-icon-end, .v-spinner)) {
     padding-inline-end: calc(
       var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--control-gap)
     );
   }
 
-  .v-input-end-pinned .v-input-field:has(> .v-input-clear) {
+  .v-input-end-pinned
+    .v-input-field:has(> .v-input-clear):has(> :is(.v-input-icon-end, .v-spinner)) {
     padding-inline-end: calc(
       var(--control-padding-inline-field) + 2 * var(--vectis-icon-size) + 2 * var(--control-gap)
     );
@@ -607,8 +613,9 @@ defineExpose({
      buttons, whose negative margin — half the difference between icon and button — already
      cancels its own overhang, so an inset lands on the glyph's edge. Measured in button
      widths instead, it pushes the cross a whole gap too far, with nothing to signal it.
-     It overrides the rule above at the same weight, so it has to stay after it. */
-  .v-input-end-pinned .v-input-clear {
+     It applies only when an end icon follows the cross: alone, the cross takes the end
+     slot itself, at the inset above. */
+  .v-input-end-pinned .v-input-clear:has(~ :is(.v-input-icon-end, .v-spinner)) {
     inset-inline-end: calc(
       var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--control-gap)
     );

@@ -37,7 +37,7 @@ export default {
     },
     fieldIcon: {
       title: 'Icône du champ',
-      text: "<code>iconStart</code> affiche une icône au début du champ. <code>iconStartLabel</code> fournit un label accessible si l'icône est rendue interactive au clic.",
+      text: "<code>iconStart</code> affiche une icône au début du champ. <code>iconStartLabel</code> fournit un label accessible si l'icône est rendue interactive au clic. <code>hideExpandIcon</code> retire le chevron, pour un champ qui se lit comme une recherche avec suggestions : la liste s'ouvre toujours au focus, et la croix d'effacement prend la fin du champ.",
     },
     icons: {
       title: 'Icônes des options',
@@ -87,6 +87,8 @@ export default {
         iconStartLabel: "Ce que fait l'icône de début, en mots, une fois cliquable.",
         expandIcon:
           "Le chevron à la fin du champ, qui pivote à l'ouverture de la liste. Un clic dessus quand la liste est ouverte la ferme. Il reste une décoration : le champ lui-même ouvre la liste et Échap la ferme au clavier, donc le chevron est masqué aux lecteurs d'écran et ne prend pas de libellé.",
+        hideExpandIcon:
+          "Retire le chevron, pour un champ qui se lit comme une recherche avec suggestions plutôt que comme une liste où choisir. La liste s'ouvre toujours quand le champ prend le focus, et l'indicateur de chargement s'affiche toujours.",
         clearable: 'Propose une croix qui vide à la fois la sélection et la recherche.',
         clearLabel:
           'Ce que fait cette croix, en mots. Sa valeur par défaut vient du dictionnaire du design system.',

@@ -25,6 +25,7 @@ export default {
         { name: 'iconStart', type: 'IconSource' },
         { name: 'iconStartLabel', type: 'string' },
         { name: 'expandIcon', type: 'IconSource', default: 'expand_more' },
+        { name: 'hideExpandIcon', type: 'boolean', default: 'false' },
         { name: 'clearable', type: 'boolean', default: 'false' },
         { name: 'clearLabel', type: 'string' },
         { name: 'emptyText', type: 'string' },

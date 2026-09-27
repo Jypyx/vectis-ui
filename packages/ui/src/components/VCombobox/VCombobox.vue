@@ -211,6 +211,12 @@ interface ComboboxProps {
    * no label.
    */
   expandIcon?: IconSource
+  /**
+   * Leaves the chevron out, for a field that reads as a search box with suggestions rather
+   * than as a list to pick from. The list still opens as the field takes the focus, and the
+   * spinner still shows while loading.
+   */
+  hideExpandIcon?: boolean
   /** Offers a cross that empties both the selection and the search. */
   clearable?: boolean
   /** What that cross does, in words. It falls back to the design system dictionary. */
@@ -271,6 +277,7 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   iconStart: undefined,
   iconStartLabel: undefined,
   expandIcon: () => expandMoreIcon,
+  hideExpandIcon: false,
   clearable: false,
   clearLabel: undefined,
   emptyText: undefined,
@@ -1149,8 +1156,11 @@ defineExpose({
              overwrite this slot, chevron and all.
 
              The spinner is hidden from screen readers, which neutralizes the status role
-             it carries: what announces the loading is the panel, and once is enough. -->
-        <template #end>
+             it carries: what announces the loading is the panel, and once is enough.
+
+             With `hideExpandIcon` and nothing loading, the slot is not passed at all, and the
+             pinned arrangement stops reserving the chevron's room. -->
+        <template v-if="loading || !hideExpandIcon" #end>
           <VSpinner v-if="loading" class="v-combobox-spinner v-input-icon-end" aria-hidden="true" />
           <VIcon
             v-else
