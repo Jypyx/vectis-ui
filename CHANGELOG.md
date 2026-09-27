@@ -2,6 +2,15 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.9.1] - 2026-09-27
+
+### Added
+
+- VPagination `href`, a function returning the address of a page. When it is set, every page and both controls render as links, so a page of results can be opened in a new tab, bookmarked or followed by a crawler. The previous and next links carry `rel="prev"` and `rel="next"`. A disabled page, or a control with no page left, becomes an inert link.
+- VPagination `navigate` event, emitted with the page and the click before the model changes. A single-page application can call `preventDefault()` on the event and pass the address to its router. A click with a modifier key held is left to the browser and emits nothing.
+
+**Full diff:** [v0.9.0...v0.9.1](https://github.com/Jypyx/vectis-ui/compare/v0.9.0...v0.9.1)
+
 ## [0.9.0] - 2026-09-25
 
 This release improves keyboard interaction, accessibility, native form participation and SSR behaviour across the component library. It also aligns several public names. The renames below ship without compatibility aliases.
