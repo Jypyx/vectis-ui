@@ -17,7 +17,7 @@ const gain = ref(60)
 
     <!-- A vertical slider has no container to take its length from, so it reads a
          token instead. Override that token to make it longer or shorter. -->
-    <VSlider v-model="gain" class="tall" orientation="vertical" inputs label="Gain" />
+    <VSlider v-model="gain" class="tall" orientation="vertical" inputs="ends" label="Gain" />
   </div>
 </template>
 

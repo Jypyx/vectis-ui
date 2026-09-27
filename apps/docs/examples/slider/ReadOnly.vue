@@ -11,7 +11,7 @@ const budget = ref<[number, number]>([20, 60])
     <!-- The thumbs stay focusable and announced, but neither a key nor the pointer
          moves them, and the number fields turn read-only with them. -->
     <VSlider v-model="volume" readonly label="Volume" />
-    <VSlider v-model="budget" range inputs readonly label="Budget" />
+    <VSlider v-model="budget" range inputs="ends" readonly label="Budget" />
   </div>
 </template>
 

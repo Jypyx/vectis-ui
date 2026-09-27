@@ -169,9 +169,9 @@ export const WithInputs: Story = {
     setup: () => ({ args, t, value: ref(40), rangeValue: ref<[number, number]>([20, 60]) }),
     template: `
       <div style="display: grid; gap: 24px; width: 420px">
-        <VSlider v-bind="args" inputs v-model="value" :label="t.volume" />
+        <VSlider v-bind="args" inputs="ends" v-model="value" :label="t.volume" />
         <output>{{ value }}</output>
-        <VSlider v-bind="args" inputs range v-model="rangeValue" :label="t.budget" />
+        <VSlider v-bind="args" inputs="ends" range v-model="rangeValue" :label="t.budget" />
       </div>
     `,
   }),
@@ -186,6 +186,77 @@ export const WithInputs: Story = {
     await userEvent.tab()
     await waitFor(() => expect(canvas.getByText('100')).toBeVisible())
     await waitFor(() => expect(field).toHaveValue(100))
+  },
+}
+
+/**
+ * `inputs` takes a placement: `ends` on either side of the track, `top` and `bottom` in a row
+ * above or below it, each field at the edge of the value it holds. Upright, `top` and
+ * `bottom` become the two sides of the track.
+ */
+export const InputPlacements: Story = {
+  render: (args) => ({
+    components: { VSlider },
+    setup: () => ({
+      args,
+      t,
+      a: ref<[number, number]>([20, 60]),
+      b: ref(2),
+      c: ref<[number, number]>([20, 60]),
+      d: ref(40),
+    }),
+    template: `
+      <div style="display: grid; gap: 32px; width: 420px">
+        <VSlider v-bind="args" class="h-top" inputs="top" range v-model="a" :label="t.budget" />
+        <VSlider
+          v-bind="args"
+          class="h-bottom"
+          inputs="bottom"
+          v-model="b"
+          :min="0"
+          :max="4"
+          :labels="['XS', 'S', 'M', 'L', 'XL']"
+          :label="t.size"
+        />
+        <div style="display: flex; gap: 48px">
+          <VSlider v-bind="args" class="v-top" orientation="vertical" inputs="top" range v-model="c" :label="t.range" />
+          <VSlider v-bind="args" class="v-bottom" orientation="vertical" inputs="bottom" v-model="d" :label="t.volume" />
+        </div>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    // jsdom lays nothing out, so the grid templates are only ever checked here.
+    const parts = (cls: string) => {
+      const root = canvasElement.querySelector(`.${cls}`)!
+      const box = (sel: string) => root.querySelector(sel)?.getBoundingClientRect()
+      return {
+        rail: box('.v-slider-rail')!,
+        labels: box('.v-slider-labels'),
+        start: box('.v-slider-field-start'),
+        end: box('.v-slider-field-end')!,
+      }
+    }
+    const near = (a: number, b: number) => expect(Math.abs(a - b)).toBeLessThan(1)
+
+    const hTop = parts('h-top')
+    await expect(hTop.start!.bottom).toBeLessThanOrEqual(hTop.rail.top)
+    await expect(hTop.end.bottom).toBeLessThanOrEqual(hTop.rail.top)
+    near(hTop.start!.left, hTop.rail.left)
+    near(hTop.end.right, hTop.rail.right)
+
+    const hBottom = parts('h-bottom')
+    await expect(hBottom.end.top).toBeGreaterThanOrEqual(hBottom.labels!.bottom)
+    near(hBottom.end.right, hBottom.rail.right)
+
+    const vTop = parts('v-top')
+    await expect(vTop.end.right).toBeLessThanOrEqual(vTop.rail.left)
+    near(vTop.end.top, vTop.rail.top)
+    near(vTop.start!.bottom, vTop.rail.bottom)
+
+    const vBottom = parts('v-bottom')
+    await expect(vBottom.end.left).toBeGreaterThanOrEqual(vBottom.rail.right)
+    near(vBottom.end.top, vBottom.rail.top)
   },
 }
 
@@ -286,7 +357,7 @@ export const FullVertical: Story = {
           tooltip
           :label="t.size"
         />
-        <VSlider v-bind="args" orientation="vertical" inputs range tooltip v-model="rangeValue" :label="t.budget" />
+        <VSlider v-bind="args" orientation="vertical" inputs="ends" range tooltip v-model="rangeValue" :label="t.budget" />
       </div>
     `,
   }),
@@ -303,7 +374,7 @@ export const ReadOnly: Story = {
     setup: () => ({ args, t, value: ref(40), rangeValue: ref<[number, number]>([20, 60]) }),
     template: `
       <div style="display: grid; gap: 24px; width: 420px">
-        <VSlider v-bind="args" v-model="value" readonly inputs :step="10" ticks :label="t.volume" />
+        <VSlider v-bind="args" v-model="value" readonly inputs="ends" :step="10" ticks :label="t.volume" />
         <output data-testid="mirror">{{ value }}</output>
         <VSlider v-bind="args" v-model="rangeValue" readonly range :label="t.budget" />
       </div>
@@ -336,7 +407,7 @@ export const Invalid: Story = {
     setup: () => ({ args, t, value: ref<[number, number]>([30, 90]) }),
     template: `
       <div style="width: 420px">
-        <VSlider v-bind="args" v-model="value" range inputs invalid :label="t.quota" />
+        <VSlider v-bind="args" v-model="value" range inputs="ends" invalid :label="t.quota" />
       </div>
     `,
   }),
@@ -354,9 +425,9 @@ export const Sizes: Story = {
     setup: () => ({ args, t, a: ref(20), b: ref(40), c: ref(60) }),
     template: `
       <div style="display: grid; gap: 24px; width: 420px">
-        <VSlider v-bind="args" v-model="a" inputs size="sm" :label="t.small" />
-        <VSlider v-bind="args" v-model="b" inputs :label="t.medium" />
-        <VSlider v-bind="args" v-model="c" inputs size="lg" :label="t.large" />
+        <VSlider v-bind="args" v-model="a" inputs="ends" size="sm" :label="t.small" />
+        <VSlider v-bind="args" v-model="b" inputs="ends" :label="t.medium" />
+        <VSlider v-bind="args" v-model="c" inputs="ends" size="lg" :label="t.large" />
       </div>
     `,
   }),

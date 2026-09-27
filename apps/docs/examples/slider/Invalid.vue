@@ -7,7 +7,7 @@ const quota = ref<[number, number]>([30, 90])
 
 <template>
   <div class="demo">
-    <VSlider v-model="quota" range inputs invalid label="Quota" />
+    <VSlider v-model="quota" range inputs="ends" invalid label="Quota" />
   </div>
 </template>
 

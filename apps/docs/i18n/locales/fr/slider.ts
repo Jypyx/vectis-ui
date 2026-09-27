@@ -29,7 +29,11 @@ export default {
     },
     inputs: {
       title: 'Saisir la valeur exactement',
-      text: '<code>inputs</code> ajoute un champ numérique à côté du rail, un par extrémité en mode plage. Ce qui est saisi est validé à la sortie du champ ou sur Entrée, ramené dans les bornes et aligné sur le pas ; une saisie illisible remet la valeur précédente.',
+      text: "<code>inputs</code> ajoute un champ numérique, un par extrémité en mode plage ; <code>ends</code> les place de part et d'autre du rail. Ce qui est saisi est validé à la sortie du champ ou sur Entrée, ramené dans les bornes et aligné sur le pas ; une saisie illisible remet la valeur précédente.",
+    },
+    inputsPlacement: {
+      title: 'Placer les champs',
+      text: "<code>top</code> et <code>bottom</code> donnent aux champs une rangée à eux, au-dessus ou au-dessous du rail, qui prend alors toute la largeur. Chaque champ se tient au bord de la valeur qu'il porte, et les champs arrivent dans l'ordre de tabulation là où on les voit. Sur un curseur vertical, les deux deviennent ses côtés, <code>top</code> le côté de début et <code>bottom</code> le côté de fin. Avec <code>tooltip</code> et <code>top</code>, la bulle recouvre la rangée de champs pendant qu'on tient une poignée.",
     },
     orientation: {
       title: 'Orientation',
@@ -76,7 +80,7 @@ export default {
         hint: "Une ligne d'aide sous la piste, qui dit ce que les nombres signifient ou jusqu'où ils peuvent aller. Elle est rattachée au curseur pour les technologies d'assistance, donc lue après le nom plutôt que comme une partie de celui-ci.",
         orientation: 'Dresse le curseur à la verticale, la valeur la plus basse en bas.',
         inputs:
-          "Ajoute un champ numérique à côté du curseur pour poser la valeur exactement, un champ ou un par extrémité en mode intervalle. Glisser est rapide mais imprécis ; c'est la porte de sortie.",
+          "Ajoute un champ numérique pour poser la valeur exactement, un champ ou un par extrémité en mode intervalle. Glisser est rapide mais imprécis ; c'est la porte de sortie. <code>ends</code> place les champs de part et d'autre de la piste, <code>top</code> et <code>bottom</code> sur une rangée au-dessus ou au-dessous, chaque champ au bord de la valeur qu'il porte. Un curseur vertical fait de <code>top</code> et <code>bottom</code> ses côtés de début et de fin. Aucun champ n'est dessiné par défaut.",
         ticks:
           "Marque chaque pas sur la piste. Fournir des libellés l'implique. Au-delà de cinquante pas, les marques formeraient un peigne illisible et ne sont pas dessinées du tout.",
         labels:

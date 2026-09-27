@@ -89,7 +89,7 @@ describe('VSlider', () => {
 
   it('change: a committed number field emits it too, and only when the value moved', async () => {
     const { getByRole, emitted } = render(VSlider, {
-      props: { modelValue: 40, inputs: true, label: 'Volume' },
+      props: { modelValue: 40, inputs: 'ends', label: 'Volume' },
     })
     const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
     await fireEvent.update(field, '55')
@@ -188,7 +188,7 @@ describe('VSlider', () => {
 
   it('inputs: one numeric field in single mode, committing on change with clamp and snap', async () => {
     const { getAllByRole, getByRole, emitted } = render(VSlider, {
-      props: { modelValue: 40, inputs: true, step: 10, label: 'Volume' },
+      props: { modelValue: 40, inputs: 'ends', step: 10, label: 'Volume' },
     })
     const fields = getAllByRole('spinbutton')
     expect(fields).toHaveLength(1)
@@ -209,7 +209,7 @@ describe('VSlider', () => {
   // number, the thumb and the fill then disagreed with nothing in the console.
   it('inputs: a value is snapped to the last step that fits, not to max', async () => {
     const { getByRole, emitted } = render(VSlider, {
-      props: { modelValue: 0, inputs: true, min: 0, max: 95, step: 10, label: 'Volume' },
+      props: { modelValue: 0, inputs: 'ends', min: 0, max: 95, step: 10, label: 'Volume' },
     })
     const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
     await fireEvent.update(field, '95')
@@ -221,7 +221,7 @@ describe('VSlider', () => {
   // into the v-model and took every fraction down with it.
   it('inputs: a step of 0 commits the clamped value rather than NaN', async () => {
     const { getByRole, emitted } = render(VSlider, {
-      props: { modelValue: 40, inputs: true, step: 0, label: 'Volume' },
+      props: { modelValue: 40, inputs: 'ends', step: 0, label: 'Volume' },
     })
     const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
     await fireEvent.update(field, '55')
@@ -231,7 +231,7 @@ describe('VSlider', () => {
 
   it('inputs: an empty field → a silent revert, nothing emitted', async () => {
     const { getByRole, emitted } = render(VSlider, {
-      props: { modelValue: 40, inputs: true, label: 'Volume' },
+      props: { modelValue: 40, inputs: 'ends', label: 'Volume' },
     })
     const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
     await fireEvent.update(field, '')
@@ -242,13 +242,76 @@ describe('VSlider', () => {
 
   it('inputs in range mode: two fields, the committed one pushing its sibling', async () => {
     const { getAllByRole, getByRole, emitted } = render(VSlider, {
-      props: { modelValue: [20, 60], range: true, inputs: true, label: 'Budget' },
+      props: { modelValue: [20, 60], range: true, inputs: 'ends', label: 'Budget' },
     })
     expect(getAllByRole('spinbutton')).toHaveLength(2)
     const start = getByRole('spinbutton', { name: 'Budget (start)' })
     await fireEvent.update(start, '80')
     await fireEvent.change(start)
     expect(emitted('update:modelValue').at(-1)).toEqual([[80, 80]])
+  })
+
+  // The grid places the fields, but the TAB order is the DOM's: a row of fields above the
+  // track has to come before the thumbs in the markup, or the keyboard would reach one
+  // field on each side of them. The sequence of focusable controls is what is locked here.
+  describe('inputs placement', () => {
+    const order = (container: Element) =>
+      [...container.querySelectorAll('input')].map((el) =>
+        el.type === 'range' ? 'thumb' : el.getAttribute('aria-label'),
+      )
+
+    it.each([
+      ['ends', ['Budget (start)', 'thumb', 'thumb', 'Budget (end)']],
+      ['top', ['Budget (start)', 'Budget (end)', 'thumb', 'thumb']],
+      ['bottom', ['thumb', 'thumb', 'Budget (start)', 'Budget (end)']],
+    ] as const)('%s in range mode: fields in the order they are seen', (inputs, expected) => {
+      const { container } = render(VSlider, {
+        props: { modelValue: [20, 60], range: true, inputs, label: 'Budget' },
+      })
+      expect(order(container)).toEqual(expected)
+      expect(container.querySelector('.v-slider')!.getAttribute('data-inputs')).toBe(inputs)
+    })
+
+    it.each([
+      ['ends', ['thumb', 'Volume']],
+      ['top', ['Volume', 'thumb']],
+      ['bottom', ['thumb', 'Volume']],
+    ] as const)('%s in single mode: the one field on its side', (inputs, expected) => {
+      const { container } = render(VSlider, {
+        props: { modelValue: 40, inputs, label: 'Volume' },
+      })
+      expect(order(container)).toEqual(expected)
+      expect(container.querySelector('.v-slider-field-end')).toBeTruthy()
+    })
+
+    it('no fields and no data-inputs by default', () => {
+      const { container } = render(VSlider, { props: { modelValue: 40, label: 'Volume' } })
+      expect(container.querySelector('.v-slider-field')).toBeNull()
+      expect(container.querySelector('.v-slider')!.hasAttribute('data-inputs')).toBe(false)
+    })
+
+    it('a bare `inputs` (true) is drawn at the ends, with a dev warning', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const { container } = render(VSlider, {
+        props: { modelValue: 40, inputs: true as unknown as 'ends', label: 'Volume' },
+      })
+      expect(container.querySelector('.v-slider')!.getAttribute('data-inputs')).toBe('ends')
+      expect(container.querySelector('.v-slider-field-end')).toBeTruthy()
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('inputs="true"'))
+      warn.mockRestore()
+    })
+
+    it('a field keeps committing after the placement changes', async () => {
+      const { getByRole, emitted, rerender } = render(VSlider, {
+        props: { modelValue: 40, inputs: 'ends', label: 'Volume' },
+      })
+      await rerender({ inputs: 'top' })
+      const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
+      expect(field.value).toBe('40')
+      await fireEvent.update(field, '70')
+      await fireEvent.change(field)
+      expect(emitted('update:modelValue').at(-1)).toEqual([70])
+    })
   })
 
   it('tooltip: the bubbles are present (1 in single, 2 in range), hidden by default', () => {
@@ -281,7 +344,7 @@ describe('VSlider', () => {
 
   it('disabled: data-disabled on the root, the controls disabled', () => {
     const { container, getByRole } = render(VSlider, {
-      props: { modelValue: 40, disabled: true, inputs: true, label: 'Volume' },
+      props: { modelValue: 40, disabled: true, inputs: 'ends', label: 'Volume' },
     })
     expect(container.querySelector('.v-slider[data-disabled]')).toBeTruthy()
     expect((getByRole('slider', { name: 'Volume' }) as HTMLInputElement).disabled).toBe(true)
@@ -293,14 +356,14 @@ describe('VSlider', () => {
   describe('accessible names of the thumbs', () => {
     it('without a label: "Start"/"End" in range, "Value" on the single field', () => {
       const range = render(VSlider, {
-        props: { modelValue: [20, 60], range: true, inputs: true },
+        props: { modelValue: [20, 60], range: true, inputs: 'ends' },
       })
       expect(range.getByRole('slider', { name: 'Start' })).toBeTruthy()
       expect(range.getByRole('slider', { name: 'End' })).toBeTruthy()
       expect(range.getByRole('spinbutton', { name: 'Start' })).toBeTruthy()
       expect(range.getByRole('spinbutton', { name: 'End' })).toBeTruthy()
 
-      const single = render(VSlider, { props: { modelValue: 40, inputs: true } })
+      const single = render(VSlider, { props: { modelValue: 40, inputs: 'ends' } })
       // Outside range mode, the thumb IS the value: with no consumer label it stays
       // nameless, and only the numeric field needs a fallback.
       expect(single.getByRole('spinbutton', { name: 'Value' })).toBeTruthy()
@@ -308,7 +371,7 @@ describe('VSlider', () => {
 
     it('with a label: suffixed "(start)"/"(end)" in range, as-is in single', () => {
       const range = render(VSlider, {
-        props: { modelValue: [20, 60], range: true, inputs: true, label: 'Budget' },
+        props: { modelValue: [20, 60], range: true, inputs: 'ends', label: 'Budget' },
       })
       expect(range.getByRole('slider', { name: 'Budget (start)' })).toBeTruthy()
       expect(range.getByRole('slider', { name: 'Budget (end)' })).toBeTruthy()
@@ -316,7 +379,7 @@ describe('VSlider', () => {
       expect(range.getByRole('spinbutton', { name: 'Budget (end)' })).toBeTruthy()
 
       const single = render(VSlider, {
-        props: { modelValue: 40, inputs: true, label: 'Volume' },
+        props: { modelValue: 40, inputs: 'ends', label: 'Volume' },
       })
       expect(single.getByRole('slider', { name: 'Volume' })).toBeTruthy()
       expect(single.getByRole('spinbutton', { name: 'Volume' })).toBeTruthy()
@@ -329,7 +392,7 @@ describe('VSlider', () => {
     // up with no accessible name at all.
     it('a consumer aria-label names the thumb, and both thumbs of a range', () => {
       const single = render(VSlider, {
-        props: { modelValue: 40, inputs: true },
+        props: { modelValue: 40, inputs: 'ends' },
         attrs: { 'aria-label': 'Volume' },
       })
       expect(single.getByRole('slider', { name: 'Volume' })).toBeTruthy()
@@ -516,7 +579,7 @@ describe('VSlider — the wrapper-root split', () => {
 
   it('readonly: the number fields turn read-only with the thumbs', () => {
     const { getByRole } = render(VSlider, {
-      props: { modelValue: 40, readonly: true, inputs: true, label: 'Volume' },
+      props: { modelValue: 40, readonly: true, inputs: 'ends', label: 'Volume' },
     })
     expect((getByRole('spinbutton') as HTMLInputElement).readOnly).toBe(true)
   })
@@ -530,7 +593,7 @@ describe('VSlider — the wrapper-root split', () => {
 
   it('invalid: data-invalid on the root, aria-invalid on every thumb and field', () => {
     const { container, getAllByRole } = render(VSlider, {
-      props: { modelValue: [20, 60], range: true, invalid: true, inputs: true, label: 'x' },
+      props: { modelValue: [20, 60], range: true, invalid: true, inputs: 'ends', label: 'x' },
     })
     expect(container.querySelector('.v-slider')!.hasAttribute('data-invalid')).toBe(true)
     for (const el of [...getAllByRole('slider'), ...getAllByRole('spinbutton')])
@@ -539,7 +602,7 @@ describe('VSlider — the wrapper-root split', () => {
 
   it('size: md by default on the number fields, an explicit one carried over', async () => {
     const { container, rerender } = render(VSlider, {
-      props: { modelValue: 40, inputs: true, label: 'x' },
+      props: { modelValue: 40, inputs: 'ends', label: 'x' },
     })
     const field = () => container.querySelector('.v-slider-field')!
     expect(field().getAttribute('data-size')).toBe('md')
@@ -552,7 +615,7 @@ describe('VSlider — the wrapper-root split', () => {
       components: { VInputGroup, VSlider },
       template: `
         <VInputGroup size="sm" disabled label="Row">
-          <VSlider :model-value="40" inputs size="lg" label="Volume" />
+          <VSlider :model-value="40" inputs="ends" size="lg" label="Volume" />
         </VInputGroup>
       `,
     })

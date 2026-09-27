@@ -20,7 +20,7 @@ export default {
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
         { name: 'orientation', type: 'SliderOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },
-        { name: 'inputs', type: 'boolean', default: 'false' },
+        { name: 'inputs', type: 'SliderInputs', values: "false | 'ends' | 'top' | 'bottom'", default: 'false' },
         { name: 'ticks', type: 'boolean', default: 'false' },
         { name: 'labels', type: 'SliderLabel[]' },
         { name: 'tooltip', type: 'boolean', default: 'false' },

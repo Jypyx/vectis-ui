@@ -13,7 +13,7 @@ const budget = ref<[number, number]>([20, 60])
          number fields along with them: there is no half-usable slider whose value can
          still be typed. -->
     <VSlider v-model="volume" disabled label="Volume" />
-    <VSlider v-model="budget" range :step="10" ticks inputs disabled label="Budget" />
+    <VSlider v-model="budget" range :step="10" ticks inputs="ends" disabled label="Budget" />
   </div>
 </template>
 

@@ -59,13 +59,22 @@ Non-numeric values through icons (those names come from the consumer's font):
 
 ## Numeric fields
 
-`inputs` adds `<VInput type="number">` fields for precise adjustment: one after the slider in single
-mode, one per bound in range mode. The entry is validated on `change` (blur or Enter), never while
-typing: parse, clamp to the bounds, snap to the last step that fits and push the sibling thumb if
-needed; an empty or invalid entry
-silently reverts to the current value.
+`inputs` adds `<VInput type="number">` fields for precise adjustment: one in single mode, one per
+bound in range mode. The entry is validated on `change` (blur or Enter), never while typing: parse,
+clamp to the bounds, snap to the last step that fits and push the sibling thumb if needed; an empty
+or invalid entry silently reverts to the current value.
 
 <Canvas of={VSliderStories.WithInputs} />
+
+The prop takes a placement. `ends` puts the fields on either side of the track, which is the most
+compact. `top` and `bottom` give them a row of their own above or below it, the start field at the
+start edge and the end field at the end one, which leaves the track the full width. On an upright
+slider the two become its sides: `top` the inline start, `bottom` the inline end, the end field level
+with the top of the track and the start field with its bottom. The fields are rendered in the order
+they are seen, so the tab order follows the screen. With `tooltip` and `top`, the bubble shows over
+the row of fields while a thumb is held.
+
+<Canvas of={VSliderStories.InputPlacements} />
 
 `size` sets the height of those fields, `md` by default like every other field of the design
 system. Inside a VInputGroup the row's size and its `disabled` win, the arbitration every field

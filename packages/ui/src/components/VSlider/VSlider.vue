@@ -15,7 +15,7 @@
  * everything meant to line up with it has to follow that same run.
  */
 
-import { computed, inject, ref, watch, watchEffect } from 'vue'
+import { computed, inject, reactive, ref, watch, watchEffect } from 'vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
@@ -44,6 +44,12 @@ export type SliderOrientation = 'horizontal' | 'vertical'
 
 /** The height of the number fields: 32, 40 or 48 pixels. */
 export type SliderSize = 'sm' | 'md' | 'lg'
+
+/**
+ * Where the number fields sit: none, at the ends of the track, or in a row above or below
+ * it. On an upright slider, above and below become the two sides of it.
+ */
+export type SliderInputs = false | 'ends' | 'top' | 'bottom'
 
 interface SliderProps {
   /** The lowest value the thumb can reach. It is 0 by default. */
@@ -90,10 +96,13 @@ interface SliderProps {
   /** Turns the slider upright, with the lowest value at the bottom. */
   orientation?: SliderOrientation
   /**
-   * Adds a number field beside the slider for setting the value exactly: one, or one per
-   * end in range mode. Sliding is quick but imprecise; this is the way out.
+   * Adds a number field for setting the value exactly: one, or one per end in range mode.
+   * Sliding is quick but imprecise; this is the way out. `ends` puts the fields on either
+   * side of the track, `top` and `bottom` in a row above or below it, each field at the
+   * edge of the value it holds. An upright slider turns `top` and `bottom` into its start
+   * and end sides. No field is drawn by default.
    */
-  inputs?: boolean
+  inputs?: SliderInputs
   /**
    * Marks each step on the track. Providing labels implies it. Past fifty steps the
    * marks would be an unreadable comb and are not drawn at all.
@@ -369,6 +378,14 @@ const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 // other field of the design system.
 const { hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
 
+/**
+ * Where the fields go, `ends` standing in for any other truthy value: a bare `inputs`
+ * attribute reaches the component as `true`, the prop being part boolean.
+ */
+const inputsPlace = computed(() =>
+  props.inputs === 'top' || props.inputs === 'bottom' ? props.inputs : props.inputs && 'ends',
+)
+
 // @devwarn
 /*
  * Every guard here describes something that fails SILENTLY. They sit in an effect, so a
@@ -401,6 +418,11 @@ if (isDev) {
         'labels',
         `${props.labels.length} labels for ${stepCount.value + 1} steps: one label per step expected.`,
       )
+    if (props.inputs !== false && props.inputs !== inputsPlace.value)
+      warn(
+        'inputs',
+        `inputs="${String(props.inputs)}" is not a placement: the fields are drawn at the ends. Write inputs="ends", "top" or "bottom".`,
+      )
     if (props.range && attrs.name !== undefined)
       warn(
         'name',
@@ -416,14 +438,35 @@ if (isDev) {
 // converts to a number as soon as it can be read as one — while an empty field, or one
 // holding a half-typed "1-", stays text. That is why the value is turned back into text
 // when it is committed. The start field exists in range mode only, and so does its sync.
-const startFieldText = ref<string | number>(String(startValue.value))
-const endFieldText = ref<string | number>(String(endValue.value))
+const fieldText = reactive<Record<Thumb, string | number>>({
+  start: String(startValue.value),
+  end: String(endValue.value),
+})
 
 // Sliding the thumb keeps the fields in step, continuously.
 watch(startValue, (v) => {
-  if (props.range) startFieldText.value = String(v)
+  if (props.range) fieldText.start = String(v)
 })
-watch(endValue, (v) => (endFieldText.value = String(v)))
+watch(endValue, (v) => (fieldText.end = String(v)))
+
+// @a11y
+/*
+ * The fields are rendered in the order they are SEEN, before or after the track, so that
+ * the tab order follows the screen. Laid out by the grid alone from a fixed DOM order, a
+ * row of fields above the track would be reached one on each side of the thumbs.
+ */
+const fieldsBefore = computed<Thumb[]>(() => {
+  if (inputsPlace.value === 'ends') return props.range ? ['start'] : []
+  if (inputsPlace.value === 'top') return props.range ? ['start', 'end'] : ['end']
+  return []
+})
+const fieldsAfter = computed<Thumb[]>(() => {
+  if (inputsPlace.value === 'ends') return ['end']
+  if (inputsPlace.value === 'bottom') return props.range ? ['start', 'end'] : ['end']
+  return []
+})
+
+const fieldLabel = (which: Thumb) => (which === 'start' ? startLabel.value : fieldEndLabel.value)
 
 // @core
 /**
@@ -434,7 +477,7 @@ watch(endValue, (v) => (endFieldText.value = String(v)))
  * Anything unreadable, an empty field included, silently puts the previous value back.
  */
 function commitField(which: Thumb) {
-  const raw = which === 'start' ? startFieldText.value : endFieldText.value
+  const raw = fieldText[which]
   // TRAP — parsed rather than converted: an empty string parses to nothing, which is
   // what triggers the revert below, where converting it would give ZERO and quietly
   // overwrite the value with it.
@@ -471,8 +514,8 @@ function commitField(which: Thumb) {
 }
 
 function resyncFields() {
-  if (props.range) startFieldText.value = String(startValue.value)
-  endFieldText.value = String(endValue.value)
+  if (props.range) fieldText.start = String(startValue.value)
+  fieldText.end = String(endValue.value)
 }
 
 const endThumbEl = ref<HTMLInputElement | null>(null)
@@ -498,6 +541,7 @@ defineExpose({
     :data-invalid="invalid ? '' : undefined"
     :data-size="resolvedSize"
     :data-orientation="orientation"
+    :data-inputs="inputsPlace || undefined"
     :style="[
       rootStyle,
       {
@@ -507,9 +551,10 @@ defineExpose({
     ]"
   >
     <VInput
-      v-if="inputs && range"
-      v-model="startFieldText"
-      class="v-slider-field v-slider-field-start"
+      v-for="which in fieldsBefore"
+      :key="which"
+      v-model="fieldText[which]"
+      :class="['v-slider-field', `v-slider-field-${which}`]"
       type="number"
       :size="resolvedSize"
       :compact="resolvedCompact"
@@ -519,8 +564,8 @@ defineExpose({
       :disabled="resolvedDisabled"
       :readonly="readonly"
       :invalid="invalid"
-      :aria-label="startLabel"
-      @change="commitField('start')"
+      :aria-label="fieldLabel(which)"
+      @change="commitField(which)"
     />
     <div class="v-slider-rail">
       <span class="v-slider-control">
@@ -603,9 +648,10 @@ defineExpose({
       </span>
     </div>
     <VInput
-      v-if="inputs"
-      v-model="endFieldText"
-      class="v-slider-field v-slider-field-end"
+      v-for="which in fieldsAfter"
+      :key="which"
+      v-model="fieldText[which]"
+      :class="['v-slider-field', `v-slider-field-${which}`]"
       type="number"
       :size="resolvedSize"
       :compact="resolvedCompact"
@@ -615,8 +661,8 @@ defineExpose({
       :disabled="resolvedDisabled"
       :readonly="readonly"
       :invalid="invalid"
-      :aria-label="fieldEndLabel"
-      @change="commitField('end')"
+      :aria-label="fieldLabel(which)"
+      @change="commitField(which)"
     />
     <span v-if="hint" :id="hintId" class="v-slider-hint">{{ hint }}</span>
   </div>
@@ -638,33 +684,56 @@ defineExpose({
   }
 
   /*
-     The zones the root lays out, from least to most furnished. `:has()` takes the
-     specificity of its argument, so the single-condition rules are all (0,2,0) and the
-     two-condition ones (0,3,0) — which means the five below are arbitrated by SOURCE
-     ORDER as much as by weight, and a range slider with inputs matches three of them at
-     once. They must stay in this order, each configuration overwriting the poorer one it
-     builds on. Alphabetize them, or move `field-start` above `field-end`, and the start
-     field lands outside the grid: no error, just a control sitting where nothing put it. */
+     The zones the root lays out, one template per combination of fields, range and labels.
+     Each combination is written with exactly the conditions that define it, so a richer
+     one always carries one condition more than the poorer ones it also matches and wins on
+     WEIGHT, never on source order: `[data-inputs='ends'][data-range]:has(.v-slider-labels)`
+     is (0,4,0) against the (0,3,0) of the two it builds on. `:has()` weighs its argument.
+     The vertical block further down restates each case with `[data-orientation]` added,
+     one condition more again, and must keep doing so: a vertical template left at the
+     weight of its horizontal twin would be decided by order alone.
+
+     `top` and `bottom` give the fields a row of their own, the start field at the start
+     edge and the end field at the end one, above the values they hold. The empty middle
+     column is what keeps the two apart; a single field leaves the first column empty. */
   .v-slider:has(.v-slider-labels) {
     grid-template-areas: 'rail' 'labels';
   }
 
-  .v-slider:has(.v-slider-field-end) {
+  .v-slider[data-inputs='ends'] {
     grid-template-areas: 'rail field-end';
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .v-slider:has(.v-slider-field-end):has(.v-slider-labels) {
+  .v-slider[data-inputs='ends']:has(.v-slider-labels) {
     grid-template-areas: 'rail field-end' 'labels .';
   }
 
-  .v-slider:has(.v-slider-field-start) {
+  .v-slider[data-inputs='ends'][data-range] {
     grid-template-areas: 'field-start rail field-end';
     grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
-  .v-slider:has(.v-slider-field-start):has(.v-slider-labels) {
+  .v-slider[data-inputs='ends'][data-range]:has(.v-slider-labels) {
     grid-template-areas: 'field-start rail field-end' '. labels .';
+  }
+
+  .v-slider[data-inputs='top'] {
+    grid-template-areas: 'field-start . field-end' 'rail rail rail';
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .v-slider[data-inputs='top']:has(.v-slider-labels) {
+    grid-template-areas: 'field-start . field-end' 'rail rail rail' 'labels labels labels';
+  }
+
+  .v-slider[data-inputs='bottom'] {
+    grid-template-areas: 'rail rail rail' 'field-start . field-end';
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .v-slider[data-inputs='bottom']:has(.v-slider-labels) {
+    grid-template-areas: 'rail rail rail' 'labels labels labels' 'field-start . field-end';
   }
 
   .v-slider-rail {
@@ -933,7 +1002,7 @@ defineExpose({
   }
 
   /* The hint takes no area of its own: it spans every column and is AUTO-PLACED, which
-     drops it into an implicit row under whichever of the eleven zone templates is in force.
+     drops it into an implicit row under whichever zone template is in force.
      Given a row in each of them instead, the `row-gap` would open under every slider that
      has no hint at all. */
   .v-slider-hint {
@@ -975,24 +1044,57 @@ defineExpose({
     grid-template-columns: auto auto;
   }
 
-  .v-slider[data-orientation='vertical']:has(.v-slider-field-end) {
+  .v-slider[data-orientation='vertical'][data-inputs='ends'] {
     grid-template-areas: 'field-end' 'rail';
     grid-template-columns: none;
   }
 
-  .v-slider[data-orientation='vertical']:has(.v-slider-field-end):has(.v-slider-labels) {
+  .v-slider[data-orientation='vertical'][data-inputs='ends']:has(.v-slider-labels) {
     grid-template-areas: 'field-end .' 'rail labels';
     grid-template-columns: auto auto;
   }
 
-  .v-slider[data-orientation='vertical']:has(.v-slider-field-start) {
+  .v-slider[data-orientation='vertical'][data-inputs='ends'][data-range] {
     grid-template-areas: 'field-end' 'rail' 'field-start';
     grid-template-columns: none;
   }
 
-  .v-slider[data-orientation='vertical']:has(.v-slider-field-start):has(.v-slider-labels) {
+  .v-slider[data-orientation='vertical'][data-inputs='ends'][data-range]:has(.v-slider-labels) {
     grid-template-areas: 'field-end .' 'rail labels' 'field-start .';
     grid-template-columns: auto auto;
+  }
+
+  /* Upright, `top` and `bottom` become the two SIDES, the inline start and the inline end:
+     the fields stack in a column beside the track, the end field level with its top and
+     the start field with its bottom, where the values they hold sit. The track spans the
+     three rows and gives them their height, the middle one taking whatever the fields
+     leave. The labels stay against the track, so `bottom` puts the fields past them. */
+  .v-slider[data-orientation='vertical'][data-inputs='top'] {
+    grid-template-areas: 'field-end rail' '. rail' 'field-start rail';
+    grid-template-columns: auto auto;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  .v-slider[data-orientation='vertical'][data-inputs='top']:has(.v-slider-labels) {
+    grid-template-areas:
+      'field-end rail labels'
+      '. rail labels'
+      'field-start rail labels';
+    grid-template-columns: auto auto auto;
+  }
+
+  .v-slider[data-orientation='vertical'][data-inputs='bottom'] {
+    grid-template-areas: 'rail field-end' 'rail .' 'rail field-start';
+    grid-template-columns: auto auto;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  .v-slider[data-orientation='vertical'][data-inputs='bottom']:has(.v-slider-labels) {
+    grid-template-areas:
+      'rail labels field-end'
+      'rail labels .'
+      'rail labels field-start';
+    grid-template-columns: auto auto auto;
   }
 
   .v-slider[data-orientation='vertical'] .v-slider-rail {

@@ -29,7 +29,11 @@ export default {
     },
     inputs: {
       title: 'Typing the value exactly',
-      text: '<code>inputs</code> adds a number field beside the track, one per end in range mode. What is typed is committed when the field is left or on Enter, clamped and snapped to the step; an unreadable entry puts the previous value back.',
+      text: '<code>inputs</code> adds a number field, one per end in range mode; <code>ends</code> puts them on either side of the track. What is typed is committed when the field is left or on Enter, clamped and snapped to the step; an unreadable entry puts the previous value back.',
+    },
+    inputsPlacement: {
+      title: 'Placing the fields',
+      text: '<code>top</code> and <code>bottom</code> give the fields a row of their own above or below the track, which then takes the full width. Each field sits at the edge of the value it holds, and the fields come in the tab order where they are seen. On a vertical slider the two become its sides, <code>top</code> the start side and <code>bottom</code> the end side. With <code>tooltip</code> and <code>top</code>, the bubble covers the row of fields while a thumb is held.',
     },
     orientation: {
       title: 'Orientation',
@@ -75,7 +79,7 @@ export default {
         hint: 'A line of help under the track, stating what the numbers mean or where they may go. It is tied to the slider for assistive technology, so it is read out after the name rather than as part of it.',
         orientation: 'Turns the slider upright, with the lowest value at the bottom.',
         inputs:
-          'Adds a number field beside the slider for setting the value exactly, one field or one per end in range mode. Sliding is quick but imprecise; this is the way out.',
+          'Adds a number field for setting the value exactly, one field or one per end in range mode. Sliding is quick but imprecise; this is the way out. <code>ends</code> puts the fields on either side of the track, <code>top</code> and <code>bottom</code> in a row above or below it, each field at the edge of the value it holds. A vertical slider turns <code>top</code> and <code>bottom</code> into its start and end sides. No field is drawn by default.',
         ticks:
           'Marks each step on the track. Providing labels implies it. Past fifty steps the marks would be an unreadable comb and are not drawn at all.',
         labels:

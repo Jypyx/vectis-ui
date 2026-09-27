@@ -10,6 +10,8 @@ import SliderIconLabels from '~/examples/slider/IconLabels.vue'
 import sliderIconLabelsSource from '~/examples/slider/IconLabels.vue?raw'
 import SliderInputs from '~/examples/slider/Inputs.vue'
 import sliderInputsSource from '~/examples/slider/Inputs.vue?raw'
+import SliderInputsPlacement from '~/examples/slider/InputsPlacement.vue'
+import sliderInputsPlacementSource from '~/examples/slider/InputsPlacement.vue?raw'
 import SliderInvalid from '~/examples/slider/Invalid.vue'
 import sliderInvalidSource from '~/examples/slider/Invalid.vue?raw'
 import SliderMinMax from '~/examples/slider/MinMax.vue'
@@ -86,6 +88,12 @@ useDocsHead('slider')
   <DocsProse keypath="slider.examples.inputs.text" />
   <DocsExample :source="sliderInputsSource" stack>
     <SliderInputs />
+  </DocsExample>
+
+  <h3 id="inputs-placement">{{ t('slider.examples.inputsPlacement.title') }}</h3>
+  <DocsProse keypath="slider.examples.inputsPlacement.text" />
+  <DocsExample :source="sliderInputsPlacementSource" stack>
+    <SliderInputsPlacement />
   </DocsExample>
 
   <h3 id="sizes">{{ t('slider.examples.sizes.title') }}</h3>

@@ -9,9 +9,9 @@ const large = ref(60)
 
 <template>
   <div class="demo">
-    <VSlider v-model="small" inputs size="sm" label="Small" />
-    <VSlider v-model="medium" inputs label="Medium" />
-    <VSlider v-model="large" inputs size="lg" label="Large" />
+    <VSlider v-model="small" inputs="ends" size="sm" label="Small" />
+    <VSlider v-model="medium" inputs="ends" label="Medium" />
+    <VSlider v-model="large" inputs="ends" size="lg" label="Large" />
   </div>
 </template>
 

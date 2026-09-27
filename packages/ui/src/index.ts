@@ -202,6 +202,7 @@ export type {
 } from './components/VProgressLinear/VProgressLinear.vue'
 export { default as VSlider } from './components/VSlider/VSlider.vue'
 export type {
+  SliderInputs,
   SliderLabel,
   SliderOrientation,
   SliderSize,
