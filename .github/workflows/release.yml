@@ -117,3 +117,49 @@ jobs:
           esac
           echo "publishing vectis-ui@$version under the dist-tag $dist_tag"
           pnpm --filter vectis-ui publish --no-git-checks --tag "$dist_tag"
+
+  # A job of its own, after the publish: it needs `contents: write`, which the publish job
+  # has no reason to hold, and a GitHub release announcing a version npm refused would be a
+  # lie. The notes ARE the CHANGELOG section of that version, never written a second time.
+  github-release:
+    name: GitHub release
+    needs: publish
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # A missing CHANGELOG section FAILS the job rather than publishing an empty release:
+      # the package is already on npm by then, so the red job is the reminder, and the
+      # release can be created by hand once the section exists.
+      #
+      # An existing release is left alone, so moving a tag and pushing it again to re-run a
+      # failed publish does not fail here a second time.
+      #
+      # A prerelease version is marked as such; for any other, `gh` picks "Latest" itself by
+      # semver, so a patch cut on an older line never takes the badge from a newer release.
+      - name: Create the release from the CHANGELOG
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            echo "release $GITHUB_REF_NAME already exists, nothing to do"
+            exit 0
+          fi
+          awk -v v="$version" '
+            index($0, "## [" v "]") == 1 { found = 1; next }
+            found && /^## \[/ { exit }
+            found
+          ' CHANGELOG.md | sed -e '/./,$!d' > notes.md
+          if [ ! -s notes.md ]; then
+            echo "::error::CHANGELOG.md has no section for $version"
+            exit 1
+          fi
+          prerelease=""
+          case "$version" in *-*) prerelease="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" --verify-tag $prerelease \
+            --title "vectis-ui $version" --notes-file notes.md
