@@ -12,6 +12,8 @@ import PaginationElevated from '~/examples/pagination/Elevated.vue'
 import paginationElevatedSource from '~/examples/pagination/Elevated.vue?raw'
 import PaginationLength from '~/examples/pagination/Length.vue'
 import paginationLengthSource from '~/examples/pagination/Length.vue?raw'
+import PaginationLinks from '~/examples/pagination/Links.vue'
+import paginationLinksSource from '~/examples/pagination/Links.vue?raw'
 import PaginationResponsive from '~/examples/pagination/Responsive.vue'
 import paginationResponsiveSource from '~/examples/pagination/Responsive.vue?raw'
 import PaginationSelectedVariants from '~/examples/pagination/SelectedVariants.vue'
@@ -96,6 +98,12 @@ useDocsHead('pagination')
   <DocsProse keypath="pagination.examples.unreachablePages.text" />
   <DocsExample :source="paginationUnreachablePagesSource" stack>
     <PaginationUnreachablePages />
+  </DocsExample>
+
+  <h3 id="links">{{ t('pagination.examples.links.title') }}</h3>
+  <DocsProse keypath="pagination.examples.links.text" />
+  <DocsExample :source="paginationLinksSource" stack>
+    <PaginationLinks />
   </DocsExample>
 
   <h3 id="states">{{ t('pagination.examples.states.title') }}</h3>

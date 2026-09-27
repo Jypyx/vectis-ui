@@ -13,6 +13,9 @@
  * at a time, and that half is entirely CSS, the row asking about its own width rather
  * than being measured from code.
  *
+ * Given `href`, every pill and both controls are links, so a list of products can be
+ * paged by address: middle-clicked into a new tab, bookmarked, followed by a crawler.
+ *
  * The only behavioural JavaScript is the keyboard, explained where it is written.
  */
 import { computed, h, nextTick, ref } from 'vue'
@@ -159,6 +162,12 @@ interface PaginationProps {
    * system dictionary.
    */
   pageLabel?: (page: number) => string
+  /**
+   * The address of a page. Given, every pill and both controls render as links, the
+   * previous and next ones carrying `rel="prev"` and `rel="next"`; a click still updates
+   * the model, then the browser follows the link. Left out, they are buttons.
+   */
+  href?: (page: number) => string
 }
 
 const props = withDefaults(defineProps<PaginationProps>(), {
@@ -183,7 +192,19 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   responsive: false,
   label: undefined,
   pageLabel: undefined,
+  href: undefined,
 })
+
+const emit = defineEmits<{
+  /**
+   * A page was chosen from the row, a pill or a control, with the click that chose it. It
+   * comes before the model changes, so under `href` a single-page application calls
+   * `preventDefault()` on the event and hands the address to its router instead of letting
+   * the browser load it. A click that opens the link elsewhere (a modifier key held) is not
+   * a choice made here and emits nothing.
+   */
+  navigate: [page: number, event: MouseEvent]
+}>()
 
 // The prop wins over the dictionary, and above both, a consumer's own aria-label or
 // aria-labelledby still wins — that arbitration is what `useAriaLabel` is for.
@@ -292,6 +313,35 @@ function goTo(n: number | undefined) {
   page.value = clamp(n, 1, total.value)
 }
 
+/** The address a pill or a control links to, or `undefined` when the row is made of buttons. */
+function hrefFor(n: number): string | undefined {
+  return props.href?.(n)
+}
+
+// @core
+/*
+ * A link clicked with a modifier held (Ctrl or Cmd for a new tab, Shift for a window, Alt for a
+ * download) opens somewhere ELSE: the page on screen stays where it is, so the model must not
+ * move. The test the routers themselves make before taking a click over.
+ */
+function opensElsewhere(event: MouseEvent): boolean {
+  return (
+    props.href !== undefined &&
+    (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+  )
+}
+
+function choose(event: MouseEvent, n: number | undefined) {
+  if (n === undefined || opensElsewhere(event)) return
+  emit('navigate', n, event)
+  goTo(n)
+}
+
+/** Whether a pill or a control can no longer be used: a disabled button, or an inert link. */
+function isUnusable(el: HTMLElement): boolean {
+  return el.matches(':disabled, [aria-disabled="true"]')
+}
+
 // @a11y
 /*
  * The previous and next controls disable themselves once no page is left in their direction,
@@ -304,12 +354,12 @@ function goTo(n: number | undefined) {
  * and a control that did not hold the focus has nothing to hand on.
  */
 async function goFromControl(event: MouseEvent, n: number | undefined) {
-  const control = event.currentTarget as HTMLButtonElement
+  const control = event.currentTarget as HTMLElement
   const hadFocus = control === document.activeElement
-  goTo(n)
+  choose(event, n)
   if (!hadFocus) return
   await nextTick()
-  if (control.disabled) {
+  if (isUnusable(control)) {
     navEl.value?.querySelector<HTMLElement>('[aria-current="page"]')?.focus()
   }
 }
@@ -327,17 +377,25 @@ async function goFromControl(event: MouseEvent, n: number | undefined) {
  * The control is named explicitly even though its label is visible: at narrow widths that
  * label is hidden and only the icon remains, and the name a screen reader announces has to
  * survive that.
+ *
+ * As a link it points at the page it leads to. With none left it still receives an address
+ * (the current page's), which VButton drops once disabled: the control stays the same `<a>`,
+ * turned inert, rather than swapping to a `<button>` under a focus `goFromControl` has to read.
+ * The `rel` goes with the address, an inert link leading nowhere.
  */
 const PageControl: FunctionalComponent<{ side: 'prev' | 'next' }> = ({ side }) => {
   const prev = side === 'prev'
   const label = prev ? resolvedPrevText.value : resolvedNextText.value
   const icon = prev ? props.prevIcon : props.nextIcon
+  const target = prev ? prevTarget.value : nextTarget.value
+  const disabled = prev ? prevDisabled.value : nextDisabled.value
   const common = {
     class: 'v-pagination-control',
     variant: props.itemVariant,
-    disabled: prev ? prevDisabled.value : nextDisabled.value,
-    onClick: (event: MouseEvent) =>
-      goFromControl(event, prev ? prevTarget.value : nextTarget.value),
+    disabled,
+    href: hrefFor(target ?? currentPage.value),
+    rel: props.href && !disabled ? side : undefined,
+    onClick: (event: MouseEvent) => goFromControl(event, target),
   }
   const glyph = () => h(VIcon, { ...iconProps(icon), mirrored: true })
   if (props.controls === 'icon') return h(VIconButton, { ...common, label }, glyph)
@@ -364,19 +422,23 @@ const navEl = ref<HTMLElement | null>(null)
 function onKeydown(event: KeyboardEvent) {
   const nav = navEl.value
   if (!nav) return
-  arrowNavigate(event, nav, () => navigableItems(nav, '.v-pagination-page:not(:disabled)'))
+  arrowNavigate(event, nav, () =>
+    navigableItems(nav, '.v-pagination-page:not(:disabled, [aria-disabled="true"])'),
+  )
 }
 
 // The pills are rendered by a VButtonGroup inside the nav, so a template ref reaches none of
 // them. `focus` goes to the current page, which every responsive step keeps on screen.
 defineExpose({
   // Two queries, not one selector list: a list matches in DOM order, which would hand the
-  // focus to the previous control ahead of the current page.
+  // focus to the previous control ahead of the current page. `a[href]` because an inert link
+  // has lost its address, and with it the ability to take the focus.
   /** Moves the focus to the current page, or to the first control that can take it. */
   focus: (options?: FocusOptions) =>
     (
-      navEl.value?.querySelector<HTMLElement>('[aria-current="page"]:not(:disabled)') ??
-      navEl.value?.querySelector<HTMLElement>('button:not(:disabled)')
+      navEl.value?.querySelector<HTMLElement>(
+        '[aria-current="page"]:is(button, a[href]):not(:disabled)',
+      ) ?? navEl.value?.querySelector<HTMLElement>(':is(button, a[href]):not(:disabled)')
     )?.focus(options),
   /** The `<nav>` element, which is also where the consumer's attributes land. */
   el: navEl,
@@ -428,9 +490,10 @@ defineExpose({
           :disabled="disabled || isPageDisabled(item.page)"
           :aria-label="pageLabelFor(item.page)"
           :aria-current="item.page === currentPage ? 'page' : undefined"
+          :href="hrefFor(item.page)"
           :data-edge="item.edge ? '' : undefined"
           :data-distance="!item.edge && item.distance > 0 ? item.distance : undefined"
-          @click="goTo(item.page)"
+          @click="choose($event, item.page)"
         >
           {{ item.page }}
         </VButton>
@@ -614,7 +677,8 @@ defineExpose({
    */
   @media (forced-colors: active) {
     .v-pagination-page.v-pagination-page.v-pagination-page.v-pagination-page[aria-current='page']:not(
-        :disabled
+        :disabled,
+        [aria-disabled='true']
       ) {
       forced-color-adjust: none;
       background-color: Highlight;

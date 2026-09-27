@@ -30,7 +30,11 @@ export default {
         { name: 'responsive', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },
         { name: 'pageLabel', type: '(page: number) => string' },
+        { name: 'href', type: '(page: number) => string' },
         { name: 'v-model', key: 'vModel', type: 'number', default: '1' },
+      ],
+      events: [
+        { name: 'navigate', type: '[page: number, event: MouseEvent]' },
       ],
     },
   ],

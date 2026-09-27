@@ -39,6 +39,10 @@ export default {
       title: 'Unreachable pages',
       text: '<code>disabledPages</code> takes a list of pages, or a function when the rule is easier to write than to enumerate. The previous and next controls step over those pages and disable themselves only when there is nothing left to step to.',
     },
+    links: {
+      title: 'Links',
+      text: 'Given <code>href</code>, a function from a page to its address, every page and both controls render as links: a page of results can be opened in a new tab, bookmarked or followed by a crawler. The previous and next links carry <code>rel="prev"</code> and <code>rel="next"</code>. A click updates the model, then the browser follows the link, unless a handler of <code>navigate</code> calls <code>preventDefault()</code> on the event to hand the address to a router. A click with a modifier held opens the link elsewhere and changes nothing on the page.',
+    },
     states: {
       title: 'States',
       text: '<code>disabled</code> puts the whole row out of reach, greyed through the colour tokens. At either end of the range the matching control disables itself.',
@@ -92,7 +96,12 @@ export default {
           'What screen readers announce for the navigation itself. It falls back to the design system dictionary.',
         pageLabel:
           'How a page is announced. A pill shows a bare number, which alone means nothing to a screen reader: this is what turns it into "Page 3". It falls back to the design system dictionary.',
+        href: 'The address of a page. Given, every page and both controls render as links, the previous and next ones carrying <code>rel="prev"</code> and <code>rel="next"</code>. A click still updates the model, then the browser follows the link.',
         vModel: 'The page being shown, counted from 1. It starts on the first.',
+      },
+      events: {
+        navigate:
+          'A page was chosen from the row, with the click that chose it. It comes before the model changes, so a single-page application can call <code>preventDefault()</code> on the event and route by hand. A click with a modifier held emits nothing.',
       },
     },
   },

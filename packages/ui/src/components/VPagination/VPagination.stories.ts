@@ -257,6 +257,44 @@ export const DisabledPages: Story = {
   }),
 }
 
+export const Links: Story = {
+  render: () => ({
+    components: { VPagination },
+    setup: () => ({
+      page: ref(3),
+      href: (p: number) => `?page=${p}`,
+      // What a single-page application does: cancel the browser's navigation and route by
+      // hand. It also keeps the story frame from loading the address.
+      onNavigate: (_page: number, event: MouseEvent) => event.preventDefault(),
+    }),
+    template: `
+      <VPagination
+        v-model="page"
+        :length="12"
+        :total-visible="7"
+        :disabled-pages="[5]"
+        :href="href"
+        @navigate="onNavigate"
+      />
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const next = canvas.getByRole('link', { name: 'Next page' })
+    await expect(next).toHaveAttribute('href', '?page=4')
+    await expect(next).toHaveAttribute('rel', 'next')
+
+    await userEvent.click(next)
+    await waitFor(() =>
+      expect(canvas.getByRole('link', { name: 'Page 4' })).toHaveAttribute('aria-current', 'page'),
+    )
+    // The disabled page 5 is stepped over, and is an inert link with no address.
+    await expect(canvas.getByRole('link', { name: 'Next page' })).toHaveAttribute('href', '?page=6')
+    await expect(canvas.getByRole('link', { name: 'Page 5' })).not.toHaveAttribute('href')
+  },
+}
+
 export const Responsive: Story = {
   render: () => ({
     components: { VPagination },

@@ -118,6 +118,22 @@ the whole component.
 
 <Canvas of={VPaginationStories.DisabledPages} />
 
+## Links
+
+Given `href`, a function from a page number to its address, every pill and both controls render
+as links. The row can then page a list of products by URL: a page opens in a new tab, is
+bookmarked, and is followed by a crawler. The previous and next controls point at the page they
+lead to, carry `rel="prev"` and `rel="next"`, and become inert links (no address,
+`aria-disabled`) when no page is left in their direction. A disabled page is an inert link too.
+
+A click updates the model, then the browser follows the link. Before that, the component emits
+`navigate` with the page and the click: a single-page application calls `preventDefault()` on the
+event and hands the address to its router instead of reloading the page. A click with a modifier
+held (Ctrl or Cmd, Shift, Alt) opens the link elsewhere, so it changes nothing here and emits
+nothing.
+
+<Canvas of={VPaginationStories.Links} />
+
 ## Edge cases
 
 A single page renders one pill and two controls at the end of the line. An out-of-range current
@@ -130,6 +146,8 @@ alignment.
 
 - The root is a `<nav>` named by `label`, and the active page carries `aria-current="page"` while
   staying activable (the APG recommendation).
+- With `href`, the pills and controls are links rather than buttons, and a link that cannot be
+  used drops its address and announces `aria-disabled`, since a link has no `disabled`.
 - Every pill gets an explicit accessible name — "Page 7" by default, customizable through
   `pageLabel` — because an isolated number is meaningless out of context.
 - The controls keep their `aria-label` even when their label is visible: responsive truncation

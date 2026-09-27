@@ -460,3 +460,139 @@ describe('VPagination — selectedVariant and exposed members', () => {
     expect(document.activeElement).toBe(container.querySelector('[aria-current="page"]'))
   })
 })
+
+describe('VPagination — links', () => {
+  const href = (page: number) => `/products?page=${page}`
+  // A hash address in the click tests: jsdom implements no other navigation.
+  const hashHref = (page: number) => `#page-${page}`
+
+  it('renders every pill as a link to its page, the current one included', () => {
+    const { getByRole } = render(VPagination, { props: { length: 5, modelValue: 2, href } })
+
+    expect(getByRole('link', { name: 'Page 3' }).getAttribute('href')).toBe('/products?page=3')
+    const current = getByRole('link', { name: 'Page 2' })
+    expect(current.getAttribute('href')).toBe('/products?page=2')
+    expect(current.getAttribute('aria-current')).toBe('page')
+  })
+
+  it('links the controls to the page they lead to, over disabled pages, with rel', () => {
+    const { getByRole } = render(VPagination, {
+      props: { length: 9, modelValue: 5, disabledPages: [4, 6], href },
+    })
+
+    const prev = getByRole('link', { name: 'Previous page' })
+    const next = getByRole('link', { name: 'Next page' })
+    expect(prev.getAttribute('href')).toBe('/products?page=3')
+    expect(prev.getAttribute('rel')).toBe('prev')
+    expect(next.getAttribute('href')).toBe('/products?page=7')
+    expect(next.getAttribute('rel')).toBe('next')
+  })
+
+  it('turns a control with no page left into an inert link, with no address and no rel', () => {
+    const { getByRole } = render(VPagination, { props: { length: 5, modelValue: 1, href } })
+
+    const prev = getByRole('link', { name: 'Previous page' })
+    expect(prev.hasAttribute('href')).toBe(false)
+    expect(prev.hasAttribute('rel')).toBe(false)
+    expect(prev.getAttribute('aria-disabled')).toBe('true')
+  })
+
+  it('a click updates the model and emits navigate with the event first', async () => {
+    const { getByRole, emitted } = render(VPagination, {
+      props: { length: 5, modelValue: 2, href: hashHref },
+    })
+
+    await fireEvent.click(getByRole('link', { name: 'Page 4' }))
+    await fireEvent.click(getByRole('link', { name: 'Next page' }))
+
+    const navigate = emitted('navigate') as Array<[number, MouseEvent]>
+    expect(navigate.map(([page]) => page)).toEqual([4, 5])
+    expect(navigate[0]![1]).toBeInstanceOf(MouseEvent)
+    expect(emitted('update:modelValue')).toEqual([[4], [5]])
+  })
+
+  it('lets navigate cancel the browser navigation, the model still following', async () => {
+    let prevented: boolean | undefined
+    const { getByRole, emitted } = render(VPagination, {
+      props: {
+        length: 5,
+        modelValue: 2,
+        href,
+        onNavigate: (_page: number, event: MouseEvent) => event.preventDefault(),
+      },
+    })
+    const link = getByRole('link', { name: 'Page 3' })
+    link.addEventListener('click', (event) => (prevented = event.defaultPrevented))
+
+    await fireEvent.click(link)
+
+    expect(prevented).toBe(true)
+    expect(emitted('update:modelValue')).toEqual([[3]])
+  })
+
+  it('leaves a click with a modifier to the browser: no model change, no navigate', async () => {
+    const { getByRole, emitted } = render(VPagination, {
+      props: { length: 5, modelValue: 2, href: hashHref },
+    })
+
+    for (const modifier of ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'] as const) {
+      await fireEvent.click(getByRole('link', { name: 'Page 4' }), { [modifier]: true })
+    }
+
+    expect(emitted('navigate')).toBeUndefined()
+    expect(emitted('update:modelValue')).toBeUndefined()
+  })
+
+  it('still emits navigate from buttons, where a modifier changes nothing', async () => {
+    const { getByRole, emitted } = render(VPagination, { props: { length: 5, modelValue: 2 } })
+
+    await fireEvent.click(getByRole('button', { name: 'Page 4' }), { ctrlKey: true })
+
+    expect((emitted('navigate') as Array<[number, MouseEvent]>)[0]![0]).toBe(4)
+    expect(emitted('update:modelValue')).toEqual([[4]])
+  })
+
+  it('makes a disabled page an inert link the arrows skip', async () => {
+    const { getByRole, container } = render(VPagination, {
+      props: { length: 5, modelValue: 2, disabledPages: [3], href: hashHref },
+    })
+
+    const disabled = container.querySelectorAll<HTMLElement>('.v-pagination-page')[2]!
+    expect(disabled.hasAttribute('href')).toBe(false)
+    expect(disabled.getAttribute('aria-disabled')).toBe('true')
+
+    const current = getByRole('link', { name: 'Page 2' })
+    current.focus()
+    await fireEvent.keyDown(current, { key: 'ArrowRight' })
+    expect(document.activeElement).toBe(getByRole('link', { name: 'Page 4' }))
+  })
+
+  it('hands the focus to the current page when a control turns inert under it', async () => {
+    const page = ref(4)
+    const { getByRole } = render({
+      components: { VPagination },
+      setup: () => ({ page, hashHref }),
+      template: '<VPagination v-model="page" :length="5" :href="hashHref" />',
+    })
+    const next = getByRole('link', { name: 'Next page' })
+    next.focus()
+
+    await fireEvent.click(next)
+    await nextTick()
+
+    expect(page.value).toBe(5)
+    expect(document.activeElement).toBe(getByRole('link', { name: 'Page 5' }))
+  })
+
+  it('focus() reaches the current page when it is a link', async () => {
+    const pagination = ref<InstanceType<typeof VPagination> | null>(null)
+    const { container } = render({
+      components: { VPagination },
+      setup: () => ({ pagination, href }),
+      template: '<VPagination ref="pagination" :length="5" :model-value="3" :href="href" />',
+    })
+    await nextTick()
+    pagination.value?.focus()
+    expect(document.activeElement).toBe(container.querySelector('[aria-current="page"]'))
+  })
+})

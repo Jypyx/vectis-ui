@@ -39,6 +39,10 @@ export default {
       title: 'Pages inaccessibles',
       text: "<code>disabledPages</code> accepte une liste de pages, ou une fonction quand la règle s'écrit plus facilement qu'elle ne s'énumère. Les contrôles précédent et suivant enjambent ces pages et ne se désactivent que lorsqu'il n'y a plus rien à atteindre.",
     },
+    links: {
+      title: 'Liens',
+      text: "Avec <code>href</code>, une fonction qui donne l'adresse d'une page, chaque page et les deux contrôles deviennent des liens : une page de résultats s'ouvre dans un nouvel onglet, se met en favori et se laisse suivre par un robot d'indexation. Les liens précédent et suivant portent <code>rel=\"prev\"</code> et <code>rel=\"next\"</code>. Un clic met à jour le modèle, puis le navigateur suit le lien, sauf si un gestionnaire de <code>navigate</code> appelle <code>preventDefault()</code> sur l'événement pour confier l'adresse à un routeur. Un clic avec une touche de modification ouvre le lien ailleurs et ne change rien à la page.",
+    },
     states: {
       title: 'États',
       text: '<code>disabled</code> met toute la rangée hors de portée, grisée par les tokens de couleur. À chaque extrémité de la plage, le contrôle correspondant se désactive de lui-même.',
@@ -92,7 +96,12 @@ export default {
           "Ce que les lecteurs d'écran annoncent pour la navigation elle-même. Il retombe sur le dictionnaire du design system.",
         pageLabel:
           "Comment une page est annoncée. Une pastille affiche un nombre nu, qui seul ne signifie rien pour un lecteur d'écran : c'est ce qui en fait « Page 3 ». Il retombe sur le dictionnaire du design system.",
+        href: 'L\'adresse d\'une page. Fournie, chaque page et les deux contrôles deviennent des liens, précédent et suivant portant <code>rel="prev"</code> et <code>rel="next"</code>. Un clic met toujours à jour le modèle, puis le navigateur suit le lien.',
         vModel: 'La page affichée, comptée à partir de 1. Elle démarre sur la première.',
+      },
+      events: {
+        navigate:
+          "Une page a été choisie dans la rangée, avec le clic qui l'a choisie. Il précède le changement du modèle, si bien qu'une application monopage peut appeler <code>preventDefault()</code> sur l'événement et router elle-même. Un clic avec une touche de modification n'émet rien.",
       },
     },
   },
