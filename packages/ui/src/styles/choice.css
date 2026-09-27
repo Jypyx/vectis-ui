@@ -27,21 +27,19 @@
    * beside it, off-centre in its cell with nothing to say why.
    */
   /*
-   * The `label` role is taken WHOLE: size, weight and leading. Taking the size alone left
-   * every checkbox, radio and switch label at whatever the host's `font-weight` and
-   * `line-height` happened to be, so a consumer repointing `--vectis-text-label-weight`
-   * moved VAccordionItem, VBreadcrumb, VSideNavigationItem and VTypography and not one
-   * control of this family. "One role = one complete recipe" is the rule, and a recipe
-   * half-read is a token that silently does nothing.
+   * The `choice` role is taken WHOLE: size, weight and leading. Taking the size alone would
+   * leave the text at whatever the host's `font-weight` and `line-height` happen to be, so a
+   * consumer repointing `--vectis-text-choice-weight` would see nothing move. "One role = one
+   * complete recipe" is the rule, and a recipe half-read is a token that silently does nothing.
    */
   .v-choice {
     display: inline-grid;
     grid-template-columns: auto auto;
     align-items: center;
     font-family: var(--vectis-text-family);
-    font-size: var(--vectis-text-label-size);
-    font-weight: var(--vectis-text-label-weight);
-    line-height: var(--vectis-text-label-leading);
+    font-size: var(--vectis-text-choice-size);
+    font-weight: var(--vectis-text-choice-weight);
+    line-height: var(--vectis-text-choice-leading);
     color: var(--vectis-color-text);
   }
 

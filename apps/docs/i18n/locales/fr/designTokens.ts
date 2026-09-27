@@ -250,6 +250,7 @@ export default {
       'Le texte courant par défaut, aussi utilisé par les lignes de menu, les notifications et les champs',
     'body-sm': 'Le petit texte courant : détails secondaires, notes',
     label: "Le libellé au-dessus d'un champ de formulaire",
+    choice: "Le texte à côté d'une case à cocher, d'un bouton radio ou d'un interrupteur",
     caption: "Un court texte d'appoint : l'aide d'un champ, un compteur",
     overline:
       "Le titre d'un groupe de lignes dans un menu, la liste d'un combobox ou une navigation latérale, avec un espacement des lettres élargi",

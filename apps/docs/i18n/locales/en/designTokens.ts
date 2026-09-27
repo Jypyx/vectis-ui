@@ -59,6 +59,7 @@ export default {
     'body-md': 'The default running text, also used by menu rows, notifications and fields',
     'body-sm': 'Small running text: secondary details, notes',
     label: 'The label above a form field',
+    choice: 'The text beside a checkbox, a radio button or a switch',
     caption: 'Short supporting text: a field hint, a counter',
     overline:
       'The heading of a group of rows in a menu, a combobox list or a side navigation, with wider letter spacing',

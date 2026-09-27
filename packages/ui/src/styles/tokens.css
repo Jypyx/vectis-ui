@@ -226,6 +226,9 @@
     --vectis-text-label-size: var(--vectis-font-size-sm);
     --vectis-text-label-weight: var(--vectis-font-weight-medium);
     --vectis-text-label-leading: var(--vectis-font-leading-snug);
+    --vectis-text-choice-size: var(--vectis-font-size-sm);
+    --vectis-text-choice-weight: var(--vectis-font-weight-regular);
+    --vectis-text-choice-leading: var(--vectis-font-leading-snug);
     --vectis-text-caption-size: var(--vectis-font-size-xs);
     --vectis-text-caption-weight: var(--vectis-font-weight-regular);
     --vectis-text-caption-leading: var(--vectis-font-leading-snug);

@@ -227,6 +227,18 @@ export const semantic = {
       weight: fontWeight('{font.weight.medium}'),
       leading: dimension('{font.leading.snug}'),
     },
+    /*
+     * The text beside a checkbox, a radio or a switch. It is `label`'s size and leading at the
+     * regular weight: an option reads as a sentence to choose, not as the name of a field, and
+     * a column of them set in medium weighs as much as the headings above it. A role of its own
+     * rather than a repointed `label`, which VAccordionItem, VBreadcrumb, VSideNavigationItem
+     * and VTypography also read.
+     */
+    choice: {
+      size: dimension('{font.size.sm}'),
+      weight: fontWeight('{font.weight.regular}'),
+      leading: dimension('{font.leading.snug}'),
+    },
     caption: {
       size: dimension('{font.size.xs}'),
       weight: fontWeight('{font.weight.regular}'),
