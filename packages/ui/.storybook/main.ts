@@ -11,7 +11,9 @@ const config: StorybookConfig = {
   ],
   framework: {
     name: '@storybook/vue3-vite',
-    options: {},
+    options: {
+      docgen: 'vue-component-meta',
+    },
   },
   /*
    * Match the library CSS target so dir selectors retain direction semantics rather than being
