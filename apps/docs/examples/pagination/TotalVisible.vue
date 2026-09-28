@@ -7,9 +7,6 @@ const page = ref(1)
 
 <template>
   <div class="column">
-    <!-- The count is CONSTANT: the ellipses are slots like the pages, so the row keeps
-         exactly the same width whichever page is current. Walk through it and nothing
-         moves sideways. -->
     <div v-for="slots in [5, 7, 9]" :key="slots" class="row">
       <VPagination
         v-model="page"

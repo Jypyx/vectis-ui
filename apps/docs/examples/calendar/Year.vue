@@ -2,8 +2,6 @@
 import { ref } from 'vue'
 import { VCalendar, type CalendarEvent } from 'vectis-ui'
 
-/* A year is read for its shape rather than its detail, so the events below are spread over
-   it: a few single days, and the two stretches that make a run of days busy at once. */
 const events = ref<CalendarEvent[]>([
   {
     id: 'kickoff',

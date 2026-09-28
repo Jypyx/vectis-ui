@@ -10,8 +10,6 @@ const columns = [
 
 <template>
   <div class="stack">
-    <!-- Loading is answered before emptiness, so a table waiting for its rows never
-         claims there are none. -->
     <VDataTable
       loading
       variant="outlined"

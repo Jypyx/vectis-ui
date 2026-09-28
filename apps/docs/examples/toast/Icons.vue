@@ -5,9 +5,6 @@ import { cloud_upload as cloudUpload } from 'vectis-ui/icons'
 
 <template>
   <div class="demo">
-    <!-- Left out, the icon comes from the tone: a notification arrives unannounced, so
-         it is scanned before it is read and the glyph is what carries the meaning at a
-         glance. -->
     <VButton
       variant="outline"
       tone="neutral"
@@ -16,8 +13,6 @@ import { cloud_upload as cloudUpload } from 'vectis-ui/icons'
       From the tone
     </VButton>
 
-    <!-- Name one and it replaces the tone's, for a notification whose subject is more
-         specific than its meaning. -->
     <VButton
       variant="outline"
       tone="neutral"
@@ -26,8 +21,6 @@ import { cloud_upload as cloudUpload } from 'vectis-ui/icons'
       A custom icon
     </VButton>
 
-    <!-- `false` removes it altogether, which is not the same as leaving it out: the
-         card then carries no glyph at all and the text runs to the edge. -->
     <VButton
       variant="outline"
       tone="neutral"

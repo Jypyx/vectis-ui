@@ -2,9 +2,7 @@
 import { ref } from 'vue'
 import { VButton, VCarousel, VCarouselItem } from 'vectis-ui'
 
-/* The stop control the component leaves to you: the prop is reactive, so 0 cancels the
-   timer on the spot. Hover and keyboard focus already hold the rotation, which leaves a
-   touch user with nothing without this button. */
+/* Provide a pause control for users who cannot hover or focus the carousel. */
 const paused = ref(false)
 
 const hues = [220, 280, 340, 20, 90, 160]

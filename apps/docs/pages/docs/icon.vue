@@ -53,11 +53,6 @@ useDocsHead('icon')
   <DocsExample :source="iconRenderingSource" stack>
     <IconRendering />
   </DocsExample>
-  <!--
-    A paragraph with a component in the middle of it, so it takes two keys with the link
-    between them: the same shape the font family page uses, and the link's own text is the
-    target page's title, which the navigation catalogue already translates.
-  -->
   <p>
     <DocsProse tag="span" keypath="icon.examples.rendering.moreBefore" />
     {{ ' ' }}

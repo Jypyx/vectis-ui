@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import { VDatePicker, VTypography } from 'vectis-ui'
 
-/* Each keeps its own value, so switching one does not disturb the others. */
 const locales = ref([
   { tag: 'en-US', caption: 'en-US, weeks from Sunday', date: '2026-06-10' },
   { tag: 'fr-FR', caption: 'fr-FR, weeks from Monday', date: '2026-06-10' },

@@ -8,10 +8,6 @@ const bare = ref('day')
 
 <template>
   <div class="demo">
-    <!-- A hidden panel is hidden and not destroyed: what it holds keeps its state, and
-         a field inside it is still submitted with the form. `lazy` is the exception,
-         and only for the first showing: it holds the content back until the panel is
-         opened once, then keeps it like the others. -->
     <VTabs v-model="withPanels" label="Project">
       <VTab value="overview" label="Overview" />
       <VTab value="details" label="Details" />
@@ -26,9 +22,6 @@ const bare = ref('day')
       </template>
     </VTabs>
 
-    <!-- Leave the slot out and no panel area is rendered at all: the same component is
-         then a plain bar, or a segmented control switching a view that lives
-         somewhere else on the page. -->
     <VTabs v-model="bare" variant="inset" label="Range">
       <VTab value="day" label="Day" />
       <VTab value="week" label="Week" />

@@ -1,66 +1,59 @@
 export default {
   title: 'Progress linear',
-  lead: 'A bar that fills as something advances, or animates continuously when there is no figure to report. It can be turned upright, and it can carry its own percentage inside it.',
-
+  lead: '<code>VProgressLinear</code> displays task progress as a bar, or an animation when progress cannot be measured.',
   examples: {
     value: {
       title: 'Value',
-      text: '<code>value</code> is how far along it is, against a <code>max</code> that says what counts as finished. Anything outside the range is brought back into it.',
+      text: 'Set <code>value</code> and <code>max</code> to report progress. Values are clamped to the range.',
     },
     indeterminate: {
       title: 'Indeterminate',
-      text: '<code>indeterminate</code> is for a wait that cannot be measured: the bar animates continuously and the value is ignored. Under reduced motion it is slowed rather than stopped.',
+      text: '<code>indeterminate</code> animates the bar without a percentage. The animation slows under reduced motion.',
     },
     tones: {
       title: 'Tones',
-      text: "<code>tone</code> says what the progress means, as a colour. There are five rather than a button's three, a bar reporting a state rather than starting an action.",
+      text: '<code>tone</code> sets the semantic colour.',
     },
     customColors: {
       title: 'Custom colours',
-      text: "<code>color</code> replaces the tone, as a hex value, a CSS name or an <code>oklch()</code>. The track's own shade is derived from it against the theme.",
+      text: '<code>color</code> overrides the tone with a CSS colour.',
     },
     thickness: {
       title: 'Thickness',
-      text: '<code>thickness</code> is always in pixels, whether given as a number or a numeric string, and 4px unless you say otherwise. There is no length prop to go with it: the bar takes the width of whatever holds it.',
+      text: '<code>thickness</code> sets the stroke width in pixels. The bar fills its container’s width.',
     },
     shape: {
       title: 'Shape',
-      text: '<code>shape</code> says whether the ends of the bar are rounded or cut square. It shows on a thick bar and is all but invisible on the default 4px one.',
+      text: '<code>shape</code> selects rounded or square stroke ends.',
     },
     customContent: {
       title: 'Content inside the bar',
-      text: '<code>showValue</code> writes the percentage inside the bar and <code>valuePosition</code> says where along it that text sits. The default slot replaces the figure and receives the value, the max and the percentage. The content is rendered twice, once over the track and once over the fill, so it has to be free of side effects.',
+      text: '<code>showValue</code> displays the percentage; <code>valuePosition</code> positions it. The default slot receives <code>value</code>, <code>max</code> and <code>percent</code>. It renders twice: use non-interactive content without side effects.',
     },
     orientation: {
       title: 'Orientation',
-      text: '<code>orientation</code> set to <code>vertical</code> fills the bar from the bottom up, in a right-to-left page as well. Its length is a token, 10rem by default, which a height of your own replaces. The text copies stay horizontal.',
+      text: '<code>orientation="vertical"</code> fills from bottom to top. Set a height to control the bar’s length.',
     },
   },
-
   api: {
     VProgressLinear: {
       props: {
         label:
-          'What is progressing, in words, for screen readers. It draws nothing on screen and falls back to the design system dictionary; an <code>aria-label</code> or <code>aria-labelledby</code> of your own takes precedence over it.',
-        value: 'How far along it is. Anything outside the range is brought back into it.',
-        max: 'What counts as finished. The other end is always zero.',
-        indeterminate:
-          'Says that the progress cannot be measured: the bar animates continuously and the value is ignored. It is what to use while waiting for a server that reports no percentage.',
-        tone: 'What the progress means, expressed as a colour.',
-        color:
-          "A colour of your own, as hex, a CSS name or <code>oklch()</code>, which replaces the tone. The track's own shade is derived from it against the theme, so it follows both.",
-        thickness:
-          "How thick the bar is, always in pixels: <code>12</code> and <code>'12'</code> both give 12px. It is 4px by default, so showing text inside the bar needs an explicit thickness.",
-        shape: 'Whether the ends of the bar are rounded or square.',
-        showValue:
-          'Writes the percentage inside the bar. It is ignored while the progress is unmeasurable, there being no figure to write.',
-        valuePosition:
-          'Where that text sits along the bar. On a vertical bar the start is the zero end, hence the bottom.',
-        orientation: 'Turns the bar upright, filling from the bottom up.',
+          'Accessible task name. Defaults to the dictionary; consumer ARIA naming attributes take precedence.',
+        value: 'Progress value, clamped between 0 and <code>max</code>.',
+        max: 'Value representing completion.',
+        indeterminate: 'Animates without a measurable value. Ignores <code>value</code>.',
+        tone: 'Colour tone.',
+        color: 'Custom CSS colour overriding the tone.',
+        thickness: 'Bar thickness in pixels. Increase it before displaying text inside.',
+        shape: 'Rounded or square stroke ends.',
+        showValue: 'Displays the percentage. Ignored in indeterminate mode.',
+        valuePosition: 'Text position along the bar. Vertical start is the bottom.',
+        orientation: 'Horizontal or vertical bar. Vertical progress fills from bottom to top.',
       },
       slots: {
         default:
-          "What to write inside the bar instead of the percentage. It is rendered twice, once over the empty track and once over the filled part in a contrasting colour, each copy cut at the fill's edge, so whatever it renders must be free of side effects.",
+          'Content replacing the percentage. Receives <code>value</code>, <code>max</code> and <code>percent</code>. Renders twice; keep content non-interactive and free of side effects.',
       },
     },
   },

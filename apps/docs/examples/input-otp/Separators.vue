@@ -7,10 +7,6 @@ import { chevron_right as chevronRight, close } from 'vectis-ui/icons'
   <div class="column">
     <VInputOTP pattern="###-###" label="Grouped code" hint="The literal, as written" />
 
-    <!--
-      The icon replaces every literal of the pattern, so it suits one whose separators are
-      punctuation and nothing more.
-    -->
     <VInputOTP
       pattern="###-###"
       :separator-icon="chevronRight"

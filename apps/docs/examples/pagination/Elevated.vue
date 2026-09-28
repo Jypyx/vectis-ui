@@ -8,8 +8,6 @@ const detached = ref(3)
 
 <template>
   <div class="column">
-    <!-- Joined, the shadow is the ROW's: one per pill would fall into every joint,
-         the segments overlapping by a pixel. -->
     <div class="row">
       <VPagination
         v-model="joined"

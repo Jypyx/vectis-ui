@@ -44,8 +44,7 @@ async function onSearch(term: string) {
   loading.value = false
 }
 
-/* The component asks once per page and waits: the next request only goes out when the
-   sentinel comes back into view, which it cannot do until this one has landed. */
+/* Append results before allowing the sentinel to request another page. */
 async function onLoadMore() {
   loading.value = true
   const result = await fetchPage(query.value, page.value + 1)

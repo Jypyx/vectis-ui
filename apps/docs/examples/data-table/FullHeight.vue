@@ -33,9 +33,6 @@ const rows = NAMES.map((name, index) => ({
 </script>
 
 <template>
-  <!-- The panel has a height, so the table takes it: the toolbar and the footer keep their
-       places and only the rows scroll, whatever the page holds. Change the page size and
-       the footer stays where it is. -->
   <div class="panel">
     <VDataTable
       variant="outlined"

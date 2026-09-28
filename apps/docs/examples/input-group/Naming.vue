@@ -4,13 +4,13 @@ import { VButton, VInput, VInputGroup } from 'vectis-ui'
 
 <template>
   <div class="column">
-    <!-- A visible label names the row, and each segment takes an aria-label of its own. -->
+    <!-- Name the group and each field separately. -->
     <VInputGroup label="Budget">
       <VInput aria-label="Amount" placeholder="0.00" />
       <VInput aria-label="Currency" placeholder="EUR" class="currency" />
     </VInputGroup>
 
-    <!-- No visible label: the group is named by aria-label instead. -->
+    <!-- aria-label names the group without a visible label. -->
     <VInputGroup aria-label="Search the archive">
       <VInput type="search" aria-label="Search terms" placeholder="Search the archive" />
       <VButton variant="solid" tone="accent">Search</VButton>

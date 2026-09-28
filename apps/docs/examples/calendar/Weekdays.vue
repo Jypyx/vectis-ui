@@ -47,8 +47,6 @@ const events = ref<CalendarEvent[]>([
 </script>
 
 <template>
-  <!-- Monday to Friday, eight in the morning to seven in the evening. Every view is on the
-       menu, since the weekend is missing from all five and not only from the columns. -->
   <VCalendar
     v-model:events="events"
     :weekdays="[1, 2, 3, 4, 5]"

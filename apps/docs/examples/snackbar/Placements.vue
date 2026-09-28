@@ -6,9 +6,6 @@ const placements: SnackbarPlacement[] = ['bottom-left', 'bottom-center', 'bottom
 
 <template>
   <div class="demo">
-    <!-- Along the bottom edge and nowhere else: a confirmation belongs where it is out
-         of the content's way and close to what the reader was doing. Set on the
-         VSnackbar it is the default for every bar; passed here it is this bar's own. -->
     <VButton
       v-for="placement in placements"
       :key="placement"

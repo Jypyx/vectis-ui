@@ -5,8 +5,7 @@ import { ICON_VIEW_BOX, cloud_upload as cloudUpload, code, search } from 'vectis
 
 import firefoxLogo from '~/assets/img/firefox-browser-svg.svg'
 
-// A component icon, the shape an icon set such as Lucide ships: the contract is a single
-// <svg> root. The drawing is borrowed from the library's own registry rather than redrawn.
+// Component icon sources require a single SVG root.
 const CodeIcon = () =>
   h('svg', { viewBox: ICON_VIEW_BOX, fill: 'currentColor' }, [h('path', { d: code.paths[0] })])
 </script>

@@ -1,78 +1,46 @@
-/**
- * `heroTitle` carries its own `<br>` and its own accent `<span>`, because where a headline
- * breaks is a decision about the sentence and not about the layout: English breaks after
- * "library", French after "moderne", and neither can be derived from the other.
- */
+// Keep the headline's line break and accent markup in the translation.
 export default {
   documentTitle: 'A UI library designed for modern browsers',
   heroTitle: 'A UI library designed<br><span class="vd-hero-accent">for modern browsers.</span>',
   heroBody:
     'Vectis UI is an ultra-lightweight suite of Vue 3 components driven by native CSS tokens. Zero overhead, zero dependencies, zero compromises.',
   heroCta: 'Install the library',
-
-  /*
-   * The six feature cards, and the section that holds them. Idiom over calque: "soupe de
-   * classes" is class soup, "guerres de sélecteurs" selector wars.
-   */
-  standardsHeading: "An architecture aligned with the web's own standards",
+  standardsHeading: 'Built on web standards',
   standardsSubtitle:
-    'Nuxt integration that needs no coaxing, and styling made simple by CSS layers. Everything is built for customisation you can predict, on top of semantic, accessible HTML.',
-
-  nativeTitle: 'Zero dependencies, all native',
-  nativeBody:
-    'Built with no wrapper layer and no utility framework, so your markup never turns into class soup. What you ship stays light, readable and fast, and asks you to install nothing else.',
-  standardTitle: 'At the front of the web platform',
+    'Components use semantic HTML, native browser APIs and CSS layers. Vue is the only runtime dependency.',
+  nativeTitle: 'Vue as the only dependency',
+  nativeBody: 'No additional runtime library or CSS framework is required.',
+  standardTitle: 'Native browser APIs',
   standardBody:
-    'Draws on the newest native capabilities, such as the Popover API and CSS Anchor Positioning, for interfaces that perform on a minimum of JavaScript.',
-  customizationTitle: 'Customisation without limits',
+    'Components use features such as the Popover API and CSS Anchor Positioning. A recent browser is required.',
+  customizationTitle: 'CSS design tokens',
   customizationBody:
-    'Bend the whole theme, and every component in it, to your brand in a moment. The entire visual configuration rests on native custom properties: CSS variables, and nothing more.',
-  /*
-   * `@layer` and `!important` are exactly what the pass-through message compiler exists for:
-   * vue-i18n's own message language reads `@` as a linked reference and would throw at render,
-   * which on a statically generated site means a page missing from the artefact.
-   */
-  overridesTitle: 'Overrides without friction',
+    'Adjust colours, spacing and typography with CSS custom properties shared across components.',
+  // The pass-through message compiler preserves @layer as literal text.
+  overridesTitle: 'Style overrides',
   overridesBody:
-    'No more selector wars, no more <code>!important</code>. CSS layers (<code>@layer</code>) give the architecture a strict hierarchy, and that is what makes overriding a single component entirely predictable.',
-  ssrTitle: 'Ready for SSR and Nuxt',
-  ssrBody:
-    'Designed for modern architectures: every component is safe to render on the server, which is what keeps both search engines and first paint happy.',
-  iconsTitle: 'Complete freedom of iconography',
-  iconsBody:
-    'Never locked into someone else’s icon set. The system is entirely agnostic and lets you plug in any icon font or library, off the shelf or your own.',
-
-  accessibilityHeading: 'Accessibility as a standard, not as an option.',
+    'Library styles use CSS layers (<code>@layer</code>). Override them with unlayered CSS in your application.',
+  ssrTitle: 'SSR and Nuxt support',
+  ssrBody: 'Components support server-side rendering in Vue and Nuxt applications.',
+  iconsTitle: 'Your choice of icons',
+  iconsBody: 'Use the built-in icons or provide SVG paths, images, components or icon fonts.',
+  accessibilityHeading: 'Keyboard and screen reader support',
   accessibilitySubtitle:
-    'Vectis UI is inclusive out of the box and ready for production. Built to meet what the web asks of an interface today, it holds to strict conformance while targeting the newest rendering engines.',
-
-  /*
-   * The three measures of the accessibility band. Only the LABELS are here: the figures
-   * themselves (`0`, `4.5:1`, `3:1`) are digits and universal punctuation, which the dictionary
-   * boundary leaves in the template, the rule VBadge's `99+` and the `N/M` counter already
-   * follow.
-   */
+    'Components include keyboard interactions, ARIA states and reduced-motion styles. Automated axe checks run in both themes.',
   a11yViolationsLabel: 'axe violations',
-  a11yViolationsNote: 'in both themes',
+  a11yViolationsNote: 'in tested examples, in both themes',
   a11yContrastLabel: 'text contrast',
-  a11yContrastNote: 'the WCAG 2 AA floor',
+  a11yContrastNote: 'WCAG 2 AA minimum for normal text',
   a11yFocusLabel: 'focus indicators',
   a11yFocusNote: 'visible on every control',
-
-  /*
-   * `stepXBody` is prose that ends up INSIDE a code block, as a comment above the sample. That
-   * makes it the one place on this site where a code sample is localised, against the rule that
-   * they stay English.
-   */
-  installHeading: 'Install, import, build',
-  installSubtitle:
-    'Add the dependency, load the global styles, and start using Vectis UI components with nothing else to configure.',
+  installHeading: 'Install, import, use',
+  installSubtitle: 'Install the package, load the global styles and import your components.',
   installTabsLabel: 'Installation steps',
-
+  // These translated instructions appear as comments in the installation snippets.
   stepInstallLabel: 'Installation',
-  stepInstallBody: 'Add the package to your project with whichever manager you prefer.',
-  stepStylesLabel: 'Style import',
-  stepStylesBody: "Load the global styles in your application's entry point.",
+  stepInstallBody: 'Install the package with your package manager.',
+  stepStylesLabel: 'Styles',
+  stepStylesBody: "Import the global styles in your application's entry point.",
   stepUseLabel: 'Usage',
-  stepUseBody: 'Import the components you need straight into your views or components.',
+  stepUseBody: 'Import the components you need.',
 }

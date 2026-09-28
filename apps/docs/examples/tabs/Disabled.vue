@@ -6,9 +6,6 @@ const tab = ref('overview')
 </script>
 
 <template>
-  <!-- A disabled tab is a disabled button: it stops responding, greys out through the
-       colour tokens rather than through an opacity, and the arrow keys step over it as
-       if it were not in the row. Its panel is simply never shown. -->
   <VTabs v-model="tab" label="Project">
     <VTab value="overview" label="Overview" />
     <VTab value="activity" label="Activity" disabled />

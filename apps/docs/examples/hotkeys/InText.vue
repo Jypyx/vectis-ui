@@ -18,8 +18,6 @@ const COMMANDS = [
 
 <template>
   <div class="stack">
-    <!-- The cap takes its size from the text it sits in, so a shortcut written into a
-         sentence keeps the line it is on. -->
     <VTypography class="prose">
       Press <VHotkeys keys="mod+k" /> to open the command palette, then type the first letters of
       what you are after. <VHotkeys keys="esc" /> puts it away again.
@@ -38,7 +36,6 @@ const COMMANDS = [
       </VMenuItem>
     </VMenu>
 
-    <!-- Inside a tooltip, which its `#content` slot is for: rich but never interactive. -->
     <VTooltip>
       <template #default="{ triggerProps }">
         <VButton v-bind="triggerProps" variant="outline" tone="neutral">Save</VButton>

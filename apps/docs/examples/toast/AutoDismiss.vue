@@ -4,9 +4,6 @@ import { VButton, toast } from 'vectis-ui'
 
 <template>
   <div class="demo">
-    <!-- Five seconds by default, and every notification may ask for its own. The
-         countdown holds while the pointer rests anywhere on the stack, so something
-         that disappears on a clock can be read to the end. -->
     <VButton
       variant="outline"
       tone="neutral"

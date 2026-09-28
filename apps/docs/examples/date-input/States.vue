@@ -25,7 +25,6 @@ const invalid = ref<string | null>('2026-06-10')
 
     <VDateInput model-value="2026-06-10" disabled mode="picker" label="Disabled, picker only" />
 
-    <!-- Frozen rather than out of reach: it still takes the focus and can be copied from. -->
     <VDateInput
       model-value="2026-06-10"
       readonly

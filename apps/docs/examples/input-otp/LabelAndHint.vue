@@ -7,8 +7,6 @@ const code = ref('')
 
 <template>
   <div class="column">
-    <!-- `label` names the row for assistive technology and renders nothing: the
-         instructions above are the page's own, written where they read best. -->
     <VTypography as="h3" variant="heading-4">Check your phone</VTypography>
     <VTypography tone="muted">We sent a six digit code to +33 6 12 34 56 78.</VTypography>
 

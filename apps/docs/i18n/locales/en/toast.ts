@@ -1,56 +1,51 @@
 export default {
   title: 'Toast',
-  lead: 'Notifications raised from anywhere in the code by calling <code>toast()</code>, and shown by a single VToaster mounted once. Several may stack, each with its own countdown.',
-
+  lead: 'Call <code>toast()</code> to display notifications through a single mounted <code>VToaster</code>. Notifications stack and dismiss independently.',
   examples: {
     variants: {
       title: 'Variants and tones',
-      text: '<code>tone</code> says what the notification means, with five values, and decides which icon it takes when none is given. <code>variant</code> is how strongly that tone is painted, tinted or solid.',
+      text: '<code>tone</code> sets the colour and default icon. <code>variant</code> selects soft or solid styling.',
     },
     contents: {
       title: 'Title and message',
-      text: '<code>message</code> carries the notification, and <code>title</code> frames it in a few words when the message alone would not say what it is about.',
+      text: '<code>message</code> is the notification text. Add an optional <code>title</code>.',
     },
     icons: {
       title: 'Icons',
-      text: 'Left out, <code>icon</code> comes from the tone. Naming one replaces it, and passing <code>false</code> removes it altogether.',
+      text: 'Override the tone’s default <code>icon</code>, or set it to <code>false</code> to hide it.',
     },
     width: {
       title: 'Width',
-      text: "<code>width</code> takes any CSS length and replaces the card's own floor and ceiling. It is never allowed past the width of the viewport.",
+      text: '<code>width</code> sets the card width within the viewport.',
     },
     placements: {
       title: 'Placements',
-      text: "<code>placement</code> puts the notification in one of six corners, each with a stack of its own. Set on the VToaster it is the default for every notification; passed when one is raised it is that one's alone.",
+      text: 'Set the default <code>placement</code> on <code>VToaster</code> or override it per notification.',
     },
     stacking: {
       title: 'Stacking',
-      text: 'Notifications stack rather than replace one another, each keeping a countdown of its own, so they go away as their own clocks run out.',
+      text: 'Each notification keeps its own dismissal timer.',
     },
     autoDismiss: {
       title: 'How long it stays',
-      text: '<code>duration</code> is how long a notification stays, five seconds by default, and every one may ask for its own. The countdown holds while the pointer rests anywhere on the stack and while the keyboard is inside it, and is released only when both are gone.',
+      text: '<code>duration</code> sets the lifetime in milliseconds. Timers pause while the pointer or keyboard focus is inside the stack.',
     },
     persistent: {
       title: 'Persistent notifications',
-      text: 'A <code>duration</code> of 0 disarms the countdown and the notification stays until it is dismissed. Leave the close cross on so there is a way out.',
+      text: '<code>duration: 0</code> keeps a notification open. Keep a close button or provide another dismissal action.',
     },
     dismissing: {
       title: 'Dismissing',
-      text: '<code>hideClose</code> takes the close cross away. <code>toast</code> hands back an id and <code>dismissToast</code> takes that notification away, or every one at once when called with no argument.',
+      text: '<code>toast()</code> returns an ID. Pass it to <code>dismissToast()</code> to close that notification, or omit it to close all. <code>hideClose</code> hides the close button.',
     },
   },
-
   api: {
     VToaster: {
       props: {
-        placement: 'Which corner notifications appear in, unless one of them asks for another.',
-        duration:
-          'How long a notification stays, in milliseconds, unless it asks for something else. A notification given 0 stays until it is dismissed.',
-        closeLabel:
-          'What the close cross does, in words. It falls back to the design system dictionary.',
-        label:
-          'What screen readers announce for the notification areas themselves, which are landmarks of the page. It falls back to the design system dictionary.',
+        placement: 'Default notification position.',
+        duration: 'Default lifetime in milliseconds. 0 disables automatic dismissal.',
+        closeLabel: 'Accessible close button name. Defaults to the dictionary.',
+        label: 'Accessible notification region name. Defaults to the dictionary.',
       },
     },
   },

@@ -17,8 +17,6 @@ const all = computed({
   },
 })
 
-/* The dash is a third appearance and not a third value: the parent is genuinely unticked
-   here, and `indeterminate` is what draws it as partially checked. */
 const some = computed(() => scopes.value.some((scope) => scope.granted) && !all.value)
 </script>
 

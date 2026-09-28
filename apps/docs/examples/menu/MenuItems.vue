@@ -27,11 +27,8 @@ import {
 
     <VMenuSeparator />
 
-    <!-- A disabled row stops responding and the arrow keys step over it. -->
     <VMenuItem label="Remind me later" :icon-start="schedule" disabled />
 
-    <!-- A row is an action, so what it means is a tone, the same word on the same prop
-         as a button. There is no accent: a menu has no primary command. -->
     <VMenuItem label="Delete" :icon-start="close" tone="danger" />
   </VMenu>
 </template>

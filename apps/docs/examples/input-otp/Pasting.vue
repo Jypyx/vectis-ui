@@ -25,8 +25,6 @@ async function copy() {
       </VButton>
     </div>
 
-    <!-- The paste is spread across the boxes and the prefix is consumed with it: a
-         code copied in its formatted form lands as three characters. -->
     <VInputOTP
       v-model="code"
       pattern="GT-###"

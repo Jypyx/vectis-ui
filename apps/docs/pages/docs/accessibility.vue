@@ -16,12 +16,6 @@ definePageMeta({ layout: 'docs' })
 const { t } = useI18n()
 useDocsHead('accessibility')
 
-/*
- * The focus demo is a row of controls of DIFFERENT shapes, because the ring is not one
- * drawing repeated: it is drawn outside a button, outside a field, around the box of a
- * checkbox rather than its label, and pulled inwards on a control whose container clips.
- * Tabbing through them is the only way to see that, so each one here is a real tab stop.
- */
 const search = ref('Vectis')
 const notify = ref(true)
 const backups = ref(false)

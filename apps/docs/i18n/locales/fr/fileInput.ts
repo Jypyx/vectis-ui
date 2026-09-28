@@ -1,112 +1,103 @@
 export default {
   title: 'Champ de fichiers',
-  lead: 'La sélection de fichiers en champ de formulaire : un champ de texte en lecture seule par-dessus un champ fichier masqué, qui accepte aussi un dépôt. La valeur est toujours une liste de fichiers, que plusieurs soient permis ou non.',
-
+  lead: '<code>VFileInput</code> sélectionne des fichiers via le sélecteur natif ou par glisser-déposer. Le modèle est toujours un <code>File[]</code>.',
   examples: {
     labelAndHint: {
       title: 'Libellé et aide',
-      text: "<code>label</code>, <code>hint</code> et <code>placeholder</code> se comportent comme sur n'importe quel autre champ. <code>iconStart</code> pose une icône au début du champ, rendue avant les puces et non à leur place.",
+      text: 'Nommez le champ avec <code>label</code>. Décrivez les fichiers acceptés dans <code>hint</code>.',
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> définit la hauteur du champ à 32, 40 ou 48 pixels, et <code>compact</code> lui retire 4px. Les puces des fichiers choisis se placent un palier en dessous du champ.',
+      text: '<code>size</code> définit la taille du champ ; <code>compact</code> réduit sa hauteur.',
     },
     multiple: {
       title: 'Fichiers multiples',
-      text: '<code>multiple</code> permet au champ de prendre plusieurs fichiers. Le modèle est un tableau de <code>File</code> dans les deux cas.',
+      text: '<code>multiple</code> autorise plusieurs fichiers. Sinon, les fichiers supplémentaires sont refusés.',
     },
     clearable: {
       title: 'Effacement',
-      text: "<code>clearable</code> ajoute une croix qui vide toute la sélection d'un coup.",
+      text: '<code>clearable</code> ajoute un bouton pour vider la sélection.',
     },
     display: {
       title: 'Affichage',
-      text: '<code>display</code> liste les fichiers en noms séparés par des virgules, ou en une puce supprimable chacun. Le slot <code>#chip</code> remplace une puce et reçoit son libellé raccourci, <code>remove</code>, ainsi que la taille et la densité calculées par le champ.',
+      text: 'Avec plusieurs fichiers, <code>display</code> choisit entre des noms séparés par des virgules et des chips supprimables. Un fichier unique apparaît toujours sous forme de texte.',
     },
     perFileLimits: {
       title: 'Limites par fichier',
-      text: "<code>accept</code> accepte la syntaxe du navigateur et filtre la boîte de dialogue système comme un fichier déposé sur le champ. <code>maxSize</code> borne un fichier. Un fichier refusé n'entre jamais dans le modèle, et <code>reject</code> est émis une fois par fichier.",
+      text: '<code>accept</code> filtre les types et <code>maxSize</code> limite chaque fichier en octets. Chaque fichier refusé émet <code>reject</code>. Ajoutez des extensions si les types MIME peuvent être absents.',
     },
     selectionLimits: {
       title: 'Limites de sélection',
-      text: '<code>maxFiles</code> et <code>maxTotalSize</code> bornent la sélection dans son ensemble. Le filtrage suit un ordre fixe : type, puis taille, puis nombre, puis taille totale.',
+      text: '<code>maxFiles</code> et <code>maxTotalSize</code> limitent toute la sélection, fichiers déjà présents compris.',
     },
     counter: {
       title: 'Compteur',
-      text: '<code>counter</code> ajoute une ligne sous le champ indiquant ce qui a été choisi. Le slot <code>#counter</code> la remplace et reçoit le nombre, le total en octets et la phrase déjà construite. Là où le <code>counter</code> de VInput et VTextarea compte des caractères sans slot, celui-ci compte des fichiers.',
+      text: '<code>counter</code> affiche le nombre de fichiers et leur taille totale. Son slot reçoit <code>text</code>, <code>count</code> et <code>bytes</code>.',
     },
     customIcon: {
       title: 'Icône personnalisée',
-      text: "<code>pickerIcon</code> est le glyphe en fin de champ qui ouvre la boîte de dialogue système, et il accepte toute valeur d'icône.",
+      text: 'Remplacez l’icône du sélecteur avec <code>pickerIcon</code>.',
     },
     states: {
       title: 'États',
-      text: "<code>invalid</code> marque le champ en erreur. <code>readonly</code> garde la sélection visible et refuse toute façon de la changer. <code>disabled</code> grise le champ et le sort de l'ordre de tabulation. <code>noDrop</code> n'écarte que le dépôt, et <code>loading</code> est purement visuel, un indicateur remplaçant l'icône de pièce jointe. <code>pickerIconLabel</code>, <code>clearLabel</code> et <code>loadingText</code> renomment ce que chacun annonce.",
+      text: '<code>readonly</code> empêche la sélection et le retrait. <code>noDrop</code> désactive uniquement le glisser-déposer. <code>loading</code> affiche un indicateur sans désactiver la sélection.',
     },
   },
-
   api: {
     VFileInput: {
       props: {
-        multiple:
-          'Permet de choisir plusieurs fichiers. Avec un seul, tout fichier supplémentaire est écarté.',
+        multiple: 'Autorise plusieurs fichiers. Sinon, les fichiers supplémentaires sont refusés.',
         accept:
-          "Quels genres de fichiers sont acceptés, dans la syntaxe du navigateur. C'est appliqué DEUX FOIS, et il le faut : en attribut, ce qui filtre la boîte de dialogue du système, et de nouveau en code, seule chose capable de filtrer un fichier DÉPOSÉ.",
+          'Types acceptés, selon la syntaxe native comme <code>image/*,.pdf</code>. Filtre les sélections et les fichiers déposés.',
         display:
-          'Comment les fichiers choisis sont montrés : leurs noms joints par des virgules, ou une puce retirable chacun. Cela ne signifie quelque chose que si plusieurs fichiers sont permis ; un nom seul est toujours du texte.',
-        maxSize: "La taille maximale d'UN fichier, en octets.",
-        maxTotalSize: 'La taille maximale de toute la sélection, en octets.',
-        maxFiles: 'Combien de fichiers peuvent être choisis au plus.',
-        counter: 'Affiche ce qui a été choisi sous le champ, « 3 fichiers (1,2 Mo) ».',
-        pickerIcon: "L'icône en fin de champ, qui ouvre la boîte de dialogue de fichiers.",
-        noDrop:
-          'Refuse les fichiers déposés sur le composant : seule la boîte de dialogue en ajoute alors.',
-        size: 'La hauteur du champ : 32, 40 ou 48 pixels.',
-        compact:
-          'Retire 4px à la hauteur, en laissant le rembourrage, le texte et les icônes tels quels.',
-        disabled: 'Rend le champ inutilisable, grisé par les tokens de couleur.',
+          'Affichage de plusieurs fichiers : texte ou chips supprimables. Un fichier unique utilise toujours du texte.',
+        maxSize: 'Taille maximale par fichier, en octets.',
+        maxTotalSize: 'Taille maximale de la sélection, en octets.',
+        maxFiles: 'Nombre maximal de fichiers sélectionnés.',
+        counter: 'Affiche le nombre de fichiers et leur taille totale sous le champ.',
+        pickerIcon: 'Icône du bouton ouvrant le sélecteur de fichiers.',
+        noDrop: 'Désactive le glisser-déposer ; le sélecteur reste disponible.',
+        size: 'Taille du composant.',
+        compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
+        disabled: 'Désactive les interactions.',
         readonly:
-          'Montre ce qui a été choisi sans permettre de le changer : ni boîte de dialogue, ni dépôt, ni retrait.',
+          'Empêche l’ouverture du sélecteur, le dépôt et le retrait de fichiers. Les contrôles conservent le focus.',
         invalid:
-          "Marque le champ comme invalide, pour une règle à vous, puisque rien ici n'est vérifié par le navigateur.",
-        label: "Le libellé au-dessus du champ, lié à lui pour qu'un clic dessus y place le focus.",
-        hint: "Une ligne d'aide sous le champ, à gauche du compteur. Elle est liée au champ pour les technologies d'assistance.",
+          'Marque le contrôle comme invalide et applique le style d’erreur. Validez séparément la sélection de fichiers.',
+        label:
+          'Libellé visible. Sans nom visible, fournissez <code>aria-label</code> ou <code>aria-labelledby</code>.',
+        hint: 'Texte d’aide lié par <code>aria-describedby</code>.',
         placeholder:
-          "Ce que dit le champ tant que rien n'est choisi. Il retombe sur le dictionnaire du design system.",
+          'Texte affiché quand la sélection est vide. Utilise le dictionnaire de la bibliothèque par défaut.',
         iconStart:
-          "Une icône dans le champ, au début. Elle est rendue avant les chips et non à leur place. Décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton.",
-        iconStartLabel: "Ce que fait l'icône de début, en mots, une fois cliquable.",
+          'Icône de début. Un écouteur <code>@click:icon-start</code> en fait un bouton ; fournissez <code>iconStartLabel</code>.',
+        iconStartLabel: 'Nom accessible du bouton d’icône de début.',
         pickerIconLabel:
-          "Ce que fait l'icône de fin, en mots. Elle nomme le bouton qui ouvre la boîte de dialogue de fichiers, et sa valeur par défaut vient du dictionnaire du design system.",
-        loading:
-          "Affiche une roue à la place de l'icône de trombone, pendant un envoi. Elle ne change rien d'autre : les fichiers se déposent toujours et la boîte de dialogue s'ouvre toujours.",
+          'Nom accessible du bouton de sélection de fichiers. Utilise le dictionnaire de la bibliothèque par défaut.',
+        loading: 'Affiche un indicateur sans désactiver la sélection ni le glisser-déposer.',
         loadingText:
-          "Ce que les lecteurs d'écran annoncent pendant que la roue tourne. Sa valeur par défaut vient du dictionnaire du design system.",
-        clearable:
-          "Propose une croix qui vide la sélection. Elle vaut plus la peine ici que sur un champ ordinaire : ce que contient un sélecteur ne s'efface pas en tapant, la croix est donc le seul retour en arrière après un mauvais choix.",
+          'Texte de chargement et nom accessible de l’indicateur. Utilise le dictionnaire de la bibliothèque par défaut.',
+        clearable: 'Ajoute un bouton pour vider la sélection.',
         clearLabel:
-          'Ce que fait cette croix, en mots. Sa valeur par défaut vient du dictionnaire du design system.',
+          'Nom accessible du bouton d’effacement. Utilise le dictionnaire de la bibliothèque par défaut.',
         vModel:
-          "Toujours une LISTE de fichiers, que plusieurs soient permis ou non, jamais un fichier seul. La forme ne dépend pas d'une prop : vous n'avez donc jamais à restreindre une union que TypeScript ne sait pas discriminer.",
+          'Fichiers sélectionnés sous forme de <code>File[]</code>, même pour un seul fichier.',
       },
       events: {
-        change: "La sélection a changé, avec toute la liste telle qu'elle est désormais.",
+        change: 'La sélection a changé. Reçoit le <code>File[]</code> complet.',
         reject:
-          'Un fichier a été écarté, avec lequel et pourquoi : son genre, sa taille, ou combien il y en avait déjà.',
-        clear: "La croix d'effacement a été pressée. La sélection est déjà vide.",
+          'Émis pour chaque fichier refusé. Reçoit le fichier et un motif : <code>type</code>, <code>size</code>, <code>count</code> ou <code>total-size</code>.',
+        clear: 'La sélection a été effacée ; le modèle est déjà vide.',
         remove:
-          "UN fichier a été retiré par sa puce, avec le fichier et la position qu'il occupait. <code>change</code> suit avec toute la liste.",
-        clickIconStart:
-          "L'icône de début a été cliquée. Attacher cet écouteur est ce qui en fait un vrai bouton, qui demande alors <code>iconStartLabel</code>.",
+          'Un chip a retiré un fichier. Reçoit le fichier et son index ; suivi de <code>change</code>.',
+        clickIconStart: 'Le bouton de l’icône de début a été activé.',
       },
       slots: {
-        chip: 'Remplace la puce qui représente un fichier. Elle reçoit le nom déjà raccourci AU MILIEU pour que son extension survive, <code>remove</code>, sans quoi le fichier ne pourrait plus être retiré, et la taille et la densité calculées pour tenir dans le champ.',
+        chip: 'Contenu du chip de fichier. Reçoit le fichier, son nom abrégé, <code>remove</code>, la taille et la densité.',
         counter:
-          'Remplace le compteur sous le champ. <code>text</code> est la phrase déjà construite et traduite ; le nombre et la taille totale en octets, <code>bytes</code>, sont là pour une formulation à vous.',
-        valueEnd:
-          "Des contrôles à vous à l'intérieur du champ, placés avant ceux que le champ possède : la croix d'effacement et l'icône qui ouvre le panneau. Ces deux-là sont l'affordance propre du composant, ce qui explique l'absence de slot <code>end</code> ici.",
-        start:
-          "Du contenu au début du champ, rendu après <code>iconStart</code> plutôt qu'à sa place.",
+          'Contenu du compteur. Reçoit le <code>text</code> localisé, <code>count</code> et la taille totale en <code>bytes</code>.',
+        valueEnd: 'Contenu avant les boutons d’effacement et de sélection.',
+        start: 'Contenu après <code>iconStart</code>.',
       },
     },
   },

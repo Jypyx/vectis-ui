@@ -15,8 +15,6 @@ import { VButton } from 'vectis-ui'
 </template>
 
 <style scoped>
-/* Both columns are the same width and align their items to the start, so what widens
-   the second pair is the prop and not the layout around it. */
 .column {
   display: flex;
   flex-direction: column;

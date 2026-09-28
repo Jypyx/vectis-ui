@@ -1,8 +1,4 @@
-/**
- * Le catalogue français. Le type de retour est ANNOTÉ plutôt qu'inféré : c'est cette annotation
- * qui fait échouer `nuxt typecheck` sur une clé manquante ou renommée, au lieu de laisser la
- * clé brute s'afficher dans la page.
- */
+/** Annotate the return type to catch missing or renamed French messages. */
 import accessibility from './fr/accessibility'
 import accordion from './fr/accordion'
 import avatar from './fr/avatar'

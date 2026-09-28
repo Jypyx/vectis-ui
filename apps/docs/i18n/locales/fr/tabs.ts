@@ -1,117 +1,108 @@
 export default {
   title: 'Onglets',
-  lead: "Une barre d'onglets et les panneaux qu'ils montrent. Les panneaux sont un slot optionnel : le même composant sert donc de simple barre ou de contrôle segmenté quand il n'y a rien à révéler.",
-
+  lead: '<code>VTabs</code> sélectionne un onglet et affiche son panneau facultatif. Il peut aussi servir de barre d’onglets sans panneaux.',
   examples: {
     variants: {
       title: 'Variantes et tonalités',
-      text: "<code>variant</code> pose d'un mot le rail et le cadre : <code>flat</code> trace un filet sous la rangée et souligne l'onglet choisi, <code>outlined</code> met cette même barre et ses panneaux dans une carte, <code>inset</code> pose la rangée dans un rail creux. <code>tone</code> colore l'onglet choisi et rien d'autre, avec les trois valeurs qu'offre un bouton.",
+      text: '<code>flat</code> souligne l’onglet sélectionné, <code>outlined</code> ajoute un cadre et <code>inset</code> utilise un fond en creux. <code>tone</code> colore la sélection.',
     },
     sizes: {
       title: 'Tailles',
-      text: "<code>size</code> reprend l'échelle partagée par tous les contrôles, de 24 à 56 pixels, et <code>compact</code> lui retire 4px. Elle se pose une fois sur la barre.",
+      text: 'Définissez <code>size</code> et <code>compact</code> sur le groupe.',
     },
     tabContent: {
       title: 'Ce que porte un onglet',
-      text: "Un onglet accepte un libellé, une icône à chaque extrémité par <code>iconStart</code> et <code>iconEnd</code>, dessinée pleine sous <code>iconFilled</code>, ou le slot par défaut pour ce qu'une chaîne ne peut pas porter. Un onglet réduit à son icône demande toujours un <code>label</code>, qui est alors son nom accessible.",
+      text: 'Utilisez des libellés, des icônes ou des slots. Donnez un <code>label</code> aux onglets sans texte pour leur nom accessible.',
     },
     panels: {
       title: 'Panneaux',
-      text: "Un panneau masqué est masqué et non détruit : son contenu garde son état et un champ qu'il contient est toujours soumis. <code>lazy</code> retient le contenu jusqu'à la première ouverture. Sans le slot <code>#panels</code>, aucune zone de panneaux n'est rendue, et ce slot doit être présent ou absent dès le départ. Une fois présent, chaque onglet demande son panneau. Un panneau peut contenir un autre VTabs, qui garde sa propre mise en page.",
+      text: 'Fournissez un panneau correspondant à chaque onglet dans <code>panels</code>, ou omettez ce slot dès le départ. Les panneaux masqués conservent leur état et leurs valeurs de formulaire. <code>lazy</code> retarde le montage jusqu’à la première ouverture.',
     },
     alignment: {
       title: 'Alignement',
-      text: '<code>align</code> dit où se placent les onglets le long de la barre quand ils ne la remplissent pas. Il se pose sur la barre et non sur la liste des onglets.',
+      text: '<code>align</code> positionne les onglets quand ils n’occupent pas toute la barre.',
     },
     fullWidth: {
       title: 'Remplir la barre',
-      text: '<code>fullWidth</code> partage toute la barre entre les onglets en parts égales, un libellé trop long pour sa part étant tronqué. Il est incompatible avec le défilement par construction.',
+      text: '<code>fullWidth</code> répartit la barre également entre les onglets. Les longs libellés sont tronqués ; le défilement est désactivé.',
     },
     orientation: {
       title: 'Orientation',
-      text: "<code>orientation</code> à <code>vertical</code> fait descendre les onglets sur le côté, les panneaux se plaçant à côté d'eux et les flèches suivant l'axe.",
+      text: 'Les onglets verticaux apparaissent à côté des panneaux. La navigation par flèches suit l’orientation.',
     },
     scrolling: {
       title: 'Défilement',
-      text: "Trop d'onglets pour la place et la barre défile, au doigt, au pavé tactile et au clavier. Le conteneur demande une taille minimale nulle, sans quoi la liste élargit son parent au lieu de déborder.",
+      text: 'Les onglets débordants défilent au toucher, au pavé tactile ou au clavier. Autorisez le parent à rétrécir avec une taille minimale nulle.',
     },
     scrollButtons: {
       title: 'Boutons de défilement',
-      text: '<code>scrollButtons</code> ajoute un bouton à chaque extrémité de la barre, chacun désactivé une fois cette extrémité atteinte. Un bouton qui avait le focus clavier le passe au bouton opposé en se désactivant. Il est optionnel, et exclut <code>fullWidth</code>.',
+      text: '<code>scrollButtons</code> ajoute des contrôles aux extrémités. Il ne peut pas être combiné à <code>fullWidth</code>.',
     },
     customArrows: {
       title: 'Flèches personnalisées',
-      text: "<code>prevIcon</code> et <code>nextIcon</code> remplacent les flèches, dont les valeurs par défaut suivent l'orientation. <code>prevLabel</code> et <code>nextLabel</code> sont ce que lit un lecteur d'écran pour ces deux boutons, et se rabattent sur le dictionnaire.",
+      text: 'Personnalisez les icônes de défilement et leurs noms accessibles avec <code>prevIcon</code>, <code>nextIcon</code>, <code>prevLabel</code> et <code>nextLabel</code>.',
     },
     activation: {
       title: "Sélectionner à l'arrivée",
-      text: "<code>activation</code> est manuelle par défaut : une flèche déplace le focus, et Entrée ou Espace choisit. En automatique, l'onglet atteint par le focus est choisi, ce qui convient à un panneau qui apparaît instantanément.",
+      text: 'L’activation manuelle déplace le focus avec les flèches et sélectionne avec Entrée ou Espace. L’activation automatique sélectionne au focus ; utilisez-la si les panneaux s’affichent immédiatement.',
     },
     disabled: {
       title: 'Onglets désactivés',
-      text: "Un onglet <code>disabled</code> ne répond plus, se grise par les tokens de couleur et est enjambé par les flèches. Ne laissez pas la valeur pointer dessus, sinon la barre n'a plus aucun arrêt de tabulation. <code>disabled</code> posé sur VTabs éteint d'un coup tous les onglets et les boutons de défilement, le panneau affiché restant affiché.",
+      text: 'Les onglets désactivés sont ignorés. Conservez le modèle sur un onglet actif. Désactiver le groupe laisse le panneau actuel visible.',
     },
   },
-
   api: {
     VTabs: {
       props: {
-        variant:
-          "Comment la barre est encadrée. <code>flat</code> ne dessine qu'un filet sous les onglets, celui sélectionné étant souligné ; <code>outlined</code> place cette même barre et ses panneaux dans une carte ; <code>inset</code> transforme la rangée en contrôle segmenté posé dans une piste creuse.",
-        tone: "La couleur que prend l'onglet sélectionné. Les autres restent neutres quoi que dise cette prop.",
-        size: "La hauteur des onglets, tirée de l'échelle partagée par tous les contrôles.",
-        compact: 'Retire 4px à la hauteur de chaque onglet.',
-        orientation: 'Si les onglets courent en travers de la page ou le long de son côté.',
-        align: 'Où se placent les onglets le long de la barre quand ils ne la remplissent pas.',
-        fullWidth: 'Fait partager toute la barre aux onglets, en parts égales.',
+        variant: 'Style de barre : souligné, encadré ou en creux.',
+        tone: 'Couleur de l’onglet sélectionné.',
+        size: 'Taille du composant.',
+        compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
+        orientation: 'Navigation horizontale ou verticale.',
+        align: 'Alignement des onglets quand la barre n’est pas remplie.',
+        fullWidth: 'Répartit les onglets également dans la barre.',
         scrollButtons:
-          "Ajoute un bouton à chaque extrémité de la barre pour la faire défiler, chacun désactivé une fois cette extrémité atteinte. Cela n'a de sens que si les onglets peuvent déborder, donc c'est exclusif de <code>fullWidth</code>.",
-        prevIcon: "L'icône du bouton de défilement arrière. Elle suit l'orientation par défaut.",
-        nextIcon: "L'icône du bouton de défilement avant. Elle suit l'orientation par défaut.",
-        prevLabel:
-          'Ce que fait le bouton de défilement arrière, en mots. Il retombe sur le dictionnaire.',
-        nextLabel:
-          'Ce que fait le bouton de défilement avant, en mots. Il retombe sur le dictionnaire.',
-        activation:
-          "Si se déplacer sur un onglet le sélectionne aussi. Sélectionner à l'arrivée est ce que recommandent les pratiques ARIA quand un panneau apparaît instantanément ; laissez en manuel quand afficher un panneau coûte une requête, sinon chaque onglet survolé en déclencherait une.",
+          'Ajoute des contrôles de défilement. Incompatible avec <code>fullWidth</code>.',
+        prevIcon: 'Icône de défilement arrière. Flèche adaptée à l’orientation par défaut.',
+        nextIcon: 'Icône de défilement avant. Flèche adaptée à l’orientation par défaut.',
+        prevLabel: 'Nom accessible du défilement arrière. Utilise le dictionnaire par défaut.',
+        nextLabel: 'Nom accessible du défilement avant. Utilise le dictionnaire par défaut.',
+        activation: 'Sélection manuelle avec Entrée/Espace, ou automatique au focus.',
         disabled:
-          "Rend tous les onglets inutilisables, et les boutons de défilement avec eux : les onglets quittent l'ordre de tabulation et se grisent par les tokens de couleur. Un onglet désactivé de lui-même le reste dans tous les cas. Le panneau affiché reste affiché.",
-        label:
-          "Ce que les lecteurs d'écran annoncent pour la rangée d'onglets. Il retombe sur le dictionnaire du design system.",
+          'Désactive tous les onglets et contrôles de défilement ; conserve le panneau actuel.',
+        label: 'Nom accessible de la liste d’onglets. Utilise le dictionnaire par défaut.',
         vModel:
-          "La valeur de l'onglet sélectionné. Il n'y a délibérément aucune valeur par défaut : le composant ne peut pas savoir lequel des onglets que vous avez écrits doit s'ouvrir. Elle doit désigner un onglet qui existe et n'est pas désactivé, faute de quoi aucun onglet n'a d'arrêt de tabulation et la barre devient inatteignable au clavier.",
+          'Valeur de l’onglet sélectionné. Doit désigner un onglet existant et actif pour l’accès au clavier.',
       },
       slots: {
-        default: 'Les onglets eux-mêmes.',
+        default: 'Enfants <code>VTab</code>.',
         panels:
-          "Les panneaux que montrent les onglets. L'omettre ne rend aucune zone de panneau, ce qui est la façon dont le même composant sert de simple barre ou de contrôle segmenté.",
+          'Enfants <code>VTabPanel</code> correspondants. Omettez-le pour une barre sans panneaux.',
       },
     },
     VTab: {
       props: {
-        value:
-          "Le nom de cet onglet dans le code. Le panneau portant la même valeur est celui qu'il montre, et c'est aussi ce que porte la valeur quand cet onglet est sélectionné.",
-        label: 'Le libellé visible. Le slot par défaut le remplace.',
-        iconStart: 'Une icône avant le libellé.',
-        iconEnd: "Une icône après le libellé, pour un compteur ou un état que l'onglet porte.",
-        iconFilled:
-          "Rend <code>iconStart</code> et <code>iconEnd</code> dans leur forme pleine, l'axe <code>FILL</code> de la police.",
-        disabled:
-          "Rend l'onglet inutilisable : il ne répond plus, les flèches l'enjambent, et il se grise par les tokens de couleur. Un VTabs posé <code>disabled</code> désactive tous les onglets, celui-ci compris, quoi que dise cette prop.",
+        value: 'Identifiant correspondant au panneau et à la valeur du modèle.',
+        label:
+          'Libellé visible, remplacé par le slot par défaut. Nomme aussi les onglets sans texte.',
+        iconStart: 'Icône avant le libellé.',
+        iconEnd: 'Icône après le libellé.',
+        iconFilled: 'Utilise des icônes pleines si disponibles.',
+        disabled: 'Désactive cet onglet ; la désactivation du groupe s’applique aussi.',
       },
       slots: {
-        default: "Le contenu de l'onglet, qui remplace la prop <code>label</code>.",
-        start: 'Un contenu avant le libellé, qui prend la place de <code>iconStart</code>.',
-        end: 'Un contenu après le libellé, qui prend la place de <code>iconEnd</code>.',
+        default: 'Contenu remplaçant le libellé.',
+        start: 'Contenu remplaçant <code>iconStart</code>.',
+        end: 'Contenu remplaçant <code>iconEnd</code>.',
       },
     },
     VTabPanel: {
       props: {
-        value: "Quel onglet montre ce panneau : ce doit être la valeur de l'un d'eux.",
-        lazy: "Retient le contenu jusqu'au premier affichage du panneau, et le conserve ensuite. C'est fait pour un panneau coûteux à construire ; l'état qu'il porte reste préservé par la suite.",
+        value: 'Identifiant de l’onglet affichant ce panneau.',
+        lazy: 'Monte le contenu à la première ouverture, puis le conserve.',
       },
       slots: {
-        default: 'Ce que contient le panneau.',
+        default: 'Contenu du panneau.',
       },
     },
   },

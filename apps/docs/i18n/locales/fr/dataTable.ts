@@ -1,153 +1,137 @@
 export default {
   title: 'Tableau de données',
-  lead: "Des lignes avec recherche, tri, sélection et pagination. Il fait les quatre lui-même sur les lignes qu'on lui donne, ou les confie à un serveur en se contentant de rapporter ce qui est demandé.",
-
+  lead: '<code>VDataTable</code> affiche des lignes avec recherche, tri, sélection et pagination. Traitez les données localement ou utilisez le mode serveur pour demander chaque résultat.',
   examples: {
     sorting: {
       title: 'Tri',
-      text: "Une colonne marquée <code>sortable</code> reçoit un en-tête cliquable, qui alterne croissant, décroissant, puis l'ordre dans lequel les lignes ont été données. <code>v-model:sort</code> lit et pose cet état.",
+      text: 'Marquez les colonnes <code>sortable</code>. Leurs en-têtes alternent entre ordre croissant, décroissant et initial. Observez ou définissez le tri avec <code>v-model:sort</code>.',
     },
     search: {
       title: 'Recherche',
-      text: "<code>searchable</code> pose un champ dans la barre d'outils, qui cherche dans les colonnes déclarées sans tenir compte de la casse ni des accents. <code>v-model:search</code> pilote le terme depuis ailleurs dans la page.",
+      text: '<code>searchable</code> ajoute un champ qui recherche dans les colonnes déclarées sans distinction de casse ni d’accents. Pilotez la requête avec <code>v-model:search</code>.',
     },
     pagination: {
       title: 'Pagination',
-      text: 'Toute valeur de <code>v-model:per-page</code> supérieure à zéro active la pagination. <code>showRange</code> ajoute le compte des lignes à côté de la navigation.',
+      text: 'Définissez <code>v-model:per-page</code> au-dessus de 0 pour activer la pagination. <code>showRange</code> affiche la plage de lignes visible.',
     },
     rowsPerPage: {
       title: 'Lignes par page',
-      text: '<code>perPageOptions</code> ajoute au pied un menu pour choisir le nombre de lignes par page. <code>v-model:per-page</code> rapporte ce qui a été choisi.',
+      text: '<code>perPageOptions</code> propose les tailles de page dans le pied du tableau.',
     },
     selection: {
       title: 'Sélection',
-      text: "<code>selectable</code> ajoute une case à chaque ligne et une à l'en-tête pour la page visible. <code>rowKey</code> est alors obligatoire, et <code>v-model:selected</code> contient les identités données par ce champ.",
+      text: '<code>selectable</code> ajoute des cases par ligne et une case pour la page. Fournissez un <code>rowKey</code> stable ; <code>v-model:selected</code> contient ces identifiants.',
     },
     toolbar: {
       title: "Barre d'outils",
-      text: "Le slot <code>#title</code> remplace la prop <code>title</code> et occupe la gauche de la barre d'outils, le champ de recherche gardant la droite.",
+      text: 'Le slot <code>title</code> remplace le titre de la barre d’outils ; la recherche reste de l’autre côté.',
     },
     customCells: {
       title: 'Cellules personnalisées',
-      text: "Un slot nommé d'après la clé d'une colonne remplace le contenu de ses cellules, et reçoit la ligne, la valeur brute et la colonne. La recherche et le tri lisent toujours la valeur sous-jacente.",
+      text: 'Un slot correspondant à une clé de colonne remplace ses cellules. Il reçoit la ligne, la valeur brute et la colonne ; le tri et la recherche utilisent toujours la valeur brute.',
     },
     customHeadings: {
       title: 'En-têtes personnalisés',
-      text: "Un slot nommé <code>head-</code> suivi de la clé de la colonne remplace un en-tête. Sur une colonne triable, il est rendu à l'intérieur du bouton de tri : tenez-vous-en donc au texte et à la décoration.",
+      text: 'Utilisez <code>head-</code> suivi d’une clé de colonne pour personnaliser son en-tête. Les en-têtes triables contiennent un bouton : gardez le slot non interactif.',
     },
     variants: {
       title: 'Variantes',
-      text: "<code>variant</code> définit la décoration : <code>flat</code> n'en porte aucune, <code>outlined</code> ajoute un fond surélevé, une bordure, des coins arrondis et une gouttière autour de la barre d'outils, de la légende et du pied.",
+      text: '<code>flat</code> laisse le tableau sans cadre ; <code>outlined</code> ajoute un fond de carte et une bordure.',
     },
     compact: {
       title: 'Compact',
-      text: '<code>compact</code> resserre chaque cellule, et avec elles le champ de recherche, le menu de taille de page et la pagination.',
+      text: '<code>compact</code> réduit les espacements des cellules et la hauteur des contrôles.',
     },
     striped: {
       title: 'Lignes zébrées',
-      text: '<code>striped</code> teinte une ligne sur deux.',
+      text: '<code>striped</code> colore une ligne sur deux.',
     },
     stickyHeader: {
       title: 'En-tête collant',
-      text: '<code>stickyHeader</code> garde les en-têtes de colonnes en place pendant le défilement des lignes. Il demande une zone de défilement bornée, par la prop <code>height</code> ou par un parent qui a sa propre hauteur.',
+      text: '<code>stickyHeader</code> conserve les en-têtes visibles dans une zone défilante limitée. Définissez <code>height</code> ou limitez la hauteur du parent.',
     },
     fullHeight: {
       title: 'Pleine hauteur',
-      text: "<code>height</code> borne tout le composant, barre d'outils et pied compris, un nombre étant lu en pixels. Sans elle, le tableau prend la hauteur de son parent dès que celui-ci en a une.",
+      text: '<code>height</code> limite tout le composant, barre d’outils et pied compris. Les nombres utilisent des pixels ; les chaînes, des longueurs CSS.',
     },
     responsive: {
       title: 'Conteneurs étroits',
-      text: "<code>responsive</code> décide de ce que fait un conteneur trop étroit pour les colonnes : défiler latéralement, ou transformer chaque ligne en carte avec ses en-têtes de colonnes répétés à l'intérieur. En cartes, la ligne d'en-têtes est hors de vue : ses boutons de tri et sa case « tout sélectionner » quittent l'ordre de tabulation avec elle.",
+      text: 'Dans un conteneur étroit, <code>responsive</code> choisit un défilement horizontal ou des cartes par ligne. Le mode cartes masque les boutons de tri des en-têtes et la case de sélection globale.',
     },
     serverSide: {
       title: 'Côté serveur',
-      text: "<code>serverSide</code> délègue la recherche, le tri et la pagination : les lignes sont affichées telles qu'elles arrivent et <code>update:params</code> rapporte chaque changement. Passez <code>total</code> pour la pagination et la plage, et <code>searchDebounce</code> pour retarder la recherche.",
+      text: '<code>serverSide</code> affiche les lignes fournies sans recherche, tri ni pagination locale. Écoutez <code>update:params</code>, chargez les lignes et fournissez <code>total</code>. <code>searchDebounce</code> retarde les requêtes de recherche.',
     },
     states: {
       title: 'Chargement et vide',
-      text: "<code>loading</code> affiche un indicateur et <code>loadingText</code> à la place des lignes, et passe avant le vide. <code>emptyText</code> est ce que dit le tableau quand il n'y a rien à montrer. Les slots <code>#loading</code> et <code>#empty</code> remplacent l'un ou l'autre état, le second recevant la recherche (<code>search</code>) qui a vidé le tableau.",
+      text: 'Le chargement est prioritaire sur les résultats vides. Personnalisez ces états avec <code>loadingText</code>, <code>emptyText</code> ou leurs slots.',
     },
     fullTable: {
       title: 'Un tableau complet',
-      text: 'Tout à la fois : un titre, une recherche, une sélection, quatre colonnes triables, des cellules personnalisées, et un pied portant le compte de la sélection, la taille de page, la plage et la pagination.',
+      text: 'Combine recherche, tri, sélection, cellules personnalisées et pagination.',
     },
   },
-
   api: {
     VDataTable: {
       props: {
-        columns: "Les colonnes à afficher, dans l'ordre.",
-        rows: 'Les lignes à afficher.',
+        columns: 'Colonnes dans l’ordre d’affichage.',
+        rows: 'Lignes à afficher.',
         rowKey:
-          "Quel champ identifie une ligne. Sans lui, une ligne est identifiée par sa position, ce qui suffit à l'affichage mais pas à une sélection : il doit être donné dès que des lignes peuvent être sélectionnées, sinon la sélection suit les positions et non les lignes.",
-        caption:
-          "Une phrase décrivant ce que contient le tableau. Elle est annoncée avant le tableau lui-même, et c'est elle qui dit à un utilisateur de lecteur d'écran si cela vaut la peine d'explorer.",
-        variant:
-          'Comment le tableau est encadré : rien du tout, ou une carte avec fond surélevé, bordure et coins arrondis.',
-        responsive:
-          "Ce qui se passe quand le composant est trop étroit : le tableau défile latéralement, ou chaque ligne devient une carte avec ses en-têtes de colonne répétés à l'intérieur.",
-        loading: 'Montre que les lignes sont en cours de chargement.',
-        loadingText:
-          "Ce qui est écrit à côté de l'indicateur pendant le chargement des lignes. Il retombe sur le dictionnaire du design system.",
-        emptyText:
-          "Ce qui est dit quand il n'y a aucune ligne à montrer. Il retombe sur le dictionnaire du design system.",
+          'Champ d’identifiant stable des lignes. Requis pour la sélection ; sinon, la position est utilisée.',
+        caption: 'Description du tableau annoncée par les technologies d’assistance.',
+        variant: 'Tableau sans cadre ou avec bordure.',
+        responsive: 'Défilement horizontal ou cartes par ligne dans les conteneurs étroits.',
+        loading: 'Affiche le contenu de chargement à la place des lignes.',
+        loadingText: 'Texte de chargement visible. Utilise le dictionnaire par défaut.',
+        emptyText: 'Texte des résultats vides. Utilise le dictionnaire par défaut.',
         title:
-          "Un titre au-dessus du tableau, à gauche de sa barre d'outils. Sans <code>caption</code>, il nomme aussi le tableau pour les lecteurs d'écran. Il masque l'attribut HTML du même nom sur le composant lui-même, compromis accepté : une infobulle sur tout un tableau serait de peu d'usage.",
-        searchable: "Ajoute un champ de recherche à la barre d'outils.",
-        searchPlaceholder:
-          'Ce que dit ce champ quand il est vide. Il retombe sur le dictionnaire du design system.',
-        searchLabel:
-          "Ce que les lecteurs d'écran annoncent pour le champ de recherche. Il retombe sur le dictionnaire du design system.",
+          'Titre de la barre d’outils. Nomme aussi le tableau si aucune légende n’est fournie.',
+        searchable: 'Ajoute un champ de recherche dans la barre d’outils.',
+        searchPlaceholder: 'Texte indicatif de recherche. Utilise le dictionnaire par défaut.',
+        searchLabel: 'Nom accessible du champ de recherche. Utilise le dictionnaire par défaut.',
         searchDebounce:
-          'Quand un serveur fait la recherche, combien de temps attendre après une frappe avant de le solliciter, en millisecondes. Zéro le sollicite aussitôt.',
-        striped:
-          "Teinte une ligne sur deux, ce qui aide l'œil à suivre une longue ligne à travers le tableau.",
+          'Délai de recherche serveur en millisecondes. 0 lance la requête immédiatement.',
+        striped: 'Colore une ligne sur deux.',
         stickyHeader:
-          'Garde les en-têtes de colonne en place pendant que les lignes défilent dessous. Cela demande une zone de défilement bornée : soit la prop <code>height</code>, soit un parent ayant une hauteur propre.',
-        compact: "Resserre les cellules d'un cran, et tout ce que le tableau rend avec elles.",
+          'Conserve les en-têtes visibles au défilement. Nécessite une hauteur limitée.',
+        compact: 'Réduit les espacements des cellules et la hauteur des contrôles.',
         height:
-          "La hauteur de TOUT le composant, barre d'outils et pagination comprises : un nombre est lu en pixels, tout le reste comme une longueur CSS. Omise, le tableau prend la hauteur de son parent dès que celui-ci en a une.",
-        sortIcon: "L'icône d'en-tête d'une colonne triable mais qui ne l'est pas actuellement.",
-        sortAscIcon:
-          "L'icône d'un tri croissant. Elle pointe vers le BAS par défaut, convention du tableur : trier de A à Z se lit vers le bas.",
-        sortDescIcon: "L'icône d'un tri décroissant.",
-        perPageOptions: 'Les choix proposés pour le nombre de lignes par page.',
-        perPageText: 'Le nom de ce choix. Il retombe sur le dictionnaire du design system.',
-        total:
-          "Combien de lignes il y a en tout sur le serveur. C'est ce qui permet à la pagination et à la plage d'être justes quand le tableau ne détient jamais qu'une page.",
-        showRange: 'Affiche quelles lignes sont consultées, « 1 à 10 sur 42 », dans le pied.',
-        rangeText: 'Reformule cette plage. Elle retombe sur le dictionnaire du design system.',
-        selectable:
-          "Ajoute une case à cocher à chaque ligne, et une dans l'en-tête pour prendre toute la page.",
+          'Hauteur totale. Les nombres utilisent des pixels ; les chaînes, des longueurs CSS. Sinon, hérite de la hauteur limitée du parent.',
+        sortIcon: 'Icône d’une colonne triable non triée.',
+        sortAscIcon: 'Icône de tri croissant.',
+        sortDescIcon: 'Icône de tri décroissant.',
+        perPageOptions: 'Tailles de page proposées dans le pied du tableau.',
+        perPageText: 'Libellé du contrôle de taille de page. Utilise le dictionnaire par défaut.',
+        total: 'Nombre total de lignes serveur pour la pagination et la plage affichée.',
+        showRange: 'Affiche la plage de lignes visible dans le pied du tableau.',
+        rangeText:
+          'Fonction formatant <code>{ start, end, total }</code>. Utilise le dictionnaire par défaut.',
+        selectable: 'Ajoute des cases par ligne et une case pour la page visible.',
         selectAllLabel:
-          "Ce comme quoi la case d'en-tête est annoncée. Elle retombe sur le dictionnaire du design system.",
+          'Nom accessible de la sélection de page. Utilise le dictionnaire par défaut.',
         selectionText:
-          "Comment la sélection est résumée dans le pied. Elle ne dit rien du tout quand rien n'est sélectionné, et retombe sur le dictionnaire du design system.",
+          'Fonction formatant le nombre sélectionné. Utilise le dictionnaire par défaut ; vide sans sélection.',
         selectRowLabel:
-          "Ce comme quoi la case d'une ligne est annoncée. « Sélectionner la ligne » ne dit rien à un utilisateur de lecteur d'écran sur QUELLE ligne : cela vaut donc la peine de fournir quelque chose venu de la ligne elle-même. <code>index</code> est la position de la ligne dans tout le tableau, à partir de 0, et non dans la page. Elle retombe sur le dictionnaire du design system, qui numérote les lignes à partir de 1.",
+          'Fonction nommant chaque case à partir de sa ligne et de son index global commençant à 0. Numéro de ligne par défaut.',
         serverSide:
-          "Confie la recherche, le tri et la pagination à un serveur : les lignes sont affichées telles qu'elles arrivent, et chaque changement de ce qui est demandé est rapporté pour que le serveur puisse y répondre.",
-        vModelSort:
-          "Selon quelle colonne les lignes sont triées, et dans quel sens. Rien n'est trié au départ. Cela peut être piloté de l'extérieur ou simplement laissé au tableau, qui le pose au clic sur les en-têtes ; le changer ne renvoie pas le lecteur à la première page.",
+          'Délègue la recherche, le tri et la pagination au serveur via <code>update:params</code>.',
+        vModelSort: 'Clé et sens du tri, ou <code>null</code>. Changer le tri conserve la page.',
         vModelPage:
-          "La page affichée, comptée à partir de 1. Rechercher ou changer la taille de page, depuis le menu ou de l'extérieur, y renvoie à la première. Elle est bornée par dérivation plutôt que réécrite : une page au-delà de la dernière affiche donc simplement la dernière.",
-        vModelPerPage:
-          "Combien de lignes une page contient. Toute valeur supérieure à zéro active la pagination : en passer une sans la lier suffit donc à l'activer.",
+          'Numéro de page à partir de 1. Changer la recherche ou la taille de page le remet à 1. Les valeurs hors limites affichent la page la plus proche sans réécrire le modèle.',
+        vModelPerPage: 'Lignes par page. Une valeur supérieure à 0 active la pagination.',
         vModelSelected:
-          "Les lignes sélectionnées, sous les identités que <code>rowKey</code> leur donne, jamais les objets de ligne eux-mêmes. Rien n'est sélectionné au départ, et une sélection SURVIT à un changement de page : la case d'en-tête ne couvre que la page visible, et c'est pourquoi elle peut être indéterminée. Le pied compte cette liste telle qu'elle est, identités de lignes qui ne sont plus affichées comprises.",
+          'Identifiants <code>rowKey</code> sélectionnés, conservés entre les pages. La case d’en-tête couvre uniquement les lignes visibles.',
         vModelSearch:
-          "Ce qui est saisi dans le champ de recherche, vide au départ. Seules les colonnes déclarées sont cherchées, sans tenir compte des accents ni de la casse ; en mode serveur rien n'est filtré ici et le terme est rapporté à la place.",
+          'Requête de recherche. La recherche locale ignore la casse et les accents ; le mode serveur la transmet sans filtrer.',
       },
       events: {
         updateParams:
-          'Ce qui est demandé au tableau, en mode serveur : la recherche, le tri, la page et la taille de page. Il part à chaque changement et jamais au montage, et une valeur égale transmise à nouveau ne demande rien.',
+          'Changements de requête en mode serveur : recherche, tri, page et taille de page. Non émis au montage ni pour une valeur inchangée.',
       },
       slots: {
-        title: "Le côté gauche de la barre d'outils, qui remplace la prop <code>title</code>.",
-        loading:
-          "Ce que montre le tableau pendant le chargement de ses lignes, à la place de l'indicateur et de son texte.",
-        empty:
-          "Ce que montre le tableau quand il n'a aucune ligne à montrer, à la place de <code>emptyText</code>. Il reçoit la recherche qui a produit ce résultat vide, vide si rien n'a été cherché.",
+        title: 'Contenu remplaçant le titre de la barre d’outils.',
+        loading: 'Contenu remplaçant l’indicateur et le texte de chargement.',
+        empty: 'Contenu des résultats vides. Reçoit la <code>search</code> actuelle.',
       },
     },
   },

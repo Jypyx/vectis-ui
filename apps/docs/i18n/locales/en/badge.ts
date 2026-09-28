@@ -1,74 +1,66 @@
 export default {
   title: 'Badge',
-  lead: 'A small count or marker, on its own or pinned to the corner of something else. It is never interactive: what it reports belongs to the element it sits on.',
-
+  lead: '<code>VBadge</code> displays a count, icon or status dot, alone or attached to another element.',
   examples: {
     variants: {
       title: 'Variants',
-      text: '<code>variant</code> fills the badge with the colour (<code>solid</code>, the default) or tints it and writes the content in the colour (<code>soft</code>), for a count that should not draw the eye. A dot is always solid.',
+      text: '<code>variant</code> selects <code>solid</code> or <code>soft</code>. Dots are always solid.',
     },
     tones: {
       title: 'Tones',
-      text: '<code>tone</code> sets the colour: <code>accent</code>, <code>neutral</code>, <code>success</code>, <code>warning</code> or <code>danger</code>.',
+      text: '<code>tone</code> sets the semantic colour.',
     },
     colors: {
       title: 'Custom colours',
-      text: '<code>color</code> replaces the tone, given as hex, a CSS colour name or <code>oklch()</code>.',
+      text: '<code>color</code> overrides the tone with a CSS colour.',
     },
     counters: {
       title: 'Counters',
-      text: '<code>count</code> displays a number. Past 99 it becomes <code>99+</code>.',
+      text: 'Counts above 99 appear as <code>99+</code>.',
     },
     icon: {
       title: 'With an icon',
-      text: '<code>icon</code> takes the place of the number, and wins over <code>count</code> when both are given.',
+      text: '<code>icon</code> takes precedence over <code>count</code>.',
     },
     dot: {
       title: 'Dot',
-      text: '<code>dot</code> draws 10px of colour with nothing in it, ignoring <code>count</code> and <code>icon</code>.',
+      text: '<code>dot</code> shows a status dot and ignores count and icon content.',
     },
     inline: {
       title: 'Inline',
-      text: 'The default slot provides a target element, beside which the badge is placed.',
+      text: 'The default slot provides the target. Include the badge information in that target’s accessible name.',
     },
     overlay: {
       title: 'Overlay',
-      text: '<code>overlay</code> pins the badge to a corner of the target instead of placing it beside it.',
+      text: '<code>overlay</code> places the badge at the target’s corner.',
     },
     overlayPosition: {
       title: 'Overlay position',
-      text: '<code>overlayPosition</code> moves the overlay corner from the top to the bottom. The horizontal side follows the reading direction.',
+      text: '<code>overlayPosition</code> chooses the top or bottom corner. The horizontal side follows the reading direction.',
     },
     bordered: {
       title: 'Bordered',
-      text: '<code>bordered</code> draws a 2px ring around the badge, and <code>ringColor</code> sets its colour to match the surface behind it.',
+      text: '<code>bordered</code> adds a ring. Set <code>ringColor</code> to match the target’s surface.',
     },
   },
-
   api: {
     VBadge: {
       props: {
-        variant:
-          'How strongly the badge is painted: filled with the full colour, or a tinted background with the content in the colour, for a count that should not draw the eye. A dot is always solid, since a pale disc with nothing in it is hard to tell from the page.',
-        tone: 'The meaning the badge carries, expressed as a colour. A solid badge is filled with it and its text adapts to stay readable; a soft one is tinted with it and writes its text in it.',
+        variant: 'Visual style.',
+        tone: 'Colour tone.',
         color:
-          'A colour of your own, as hex, a CSS name or <code>oklch()</code>, which replaces the tone. On a solid badge, where <code>contrast-color()</code> is supported the text turns black or white by itself; everywhere else it falls back to white, so with a light colour the contrast is yours to check. A soft badge mixes its background and text from that colour and the theme.',
-        count:
-          'The number to display. Anything above 99 is shown as 99+, so a busy counter cannot stretch the pill indefinitely.',
-        icon: 'A single icon shown instead of a number. It takes precedence over <code>count</code>, and is ignored when the badge is a dot.',
-        dot: 'Reduces the badge to a 10px dot with no content, the discreet way to signal that something is new without saying how much.',
-        overlay:
-          'Pins the badge to a corner of the target element instead of placing it beside it. It does nothing when the badge has no target.',
-        overlayPosition:
-          'Which corner an overlaid badge is pinned to: the top one by default, the bottom one for a marker that belongs at the foot of its target, such as a presence dot under an avatar. The horizontal side follows the reading direction and is not configurable.',
-        bordered:
-          'Draws a 2px ring in the colour of the surface behind the badge, which detaches it from a busy target such as a picture. That colour is the page background by default, and <code>ringColor</code> is how you change it.',
-        ringColor:
-          "The colour of the ring <code>bordered</code> draws. It defaults to the page background, so a badge sitting on a card or a coloured banner should be given that surface's colour instead. Without <code>bordered</code> it does nothing.",
+          'Custom CSS colour. For solid badges, check foreground contrast in browsers without <code>contrast-color()</code> support.',
+        count: 'Count to display. Values above 99 appear as <code>99+</code>.',
+        icon: 'Icon replacing the count.',
+        dot: 'Shows a status dot without content.',
+        overlay: 'Places the badge at the target’s corner. Requires a target in the default slot.',
+        overlayPosition: 'Top or bottom corner. The horizontal side follows the reading direction.',
+        bordered: 'Adds a ring around the badge.',
+        ringColor: 'Ring colour when bordered. Defaults to the page background.',
       },
       slots: {
         default:
-          "The element the badge belongs to. Without it the badge stands on its own; with it, the badge is placed beside the element, or in its corner under <code>overlay</code>, and is hidden from assistive technology: say the count in the element's own name.",
+          'Target element. Attached badges are hidden from assistive technology; include their information in the target’s accessible name.',
       },
     },
   },

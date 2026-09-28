@@ -4,9 +4,6 @@ import { VProgressLinear, VTypography } from 'vectis-ui'
 
 <template>
   <div class="row">
-    <!-- Upright, the bar fills from the BOTTOM up: zero is anchored to the bottom edge,
-         so a vertical bar reads the way a gauge does. It takes the height of whatever
-         holds it, the way the horizontal one takes the width. -->
     <div v-for="value in [25, 60, 90]" :key="value" class="gauge">
       <VProgressLinear
         :value="value"

@@ -9,8 +9,6 @@ import { close, description, image, schedule, search } from 'vectis-ui/icons'
       <VButton v-bind="triggerProps" variant="outline" tone="neutral">Workspace</VButton>
     </template>
 
-    <!-- A group is a named block: its label is a heading and not a command, so nothing
-         happens on click and the arrows never stop on it. -->
     <VMenuGroup label="Create">
       <VMenuItem label="Document" :icon-start="description" />
       <VMenuItem label="Image board" :icon-start="image" />

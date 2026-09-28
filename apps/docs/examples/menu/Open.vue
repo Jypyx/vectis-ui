@@ -21,8 +21,6 @@ const open = ref(false)
       <VButton variant="ghost" tone="neutral" @click="open = false">Close from code</VButton>
     </div>
 
-    <!-- The model is fed BY the panel, so every dismissal writes back to it: a click
-         outside, Escape, or choosing a command. Nothing has to be reset by hand. -->
     <VTypography variant="body-sm" tone="muted">
       The menu is {{ open ? 'open' : 'closed' }}.
     </VTypography>

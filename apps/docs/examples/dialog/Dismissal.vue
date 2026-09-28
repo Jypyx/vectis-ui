@@ -16,7 +16,6 @@ const locked = ref(false)
     <VButton variant="outline" tone="neutral" @click="locked = true">Footer only</VButton>
   </div>
 
-  <!-- Escape and the backdrop still work, so the reader is never trapped. -->
   <VDialog
     v-model:open="noCross"
     hide-close
@@ -48,8 +47,6 @@ const locked = ref(false)
     </template>
   </VDialog>
 
-  <!-- Both refused: the footer is the only way out. Escape alone cannot be refused while
-       the backdrop still closes, so the two go together. -->
   <VDialog
     v-model:open="locked"
     hide-close

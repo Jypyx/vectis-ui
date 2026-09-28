@@ -14,8 +14,6 @@ const crashes = ref(false)
 </template>
 
 <style scoped>
-/* A spread row takes the width it is given, so the panel is what decides how far apart
-   the label and the box end up. */
 .settings {
   display: grid;
   gap: var(--vectis-space-3);

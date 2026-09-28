@@ -32,9 +32,6 @@ const sizes = ['sm', 'md', 'lg'] as const
       />
     </div>
 
-    <!-- Inside a group the corner rules are the row's, and they win: a circular segment
-         keeps square seams so the row still reads as one object. Intended, and the
-         reason a shape is worth choosing before grouping rather than after. -->
     <VButtonGroup variant="outline">
       <VIconButton :icon="arrowUpward" shape="circular" label="Sort ascending" />
       <VIconButton :icon="swapVert" shape="circular" label="Unsorted" />

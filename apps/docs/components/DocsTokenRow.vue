@@ -9,10 +9,7 @@ const props = defineProps<{
 
 const { t, tm, rt } = useI18n()
 
-/*
- * `tm` hands back the catalogue's record, whose entries are either plain strings or the message
- * functions the production build compiles them into; `rt` resolves the latter only.
- */
+/* Resolve catalogue entries through rt before rendering. */
 const segments = computed(() => {
   const entry = (tm('designTokens.descriptions') as Record<string, unknown>)[props.row.name]
   const text = typeof entry === 'string' ? entry : rt(entry as never)

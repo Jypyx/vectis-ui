@@ -7,7 +7,6 @@ function remove() {
 </script>
 
 <template>
-  <!-- Mount <VSnackbar /> once, at the root of your application. This site does it in its layout,
-       which is why the example does not: a second one would render the same bar twice. -->
+  <!-- Mount VSnackbar once in your application. This site already provides it. -->
   <VButton variant="outline" tone="neutral" @click="remove">Delete</VButton>
 </template>

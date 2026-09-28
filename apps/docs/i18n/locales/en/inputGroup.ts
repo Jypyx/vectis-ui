@@ -1,52 +1,51 @@
 export default {
   title: 'Input group',
-  lead: 'Joins two or more form controls into a single object: a country code against a phone number, a search field against its button. The shared borders melt into one line and only the two ends of the row stay rounded.',
-
+  lead: '<code>VInputGroup</code> joins fields based on <code>VInput</code> and buttons in one row, with shared borders and labels.',
   examples: {
     multipleInputs: {
-      title: 'Several fields in one row',
-      text: 'A row takes as many segments as needed. Every segment holding a field takes an equal share of what is left, the others keeping their natural width.',
+      title: 'Multiple fields',
+      text: 'Fields share the available width equally. Buttons keep their natural width.',
     },
     naming: {
-      title: 'Naming the row and its segments',
-      text: 'The group renders one <code>label</code> and one <code>hint</code> for the whole row. Name each segment with <code>aria-label</code> and keep visible labels on the group so the controls stay aligned.',
+      title: 'Accessible names',
+      text: 'Use the group’s <code>label</code> and <code>hint</code> for shared text. Give each field an <code>aria-label</code> to name it without adding a visible label.',
     },
     widths: {
       title: 'Widths',
-      text: 'Proportions are set on the segment itself, with a class or an inline <code>flex</code>. A consumer rule is unlayered, so it wins over the share the group hands out.',
+      text: 'Set <code>flex</code> on a segment’s class to change its width.',
     },
     withButton: {
-      title: 'A field and its button',
-      text: 'A <code>solid</code> or <code>soft</code> button covers the shared edge with its own background, and an <code>outline</code> button in <code>tone="neutral"</code> draws the same border colour as the fields. A <code>ghost</code> button has no frame at all, so it is the one variant to avoid here.',
+      title: 'With a button',
+      text: 'Use <code>solid</code> or <code>soft</code>, or <code>outline</code> with <code>tone="neutral"</code>. Avoid <code>ghost</code>, which has no visible frame.',
     },
     sizes: {
       title: 'Size and density',
-      text: '<code>size</code> and <code>compact</code> are set on the row and travel to every segment, winning over what a segment asks for itself.',
+      text: 'Set <code>size</code> and <code>compact</code> on the group to override individual settings.',
     },
     states: {
       title: 'States',
-      text: 'A group with none of the shape props set leaves every segment exactly as it was. <code>disabled</code> adds up instead of replacing, so a segment switched off on its own stays off under a row that says nothing.',
+      text: '<code>disabled</code> disables all segments. Individually disabled segments stay disabled; set errors on the affected field.',
     },
     pickers: {
-      title: 'Two fields that open a panel',
-      text: "Each panel is anchored to its own field's box, so it opens under the segment it belongs to rather than under the group. The buttons a panel contains are not segments of the row and keep the size their own component gave them.",
+      title: 'With pickers',
+      text: 'Each picker panel opens beneath its own field. Group sizing does not affect controls inside the panels.',
     },
   },
-
   api: {
     VInputGroup: {
       props: {
         label:
-          'The label above the row, rendered once for all of its segments and used as the accessible name of the group. A segment carrying one of its own is pushed out of line, so name each of them with <code>aria-label</code> instead.',
-        hint: 'A line of help under the row, tied to the group so assistive technology reads it out along with the label.',
-        size: 'The height every segment takes, whatever it names for itself: a row of controls of two heights stops reading as one object. Left out, each segment keeps its own.',
+          'Shared visible label and accessible group name. Consumer <code>aria-label</code> or <code>aria-labelledby</code> takes precedence. Name each field separately.',
+        hint: 'Shared help text below the row, linked to the group through <code>aria-describedby</code>.',
+        size: 'Size of all segments. Overrides individual sizes; when omitted, each segment keeps its own.',
         compact:
-          'Takes 4px off the height of every segment, the way <code>compact</code> does on a lone field.',
+          'Reduces segment height. Overrides individual values, including when set to <code>false</code>; when omitted, each segment keeps its own.',
         disabled:
-          'Makes the whole row unusable. It adds to what each segment says rather than replacing it: a segment disabled on its own stays disabled under a row that says nothing.',
+          'Disables all segments. Setting it to <code>false</code> does not enable individually disabled controls.',
       },
       slots: {
-        default: 'The fields and buttons to join. Each one is a segment of the row.',
+        default:
+          'Fields based on <code>VInput</code>, plus <code>VButton</code> or <code>VIconButton</code> components.',
       },
     },
   },

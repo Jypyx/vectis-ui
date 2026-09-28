@@ -13,9 +13,6 @@ const placements: ToastPlacement[] = [
 
 <template>
   <div class="demo">
-    <!-- Six corners, each with a stack of its own, so notifications aimed at different
-         ones never queue behind each other. Set on the VToaster the placement is the
-         default for every notification; passed here it is this one's alone. -->
     <VButton
       v-for="placement in placements"
       :key="placement"

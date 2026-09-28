@@ -1,55 +1,53 @@
 export default {
   title: 'Checkbox',
-  lead: 'A choice that a submit will carry out, as opposed to a switch, which acts at once. It wraps a real <code>&lt;input type="checkbox"&gt;</code>, so it submits with the form.',
-
+  lead: 'Use <code>VCheckbox</code> for independent choices or confirmation, such as accepting terms.',
   examples: {
     labelPosition: {
       title: 'Label position',
-      text: '<code>labelPosition</code> moves the label before the box instead of after it.',
+      text: '<code>labelPosition="start"</code> places the label before the checkbox.',
     },
     spread: {
-      title: 'Spread',
-      text: '<code>spread</code> takes the full width offered and pushes the label and the box to opposite ends of the row.',
+      title: 'Full width',
+      text: '<code>spread</code> fills the available width and places the label and checkbox at opposite ends.',
     },
     indeterminate: {
       title: 'Indeterminate',
-      text: '<code>indeterminate</code> shows a dash instead of a tick. It is an appearance of its own: the v-model still holds true or false.',
+      text: '<code>indeterminate</code> indicates a partial selection, such as some items in a list being checked. It does not change the boolean <code>v-model</code>.',
     },
     disabled: {
       title: 'Disabled',
-      text: '<code>disabled</code> prevents the box from being ticked and greys it out through the colour tokens. The keyboard steps over it.',
+      text: '<code>disabled</code> prevents changes and removes the checkbox from Tab navigation and form submission.',
     },
     hint: {
       title: 'Hint',
-      text: '<code>label</code> writes the text beside the box, and the default slot replaces it when the label needs more than text. <code>hint</code> adds a caption underneath, tied to the box through <code>aria-describedby</code> and kept outside the <code>&lt;label&gt;</code>, so it is announced as a description rather than as part of the name.',
+      text: 'Use <code>label</code> or the default slot for the name. <code>hint</code> adds help text linked through <code>aria-describedby</code>.',
     },
     readonly: {
       title: 'Read-only',
-      text: '<code>readonly</code> shows the state without letting it change. The native attribute does nothing on a checkbox, so the component cancels the click, which covers Space as well. The box stays focusable, is submitted with its form and is announced as read-only. It still takes part in constraint validation, though, so <code>readonly</code> with <code>required</code> and nothing ticked leaves a form that cannot be submitted or fixed.',
+      text: '<code>readonly</code> prevents changes by click or Space while preserving focus and native form behavior. A read-only, unchecked field with <code>required</code> still fails native form validation.',
     },
   },
-
   api: {
     VCheckbox: {
       props: {
-        label: 'The text beside the box, which names it. The default slot replaces it.',
-        hint: 'A line of help under the label. It is tied to the checkbox for assistive technology, so it is read out after the label rather than as part of it.',
+        label:
+          'Visible label, replaced by the default slot. Without either, provide <code>aria-label</code> or <code>aria-labelledby</code>.',
+        hint: 'Help text below the label, linked through <code>aria-describedby</code>.',
         readonly:
-          'Shows the state without allowing it to be changed. The checkbox can still be focused, is announced as read-only and is still submitted with its form; a click or the Space key simply changes nothing.',
+          'Prevents changes while keeping the checkbox focusable. Sets <code>aria-readonly</code>; native form submission and validation still apply.',
         indeterminate:
-          'Shows the box as partially checked, a dash instead of a tick. This is what a parent checkbox looks like when some of its children are ticked and others are not. It is a state of its own, not a value the v-model can hold.',
-        labelPosition: 'Which side of the box the label sits on.',
-        spread:
-          'Pushes the label and the box to opposite ends of the line, the row taking the full width available. This is the usual shape for a list of settings.',
+          'Displays a partial-selection state. Independent of <code>v-model</code>, which remains a boolean.',
+        labelPosition:
+          'Label before the checkbox with <code>start</code>, or after it with <code>end</code>.',
+        spread: 'Fills the available width and separates the label and checkbox.',
         invalid:
-          'Marks the field as invalid, which colours the box and tells assistive technology so. Use it for a rule the browser cannot check by itself; native validity is already handled without it.',
-        disabled: 'Makes the checkbox unusable, greyed out through the colour tokens.',
+          'Sets <code>aria-invalid</code> and the error style. Does not block form submission by itself.',
+        disabled: 'Disables the checkbox and excludes it from focus and form submission.',
         vModel:
-          'Whether the box is ticked. It starts unticked, and the dash is a third appearance rather than a third value: that one is <code>indeterminate</code>.',
+          'Checked state, a boolean defaulting to <code>false</code>. Use native <code>name</code> and <code>value</code> attributes for form submission.',
       },
       slots: {
-        default:
-          "The label, when it needs more than the <code>label</code> prop's text. It is clickable.",
+        default: 'Clickable label content, replacing <code>label</code>.',
       },
     },
   },

@@ -1,44 +1,39 @@
 export default {
   title: 'Tooltip',
-  lead: 'A short description of the element under the pointer, or under keyboard focus. It is a description and never a container: nothing inside it can be interacted with.',
-
+  lead: '<code>VTooltip</code> displays a short description on hover or focus. Its content must remain non-interactive.',
   examples: {
     placements: {
       title: 'Placements',
-      text: '<code>placement</code> offers eight sides, four of them aligned to an edge of the trigger rather than centred on it. It names a preference: the browser moves the panel when the side asked for has no room.',
+      text: '<code>placement</code> sets the preferred tooltip position.',
     },
     edgeFlipping: {
       title: 'At the edge of the screen',
-      text: 'With no room on the side it asked for, the panel takes the opposite one. It is pure CSS, with no measurement and no observer.',
+      text: 'The tooltip moves to the opposite side when space is insufficient.',
     },
     delay: {
       title: 'Opening and closing',
-      text: '<code>delay</code> is how long the pointer has to rest on the trigger before the tooltip appears, 300ms by default, and 0 removes the wait. Keyboard focus opens it at once, Escape closes it without taking the focus away, and pressing the trigger closes it too.',
+      text: '<code>delay</code> sets the hover wait in milliseconds. Focus opens immediately; Escape or trigger activation closes without moving focus.',
     },
     describing: {
       title: 'Describing, not naming',
-      text: 'The tooltip sets <code>aria-describedby</code> on its trigger, which keeps its own accessible name: an icon button still carries its <code>label</code>. A tap opens nothing, so whatever the tooltip says has to exist somewhere else as well.',
+      text: 'The tooltip uses <code>aria-describedby</code>; the trigger still needs its own accessible name. Taps do not open it, so keep essential information available elsewhere.',
     },
     richContent: {
       title: 'Rich content',
-      text: 'The <code>#content</code> slot wins over the <code>text</code> prop when both are given. It has to stay non-interactive: nothing inside can be reached from the keyboard, and the description is flattened to plain text for a screen reader.',
+      text: '<code>content</code> overrides <code>text</code>. Use formatting or decorative icons, without interactive controls.',
     },
   },
-
   api: {
     VTooltip: {
       props: {
-        text: 'What the tooltip says. The <code>#content</code> slot replaces it when both are given.',
-        placement:
-          'Which side of the element the tooltip appears on. The browser flips it to the opposite side by itself when there is not enough room.',
-        delay:
-          'How long the pointer must rest on the element before the tooltip appears, in milliseconds. Keyboard focus opens it at once, the intent not being in doubt there, and a delay of 0 disables the wait entirely.',
+        text: 'Tooltip description. Replaced by the <code>content</code> slot.',
+        placement: 'Preferred position; flips when space is insufficient.',
+        delay: 'Hover delay in milliseconds; 0 removes the wait. Focus opens immediately.',
       },
       slots: {
-        default:
-          'The element the tooltip describes. Bind the <code>triggerProps</code> it receives onto it, which is what ties the two together for assistive technology, and make sure it is something that can take focus, or keyboard users will never see the tooltip.',
+        default: 'Focusable trigger. Bind the supplied <code>triggerProps</code>.',
         content:
-          'Content richer than a plain string: formatting, a keyboard shortcut, an icon. It must stay non-interactive: the description is flattened to plain text for screen readers, and nothing inside can be reached from the keyboard. Content one can interact with belongs in a panel that stays open, such as VMenu.',
+          'Non-interactive description replacing <code>text</code>. Assistive technology reads it as plain text.',
       },
     },
   },

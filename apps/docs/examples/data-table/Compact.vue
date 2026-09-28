@@ -19,8 +19,6 @@ const rows = [
 </script>
 
 <template>
-  <!-- The cells tighten, and so does everything the table renders with them: the search
-       field, the page size menu and the pagination all take the shorter step. -->
   <VDataTable
     compact
     variant="outlined"

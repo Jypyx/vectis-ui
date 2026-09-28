@@ -8,11 +8,6 @@ const syncPanel = useTemplateRef<InstanceType<typeof VPopover>>('syncPanel')
 
 <template>
   <div class="column">
-    <!--
-      Auto: the browser dismisses it on a click outside or on Escape, and stacks it with the
-      other panels on the page. The model is written back from the DOM, so nothing has to be
-      reset by hand.
-    -->
     <VPopover>
       <template #trigger="{ triggerProps }">
         <VButton v-bind="triggerProps" variant="outline" tone="neutral">auto</VButton>
@@ -22,10 +17,6 @@ const syncPanel = useTemplateRef<InstanceType<typeof VPopover>>('syncPanel')
       </VTypography>
     </VPopover>
 
-    <!--
-      Manual: nothing dismisses it but you. This is what a panel with rules of its own needs,
-      and it means the panel must offer a way out.
-    -->
     <VPopover v-model:open="manualOpen" mode="manual">
       <template #trigger="{ triggerProps }">
         <VButton v-bind="triggerProps" variant="outline" tone="neutral">manual</VButton>
@@ -38,9 +29,7 @@ const syncPanel = useTemplateRef<InstanceType<typeof VPopover>>('syncPanel')
       </div>
     </VPopover>
 
-    <!-- The model costs a tick. When the opening has to be synchronous, because a focus
-         move or a timer is armed on the assumption the panel is already there, the
-         exposed methods are the route. -->
+    <!-- Use exposed methods when opening must happen synchronously. -->
     <div class="row">
       <VPopover ref="syncPanel" mode="manual">
         <template #trigger="{ triggerProps }">

@@ -43,8 +43,6 @@ const rows = NAMES.map((name, index) => ({
 </script>
 
 <template>
-  <!-- The headings need something to stay put against, so the scrolling area has to be
-       bounded: here by `height`, otherwise by a parent with a height of its own. -->
   <VDataTable
     sticky-header
     variant="outlined"

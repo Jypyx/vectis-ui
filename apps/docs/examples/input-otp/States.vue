@@ -12,8 +12,6 @@ import { VInputOTP } from 'vectis-ui'
       hint="Out of reach entirely"
     />
 
-    <!-- Frozen rather than out of reach: the boxes still take the focus and the code
-         can be selected and copied. -->
     <VInputOTP
       model-value="481902"
       :length="6"

@@ -15,8 +15,6 @@ const selected = ref<Record<string, string>>({
 
 <template>
   <div class="demo">
-    <!-- The scale shared by every control, set once on the bar: each tab is a button
-         of that size, so a tab and a button beside it line up. -->
     <div v-for="size in sizes" :key="size" class="row">
       <p class="caption">{{ size }}</p>
       <VTabs v-model="selected[size]" :size="size" :label="`Project, ${size}`">

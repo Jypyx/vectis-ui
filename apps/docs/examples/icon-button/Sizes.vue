@@ -17,8 +17,6 @@ const sizes = ['xs', 'sm', 'md', 'lg', 'xl'] as const
     />
   </div>
 
-  <!-- Compact takes 4px off both sides, so the box stays square and the icon inside it
-       keeps the size its step gives it. -->
   <div class="row">
     <VIconButton
       v-for="size in sizes"

@@ -1,51 +1,50 @@
 export default {
   title: 'Bouton radio',
-  lead: "Un choix parmi plusieurs. Le groupe est natif : tous les boutons partageant un <code>name</code> lui appartiennent, et le navigateur se charge de l'exclusivité et des flèches.",
-
+  lead: '<code>VRadio</code> sélectionne une valeur parmi plusieurs options. Partagez le même <code>name</code> et le même <code>v-model</code> dans le groupe pour la sélection native et la navigation par flèches.',
   examples: {
     labelPosition: {
       title: 'Position du libellé',
-      text: "<code>labelPosition</code> place le libellé avant le point plutôt qu'après.",
+      text: '<code>labelPosition="start"</code> place le libellé avant le bouton radio.',
     },
     spread: {
-      title: 'Écartement',
-      text: '<code>spread</code> prend toute la largeur offerte et pousse le libellé et le point aux deux extrémités de la ligne.',
+      title: 'Pleine largeur',
+      text: '<code>spread</code> occupe la largeur disponible et place le libellé et le bouton radio aux extrémités opposées.',
     },
     disabled: {
       title: 'Désactivé',
-      text: '<code>disabled</code> empêche de choisir le bouton et le grise par les tokens de couleur. Un bouton à la fois sélectionné et désactivé garde son point.',
+      text: '<code>disabled</code> empêche la sélection et retire l’option de la navigation clavier et de l’envoi du formulaire.',
     },
     hint: {
       title: 'Aide',
-      text: "<code>label</code> écrit le texte à côté du point, et le slot par défaut le remplace. <code>hint</code> ajoute une légende en dessous, reliée au bouton par <code>aria-describedby</code> : c'est l'endroit où dire ce qu'une option implique.",
+      text: 'Utilisez <code>label</code> ou le slot par défaut pour nommer l’option. <code>hint</code> ajoute un texte d’aide lié par <code>aria-describedby</code>.',
     },
     readonly: {
       title: 'Lecture seule',
-      text: "<code>readonly</code>, posé sur chaque bouton du groupe, laisse la sélection où elle est. Le composant annule le clic, et les flèches sont couvertes aussi, puisque le navigateur sélectionne le bouton suivant par un clic : le focus se déplace, la sélection non. Aucun <code>aria-readonly</code> n'est écrit, ARIA l'autorisant sur un <code>radiogroup</code> et pas sur un <code>radio</code> : posez-le sur l'élément qui nomme la question, sinon rien n'annonce l'état. Et un bouton en lecture seule participe toujours à la validation de contrainte, donc <code>readonly</code> avec <code>required</code> et rien de sélectionné laisse un formulaire impossible à envoyer comme à corriger.",
+      text: 'Définissez <code>readonly</code> sur chaque option pour conserver la sélection pendant que les flèches déplacent le focus. Utilisez un conteneur nommé avec <code>role="radiogroup"</code> et <code>aria-readonly="true"</code> pour annoncer cet état. Un groupe en lecture seule avec <code>required</code> et sans sélection reste invalide pour la validation native du formulaire.',
     },
   },
-
   api: {
     VRadio: {
       props: {
-        label: 'Le texte à côté du point, qui le nomme. Le slot par défaut le remplace.',
-        hint: "Une ligne d'aide sous le libellé. Elle est reliée au bouton pour les technologies d'assistance, qui la lisent après le libellé et non comme une partie de celui-ci.",
+        label:
+          'Libellé visible, remplacé par le slot par défaut. Sans l’un ni l’autre, fournissez <code>aria-label</code> ou <code>aria-labelledby</code>.',
+        hint: 'Texte d’aide sous le libellé, lié par <code>aria-describedby</code>.',
         readonly:
-          "Montre la sélection sans permettre de la changer. Le bouton reste focalisable et s'envoie toujours avec son formulaire ; un clic ou une flèche ne sélectionnent simplement rien. À poser sur chaque bouton du groupe.",
+          'Empêche les changements de sélection tout en conservant le focus et le comportement natif du formulaire. À définir sur chaque option. Annoncez la lecture seule sur le conteneur du groupe.',
         value:
-          "Ce que signifie le choix de ce bouton. Le v-model du groupe porte la valeur du bouton sélectionné : c'est donc ce qu'il devient quand celui-ci est choisi.",
-        labelPosition: 'De quel côté du point se place le libellé.',
-        spread:
-          'Pousse le libellé et le point aux extrémités opposées de la ligne, qui prend toute la largeur disponible.',
+          'Chaîne ou nombre affecté au <code>v-model</code> lors de la sélection. Utilisez une valeur distincte par option.',
+        labelPosition:
+          'Libellé avant le bouton radio avec <code>start</code>, ou après avec <code>end</code>.',
+        spread: 'Occupe la largeur disponible et sépare le libellé du bouton radio.',
         invalid:
-          "Marque le champ comme invalide, ce qui colore le point et le signale aux technologies d'assistance. C'est pour une règle que le navigateur ne sait pas vérifier seul.",
-        disabled: 'Rend ce choix inutilisable, grisé par les tokens de couleur.',
+          'Définit <code>aria-invalid</code> et le style d’erreur. Ne bloque pas à lui seul l’envoi du formulaire.',
+        disabled:
+          'Désactive cette option et l’exclut de la navigation clavier et de l’envoi du formulaire.',
         vModel:
-          "La valeur sélectionnée dans le groupe, partagée par tous les boutons portant le même <code>name</code>. Elle est vide tant que rien n'est choisi, et un bouton est sélectionné quand elle correspond à sa propre <code>value</code>.",
+          'Valeur sélectionnée, partagée par le groupe. Une option est sélectionnée si le modèle correspond à son <code>value</code>. Vaut une chaîne vide par défaut.',
       },
       slots: {
-        default:
-          'Le libellé, quand il demande plus que le texte de la prop <code>label</code>. Il est cliquable.',
+        default: 'Contenu cliquable du libellé, remplaçant <code>label</code>.',
       },
     },
   },

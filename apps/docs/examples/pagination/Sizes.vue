@@ -20,8 +20,6 @@ const page = ref(3)
       <VTypography variant="caption" tone="muted">{{ size }}</VTypography>
     </div>
 
-    <!-- A pill is square at one digit and widens by itself past that: its minimum
-         width derives from the control height, so nothing is set per size. -->
     <div v-for="size in sizes" :key="`${size}-compact`" class="row">
       <VPagination
         v-model="page"

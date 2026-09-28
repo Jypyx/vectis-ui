@@ -6,9 +6,7 @@ import { description, more_horiz as moreHoriz, notifications, search } from 'vec
 <template>
   <aside class="sidebar">
     <VSideNavigation label="Project">
-      <!-- On a leaf the action is stretched over the row by an overlay, so whatever
-           sits at the end stays a sibling of it rather than inside it. A real control
-           belongs here and nowhere else. -->
+      <!-- Leaf end content sits beside the link, so it may contain a control. -->
       <VSideNavigationItem href="#usage" :icon="description">
         Drafts
         <template #end>
@@ -22,10 +20,7 @@ import { description, more_horiz as moreHoriz, notifications, search } from 'vec
         </template>
       </VSideNavigationItem>
 
-      <!-- A branch is a native disclosure and its row is the summary, which has to
-           hold the whole line. So the end of a branch row takes a counter or a badge,
-           never a control: a control there would be nested inside the one the row
-           already is. -->
+      <!-- Branch end content sits inside summary; keep it non-interactive. -->
       <VSideNavigationItem :icon="notifications">
         Notifications
         <template #end><VBadge :count="12" tone="accent" /></template>

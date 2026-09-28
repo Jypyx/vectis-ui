@@ -14,8 +14,6 @@ const rating = ref(3)
       <p class="value">{{ temperature }} °C</p>
     </div>
 
-    <!-- A short span is what makes each stop reachable from the keyboard in a few
-         presses, and what makes the ticks worth drawing. -->
     <div class="row">
       <p class="caption">Rating, 1 to 5</p>
       <VSlider v-model="rating" :min="1" :max="5" ticks label="Rating" />

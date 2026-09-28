@@ -1,84 +1,81 @@
 export default {
   title: 'Groupe de boutons',
-  lead: "Assemble des boutons en un seul contrôle segmenté : bordures fusionnées, coins arrondis aux extrémités seulement. La rangée est un objet unique, donc c'est le groupe qui décide de son dessin, depuis le fait même d'assembler les boutons jusqu'à la variante, le ton, la taille et la densité que chacun d'eux reprend.",
-
+  lead: '<code>VButtonGroup</code> rassemble des actions liées et partage la disposition et les réglages d’apparence entre <code>VButton</code> et <code>VIconButton</code>.',
   examples: {
     variantsAndTones: {
       title: 'Variantes et tons',
-      text: "<code>variant</code> et <code>tone</code> se posent une fois sur le groupe. La variante l'emporte sur celle donnée à un bouton ; le ton n'est qu'une valeur de repli.",
+      text: 'Le <code>variant</code> du groupe remplace celui de chaque bouton. Son <code>tone</code> s’applique uniquement aux boutons sans ton propre.',
     },
     toneOverride: {
-      title: 'Un segment, un autre ton',
-      text: 'Un segment garde son propre <code>tone</code> face au groupe, ce qui permet à une rangée neutre de porter une seule action destructrice.',
+      title: 'Tons individuels',
+      text: 'Définissez le <code>tone</code> d’un bouton pour remplacer celui du groupe, par exemple pour signaler une action destructrice.',
     },
     orientation: {
       title: 'Orientation',
-      text: "<code>vertical</code> empile les segments en colonne plutôt qu'en rangée, la jonction suivant l'axe.",
+      text: '<code>orientation="vertical"</code> dispose les boutons en colonne.',
     },
     detached: {
-      title: 'Séparés',
-      text: "<code>detached</code> laisse les boutons séparés, chacun gardant ses coins et ses bordures, le groupe continuant de transmettre ses props d'apparence.",
+      title: 'Boutons séparés',
+      text: '<code>detached</code> sépare les boutons en conservant les réglages d’apparence du groupe.',
     },
     seamless: {
-      title: 'Sans traits',
-      text: "<code>seamless</code> retire les traits dessinés à chaque jonction, ne laissant qu'un seul cadre aux bords extérieurs intacts.",
+      title: 'Sans séparateurs',
+      text: '<code>seamless</code> retire les séparateurs internes et conserve la bordure extérieure. Sans effet avec <code>detached</code>.',
     },
     elevated: {
-      title: 'Surélevé',
-      text: "<code>elevated</code> donne l'ombre à la rangée plutôt qu'à chaque segment. En mode détaché, chaque bouton porte de nouveau la sienne.",
+      title: 'Avec une ombre',
+      text: '<code>elevated</code> ajoute une ombre au groupe, ou à chaque bouton lorsqu’ils sont séparés.',
     },
     sizes: {
       title: 'Tailles',
-      text: "<code>size</code> définit la hauteur de chaque segment : 24, 32, 40, 48 ou 56 pixels. Elle l'emporte sur celle donnée à un bouton.",
+      text: '<code>size</code> définit la taille de tous les boutons et remplace les tailles individuelles.',
     },
     compact: {
       title: 'Compact',
-      text: '<code>compact</code> retire 4px à la hauteur de chaque segment.',
+      text: '<code>compact</code> réduit la hauteur de chaque bouton.',
     },
     fullWidth: {
       title: 'Pleine largeur',
-      text: '<code>fullWidth</code> étire la rangée sur son parent et donne à chaque segment une part égale de cette largeur.',
+      text: '<code>fullWidth</code> occupe toute la largeur du parent. Dans un groupe horizontal, les boutons ont la même largeur.',
     },
     icons: {
       title: 'Avec des icônes',
-      text: "Les segments portent <code>iconStart</code> et <code>iconEnd</code> comme n'importe quel bouton. Un VIconButton est aussi un segment, et demande toujours son <code>label</code>.",
+      text: 'Utilisez <code>iconStart</code> et <code>iconEnd</code> sur les boutons, ou <code>VIconButton</code> avec un <code>label</code> obligatoire.',
     },
     link: {
-      title: 'Lien',
-      text: 'Un segment auquel on donne un <code>href</code> rend un <code>&lt;a&gt;</code>. Un lien désactivé voit son adresse retirée, ce qui le laisse ni focalisable ni suivable.',
+      title: 'Liens',
+      text: 'Définissez <code>href</code> sur un bouton pour afficher un lien. Un lien désactivé ou en chargement ne permet pas de naviguer.',
     },
     states: {
       title: 'États',
-      text: "<code>disabled</code> posé sur le groupe s'ajoute à celui de chaque bouton : un segment ne peut pas se réactiver une fois la rangée coupée. <code>loading</code> reste propre au bouton.",
+      text: '<code>disabled</code> désactive tous les boutons. Définissez <code>loading</code> sur les boutons concernés.',
     },
   },
-
   api: {
     VButtonGroup: {
       props: {
-        orientation:
-          'Le sens dans lequel les boutons sont assemblés : une rangée par défaut, ou une colonne avec <code>vertical</code>.',
+        orientation: 'Disposition en ligne horizontale ou en colonne verticale.',
         detached:
-          'Laisse les boutons séparés, avec un écart entre eux et chacun gardant ses propres coins, au lieu de les assembler en contrôle segmenté. Tout ce que le groupe transmet circule toujours, et une rangée surélevée laisse alors chaque bouton porter sa propre ombre.',
+          'Sépare les boutons par un espace. Chacun garde ses coins et bordures ; les réglages d’apparence du groupe restent appliqués.',
         seamless:
-          "Retire les traits entre les boutons assemblés : aucune couture n'est dessinée, et les bordures des deux côtés de chaque arête partagée sont effacées, si bien que la rangée se lit comme un cadre unique plutôt que comme des segments. Les arêtes extérieures restent. Sans effet sous <code>detached</code>, où aucune arête n'est partagée.",
+          'Retire les séparateurs internes et conserve la bordure extérieure. Sans effet avec <code>detached</code>.',
         fullWidth:
-          "Étire la rangée sur toute la largeur de son parent, chaque segment prenant une part égale de cette largeur quel que soit son libellé. Un segment ne descend jamais sous la largeur de son propre libellé : une rangée de libellés trop longs pour le parent le déborde au lieu d'être écrasée. Sous <code>vertical</code>, il ne reste que la largeur, une colonne étirant déjà chaque segment.",
+          'Occupe toute la largeur du parent. Les boutons horizontaux ont la même largeur, mais peuvent déborder si leur contenu est trop large.',
         variant:
-          "Le poids visuel que porte chaque segment, sur les valeurs de VButton : <code>solid</code>, <code>outline</code>, <code>ghost</code> ou <code>soft</code>. Il l'emporte sur la variante donnée à un bouton, un segment d'une autre silhouette ne se lisant plus comme un morceau de la rangée. Omis, chaque bouton garde la sienne.",
-        tone: 'La couleur des segments, parmi <code>accent</code>, <code>neutral</code> et <code>danger</code>. Celui-ci est un repli et non un ordre : un bouton qui nomme son propre ton le garde, ce qui permet à une seule action destructrice de se signaler dans la rangée.',
-        size: "La hauteur des segments, tirée de l'échelle de tailles partagée par tous les contrôles : <code>xs</code>, <code>sm</code>, <code>md</code>, <code>lg</code> ou <code>xl</code>. Elle l'emporte sur la taille donnée à un bouton. Omise, chaque bouton garde la sienne.",
+          'Style visuel de tous les boutons. Remplace les variantes individuelles ; si omis, chaque bouton conserve la sienne.',
+        tone: 'Ton appliqué aux boutons sans <code>tone</code> propre.',
+        size: 'Taille de tous les boutons. Remplace les tailles individuelles ; si omise, chaque bouton conserve la sienne.',
         compact:
-          "Retire 4px à la hauteur de chaque segment. Il l'emporte sur la valeur donnée à un bouton. Omis, chaque bouton garde la sienne.",
+          'Réduit la hauteur des boutons. Remplace les valeurs individuelles, même avec <code>false</code> ; si omis, chaque bouton conserve la sienne.',
         elevated:
-          "Soulève la rangée avec l'échelle d'ombres, aux conditions de la prop de VButton. L'ombre est celle de la rangée et non celle de chaque segment, ce qui garde les joints nets : trois ombres qui se chevauchent y dessineraient une bande sombre. Il l'emporte sur la valeur donnée à un bouton. Omis, chaque bouton garde la sienne.",
+          'Ajoute une ombre au groupe, ou à chaque bouton avec <code>detached</code>. Remplace les valeurs individuelles, même avec <code>false</code> ; si omis, chaque bouton conserve la sienne.',
         disabled:
-          "Rend chaque segment inutilisable. Celui-ci s'ajoute au lieu de trancher : un bouton qui se désactive lui-même le reste dans une rangée qui ne dit rien, et un segment ne peut pas se réactiver une fois la rangée éteinte.",
+          'Désactive tous les boutons. La valeur <code>false</code> ne réactive pas les boutons désactivés individuellement.',
         label:
-          'Ce que les lecteurs d\'écran annoncent pour la rangée, qui est un <code>role="group"</code> : « Mise en forme », « Affichage ». Un groupe sans nom est annoncé comme un simple groupe. Un <code>aria-label</code> ou un <code>aria-labelledby</code> posé par le consommateur l\'emporte.',
+          'Nom accessible du groupe, par exemple « Mise en forme ». Les attributs <code>aria-label</code> ou <code>aria-labelledby</code> fournis prennent le pas sur cette prop.',
       },
       slots: {
-        default: 'Les VButton et VIconButton à assembler.',
+        default: 'Les composants <code>VButton</code> et <code>VIconButton</code> à regrouper.',
       },
     },
   },

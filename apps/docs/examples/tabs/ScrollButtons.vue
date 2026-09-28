@@ -9,17 +9,12 @@ const vertical = ref('Paris')
 
 <template>
   <div class="demo">
-    <!-- A button at each end, disabled once that end is reached, for a pointer that has
-         no wheel to scroll with. They are opt-in: on a bar that never overflows they
-         would be two permanently disabled controls. -->
     <div class="narrow">
       <VTabs v-model="horizontal" scroll-buttons label="Cities">
         <VTab v-for="city in cities" :key="city" :value="city" :label="city" />
       </VTabs>
     </div>
 
-    <!-- Vertically the buttons move to the top and bottom of the column, and their
-         icons follow the axis without being asked. -->
     <div class="short">
       <VTabs v-model="vertical" orientation="vertical" scroll-buttons label="Cities, vertical">
         <VTab v-for="city in cities" :key="city" :value="city" :label="city" />

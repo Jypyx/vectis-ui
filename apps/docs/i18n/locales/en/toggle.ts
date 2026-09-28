@@ -1,113 +1,108 @@
 export default {
   title: 'Toggle',
-  lead: 'A group of buttons driven by one value: a segmented control for one choice, or a set of filters for several. Every item is a VButton, so the tones and variants are the ones you already know.',
-
+  lead: '<code>VToggle</code> groups <code>VToggleItem</code> buttons to select one or more values through <code>v-model</code>.',
   examples: {
     variants: {
       title: 'Variants and tones',
-      text: '<code>itemVariant</code> paints the items that are not chosen, transparent under <code>ghost</code> and outlined under <code>outline</code>. <code>tone</code> colours the chosen item and nothing else, with the three values a button offers.',
+      text: '<code>itemVariant</code> styles unselected items. <code>tone</code> applies to selected items; the others remain neutral.',
     },
     selectedVariants: {
-      title: 'How the selection is drawn',
-      text: "<code>selectedVariant</code> is how the chosen item is painted in the group's tone: filled with <code>solid</code>, tinted with <code>soft</code>, or the colour of its text alone with <code>ghost</code>.",
+      title: 'Selection style',
+      text: '<code>selectedVariant</code> sets the selected style: <code>solid</code>, <code>soft</code> or <code>ghost</code>.',
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> takes the scale every control shares, 24 to 56 pixels, and <code>compact</code> takes 4px off it. It is set once on the group.',
+      text: '<code>size</code> sets every item’s size. <code>compact</code> reduces their height.',
     },
     itemContent: {
-      title: 'What an item holds',
-      text: 'An item takes a label, an icon at either end, or the default slot for what a string cannot hold. An item reduced to its icon still needs a <code>label</code>, which is then its accessible name.',
+      title: 'Item content',
+      text: 'Use <code>label</code> or the default slot for visible text, and <code>iconStart</code> or <code>iconEnd</code> for icons. Give icon-only items an <code>aria-label</code>.',
     },
     filledIcons: {
       title: 'Filled icons',
-      text: "<code>selectedIconFilled</code> draws the chosen item's start icon in its filled form. <code>iconFilled</code> on an item fills its icons whatever is chosen. Nothing happens to an icon that has no filled drawing.",
+      text: '<code>selectedIconFilled</code> fills the selected item’s start icon. An item’s <code>iconFilled</code> fills both icons regardless of selection, where supported.',
     },
     detached: {
       title: 'Detached',
-      text: '<code>detached</code> leaves the items as separate buttons with a gap between them, instead of joining them into one segmented control.',
+      text: '<code>detached</code> separates the items with a gap.',
     },
     seamless: {
-      title: 'Seamless',
-      text: '<code>seamless</code> takes out the lines drawn between two items, so the row reads as one frame holding a highlight that moves. It has no effect under <code>detached</code>.',
+      title: 'No dividers',
+      text: '<code>seamless</code> removes inner dividers. Has no effect with <code>detached</code>.',
     },
     fullWidth: {
       title: 'Full width',
-      text: '<code>fullWidth</code> stretches the row across its parent and gives every item an equal share of that width.',
+      text: '<code>fullWidth</code> fills the parent’s width. Horizontal groups give each item equal width.',
     },
     elevated: {
       title: 'Elevated',
-      text: '<code>elevated</code> raises the row off the page, the shadow belonging to the row rather than to each item.',
+      text: '<code>elevated</code> adds one shadow to a joined group, or a shadow to each item when detached.',
     },
     orientation: {
-      title: 'Orientation',
-      text: '<code>orientation</code> set to <code>vertical</code> stacks the items down the page, the joins and the arrow keys following the axis.',
+      title: 'Orientation and keyboard',
+      text: '<code>orientation="vertical"</code> stacks the items. Arrows move focus along that axis; Home and End focus the first and last enabled items. Each enabled item remains a Tab stop. Space or Enter changes the selection.',
     },
     multiple: {
-      title: 'Choosing several',
-      text: '<code>multiple</code> lets several items be chosen at once, which makes the value a list. Clicking a chosen item gives it up again, and the array is never mutated in place.',
+      title: 'Multiple selection',
+      text: '<code>multiple</code> allows several selections and uses an array for <code>v-model</code>. Activate a selected item again to deselect it.',
     },
     mandatory: {
-      title: 'Keeping one selected',
-      text: '<code>mandatory</code> refuses to give up the last chosen item. It is a guard and nothing more: it selects nothing on its own.',
+      title: 'Keep a selection',
+      text: '<code>mandatory</code> prevents deselecting the last selected item. Set the initial selection through <code>v-model</code>.',
     },
     disabled: {
       title: 'Disabled',
-      text: '<code>disabled</code> applies to the whole group, where nothing responds and no item takes focus, or to a single item, which the arrow keys then step over. Both grey out through the colour tokens.',
+      text: 'Disable the group or an individual item with <code>disabled</code>. Disabled items cannot receive focus and are skipped by arrow navigation.',
     },
   },
-
   api: {
     VToggle: {
       props: {
-        multiple: 'Allows several items to be chosen at once, which makes the value a list.',
+        multiple: 'Allows multiple selections. Use an array for <code>v-model</code>.',
         mandatory:
-          'Refuses to let the last chosen item be given up, so that something is always selected once something has been. It is a guard and nothing more: it selects nothing on its own at the start.',
-        detached:
-          'Leaves the items as separate buttons with a gap between them. Left out, they are joined into one segmented control.',
+          'Prevents deselecting the last selected item. Does not select an initial value or prevent external changes to <code>v-model</code>.',
+        detached: 'Separates the items with a gap.',
         seamless:
-          'Takes the lines out from between the joined items, so the row reads as one frame rather than as segments. It has no effect under <code>detached</code>, where the items are separate buttons already.',
-        orientation: 'Whether the items run across the page or down it.',
+          'Removes inner dividers while preserving the outer border. Has no effect with <code>detached</code>.',
+        orientation: 'Horizontal row or vertical column. Sets the arrow navigation direction.',
         fullWidth:
-          "Stretches the row across the whole inline size of its parent, every item taking an equal share of it, on the terms of VButtonGroup's own prop.",
+          'Fills the parent’s width. Horizontal items share equal widths but may overflow if their content is too wide.',
         itemVariant:
-          'How the unselected items are drawn. What the selected one takes is <code>selectedVariant</code>. It is named for the items because that is what it paints: on VTabs and VDataTable <code>variant</code> names the decoration of the frame instead.',
+          'Visual style of unselected items: <code>ghost</code> or <code>outline</code>.',
         selectedVariant:
-          "How the selected item is drawn, in the group's tone: filled with <code>solid</code>, tinted with <code>soft</code>, or the colour of its text alone with <code>ghost</code>.",
-        tone: 'The colour a selected item takes. The others stay neutral.',
-        size: 'The height of the items, from the scale shared by every control.',
-        compact: 'Takes 4px off the height of every item.',
-        elevated:
-          "Raises the row off the page, on the terms of VButtonGroup's own prop: the shadow belongs to the row rather than to each item, so the joints stay clear.",
-        disabled: 'Makes the whole group unusable.',
+          'Visual style of selected items: <code>solid</code>, <code>soft</code> or <code>ghost</code>.',
+        tone: 'Tone of selected items. Unselected items remain neutral.',
+        size: 'Size of all items.',
+        compact: 'Reduces item height.',
+        elevated: 'Adds a group shadow, or individual shadows with <code>detached</code>.',
+        disabled: 'Disables all items and removes them from the tab order.',
         selectedIconFilled:
-          "Draws the selected item's icon in its filled form, a common way of reinforcing that it is the one in effect.",
+          'Requests a filled start icon for selected items, where supported. Does not affect end icons or slot content.',
         label:
-          'What screen readers announce for the group, "Text alignment", "Filters". It is strongly recommended: no default could say what a group of buttons is for.',
+          'Accessible group name. Provide this or an <code>aria-label</code> or <code>aria-labelledby</code>.',
         vModel:
-          'What is selected, and its shape follows <code>multiple</code>: a single value, or <code>null</code> where it starts, when one item may be chosen, and an array when several may. A null or scalar value passed in multiple mode is read as an empty selection. The array is never mutated in place. Re-clicking the selected item deselects it unless <code>mandatory</code> is set.',
+          'Selected value: a string, number or <code>null</code> for single selection; an array for multiple selection. In multiple mode, a scalar or <code>null</code> is treated as an empty selection. Activating a selected item deselects it unless <code>mandatory</code> prevents it.',
       },
       slots: {
-        default: 'The items of the group.',
+        default: 'The <code>VToggleItem</code> components in the group.',
       },
     },
     VToggleItem: {
       props: {
         value:
-          "What choosing this item means. It is what the group's value holds when the item is selected, and it must be unique within the group.",
-        label: 'The visible label. The default slot replaces it.',
-        iconStart: 'An icon before the label.',
-        iconEnd:
-          'An icon after the label. It is not switched to its filled form by the group <code>selectedIconFilled</code>, which names the icon standing for the item rather than one trailing it; <code>iconFilled</code> fills it for good.',
+          'Value written to the group’s <code>v-model</code>. Must be unique within the group.',
+        label:
+          'Visible text, replaced by the default slot. For icon-only items, use <code>aria-label</code>.',
+        iconStart: 'Icon before the label, replaced by the <code>#start</code> slot.',
+        iconEnd: 'Icon after the label, replaced by the <code>#end</code> slot.',
         iconFilled:
-          "Renders <code>iconStart</code> and <code>iconEnd</code> in their filled form, whether the item is selected or not. The group's <code>selectedIconFilled</code> still fills the start icon of the selected item when this is left out.",
-        disabled:
-          'Makes this item unusable: it no longer responds, the arrow keys skip over it, and it greys out through the colour tokens.',
+          'Requests filled versions of both icons regardless of selection, where supported. Does not affect slot content.',
+        disabled: 'Disables this item and removes it from Tab and arrow navigation.',
       },
       slots: {
-        default: 'The content of the item, replacing the <code>label</code> prop.',
-        start: 'Content before the label, which takes the place of <code>iconStart</code>.',
-        end: 'Content after the label, which takes the place of <code>iconEnd</code>.',
+        default: 'Visible content, replacing <code>label</code>.',
+        start: 'Content before the label, replacing <code>iconStart</code>.',
+        end: 'Content after the label, replacing <code>iconEnd</code>.',
       },
     },
   },

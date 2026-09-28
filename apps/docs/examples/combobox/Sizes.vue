@@ -9,8 +9,6 @@ const countries = [
   { value: 'ch', label: 'Switzerland' },
 ]
 
-/* Multiple mode on every row: the chips are what shows that the panel and the field are
-   not the only things following the step. */
 const rows = ref(
   (['sm', 'md', 'lg'] as const).flatMap((size) => [
     { key: size, size, compact: false, label: size, selected: ['fr'] },

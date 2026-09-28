@@ -1,52 +1,51 @@
 export default {
   title: 'Groupe de champs',
-  lead: 'Réunit deux contrôles de formulaire ou plus en un seul objet : un indicatif pays contre un numéro de téléphone, un champ de recherche contre son bouton. Les bordures partagées se fondent en un seul trait et seules les deux extrémités de la rangée restent arrondies.',
-
+  lead: '<code>VInputGroup</code> réunit des champs basés sur <code>VInput</code> et des boutons sur une ligne, avec des bordures et des libellés partagés.',
   examples: {
     multipleInputs: {
-      title: 'Plusieurs champs dans une rang�e',
-      text: 'Une rangée prend autant de segments que nécessaire. Chaque segment portant un champ prend une part égale de ce qui reste, les autres gardant leur largeur naturelle.',
+      title: 'Plusieurs champs',
+      text: 'Les champs se partagent équitablement la largeur disponible. Les boutons gardent leur largeur naturelle.',
     },
     naming: {
-      title: 'Nommer la rangée et ses segments',
-      text: 'Le groupe rend un seul <code>label</code> et un seul <code>hint</code> pour toute la rangée. Nommez chaque segment avec <code>aria-label</code> et gardez les libellés visibles sur le groupe pour aligner les contrôles.',
+      title: 'Noms accessibles',
+      text: 'Utilisez les props <code>label</code> et <code>hint</code> du groupe pour les textes communs. Donnez un <code>aria-label</code> à chaque champ pour le nommer sans ajouter de libellé visible.',
     },
     widths: {
       title: 'Largeurs',
-      text: "Les proportions se posent sur le segment lui-même, par une classe ou un <code>flex</code> en ligne. Une règle de votre application n'est pas en couche, elle l'emporte donc sur la part distribuée par le groupe.",
+      text: 'Définissez <code>flex</code> dans la classe d’un segment pour modifier sa largeur.',
     },
     withButton: {
-      title: 'Un champ et son bouton',
-      text: 'Un bouton <code>solid</code> ou <code>soft</code> couvre le bord partagé avec son propre fond, et un bouton <code>outline</code> en <code>tone="neutral"</code> dessine la même couleur de bordure que les champs. Un bouton <code>ghost</code> n\'a aucun cadre : c\'est la seule variante à éviter ici.',
+      title: 'Avec un bouton',
+      text: 'Utilisez <code>solid</code> ou <code>soft</code>, ou <code>outline</code> avec <code>tone="neutral"</code>. Évitez <code>ghost</code>, qui n’a pas de cadre visible.',
     },
     sizes: {
       title: 'Taille et densité',
-      text: "<code>size</code> et <code>compact</code> se posent sur la rangée et atteignent chaque segment, en l'emportant sur ce qu'un segment demande pour lui-même.",
+      text: 'Définissez <code>size</code> et <code>compact</code> sur le groupe pour remplacer les réglages individuels.',
     },
     states: {
       title: 'États',
-      text: "Un groupe sans aucune prop de forme laisse chaque segment exactement tel qu'il était. <code>disabled</code> s'ajoute au lieu de remplacer : un segment coupé de lui-même le reste sous une rangée qui ne dit rien.",
+      text: '<code>disabled</code> désactive tous les segments. Les segments désactivés individuellement le restent ; définissez les erreurs sur le champ concerné.',
     },
     pickers: {
-      title: 'Deux champs qui ouvrent un panneau',
-      text: "Chaque panneau est ancré à la boîte de son propre champ, il s'ouvre donc sous le segment auquel il appartient et non sous le groupe. Les boutons que contient un panneau ne sont pas des segments de la rangée et gardent la taille que leur composant leur a donnée.",
+      title: 'Avec des sélecteurs',
+      text: 'Chaque panneau s’ouvre sous son propre champ. La taille définie sur le groupe n’affecte pas les contrôles des panneaux.',
     },
   },
-
   api: {
     VInputGroup: {
       props: {
         label:
-          "Le libellé au-dessus de la rangée, rendu une seule fois pour tous ses segments et utilisé comme nom accessible du groupe. Un segment qui porte le sien se retrouve décalé, nommez donc chacun d'eux avec <code>aria-label</code>.",
-        hint: "Une ligne d'aide sous la rangée, rattachée au groupe pour que les technologies d'assistance la lisent avec le libellé.",
-        size: "La hauteur que prend chaque segment, quelle que soit celle qu'il nomme pour lui-même : une rangée de contrôles de deux hauteurs cesse de se lire comme un seul objet. Absente, chaque segment garde la sienne.",
+          'Libellé visible commun et nom accessible du groupe. Les attributs <code>aria-label</code> ou <code>aria-labelledby</code> fournis prennent le pas sur cette prop. Nommez chaque champ séparément.',
+        hint: 'Texte d’aide commun sous la ligne, lié au groupe par <code>aria-describedby</code>.',
+        size: 'Taille de tous les segments. Remplace les tailles individuelles ; si omise, chaque segment conserve la sienne.',
         compact:
-          'Retire 4px à la hauteur de chaque segment, comme <code>compact</code> le fait sur un champ isolé.',
+          'Réduit la hauteur des segments. Remplace les valeurs individuelles, même avec <code>false</code> ; si omis, chaque segment conserve la sienne.',
         disabled:
-          "Rend toute la rangée inutilisable. Cela s'ajoute à ce que dit chaque segment au lieu de le remplacer : un segment désactivé de lui-même le reste sous une rangée qui ne dit rien.",
+          'Désactive tous les segments. La valeur <code>false</code> ne réactive pas les contrôles désactivés individuellement.',
       },
       slots: {
-        default: 'Les champs et les boutons à joindre. Chacun est un segment de la rangée.',
+        default:
+          'Champs basés sur <code>VInput</code>, et boutons <code>VButton</code> ou <code>VIconButton</code>.',
       },
     },
   },

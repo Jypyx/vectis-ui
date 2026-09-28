@@ -11,8 +11,6 @@ import {
   <div class="row">
     <aside class="sidebar">
       <p class="caption">One icon, rotated</p>
-      <!-- Given only the closed chevron, the open one is that same drawing turned by
-           180 degrees. It is the right shape for a glyph that reads both ways up. -->
       <VSideNavigation label="Rotated chevron" :expand-icon="arrowDropDown">
         <VSideNavigationItem default-open>
           Documents
@@ -31,11 +29,6 @@ import {
 
     <aside class="sidebar">
       <p class="caption">Two icons, swapped</p>
-      <!--
-        Naming both swaps one drawing for the other instead, which a file tree wants: a chevron
-        pointing along the reading direction when the branch is closed, and down when it is
-        open.
-      -->
       <VSideNavigation
         label="Swapped chevrons"
         :expand-icon="chevronRight"

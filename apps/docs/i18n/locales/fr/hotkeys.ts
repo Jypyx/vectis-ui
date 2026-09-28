@@ -1,69 +1,61 @@
 export default {
   title: 'Raccourcis clavier',
-  lead: "Un raccourci clavier, affiché. Il se rend en <code>&lt;kbd&gt;</code> imbriqués, écrit ses glyphes selon la plateforme, et peut écouter la combinaison qu'il montre si vous le lui demandez.",
-
+  lead: '<code>VHotkeys</code> affiche un raccourci clavier selon les conventions de la plateforme. Activez <code>listen</code> pour émettre un événement lorsqu’il est utilisé.',
   examples: {
     keys: {
       title: "Ce qu'on peut écrire",
       written: 'Vous écrivez',
       elsewhere: 'Windows et Linux',
-      text: "<code>keys</code> est une simple chaîne, séparée par des <code>+</code>, où ni la casse ni les espaces ne comptent. <code>mod</code> est le modificateur qui appartient au système, Command sur un Mac et Ctrl partout ailleurs, là où <code>meta</code> nomme cette touche physique au sens littéral. Un jeton que le design system ne connaît pas est dessiné exactement tel qu'il a été écrit, et la touche <code>+</code> s'écrit <code>plus</code>.",
+      text: 'Écrivez <code>keys</code> sous forme de chaîne séparée par <code>+</code>, sans distinction de casse ni d’espaces. <code>mod</code> désigne Command sur macOS et Ctrl ailleurs ; <code>meta</code> est la touche système littérale. Écrivez la touche plus avec <code>plus</code>. Les valeurs inconnues s’affichent telles quelles.',
     },
     variants: {
       title: 'Variantes',
-      text: "<code>variant</code> dessine les touches teintées, contourées ou surélevées. Il n'y a ni prop de ton ni prop de couleur : toutes les peintures dérivent de la couleur héritée.",
+      text: '<code>variant</code> choisit des touches atténuées, avec bordure ou en relief. Les couleurs héritent du texte environnant.',
     },
     sizes: {
       title: 'Tailles',
-      text: "<code>size</code> accepte <code>xs</code> ou <code>sm</code>, et <code>compact</code> retire 4px à l'une comme à l'autre. Une touche d'un seul caractère est carrée.",
+      text: 'Choisissez <code>xs</code> ou <code>sm</code>. <code>compact</code> réduit la hauteur.',
     },
     attached: {
       title: 'Attaché',
-      text: "<code>attached</code> déplace la décoration de chaque touche vers le raccourci entier, si bien que la combinaison se lit comme une seule touche. C'est purement visuel : le balisage, les touches et le nom annoncé sont identiques.",
+      text: '<code>attached</code> encadre le raccourci comme une seule touche. Il ne modifie ni son nom accessible ni son comportement.',
     },
     platform: {
       title: 'Plateforme',
-      text: '<code>platform</code> impose le système au lieu de le lire une fois le composant dans la page, ce dont a besoin un tableau montrant tous les systèmes.',
+      text: '<code>platform</code> remplace la détection automatique de la plateforme.',
     },
     separator: {
       title: 'Séparateur',
-      text: "<code>separator</code> est ce qui s'écrit entre deux touches, <code>+</code> par défaut. Une chaîne vide laisse l'écart en place et donne la convention macOS.",
+      text: '<code>separator</code> définit le texte entre les touches. Utilisez une chaîne vide pour juxtaposer les symboles macOS.',
     },
     inText: {
       title: 'Dans le texte et dans les composants',
-      text: "Une touche prend sa taille dans l'échelle <code>size</code>, <code>xs</code> par défaut, et se place au milieu de la ligne qui l'entoure. Ses places habituelles sont la fin d'une ligne de menu, une infobulle, et le contrôle dont le raccourci est un second chemin.",
+      text: 'Placez les raccourcis à côté des contrôles, dans les menus ou dans les infobulles.',
     },
     listening: {
       title: 'Écoute',
-      text: "<code>listen</code> fait guetter au composant la combinaison qu'il affiche et émettre <code>trigger</code>. Les modificateurs sont comparés exactement, si bien que <code>mod+k</code> et <code>mod+shift+k</code> peuvent coexister. <code>allowDefault</code> conserve le raccourci du navigateur, et <code>allowInInput</code> laisse le raccourci se déclencher pendant une saisie dans un champ. Échap est signalé mais jamais annulé, il ferme donc toujours les dialogues. La comparaison lit le caractère produit par la touche : un symbole tapé avec Maj (<code>?</code>), un chiffre sur un clavier AZERTY et Option + lettre sur macOS ne correspondent pas, préférez donc les lettres et les touches nommées.",
+      text: '<code>listen</code> émet <code>trigger</code> si les touches modificatrices correspondent exactement. <code>allowDefault</code> conserve l’action du navigateur ; <code>allowInInput</code> autorise la détection dans les champs éditables. Échap n’est jamais annulé. La détection utilise le caractère produit : préférez les lettres et touches nommées aux symboles, chiffres AZERTY ou combinaisons Option-lettre sur macOS.',
     },
   },
-
   api: {
     VHotkeys: {
       props: {
-        keys: "La combinaison, séparée par <code>+</code> : <code>mod+k</code>, <code>ctrl+shift+p</code>, <code>alt+enter</code>. La casse et les espaces sont sans importance. <code>mod</code> est le modificateur multiplateforme, Commande sur macOS et Ctrl partout ailleurs, tandis que <code>meta</code> désigne la touche Commande ou Windows elle-même. Un jeton inconnu s'affiche tel qu'il a été déclaré, et la touche <code>+</code> s'écrit <code>plus</code>.",
-        variant: 'Comment une touche est dessinée : teintée, contourée, ou soulevée de la page.',
-        attached:
-          "Dessine toute la combinaison comme une seule touche plutôt que plusieurs, ce qui place le séparateur à l'intérieur de la touche au lieu de le mettre entre deux. C'est purement visuel : le balisage et le nom annoncé sont identiques dans les deux cas.",
-        size: "La taille des touches. Un raccourci est du décor à côté d'un autre texte, il part donc de la plus petite.",
-        compact: 'Retire 4px à la hauteur, en laissant le rembourrage et le texte tels quels.',
-        platform:
-          "Force le système d'exploitation du clavier au lieu de le détecter, pour un rendu déterministe ou un hôte qui le sait déjà.",
-        separator:
-          'Ce qui est écrit entre deux touches. Une chaîne vide donne la convention macOS, où les symboles se suivent simplement.',
-        listen:
-          "Écoute réellement la combinaison et la rapporte. Désactivé par défaut : un composant dont le métier est d'afficher un raccourci ne doit pas capturer le clavier de la page sans qu'on le lui demande.",
+        keys: 'Chaîne de raccourci séparée par <code>+</code>. Utilisez <code>mod</code> pour Command/Ctrl et <code>plus</code> pour la touche plus.',
+        variant: 'Style des touches : atténué, avec bordure ou en relief.',
+        attached: 'Encadre toute la combinaison comme une seule touche.',
+        size: 'Taille du composant.',
+        compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
+        platform: 'Plateforme imposée pour l’affichage et la détection du raccourci.',
+        separator: 'Texte entre les touches. Une chaîne vide conserve uniquement l’espacement.',
+        listen: 'Active la détection du raccourci et l’événement <code>trigger</code>.',
         allowDefault:
-          "Pendant l'écoute, laisse le navigateur continuer de faire ce que la combinaison fait normalement. Sans lui, le navigateur est arrêté, ce qui est tout l'intérêt de reprendre une combinaison. Échap n'est jamais arrêté : il doit rester la demande de fermeture des dialogues.",
-        allowInInput:
-          "Pendant l'écoute, se déclenche même quand le lecteur est en train de saisir dans un champ. Désactivé par défaut, pour qu'un raccourci ne parte pas au milieu d'une phrase.",
-        label:
-          "Ce que les lecteurs d'écran annoncent. Il retombe sur le dictionnaire du design system, qui écrit les modificateurs en mots : le glyphe gagne à l'écran, le mot gagne dans le nom accessible.",
+          'Conserve l’action du navigateur lors de la détection. Échap est toujours conservé.',
+        allowInInput: 'Autorise la détection dans les champs éditables.',
+        label: 'Nom accessible du raccourci. Lecture localisée des touches par défaut.',
       },
       events: {
         trigger:
-          "La combinaison a été pressée, avec l'événement clavier d'origine. Cet événement ne part que si <code>listen</code> est posé.",
+          'Le raccourci a été utilisé avec <code>listen</code> activé. Reçoit l’événement clavier.',
       },
     },
   },

@@ -13,8 +13,6 @@ const PLACEMENTS: MenuPlacement[] = [
 
 <template>
   <div class="grid">
-    <!-- Only the block axis is offered: a list of commands opening beside its button
-         would leave the reader looking in the wrong place. -->
     <VMenu v-for="placement in PLACEMENTS" :key="placement" :placement="placement">
       <template #trigger="{ triggerProps }">
         <VButton v-bind="triggerProps" variant="outline" tone="neutral">
@@ -33,7 +31,7 @@ const PLACEMENTS: MenuPlacement[] = [
   display: grid;
   grid-template-columns: repeat(3, max-content);
   gap: var(--vectis-space-4);
-  /* Room above and below, so a menu is never flipped by a shortage of space. */
+  /* Leave room on both sides to demonstrate the requested placement without flipping. */
   padding-block: var(--vectis-space-10);
 }
 </style>

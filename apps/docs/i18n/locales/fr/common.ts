@@ -25,7 +25,7 @@ export default {
     packageManager: 'Gestionnaire de paquets',
   },
   example: {
-    label: "Ce que montre l'exemple",
+    label: 'Affichage de l’exemple',
     preview: 'Aperçu',
     code: 'Code',
   },
@@ -36,7 +36,7 @@ export default {
     slots: 'Slots',
     types: 'Types',
     typesLead:
-      "Les types que les tables ci-dessus nomment, écrits comme la librairie les déclare. Ceux qui portent <code>export</code> s'importent depuis <code>vectis-ui</code> pour typer votre propre code ; les autres décrivent la forme de ce qu'un slot fournit.",
+      'Types utilisés dans les tables d’API. Importez les types exportés depuis <code>vectis-ui</code>.',
     cssVariables: 'Variables CSS',
   },
   table: {
@@ -58,6 +58,5 @@ export default {
     builtWith:
       'Réalisé avec <a href="https://github.com/Jypyx/vectis-ui" target="_blank" rel="noreferrer">Vectis UI</a> et <a href="https://nuxt.com" target="_blank" rel="noreferrer">Nuxt</a>',
   },
-
   ogImageAlt: 'Le logo et le nom Vectis UI sur un fond violet sombre.',
 }

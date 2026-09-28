@@ -2,8 +2,6 @@
 import { ref } from 'vue'
 import { VButton, VDialog, VTypography } from 'vectis-ui'
 
-/* One dialog per width, each opened by its own button. Whatever is asked for, the
-   dialog is never allowed past the viewport, margins included. */
 const WIDTHS = ['320px', '480px', '40rem']
 
 const opened = ref<string | null>(null)

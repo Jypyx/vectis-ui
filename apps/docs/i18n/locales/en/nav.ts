@@ -1,8 +1,3 @@
-/**
- * The type is what binds the two: a `Record` over `DocsSlug` means a slug added to the
- * inventory without a title here fails `nuxt typecheck`, and a title left behind after a slug
- * is removed fails too. Neither can drift silently into the sidebar.
- */
 import type { DocsSlug, NavGroupId } from '~/content/nav'
 
 export type NavMessages = Record<DocsSlug, string> & { group: Record<NavGroupId, string> }

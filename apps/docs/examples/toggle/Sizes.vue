@@ -15,8 +15,6 @@ const selected = ref<Record<string, string>>({
 
 <template>
   <div class="demo">
-    <!-- The scale shared by every control, set once on the group: each item is a
-         button of that size, so a toggle row and a button beside it line up. -->
     <div v-for="size in sizes" :key="size" class="row">
       <p class="caption">{{ size }}</p>
       <VToggle v-model="selected[size]" :size="size" :label="`Period, ${size}`">

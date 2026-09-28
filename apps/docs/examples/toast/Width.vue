@@ -7,8 +7,6 @@ const LONG =
 
 <template>
   <div class="demo">
-    <!-- Left alone the card sits between a floor and a ceiling of its own, so a short
-         message is not a sliver and a long one does not stretch across the page. -->
     <VButton
       variant="outline"
       tone="neutral"
@@ -17,10 +15,6 @@ const LONG =
       Default width
     </VButton>
 
-    <!--
-      It is never allowed past the width of the viewport, margins included, so a value too large
-      for a phone is simply ignored there rather than pushing the card off the screen.
-    -->
     <VButton
       variant="outline"
       tone="neutral"

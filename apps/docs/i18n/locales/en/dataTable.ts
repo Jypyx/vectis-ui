@@ -1,151 +1,134 @@
 export default {
   title: 'Data table',
-  lead: 'Rows with searching, sorting, selection and pagination. It does all four itself over the rows it is given, or hands them to a server and simply reports what is being asked for.',
-
+  lead: '<code>VDataTable</code> displays rows with search, sorting, selection and pagination. Process data locally or use server mode to request each result set.',
   examples: {
     sorting: {
       title: 'Sorting',
-      text: 'A column marked <code>sortable</code> gets a clickable heading, cycling ascending, descending, then the order the rows were given. <code>v-model:sort</code> reads and sets that state.',
+      text: 'Mark columns <code>sortable</code>. Their headings cycle through ascending, descending and original order. Observe or set the sort with <code>v-model:sort</code>.',
     },
     search: {
       title: 'Search',
-      text: '<code>searchable</code> puts a field in the toolbar, which searches the declared columns while ignoring case and accents. <code>v-model:search</code> drives the term from elsewhere on the page.',
+      text: '<code>searchable</code> adds a field searching declared columns without case or accent sensitivity. Control the query with <code>v-model:search</code>.',
     },
     pagination: {
       title: 'Pagination',
-      text: 'Any <code>v-model:per-page</code> above zero turns the pagination on. <code>showRange</code> adds the row count beside the nav.',
+      text: 'Set <code>v-model:per-page</code> above 0 to enable pagination. <code>showRange</code> displays the visible row range.',
     },
     rowsPerPage: {
       title: 'Rows per page',
-      text: '<code>perPageOptions</code> adds a menu to the footer for choosing how many rows a page holds. <code>v-model:per-page</code> reports what was chosen.',
+      text: '<code>perPageOptions</code> offers page sizes in the footer.',
     },
     selection: {
       title: 'Selection',
-      text: '<code>selectable</code> adds a checkbox to every row and one to the heading for the visible page. <code>rowKey</code> is required with it, and <code>v-model:selected</code> holds the identities that field gives.',
+      text: '<code>selectable</code> adds row checkboxes and a page-wide checkbox. Provide a stable <code>rowKey</code>; <code>v-model:selected</code> contains those identifiers.',
     },
     toolbar: {
       title: 'Toolbar',
-      text: 'The <code>#title</code> slot replaces the <code>title</code> prop and takes the left of the toolbar, the search field keeping the right.',
+      text: 'The <code>title</code> slot replaces the toolbar title; search remains on the other side.',
     },
     customCells: {
       title: 'Custom cells',
-      text: "A slot named after a column key replaces what that column's cells show, and receives the row, the raw value and the column. Searching and sorting still read the underlying value.",
+      text: 'A slot matching a column key replaces its cells. It receives the row, raw value and column; sorting and search still use the raw value.',
     },
     customHeadings: {
       title: 'Custom headings',
-      text: 'A slot named <code>head-</code> plus the column key replaces a heading. On a sortable column it renders inside the sort button, so keep it to text and decoration.',
+      text: 'Use <code>head-</code> followed by a column key to customize its heading. Sortable headings contain a button: keep slot content non-interactive.',
     },
     variants: {
       title: 'Variants',
-      text: '<code>variant</code> sets the decoration: <code>flat</code> carries none, <code>outlined</code> adds a raised background, a border, rounded corners and a gutter around the toolbar, the caption and the footer.',
+      text: '<code>flat</code> leaves the table unframed; <code>outlined</code> adds a card surface and border.',
     },
     compact: {
       title: 'Compact',
-      text: '<code>compact</code> tightens every cell, and the search field, the page size menu and the pagination with them.',
+      text: '<code>compact</code> reduces cell spacing and control height.',
     },
     striped: {
       title: 'Striped rows',
-      text: '<code>striped</code> tints every other row.',
+      text: '<code>striped</code> tints alternate rows.',
     },
     stickyHeader: {
       title: 'Sticky header',
-      text: '<code>stickyHeader</code> keeps the column headings in place while the rows scroll. It needs a bounded scrolling area, either the <code>height</code> prop or a parent with a height of its own.',
+      text: '<code>stickyHeader</code> keeps headings visible in a bounded scroll area. Set <code>height</code> or constrain the parent height.',
     },
     fullHeight: {
       title: 'Full height',
-      text: "<code>height</code> bounds the whole component, toolbar and footer included, a number being read as pixels. Left out, the table takes its parent's height whenever the parent has one.",
+      text: '<code>height</code> bounds the whole component, including toolbar and footer. Numbers use pixels; strings use CSS lengths.',
     },
     responsive: {
       title: 'Narrow containers',
-      text: '<code>responsive</code> decides what a container too narrow for the columns does: scroll sideways, or turn each row into a card with its column headings repeated inside it. As cards, the heading row is out of sight, so its sort buttons and its "select all" box leave the tab order with it.',
+      text: 'In narrow containers, <code>responsive</code> selects horizontal scrolling or row cards. Card mode hides heading sort buttons and the select-all checkbox.',
     },
     serverSide: {
       title: 'Server side',
-      text: '<code>serverSide</code> hands the searching, the sorting and the paging over: the rows are shown as they arrive and <code>update:params</code> reports every change. Pass <code>total</code> for the pagination and the range, and <code>searchDebounce</code> to delay the search.',
+      text: '<code>serverSide</code> displays supplied rows without local search, sort or pagination. Listen to <code>update:params</code>, fetch the rows and provide <code>total</code>. <code>searchDebounce</code> delays search requests.',
     },
     states: {
       title: 'Loading and empty',
-      text: '<code>loading</code> shows a spinner and <code>loadingText</code> in place of the rows, and is answered before emptiness. <code>emptyText</code> is what the table says when there is nothing to show. The <code>#loading</code> and <code>#empty</code> slots replace either state, the second receiving the <code>search</code> that emptied the table.',
+      text: 'Loading takes precedence over empty results. Customize these states with <code>loadingText</code>, <code>emptyText</code> or their slots.',
     },
     fullTable: {
       title: 'A complete table',
-      text: 'Everything at once: a title, a search, a selection, four sortable columns, cells of its own, and a footer carrying the selection count, the page size, the range and the pagination.',
+      text: 'Combines search, sorting, selection, custom cells and pagination.',
     },
   },
-
   api: {
     VDataTable: {
       props: {
-        columns: 'The columns to show, in order.',
-        rows: 'The rows to show.',
+        columns: 'Columns in display order.',
+        rows: 'Rows to display.',
         rowKey:
-          'Which field identifies a row. Without it a row is identified by its position, which is enough for display but not for a selection: it must be given as soon as rows can be selected, or the selection follows the positions rather than the rows.',
-        caption:
-          'A sentence describing what the table holds. It is announced before the table itself, and is what tells a screen reader user whether it is worth exploring.',
-        variant:
-          'How the table is framed: nothing at all, or a card with a raised background, a border and rounded corners.',
-        responsive:
-          'What happens when the component is too narrow: the table scrolls sideways, or each row becomes a card with its column headings repeated inside it.',
-        loading: 'Shows that the rows are being loaded.',
-        loadingText:
-          'What is written beside the spinner while the rows are loading. It falls back to the design system dictionary.',
-        emptyText:
-          'What is said when there is no row to show. It falls back to the design system dictionary.',
-        title:
-          'A title above the table, on the left of its toolbar. With no <code>caption</code> it also names the table for screen readers. It shadows the HTML attribute of the same name on the component itself, an accepted trade-off: a tooltip over a whole table would be of little use.',
-        searchable: 'Adds a search field to the toolbar.',
-        searchPlaceholder:
-          'What that field says while empty. It falls back to the design system dictionary.',
-        searchLabel:
-          'What screen readers announce for the search field. It falls back to the design system dictionary.',
-        searchDebounce:
-          'When a server does the searching, how long to wait after a keystroke before asking it, in milliseconds. Zero asks at once.',
-        striped: 'Tints every other row, which helps the eye follow a long line across the table.',
-        stickyHeader:
-          'Keeps the column headings in place while the rows scroll under them. It needs a bounded scrolling area to work: either the <code>height</code> prop, or a parent with a height of its own.',
-        compact: 'Tightens the cells by one step, and everything the table renders with them.',
+          'Stable row identifier field. Required for selection; otherwise row position is used.',
+        caption: 'Table description announced by assistive technology.',
+        variant: 'Unframed or outlined table.',
+        responsive: 'Horizontal scrolling or row cards in narrow containers.',
+        loading: 'Displays loading content instead of rows.',
+        loadingText: 'Visible loading text. Defaults to the dictionary.',
+        emptyText: 'Empty-result text. Defaults to the dictionary.',
+        title: 'Toolbar title. Also names the table when no caption is provided.',
+        searchable: 'Adds a toolbar search field.',
+        searchPlaceholder: 'Search placeholder. Defaults to the dictionary.',
+        searchLabel: 'Accessible search field name. Defaults to the dictionary.',
+        searchDebounce: 'Server search delay in milliseconds. 0 requests immediately.',
+        striped: 'Tints alternate rows.',
+        stickyHeader: 'Keeps headings visible while scrolling. Requires a bounded height.',
+        compact: 'Reduces cell spacing and control height.',
         height:
-          "The height of the whole component, toolbar and pagination included: a number is read as pixels, anything else as a CSS length. Left out, the table takes its parent's height whenever the parent has one.",
-        sortIcon: 'The heading icon of a column that can be sorted but currently is not.',
-        sortAscIcon:
-          'The icon of an ascending sort. It points down by default, the spreadsheet convention: sorting A to Z reads downwards.',
-        sortDescIcon: 'The icon of a descending sort.',
-        perPageOptions: 'The choices offered for how many rows a page holds.',
-        perPageText: 'What that choice is called. It falls back to the design system dictionary.',
-        total:
-          'How many rows there are in all on the server. It is what lets the pagination and the range be right when the table only ever holds one page.',
-        showRange: 'Shows which rows are being looked at, "1 to 10 of 42", in the footer.',
-        rangeText: 'Rephrases that range. It falls back to the design system dictionary.',
-        selectable: 'Adds a checkbox to every row, and one in the heading to take the whole page.',
-        selectAllLabel:
-          'What the heading checkbox is announced as. It falls back to the design system dictionary.',
+          'Whole component height. Numbers use pixels; strings use CSS lengths. Otherwise inherits a constrained parent height.',
+        sortIcon: 'Icon of an unsorted sortable column.',
+        sortAscIcon: 'Ascending sort icon.',
+        sortDescIcon: 'Descending sort icon.',
+        perPageOptions: 'Page sizes offered in the footer.',
+        perPageText: 'Page-size control label. Defaults to the dictionary.',
+        total: 'Total server row count for pagination and range display.',
+        showRange: 'Displays the visible row range in the footer.',
+        rangeText:
+          'Function formatting <code>{ start, end, total }</code>. Defaults to the dictionary.',
+        selectable: 'Adds row checkboxes and a visible-page checkbox.',
+        selectAllLabel: 'Accessible page-selection name. Defaults to the dictionary.',
         selectionText:
-          'How the selection is summed up in the footer. It says nothing at all when nothing is selected, and falls back to the design system dictionary.',
+          'Function formatting the selected count. Defaults to the dictionary; empty with no selection.',
         selectRowLabel:
-          'What a row\'s checkbox is announced as. "Select row" tells a screen reader user nothing about which row, so this is worth supplying with something from the row itself. <code>index</code> is the row\'s position in the whole table, from 0, not in the page. It falls back to the design system dictionary, which numbers the rows from 1.',
+          'Function naming each checkbox from its row and global zero-based index. Defaults to a row number.',
         serverSide:
-          'Hands the searching, the sorting and the paging over to a server: the rows are shown exactly as they arrive, and every change of what is being asked for is reported so the server can answer it.',
+          'Delegates search, sort and pagination to the server through <code>update:params</code>.',
         vModelSort:
-          'Which column the rows are sorted by, and in which direction. Nothing is sorted to begin with. It may be driven from outside or simply left to the table, which sets it as headers are clicked; changing it does not send the reader back to the first page.',
+          'Sort key and direction, or <code>null</code>. Changing sort preserves the page.',
         vModelPage:
-          'The page being shown, counted from 1. Searching or changing the page size, from the menu or from outside, sends it back to the first. It is clamped by derivation rather than written to, so a page beyond the last simply displays the last.',
-        vModelPerPage:
-          'How many rows a page holds. Any value above zero turns the pagination on, so passing one down without binding it is enough to enable it.',
+          'Page number from 1. Search and page-size changes reset it to 1. Out-of-range values display the nearest page without rewriting the model.',
+        vModelPerPage: 'Rows per page. Values above 0 enable pagination.',
         vModelSelected:
-          'The selected rows, as the identities <code>rowKey</code> gives them, never the row objects themselves. Nothing is selected to begin with, and a selection survives a change of page: the header checkbox covers the visible page alone, which is why it can be indeterminate. The footer counts this list as it stands, identities of rows no longer shown included.',
+          'Selected <code>rowKey</code> identifiers, preserved across pages. The header checkbox covers only visible rows.',
         vModelSearch:
-          'What is typed in the search field, empty to begin with. Only the declared columns are searched, accent- and case-insensitively; in server mode nothing is filtered here and the term is reported instead.',
+          'Search query. Local search ignores case and accents; server mode reports it without filtering.',
       },
       events: {
         updateParams:
-          'What the table is being asked for, in server mode: the search, the sort, the page and the page size. It fires on every change and never on mount, and an equal value handed down again asks for nothing.',
+          'Server-mode query changes: search, sort, page and page size. Does not fire on mount or for unchanged values.',
       },
       slots: {
-        title: 'The left side of the toolbar, replacing the <code>title</code> prop.',
-        loading:
-          'What the table shows while its rows are loading, replacing the spinner and its text.',
-        empty:
-          'What the table shows when there is no row to show, replacing <code>emptyText</code>. It receives the search that produced the empty result, empty when nothing was searched for.',
+        title: 'Content replacing the toolbar title.',
+        loading: 'Content replacing the loading spinner and text.',
+        empty: 'Empty-result content. Receives the current <code>search</code>.',
       },
     },
   },

@@ -5,8 +5,6 @@ import { VFilePicker, type FileRejection } from 'vectis-ui'
 const one = ref<File[]>([])
 const several = ref<File[]>([])
 
-/* The component turns a file away and says so; showing why is the consumer's job, here
-   and for every other limit. */
 const refused = ref('')
 
 function onReject({ file }: FileRejection) {

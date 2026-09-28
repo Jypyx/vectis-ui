@@ -1,106 +1,93 @@
 export default {
   title: 'Calendrier',
-  lead: "Un agenda à lire et à réorganiser : vues jour, semaine, mois et année, avec des événements que l'on peut déplacer et étirer. Ouvrir l'un d'eux pour l'éditer vous revient.",
-
+  lead: '<code>VCalendar</code> affiche des événements par jour, semaine, mois ou année. Déplacez et redimensionnez les événements à la souris ou au clavier ; fournissez vos propres formulaires de création et de modification.',
   examples: {
     month: {
       title: 'Mois',
-      text: 'La vue mois dessine chaque jour comme une case contenant ses événements en puces. <code>monthEventLimit</code> limite le nombre affiché avant que le reste soit compté.',
+      text: '<code>monthEventLimit</code> limite le nombre de cartes par jour. Un compteur indique les événements restants.',
     },
     year: {
       title: 'Année',
-      text: "La vue année affiche douze petits mois pour se repérer. Les jours chargés sont cerclés et choisir un mois l'ouvre.",
+      text: 'La vue annuelle affiche douze mois. Sélectionner un mois ouvre sa vue détaillée.',
     },
     customView: {
       title: 'Vue personnalisée',
-      text: 'La vue <code>custom</code> vous en laisse la longueur : <code>customDays</code> dit combien de jours elle montre, et de combien avancent Précédent et Suivant.',
+      text: '<code>customDays</code> définit le nombre de jours de la vue personnalisée et le pas de navigation.',
     },
     weekdays: {
       title: 'Les jours affichés',
-      text: '<code>weekdays</code> décide quels jours apparaissent, en nombres à partir de 0 pour dimanche, sa première entrée étant le jour où commence la semaine. Sans lui, <code>firstDayOfWeek</code> fixe ce premier jour à la place de la locale. <code>dayStart</code> et <code>dayEnd</code> rognent les heures affichées dans les grilles horaires.',
+      text: '<code>weekdays</code> définit les jours visibles et leur ordre. Sa première entrée remplace <code>firstDayOfWeek</code>. Limitez les heures affichées avec <code>dayStart</code> et <code>dayEnd</code>.',
     },
     allDay: {
       title: 'Événements sur la journée',
-      text: '<code>allDay</code> place un événement dans le bandeau au-dessus de la grille, où va déjà un événement de 24 heures ou plus. Celui qui passe minuit en durant moins reste dans la grille, avec une carte dans chacun de ses deux jours. Celui qui finit à minuit pile n’appartient qu’à son premier jour.',
+      text: 'Les événements marqués <code>allDay</code> ou durant au moins 24 heures apparaissent dans la bande dédiée. Un événement plus court passant minuit apparaît sur les deux jours ; une fin à minuit appartient au jour précédent.',
     },
     overlapping: {
       title: 'Événements qui se chevauchent',
-      text: "Les événements simultanés se partagent la largeur de leur journée, groupés en grappes pour qu'une matinée chargée ne rétrécisse pas un rendez-vous isolé de l'après-midi.",
+      text: 'Les événements qui se chevauchent se partagent la largeur de la colonne.',
     },
     colours: {
       title: 'Couleurs',
-      text: "Un événement sans <code>color</code> prend une teinte dérivée de son identifiant. Celui qui nomme sa propre couleur l'emploie pour son bord d'attaque et un voile sur sa face.",
+      text: 'Définissez une couleur CSS dans <code>color</code>. Sinon, la couleur dépend de l’identifiant de l’événement.',
     },
     eventSlot: {
       title: "Contenu d'événement personnalisé",
-      text: "Le slot <code>#event</code> remplace le contenu d'une carte et reçoit l'événement, son <code>timeText</code> formaté, le <code>layout</code> dans lequel il est dessiné, s'il se poursuit avant ou après la journée, et s'il est en train d'être glissé ou saisi au clavier.",
+      text: 'Le slot <code>event</code> remplace le contenu de la carte. Ses données d’événement, d’heure et de disposition permettent d’adapter l’affichage.',
     },
     editing: {
       title: 'Créer et éditer des événements',
-      text: "Le calendrier signale ce que le lecteur a fait et vous laisse la liste : créer et éditer se résument à trois événements et une boîte de dialogue. Tracer un créneau avec <code>creatable</code> déclenche <code>event-create</code> avec ses deux bornes, cliquer une case vide déclenche <code>cell-activate</code> avec un début seulement, et un bouton placé dans le slot <code>#actions</code> ouvre un formulaire vierge. Cliquer une carte déclenche <code>event-activate</code>, qui ouvre le même formulaire prérempli. Enregistrer écrit un nouveau tableau dans <code>v-model:events</code>, le modèle où le glisser et l'étirement écrivent déjà.",
+      text: 'Ouvrez votre éditeur avec <code>event-activate</code> et <code>cell-activate</code>. Avec <code>creatable</code>, tracer une plage horaire vide émet <code>event-create</code> sans ajouter d’événement. Enregistrez les modifications dans <code>v-model:events</code> ; le déplacement et le redimensionnement mettent directement ce modèle à jour.',
     },
   },
-
   api: {
     VCalendar: {
       props: {
-        views:
-          "Quelles vues le menu propose, dans l'ordre où il les liste. Le restreindre est la façon dont un calendrier qui ne montre que des semaines cesse d'en proposer d'autres.",
-        customDays:
-          'Combien de jours la vue personnalisée montre, et de combien Précédent et Suivant y avancent.',
+        views: 'Vues proposées dans le menu, dans l’ordre d’affichage.',
+        customDays: 'Nombre de jours de la vue personnalisée et pas de navigation.',
         weekdays:
-          "Quels jours de la semaine sont montrés, en nombres à partir de 0 pour dimanche. L'ORDRE compte aussi : la première entrée est le jour où commence une semaine, et elle l'emporte sur <code>firstDayOfWeek</code>. Omis, les sept jours à partir de <code>firstDayOfWeek</code>.",
+          'Jours visibles dans l’ordre, avec 0 pour dimanche. La première entrée remplace <code>firstDayOfWeek</code>.',
         firstDayOfWeek:
-          "Le jour où commence une semaine, à partir de 0 pour dimanche, quand <code>weekdays</code> n'est pas donné. Omis, la locale décide.",
-        locale:
-          'La langue dans laquelle les jours, les mois et les heures sont écrits. Elle retombe sur la locale globale.',
-        format:
-          'Si les heures sont montrées sur une horloge de 12 ou de 24 heures. Suit la locale.',
-        dayStart: "L'heure à laquelle la grille commence, à partir de 0.",
-        dayEnd: "L'heure à laquelle elle se termine, jusqu'à 24.",
-        slotDuration:
-          "Le pas sur lequel tout s'aligne, en minutes : de combien un coup de pouce déplace un événement, et l'unité dans laquelle un créneau se trace.",
-        scrollTime:
-          'Où la grille est défilée à sa première apparition, pour que la journée de travail soit en vue.',
-        hideCurrentTime:
-          "Retire la ligne tracée en travers de la colonne du jour à l'heure qu'il est, et le point sur son bord avant. Laissée en place, elle avance d'une minute par minute tant que le calendrier est à l'écran.",
-        monthEventLimit:
-          "Combien d'événements un jour de la vue mois montre avant de compter le reste.",
+          'Premier jour quand <code>weekdays</code> est absent. Dépend de la locale par défaut ; 0 désigne dimanche.',
+        locale: 'Locale des dates et heures. Utilise la locale globale par défaut.',
+        format: 'Affichage sur 12 ou 24 heures. Dépend de la locale par défaut.',
+        dayStart: 'Première heure visible, à partir de 0.',
+        dayEnd: 'Fin des heures visibles, jusqu’à 24.',
+        slotDuration: 'Pas en minutes pour déplacer, redimensionner et créer des événements.',
+        scrollTime: 'Position de défilement initiale, sous forme de chaîne horaire.',
+        hideCurrentTime: 'Masque l’indicateur de l’heure actuelle.',
+        monthEventLimit: 'Nombre maximal de cartes par jour dans la vue mensuelle.',
         readonly:
-          "Empêche de déplacer et d'étirer les événements, à la souris comme au clavier. Ils restent lisibles et cliquables, et rien de plus.",
-        disabled:
-          "Fige tout le calendrier : plus rien ne se déplace, ne se crée ni ne s'ouvre, et aucune autre période n'est atteignable. Les cartes sortent du parcours de tabulation, la grille garde le sien, si bien que l'agenda reste lisible. C'est ce qui le distingue de <code>readonly</code>, qui n'arrête que l'édition.",
+          'Empêche le déplacement et le redimensionnement. La navigation et l’activation restent disponibles ; <code>creatable</code> contrôle la création.',
+        disabled: 'Désactive la navigation, la création, la modification et l’activation.',
         creatable:
-          "Permet de tracer au pointeur une plage vide d'une grille horaire, vers le haut ou vers le bas depuis le créneau pressé. Au relâchement, ses horaires sont transmis par <code>event-create</code> et rien n'est ajouté à <code>events</code> : mettre l'événement au calendrier vous revient. Un clic, ou Entrée sur une cellule, transmet <code>cell-activate</code> avec ou sans cette prop.",
+          'Permet de tracer une plage vide pour émettre <code>event-create</code>. N’ajoute aucun événement.',
         edgeStepDelay:
-          "Combien de temps un événement déplacé doit reposer contre le bord du calendrier avant que la vue passe à la période précédente ou suivante, en millisecondes. Zéro le désactive. L'attente est tout l'intérêt : tourner la page à l'instant où le pointeur touche le bord rendrait le dernier jour d'une semaine impossible à viser.",
+          'Délai en millisecondes avant qu’un événement glissé contre un bord change la période visible. 0 désactive ce comportement.',
         noEdgeScroll:
-          "Empêche un glissement près du haut ou du bas d'une grille horaire de la faire défiler.",
-        label: 'Le nom du calendrier, pour qui ne peut pas le voir.',
-        vModelView: 'Quelle étendue le calendrier affiche. Il ouvre sur la semaine.',
-        vModelDate:
-          "Le jour sur lequel la vue est ancrée, en chaîne ISO. Il ouvre sur aujourd'hui.",
+          'Désactive le défilement vertical lors d’un glissement près des bords de la grille.',
+        label: 'Nom accessible du calendrier.',
+        vModelView: 'Vue affichée. <code>week</code> par défaut.',
+        vModelDate: 'Date de référence au format <code>YYYY-MM-DD</code>. Date du jour par défaut.',
         vModelEvents:
-          "Ce qui est au calendrier. C'est un modèle plutôt qu'une simple prop parce que déplacer et redimensionner y réécrivent : le calendrier réorganise ce qu'on lui donne et rend la nouvelle liste, sans jamais muter celle qu'il a reçue.",
+          'Tableau d’événements. Déplacer ou redimensionner émet un nouveau tableau sans modifier celui fourni.',
       },
       events: {
-        eventActivate:
-          'Une carte a été cliquée ou activée, le signal pour ouvrir un éditeur à vous.',
+        eventActivate: 'Un événement a été activé. Reçoit l’événement.',
         cellActivate:
-          "Une partie vide de la grille a été activée, à ce jour et à cette heure. Un jour de la vue mois n'a pas d'heure à lui, et donne celle à laquelle commencent les grilles horaires.",
+          'Une cellule vide a été activée. Reçoit sa date et son heure ; la vue mensuelle utilise <code>dayStart</code>.',
         eventMove:
-          "Un événement a été déplacé ou poussé ailleurs. Il porte l'événement tel qu'il est désormais et d'où il vient, si bien qu'annuler ne demande aucune copie de votre part.",
-        eventResize: "La fin d'un événement a été déplacée ou poussée, en ces deux mêmes parties.",
+          'Un événement a été déplacé. Reçoit l’événement modifié et ses anciennes dates de début et de fin.',
+        eventResize:
+          'Un événement a été redimensionné. Reçoit l’événement modifié et ses anciennes dates de début et de fin.',
         eventCreate:
-          "Une plage vide d'une journée a été tracée, et voici ses horaires. Rien n'a été ajouté à la liste : c'est le signal pour créer l'événement, dans votre propre modèle ou par votre propre formulaire.",
+          'Une plage vide a été tracée. Reçoit son début et sa fin ; ajoutez vous-même l’événement.',
       },
       slots: {
-        actions:
-          "Des contrôles supplémentaires dans la barre d'outils, entre la plage et le menu des vues.",
-        event: "Le contenu de la carte d'un événement, qui remplace le titre et les heures.",
+        actions: 'Contrôles de la barre d’outils entre la période et le menu des vues.',
+        event: 'Remplace le contenu de la carte. Reçoit l’événement et son état d’affichage.',
         dayHeader:
-          "La tête d'une colonne de jour, qui remplace le jour de la semaine et le numéro.",
-        allDayLabel: 'Le libellé à côté de la bande des événements sur la journée entière.',
+          'Remplace l’en-tête d’une colonne. Reçoit <code>iso</code>, <code>weekday</code>, <code>dayText</code> et <code>today</code>.',
+        allDayLabel: 'Libellé à côté de la bande des événements à la journée.',
       },
     },
   },

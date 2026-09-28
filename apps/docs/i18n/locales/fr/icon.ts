@@ -1,53 +1,46 @@
 export default {
   title: 'Icône',
-  lead: "Une icône, depuis la source dont vous disposez. La bibliothèque embarque ses propres dessins, donc rien ici n'exige de police d'icônes, et un résolveur permet de brancher un jeu tiers à la place.",
-
+  lead: '<code>VIcon</code> affiche les icônes intégrées, des SVG personnalisés, des images ou les icônes d’un résolveur.',
   examples: {
     size: {
       title: 'Taille',
-      text: "<code>size</code> est un nombre de pixels, l'icône étant carrée. Sans elle, l'icône prend la taille que son contexte impose, et retombe sur <code>1em</code> en l'absence de contexte.",
+      text: '<code>size</code> définit la taille carrée en pixels. Sans cette prop, l’icône utilise la taille du contexte ou <code>1em</code>.',
     },
     filled: {
       title: 'Pleine',
-      text: "<code>filled</code> demande la forme pleine de l'icône, ce qui sert à marquer un état. Une icône de la bibliothèque sans dessin plein rend celui qu'elle a toujours eu.",
+      text: '<code>filled</code> sélectionne le dessin plein lorsqu’il existe.',
     },
     mirrored: {
       title: 'En miroir',
-      text: "<code>mirrored</code> retourne l'icône dans un contexte de droite à gauche, pour un glyphe qui désigne une direction physique : un chevron « précédent » pointe à gauche en français et à droite en arabe. La direction est celle que le navigateur a calculée, donc un <code>dir</code> sur n'importe quel ancêtre suffit. La plupart des icônes disent la même chose dans les deux sens et ne se retournent pas.",
+      text: '<code>mirrored</code> retourne les icônes directionnelles dans les dispositions de droite à gauche. La direction suit le contexte <code>dir</code> le plus proche.',
     },
     rendering: {
       title: "D'où vient le dessin",
-      text: 'Le dessin est cherché dans un ordre fixe, et la première source qui répond est celle qui est dessinée :',
+      text: 'La première source disponible est utilisée dans cet ordre :',
       order: [
-        "<code>render</code>, une description explicite de ce qu'il faut dessiner : des données de tracé SVG, un composant, une image, ou la classe d'une police.",
-        "<code>src</code>, l'adresse d'une image.",
-        '<code>name</code>, proposé à votre résolveur en premier, puis au dessin que porte une icône de la bibliothèque, puis à une police à ligatures.',
-        "Le slot par défaut, un SVG en ligne, atteint quand ni <code>render</code>, ni <code>src</code>, ni <code>name</code> n'ont été donnés.",
+        '<code>render</code> : tracés SVG, composant, image ou classe de police.',
+        '<code>src</code> : URL d’image.',
+        '<code>name</code> : résolveur, dessin intégré, puis police à ligatures.',
+        'Slot par défaut : SVG en ligne si aucune prop de source n’est définie.',
       ],
       moreBefore:
-        "L'ordre est le contrat : votre résolveur passe avant les dessins de la bibliothèque, et un résolveur qui ne répond rien pour un nom donné le rend au lieu de laisser un trou, ce qui rend utilisable une correspondance partielle. Une simple chaîne n'est jamais qu'un nom, jamais une adresse. Brancher un jeu, et la liste de ce que la bibliothèque embarque, sont tous deux sur",
+        'Un résolveur peut ne rien renvoyer pour utiliser l’icône intégrée. Une chaîne simple désigne un nom d’icône. Pour la configuration et les icônes disponibles, consultez',
       moreAfter: '.',
     },
   },
-
   api: {
     VIcon: {
       props: {
-        name: "Quelle icône dessiner. Une simple chaîne est un nom : elle est proposée à votre résolveur, puis laissée à une police d'icônes en tant que ligature. Une des icônes de la bibliothèque, importée depuis <code>vectis-ui/icons</code>, porte son dessin avec elle ; le résolveur est tout de même interrogé d'abord, et le dessin répond quand rien d'autre ne le fait.",
-        render:
-          "Une description explicite de ce qu'il faut dessiner, une image, un composant, un tracé ou une classe, qui l'emporte sur tout le reste. C'est la voie que prend chaque prop d'icône de la bibliothèque quand on lui donne autre chose qu'un simple nom.",
-        src: "L'adresse d'une image à utiliser comme icône. Elle l'emporte sur <code>name</code>.",
-        size: "Une taille en pixels, en nombre ou en chaîne numérique. Sans elle, ou avec autre chose qu'un nombre, l'icône prend la taille que son contexte impose, un bouton en fixant une pour les icônes qu'il contient, et à défaut 1em, ce qui la fait suivre le texte alentour.",
-        label:
-          "Ce que l'icône signifie, pour les lecteurs d'écran. L'omettre marque l'icône comme décorative et la masque à ces derniers, ce qui est juste dès que le texte alentour dit déjà ce qu'elle dit.",
-        filled:
-          "Dessine la version pleine de l'icône. Les icônes intégrées l'honorent partout où le remplissage change réellement le dessin, et une police à ligatures le fait toujours. Cela ne signifie rien pour une image ou un SVG en ligne, dont la forme est fixe.",
-        mirrored:
-          "Retourne l'icône horizontalement dans un contexte de droite à gauche, pour un glyphe qui désigne une direction physique : un chevron « précédent » pointe à gauche en français et à droite en arabe. Désactivé par défaut, la plupart des icônes disant la même chose dans les deux sens. La direction est celle que le navigateur a calculée, donc le <code>dir</code> d'un ancêtre suffit.",
+        name: 'Nom d’icône ou icône intégrée importée depuis <code>vectis-ui/icons</code>. Le résolveur est prioritaire sur le dessin intégré ; les chaînes non résolues utilisent une police à ligatures.',
+        render: 'Source d’icône explicite. Prioritaire sur les autres sources.',
+        src: 'URL d’image. Prioritaire sur <code>name</code>.',
+        size: 'Taille en pixels, nombre ou chaîne numérique. Utilise la taille du contexte ou <code>1em</code> par défaut.',
+        label: 'Nom accessible. Omettez-le pour une icône décorative.',
+        filled: 'Utilise une variante pleine si la source la prend en charge.',
+        mirrored: 'Retourne l’icône horizontalement dans un contexte de droite à gauche.',
       },
       slots: {
-        default:
-          "Un SVG en ligne, utilisé quand ni <code>src</code> ni <code>name</code> n'a été donné.",
+        default: 'SVG en ligne utilisé si aucune prop de source n’est définie.',
       },
     },
   },

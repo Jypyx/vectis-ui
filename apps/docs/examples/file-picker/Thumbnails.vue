@@ -5,9 +5,7 @@ import { VFilePicker } from 'vectis-ui'
 const shown = ref<File[]>([])
 const hidden = ref<File[]>([])
 
-/* A real PNG, drawn in the browser: a thumbnail is only ever painted from bytes an
-   <img> can decode, so an empty buffer would fall back to the kind icon and prove
-   nothing. Both zones are given the same two files. */
+/* Generate a decodable PNG in the browser to demonstrate image thumbnails. */
 async function gradientPng(name: string): Promise<File> {
   const canvas = document.createElement('canvas')
   canvas.width = 96

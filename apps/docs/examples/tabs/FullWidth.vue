@@ -8,18 +8,12 @@ const wide = ref('overview')
 
 <template>
   <div class="demo">
-    <!-- The tabs share the whole bar between them, in equal parts whatever their
-         labels are worth. It is what turns a short row into a segmented control that
-         spans its container. -->
     <VTabs v-model="tab" variant="inset" full-width label="Range">
       <VTab value="day" label="Day" />
       <VTab value="week" label="Week" />
       <VTab value="month" label="Month" />
     </VTabs>
 
-    <!-- A label too long for its share is truncated rather than allowed to widen it.
-         Filling the bar and scrolling are incompatible by construction: tabs told to fill the
-         bar can never overflow it. -->
     <VTabs v-model="wide" full-width label="Project">
       <VTab value="overview" label="Overview" />
       <VTab value="activity" label="Activity and recent changes" />

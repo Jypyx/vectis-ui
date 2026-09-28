@@ -8,9 +8,6 @@ const automatic = ref('overview')
 
 <template>
   <div class="demo">
-    <!-- Manual by default: an arrow key moves the focus and Enter or Space selects.
-         That is what a panel costing a request needs, since otherwise every tab passed
-         over on the way would fire one. -->
     <div class="row">
       <p class="caption">manual, the default</p>
       <VTabs v-model="manual" label="Project, manual">

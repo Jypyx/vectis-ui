@@ -6,9 +6,6 @@ const tones: ToastTone[] = ['neutral', 'accent', 'success', 'warning', 'danger']
 
 <template>
   <div class="demo">
-    <!-- The tone says what the notification means, and it also decides which icon it
-         takes when none is given. Five of them, because a notification reports a state
-         and success and warning are states. -->
     <div class="row">
       <p class="caption">soft, the default</p>
       <div class="buttons">

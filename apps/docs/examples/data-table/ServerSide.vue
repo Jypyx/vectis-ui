@@ -48,8 +48,7 @@ const rows = ref<Project[]>([])
 const total = ref(0)
 const loading = ref(true)
 
-/* A stand-in for the request. In server mode the table filters, sorts and slices nothing,
-   so everything below is the answering end's work. */
+/* Simulate the server response; production code would fetch these rows. */
 function load(params: DataTableParams) {
   loading.value = true
 

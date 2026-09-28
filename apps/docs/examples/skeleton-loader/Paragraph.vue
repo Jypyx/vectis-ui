@@ -4,10 +4,6 @@ import { VSkeletonLoader } from 'vectis-ui'
 
 <template>
   <div class="demo">
-    <!-- In the text shape the height is one em and the gutter is the leading, so N
-         silhouettes occupy exactly N lines of the typography around them: swapping
-         them for the real text shifts nothing. The last line is drawn shorter, and
-         that single detail is what reads as a paragraph rather than as a table. -->
     <div class="body">
       <p class="caption">body-sm, 5 lines</p>
       <VSkeletonLoader :lines="5" />

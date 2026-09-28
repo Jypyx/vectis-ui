@@ -26,10 +26,6 @@ const page = ref(3)
       <VTypography variant="caption" tone="muted">{{ display.caption }}</VTypography>
     </div>
 
-    <!--
-      The icons and the wording are yours. A label is both the visible text and the accessible
-      name, which keeps the control named once its text is hidden at a narrow width.
-    -->
     <div class="row">
       <VPagination
         v-model="page"

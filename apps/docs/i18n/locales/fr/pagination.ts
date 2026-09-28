@@ -1,107 +1,97 @@
 export default {
   title: 'Pagination',
-  lead: "Une rangée de boutons de page. Chaque pastille est un VButton, donc rien de leurs états n'est redéfini ici, et la rangée peut abandonner des pages à mesure que la place se réduit, sans point de rupture.",
-
+  lead: '<code>VPagination</code> sélectionne une page avec des boutons ou des liens. Il peut tronquer la plage et s’adapter aux conteneurs étroits.',
   examples: {
     variantsAndTones: {
       title: 'Variantes et tonalités',
-      text: '<code>itemVariant</code> peint les pages qui ne sont pas courantes et les contrôles, en ghost par défaut ou en outlined. <code>tone</code> est la couleur que prend la page courante, le reste de la rangée restant neutre.',
+      text: '<code>itemVariant</code> définit le style des autres pages et des contrôles. <code>tone</code> colore uniquement la page actuelle.',
     },
     selectedVariants: {
       title: 'Comment la sélection est dessinée',
-      text: '<code>selectedVariant</code> est la façon dont la page courante est peinte dans le ton de la rangée : pleine en <code>solid</code>, teintée en <code>soft</code>, ou par la seule couleur de son texte en <code>ghost</code>. Dans une rangée <code>outline</code>, une page courante soft ou ghost garde la bordure du cadre, qui reste ainsi fermé.',
+      text: '<code>selectedVariant</code> définit le style de la page actuelle : plein, atténué ou sans fond.',
     },
     detached: {
       title: 'Détaché',
-      text: '<code>detached</code> espace les boutons et rend à chacun ses coins, au lieu de les joindre en contrôle segmenté. <code>seamless</code> les garde joints et retire les traits entre eux, si bien que la rangée se lit comme un cadre unique.',
+      text: '<code>detached</code> sépare les boutons. <code>seamless</code> retire les bordures entre les boutons joints.',
     },
     elevated: {
       title: 'Surélevé',
-      text: "<code>elevated</code> soulève la rangée. Jointe, l'ombre appartient à la rangée ; détachée, chaque bouton porte la sienne.",
+      text: '<code>elevated</code> ajoute une ombre à la ligne, ou à chaque bouton s’ils sont séparés.',
     },
     sizes: {
       title: 'Tailles',
-      text: "<code>size</code> définit la hauteur, de 24 à 56 pixels, et <code>compact</code> lui retire 4px. Une pastille est carrée à un chiffre et s'élargit d'elle-même au-delà.",
+      text: '<code>size</code> définit la taille des boutons ; <code>compact</code> réduit leur hauteur.',
     },
     length: {
       title: 'Nombre de pages',
-      text: "<code>length</code> est le nombre total de pages, une par défaut. Toutes les pages sont rendues tant que <code>totalVisible</code> ne dit pas combien d'emplacements garder.",
+      text: '<code>length</code> est le nombre total de pages. Sans <code>totalVisible</code>, toutes les pages apparaissent.',
     },
     totalVisible: {
       title: "Nombre d'emplacements",
-      text: "<code>totalVisible</code> est le nombre d'emplacements rendus par la rangée, points de suspension compris, ce qui garde sa largeur constante. La première et la dernière page sont toujours gardées, et cinq est le minimum utile.",
+      text: '<code>totalVisible</code> limite les emplacements de pages et de points de suspension, avec un minimum de cinq. Les première et dernière pages restent visibles.',
     },
     controls: {
       title: 'Précédent et suivant',
-      text: '<code>controls</code> décide de ce que montrent les boutons précédent et suivant : une icône, un mot, les deux, ou rien du tout. Leurs icônes et leurs mots vous appartiennent, un libellé étant à la fois le texte visible et le nom accessible. Un bouton qui atteint la dernière page où il peut aller se désactive et passe le focus clavier à la page atteinte.',
+      text: '<code>controls</code> choisit des icônes, du texte, les deux ou aucun contrôle. Ils se désactivent si aucune page n’est accessible dans leur direction.',
     },
     unreachablePages: {
       title: 'Pages inaccessibles',
-      text: "<code>disabledPages</code> accepte une liste de pages, ou une fonction quand la règle s'écrit plus facilement qu'elle ne s'énumère. Les contrôles précédent et suivant enjambent ces pages et ne se désactivent que lorsqu'il n'y a plus rien à atteindre.",
+      text: '<code>disabledPages</code> accepte un tableau de pages ou un prédicat. Les contrôles précédent et suivant ignorent ces pages.',
     },
     links: {
       title: 'Liens',
-      text: "Avec <code>href</code>, une fonction qui donne l'adresse d'une page, chaque page et les deux contrôles deviennent des liens : une page de résultats s'ouvre dans un nouvel onglet, se met en favori et se laisse suivre par un robot d'indexation. Les liens précédent et suivant portent <code>rel=\"prev\"</code> et <code>rel=\"next\"</code>. Un clic met à jour le modèle, puis le navigateur suit le lien, sauf si un gestionnaire de <code>navigate</code> appelle <code>preventDefault()</code> sur l'événement pour confier l'adresse à un routeur. Un clic avec une touche de modification ouvre le lien ailleurs et ne change rien à la page.",
+      text: 'Fournissez <code>href</code> pour afficher des liens. Gérez <code>navigate</code> et appelez <code>preventDefault()</code> pour naviguer via un routeur. Les clics avec une touche modificatrice conservent le comportement natif sans modifier le modèle.',
     },
     states: {
       title: 'États',
-      text: '<code>disabled</code> met toute la rangée hors de portée, grisée par les tokens de couleur. À chaque extrémité de la plage, le contrôle correspondant se désactive de lui-même.',
+      text: '<code>disabled</code> désactive toute la ligne.',
     },
     alignment: {
       title: 'Alignement',
-      text: "<code>align</code> dit où se place la rangée dans la largeur qui lui est donnée. Il ne veut dire quelque chose qu'en mode responsive, qui fait prendre à la navigation toute la largeur disponible.",
+      text: '<code>align</code> positionne la ligne en mode responsive.',
     },
     responsive: {
       title: 'Conteneurs étroits',
-      text: '<code>responsive</code> abandonne des pages à mesure que la place se réduit, en masquant les voisines de la page courante un cran à la fois, la première, la dernière et la courante ne partant jamais. Il mesure sa propre largeur et non celle de la fenêtre.',
+      text: '<code>responsive</code> masque les pages voisines si le conteneur rétrécit, en conservant les première, dernière et actuelle.',
     },
   },
-
   api: {
     VPagination: {
       props: {
-        length:
-          'Combien de pages il y a en tout. Elle vaut 1 par défaut, ce qui rend une seule page : le vrai nombre doit presque toujours être donné.',
+        length: 'Nombre total de pages.',
         totalVisible:
-          "Combien d'emplacements rendre, ellipses comprises, pour que la rangée garde exactement la même largeur quelle que soit la page courante. En dessous de cinq il ne resterait rien à montrer autour de la page courante : cinq est donc le minimum effectif. Omise, toutes les pages sont rendues.",
-        detached:
-          "Sépare les boutons au lieu de les joindre en un seul contrôle segmenté. C'est le mot que VButtonGroup et VToggle emploient pour la même question, dans le même sens.",
+          'Nombre maximal d’emplacements de pages et de points de suspension ; minimum 5. Absent, affiche toutes les pages.',
+        detached: 'Sépare les boutons de page.',
         seamless:
-          'Retire les traits entre les boutons joints, si bien que la rangée se lit comme un cadre unique plutôt que comme des segments, aux conditions de la prop de VButtonGroup. Sans effet sous <code>detached</code>.',
-        itemVariant:
-          "Comment sont dessinées les pages autres que la page courante, ainsi que les contrôles. Ce que prend la page courante est <code>selectedVariant</code>. Elle porte le nom des items parce que c'est ce qu'elle peint : sur VTabs et VDataTable, <code>variant</code> nomme la décoration du cadre.",
-        selectedVariant:
-          'Comment est dessinée la page courante, dans le ton de la rangée : pleine, teintée, ou la seule couleur de son texte.',
-        tone: 'La couleur que prend la page courante. Les autres pages et les contrôles restent neutres.',
-        size: "La hauteur des boutons, tirée de l'échelle partagée par tous les contrôles.",
-        compact: 'Retire 4px à la hauteur de chaque bouton.',
-        elevated:
-          "Surélève la rangée. Jointe, l'ombre appartient à la rangée et non à chaque pastille, ce qui l'empêche de tomber dans les jointures ; détachée, chaque bouton porte la sienne.",
-        align:
-          "Où se place la rangée dans l'espace qu'on lui donne. Cela ne compte qu'en mode responsive, où la rangée prend toute la largeur disponible.",
-        controls:
-          "Les boutons précédent et suivant de part et d'autre des pages : ce qu'ils affichent, ou <code>false</code> pour les retirer. Une prop plutôt que deux, la forme que <code>preview</code> de VFilePicker et <code>controls</code> de VCarousel emploient déjà.",
-        prevIcon: "L'icône du contrôle précédent.",
-        nextIcon: "L'icône du contrôle suivant.",
+          'Retire les séparateurs entre boutons joints. Ignoré si les boutons sont séparés.',
+        itemVariant: 'Style des autres pages et des contrôles précédent/suivant.',
+        selectedVariant: 'Style de la page actuelle.',
+        tone: 'Couleur de la page actuelle.',
+        size: 'Taille du composant.',
+        compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
+        elevated: 'Ajoute une ombre à la ligne ou aux boutons séparés.',
+        align: 'Alignement de la ligne en mode responsive.',
+        controls: 'Contenu précédent/suivant : icônes, texte, les deux ou <code>false</code>.',
+        prevIcon: 'Icône du contrôle précédent.',
+        nextIcon: 'Icône du contrôle suivant.',
         prevText:
-          "Le libellé du contrôle précédent, utilisé à la fois comme texte visible et comme ce que les lecteurs d'écran annoncent. Il retombe sur le dictionnaire du design system.",
+          'Texte et nom accessible du contrôle précédent. Utilise le dictionnaire par défaut.',
         nextText:
-          "Le libellé du contrôle suivant, utilisé à la fois comme texte visible et comme ce que les lecteurs d'écran annoncent. Il retombe sur le dictionnaire du design system.",
-        disabled: 'Rend tout le composant inutilisable.',
+          'Texte et nom accessible du contrôle suivant. Utilise le dictionnaire par défaut.',
+        disabled: 'Désactive les interactions.',
         disabledPages:
-          "Quelles pages ne peuvent pas être atteintes, en liste ou en fonction. Les contrôles précédent et suivant les ENJAMBENT plutôt que de s'arrêter dessus.",
+          'Pages indisponibles sous forme de tableau ou de prédicat. Les contrôles les ignorent.',
         responsive:
-          'Laisse la rangée abandonner des pages à mesure que la place se réduit, en interrogeant sa propre largeur. Désactivé par défaut, parce que cela fait prendre à la rangée toute la largeur disponible.',
-        label:
-          "Ce que les lecteurs d'écran annoncent pour la navigation elle-même. Il retombe sur le dictionnaire du design system.",
+          'Masque les pages voisines pour tenir dans le conteneur. Occupe la largeur disponible.',
+        label: 'Nom accessible de la navigation. Utilise le dictionnaire par défaut.',
         pageLabel:
-          "Comment une page est annoncée. Une pastille affiche un nombre nu, qui seul ne signifie rien pour un lecteur d'écran : c'est ce qui en fait « Page 3 ». Il retombe sur le dictionnaire du design system.",
-        href: 'L\'adresse d\'une page. Fournie, chaque page et les deux contrôles deviennent des liens, précédent et suivant portant <code>rel="prev"</code> et <code>rel="next"</code>. Un clic met toujours à jour le modèle, puis le navigateur suit le lien.',
-        vModel: 'La page affichée, comptée à partir de 1. Elle démarre sur la première.',
+          'Fonction fournissant un nom accessible pour chaque numéro de page. Utilise le dictionnaire par défaut.',
+        href: 'Fonction associant une page à son URL. Affiche les pages et contrôles comme des liens.',
+        vModel: 'Page actuelle, à partir de 1.',
       },
       events: {
         navigate:
-          "Une page a été choisie dans la rangée, avec le clic qui l'a choisie. Il précède le changement du modèle, si bien qu'une application monopage peut appeler <code>preventDefault()</code> sur l'événement et router elle-même. Un clic avec une touche de modification n'émet rien.",
+          'Activation d’une page, avant la mise à jour du modèle. Reçoit la page et le clic ; appelez <code>preventDefault()</code> pour le routage. Les clics avec une touche modificatrice ne l’émettent pas.',
       },
     },
   },

@@ -6,10 +6,6 @@ const sizes: SkeletonLoaderSize[] = ['xs', 'sm', 'md', 'lg', 'xl']
 
 <template>
   <div class="demo">
-    <!--
-      The control scale, 24 to 56 pixels: an md skeleton is exactly the height of an md button,
-      which lets a silhouette hold the place of the control it stands in for.
-    -->
     <div class="row">
       <p class="caption">circle</p>
       <div class="inline">

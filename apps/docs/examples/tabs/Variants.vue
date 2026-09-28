@@ -19,9 +19,6 @@ const selectedByTone = ref<Record<string, string>>({
 
 <template>
   <div class="demo">
-    <!-- Two decisions in one word. `flat` draws a rule under the tabs and underlines
-         the selected one; `outlined` puts that same bar and its panels inside a card;
-         `inset` turns the row into a segmented control in a hollow track. -->
     <div v-for="value in variants" :key="value" class="row">
       <p class="caption">{{ value }}</p>
       <VTabs v-model="selectedByVariant[value]" :variant="value" :label="`Project, ${value}`">
@@ -31,8 +28,6 @@ const selectedByTone = ref<Record<string, string>>({
       </VTabs>
     </div>
 
-    <!-- The tone colours the selected tab and nothing else: the others stay neutral
-         whatever it says, since only one of them is making a claim. -->
     <div v-for="value in tones" :key="value" class="row">
       <p class="caption">{{ value }}</p>
       <VTabs v-model="selectedByTone[value]" :tone="value" :label="`Project, ${value}`">

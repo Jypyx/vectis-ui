@@ -5,10 +5,6 @@ import { VDatePicker, VTypography } from 'vectis-ui'
 const appointment = ref('2026-06-16')
 const holiday = ref('2026-06-16')
 
-/*
- * A predicate answers for one date at a time, which makes a rule such as "no weekends" one line
- * rather than an enumeration.
- */
 function isWeekend(iso: string) {
   const day = new Date(`${iso}T00:00:00`).getDay()
   return day === 0 || day === 6

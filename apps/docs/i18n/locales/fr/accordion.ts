@@ -1,71 +1,61 @@
 export default {
   title: 'Accordéon',
-  lead: "Des sections qui se replient. Il est construit sur <code>&lt;details&gt;</code> et <code>&lt;summary&gt;</code>, si bien que l'état ouvert, le comportement clavier et la recherche dans la page viennent tous du navigateur.",
-
+  lead: '<code>VAccordion</code> regroupe des sections repliables fondées sur des éléments natifs <code>&lt;details&gt;</code>.',
   examples: {
     variants: {
       title: 'Variantes',
-      text: '<code>variant</code> définit la décoration du groupe : <code>flat</code> (par défaut) ne dessine rien, <code>outlined</code> ajoute un fond surélevé, une bordure et des coins arrondis.',
+      text: '<code>flat</code> laisse le groupe sans cadre ; <code>outlined</code> ajoute un fond et une bordure.',
     },
     exclusive: {
       title: 'Une section à la fois',
-      text: "Un groupe ne garde qu'une section ouverte par défaut. <code>multiple</code> permet d'en garder plusieurs ouvertes en même temps. VSideNavigation a le défaut et la prop inverses, <code>exclusive</code> : une barre latérale laisse d'ordinaire plusieurs sections ouvertes.",
+      text: 'Une seule section reste ouverte par défaut. Activez <code>multiple</code> pour en conserver plusieurs ouvertes.',
     },
     subtitles: {
       title: 'Sous-titres et icônes',
-      text: '<code>icon</code> place une icône avant le titre et <code>subtitle</code> ajoute une seconde ligne en dessous. Les slots <code>#icon</code> et <code>#subtitle</code> acceptent du balisage plutôt que du texte simple.',
+      text: 'Ajoutez <code>icon</code> et <code>subtitle</code>, ou utilisez leurs slots pour du contenu personnalisé.',
     },
     compact: {
       title: 'Compact',
-      text: '<code>compact</code> réduit chaque rembourrage de 4px, le texte et les icônes gardant leur taille.',
+      text: '<code>compact</code> réduit les espacements internes sans modifier le texte ni les icônes.',
     },
     icons: {
       title: "Icônes d'ouverture et de fermeture",
-      text: "<code>expandIcon</code> remplace le chevron. Ajouter <code>collapseIcon</code> échange les deux icônes à l'ouverture, au lieu de faire pivoter la première.",
+      text: 'Sans <code>collapseIcon</code>, l’icône tourne à l’ouverture. Avec cette prop, les icônes s’échangent.',
     },
     disabled: {
       title: 'Sections désactivées',
-      text: "<code>disabled</code> empêche l'ouverture d'une section et la grise. Le clavier l'enjambe.",
+      text: 'Les sections désactivées ne peuvent pas être ouvertes ou fermées et sont ignorées par la navigation au clavier.',
     },
   },
-
   api: {
     VAccordion: {
       props: {
-        multiple:
-          'Laisse le lecteur garder plusieurs sections ouvertes à la fois. Sans lui, une seule reste ouverte et en ouvrir une referme la précédente, ce dont le navigateur se charge seul dès que tous les items partagent un même nom de <code>&lt;details&gt;</code>.',
-        variant:
-          "Comment le groupe est décoré. <code>flat</code> ne dessine rien et laisse l'accordéon poser sur la surface derrière lui ; <code>outlined</code> lui donne un fond surélevé, une bordure et des coins arrondis, si bien qu'il se lit comme une carte.",
+        multiple: 'Permet de conserver plusieurs sections ouvertes.',
+        variant: 'Groupe sans cadre ou avec bordure.',
         expandIcon:
-          "L'icône affichée sur une section fermée. C'est un chevron, qui pivote de 180° quand la section s'ouvre.",
-        collapseIcon:
-          "L'icône affichée sur une section ouverte. Sans elle, l'icône d'ouverture est simplement pivotée ; avec elle, les deux sont échangées.",
-        compact:
-          'Densité réduite : chaque rembourrage perd 4px, tandis que le texte et les icônes gardent leur taille.',
+          'Icône de section fermée. Tourne à l’ouverture sauf si <code>collapseIcon</code> est défini.',
+        collapseIcon: 'Icône de section ouverte remplaçant l’icône tournée.',
+        compact: 'Réduit les espacements internes des éléments.',
       },
       slots: {
-        default: 'Les <code>VAccordionItem</code> qui composent le groupe.',
+        default: 'Enfants <code>VAccordionItem</code>.',
       },
     },
     VAccordionItem: {
       props: {
-        title:
-          'Le titre de la section, la ligne qui reste visible quand elle est fermée. Utilisez le slot <code>#title</code> quand le titre demande du balisage plutôt que du texte simple.',
-        subtitle:
-          'Une seconde ligne sous le titre, pour une courte explication ou un statut. Le slot <code>#subtitle</code> la remplace quand du balisage est nécessaire.',
-        icon: 'Une icône avant le titre. Le slot <code>#icon</code> la remplace.',
+        title: 'Titre de section. Remplacé par le slot <code>title</code>.',
+        subtitle: 'Seconde ligne sous le titre. Remplacée par son slot.',
+        icon: 'Icône avant le titre. Remplacée par son slot.',
         defaultOpen:
-          "Rend la section déjà ouverte. Seule sa valeur initiale est lue : le navigateur possède l'état ensuite, donc changer cette prop plus tard ne refermera pas une section que le lecteur a ouverte.",
-        vModelOpen:
-          "Si la section est ouverte, quand vous voulez la piloter ou l'observer. Non liée, le navigateur garde cet état pour lui et <code>defaultOpen</code> n'en donne que la valeur initiale.",
-        disabled:
-          "Rend la section inerte. Elle ne peut plus être ouverte, le clavier l'enjambe, et elle se grise par les tokens de couleur.",
+          'État ouvert initial. Les modifications ultérieures ne pilotent pas la section.',
+        vModelOpen: 'État ouvert à observer ou à piloter.',
+        disabled: 'Désactive les interactions.',
       },
       slots: {
-        default: 'Le contenu révélé quand la section est ouverte.',
-        title: 'Un titre fait de balisage, qui remplace la prop <code>title</code>.',
-        subtitle: 'Un sous-titre fait de balisage, qui remplace la prop <code>subtitle</code>.',
-        icon: 'Du contenu libre avant le titre, qui prend la place de <code>icon</code>.',
+        default: 'Contenu déplié.',
+        title: 'Contenu remplaçant le titre.',
+        subtitle: 'Contenu remplaçant le sous-titre.',
+        icon: 'Contenu remplaçant l’icône.',
       },
     },
   },

@@ -2,11 +2,7 @@
 import { VToggle, VToggleItem } from 'vectis-ui'
 
 const props = defineProps<{
-  /**
-   * The packages to add, space-separated. `vectis-ui vue` for a Vite application, where Vue is
-   * a peer dependency the project installs itself; `vectis-ui` alone under Nuxt, which brings
-   * Vue with it.
-   */
+  /** Space-separated package names to install. */
   packages: string
 }>()
 
@@ -18,10 +14,7 @@ const code = computed(() => commandFor(props.packages))
 
 <template>
   <DocsCode lang="bash" :code="code">
-    <!--
-      `size="xs"` against the header's `sm` copy button is deliberate: four text segments in a
-      title bar are chrome, and at `sm` the row stops fitting a phone.
-    -->
+    <!-- Use smaller segments so the package manager toggle fits on mobile. -->
     <template #head>
       <VToggle
         v-model="packageManager"

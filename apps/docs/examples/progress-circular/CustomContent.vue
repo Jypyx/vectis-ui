@@ -10,9 +10,6 @@ import { check } from 'vectis-ui/icons'
       <VTypography variant="caption" tone="muted">showValue</VTypography>
     </div>
 
-    <!-- The slot replaces the percentage and receives the value, the max and the
-         percentage worked out from them. It sits in the hole of the ring, on the page
-         background, so it takes the page's own text colour. -->
     <div class="cell">
       <VProgressCircular :value="7" :max="12" :size="96" label="Files uploaded">
         <template #default="{ value, max }">

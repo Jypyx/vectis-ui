@@ -7,8 +7,6 @@ const THICKNESSES = [2, 4, 8, 14]
 
 <template>
   <div class="column">
-    <!-- The geometry is entirely CSS: the radius is derived from the diameter and the
-         thickness, so changing either recomputes nothing in JavaScript. -->
     <div class="row">
       <div v-for="size in SIZES" :key="size" class="cell">
         <VProgressCircular :value="65" :size="size" :label="`Upload, ${size}px`" />
@@ -16,8 +14,6 @@ const THICKNESSES = [2, 4, 8, 14]
       </div>
     </div>
 
-    <!-- Thickness is independent of the diameter, and both are always pixels whether
-         given as a number or as a numeric string. -->
     <div class="row">
       <div v-for="thickness in THICKNESSES" :key="thickness" class="cell">
         <VProgressCircular

@@ -4,8 +4,7 @@ import { VDateInput } from 'vectis-ui'
 
 const night = ref<string | null>('2026-06-15')
 
-/* Derived from the date itself and never drawn at random: the server and the browser have
-   to render the same figure, or hydration finds two calendars. */
+/* Derive prices from dates so server and client render the same values. */
 function priceFor(iso: string) {
   return 80 + ((Number(iso.slice(-2)) * 7) % 60)
 }
@@ -36,11 +35,7 @@ function priceFor(iso: string) {
 .number {
   line-height: 1;
 }
-/*
- * The price is set back from the number rather than given a colour of its own: mixing
- * `currentcolor` towards transparent keeps it legible on the page and on the accent a selected
- * day is painted with, where a muted token would disappear.
- */
+/* Inherit the selected day's foreground colour to preserve contrast. */
 .price {
   font-size: var(--vectis-text-caption-size);
   line-height: 1;

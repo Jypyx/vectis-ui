@@ -1,41 +1,37 @@
 export default {
   title: 'JavaScript helpers',
-  lead: 'The package exports named functions only, and the list is short on purpose: configuration for the whole design system, and nothing that a component could have done itself.',
+  lead: 'Functions for configuring localisation and icons, and displaying notifications. Import them by name from <code>vectis-ui</code>.',
 
-  exportedHeading: 'What is exported',
+  exportedHeading: 'Public exports',
   columnExport: 'Export',
-  columnDoes: 'What it does',
+  columnDoes: 'Purpose',
   setLocale:
-    'Sets the locale for the whole design system. The FORMATS derive from <code>Intl</code> from this tag, whether or not a dictionary matches it.',
+    'Sets the global language and default regional formats. Components with a <code>locale</code> prop can override formats.',
   registerMessages:
-    'Registers a dictionary. Partial dictionaries are legitimate: what is missing falls back to English.',
+    'Registers or updates a language dictionary. Omitted keys retain previous translations, then fall back to English.',
   dictionaries:
-    'The two shipped dictionaries. <code>en</code> is always bundled; <code>fr</code> is opt-in, and not importing it prunes it.',
+    'English and French dictionaries. English is the default; import and register <code>fr</code> to enable French.',
   setIconResolver:
-    'Wires a third-party icon library. Consulted BEFORE the built-in registry; return <code>undefined</code> to hand over.',
-  ligatureResolver:
-    'Resolves a name to an icon-font ligature, such as Material Symbols or IcoMoon.',
+    'Registers the icon resolver. Return <code>undefined</code> to use the imported SVG or ligature fallback.',
+  ligatureResolver: 'Creates a resolver that renders icon names with a ligature font.',
   classResolver:
-    'Resolves a name to a class-driven set: Font Awesome, Phosphor, Bootstrap Icons. Strict by default, so an unmapped name falls back to the built-in SVG rather than to an empty square.',
-  componentResolver:
-    'Resolves a name to a component from your own library, such as Lucide or Untitled UI.',
+    'Creates a resolver for CSS classes. By default, built-in names without an alias retain their fallback.',
+  componentResolver: 'Creates a resolver that maps icon names to Vue components.',
   toast:
-    'Adds and removes a notification. It is the only imperative API in the library, because a toast has no place in the tree that asks for it.',
+    'Adds a toast and returns its ID. <code>dismissToast(id)</code> removes it; omit the ID to remove all toasts. Render <code>VToaster</code> to display them.',
+  snackbar:
+    'Shows a snackbar and returns its ID, replacing the previous snackbar. <code>dismissSnackbar(id)</code> removes the matching snackbar; omit the ID to remove the current one. Render <code>VSnackbar</code> to display it.',
 
   moduleState:
-    'Everything above writes MODULE-LEVEL state, which is what lets it be called from any <code>.ts</code> file without a plugin or a provider, and what makes already-mounted components re-render when it changes. The same property is the constraint: it belongs to the process rather than to a request, so it is configuration and never anything that varies per visitor.',
+    'Locale and icon configuration are shared across the process. Configure them at application startup; for concurrent multilingual SSR, pass text and locale props explicitly. Call <code>toast</code> and <code>snackbar</code> in browser event handlers or <code>onMounted</code> hooks.',
   types:
-    'Types are exported alongside them (<code>Messages</code>, <code>MessagesInput</code>, <code>IconSource</code>, <code>IconResolver</code>, <code>ToastOptions</code>), plus one per component whose API needs naming, such as <code>ComboboxOption</code>, <code>DataTableColumn</code> or <code>DatePickerSelection</code>.',
+    'Types are exported alongside the functions, including <code>MessagesInput</code>, <code>IconResolver</code>, <code>ToastOptions</code> and <code>SnackbarOptions</code>. Component pages document their own types.',
 
-  internalHeading: 'The internal helpers, and why they stay internal',
+  internalHeading: 'Internal helpers',
   internalBody:
-    'The library carries a full set of date, time, file and text helpers, and they are what VDatePicker, VDateInput, VTimePicker and VFilePicker are built on. They are NOT exported, and the reason is stated at the entry point: the internal modules are not part of the public surface, so their signatures stay free to change with the components that use them.',
-  columnModule: 'Module',
-  columnInternal: 'Internal helpers',
-  internalQuote:
-    'Two of them are worth copying rather than importing: <code>hourCycleFor(locale)</code> and <code>firstDayOfWeekFor(locale)</code> answer questions <code>Intl</code> only answers indirectly.',
+    'Date, time, file and text utilities are internal implementation details. They are not public exports.',
 
   composablesHeading: 'Composables',
   composablesBody:
-    'The same rule covers the composables, <code>usePopover</code>, <code>useFieldPanel</code>, <code>useMaskedField</code>, <code>useFocusoutDismiss</code>, <code>useTextLimit</code>, <code>useRootAttrs</code>, <code>useTimer</code> and their kin: internal, unexported, and documented in their own files. If you find yourself needing one, that is a request for a component.',
+    'The library’s composables are internal. Use the component props, events and slots documented on each component page.',
 }

@@ -3,8 +3,7 @@ import { VAvatar, VAvatarGroup } from 'vectis-ui'
 </script>
 
 <template>
-  <!-- The separation ring takes the page background by default. This demo sits on a raised card,
-       so it passes that card's colour instead. -->
+  <!-- Match the separation ring to the demo card background. -->
   <VAvatarGroup ring-color="var(--vectis-color-surface-raised)">
     <VAvatar name="Ada Lovelace" />
     <VAvatar name="Grace Hopper" />

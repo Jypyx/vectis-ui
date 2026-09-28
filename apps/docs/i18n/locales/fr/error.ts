@@ -1,9 +1,8 @@
 export default {
   notFoundTitle: 'Page introuvable',
-  errorTitle: "Une erreur s'est produite",
+  errorTitle: 'Erreur de page',
   notFoundHeading: "Cette page n'existe pas",
-  notFoundBody:
-    "L'adresse est peut-être obsolète, ou le composant est peut-être listé sous un autre nom. La recherche intégrée à la documentation (Ctrl ou ⌘ puis K) couvre toutes les pages et tous les composants.",
+  notFoundBody: 'Vérifiez l’adresse ou recherchez dans la documentation avec Ctrl+K ou ⌘K.',
   errorBody: "La page n'a pas pu être rendue.",
   toDocs: 'Aller à la documentation',
   toHome: "Retour à la page d'accueil",

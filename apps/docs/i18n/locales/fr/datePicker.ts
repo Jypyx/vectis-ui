@@ -1,77 +1,72 @@
 export default {
   title: 'Sélecteur de date',
-  lead: "Une grille de calendrier en ligne. Chaque date qu'il contient est une simple chaîne <code>YYYY-MM-DD</code> en heure locale et jamais un <code>Date</code>, si bien qu'une valeur ne peut pas glisser d'un jour d'un fuseau à l'autre.",
-
+  lead: '<code>VDatePicker</code> est un calendrier intégré pour une date, une période ou plusieurs dates. Les valeurs sont des dates locales au format <code>YYYY-MM-DD</code>.',
   examples: {
     range: {
       title: 'Période',
-      text: '<code>selection</code> à <code>range</code> fait de la valeur un début et une fin, la période sous le pointeur étant prévisualisée entre les deux clics.',
+      text: 'Sélectionnez le début puis la fin de la période. Le modèle est <code>{ start, end }</code> ; chaque borne peut valoir <code>null</code> tant que la période est incomplète.',
     },
     multiple: {
       title: 'Dates multiples',
-      text: '<code>selection</code> à <code>multiple</code> fait de la valeur une liste, un jour déjà présent en ressortant à un nouveau clic.',
+      text: 'Sélectionnez des dates pour les ajouter au tableau de dates ISO ; sélectionnez-les à nouveau pour les retirer.',
     },
     presets: {
       title: 'Raccourcis',
-      text: "Le slot <code>#footer</code> est une bande sous la grille, pour des actions ou pour les dates les plus demandées. Les boutons qui s'y trouvent écrivent le modèle comme n'importe quel autre contrôle.",
+      text: 'Placez des boutons de dates prédéfinies dans <code>footer</code> et utilisez-les pour modifier le modèle.',
     },
     disabledDates: {
       title: 'Dates désactivées',
-      text: '<code>disabledDates</code> accepte une liste de jours, ou une fonction interrogée pour une date à la fois. Un jour fermé reste visible, barré, et atteignable au clavier.',
+      text: '<code>disabledDates</code> accepte des dates ISO ou un prédicat. Les jours indisponibles restent visibles et accessibles au clavier.',
     },
     bounds: {
       title: 'Minimum et maximum',
-      text: '<code>min</code> et <code>max</code> bornent la navigation autant que le choix, dans toutes les vues.',
+      text: '<code>min</code> et <code>max</code> limitent la sélection et la navigation dans le calendrier.',
     },
     events: {
       title: 'Pastilles',
-      text: "<code>events</code> dessine jusqu'à trois points sous un jour. Chacun accepte n'importe quelle couleur CSS et un <code>label</code>, qui est ce que lisent les technologies d'assistance.",
+      text: 'Signalez les événements par des points colorés. Leurs libellés font partie du nom accessible du jour.',
     },
     adjacentDays: {
       title: 'Jours adjacents',
-      text: '<code>showAdjacentDays</code> remplit les coins de la grille avec les mois voisins, grisés et inertes. <code>selectAdjacentDays</code> les rend aussi choisissables, et en choisir un déplace le calendrier vers son mois.',
+      text: 'Affichez les jours voisins avec <code>showAdjacentDays</code>. Autorisez leur sélection avec <code>selectAdjacentDays</code>.',
     },
     localization: {
       title: 'Localisation',
-      text: "<code>locale</code> décide des noms de mois et de jours et du jour où commencent les semaines, et l'emporte sur la locale globale. <code>firstDayOfWeek</code> remplace le jour que cette locale aurait choisi.",
+      text: '<code>locale</code> définit les noms des mois et le début de semaine. <code>firstDayOfWeek</code> remplace ce dernier.',
     },
   },
-
   api: {
     VDatePicker: {
       props: {
-        selection:
-          'Ce que le lecteur choisit : une date unique, une période entre deux dates, ou un nombre quelconque de dates séparées. Cela détermine la forme de la valeur.',
+        selection: 'Mode de sélection : une date, une période ou plusieurs dates.',
         locale:
-          "Une locale BCP 47, qui décide des noms de mois et de jours et du premier jour de la semaine. Elle l'emporte sur la locale globale du design system et retombe dessus, ce pourquoi elle n'a pas de valeur par défaut littérale.",
+          'Locale BCP 47 pour l’affichage des dates et le début de semaine. Remplace la locale globale.',
         firstDayOfWeek:
-          'Force le jour où commencent les semaines, de 0 pour dimanche à 6 pour samedi. Omise, la locale décide.',
-        min: 'La première date sélectionnable, en chaîne ISO. Ni la navigation ni la sélection ne remontent au-delà.',
-        max: 'La dernière date sélectionnable, en chaîne ISO. Ni la navigation ni la sélection ne vont au-delà.',
+          'Premier jour de la semaine, de 0 (dimanche) à 6 (samedi). Dépend de la locale par défaut.',
+        min: 'Première date sélectionnable au format <code>YYYY-MM-DD</code>. Limite aussi la navigation.',
+        max: 'Dernière date sélectionnable au format <code>YYYY-MM-DD</code>. Limite aussi la navigation.',
         disabledDates:
-          'Les dates qui ne peuvent pas être choisies, en liste de chaînes ISO ou en fonction. Elles restent visibles, barrées, et restent atteignables au clavier.',
-        showAdjacentDays:
-          'Remplit aussi les coins vides de la grille avec les jours grisés des mois voisins.',
+          'Dates indisponibles : tableau de chaînes ISO ou prédicat. Les jours restent visibles et accessibles au clavier.',
+        showAdjacentDays: 'Affiche les jours des mois voisins.',
         selectAdjacentDays:
-          'Permet de cliquer ces jours voisins, ce qui déplace le calendrier sur leur mois. Un jour cliquable doit être visible : cela implique donc de les afficher.',
-        events: 'Les événements à marquer, en trois points colorés au plus sous le jour concerné.',
-        disabled:
-          'Rend tout le calendrier inutilisable : aucune date ne peut être choisie, aucun mois atteint, et tout se grise par les jetons de couleur.',
+          'Permet de sélectionner les jours des mois voisins et ouvre le mois choisi. Implique <code>showAdjacentDays</code>.',
+        events:
+          'Événements représentés par trois points au maximum par jour. Chacun accepte une date, une couleur CSS et un libellé accessible.',
+        disabled: 'Désactive la sélection et la navigation.',
         readonly:
-          'Montre la sélection sans permettre de la changer. Le calendrier reste lisible et parcourable, un autre mois ou une autre année, ce qui le distingue de <code>disabled</code>.',
+          'Empêche la sélection. La navigation entre les mois et les années reste disponible.',
         label:
-          "Le nom accessible du sélecteur entier, son en-tête et sa grille ensemble. Une plage montrée comme deux calendriers côte à côte en demande un chacun, sinon un lecteur d'écran annonce deux fois le même groupe. Il retombe sur le dictionnaire, et un <code>aria-label</code> du consommateur l'emporte.",
+          'Nom accessible du calendrier. Utilise le dictionnaire par défaut ; l’attribut <code>aria-label</code> fourni est prioritaire.',
         vModel:
-          "Ce qui est sélectionné, et sa forme suit <code>selection</code> : une chaîne ISO pour une date unique, une paire début et fin pour une période, un tableau pour plusieurs. Rien n'est sélectionné au départ.",
+          'Date ISO ou <code>null</code> pour une sélection unique, <code>{ start, end }</code> pour une période, tableau de dates ISO pour une sélection multiple.',
       },
       events: {
         select:
-          "Une date a été choisie, avec la valeur telle qu'elle est désormais. Choisi ne veut pas dire terminé : une période ou une liste est encore en construction après lui, et c'est pourquoi VTimePicker nomme <code>confirm</code> la fin d'un choix.",
+          'Une date a été sélectionnée. Reçoit le modèle actuel, y compris une période incomplète.',
       },
       slots: {
-        day: "Remplace le contenu d'une cellule de jour, pour afficher un prix ou une disponibilité sous le numéro. Elle reçoit tout ce que l'on sait de ce jour, y compris s'il appartient au mois affiché.",
-        footer:
-          'La bande sous la grille, pour des actions comme Fermer ou Enregistrer, ou pour des dates prédéfinies.',
+        day: 'Contenu d’une cellule. Reçoit <code>iso</code>, <code>day</code>, <code>inMonth</code>, <code>disabled</code>, <code>selected</code>, <code>today</code>, <code>inRange</code> et <code>events</code>.',
+        footer: 'Actions ou dates prédéfinies sous la grille.',
       },
     },
   },

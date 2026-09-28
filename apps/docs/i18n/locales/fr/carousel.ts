@@ -1,98 +1,91 @@
 export default {
   title: 'Carrousel',
-  lead: "Des diapositives parcourues au doigt, au pavé tactile, à la barre de défilement ou au clavier. C'est un seul conteneur natif à accroche de défilement : rien n'est cloné, et le nombre de diapositives qui tiennent est décidé par le CSS sans un seul point de rupture.",
-
+  lead: '<code>VCarousel</code> affiche des diapositives dans une piste défilante avec contrôles, indicateurs et lecture automatique facultatifs.',
   examples: {
     itemsPerView: {
       title: 'Diapositives par vue',
-      text: "<code>itemsPerView</code> est le nombre de diapositives visibles à la fois, et <code>itemMinSize</code> la taille minimale de chacune avant qu'il en tienne moins.",
+      text: '<code>itemsPerView</code> définit le nombre maximal de diapositives visibles. <code>itemMinSize</code> réduit ce nombre si le conteneur rétrécit.',
     },
     peek: {
       title: 'Débord',
-      text: '<code>peek</code> laisse dépasser une bande de la diapositive suivante, écart compris.',
+      text: '<code>peek</code> laisse une partie de la diapositive suivante visible, espacement compris.',
     },
     effects: {
       title: 'Effets',
-      text: "<code>effect</code> décide comment une diapositive cède la place à la suivante : <code>slide</code> n'anime rien, <code>fade</code> fait fondre chaque diapositive sur place et demande une seule diapositive à la fois sans <code>peek</code>, <code>scale</code> recule les voisines.",
+      text: 'Choisissez un glissement, un fondu ou une mise à l’échelle. Le fondu exige une diapositive par vue sans aperçu ; sinon, le glissement est utilisé.',
     },
     orientation: {
       title: 'Orientation',
-      text: "<code>orientation</code> à <code>vertical</code> fait pivoter tout le composant sur l'axe de bloc. Donnez aussi une <code>height</code>, dont les diapositives prennent une part.",
+      text: 'Les carrousels verticaux nécessitent une <code>height</code> explicite.',
     },
     customIcons: {
       title: 'Icônes personnalisées',
-      text: '<code>prevIcon</code> et <code>nextIcon</code> acceptent un <code>IconSource</code>, et <code>prevLabel</code> et <code>nextLabel</code> les mots annoncés par ces boutons.',
+      text: 'Personnalisez les contrôles avec <code>prevIcon</code>, <code>nextIcon</code> et leurs noms accessibles.',
     },
     placements: {
       title: 'Placements',
-      text: '<code>controls</code> et <code>indicators</code> se placent indépendamment : <code>inside</code> les pose sur les diapositives, <code>outside</code> à côté, <code>false</code> les retire.',
+      text: '<code>controls</code> et <code>indicators</code> acceptent chacun <code>inside</code>, <code>outside</code> ou <code>false</code>.',
     },
     jumps: {
       title: 'Sauts',
-      text: "Un déplacement de plus d'une page se fait d'un coup, l'effet étant joué une fois à l'arrivée. <code>noJump</code> rétablit le trajet complet, sur tous les chemins.",
+      text: 'Les déplacements de plusieurs pages sont directs par défaut. <code>noJump</code> fait défiler les diapositives intermédiaires.',
     },
     loop: {
       title: 'Boucle',
-      text: "<code>loop</code> ramène la dernière position vers la première, si bien qu'aucun bouton n'est jamais désactivé. Cela vaut pour les boutons, les flèches du clavier et la lecture automatique.",
+      text: '<code>loop</code> fait revenir la navigation de la dernière position à la première, et inversement.',
     },
     autoplay: {
       title: 'Défilement automatique',
-      text: "<code>autoplay</code> est un intervalle en millisecondes, zéro le désactivant. Il se suspend au survol et au focus clavier, et ne tourne jamais pour un lecteur qui a demandé moins d'animation. Aucun bouton de pause n'est rendu : ajoutez-en un, comme le fait l'exemple.",
+      text: '<code>autoplay</code> définit un intervalle en millisecondes. Le survol et le focus le suspendent ; la réduction des mouvements le désactive. Ajoutez un bouton de pause qui règle l’intervalle sur 0.',
     },
   },
-
   api: {
     VCarousel: {
       props: {
         itemsPerView:
-          "Combien de diapositives peuvent être visibles à la fois. C'est un MAXIMUM et non une cible : le plancher ci-dessous décide combien tiennent réellement, ce qui rend l'ensemble adaptatif sans point de rupture.",
+          'Nombre maximal de diapositives par vue. La largeur du conteneur et <code>itemMinSize</code> déterminent combien tiennent.',
         itemMinSize:
-          "Jusqu'où une diapositive peut rétrécir. Dès qu'une part égale passerait sous cette valeur, moins de diapositives tiennent et le carrousel défile plus loin à la place. Un nombre est lu en pixels ; tout le reste est utilisé tel quel, donc <code>'20vw'</code> fonctionne.",
-        peek: "Quelle part de la diapositive SUIVANTE reste visible, pour indiquer qu'il y a une suite. Elle inclut l'écart qui la précède. Elle ne peut pas se combiner à l'effet de fondu, qui suppose qu'une diapositive remplit exactement la vue.",
-        gap: "L'espace entre deux diapositives.",
-        orientation: 'Si le carrousel défile en travers de la page ou de haut en bas.',
+          'Taille minimale d’une diapositive. Les nombres utilisent des pixels ; les chaînes, des longueurs CSS.',
+        peek: 'Partie visible de la diapositive suivante, espacement compris. Incompatible avec le fondu.',
+        gap: 'Espacement entre les diapositives.',
+        orientation: 'Défilement horizontal ou vertical.',
         effect:
-          "Comment une diapositive cède la place à la suivante, piloté par le défilement lui-même. Le glissement ne signifie aucune animation. Le fondu exige UNE diapositive à la fois et aucun débord, puisqu'il maintient chaque diapositive en place pendant que le défilement passe dessous ; demandé autrement, il retombe sur le glissement plutôt que de se dégrader.",
-        height:
-          "La hauteur de la zone visible. DONNEZ-EN UNE quand le carrousel défile vers le bas : une diapositive dimensionnée en part de la hauteur a besoin d'une hauteur DONT prendre une part, et sans elle chaque diapositive s'effondre sur son propre contenu. En défilement horizontal, la hauteur vient des diapositives elles-mêmes.",
-        loop: "Si le carrousel revient au début : après la dernière position il retourne à la première, et avant la première il va à la dernière. Rien n'est cloné pour cela : la vraie piste revient au début, d'un coup, en jouant la transition à l'arrivée plutôt qu'en passant devant chaque diapositive intermédiaire. Sans effet là où il n'y a qu'une seule position de repos, et les boutons y restent désactivés plutôt que de devenir deux contrôles qui ne font rien.",
+          'Glissement, fondu ou mise à l’échelle. Le fondu utilise le glissement si la vue ne contient pas exactement une diapositive sans aperçu.',
+        height: 'Hauteur de la zone visible. Requise pour le défilement vertical.',
+        loop: 'Boucle entre les positions initiale et finale. Les contrôles restent désactivés s’il n’y a qu’une position.',
         noJump:
-          "Si un déplacement de plus d'une page conserve tout le défilement au lieu d'aller directement à destination. Désactivé par défaut : un point situé cinq pages plus loin arrive d'un coup et joue la transition une fois, à l'arrivée. Activez-le quand le trajet est le sujet, sur une poignée de diapositives où voir la piste défiler dit quelque chose de la distance parcourue. Il couvre tous les chemins, les points, les touches Origine et Fin et un carrousel en boucle qui revient au début, et il ne change rien pour un lecteur ayant demandé moins de mouvement, cette préférence rendant déjà tout défilement instantané.",
+          'Fait défiler les diapositives intermédiaires lors des déplacements de plusieurs pages. La réduction des mouvements conserve un déplacement instantané.',
         autoplay:
-          "Combien de temps chaque diapositive est montrée avant la suivante, en millisecondes ; zéro signifie qu'il n'avance pas de lui-même. Il s'arrête à la dernière page sauf si le carrousel boucle, se met en pause tant que le pointeur y repose ou que le focus CLAVIER est à l'intérieur, et ne tourne jamais pour un lecteur ayant demandé moins de mouvement. Aucun bouton de pause n'est rendu : cette prop est réactive, donc la lier à zéro est un contrôle d'arrêt d'une ligne de votre côté, et il vaut la peine de l'ajouter, puisque le survol et le focus ne laissent rien à un utilisateur tactile. La boucle rend cette liaison nécessaire plutôt que recommandée, le mouvement ne s'arrêtant plus de lui-même.",
+          'Intervalle de défilement en millisecondes ; 0 le désactive. Se suspend au survol/focus et respecte la réduction des mouvements. Fournissez un contrôle de pause, surtout en boucle.',
         controls:
-          "Où vont les boutons précédent et suivant : par-dessus les diapositives, à côté, ou nulle part. Placés à côté, leur place est réservée en rembourrage, si bien que l'encombrement du composant est inchangé et que ce sont les diapositives qui rétrécissent. Dans les deux cas ils sont centrés sur les DIAPOSITIVES et jamais sur les diapositives plus les points.",
-        indicators:
-          'Où vont les points de position : par-dessus les diapositives, après elles, ou nulle part. Après elles signifie en dessous quand le carrousel défile horizontalement, et à côté quand il défile verticalement.',
+          'Position des contrôles précédent/suivant : à l’intérieur, à l’extérieur ou masqués.',
+        indicators: 'Position des indicateurs : à l’intérieur, à l’extérieur ou masqués.',
         controlsVisibility:
-          "Si ces boutons sont toujours visibles, ou n'apparaissent que quand le pointeur est sur le carrousel ou que le focus clavier est à l'intérieur. Là où il n'y a pas de pointeur pour survoler, ils restent visibles quoi que dise cette prop. Les points ne sont jamais masqués.",
-        prevIcon: "L'icône du bouton précédent. Elle suit l'orientation par défaut.",
-        nextIcon: "L'icône du bouton suivant. Elle suit l'orientation par défaut.",
-        prevLabel: 'Ce que fait le bouton précédent, en mots. Il retombe sur le dictionnaire.',
-        nextLabel: 'Ce que fait le bouton suivant, en mots. Il retombe sur le dictionnaire.',
-        label:
-          "Ce que les lecteurs d'écran annoncent pour le carrousel dans son ensemble. Donnez-en un DISTINCT à chaque carrousel d'une page : c'est un point de repère, et deux points de repère portant le même nom sont indiscernables pour qui navigue entre eux.",
+          'Toujours visibles ou visibles au survol/focus. Ils restent visibles au toucher.',
+        prevIcon: 'Icône du contrôle précédent. Flèche adaptée à l’orientation par défaut.',
+        nextIcon: 'Icône du contrôle suivant. Flèche adaptée à l’orientation par défaut.',
+        prevLabel: 'Nom accessible du contrôle précédent. Utilise le dictionnaire par défaut.',
+        nextLabel: 'Nom accessible du contrôle suivant. Utilise le dictionnaire par défaut.',
+        label: 'Nom accessible du carrousel. Utilisez des noms distincts s’il y en a plusieurs.',
         vModel:
-          "Quelle diapositive est courante : la première entièrement visible quand plusieurs tiennent à la fois, ce qui est aussi la position où le carrousel s'est arrêté. Une valeur hors des positions où le carrousel peut s'arrêter y est ramenée.",
+          'Position actuelle, à partir de 0. Désigne la première diapositive entièrement visible et est limitée aux positions accessibles.',
       },
       slots: {
-        default:
-          'Les diapositives. Leur nombre est lu depuis ce que ce slot REND, donc un <code>v-for</code> convient parfaitement, mais le slot ne doit pas dépendre de quelque chose de vrai seulement dans un navigateur, sans quoi le serveur et le client compteraient différemment.',
+        default: 'Diapositives. Conservez le même nombre au rendu serveur et client.',
         controls:
-          "Remplace entièrement les boutons précédent et suivant, leur placement compris : un contenu personnalisé se positionne donc lui-même, et le réglage de visibilité ne s'y applique plus.",
+          'Remplace et positionne les contrôles. Reçoit <code>previous</code>, <code>next</code>, <code>atStart</code>, <code>atEnd</code>, <code>index</code>, <code>count</code>, <code>pageCount</code> et <code>orientation</code>.',
         indicators:
-          'Remplace toute la barre de points. Rendez un contrôle par POSITION et non par diapositive : une position au-delà de la dernière ne peut pas être atteinte, donc une barre bâtie sur le nombre de diapositives propose des points qui ne mènent nulle part. Le nombre de diapositives est passé aussi, pour une formulation comme « 3 sur 8 ».',
+          'Remplace la barre d’indicateurs. Reçoit <code>index</code>, <code>count</code>, <code>pageCount</code>, <code>goTo</code> et <code>orientation</code>. Affichez un contrôle par page, plutôt que par diapositive.',
         indicator:
-          "Remplace ce qui est dessiné À L'INTÉRIEUR d'un point. Le bouton lui-même, et tout ce qui le fait annoncer et se comporter correctement, reste celui du design system.",
+          'Contenu d’un bouton indicateur. Reçoit <code>index</code> et <code>active</code>.',
       },
     },
     VCarouselItem: {
       props: {
-        index:
-          "Quelle diapositive est celle-ci parmi ses voisines. Le carrousel l'injecte en les rendant. Ne la passez JAMAIS à la main : c'est ce qui rend le « 3 sur 8 » annoncé par un lecteur d'écran identique sur le serveur et dans le navigateur.",
+        index: 'Index attribué par le carrousel. Ne le définissez pas manuellement.',
       },
       slots: {
-        default: 'Le contenu de la diapositive : une image, une carte, du texte libre.',
+        default: 'Contenu de la diapositive.',
       },
     },
   },

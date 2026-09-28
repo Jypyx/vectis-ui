@@ -6,9 +6,6 @@ import { code, description, folder_zip as folderZip } from 'vectis-ui/icons'
 <template>
   <aside class="sidebar">
     <VSideNavigation label="Repository">
-      <!-- Nesting is not limited. Each level is indented by the room a start icon
-           takes, so a subitem's label lands on the same vertical as the label of the
-           branch holding it. -->
       <VSideNavigationItem :icon="folderZip" default-open>
         src
         <template #children>

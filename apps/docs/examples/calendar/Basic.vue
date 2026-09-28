@@ -2,12 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { VCalendar, type CalendarEvent } from 'vectis-ui'
 
-/*
- * This page is prerendered, so the clock cannot be read while the markup is being built: the
- * build date would be written into the HTML and the browser would disagree with it. The
- * schedule below therefore starts on a fixed week and moves onto the current one once the page
- * is in the browser, which the theme does here for the same reason.
- */
+/* Use a fixed initial week for prerendering; switch to the current week after mounting. */
 const REFERENCE_MONDAY = '2026-01-05'
 
 const anchor = ref(REFERENCE_MONDAY)
@@ -18,7 +13,7 @@ onMounted(() => {
   events.value = scheduleFor(anchor.value)
 })
 
-/** A date as the local ISO day the calendar reads, never through UTC. */
+/** Format the local date without converting it to UTC. */
 function isoOf(date: Date): string {
   const two = (part: number) => String(part).padStart(2, '0')
   return `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())}`

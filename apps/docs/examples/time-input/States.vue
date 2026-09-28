@@ -25,7 +25,6 @@ const invalid = ref<string | null>('09:15')
 
     <VTimeInput model-value="09:15" disabled mode="picker" label="Disabled, picker only" />
 
-    <!-- Frozen rather than out of reach: it still takes the focus and can be copied from. -->
     <VTimeInput
       model-value="09:15"
       readonly

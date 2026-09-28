@@ -13,8 +13,6 @@ const step = (delta: number) => (value.value += delta)
     <div class="row">
       <VButton variant="outline" tone="neutral" size="sm" @click="step(-25)">-25</VButton>
       <VButton variant="outline" tone="neutral" size="sm" @click="step(25)">+25</VButton>
-      <!-- Anything outside the range is brought back into it, so a value of 130 or -10
-           needs no clamping of your own. -->
       <VTypography variant="body-sm" tone="muted">value = {{ value }}, max = 100</VTypography>
     </div>
 

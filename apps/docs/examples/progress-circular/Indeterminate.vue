@@ -5,9 +5,6 @@ import { VProgressCircular, VTypography } from 'vectis-ui'
 <template>
   <div class="column">
     <div class="row">
-      <!-- The ring turns and its arc grows and shrinks on a period of its own, the two
-           offset so the movement never settles into a rhythm. The value is ignored:
-           there is nothing to report. -->
       <VProgressCircular indeterminate label="Waiting for the server" />
       <VProgressCircular indeterminate :size="64" tone="neutral" label="Loading" />
       <VProgressCircular indeterminate :size="64" :thickness="10" label="Working" />

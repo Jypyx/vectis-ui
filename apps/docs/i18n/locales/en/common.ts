@@ -1,13 +1,5 @@
-/**
- * Everything here is a label rather than prose, so it is a plain string and never carries
- * markup. `DocsProse` is for paragraphs, `t()` for the words on a control.
- */
 export default {
   header: {
-    /**
-     * Names the `<nav>` holding Home and Documentation, so a screen reader can tell the two
-     * navs apart.
-     */
     mainNav: 'Main',
     home: 'Home',
     docs: 'Documentation',
@@ -21,40 +13,29 @@ export default {
     open: 'Search',
     label: 'Search the documentation',
     placeholder: 'Search pages and components',
-    empty: 'No result',
+    empty: 'No results',
   },
   outline: 'On this page',
   sidebar: 'Documentation',
-  /* The heading of the section every component page opens on, above its API. It is the same
-     word on all forty-four, so it lives here rather than in each page's own catalogue. */
   usage: 'Usage',
-  /* The heading of the section gathering a component's variations, under its Usage example. It
-     is the same word on all forty-four, so it lives here rather than in each page's own
-     catalogue. */
   examples: 'Examples',
   code: {
     copy: 'Copy the code',
     copied: 'Copied to the clipboard',
-    /** Names the toggle an install command carries in its header, in DocsInstall. */
     packageManager: 'Package manager',
   },
-  /* The two words on the toggle every live example carries, and the name of the toggle itself,
-     which is the only thing a screen reader has to tell the two buttons apart from the page. */
   example: {
-    label: 'What the example shows',
+    label: 'Example view',
     preview: 'Preview',
     code: 'Code',
   },
-  /* The headings of a component page's API section. They are the same on all forty-four, so
-     they live here rather than in each page's own catalogue. */
   api: {
     heading: 'API',
     props: 'Props',
     events: 'Events',
     slots: 'Slots',
     types: 'Types',
-    typesLead:
-      'The types the tables above name, written as the library declares them. The ones carrying <code>export</code> can be imported from <code>vectis-ui</code> to type your own code; the others are the shape of what a slot hands out.',
+    typesLead: 'Types used in the API tables. Import exported types from <code>vectis-ui</code>.',
     cssVariables: 'CSS variables',
   },
   table: {
@@ -69,23 +50,12 @@ export default {
     signature: 'Signature',
     token: 'Token',
     value: 'Value',
-    /* What a Default cell says for a prop that has none. A word rather than a dash: a screen
-       reader announces punctuation as punctuation, or skips it entirely. */
     noDefault: 'none',
   },
-  /*
-   * The two anchors are written INTO the message, hrefs and all, which duplicates the two URLs
-   * across the locales. Both alternatives are worse.
-   */
   footer: {
     licence: 'MIT licensed, © 2026 Jypyx',
     builtWith:
       'Built with <a href="https://github.com/Jypyx/vectis-ui" target="_blank" rel="noreferrer">Vectis UI</a> and <a href="https://nuxt.com" target="_blank" rel="noreferrer">Nuxt</a>',
   },
-
-  /*
-   * It describes the PICTURE and does not repeat the page: a card shows the title and the
-   * description beside the image, and both of those are already translated.
-   */
   ogImageAlt: 'The Vectis UI logo and name on a dark violet background.',
 }

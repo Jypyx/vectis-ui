@@ -8,10 +8,6 @@ const detached = ref('week')
 
 <template>
   <div class="demo">
-    <!--
-      Joined by default: the items melt into one segmented control, which says they are one
-      choice.
-    -->
     <div class="row">
       <p class="caption">joined, the default</p>
       <VToggle v-model="joined" item-variant="outline" label="Period, joined">
@@ -21,8 +17,6 @@ const detached = ref('week')
       </VToggle>
     </div>
 
-    <!-- Detached leaves them as separate buttons with a gap, which suits a row of
-         filters that happen to share a model more than it suits one exclusive choice. -->
     <div class="row">
       <p class="caption">detached</p>
       <VToggle v-model="detached" detached item-variant="outline" label="Period, detached">

@@ -62,12 +62,6 @@ function onEscape() {
 </template>
 
 <style scoped>
-/*
- * Unlayered like the rest of the site's CSS, and scoped because it belongs to this panel
- * alone. It lives here rather than in docs-layout.css for the reason that file states about
- * itself: what a STATE owns goes with its component, and these rules are hover and
- * focus-visible.
- */
 .vd-search-field {
   flex: 1 1 auto;
 }

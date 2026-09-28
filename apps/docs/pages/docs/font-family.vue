@@ -5,11 +5,6 @@ const { t } = useI18n()
 const localePath = useLocalePath()
 useDocsHead('fontFamily')
 
-/*
- * Both samples do the same thing twice, so that the only difference a reader has to read is
- * where the font comes from: the token lines are identical on purpose, and so is the family
- * they name.
- */
 const importCode = `/* Your own stylesheet, in no layer. */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -51,11 +46,6 @@ const faceCode = `/* Your own stylesheet, in no layer. The files are served from
   <DocsProseList keypath="fontFamily.splitList" />
 
   <h2 id="the-icon-font">{{ t('fontFamily.iconHeading') }}</h2>
-  <!--
-    The one paragraph on the site that a single message cannot carry: it has a component in the
-    middle of it. Two keys with the link between them, and the link's own text is the target
-    page's title, which the navigation catalogue already translates.
-  -->
   <p>
     <DocsProse tag="span" keypath="fontFamily.iconBefore" />
     {{ ' ' }}

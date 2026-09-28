@@ -1,44 +1,40 @@
 export default {
   title: 'Infobulle',
-  lead: "Une courte description de l'élément sous le pointeur, ou sous le focus clavier. C'est une description et jamais un conteneur : rien à l'intérieur ne peut être manipulé.",
-
+  lead: '<code>VTooltip</code> affiche une courte description au survol ou au focus. Son contenu doit rester non interactif.',
   examples: {
     placements: {
       title: 'Placements',
-      text: '<code>placement</code> propose huit côtés, dont quatre alignés sur un bord du déclencheur plutôt que centrés dessus. Il nomme une préférence : le navigateur déplace le panneau quand le côté demandé manque de place.',
+      text: '<code>placement</code> définit la position souhaitée de l’infobulle.',
     },
     edgeFlipping: {
       title: "Au bord de l'écran",
-      text: "Faute de place du côté demandé, le panneau prend le côté opposé. C'est du CSS pur, sans mesure ni observateur.",
+      text: 'L’infobulle passe de l’autre côté si l’espace manque.',
     },
     delay: {
       title: 'Ouverture et fermeture',
-      text: "<code>delay</code> est le temps pendant lequel le pointeur doit reposer sur le déclencheur avant que l'infobulle apparaisse, 300ms par défaut, et 0 supprime l'attente. Le focus clavier l'ouvre aussitôt, Échap la ferme sans retirer le focus, et appuyer sur le déclencheur la ferme aussi.",
+      text: '<code>delay</code> définit l’attente au survol en millisecondes. Le focus ouvre immédiatement ; Échap ou l’activation du déclencheur ferme sans déplacer le focus.',
     },
     describing: {
       title: 'Décrire, pas nommer',
-      text: "L'infobulle pose <code>aria-describedby</code> sur son déclencheur, qui garde son propre nom accessible : un bouton icône porte toujours son <code>label</code>. Une tape n'ouvre rien, ce que dit l'infobulle doit donc exister ailleurs aussi.",
+      text: 'L’infobulle utilise <code>aria-describedby</code> ; le déclencheur nécessite toujours son propre nom accessible. Le toucher ne l’ouvre pas : rendez les informations essentielles disponibles ailleurs.',
     },
     richContent: {
       title: 'Contenu riche',
-      text: "Le slot <code>#content</code> l'emporte sur la prop <code>text</code> quand les deux sont donnés. Il doit rester non interactif : rien à l'intérieur n'est atteignable au clavier, et la description est aplatie en texte simple pour un lecteur d'écran.",
+      text: '<code>content</code> remplace <code>text</code>. Utilisez de la mise en forme ou des icônes décoratives, sans contrôles interactifs.',
     },
   },
-
   api: {
     VTooltip: {
       props: {
-        text: "Ce que dit l'infobulle. Le slot <code>#content</code> la remplace quand les deux sont donnés.",
-        placement:
-          "De quel côté de l'élément l'infobulle apparaît. Le navigateur la bascule de lui-même du côté opposé quand la place manque.",
+        text: 'Description de l’infobulle. Remplacée par le slot <code>content</code>.',
+        placement: 'Position souhaitée ; change de côté si l’espace manque.',
         delay:
-          "Combien de temps le pointeur doit rester sur l'élément avant que l'infobulle apparaisse, en millisecondes. Le focus clavier l'ouvre immédiatement, l'intention n'y faisant aucun doute, et un délai de 0 supprime entièrement l'attente.",
+          'Délai au survol en millisecondes ; 0 supprime l’attente. Le focus ouvre immédiatement.',
       },
       slots: {
-        default:
-          "L'élément que l'infobulle décrit. Liez les <code>triggerProps</code> qu'il reçoit dessus, ce qui relie les deux pour les technologies d'assistance, et assurez-vous qu'il puisse prendre le focus, sans quoi les utilisateurs au clavier ne verront jamais l'infobulle.",
+        default: 'Déclencheur accessible au focus. Liez les <code>triggerProps</code> fournis.',
         content:
-          "Un contenu plus riche qu'une simple chaîne : une mise en forme, un raccourci clavier, une icône. Il doit rester non interactif : la description est aplatie en texte brut pour les lecteurs d'écran, et rien à l'intérieur n'est atteignable au clavier. Un contenu manipulable appartient à un panneau qui reste ouvert, comme VMenu.",
+          'Description non interactive remplaçant <code>text</code>. Les technologies d’assistance la lisent comme du texte simple.',
       },
     },
   },

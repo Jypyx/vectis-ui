@@ -5,9 +5,9 @@ import type { ApiEntry, TypeEntry } from '~/content/api/types'
 import { anchorOf } from '~/content/api/types'
 
 const props = defineProps<{
-  /** The row being rendered. Only its type and its values are read. */
+  /** API row supplying the type and union values. */
   entry: ApiEntry
-  /** The page's named types: what decides whether a name in this cell is a link. */
+  /** Named types available as definition links. */
   types?: TypeEntry[]
 }>()
 
@@ -19,11 +19,10 @@ const pattern = computed(() => {
 
 interface Segment {
   text: string
-  /** The anchor of the definition below, on a segment that is one of the page's named types. */
+  /** Definition anchor for a named type. */
   href?: string
 }
 
-/** The cell cut into the names this page defines and whatever is written between them. */
 const segments = computed<Segment[]>(() => {
   const type = props.entry.type
   const regex = pattern.value
@@ -42,12 +41,7 @@ const segments = computed<Segment[]>(() => {
 </script>
 
 <template>
-  <!--
-    The segments are written one per line deliberately: the compiler's `condense` whitespace mode
-    drops a whitespace-only node that contains a newline, so nothing is inserted between two
-    segments. Put them on one line with spaces around them and `ComboboxOption[]` would be
-    rendered as `ComboboxOption []`.
-  -->
+  <!-- Newlines let Vue condense whitespace without inserting spaces inside type names. -->
   <td>
     <code>
       <template v-for="(segment, index) in segments" :key="index">
@@ -65,10 +59,7 @@ const segments = computed<Segment[]>(() => {
   max-inline-size: 22rem;
   color: var(--vectis-color-text-muted);
 }
-/* A link on the TEXT's own colour, the DocsOutline rail's arrangement: a Type column of thirteen
-   rows turned accent would read as thirteen things to do, where all this one says is that the
-   name has a shape and the shape is printed further down. The dotted underline is what still
-   marks it as a link at a glance. */
+/* Keep type links on the text colour; the dotted underline marks them as links. */
 .vd-api-type-link {
   color: inherit;
   text-decoration: underline dotted;

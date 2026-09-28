@@ -2,8 +2,6 @@
 import { ref } from 'vue'
 import { VTimePicker, VTypography } from 'vectis-ui'
 
-/* Each keeps its own value, so adjusting one does not disturb the others. en-US and en-GB
-   are the sharp pair: the same words, and only the clock between them. */
 const locales = ref<{ tag: string; caption: string; time: string | null }[]>([
   { tag: 'en-US', caption: 'en-US, twelve hours', time: '19:30' },
   { tag: 'en-GB', caption: 'en-GB, twenty-four', time: '19:30' },

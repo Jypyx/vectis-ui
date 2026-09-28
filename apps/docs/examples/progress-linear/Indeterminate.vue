@@ -4,9 +4,6 @@ import { VProgressLinear, VTypography } from 'vectis-ui'
 
 <template>
   <div class="column">
-    <!-- One bar crosses the track, flush with each edge at the extremes, so the loop is
-         invisible and the track is never empty. The value is ignored: there is nothing
-         to report. -->
     <VProgressLinear indeterminate label="Waiting for the server" />
 
     <VProgressLinear indeterminate tone="neutral" thickness="8" label="Loading" />

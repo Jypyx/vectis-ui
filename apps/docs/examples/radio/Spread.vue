@@ -17,8 +17,6 @@ const side = ref('start')
 </template>
 
 <style scoped>
-/* A spread row takes the width it is given, so the panel is what decides how far apart
-   the label and the dot end up. */
 .settings {
   display: grid;
   gap: var(--vectis-space-3);

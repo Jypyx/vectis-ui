@@ -1,76 +1,68 @@
 export default {
   title: 'Date picker',
-  lead: 'An inline calendar grid. Every date it holds is a plain local-time <code>YYYY-MM-DD</code> string and never a <code>Date</code>, so a value cannot shift a day across time zones.',
-
+  lead: '<code>VDatePicker</code> is an inline calendar for a date, a range or several dates. Values are local dates in <code>YYYY-MM-DD</code> format.',
   examples: {
     range: {
       title: 'Range',
-      text: '<code>selection</code> set to <code>range</code> makes the value a start and an end, the span under the pointer being previewed between the two clicks.',
+      text: 'Select the start and end of the range in two steps. The model is <code>{ start, end }</code>; either bound can be <code>null</code> while the range is incomplete.',
     },
     multiple: {
       title: 'Multiple dates',
-      text: '<code>selection</code> set to <code>multiple</code> makes the value a list, a day already in it coming back out when it is clicked again.',
+      text: 'Select dates to add them to the ISO date array; select them again to remove them.',
     },
     presets: {
       title: 'Presets',
-      text: 'The <code>#footer</code> slot is a strip under the grid, for actions or for the dates a reader reaches for most. The buttons in it write the model like any other control.',
+      text: 'Place preset date buttons in <code>footer</code> and update the model from them.',
     },
     disabledDates: {
       title: 'Disabled dates',
-      text: '<code>disabledDates</code> takes a list of days, or a function asked about one date at a time. A closed day stays visible, struck through, and reachable by keyboard.',
+      text: '<code>disabledDates</code> accepts ISO dates or a predicate. Unavailable days remain visible and reachable with the keyboard.',
     },
     bounds: {
       title: 'Minimum and maximum',
-      text: '<code>min</code> and <code>max</code> bound the navigation as well as the choice, in every view.',
+      text: '<code>min</code> and <code>max</code> restrict both selection and calendar navigation.',
     },
     events: {
       title: 'Event dots',
-      text: '<code>events</code> draws up to three dots under a day. Each takes any CSS colour and a <code>label</code>, which is what assistive technology reads.',
+      text: 'Mark events with coloured dots. Their labels are included in the day’s accessible name.',
     },
     adjacentDays: {
       title: 'Adjacent days',
-      text: '<code>showAdjacentDays</code> fills the corners of the grid with the neighbouring months, greyed and inert. <code>selectAdjacentDays</code> makes them choosable as well, and picking one moves the calendar to its month.',
+      text: 'Show neighbouring days with <code>showAdjacentDays</code>. Enable their selection with <code>selectAdjacentDays</code>.',
     },
     localization: {
       title: 'Localization',
-      text: '<code>locale</code> decides the month and day names and the day the weeks start on, and takes precedence over the global locale. <code>firstDayOfWeek</code> overrides the day that locale would have chosen.',
+      text: '<code>locale</code> sets month names and week start. <code>firstDayOfWeek</code> overrides the week start.',
     },
   },
-
   api: {
     VDatePicker: {
       props: {
-        selection:
-          'What the reader is picking: a single date, a period between two dates, or any number of separate dates. It determines the shape of the value.',
-        locale:
-          "A BCP 47 locale, which decides the month and day names and the first day of the week. It takes precedence over the design system's global locale and falls back to it, which is why it has no literal default.",
-        firstDayOfWeek:
-          'Forces the day the weeks start on, 0 for Sunday through 6 for Saturday. Left out, the locale decides.',
-        min: 'The earliest selectable date, as an ISO string. Neither navigation nor selection goes back beyond it.',
-        max: 'The latest selectable date, as an ISO string. Neither navigation nor selection goes past it.',
+        selection: 'Selection mode: one date, a range or several dates.',
+        locale: 'BCP 47 locale for date display and week start. Overrides the global locale.',
+        firstDayOfWeek: 'First weekday, from 0 (Sunday) to 6 (Saturday). Defaults to the locale.',
+        min: 'Earliest selectable date, in <code>YYYY-MM-DD</code> format. Also limits navigation.',
+        max: 'Latest selectable date, in <code>YYYY-MM-DD</code> format. Also limits navigation.',
         disabledDates:
-          'Dates that cannot be chosen, given as a list of ISO strings or as a function. They stay visible, struck through, and can still be reached with the keyboard.',
-        showAdjacentDays:
-          'Also fills the empty corners of the grid with the greyed days of the neighbouring months.',
+          'Unavailable dates: an array of ISO strings or a predicate. Days remain visible and reachable with the keyboard.',
+        showAdjacentDays: 'Shows days from neighbouring months.',
         selectAdjacentDays:
-          'Lets those neighbouring days be clicked, which moves the calendar to their month. A clickable day has to be visible, so this implies showing them.',
-        events: 'The events to mark, as up to three coloured dots under the day they fall on.',
-        disabled:
-          'Makes the whole calendar unusable: no date can be chosen, no month reached, and everything greys out through the colour tokens.',
-        readonly:
-          'Shows what is selected without letting it be changed. The calendar can still be read and walked through, another month or another year, which is what separates it from <code>disabled</code>.',
+          'Allows selecting days from neighbouring months and navigates to that month. Implies <code>showAdjacentDays</code>.',
+        events:
+          'Events shown as up to three dots per day. Each accepts a date, CSS colour and accessible label.',
+        disabled: 'Disables selection and navigation.',
+        readonly: 'Prevents selection. Month and year navigation remain available.',
         label:
-          'The accessible name of the whole picker, its header and its grid together. A range shown as two calendars side by side needs one each, or a screen reader announces the same group twice. It falls back to the dictionary, and a consumer <code>aria-label</code> wins.',
+          'Accessible name of the calendar. Defaults to the dictionary; consumer <code>aria-label</code> takes precedence.',
         vModel:
-          'What is selected, and its shape follows <code>selection</code>: an ISO string for a single date, a start and end pair for a period, an array for several. Nothing is selected to begin with.',
+          'ISO date or <code>null</code> for single selection, <code>{ start, end }</code> for a range, ISO date array for multiple selection.',
       },
       events: {
-        select:
-          'A date was chosen, with the value as it now stands. Chosen is not finished: a period or a list is still being built after it, which is why VTimePicker names its own end of a choice <code>confirm</code>.',
+        select: 'A date was selected. Receives the current model, including an incomplete range.',
       },
       slots: {
-        day: 'Replaces the content of a day cell, to show a price or an availability under the number. It receives everything known about that day, including whether it belongs to the displayed month.',
-        footer: 'The strip under the grid, for actions such as Close or Save, or for preset dates.',
+        day: 'Day cell content. Receives <code>iso</code>, <code>day</code>, <code>inMonth</code>, <code>disabled</code>, <code>selected</code>, <code>today</code>, <code>inRange</code> and <code>events</code>.',
+        footer: 'Actions or preset dates below the grid.',
       },
     },
   },

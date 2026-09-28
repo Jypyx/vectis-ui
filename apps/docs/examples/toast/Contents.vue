@@ -12,8 +12,6 @@ import { VButton, toast } from 'vectis-ui'
       Message only
     </VButton>
 
-    <!-- A title frames the message when the message alone would not say what it is
-         about. Keep it to a few words: it is a heading, not a first sentence. -->
     <VButton
       variant="outline"
       tone="neutral"

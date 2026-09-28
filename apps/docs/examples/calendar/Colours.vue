@@ -4,8 +4,6 @@ import { VCalendar, type CalendarEvent } from 'vectis-ui'
 
 const DAY = '2026-06-10'
 
-/* The first six name no colour, so each takes the hue its id derives. The last two name
-   one of their own, in two of the notations any CSS colour may be written in. */
 const events = ref<CalendarEvent[]>([
   { id: 'hue-1', title: 'Standup', start: DAY, end: DAY, startTime: '08:00', endTime: '09:00' },
   {

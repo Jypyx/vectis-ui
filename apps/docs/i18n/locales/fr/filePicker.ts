@@ -1,99 +1,94 @@
 export default {
   title: 'Sélecteur de fichiers',
-  lead: "Le frère en zone de dépôt de VFileInput : une surface plutôt qu'un champ, avec les mêmes règles de filtrage et la même liste de fichiers en valeur.",
-
+  lead: '<code>VFilePicker</code> est une zone de dépôt avec un sélecteur natif et une liste d’aperçus facultative. Le modèle est toujours un <code>File[]</code>.',
   examples: {
     titleAndSubtitle: {
       title: 'Titre et sous-titre',
-      text: "<code>title</code> est obligatoire et <code>subtitle</code> est l'endroit où écrire les règles en clair. Les deux ont un slot, qui n'accepte que du texte et des éléments en ligne.",
+      text: 'Utilisez <code>title</code> pour la consigne et <code>subtitle</code> pour les contraintes de fichiers.',
     },
     preview: {
       title: 'La liste des fichiers',
-      text: '<code>preview</code> dit où va la liste des fichiers choisis, sous la zone ou à côté, ou la retire. À côté, elle repasse dessous dès que le composant est étroit.',
+      text: '<code>preview="bottom"</code> liste les fichiers sous la zone. <code>preview="end"</code> les place à côté, puis en dessous si le composant est étroit.',
     },
     customIcons: {
       title: 'Icônes personnalisées',
-      text: '<code>icon</code> est le grand glyphe en haut de la zone. <code>typeIcons</code> remplace le glyphe affiché par une ligne pour un type de fichier, en ne nommant que les types à changer, et <code>removeIcon</code> celui du bouton qui retire une ligne.',
+      text: 'Personnalisez l’icône de la zone avec <code>icon</code> et celles des types de fichiers avec <code>typeIcons</code>.',
     },
     thumbnails: {
       title: 'Vignettes',
-      text: "Une image est affichée telle quelle, par une adresse temporaire créée dans la page. <code>hideThumbnails</code> affiche à la place l'icône de son type.",
+      text: 'Les images affichent des miniatures. <code>hideThumbnails</code> les remplace par des icônes de type de fichier.',
     },
     multiple: {
       title: 'Fichiers multiples',
-      text: '<code>multiple</code> permet à la zone de prendre plusieurs fichiers, les suivants étant écartés sinon. La valeur est une liste dans les deux cas, et <code>reject</code> est émis une fois par fichier refusé.',
+      text: '<code>multiple</code> autorise plusieurs fichiers ; <code>maxFiles</code> limite la sélection.',
     },
     accept: {
       title: 'Types acceptés',
-      text: '<code>accept</code> accepte la syntaxe du navigateur et filtre la boîte de dialogue système comme un fichier déposé. Un fichier qui échoue revient par <code>reject</code> avec la raison <code>type</code>.',
+      text: '<code>accept</code> filtre les sélections et les dépôts. Ajoutez des extensions si les types MIME peuvent être absents.',
     },
     maxSize: {
       title: 'Taille maximale',
-      text: "<code>maxSize</code> est la taille maximale d'un fichier, en octets. Chacun est pesé séparément.",
+      text: '<code>maxSize</code> limite chaque fichier en octets. Écoutez <code>reject</code> pour expliquer les refus.',
     },
     totalSize: {
       title: 'Taille totale et nombre',
-      text: '<code>maxTotalSize</code> et <code>maxFiles</code> bornent la sélection dans son ensemble, en comptant ce qui est déjà dans la liste. Le filtrage suit un ordre fixe : type, puis taille, puis nombre, puis taille totale.',
+      text: '<code>maxTotalSize</code> limite toute la sélection, fichiers déjà présents compris.',
     },
     states: {
       title: 'États',
-      text: "<code>readonly</code> montre ce qui a été pris sans rien laisser changer, boutons de retrait compris. <code>disabled</code> grise la zone et l'empêche d'accepter quoi que ce soit, y compris en cours de glisser.",
+      text: '<code>readonly</code> empêche les ajouts et retraits tout en conservant le focus. <code>loading</code> remplace l’icône de la zone par un indicateur sans désactiver la sélection.',
     },
   },
-
   api: {
     VFilePicker: {
       props: {
-        title:
-          "Ce qu'on demande au lecteur de déposer, en une ligne. C'est OBLIGATOIRE : une zone de dépôt sans consigne n'est qu'un rectangle. Elle masque l'attribut HTML du même nom, compromis accepté.",
-        subtitle:
-          'Une seconde ligne dessous, pour les contraintes en clair : genres, tailles, nombre.',
-        icon: 'La grande icône en haut de la zone.',
+        title: 'Consigne de dépôt obligatoire.',
+        subtitle: 'Contraintes de fichiers facultatives sous le titre.',
+        icon: 'Grande icône de la zone de dépôt.',
         hideBrowse:
-          "Masque le séparateur et le bouton de parcours sous la consigne. Cela change la NATURE de la zone : elle devient alors le contrôle elle-même, un vrai bouton, si bien qu'Entrée, Espace et le focus viennent de la plateforme plutôt que d'un conteneur qui se contente de réagir aux clics.",
+          'Masque le bouton de parcours et transforme la zone en bouton, activable avec Entrée ou Espace.',
         browseText:
-          'Le texte affiché sur le bouton de parcours, qui lui sert aussi de nom accessible. Il retombe sur le dictionnaire du design system.',
+          'Texte visible et nom accessible du bouton de parcours. Utilise le dictionnaire de la bibliothèque par défaut.',
         preview:
-          "Où les fichiers pris sont listés : sous la zone, ou à côté, auquel cas la liste repasse dessous quand le COMPOSANT est étroit, en suivant la largeur qu'on lui a donnée et non celle de la fenêtre. Par défaut, rien n'est listé du tout.",
-        hideThumbnails:
-          "Affiche l'icône de genre pour chaque fichier de cette liste, images comprises : la porte de sortie quand une liste contient beaucoup d'images, ou de très grandes. Sans lui, une image est montrée en vignette : elle reçoit une adresse temporaire, créée dans le navigateur seulement et libérée dès que le fichier quitte la liste ou que le composant disparaît.",
-        typeIcons: "Remplace l'icône d'un ou plusieurs genres de fichiers.",
-        removeIcon: "L'icône du bouton qui retire un fichier de la liste.",
-        multiple:
-          'Permet de prendre plusieurs fichiers. Avec un seul, tout fichier supplémentaire est écarté.',
+          'Position des aperçus : <code>false</code>, <code>bottom</code> ou <code>end</code>. La liste latérale passe en dessous dans un conteneur étroit.',
+        hideThumbnails: 'Utilise des icônes de type de fichier à la place des miniatures.',
+        typeIcons: 'Icônes personnalisées par catégorie de fichier.',
+        removeIcon: 'Icône du bouton de retrait d’un fichier.',
+        multiple: 'Autorise plusieurs fichiers. Sinon, les fichiers supplémentaires sont refusés.',
         accept:
-          "Quels genres de fichiers sont acceptés, dans la syntaxe du navigateur. C'est appliqué deux fois : en attribut, ce qui filtre la boîte de dialogue du système, et de nouveau en code, seule chose capable de filtrer un fichier déposé.",
-        maxSize: "La taille maximale d'UN fichier, en octets.",
-        maxTotalSize: 'La taille maximale de toute la sélection, en octets.',
-        maxFiles: 'Combien de fichiers peuvent être pris au plus.',
-        disabled: 'Rend la zone inutilisable, grisée par les tokens de couleur.',
+          'Types acceptés, selon la syntaxe native comme <code>image/*,.pdf</code>. Filtre les sélections et les fichiers déposés.',
+        maxSize: 'Taille maximale par fichier, en octets.',
+        maxTotalSize: 'Taille maximale de la sélection, en octets.',
+        maxFiles: 'Nombre maximal de fichiers sélectionnés.',
+        disabled: 'Désactive les interactions.',
         readonly:
-          'Montre ce qui a été pris sans permettre de le changer : ni boîte de dialogue, ni dépôt, ni retrait. Ses boutons restent atteignables au clavier, annoncés comme indisponibles.',
+          'Empêche l’ouverture du sélecteur, le dépôt et le retrait de fichiers. Les contrôles conservent le focus.',
         invalid:
-          "Marque la zone comme invalide, ce qui colore son contour et s'annonce sur le contrôle que l'on atteint. C'est pour une règle à vous : rien ici n'est vérifié par le navigateur, le vrai champ étant masqué.",
-        loading:
-          "Affiche un indicateur à la place de l'icône de la zone, typiquement pendant un envoi. Il dit que quelque chose se passe et ne change rien d'autre : les fichiers peuvent toujours être déposés et la boîte de dialogue s'ouvre encore.",
+          'Marque le contrôle comme invalide et applique le style d’erreur. Validez séparément la sélection de fichiers.',
+        loading: 'Affiche un indicateur à la place de l’icône sans désactiver la sélection.',
         loadingText:
-          "Ce que les lecteurs d'écran annoncent pendant que l'indicateur tourne. Sa valeur par défaut vient du dictionnaire du design system.",
+          'Texte de chargement et nom accessible de l’indicateur. Utilise le dictionnaire de la bibliothèque par défaut.',
         vModel:
-          "Toujours une LISTE de fichiers, que plusieurs soient permis ou non, jamais un fichier seul. La forme ne dépend pas d'une prop : vous n'avez donc jamais à restreindre une union que TypeScript ne sait pas discriminer.",
+          'Fichiers sélectionnés sous forme de <code>File[]</code>, même pour un seul fichier.',
       },
       events: {
-        change: "La sélection a changé, avec toute la liste telle qu'elle est désormais.",
-        reject: 'Un fichier a été écarté, avec lequel et pourquoi.',
-        remove: 'Un fichier a été retiré de la liste, avec lequel et où il se trouvait.',
+        change: 'La sélection a changé. Reçoit le <code>File[]</code> complet.',
+        reject:
+          'Émis pour chaque fichier refusé. Reçoit le fichier et un motif : <code>type</code>, <code>size</code>, <code>count</code> ou <code>total-size</code>.',
+        remove: 'Un fichier a été retiré. Reçoit le fichier et son index.',
       },
       slots: {
-        icon: "La grande icône, pour une illustration que la prop ne peut pas exprimer. Elle doit rester non interactive, et les deux suivantes aussi : avec le bouton de parcours masqué, la zone EST un bouton, et rien d'interactif ne peut se trouver dans un bouton.",
-        title: 'La consigne. Texte et éléments en ligne seulement, pour la même raison.',
-        subtitle: 'La seconde ligne. Même contrat que la consigne.',
+        icon: 'Illustration de la zone. Gardez-la non interactive.',
+        title:
+          'Contenu de la consigne. Utilisez du texte et des éléments en ligne non interactifs.',
+        subtitle:
+          'Contenu des contraintes. Utilisez du texte et des éléments en ligne non interactifs.',
         browse:
-          "Le bouton de parcours. Appelez le <code>open</code> qu'il reçoit : sans lui, un bouton à vous ne pourrait plus ouvrir la boîte de dialogue du tout.",
-        item: "TOUTE une ligne de la liste, la porte de sortie pour une ligne montrant sa propre progression d'envoi. Elle reçoit tout ce qu'avait la ligne standard.",
-        thumbnail:
-          "Le carré en début de ligne seulement : pour une vignette produite par votre serveur, l'image d'accroche d'une vidéo, ou un format que le navigateur ne sait pas décoder.",
+          'Contrôle de parcours personnalisé. Reçoit <code>open</code> et <code>disabled</code> ; appelez <code>open</code> pour ouvrir le sélecteur.',
+        item: 'Ligne d’aperçu entière. Reçoit le fichier, l’index, la catégorie, la miniature, l’icône, la taille formatée et <code>remove</code>.',
+        thumbnail: 'Visuel de l’aperçu. Reçoit les mêmes données que <code>item</code>.',
         remove:
-          'Le contrôle qui retire une ligne. <code>remove</code> est la seule chose qui peut sortir le fichier, et <code>removeLabel</code> est le nom accessible tout prêt, celui du fichier compris, sans lequel le bouton ne serait annoncé comme rien du tout.',
+          'Contrôle de retrait. Appelez <code>remove</code> et utilisez <code>removeLabel</code> comme nom accessible.',
       },
     },
   },

@@ -8,8 +8,6 @@ const framed = ref('overview')
 
 <template>
   <div class="demo">
-    <!-- Down the side instead of across: the panels then sit beside the tabs rather
-         than under them, and the arrow keys follow the axis. -->
     <VTabs v-model="flat" orientation="vertical" label="Project">
       <VTab value="overview" label="Overview" />
       <VTab value="activity" label="Activity" />
@@ -21,9 +19,6 @@ const framed = ref('overview')
       </template>
     </VTabs>
 
-    <!-- Framed, the rule between the tabs and the panels moves to the other edge of
-         the column: the frame already draws the outer one, and what is missing is the
-         boundary between the two halves. -->
     <VTabs v-model="framed" orientation="vertical" variant="outlined" label="Project, framed">
       <VTab value="overview" label="Overview" />
       <VTab value="activity" label="Activity" />

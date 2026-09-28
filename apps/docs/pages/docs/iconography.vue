@@ -52,11 +52,10 @@ setIconResolver(
 
 const ligatureCode = `import { ligatureIconResolver, setIconResolver } from 'vectis-ui'
 
-// The name IS the glyph, so one line covers every icon in the application.
+// The font must support every icon name.
 setIconResolver(ligatureIconResolver())
 
-// Or, for a font spelling a few of them differently. The names left out
-// are passed on as they stand.
+// Add aliases for names that differ. Other names pass through unchanged.
 setIconResolver(ligatureIconResolver({ aliases: { close: 'clear', more_horiz: 'more' } }))`
 
 const componentCode = `import { componentIconResolver, setIconResolver } from 'vectis-ui'
@@ -64,7 +63,7 @@ import { Check, Search, X } from 'lucide-vue-next'
 
 setIconResolver(
   componentIconResolver({
-    // Three names answered here; every other one falls back to the built-in drawing.
+    // Unmapped names use the imported SVG path or ligature fallback.
     components: { check: Check, close: X, search: Search },
     props: () => ({ strokeWidth: 1.75 }),
   }),
@@ -74,9 +73,7 @@ const handWrittenCode = `import { setIconResolver } from 'vectis-ui'
 
 import { docsIcons } from '~/icons/icons'
 
-// A resolver is only a function, so a table is not compulsory. This one is
-// the site you are reading: the icons its chrome needs, and \`undefined\` for
-// everything else, which hands the name back to the icon that carries it.
+// Return undefined to preserve the fallback for other names.
 setIconResolver((name, context) => {
   const paths = docsIcons[name]
   if (!paths) return undefined

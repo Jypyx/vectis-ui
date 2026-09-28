@@ -48,8 +48,7 @@ const themeAttrCode = `<!-- No attribute at all is the light theme -->
 <!-- The same page, dark -->
 <html data-theme="dark">`
 
-const themeScopeCode = `<!-- A dark aside inside a light page: the nearest attribute wins,
-     and everything under it inherits. -->
+const themeScopeCode = `<!-- Use a dark theme for the aside. -->
 <main data-theme="light">
   <VDataTable :columns="columns" :rows="rows" />
 
@@ -58,11 +57,11 @@ const themeScopeCode = `<!-- A dark aside inside a light page: the nearest attri
   </aside>
 </main>`
 
-const themeSystemCode = `// Following the system, in one line. The application makes that call, not the library.
+const themeSystemCode = `// Read the system preference once, in the browser.
 const dark = window.matchMedia('(prefers-color-scheme: dark)')
 document.documentElement.dataset.theme = dark.matches ? 'dark' : 'light'`
 
-const coralCode = `/* Any selector at all. This one is on the panel below. */
+const coralCode = `/* Scope overrides to this container. */
 .coral {
   --vectis-color-accent: oklch(64% 0.16 32);
   --vectis-color-accent-hover: oklch(58% 0.16 32);
@@ -71,15 +70,13 @@ const coralCode = `/* Any selector at all. This one is on the panel below. */
   /* Mixed towards the surface, so both tints follow whichever theme is showing. */
   --vectis-color-accent-surface: color-mix(in oklch, var(--vectis-color-accent) 14%, var(--vectis-color-surface));
   --vectis-color-accent-border: color-mix(in oklch, var(--vectis-color-accent) 40%, var(--vectis-color-surface));
-  /* The focus ring is a role of its own, not the accent under another name: the accent
-     carries white text, the ring has to be seen against the page. This one value clears 3:1
-     on both grounds, so it needs no dark counterpart. */
+  /* Set the focus colour separately from the accent. */
   --vectis-focus-ring-color: oklch(58% 0.16 32);
   --vectis-radius-interactive: var(--vectis-radius-pill);
   --vectis-radius-chip: var(--vectis-radius-pill);
 }
 
-/* Text needs a lighter step on a dark ground: the one role that has to differ. */
+/* Use a lighter accent text colour in the dark theme. */
 [data-theme='dark'] .coral {
   --vectis-color-accent-text: oklch(78% 0.13 32);
 }`
@@ -87,8 +84,7 @@ const coralCode = `/* Any selector at all. This one is on the panel below. */
 const layersCode = `/* The order the library declares, for reference. */
 @layer vectis.reset, vectis.tokens, vectis.components, vectis.utilities;
 
-/* Your rule is in no layer, so it wins over all four.
-   One class, no !important, nothing added to buy specificity. */
+/* Unlayered CSS overrides the library's normal declarations. */
 .v-button {
   text-transform: uppercase;
 }`
@@ -137,7 +133,6 @@ export default defineNuxtConfig({
 
   <DocsProse keypath="theming.switchScope" />
   <DocsCode lang="html" :code="themeScopeCode" />
-  <DocsProse keypath="theming.switchScopeBody" />
   <DocsProse keypath="theming.switchColorScheme" />
   <DocsProse keypath="theming.switchSystem" />
   <DocsCode lang="ts" :code="themeSystemCode" />
@@ -168,7 +163,6 @@ export default defineNuxtConfig({
   <h2 id="css-layers">{{ t('theming.layersHeading') }}</h2>
   <DocsProse keypath="theming.layersBody" />
   <DocsCode lang="css" :code="layersCode" />
-  <DocsProse keypath="theming.layersConsequence" />
   <DocsProse keypath="theming.layersTrap" />
 
   <h2 id="modern-css">{{ t('theming.buildHeading') }}</h2>

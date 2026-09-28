@@ -39,8 +39,7 @@ const hues = [220, 280, 340, 20, 90, 160]
   font-size: var(--vectis-text-heading-3-size);
   font-weight: var(--vectis-text-heading-3-weight);
 }
-/* The vertical slide is already sized by the carousel: the content fills it rather than
-   bringing a height of its own. */
+/* Let content fill the carousel's assigned slide height. */
 .fill {
   block-size: 100%;
 }

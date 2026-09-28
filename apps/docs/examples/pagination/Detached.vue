@@ -14,8 +14,6 @@ const seamless = ref(3)
       <VTypography variant="caption" tone="muted">Joined, the default</VTypography>
     </div>
 
-    <!-- The same word, in the same direction, as VButtonGroup and VToggle: the buttons
-         are spaced and each keeps its own corners. -->
     <div class="row">
       <VPagination
         v-model="detached"
@@ -27,8 +25,6 @@ const seamless = ref(3)
       <VTypography variant="caption" tone="muted">detached</VTypography>
     </div>
 
-    <!-- Joined again, with the lines between the buttons taken out: one frame, and the
-         current page as a highlight that moves inside it. -->
     <div class="row">
       <VPagination
         v-model="seamless"

@@ -5,10 +5,6 @@ import { description, image, table_chart as tableChart } from 'vectis-ui/icons'
 
 <template>
   <div class="row">
-    <!--
-      The size is set once on the navigation and every level follows, however deep: a sublist
-      never restates it. `compact` takes 4px off each row on top of that.
-    -->
     <aside class="sidebar">
       <p class="caption">sm</p>
       <VSideNavigation label="Rows of 32px" size="sm">

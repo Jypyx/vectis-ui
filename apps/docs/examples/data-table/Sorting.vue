@@ -2,8 +2,6 @@
 import { ref } from 'vue'
 import { VDataTable, type DataTableSort } from 'vectis-ui'
 
-/* `sortable` turns a heading into a button and the table does the sorting itself, on the
-   values as they are given. The ascending icon points down, the spreadsheet convention. */
 const columns = [
   { key: 'name', label: 'Project', sortable: true },
   { key: 'owner', label: 'Owner' },
@@ -18,8 +16,6 @@ const rows = [
   { name: 'Granit', owner: 'Emma', status: 'Active', commits: 45 },
 ]
 
-/* The sort is a model, so the table can open on a column already sorted, and what the
-   reader clicks can be read back. */
 const sort = ref<DataTableSort | null>({ key: 'commits', direction: 'desc' })
 
 const DIRECTIONS = { asc: 'ascending', desc: 'descending' }

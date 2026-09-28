@@ -17,8 +17,6 @@ const key = ref('')
       hint="Digits only, and a phone offers its number pad"
     />
 
-    <!-- Outside a numeric code the value is forced to capitals, so it has one
-         canonical form whatever the reader typed. -->
     <VInputOTP
       v-model="word"
       :length="5"

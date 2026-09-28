@@ -1,62 +1,56 @@
 export default {
   title: 'Avatar',
-  lead: 'A person or a thing, as a disc. A picture when there is one, an icon or the initials when there is not, on a colour derived from the name so the same person keeps the same one everywhere.',
-
+  lead: '<code>VAvatar</code> represents a person or entity with an image, icon or initials.',
   examples: {
     image: {
       title: 'With a picture',
-      text: '<code>src</code> displays a picture. <code>name</code> provides its alternative text and the initials shown when the file cannot be loaded.',
+      text: '<code>src</code> displays the image. If it fails to load, the avatar uses its icon or initials.',
     },
     icon: {
       title: 'With an icon',
-      text: '<code>icon</code> displays an icon instead of the initials. <code>alt</code> names the avatar when no <code>name</code> is given.',
+      text: '<code>icon</code> replaces initials. Provide <code>name</code> or <code>alt</code> for an accessible name.',
     },
     initials: {
       title: 'Initials and automatic colour',
-      text: 'With no picture and no icon, the disc shows the initials of <code>name</code> on a colour derived from it.',
+      text: 'Without an image or icon, <code>name</code> supplies initials and determines the background colour.',
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> sets the diameter: 24, 32, 40, 48 or 56 pixels. The content inside follows.',
+      text: '<code>size</code> sets the avatar diameter.',
     },
     compact: {
       title: 'Compact',
-      text: '<code>compact</code> reduces the diameter by 4px.',
+      text: '<code>compact</code> reduces the diameter.',
     },
     color: {
       title: 'Custom colour',
-      text: '<code>color</code> replaces the colour derived from the name. Hex, a CSS colour name and <code>oklch()</code> are accepted.',
+      text: '<code>color</code> overrides the automatic background. Check its contrast with the white foreground.',
     },
     interactive: {
       title: 'Buttons and links',
-      text: '<code>clickable</code> renders a <code>&lt;button&gt;</code> and <code>href</code> an <code>&lt;a&gt;</code>, the address winning when both are given. <code>disabled</code> makes the avatar inert.',
+      text: '<code>clickable</code> creates a button; <code>href</code> creates a link and takes precedence. <code>disabled</code> disables either control.',
     },
     tooltip: {
       title: 'With a tooltip',
-      text: 'A VTooltip needs a focusable trigger: make the avatar <code>clickable</code> or a link, then bind the tooltip <code>triggerProps</code> onto it.',
+      text: 'For <code>VTooltip</code>, make the avatar focusable with <code>clickable</code> or <code>href</code> and bind <code>triggerProps</code>.',
     },
   },
-
   api: {
     VAvatar: {
       props: {
-        src: 'The picture to show. It is preferred above everything else, and an image that fails to load hands over to the icon or the initials rather than leaving a gap.',
-        icon: 'The icon to show when there is no picture. It comes before the initials, so an avatar given both an icon and a name shows the icon.',
-        name: 'The full name. It does three things at once: it names the avatar for assistive technology, its initials are what shows when there is no picture and no icon, and it is the seed the automatic colour is derived from.',
-        alt: "The accessible name, when it should not simply be the name: an avatar standing for a team rather than a person, say. It wins over <code>name</code>, and an <code>aria-label</code> of yours wins over it. On a picture it is the image's <code>alt</code> text.",
-        color:
-          'A colour of your own, as hex, a CSS name or <code>oklch()</code>. It replaces the hue otherwise derived from <code>name</code>, and the text on it is always white, so a light colour is yours to check.',
-        size: "The diameter of the disc, from the size scale shared by every control. Left out inside a VAvatarGroup it takes the group's size; on its own it is <code>md</code>.",
-        compact:
-          'Takes 4px off the diameter, as it does on every other control. Unlike the size it is cumulative: inside a compact VAvatarGroup the avatar is compact whatever this says.',
-        href: 'Turns the avatar into an <code>&lt;a&gt;</code> pointing at this address. A disabled link becomes inert: the address is dropped, so it can be neither focused nor followed.',
-        clickable:
-          'Turns the avatar into a <code>&lt;button&gt;</code>. It is ignored as soon as <code>href</code> makes it a link.',
-        disabled:
-          'Makes an interactive avatar unusable: it stops responding, leaves the tab order and greys out. It says nothing on a plain avatar, which was never interactive.',
+        src: 'Image URL. Falls back to the icon or initials on loading failure.',
+        icon: 'Icon shown without an image. Takes precedence over initials.',
+        name: 'Full name used for the accessible name, initials and automatic colour.',
+        alt: 'Accessible name overriding <code>name</code>. Consumer <code>aria-label</code> takes precedence.',
+        color: 'Custom CSS background colour. The foreground stays white.',
+        size: 'Avatar diameter. Inherits the group size; otherwise defaults to <code>md</code>.',
+        compact: 'Reduces the diameter. Also applies when the group is compact.',
+        href: 'Link destination. Takes precedence over <code>clickable</code>; removed when disabled.',
+        clickable: 'Renders a button when <code>href</code> is absent.',
+        disabled: 'Disables interactive avatars and removes them from the tab order.',
       },
       slots: {
-        default: 'Content replacing the initials.',
+        default: 'Content replacing initials.',
       },
     },
   },

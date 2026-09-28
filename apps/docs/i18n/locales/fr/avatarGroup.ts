@@ -1,46 +1,41 @@
 export default {
   title: "Groupe d'avatars",
-  lead: "Des avatars empilés en rangée, chacun séparé du suivant par un anneau de la couleur de la page. Au-delà d'une limite de votre choix, les autres sont résumés en un seul disque.",
-
+  lead: '<code>VAvatarGroup</code> superpose les avatars sur une ligne et peut regrouper les avatars excédentaires dans un compteur.',
   examples: {
     overflow: {
       title: 'Débordement',
-      text: "<code>max</code> définit le nombre d'avatars dessinés avant que le reste soit résumé en <code>+N</code> sur un dernier disque.",
+      text: '<code>max</code> limite les avatars visibles. Le nombre restant apparaît sous la forme <code>+N</code>.',
     },
     size: {
       title: 'La taille sur le groupe',
-      text: "<code>size</code> posée sur le groupe s'applique à chaque avatar, disque de débordement compris. Un avatar qui fixe sa propre taille la garde.",
+      text: 'La prop <code>size</code> du groupe s’applique sauf si un avatar définit sa propre taille.',
     },
     compact: {
       title: 'Compact',
-      text: '<code>compact</code> posée sur le groupe retire 4px à chaque avatar de la rangée.',
+      text: '<code>compact</code> réduit le diamètre de tous les avatars.',
     },
     customOverflow: {
       title: 'Débordement personnalisé',
-      text: "Le slot <code>#overflow</code> remplace le disque <code>+N</code> et reçoit <code>count</code>, le nombre d'avatars masqués.",
+      text: 'Le slot <code>overflow</code> reçoit le <code>count</code> des avatars masqués.',
     },
     tooltips: {
       title: 'Avec des infobulles',
-      text: "Chaque avatar peut être enveloppé dans une VTooltip. Le déclencheur doit être focalisable, d'où <code>clickable</code> ici.",
+      text: 'Rendez les avatars avec infobulle accessibles au focus avec <code>clickable</code> ou un lien.',
     },
   },
-
   api: {
     VAvatarGroup: {
       props: {
-        max: "Combien d'avatars montrer avant que les restants ne soient résumés en un seul disque « +X ». Omise, ou mise à 0, tous les avatars sont montrés.",
-        size: 'La taille donnée aux avatars du groupe. Un avatar qui fixe une taille à lui la garde.',
-        compact:
-          "Applique la densité réduite à chaque avatar du groupe. Contrairement à la taille, elle se cumule : un avatar ne peut pas s'en retirer dans un groupe compact.",
-        ringColor:
-          "La couleur de l'anneau dessiné autour de chaque disque. Elle vaut par défaut le fond de la page, et c'est ce qui fait lire l'anneau comme un écart entre deux avatars.",
+        max: 'Nombre maximal d’avatars visibles avant le compteur. Absent ou égal à 0, affiche tous les avatars.',
+        size: 'Taille des avatars par défaut ; chaque avatar peut la remplacer.',
+        compact: 'Réduit le diamètre de tous les avatars ; les enfants ne peuvent pas l’annuler.',
+        ringColor: 'Couleur de séparation entre avatars. Couleur de fond de page par défaut.',
         label:
-          "Le nom accessible du groupe, par exemple « Membres du projet » : une rangée de visages ne dit pas d'elle-même qui sont ces personnes. Votre propre <code>aria-label</code> ou <code>aria-labelledby</code> l'emporte sur lui.",
+          'Nom accessible du groupe. Les attributs <code>aria-label</code> ou <code>aria-labelledby</code> fournis sont prioritaires.',
       },
       slots: {
-        default: 'Les VAvatar à empiler.',
-        overflow:
-          "Remplace le disque « +X » qui représente les avatars au-delà de <code>max</code>. Il reçoit <code>count</code>, le nombre d'avatars masqués.",
+        default: 'Avatars à regrouper.',
+        overflow: 'Contenu remplaçant le compteur. Reçoit <code>count</code>.',
       },
     },
   },

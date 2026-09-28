@@ -8,10 +8,6 @@ const budget = ref<[number, number]>([20, 60])
 
 <template>
   <div class="demo">
-    <!-- It greys the track, the thumb and the ticks through the colour tokens rather
-         than through an opacity, takes the thumbs out of the tab order, and disables the
-         number fields along with them: there is no half-usable slider whose value can
-         still be typed. -->
     <VSlider v-model="volume" disabled label="Volume" />
     <VSlider v-model="budget" range :step="10" ticks inputs="ends" disabled label="Budget" />
   </div>

@@ -19,8 +19,6 @@ const PLACEMENTS: PopoverPlacement[] = [
 
 <template>
   <div class="grid">
-    <!-- A preference rather than a position: a browser short of room on that side flips
-         the panel to the opposite one by itself. -->
     <VPopover v-for="placement in PLACEMENTS" :key="placement" :placement="placement">
       <template #trigger="{ triggerProps }">
         <VButton v-bind="triggerProps" variant="outline" tone="neutral" size="sm">

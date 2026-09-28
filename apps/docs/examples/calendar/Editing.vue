@@ -88,8 +88,7 @@ function onEventCreate(times: CalendarEventTimes) {
   openNew(times)
 }
 
-/* A clicked cell only has a start, so the event is given an hour. A day of the month view
-   reports the hour the grid starts at, midnight here, which is a poor default for a meeting. */
+/* Give a new event a one-hour duration and avoid midnight for month-cell activation. */
 function onCellActivate(cell: CalendarCell) {
   const startTime = view.value === 'month' ? '09:00' : cell.time
   const end = addMinutes(cell.date, startTime, 60)
@@ -122,10 +121,9 @@ const endsBeforeStart = computed(() => {
 })
 
 function save() {
-  // `required` has the browser refuse empty fields before this runs. What it cannot know is
-  // whether the end comes after the start, or that a title made of spaces is no title.
+  // Native required validation does not reject whitespace or reversed date ranges.
   const title = draft.title.trim()
-  // The contract always wants times: an all-day event spans the whole of its days.
+  // All-day events still need start and end times.
   const startTime = draft.allDay ? '00:00' : draft.startTime
   const endTime = draft.allDay ? '23:59' : draft.endTime
   if (!title || !draft.start || !draft.end || !startTime || !endTime) return
@@ -142,7 +140,6 @@ function save() {
     description: draft.description.trim() || undefined,
   }
 
-  // A new array rather than a push: the calendar is handed a list and never mutates it.
   events.value =
     editingId.value === null
       ? [...events.value, saved]
@@ -176,9 +173,7 @@ function remove() {
     </template>
   </VCalendar>
 
-  <!-- Closing the dialog hands the focus back to whatever opened it: the card, the cell or
-       the button. The form lives in the body and its buttons in the footer, so the submit
-       button reaches it through the `form` attribute. -->
+  <!-- The footer submit button targets the body form through its form attribute. -->
   <VDialog
     v-model:open="open"
     :title="editingId === null ? 'New event' : 'Edit event'"

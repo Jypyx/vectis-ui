@@ -4,8 +4,6 @@ import { VSeparator, VTypography } from 'vectis-ui'
 
 <template>
   <div class="stack">
-    <!-- Across the page, the default. The rule ships no margin of its own, so the space
-         around it is the `gap` of the column that holds it. -->
     <div class="card">
       <VTypography variant="heading-4">Project settings</VTypography>
       <VSeparator />
@@ -14,8 +12,6 @@ import { VSeparator, VTypography } from 'vectis-ui'
       </VTypography>
     </div>
 
-    <!-- Upright, as a flex item: it takes the height of its line on its own, whatever
-         the container aligns its items to. Nothing to set. -->
     <div class="meta">
       <VTypography as="span" variant="body-sm">Draft</VTypography>
       <VSeparator orientation="vertical" />
@@ -24,10 +20,7 @@ import { VSeparator, VTypography } from 'vectis-ui'
       <VTypography as="span" variant="body-sm">3 comments</VTypography>
     </div>
 
-    <!--
-      An <hr> has no height of its own. Outside a flex or grid line the rule collapses to
-      nothing, silently and with no error, so in ordinary flow it needs a height of yours.
-    -->
+    <!-- Outside flex or grid layouts, vertical separators need an explicit height. -->
     <div class="flow">
       <VSeparator orientation="vertical" class="standing" />
       <VTypography variant="body-sm" tone="muted">

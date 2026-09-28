@@ -17,13 +17,9 @@ function choose(city: string) {
 </script>
 
 <template>
-  <!--
-    Without it, a shown popover moves to the top layer and is resolved against the whole
-    document, so every panel on the page would attach to the last element that named the anchor.
-  -->
+  <!-- Scope the anchor so top-layer panels do not attach to another instance. -->
   <div class="field-wrapper">
-    <!-- A plain input, because that is the case the prop exists for: `popovertarget` is
-         not valid on a text field, so the panel cannot be wired to it that way. -->
+    <!-- Text inputs cannot use popovertarget; open the panel from the focus handler. -->
     <input
       v-model="query"
       class="field"
@@ -34,8 +30,6 @@ function choose(city: string) {
       @input="open = true"
     />
 
-    <!-- Given a name, VPopover renders no wrapper of its own and positions the panel
-         against whatever carries it. -->
     <VPopover v-model:open="open" anchor="--city-anchor" match-trigger mode="manual" bare>
       <ul class="list">
         <li v-for="city in matches()" :key="city">

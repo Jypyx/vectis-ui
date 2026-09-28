@@ -1,88 +1,78 @@
 export default {
   title: 'Puce',
-  lead: "Une petite information : un statut, une étiquette, un filtre qui reste choisi. Elle partage mot pour mot sa table de variantes et de tons avec VButton, et ajoute les deux états qu'un bouton n'a pas.",
-
+  lead: '<code>VChip</code> affiche un tag, un statut ou un filtre. Il peut servir de bouton, de lien, de bascule ou d’élément supprimable.',
   examples: {
     variantsAndTones: {
       title: 'Variantes et tonalités',
-      text: '<code>variant</code> propose trois façons de peindre la puce, <code>soft</code>, <code>solid</code> et <code>outline</code>, et <code>tone</code> cinq sens.',
+      text: 'Combinez <code>variant</code> et <code>tone</code> pour définir l’apparence.',
     },
     shapes: {
       title: 'Silhouettes',
-      text: "<code>shape</code> choisit la silhouette : <code>chip</code> prend le rayon d'angle d'un contrôle interactif, <code>pill</code> arrondit complètement les extrémités. Les coins de <code>chip</code> lisent <code>--vectis-radius-chip</code>, qui pointe vers <code>--vectis-radius-interactive</code> depuis <code>:root</code> : redéfinissez-le pour arrondir les puces indépendamment des autres contrôles. Posé sur un sélecteur plus étroit que <code>:root</code>, un override de <code>--vectis-radius-interactive</code> n'atteint pas les puces : donnez alors les deux tokens à ce sélecteur.",
+      text: '<code>shape</code> choisit des coins arrondis ou une capsule. Personnalisez le rayon avec <code>--vectis-radius-chip</code>.',
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> définit la hauteur à 24 ou 32 pixels, et <code>compact</code> lui retire 4px.',
+      text: '<code>size</code> définit la taille du chip ; <code>compact</code> réduit sa hauteur.',
     },
     customColors: {
       title: 'Couleurs personnalisées',
-      text: "<code>color</code> remplace le ton, toutes les nuances nécessaires en étant dérivées. Elle accepte n'importe quelle couleur CSS.",
+      text: '<code>color</code> remplace le ton par une couleur CSS. Vérifiez le contraste du texte sur les chips pleins.',
     },
     icons: {
       title: 'Avec des icônes',
-      text: "<code>iconStart</code> et <code>iconEnd</code> posent une icône de part et d'autre du libellé, et les slots <code>#start</code> et <code>#end</code> les remplacent. <code>iconFilled</code> dessine les deux icônes pleines. Une puce sans libellé devient carrée et doit recevoir un nom.",
+      text: 'Utilisez les props d’icônes ou les slots <code>start</code> et <code>end</code>. Donnez un nom accessible aux chips interactifs sans texte.',
     },
     clickable: {
       title: 'Cliquable et liens',
-      text: "<code>clickable</code> rend la puce sous forme de bouton et <code>href</code> sous forme de lien. Sans l'un ni l'autre, c'est du texte simple.",
+      text: '<code>clickable</code> affiche un bouton ; <code>href</code> affiche un lien. Sans ces props, le chip est un contenu simple.',
     },
     selection: {
       title: 'Sélection',
-      text: "<code>selectable</code> transforme la puce en bascule liée à <code>v-model:selected</code>. <code>check</code> ajoute une coche avant le libellé, à la place de l'icône de début, et <code>checkIcon</code> change son glyphe.",
+      text: 'Activez <code>selectable</code> et liez <code>v-model:selected</code>. <code>check</code> affiche une coche à la place de l’icône de début lorsque le chip est sélectionné.',
     },
     dismissible: {
       title: 'Suppression',
-      text: "<code>dismissible</code> ajoute un second bouton qui émet <code>dismiss</code>, le retrait de la liste vous revenant. <code>dismissIcon</code> et <code>dismissLabel</code> changent son glyphe et ses mots. Dans une rangée de puces, donnez à chaque croix un <code>dismissLabel</code> qui nomme ce qu'elle retire, sans quoi toutes sont annoncées avec le même mot.",
+      text: '<code>dismissible</code> ajoute un bouton émettant <code>dismiss</code>. Retirez vous-même le chip. Donnez à chaque bouton un <code>dismissLabel</code> qui nomme l’élément retiré.',
     },
     states: {
       title: 'États',
-      text: '<code>disabled</code> grise la puce par les tokens de couleur. Un lien désactivé voit son adresse retirée, ce qui le laisse ni focalisable ni suivable.',
+      text: '<code>disabled</code> empêche les interactions. Les liens désactivés perdent leur destination et quittent l’ordre de tabulation.',
     },
   },
-
   api: {
     VChip: {
       props: {
-        variant:
-          "L'intensité avec laquelle la puce est peinte : un fond teinté, la couleur pleine, ou une bordure seule.",
-        tone: "Ce que la puce signifie, exprimé en couleur. Une puce peut rapporter un état là où un bouton ne le peut pas, et c'est pourquoi elle en propose cinq plutôt que trois.",
+        variant: 'Style visuel.',
+        tone: 'Ton de couleur.',
         color:
-          "Une couleur à vous, en hexadécimal, en nom CSS ou en <code>oklch()</code>, qui remplace le ton. Toutes les nuances nécessaires sont dérivées de cette seule couleur, si bien qu'elle suit les deux thèmes sans rien à reconstruire. Seul le contraste du texte sur une puce en couleur pleine reste à votre charge.",
-        shape: 'La silhouette : des coins doucement arrondis, ou une pilule complète.',
-        size: 'La hauteur de la puce.',
-        compact:
-          'Retire 4px à la hauteur, en laissant le rembourrage, le texte et les icônes tels quels.',
-        clickable: "Fait de la puce un bouton qui réagit au clic, sans retenir d'état.",
-        href: 'Où la puce mène, ce qui en fait un lien.',
+          'Couleur CSS personnalisée remplaçant le ton. Vérifiez le contraste du texte sur les chips pleins.',
+        shape: 'Coins arrondis ou forme de capsule.',
+        size: 'Taille du composant.',
+        compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
+        clickable: 'Affiche un bouton sans état de sélection.',
+        href: 'Destination du lien.',
         selectable:
-          "Fait de la puce quelque chose qui reste choisi. Cela l'emporte sur <code>href</code> et <code>clickable</code>.",
-        check:
-          "Affiche une coche avant le libellé tant que la puce est sélectionnée. Elle remplace l'icône de début qui aurait été donnée, si bien que les deux ne sont jamais montrées ensemble.",
-        checkIcon:
-          "L'icône de cette coche, une coche intégrée par défaut. <code>iconFilled</code> ne l'atteint pas.",
-        iconStart: 'Une icône avant le libellé. Le slot <code>#start</code> la remplace.',
-        iconEnd: 'Une icône après le libellé. Le slot <code>#end</code> la remplace.',
+          'Affiche un bouton bascule. Prioritaire sur <code>href</code> et <code>clickable</code>.',
+        check: 'Affiche une coche si le chip est sélectionné, à la place du contenu de début.',
+        checkIcon: 'Icône de coche. Non affectée par <code>iconFilled</code>.',
+        iconStart: 'Icône avant le libellé. Remplacée par le slot <code>start</code>.',
+        iconEnd: 'Icône après le libellé. Remplacée par le slot <code>end</code>.',
         iconFilled:
-          "Rend <code>iconStart</code> et <code>iconEnd</code> dans leur forme pleine, l'axe <code>FILL</code> de la police. Sans effet sur les slots, ni sur la coche ou la croix de retrait.",
-        dismissible:
-          "Ajoute un bouton qui demande le retrait de la puce. Il ne fait qu'émettre cette demande : retirer la puce est votre décision.",
-        dismissIcon: "L'icône de ce bouton de retrait.",
+          'Utilise les icônes de début et de fin pleines si disponibles. Sans effet sur les slots, la coche ou l’icône de suppression.',
+        dismissible: 'Ajoute un bouton de suppression. Ne retire pas automatiquement le chip.',
+        dismissIcon: 'Icône du bouton de suppression.',
         dismissLabel:
-          'Ce que fait le bouton de retrait, en mots. Il retombe sur le dictionnaire du design system.',
-        disabled: 'Rend la puce inutilisable, grisée par les tokens de couleur.',
-        vModelSelected:
-          "Si la puce est sélectionnée, ce qui est aussi ce qui la rend sélectionnable : la lier transforme la puce en bouton bascule et l'emporte sur <code>href</code> et <code>clickable</code>.",
+          'Nom accessible du bouton de suppression. Utilise le dictionnaire de la bibliothèque par défaut.',
+        disabled: 'Désactive les interactions.',
+        vModelSelected: 'État de sélection si <code>selectable</code> est activé.',
       },
       events: {
-        dismiss:
-          "Le bouton de retrait a été pressé. La puce est toujours à l'écran : la retirer vous revient.",
+        dismiss: 'Le bouton de suppression a été activé. Retirez le chip en réponse.',
       },
       slots: {
-        default:
-          "Le libellé. Il peut être omis entièrement, ce qui donne une puce faite d'icônes seules.",
-        start: 'Du contenu avant le libellé, qui prend la place de <code>iconStart</code>.',
-        end: 'Du contenu après le libellé, qui prend la place de <code>iconEnd</code>.',
+        default: 'Libellé. Peut être omis pour un chip composé d’icônes.',
+        start: 'Contenu remplaçant <code>iconStart</code>.',
+        end: 'Contenu remplaçant <code>iconEnd</code>.',
       },
     },
   },

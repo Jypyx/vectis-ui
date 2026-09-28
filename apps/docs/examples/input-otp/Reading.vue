@@ -7,8 +7,6 @@ const EXPECTED = '481902'
 const code = ref('')
 const verdict = ref<'right' | 'wrong' | null>(null)
 
-/* `complete` fires once every box is filled, which is the cue to verify rather than
-   something to work out from the value's length. */
 function verify(value: string) {
   verdict.value = value === EXPECTED ? 'right' : 'wrong'
 }

@@ -1,107 +1,91 @@
 export default {
   title: 'Pagination',
-  lead: 'A row of page buttons. Every pill is a VButton, so nothing about their states is redefined here, and the row can shed pages as the space narrows without a breakpoint.',
-
+  lead: '<code>VPagination</code> selects a page with buttons or links. It supports truncated ranges and adapts to narrow containers.',
   examples: {
     variantsAndTones: {
       title: 'Variants and tones',
-      text: '<code>itemVariant</code> paints the pages that are not current and the controls, ghost by default or outlined. <code>tone</code> is the colour the current page takes, the rest of the row staying neutral.',
+      text: '<code>itemVariant</code> styles other pages and controls. <code>tone</code> colours only the current page.',
     },
     selectedVariants: {
       title: 'How the selection is drawn',
-      text: "<code>selectedVariant</code> is how the current page is painted in the row's tone: filled with <code>solid</code>, tinted with <code>soft</code>, or the colour of its text alone with <code>ghost</code>. In an <code>outline</code> row, a soft or ghost current page keeps the frame's border, so the frame stays closed.",
+      text: '<code>selectedVariant</code> styles the current page as solid, soft or ghost.',
     },
     detached: {
       title: 'Detached',
-      text: '<code>detached</code> spaces the buttons out and gives each its own corners, instead of joining them into a segmented control. <code>seamless</code> keeps them joined and takes the lines out from between them, so the row reads as one frame.',
+      text: '<code>detached</code> separates the buttons. <code>seamless</code> removes borders between joined buttons.',
     },
     elevated: {
       title: 'Elevated',
-      text: '<code>elevated</code> raises the row off the page. Joined, the shadow belongs to the row; detached, every button carries its own.',
+      text: '<code>elevated</code> adds a shadow to the row, or to each button when detached.',
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> sets the height, from 24 to 56 pixels, and <code>compact</code> takes 4px off it. A pill is square at one digit and widens by itself past that.',
+      text: '<code>size</code> sets the button size; <code>compact</code> reduces its height.',
     },
     length: {
       title: 'Length',
-      text: '<code>length</code> is how many pages there are in all, one by default. Every page is rendered unless <code>totalVisible</code> says how many slots to keep.',
+      text: '<code>length</code> is the total page count. Without <code>totalVisible</code>, all pages appear.',
     },
     totalVisible: {
       title: 'Total visible',
-      text: '<code>totalVisible</code> is how many slots the row renders, ellipses counted among them, which is what keeps its width constant. The first and last pages are always kept, and five is the effective minimum.',
+      text: '<code>totalVisible</code> caps page and ellipsis slots, with a minimum of five. The first and last pages remain visible.',
     },
     controls: {
       title: 'Previous and next',
-      text: '<code>controls</code> decides what the previous and next buttons show: an icon, a word, both, or nothing at all. Their icons and their wording are yours, a label being both the visible text and the accessible name. A control reaching the last page it can go to disables itself and hands the keyboard focus to the page just reached.',
+      text: '<code>controls</code> selects icons, text, both or neither. Controls disable when no reachable page remains in their direction.',
     },
     unreachablePages: {
       title: 'Unreachable pages',
-      text: '<code>disabledPages</code> takes a list of pages, or a function when the rule is easier to write than to enumerate. The previous and next controls step over those pages and disable themselves only when there is nothing left to step to.',
+      text: '<code>disabledPages</code> accepts a page array or predicate. Previous and next controls skip those pages.',
     },
     links: {
       title: 'Links',
-      text: 'Given <code>href</code>, a function from a page to its address, every page and both controls render as links: a page of results can be opened in a new tab, bookmarked or followed by a crawler. The previous and next links carry <code>rel="prev"</code> and <code>rel="next"</code>. A click updates the model, then the browser follows the link, unless a handler of <code>navigate</code> calls <code>preventDefault()</code> on the event to hand the address to a router. A click with a modifier held opens the link elsewhere and changes nothing on the page.',
+      text: 'Provide <code>href</code> to render links. Handle <code>navigate</code> and call <code>preventDefault()</code> for router navigation. Modified clicks preserve native link behaviour without updating the model.',
     },
     states: {
       title: 'States',
-      text: '<code>disabled</code> puts the whole row out of reach, greyed through the colour tokens. At either end of the range the matching control disables itself.',
+      text: '<code>disabled</code> disables the entire row.',
     },
     alignment: {
       title: 'Alignment',
-      text: '<code>align</code> says where the row sits in the width it is given. It only says something in responsive mode, which is what makes the nav take the whole width available.',
+      text: '<code>align</code> positions the row in responsive mode.',
     },
     responsive: {
       title: 'Narrow containers',
-      text: "<code>responsive</code> sheds pages as the space narrows, hiding the neighbours of the current page one step at a time while the first page, the last and the current one never go. It measures its own width rather than the window's.",
+      text: '<code>responsive</code> hides neighbouring pages as the container narrows, preserving the first, last and current pages.',
     },
   },
-
   api: {
     VPagination: {
       props: {
-        length:
-          'How many pages there are in all. It is 1 by default, which renders a single page: the real count almost always has to be given.',
-        totalVisible:
-          'How many slots to render, ellipses counted among them, so the row keeps exactly the same width whichever page is current. Below five there would be nothing left to show around the current page, so five is the effective minimum. Left out, every page is rendered.',
-        detached:
-          'Separates the buttons instead of joining them into one segmented control. It is the word VButtonGroup and VToggle use for the same question, in the same direction.',
-        seamless:
-          "Takes the lines out from between the joined buttons, so the row reads as one frame rather than as segments, on the terms of VButtonGroup's own prop. It has no effect under <code>detached</code>.",
-        itemVariant:
-          'How the pages other than the current one, and the controls, are drawn. What the current page takes is <code>selectedVariant</code>. It is named for the items because that is what it paints: on VTabs and VDataTable <code>variant</code> names the decoration of the frame instead.',
-        selectedVariant:
-          "How the current page is drawn, in the row's tone: filled, tinted, or the colour of its text alone.",
-        tone: 'The colour the current page takes. The other pages and the controls stay neutral.',
-        size: 'The height of the buttons, from the scale shared by every control.',
-        compact: 'Takes 4px off the height of every button.',
-        elevated:
-          'Raises the row off the page. Joined, the shadow belongs to the row rather than to each pill, which is what stops it falling into the joints; detached, every button carries its own.',
-        align:
-          'Where the row sits in the space it is given. It only matters in responsive mode, where the row takes the whole width available.',
-        controls:
-          'The previous and next buttons on either side of the pages: what they show, or <code>false</code> to leave them out. One prop rather than two, the shape VFilePicker <code>preview</code> and VCarousel <code>controls</code> already use.',
-        prevIcon: 'The icon of the previous control.',
-        nextIcon: 'The icon of the next control.',
-        prevText:
-          'The wording of the previous control, used both as its visible text and as what screen readers announce. It falls back to the design system dictionary.',
-        nextText:
-          'The wording of the next control, used both as its visible text and as what screen readers announce. It falls back to the design system dictionary.',
-        disabled: 'Makes the whole component unusable.',
-        disabledPages:
-          'Which pages cannot be reached, as a list or as a function. The previous and next controls step over them rather than stopping at one.',
-        responsive:
-          'Lets the row shed pages as the space narrows, by asking about its own width. It is off by default, because it makes the row take the full width available.',
-        label:
-          'What screen readers announce for the navigation itself. It falls back to the design system dictionary.',
+        length: 'Total page count.',
+        totalVisible: 'Maximum page and ellipsis slots; minimum 5. Omitted shows every page.',
+        detached: 'Separates page buttons.',
+        seamless: 'Removes separators between joined buttons. Ignored when detached.',
+        itemVariant: 'Style of other pages and previous/next controls.',
+        selectedVariant: 'Style of the current page.',
+        tone: 'Colour of the current page.',
+        size: 'Component size.',
+        compact: 'Reduces the control height without changing text or icons.',
+        elevated: 'Adds a shadow to the row or detached buttons.',
+        align: 'Row alignment in responsive mode.',
+        controls: 'Previous/next content: icons, text, both or <code>false</code>.',
+        prevIcon: 'Previous control icon.',
+        nextIcon: 'Next control icon.',
+        prevText: 'Previous control text and accessible name. Defaults to the dictionary.',
+        nextText: 'Next control text and accessible name. Defaults to the dictionary.',
+        disabled: 'Disables interaction.',
+        disabledPages: 'Unavailable pages as an array or predicate. Controls skip them.',
+        responsive: 'Hides neighbouring pages to fit the container. Takes the available width.',
+        label: 'Accessible navigation name. Defaults to the dictionary.',
         pageLabel:
-          'How a page is announced. A pill shows a bare number, which alone means nothing to a screen reader: this is what turns it into "Page 3". It falls back to the design system dictionary.',
-        href: 'The address of a page. Given, every page and both controls render as links, the previous and next ones carrying <code>rel="prev"</code> and <code>rel="next"</code>. A click still updates the model, then the browser follows the link.',
-        vModel: 'The page being shown, counted from 1. It starts on the first.',
+          'Function providing an accessible name for each page number. Defaults to the dictionary.',
+        href: 'Function mapping a page to its URL. Renders pages and controls as links.',
+        vModel: 'Current page, starting at 1.',
       },
       events: {
         navigate:
-          'A page was chosen from the row, with the click that chose it. It comes before the model changes, so a single-page application can call <code>preventDefault()</code> on the event and route by hand. A click with a modifier held emits nothing.',
+          'Page activation, before the model update. Receives the page and click event; call <code>preventDefault()</code> for routing. Modified clicks do not emit it.',
       },
     },
   },

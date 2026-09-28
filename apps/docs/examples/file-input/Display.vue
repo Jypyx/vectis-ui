@@ -3,8 +3,6 @@ import { ref } from 'vue'
 import { VChip, VFileInput } from 'vectis-ui'
 import { description, picture_as_pdf as pictureAsPdf } from 'vectis-ui/icons'
 
-/* Two files to start with, so the three fields read before anything is picked. A real
-   selection comes from the dialog or from a drop. */
 const start = () => [
   new File(['x'], 'quarterly-report.pdf', { type: 'application/pdf' }),
   new File(['x'], 'balance-sheet-2026-final-v3.xlsx'),

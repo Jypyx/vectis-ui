@@ -1,71 +1,60 @@
 export default {
   title: 'Accordion',
-  lead: 'Sections that fold. It is built on <code>&lt;details&gt;</code> and <code>&lt;summary&gt;</code>, so the open state, the keyboard behaviour and in-page search all come from the browser.',
-
+  lead: '<code>VAccordion</code> groups collapsible sections built with native <code>&lt;details&gt;</code> elements.',
   examples: {
     variants: {
       title: 'Variants',
-      text: '<code>variant</code> sets the group decoration: <code>flat</code> (default) draws nothing, <code>outlined</code> adds a raised background, a border and rounded corners.',
+      text: '<code>flat</code> leaves the group unframed; <code>outlined</code> adds a background and border.',
     },
     exclusive: {
       title: 'One section at a time',
-      text: 'A group keeps a single section open by default. <code>multiple</code> allows several sections to stay open at the same time. VSideNavigation has the opposite default and the opposite prop, <code>exclusive</code>: a sidebar usually lets several sections stay open.',
+      text: 'One section stays open by default. Enable <code>multiple</code> to keep several open.',
     },
     subtitles: {
       title: 'Subtitles and icons',
-      text: '<code>icon</code> places an icon before the title and <code>subtitle</code> adds a second line under it. The <code>#icon</code> and <code>#subtitle</code> slots take markup instead of plain text.',
+      text: 'Add <code>icon</code> and <code>subtitle</code>, or use their slots for custom content.',
     },
     compact: {
       title: 'Compact',
-      text: '<code>compact</code> reduces every padding by 4px, leaving the text and the icons at their size.',
+      text: '<code>compact</code> reduces padding without changing text or icons.',
     },
     icons: {
       title: 'Expand and collapse icons',
-      text: '<code>expandIcon</code> replaces the chevron. Adding <code>collapseIcon</code> swaps the two icons when a section opens, instead of rotating the first one.',
+      text: 'Without <code>collapseIcon</code>, the expand icon rotates when open. With it, the icons switch.',
     },
     disabled: {
       title: 'Disabled sections',
-      text: '<code>disabled</code> prevents a section from being opened and greys it out. The keyboard steps over it.',
+      text: 'Disabled sections cannot be toggled and are skipped by keyboard navigation.',
     },
   },
-
   api: {
     VAccordion: {
       props: {
-        multiple:
-          'Lets the reader keep several sections open at once. Left out, only one stays open and opening one closes the last, which the browser does on its own once every item shares a <code>&lt;details&gt;</code> name.',
-        variant:
-          'How the group is decorated. <code>flat</code> draws nothing and lets the accordion sit on the surface behind it; <code>outlined</code> gives it a raised background, a border and rounded corners, so it reads as a card.',
+        multiple: 'Allows several sections to remain open.',
+        variant: 'Unframed or outlined group.',
         expandIcon:
-          'The icon shown on a closed section. It is a chevron, which rotates by 180° when the section opens.',
-        collapseIcon:
-          'The icon shown on an open section. Leave it out and the expand icon is rotated instead; give one and the two are swapped.',
-        compact:
-          'Reduced density: every padding loses 4px, while the text and the icons keep their size.',
+          'Closed-section icon. Rotates when open unless <code>collapseIcon</code> is set.',
+        collapseIcon: 'Open-section icon replacing the rotated expand icon.',
+        compact: 'Reduces item padding.',
       },
       slots: {
-        default: 'The <code>VAccordionItem</code>s that make up the group.',
+        default: '<code>VAccordionItem</code> children.',
       },
     },
     VAccordionItem: {
       props: {
-        title:
-          'The heading of the section, the line that stays visible when it is closed. Use the <code>#title</code> slot when the heading needs markup rather than plain text.',
-        subtitle:
-          'A second line under the title, for a short explanation or a status. The <code>#subtitle</code> slot replaces it when markup is needed.',
-        icon: 'An icon before the title. The <code>#icon</code> slot replaces it.',
-        defaultOpen:
-          'Renders the section already open. Only its initial value is read: the browser owns the state afterwards, so changing this later will not close a section the reader has opened.',
-        vModelOpen:
-          'Whether the section is open, when you want to drive or observe it. Left unbound, the browser keeps that state to itself and <code>defaultOpen</code> gives only the initial value.',
-        disabled:
-          'Makes the section inert. It can no longer be opened, the keyboard steps over it, and it greys out through the colour tokens.',
+        title: 'Section heading. Replaced by the <code>title</code> slot.',
+        subtitle: 'Second line below the title. Replaced by its slot.',
+        icon: 'Icon before the title. Replaced by its slot.',
+        defaultOpen: 'Initial open state. Later changes do not control the section.',
+        vModelOpen: 'Open state to observe or control.',
+        disabled: 'Disables interaction.',
       },
       slots: {
-        default: 'The content revealed when the section is open.',
-        title: 'A title made of markup, which replaces the <code>title</code> prop.',
-        subtitle: 'A subtitle made of markup, which replaces the <code>subtitle</code> prop.',
-        icon: 'Free content before the title, which takes the place of <code>icon</code>.',
+        default: 'Expanded content.',
+        title: 'Content replacing the title.',
+        subtitle: 'Content replacing the subtitle.',
+        icon: 'Content replacing the icon.',
       },
     },
   },

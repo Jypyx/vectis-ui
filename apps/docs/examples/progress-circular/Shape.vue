@@ -4,8 +4,6 @@ import { VProgressCircular, VTypography } from 'vectis-ui'
 
 <template>
   <div class="row">
-    <!-- The shape is the end of the drawn arc, rounded or cut square. It shows on a
-         thick ring and is all but invisible on a thin one. -->
     <div class="cell">
       <VProgressCircular :value="65" :size="96" :thickness="14" label="Upload, rounded" />
       <VTypography variant="caption" tone="muted">rounded, the default</VTypography>

@@ -8,9 +8,6 @@ const detached = ref('week')
 
 <template>
   <div class="demo">
-    <!-- Down the page instead of across. The joins move to the horizontal edges, the
-         corners are carved at the top and the bottom of the column, and the arrow keys
-         follow the axis. -->
     <VToggle v-model="joined" orientation="vertical" item-variant="outline" label="Period">
       <VToggleItem value="day" label="Day" />
       <VToggleItem value="week" label="Week" />

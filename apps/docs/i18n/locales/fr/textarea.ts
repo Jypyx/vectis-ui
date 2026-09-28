@@ -1,95 +1,94 @@
 export default {
   title: 'Zone de texte',
-  lead: "Un champ de texte multiligne, avec le même décor que VInput : libellé au-dessus, indication en dessous, icônes à l'intérieur, compteur et bouton d'effacement. Il peut grandir à mesure que le texte est saisi.",
-
+  lead: '<code>VTextarea</code> est un champ multiligne avec un libellé, un texte d’aide, des icônes et des actions facultatifs. Utilisez <code>autoGrow</code> pour adapter sa hauteur au contenu.',
   examples: {
     labelAndHint: {
-      title: 'Libellé et indication',
-      text: '<code>label</code> est un vrai <code>&lt;label&gt;</code> lié au champ : cliquer les mots place le curseur dans la boîte. <code>hint</code> passe sous le champ et lui est lié par <code>aria-describedby</code>.',
+      title: 'Libellé et aide',
+      text: '<code>label</code> nomme le champ. <code>hint</code> ajoute un texte d’aide lié par <code>aria-describedby</code>.',
     },
     sizes: {
       title: 'Tailles',
-      text: "<code>size</code> pose les rembourrages, l'échelle typographique et les icônes, jamais la hauteur, qui vient de <code>rows</code>. <code>compact</code> retire 4px aux rembourrages à chacune des trois tailles.",
+      text: '<code>size</code> ajuste les espacements internes, le texte et les icônes. <code>rows</code> définit le nombre de lignes ; <code>compact</code> réduit les espacements verticaux.',
     },
     icons: {
       title: 'Icônes',
-      text: "<code>iconStart</code> et <code>iconEnd</code> posent une icône décorative à chaque extrémité, sur la première ligne plutôt qu'au milieu de la boîte. Le slot <code>#end</code> remplace l'icône de fin, là où <code>#start</code> est rendu après l'icône de début plutôt qu'à sa place.",
+      text: '<code>iconStart</code> et <code>iconEnd</code> s’alignent sur la première ligne. Utilisez <code>#start</code> et <code>#end</code> pour du contenu personnalisé.',
     },
     clickableIcons: {
       title: 'Icônes cliquables',
-      text: "Un écouteur <code>@click:icon-start</code> ou <code>@click:icon-end</code> transforme l'icône en vrai bouton, qui demande alors son libellé. Chaque bouton est son propre arrêt de tabulation et reste hors de la zone de saisie.",
+      text: 'Ajoutez un écouteur <code>@click:icon-start</code> ou <code>@click:icon-end</code> pour transformer une icône en bouton. Fournissez son nom accessible avec <code>iconStartLabel</code> ou <code>iconEndLabel</code>.',
     },
     clearable: {
-      title: 'Effaçable',
-      text: "<code>clearable</code> ajoute une croix qui vide le champ, affichée tant qu'il y a quelque chose à vider et que le champ est modifiable. L'appuyer rend aussitôt le focus à la zone de saisie, et <code>clear</code> est émis après coup.",
+      title: 'Bouton d’effacement',
+      text: '<code>clearable</code> ajoute un bouton qui vide le champ, émet <code>clear</code> et lui rend le focus.',
     },
     counters: {
-      title: 'Compteurs',
-      text: "<code>counter</code> passe sous le champ, à côté du texte d'aide. Face à <code>maxlength</code>, le navigateur refuse tout ce qui dépasse la limite, là où <code>softLimit</code> laisse le lecteur continuer : le compteur passe au rouge et le champ se déclare invalide par la validité native. Il compte des caractères, comme sur VInput ; sur VFileInput, la même prop compte des fichiers et leur taille.",
+      title: 'Compteur de caractères',
+      text: '<code>counter</code> affiche le nombre de caractères sous le champ. Avec <code>maxlength</code>, <code>softLimit</code> autorise la saisie au-delà de la limite et signale une erreur de validation native.',
     },
     autoGrow: {
-      title: 'Croissance automatique',
-      text: '<code>rows</code> donne au champ sa hauteur de départ, et par défaut sa hauteur tout court. <code>autoGrow</code> laisse la boîte grandir à mesure que le texte est saisi, en CSS pur.',
+      title: 'Hauteur automatique',
+      text: '<code>autoGrow</code> adapte la hauteur au contenu, avec <code>rows</code> comme minimum. Sans cette option, le champ défile et peut être redimensionné verticalement.',
     },
     states: {
       title: 'États',
-      text: "<code>invalid</code> sert à une règle que le navigateur ne peut pas vérifier lui-même. <code>disabled</code> grise le champ par les tokens de couleur. <code>readonly</code> reste focalisable et copiable, et masque la croix. <code>loading</code> place un indicateur là où va l'icône de fin, le champ restant utilisable.",
+      text: '<code>disabled</code> bloque les interactions. <code>readonly</code> permet le focus et la copie. <code>invalid</code> signale une erreur. <code>loading</code> affiche un indicateur de chargement sans empêcher la saisie.',
     },
   },
-
   api: {
     VTextarea: {
       props: {
-        size: 'La taille du champ, qui fixe son rembourrage, son échelle typographique et ses icônes.',
+        size: 'Ajuste les espacements internes, le texte et les icônes. Utilisez <code>rows</code> pour définir le nombre de lignes.',
         compact:
-          'Retire 4px au champ en resserrant son rembourrage, en laissant le nombre de lignes, la typographie et les icônes tels quels.',
-        rows: "Combien de lignes de texte le champ affiche, l'attribut natif <code>rows</code>, qui est ce qui donne sa hauteur au champ. Tout ce qui est sous 1 est ramené à 1, et à 1 le champ fait exactement la hauteur d'un VInput de même taille.",
+          'Réduit les espacements verticaux sans modifier le nombre de lignes, le texte ni les icônes.',
+        rows: 'Nombre de lignes visibles, arrondi à un entier d’au moins 1. Avec <code>autoGrow</code>, définit la hauteur minimale.',
         autoGrow:
-          "Laisse le champ grandir à mesure que le texte est saisi, au lieu de défiler dans la hauteur que <code>rows</code> lui donne, qui reste sa hauteur de départ. C'est du CSS pur : là où le navigateur ne le prend pas en charge, le champ se comporte comme une zone de texte ordinaire.",
+          'Adapte la hauteur au contenu avec la propriété CSS <code>field-sizing</code>. Désactive le redimensionnement manuel. Sans prise en charge par le navigateur, le champ garde une hauteur fixe et défile.',
         invalid:
-          "Marque le champ comme invalide quoi qu'en pense le navigateur, la voie pour une règle que seul le serveur peut vérifier.",
-        disabled: 'Rend le champ inutilisable, grisé par les tokens de couleur.',
+          'Définit <code>aria-invalid</code> et le style d’erreur. Ne bloque pas à lui seul l’envoi du formulaire.',
+        disabled:
+          'Désactive le champ et l’exclut de la navigation par Tab et de l’envoi du formulaire.',
         readonly:
-          "Montre le texte sans permettre de le changer. Le champ peut toujours être focalisé et copié, et le bouton d'effacement est masqué.",
-        label: "Le libellé au-dessus du champ, lié à lui pour qu'un clic dessus y place le focus.",
-        hint: "Une ligne d'aide sous le champ, liée à la zone de texte pour les technologies d'assistance afin d'être lue avec le libellé.",
+          'Empêche la modification tout en permettant le focus et la copie. Masque le bouton d’effacement sauf si <code>clearVisible</code> impose sa visibilité.',
+        label:
+          'Libellé visible lié à la zone de texte. Si omis, fournissez <code>aria-label</code> ou <code>aria-labelledby</code>.',
+        hint: 'Texte d’aide sous le champ, lié par <code>aria-describedby</code>.',
         iconStart:
-          "Une icône dans le champ, au début. Elle est décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> soit attaché : elle devient alors un vrai bouton et demande <code>iconStartLabel</code>.",
+          'Icône de début. Devient un bouton avec <code>@click:icon-start</code> ; nécessite alors <code>iconStartLabel</code>.',
         iconEnd:
-          "La même chose à la fin du champ. Le slot <code>#end</code> la remplace, et l'indicateur de chargement prend sa place pendant qu'il tourne.",
-        iconStartLabel: "Ce que fait l'icône de début, en mots, une fois qu'elle est cliquable.",
-        iconEndLabel: "Ce que fait l'icône de fin, en mots, une fois qu'elle est cliquable.",
+          'Icône de fin. Devient un bouton avec <code>@click:icon-end</code> ; nécessite alors <code>iconEndLabel</code>. Remplacée par <code>#end</code> ou l’indicateur de chargement.',
+        iconStartLabel: 'Nom accessible du bouton d’icône de début.',
+        iconEndLabel: 'Nom accessible du bouton d’icône de fin.',
         loading:
-          "Affiche un indicateur à la fin du champ, à la place de l'icône ou du slot de fin.",
+          'Remplace l’icône de fin ou le contenu de <code>#end</code> par un indicateur de chargement. Ne désactive pas le champ.',
         loadingText:
-          "Ce que les lecteurs d'écran annoncent pendant que l'indicateur tourne. Il retombe sur le dictionnaire du design system.",
+          'Texte accessible de l’indicateur de chargement. Utilise le dictionnaire de la bibliothèque par défaut.',
         clearable:
-          'Propose une croix qui vide le champ. Elle apparaît quand il y a quelque chose à effacer et que le champ est modifiable.',
+          'Ajoute un bouton d’effacement si le champ est rempli et modifiable, sauf si <code>clearVisible</code> impose sa visibilité. Masqué lorsque le champ est désactivé.',
         clearVisible:
-          "Décide si la croix est affichée, au lieu de laisser le champ le déduire de son propre contenu, champ en lecture seule compris. C'est la même échappatoire que celle de VInput, pour les composants bâtis dessus qui tiennent ailleurs que dans le texte ce qu'il y a à effacer.",
+          'Remplace les critères de contenu et de lecture seule pour afficher le bouton d’effacement. Nécessite <code>clearable</code> et un champ non désactivé.',
         clearLabel:
-          "Ce que fait le bouton d'effacement, en mots. Il retombe sur le dictionnaire du design system.",
+          'Nom accessible du bouton d’effacement. Utilise le dictionnaire de la bibliothèque par défaut.',
         maxlength:
-          "Le nombre maximum de caractères. Par défaut c'est la limite du navigateur lui-même, qui refuse simplement tout ce qui la dépasse.",
+          'Limite native de caractères. L’attribut natif n’est pas appliqué avec <code>softLimit</code>.',
         softLimit:
-          "Transforme cette limite en limite souple : le lecteur peut taper au-delà, et le champ passe en erreur au lieu de refuser les frappes en silence. C'est rapporté par la validité native, donc un formulaire ne peut pas être envoyé au-dessus de la limite.",
+          'Autorise le dépassement de <code>maxlength</code> et signale une erreur de validation native tant que la valeur dépasse la limite.',
         counter:
-          'Affiche ce qui a été saisi, sous le champ : 12/80 face à une limite, ou simplement 12 sans limite.',
-        vModel: 'Le texte du champ, vide au départ.',
+          'Nombre de caractères sous le champ : <code>12/80</code> avec une limite, ou <code>12</code> sans limite.',
+        vModel: 'Texte du champ. Vaut une chaîne vide par défaut.',
       },
       events: {
-        clear: "Le bouton d'effacement a été pressé. La valeur est déjà vidée.",
+        clear: 'Émis après que le bouton d’effacement a remplacé la valeur par une chaîne vide.',
         clickIconStart:
-          "L'icône de début a été pressée. Attacher cet écouteur est ce qui en fait un bouton.",
+          'Émis à l’activation du bouton d’icône de début. Transmet un <code>MouseEvent</code>.',
         clickIconEnd:
-          "L'icône de fin a été pressée. Attacher cet écouteur est ce qui en fait un bouton.",
+          'Émis à l’activation du bouton d’icône de fin. Transmet un <code>MouseEvent</code>.',
       },
       slots: {
-        start:
-          "Du contenu au début du champ, rendu après <code>iconStart</code> plutôt qu'à sa place.",
-        end: "Du contenu à la fin du champ, qui remplace <code>iconEnd</code>. Il est masqué pendant le chargement, l'indicateur prenant cette place.",
+        start: 'Contenu après <code>iconStart</code>. Ne remplace pas l’icône.',
+        end: 'Contenu remplaçant <code>iconEnd</code>. Masqué pendant le chargement.',
         valueEnd:
-          "Des contrôles à vous à l'intérieur du champ, placés avant ceux que le champ possède : la croix d'effacement et l'icône qui ouvre le panneau. Ces deux-là sont l'affordance propre du composant, ce qui explique l'absence de slot <code>end</code> ici.",
+          'Contenu après la zone de saisie, avant le bouton d’effacement et l’icône de fin.',
       },
     },
   },

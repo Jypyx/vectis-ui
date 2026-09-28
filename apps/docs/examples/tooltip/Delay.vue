@@ -4,7 +4,6 @@ import { VButton, VTooltip } from 'vectis-ui'
 
 <template>
   <div class="demo">
-    <!-- Keyboard focus opens it at once instead: the intent is not in doubt there. -->
     <VTooltip text="Appears after the default wait">
       <template #default="{ triggerProps }">
         <VButton variant="outline" tone="neutral" v-bind="triggerProps">300ms</VButton>
@@ -22,9 +21,6 @@ import { VButton, VTooltip } from 'vectis-ui'
         <VButton variant="outline" tone="neutral" v-bind="triggerProps">No wait</VButton>
       </template>
     </VTooltip>
-
-    <!-- Tab to any of these and the tooltip opens immediately; Escape closes it
-         without taking the focus away, and pressing the trigger closes it too. -->
   </div>
 </template>
 

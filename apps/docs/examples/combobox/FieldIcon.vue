@@ -48,7 +48,6 @@ function switchOrder() {
       @click:icon-start="switchOrder"
     />
 
-    <!-- Without the chevron, the field reads as a search box with suggestions. -->
     <VCombobox
       v-model="topic"
       :options="options"

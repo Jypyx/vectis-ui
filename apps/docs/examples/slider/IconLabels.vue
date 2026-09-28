@@ -5,8 +5,6 @@ import { check_circle as checkCircle, error, info, warning } from 'vectis-ui/ico
 
 const threshold = ref(1)
 
-// A label may be an icon instead of a word, and then the words come with it: the icon
-// is what the reader sees, the label what a screen reader announces.
 const labels = [
   { icon: checkCircle, label: 'Silent' },
   { icon: info, label: 'Information' },

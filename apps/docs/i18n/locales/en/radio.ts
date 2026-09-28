@@ -1,51 +1,50 @@
 export default {
   title: 'Radio',
-  lead: 'One choice among several. The group is native: every button sharing a <code>name</code> belongs to it, and the browser handles the exclusivity and the arrow keys.',
-
+  lead: '<code>VRadio</code> selects one value from a set of options. Share the same <code>name</code> and <code>v-model</code> across the group for native selection and arrow navigation.',
   examples: {
     labelPosition: {
       title: 'Label position',
-      text: '<code>labelPosition</code> moves the label before the dot instead of after it.',
+      text: '<code>labelPosition="start"</code> places the label before the radio button.',
     },
     spread: {
-      title: 'Spread',
-      text: '<code>spread</code> takes the full width offered and pushes the label and the dot to opposite ends of the row.',
+      title: 'Full width',
+      text: '<code>spread</code> fills the available width and places the label and radio button at opposite ends.',
     },
     disabled: {
       title: 'Disabled',
-      text: '<code>disabled</code> prevents the button from being picked and greys it out through the colour tokens. A button both selected and disabled keeps its dot.',
+      text: '<code>disabled</code> prevents selection and removes the option from keyboard navigation and form submission.',
     },
     hint: {
       title: 'Hint',
-      text: '<code>label</code> writes the text beside the dot, and the default slot replaces it. <code>hint</code> adds a caption underneath, tied to the button through <code>aria-describedby</code>, which is the place to say what an option implies.',
+      text: 'Use <code>label</code> or the default slot for the name. <code>hint</code> adds help text linked through <code>aria-describedby</code>.',
     },
     readonly: {
       title: 'Read-only',
-      text: '<code>readonly</code>, set on every button of the group, keeps the selection where it is. The component cancels the click, and the arrow keys are covered too, since the browser selects the next button through a click: the focus moves, the selection does not. No <code>aria-readonly</code> is written, ARIA allowing it on a <code>radiogroup</code> and not on a <code>radio</code>: put it on the wrapper that names the question, or nothing announces the state. And a read-only button still takes part in constraint validation, so <code>readonly</code> with <code>required</code> and nothing selected leaves a form that cannot be submitted or fixed.',
+      text: 'Set <code>readonly</code> on every option to keep the selection unchanged while arrows move focus. Use a named wrapper with <code>role="radiogroup"</code> and <code>aria-readonly="true"</code> to announce the state. A read-only group with <code>required</code> and no selection still fails native form validation.',
     },
   },
-
   api: {
     VRadio: {
       props: {
-        label: 'The text beside the dot, which names it. The default slot replaces it.',
-        hint: 'A line of help under the label. It is tied to the radio button for assistive technology, so it is read out after the label rather than as part of it.',
+        label:
+          'Visible label, replaced by the default slot. Without either, provide <code>aria-label</code> or <code>aria-labelledby</code>.',
+        hint: 'Help text below the label, linked through <code>aria-describedby</code>.',
         readonly:
-          'Shows the selection without allowing it to be changed. The button can still be focused and is still submitted with its form; a click or an arrow key simply selects nothing. Set it on every button of the group.',
+          'Prevents selection changes while preserving focus and native form behavior. Set on every option. Announce read-only state on the group wrapper.',
         value:
-          "What choosing this button means. The group's v-model holds the value of the selected button, so this is what it becomes when this one is picked.",
-        labelPosition: 'Which side of the dot the label sits on.',
-        spread:
-          'Pushes the label and the dot to opposite ends of the line, the row taking the full width available.',
+          'String or number assigned to <code>v-model</code> when selected. Use a distinct value for each option.',
+        labelPosition:
+          'Label before the radio button with <code>start</code>, or after it with <code>end</code>.',
+        spread: 'Fills the available width and separates the label and radio button.',
         invalid:
-          'Marks the field as invalid, which colours the dot and tells assistive technology so. It is for a rule the browser cannot check by itself.',
-        disabled: 'Makes this choice unusable, greyed out through the colour tokens.',
+          'Sets <code>aria-invalid</code> and the error style. Does not block form submission by itself.',
+        disabled:
+          'Disables this option and excludes it from keyboard navigation and form submission.',
         vModel:
-          'The value selected in the group, shared by every radio carrying the same <code>name</code>. It is empty until one is chosen, and a radio is selected when it matches its own <code>value</code>.',
+          'Selected value, shared by the group. An option is selected when the model matches its <code>value</code>. Defaults to an empty string.',
       },
       slots: {
-        default:
-          "The label, when it needs more than the <code>label</code> prop's text. It is clickable.",
+        default: 'Clickable label content, replacing <code>label</code>.',
       },
     },
   },

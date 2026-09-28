@@ -42,8 +42,7 @@ code {
 .vd-token-value > code {
   color: var(--vectis-color-text);
 }
-/* A reference is a property name, copied whole: it never breaks, and a narrow screen scrolls the
-   table instead. The resolved value is left to wrap at its spaces, a font stack being long. */
+/* Keep token references unbroken; allow long resolved values to wrap. */
 .vd-token-reference {
   display: block;
   white-space: nowrap;

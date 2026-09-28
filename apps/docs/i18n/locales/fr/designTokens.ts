@@ -1,11 +1,6 @@
 import type { DescribedToken, TextRole } from '~/content/designTokens'
 
-/*
- * `descriptions` traduit les `$description` de la source de la bibliothèque, que le catalogue
- * anglais publie tels quels. Le type `Record<DescribedToken, string>` fait échouer
- * `nuxt typecheck` sur un token ajouté à la bibliothèque sans traduction, ou retiré sans que sa
- * ligne ne le soit ici.
- */
+// Keep translations aligned with the library’s token descriptions and keys.
 const descriptions: Record<DescribedToken, string> = {
   '--vectis-color-surface': 'Le fond de page par défaut',
   '--vectis-color-surface-muted': 'Un fond atténué, pour les zones secondaires',
@@ -198,16 +193,14 @@ const descriptions: Record<DescribedToken, string> = {
 
 export default {
   title: 'Design tokens',
-  lead: 'Les tokens sémantiques que Vectis UI expose sous forme de variables CSS, avec ce que chacun contrôle et sa valeur par défaut. Ce sont les noms à surcharger pour adapter la bibliothèque à votre propre design ou à votre charte graphique.',
-
+  lead: 'Les variables CSS sémantiques pour personnaliser Vectis UI, avec leur usage et leurs valeurs par défaut.',
   readingBody:
-    "Quand une valeur pointe vers un autre token, le tableau l'affiche deux fois : la valeur à laquelle elle se résout, puis la référence telle que la feuille de styles l'écrit, par exemple <code>var(--vectis-color-gray-900)</code>. Surcharger le rôle garde cohérents tous les composants qui le lisent, alors que modifier la primitive derrière lui modifie aussi tous les autres rôles qui pointent vers elle.",
+    'Pour les références à un token, les tableaux affichent la valeur résolue et l’expression CSS, par exemple <code>var(--vectis-color-gray-900)</code>. Redéfinissez un token sémantique pour modifier son rôle ; changer une primitive affecte tous les rôles qui la référencent.',
   readingOverrideBefore:
-    "Les primitives (les cinq palettes et les échelles d'espacement, de typographie, de rayons, d'ombres et de durées) ne sont pas listées à part : elles apparaissent dans ces références. La façon de surcharger un token pour toute la page ou pour une partie seulement est expliquée sur la page",
+    'Les primitives apparaissent dans les références, sans tableau distinct. Pour des exemples de surcharge, consultez la page',
   readingOverrideAfter: '.',
   readingSiteAccent:
-    'Ce site redéfinit son propre accent en violet : les boutons et les liens autour de ces tableaux ne correspondent donc pas aux valeurs indigo par défaut qui y sont listées.',
-
+    'Ce site utilise un accent violet. Les tableaux affichent les valeurs indigo par défaut de la bibliothèque.',
   columnToken: 'Token',
   columnDescription: 'Description',
   columnDefault: 'Valeur par défaut',
@@ -217,64 +210,53 @@ export default {
   columnSize: 'Taille',
   columnWeight: 'Graisse',
   columnLeading: 'Interlignage',
-  columnTracking: 'Approche',
+  columnTracking: 'Espacement des lettres',
   sameAsLight: 'Identique au thème clair',
   noToken: 'aucun',
-
   colorsHeading: 'Couleurs',
   colorsBody:
-    "Surfaces, texte, bordures et les quatre tons. Chaque ton est une famille de six rôles : la couleur pleine, ses états survolé et appuyé, une surface teintée, la bordure assortie à cette surface et une couleur de texte qui y reste lisible. Les trois couleurs d'événement du calendrier contiennent une variable de teinte que le calendrier pose sur chaque événement, d'où sa présence dans leur valeur.",
-
-  focusHeading: 'Anneau de focus',
+    'Couleurs des surfaces, textes, bordures, tons et événements du calendrier. Chaque ton définit une couleur pleine, des états survolé et appuyé, une surface teintée, une bordure et du texte.',
+  focusHeading: 'Contour de focus',
   focusBody:
-    "L'anneau dessiné autour d'un contrôle qui reçoit le focus au clavier. Sa couleur est un rôle à part entière plutôt que l'accent : l'accent doit porter du texte blanc, l'anneau doit ressortir sur la page.",
-
+    'Couleur, épaisseur et décalage du contour de focus clavier. Sa couleur est indépendante de l’accent pour permettre d’ajuster son contraste avec le fond.',
   typographyHeading: 'Typographie',
   typographyBody:
-    "Trois familles de polices, puis les rôles de texte. Un rôle est une recette complète : sa taille, sa graisse et son interlignage, plus une approche quand elle compte. Les composants demandent un rôle, donc surcharger l'une de ses valeurs modifie tous les endroits où ce rôle est utilisé.",
-  typographyFontBefore:
-    "Le chargement d'une police web et son affectation aux familles sont expliqués sur la page",
+    'Familles de polices et rôles de texte. Chaque rôle regroupe la taille, la graisse, l’interlignage et, s’il est défini, l’espacement des lettres.',
+  typographyFontBefore: 'Pour charger et configurer les polices, consultez la page',
   typographyFontAfter: '.',
   familiesCaption: 'Familles de polices',
   rolesCaption: 'Rôles de texte',
   roles: {
-    display: 'Le plus grand texte, pour un titre de une',
-    'heading-1': "Le titre d'une page",
-    'heading-2': 'Un titre de section',
-    'heading-3': 'Un titre de sous-section',
-    'heading-4': "Le plus petit titre : un groupe au sein d'une section, le titre d'une carte",
-    subtitle: "La ligne sous un titre, dans un dialogue ou un élément d'accordéon",
-    'body-xl': "Le paragraphe d'introduction qui ouvre une page ou une section",
-    'body-lg': 'Le texte courant avec plus de place, pour une lecture plus longue',
-    'body-md':
-      'Le texte courant par défaut, aussi utilisé par les lignes de menu, les notifications et les champs',
-    'body-sm': 'Le petit texte courant : détails secondaires, notes',
-    label: "Le libellé au-dessus d'un champ de formulaire",
-    choice: "Le texte à côté d'une case à cocher, d'un bouton radio ou d'un interrupteur",
-    caption: "Un court texte d'appoint : l'aide d'un champ, un compteur",
+    display: 'Grand titre d’accueil',
+    'heading-1': 'Titre de page',
+    'heading-2': 'Titre de section',
+    'heading-3': 'Titre de sous-section',
+    'heading-4': 'Titre de groupe ou de carte',
+    subtitle: 'Sous-titre de dialogue ou d’élément d’accordéon',
+    'body-xl': 'Introduction de page ou de section',
+    'body-lg': 'Grand texte courant pour une lecture prolongée',
+    'body-md': 'Texte courant par défaut, éléments de menu, notifications et champs',
+    'body-sm': 'Détails secondaires et notes',
+    label: 'Libellé au-dessus d’un champ de formulaire',
+    choice: 'Libellé à côté d’une case à cocher, d’un bouton radio ou d’un interrupteur',
+    caption: 'Texte d’aide d’un champ ou compteur',
     overline:
-      "Le titre d'un groupe de lignes dans un menu, la liste d'un combobox ou une navigation latérale, avec un espacement des lettres élargi",
-    code: 'Le code en ligne et les contenus de code',
-    control:
-      "Le libellé d'un contrôle comme un bouton, un chip ou un onglet. Il n'a pas de taille propre : le texte suit la taille donnée au contrôle",
+      'Titre de groupe dans un menu, une combobox ou une navigation latérale, avec un espacement des lettres élargi',
+    code: 'Code en ligne et blocs de code',
+    control: 'Libellé de bouton, de chip ou d’onglet. La taille du texte suit celle du contrôle.',
   } satisfies Record<TextRole, string>,
-
-  radiusHeading: 'Rayons',
+  radiusHeading: 'Rayons des angles',
   radiusBody:
-    "Les rayons d'angle par rôle. <code>--vectis-radius-chip</code> pointe vers <code>--vectis-radius-interactive</code> : les chips suivent donc les autres contrôles tant que vous ne leur donnez pas un rayon propre. La référence est résolue là où les tokens sont déclarés, sur la racine : une surcharge du rayon interactive sur un sélecteur plus étroit doit aussi redéfinir le rayon des chips.",
-
-  motionHeading: 'Mouvement',
+    '<code>--vectis-radius-chip</code> référence <code>--vectis-radius-interactive</code> à la racine. Si vous redéfinissez le rayon des contrôles sur un conteneur, définissez aussi celui des chips pour modifier les deux.',
+  motionHeading: 'Animations',
   motionBody:
-    "Les trois durées qu'utilise une transition. Elles sont les mêmes dans les deux thèmes. Les animations en boucle, comme celle du spinner, utilisent directement l'échelle des durées et ne suivent pas ces rôles.",
-
+    'Durées des transitions, communes aux deux thèmes. Les animations en boucle, comme celle du spinner, utilisent plutôt les tokens de durée primitifs.',
   sizesHeading: 'Tailles',
   sizesBody:
-    "La hauteur de chaque palier de l'échelle de taille des contrôles, et les trois tailles d'icône. Un contrôle en <code>compact</code> mesure 4px de moins que son palier.",
-
+    'Hauteurs des contrôles et tailles des icônes. <code>compact</code> réduit la hauteur d’un contrôle de 4px.',
   componentsHeading: 'Dimensions des composants',
   componentsBody:
-    "Les dimensions propres à un seul composant : un rail, un curseur, la largeur d'un panneau. Chaque groupe renvoie vers la page de son composant.",
-
+    'Dimensions propres à chaque composant, comme l’épaisseur d’un rail ou la largeur d’un panneau. Les titres des groupes renvoient à la documentation du composant.',
   groups: {
     surfaces: 'Surfaces',
     text: 'Texte',
@@ -286,8 +268,7 @@ export default {
     backdrop: 'Voile',
     events: 'Événements du calendrier',
     controlHeights: 'Hauteurs des contrôles',
-    iconSizes: "Tailles d'icône",
+    iconSizes: 'Tailles des icônes',
   },
-
   descriptions,
 }

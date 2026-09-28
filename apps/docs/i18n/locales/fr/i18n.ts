@@ -1,36 +1,36 @@
 export default {
   title: 'Localisation (i18n)',
-  lead: "Aucun libellé destiné à l'utilisateur n'est codé en dur au sein des composants : l'intégralité des chaînes de caractères est résolue dynamiquement via un dictionnaire de traduction. La bibliothèque est configurée en anglais (<code>en</code>) par défaut et fournit nativement la locale française (<code>fr</code>). L'ajout de langues supplémentaires s'effectue directement au niveau de l'application consommatrice.",
+  lead: 'Vectis UI utilise les messages anglais et la locale <code>en-US</code> par défaut. Enregistrez le dictionnaire français fourni ou ajoutez vos propres traductions.',
   split:
-    "La localisation repose sur un découplage strict entre le vocabulaire et le formatage. Les libellés textuels sont issus des dictionnaires de traduction, tandis que le formatage des données (dates, nombres, premier jour de la semaine et cycle 12/24h) s'appuie directement sur l'API native <code>Intl</code> à partir du tag de langue. Ainsi, déclarer une locale sans dictionnaire associé applique immédiatement les conventions régionales appropriées pour les données, tout en conservant les libellés d'interface en anglais. Ce comportement constitue une stratégie de dégradation gracieuse (graceful degradation) parfaitement maîtrisée.",
+    'Les dictionnaires fournissent les textes de l’interface. La locale détermine aussi les formats régionaux via <code>Intl</code>. Si aucun dictionnaire n’est enregistré pour une langue, les messages restent en anglais et les formats suivent la locale choisie.',
 
   frenchHeading: 'Changer de langue',
   frenchBody:
-    "L'activation d'une locale repose sur deux étapes distinctes : l'enregistrement du dictionnaire de traduction, puis le choix de la locale active. Bien que fourni par la bibliothèque, le dictionnaire français (<code>fr</code>) est optionnel : l'omettre de vos imports suffit à l'exclure du bundle final (tree-shaking). Au-delà de l'optimisation du poids (inférieur à 1 Ko gzippé), ce modèle unifie l'intégration : activer la locale française intégrée ou ajouter une langue sur mesure s'effectue via un mécanisme rigoureusement identique, sans distinction de statut entre dictionnaires natifs et tiers.",
+    'Importez et enregistrez le dictionnaire français, puis sélectionnez une locale avec <code>setLocale</code> :',
   frenchWhere:
-    "L'enregistrement des dictionnaires et la sélection initiale de la locale s'effectuent au niveau du module (dans <code>main.ts</code> ou un plugin Nuxt), en dehors du hook <code>setup()</code> des composants. Par la suite, setLocale peut être invoqué dynamiquement depuis n'importe quel point de l'application. La table de traduction s'appuyant sur l'état réactif de Vue, sa mise à jour déclenche le re-rendu immédiat de tous les composants montés, sans nécessiter de navigation ni de rechargement de page.",
+    'Enregistrez les dictionnaires au démarrage de l’application, dans <code>main.ts</code> ou un plugin Nuxt universel. Appelez <code>setLocale</code> pour mettre à jour les messages des composants et les formats par défaut sans recharger la page.',
   processBody:
-    "L'état d'i18n étant conservé au niveau du module, la locale est globale pour un processus d'exécution donné. Ce choix d'architecture implique une contrainte explicite : un même processus Node.js ne maintient qu'une seule locale active à la fois. Le rendu côté serveur (SSR) dynamique et concurrentiel par requête n'est donc pas pris en charge nativement ; dans ce scénario, les libellés doivent être transmis explicitement via les props des composants.<br>En revanche, cette limitation est sans impact sur le pré-rendu statique (SSG), les routes étant générées de façon séquentielle : la locale est définie juste avant la compilation de chaque page, garantissant la génération conforme de l'interface dans la langue ciblée.",
+    'La locale est partagée par tout le processus. Pour des requêtes SSR simultanées dans plusieurs langues, transmettez explicitement les textes et la locale via les props des composants. Pour la génération statique, rendez les routes séquentiellement et définissez la locale avant le rendu de chaque route.',
 
   addHeading: 'Ajouter une langue',
   addBody:
-    "Un dictionnaire sur mesure est un simple objet JavaScript. La déclaration de dictionnaires partiels est totalement valide : toute clé absente retombe automatiquement sur le dictionnaire anglais au lieu d'afficher une clé technique brute. Enregistrez l'objet sous son sous-tag de langue, puis définissez la locale active.",
+    'Enregistrez un dictionnaire sous son code de langue, par exemple <code>de</code>. Un dictionnaire partiel conserve les valeurs déjà enregistrées pour les clés omises, puis utilise l’anglais en dernier recours.',
   addTyping:
-    "En typant l'objet avec <code>MessagesInput</code>, l'éditeur fournit l'autoplétion complète pour les espaces de noms, les clés et les arguments des messages paramétrés. Les entrées textuelles sont formulées sous forme de fonctions TypeScript typées, sans dépendance à un moteur ICU ou de pluralisation complexe : la gestion des pluriels s'effectue par de simples expressions ternaires au sein des fonctions. La fusion des dictionnaires est non récursive par conception, l'arborescence étant strictement limitée à deux niveaux afin de préserver l'intégrité des fonctions de message.",
+    'Utilisez <code>MessagesInput</code> pour vérifier les espaces de noms, les clés et les paramètres des messages. Les dictionnaires ont deux niveaux : espace de noms et clé.',
   precedenceBody:
-    "La résolution textuelle s'appuie sur le <strong>sous-tag</strong> de langue (ex. <code>en-GB</code> et <code>en-US</code> partagent le dictionnaire <code>en</code> et ne diffèrent que par leurs formats <code>Intl</code>). Au sommet de la hiérarchie, les props explicites restent prioritaires : la chaîne de résolution pour le nom accessible d'un composant suit l'ordre de préséance suivant : <code>aria-labelledby</code> -> <code>aria-label</code> -> prop <code>label</code> -> dictionnaire actif -> dictionnaire anglais de secours. L'interface garantit l'absence de chaînes vides, de clés brutes à l'écran ou d'échecs silencieux en mode développement.",
+    '<code>en-GB</code> et <code>en-US</code> partagent le dictionnaire <code>en</code>, mais utilisent des formats régionaux différents. Les props de texte, comme <code>loadingText</code>, remplacent les messages correspondants du dictionnaire.',
 
-  demoHeading: 'Langues et les formats',
+  demoHeading: 'Langue et formats',
   demoBody:
-    "Le dictionnaire de traduction et la locale de formatage constituent deux réglages strictement indépendants. Tandis que <code>registerMessages</code> et <code>setLocale</code> déterminent la couche lexicale (les chaînes traduites), le code de locale (ainsi que la prop <code>locale</code> disponible sur les composants concernés) pilote les conventions régionales dérivées de l'API <code>Intl</code> (ordonnancement et séparateurs de dates, premier jour de la semaine, format 12/24h). Cette étanchéité permet d'associer librement un dictionnaire linguistique à un code régional distinct : une application peut par exemple afficher ses libellés en français tout en appliquant les formats canadiens anglais (<code>en-CA</code>), ou conserver une interface en anglais avec un formatage adapté à l'Allemagne (<code>de-DE</code>).",
+    'Utilisez <code>setLocale</code> pour définir la langue globale et les formats par défaut. Sur les composants qui l’acceptent, la prop <code>locale</code> remplace les formats sans changer les messages du dictionnaire. Dans cet exemple, choisissez séparément la langue et les formats de date et d’heure.',
   demoLanguage: 'Langue',
   demoFormats: 'Formats',
 
-  keysHeading: 'Nomenclature et référence des clés de traduction',
+  keysHeading: 'Clés de traduction',
   keysBody:
-    "Le dictionnaire complet de Vectis UI s'articule autour de 134 clés réparties au sein de 22 espaces de noms (namespaces), présentées ci-dessous avec leurs valeurs françaises à titre de référence. L'enregistrement supportant l'injection partielle, vous n'avez besoin de déclarer que les espaces de noms et les clés que vous souhaitez explicitement traduire.",
+    'Le tableau présente les messages français par espace de noms. Enregistrez uniquement les clés à traduire ou à remplacer.',
   keysFunctions:
-    "Parmi ces clés, 22 sont des fonctions TypeScript paramétrées. Leur signature expose la liste des arguments attendus ainsi que leur placement dans la chaîne produite. En l'absence de moteur ICU ou de parseur de pluriel dédié, la gestion des formes grammaticales (dont la pluralisation) repose directement sur la logique conditionnelle native (expressions ternaires JS/TS), offrant toute la souplesse nécessaire aux langues complexes.",
+    'Les messages paramétrés sont des fonctions TypeScript, présentées avec leurs arguments ci-dessous. Gérez les règles de pluriel dans ces fonctions.',
   keysColumnKey: 'Clé',
   keysColumnDefault: 'Valeur française',
 }

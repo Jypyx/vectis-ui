@@ -9,8 +9,6 @@ const reference = ref('')
 
 <template>
   <div class="column">
-    <!-- Each # is a box, everything else is drawn between them and never enters the
-         value. The pattern wins over `length`, which is then ignored. -->
     <VInputOTP
       v-model="grouped"
       pattern="###-###"
@@ -18,8 +16,6 @@ const reference = ref('')
       :hint="`Two groups of three. Value: ${grouped || 'empty'}`"
     />
 
-    <!-- A literal can be a real prefix rather than punctuation. It is shown, never
-         typed, and stays out of the value. -->
     <VInputOTP
       v-model="prefixed"
       pattern="GT-###"

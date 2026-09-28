@@ -10,8 +10,6 @@ const page = ref(3)
 
 <template>
   <div class="column">
-    <!-- The variant paints the OTHER pages and the controls; the current page takes
-         `selectedVariant`, filled by default. -->
     <div v-for="variant in variants" :key="variant" class="row">
       <VPagination
         v-for="tone in tones"

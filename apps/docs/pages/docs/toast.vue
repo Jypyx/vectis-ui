@@ -33,13 +33,7 @@ useDocsHead('toast')
   <h1>{{ t('toast.title') }}</h1>
   <DocsProse class="vd-lead" keypath="toast.lead" />
 
-  <!--
-    One toaster for every example on this page, and it has to be exactly one: `toast()`
-    is module-level state with a single renderer, so a second instance would show each
-    notification twice and run a second countdown for it. It belongs to the page rather
-    than to an example for that reason, which is also what each example says in its own
-    comment.
-  -->
+  <!-- Mount one toaster to avoid duplicate notifications and timers. -->
   <VToaster />
 
   <h2 id="usage">{{ t('common.usage') }}</h2>

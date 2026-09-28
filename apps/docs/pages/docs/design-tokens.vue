@@ -18,10 +18,7 @@ const { t, tm, rt } = useI18n()
 const localePath = useLocalePath()
 useDocsHead('designTokens')
 
-/*
- * Every value, name and English description on this page comes from `vectis-ui/tokens` through
- * `content/designTokens.ts`. Nothing here restates a token, so the page follows the library.
- */
+/* Read token values from the library to keep this reference current. */
 
 const themedColumns = computed(() => [
   t('designTokens.columnToken'),
@@ -155,10 +152,6 @@ const roleRows = computed(() =>
 </template>
 
 <style scoped>
-/*
- * A group heading inside a table, set in the label weight, so the rows under it read as
- * one family without an extra heading in the outline.
- */
 .vd-token-group > th {
   padding: var(--vectis-space-4) var(--vectis-space-3) var(--vectis-space-2);
   border-bottom: 1px solid var(--vectis-color-border-strong);

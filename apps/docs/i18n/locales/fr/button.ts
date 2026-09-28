@@ -1,75 +1,71 @@
 export default {
   title: 'Bouton',
-  lead: "Le bouton qui déclenche une action, et la référence dont sont tirées les tables de tons et de variantes de tous les autres composants colorés. Il rend un <code>&lt;button&gt;</code> natif, ou un <code>&lt;a&gt;</code> dès qu'on lui donne un <code>href</code>.",
-
+  lead: '<code>VButton</code> déclenche une action ou ouvre une URL si <code>href</code> est défini.',
   examples: {
     variantsAndTones: {
       title: 'Variantes et tons',
-      text: '<code>variant</code> propose quatre façons de peindre le bouton, et <code>tone</code> trois sens : <code>accent</code>, <code>neutral</code> et <code>danger</code>.',
+      text: '<code>variant</code> définit le style visuel et <code>tone</code> indique l’intention de l’action.',
     },
     elevated: {
-      title: 'Surélevé',
-      text: "<code>elevated</code> applique l'échelle d'ombres à la variante en cours. Un bouton ghost ou outline gagne en plus un fond surélevé.",
+      title: 'Avec une ombre',
+      text: '<code>elevated</code> ajoute une ombre. Les variantes <code>ghost</code> et <code>outline</code> reçoivent aussi un fond.',
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> définit la hauteur : 24, 32, 40, 48 ou 56 pixels. La typographie, les rembourrages et les icônes suivent.',
+      text: '<code>size</code> ajuste la hauteur, les espacements internes, le texte et les icônes.',
     },
     compact: {
       title: 'Compact',
-      text: "<code>compact</code> retire 4px à la hauteur, sans rien déplacer d'autre.",
+      text: '<code>compact</code> réduit la hauteur sans modifier les espacements internes, le texte ni les icônes.',
     },
     fullWidth: {
       title: 'Pleine largeur',
-      text: '<code>fullWidth</code> étire le bouton sur toute la largeur de son parent et le passe en bloc.',
+      text: '<code>fullWidth</code> étend le bouton à la largeur de son parent.',
     },
     icons: {
       title: 'Avec des icônes',
-      text: "<code>iconStart</code> et <code>iconEnd</code> posent une icône de part et d'autre du libellé, et <code>iconFilled</code> les passe à leur forme pleine. Les slots <code>#start</code> et <code>#end</code> prennent le relais quand le contenu est plus qu'une icône.",
+      text: 'Ajoutez des icônes avec <code>iconStart</code> ou <code>iconEnd</code>. Pour du contenu personnalisé, utilisez <code>#start</code> ou <code>#end</code>.',
     },
     customIcons: {
       title: 'Icônes personnalisées',
-      text: "Les deux props d'icône acceptent un <code>IconSource</code> : une des icônes de la bibliothèque, un nom confié au résolveur installé par votre application, des données de tracé SVG, un composant, ou une image.",
+      text: 'Les deux props d’icône acceptent un <code>IconSource</code> : une icône intégrée, un nom résolu par votre application, un tracé SVG, un composant ou une image.',
     },
     link: {
       title: 'Lien',
-      text: '<code>href</code> rend le bouton sous forme de <code>&lt;a&gt;</code>. Un lien désactivé ou en chargement est rendu inerte, son adresse retirée.',
+      text: '<code>href</code> affiche un lien. La navigation est bloquée lorsque le bouton est désactivé ou en chargement.',
     },
     states: {
       title: 'États',
-      text: "<code>disabled</code> grise le bouton par les tokens de couleur. <code>loading</code> le désactive, l'annonce occupé et place un indicateur là où était l'icône de début.",
+      text: '<code>disabled</code> empêche l’activation. <code>loading</code> affiche aussi un indicateur de chargement et définit <code>aria-busy</code>.',
     },
   },
-
   api: {
     VButton: {
       props: {
         variant:
-          "Le poids visuel que porte l'action : <code>solid</code> est rempli du ton, <code>soft</code> utilise un fond teinté, <code>outline</code> ne garde qu'une bordure, et <code>ghost</code> ne montre rien jusqu'au survol. Dans un VButtonGroup, c'est le groupe qui en décide, comme de la taille, de la densité et de l'élévation.",
-        tone: "Ce que l'action signifie : <code>accent</code> pour l'action ordinaire, <code>neutral</code> pour une action secondaire, <code>danger</code> pour celle qui détruit quelque chose. Sur un bouton, un ton est une intention, et c'est pourquoi des états comme succès ou avertissement ne sont pas proposés ici. Omis dans un VButtonGroup, il prend celui du groupe ; seul, le bouton est en <code>accent</code>.",
+          'Style visuel : <code>solid</code> pour un fond plein, <code>soft</code> pour un fond teinté, <code>outline</code> pour une bordure ou <code>ghost</code> pour un fond transparent jusqu’au survol. <code>VButtonGroup</code> impose sa valeur.',
+        tone: 'Intention de l’action : <code>accent</code> pour une action principale, <code>neutral</code> pour une action secondaire ou <code>danger</code> pour une action destructive. Si omis, reprend le ton de <code>VButtonGroup</code>, ou <code>accent</code> hors d’un groupe.',
         elevated:
-          "Soulève le bouton de la page avec l'échelle d'ombres, quelle que soit la variante. Un bouton ghost ou outline reçoit en plus une surface surélevée, parce qu'en thème sombre une ombre posée sur le fond de page n'a rien qui la projette.",
-        size: "La hauteur du bouton, tirée de l'échelle de tailles partagée par tous les contrôles : 24, 32, 40, 48 et 56 pixels.",
+          'Ajoute une ombre et, pour <code>ghost</code> et <code>outline</code>, un fond. <code>VButtonGroup</code> impose sa valeur.',
+        size: 'Taille du bouton. <code>VButtonGroup</code> impose sa valeur.',
         compact:
-          'Retire 4px à la hauteur, en laissant le rembourrage, le texte et les icônes tels quels.',
-        fullWidth:
-          'Étire le bouton sur toute la largeur de son parent au lieu de le laisser à la largeur de son libellé. Il devient également un élément de bloc, et ne repose donc plus sur une ligne de texte.',
-        href: "Transforme le bouton en <code>&lt;a&gt;</code> pointant vers cette adresse. Un lien désactivé ou en chargement devient inerte : l'adresse est retirée, si bien qu'il ne peut être ni focalisé ni suivi.",
-        type: 'Le type natif du bouton. Il est ignoré dès que <code>href</code> en fait un lien.',
-        disabled:
-          "Rend le bouton inutilisable : il cesse de répondre, quitte l'ordre de tabulation et se grise par les tokens de couleur plutôt que par l'opacité.",
+          'Réduit la hauteur sans modifier les espacements internes, le texte ni les icônes. <code>VButtonGroup</code> impose sa valeur.',
+        fullWidth: 'Occupe toute la largeur du parent.',
+        href: 'Destination du lien. Affiche un <code>&lt;a&gt;</code> au lieu d’un <code>&lt;button&gt;</code>. Lorsque le bouton est désactivé ou en chargement, le lien perd sa destination et ne peut plus recevoir le focus ni déclencher de navigation.',
+        type: 'Type natif du bouton. Ignoré si <code>href</code> est défini.',
+        disabled: 'Empêche l’activation et retire le bouton de l’ordre de tabulation.',
         loading:
-          "Affiche un indicateur, désactive le bouton et l'annonce comme occupé. L'indicateur prend la place de l'icône de début, si bien que les deux ne sont jamais côte à côte.",
-        iconStart: 'Une icône avant le libellé. Le slot <code>#start</code> la remplace.',
-        iconEnd: 'Une icône après le libellé. Le slot <code>#end</code> la remplace.',
+          'Désactive le bouton, définit <code>aria-busy</code> et remplace <code>iconStart</code> ou le contenu de <code>#start</code> par un indicateur de chargement.',
+        iconStart: 'Icône avant le libellé. Remplacée par le slot <code>#start</code>.',
+        iconEnd: 'Icône après le libellé. Remplacée par le slot <code>#end</code>.',
         iconFilled:
-          "Rend les deux icônes dans leur forme pleine, l'axe <code>FILL</code> de la police. Sans effet sur les slots <code>#start</code> et <code>#end</code>, dont vous construisez vous-même les icônes.",
+          'Demande les versions pleines de <code>iconStart</code> et <code>iconEnd</code>, si disponibles. Sans effet sur le contenu des slots.',
       },
       slots: {
-        default: 'Le libellé du bouton.',
+        default: 'Libellé du bouton.',
         start:
-          'Du contenu placé avant le libellé, en général une icône. Marquez-la <code>aria-hidden</code> quand elle ne fait que répéter ce que le libellé dit déjà.',
-        end: 'Du contenu placé après le libellé.',
+          'Contenu avant le libellé, à la place de <code>iconStart</code>. Masqué pendant le chargement. Ajoutez <code>aria-hidden="true"</code> au contenu décoratif.',
+        end: 'Contenu après le libellé, à la place de <code>iconEnd</code>.',
       },
     },
   },

@@ -12,9 +12,6 @@ const selected = ref<Record<string, string>>({
 
 <template>
   <div class="demo">
-    <!-- Where the tabs sit when they do not fill the bar. It is set on the bar and not
-         on the list of tabs: pushing an overflowing list around would put whatever ran
-         past the start edge out of reach. -->
     <div v-for="align in aligns" :key="align" class="row">
       <p class="caption">{{ align }}</p>
       <VTabs v-model="selected[align]" :align="align" :label="`Project, ${align}`">

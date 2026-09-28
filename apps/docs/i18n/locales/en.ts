@@ -1,10 +1,4 @@
-/**
- * The default export must be the `defineI18nLocale` macro or a literal object, and never
- * `export default messages`. The module reads this file STATICALLY to build its locale loader,
- * and an identifier there is something it cannot follow: the build stops with "You need to
- * define 'export default' that will return the locale messages", which names the symptom and
- * not the cause.
- */
+/** Default-export the locale macro so Nuxt can discover messages statically. */
 import accessibility from './en/accessibility'
 import accordion from './en/accordion'
 import avatar from './en/avatar'

@@ -5,8 +5,6 @@ import { VButton, dismissToast, toast } from 'vectis-ui'
 const id = ref<number | null>(null)
 
 function raise() {
-  // `toast` hands back an id, which lets this notification be taken away from code: the request
-  // it was about came back, or the state it reported is over.
   id.value = toast({ tone: 'accent', message: 'Uploading…', duration: 0 })
 }
 
@@ -18,9 +16,6 @@ function dismissOne() {
 
 <template>
   <div class="demo">
-    <!-- The close cross is on by default, and turning it off only makes sense on a
-         notification that goes away on its own: with no countdown and no cross,
-         nothing but code can remove it. -->
     <VButton
       variant="outline"
       tone="neutral"

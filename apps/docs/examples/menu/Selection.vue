@@ -21,9 +21,6 @@ const current = () => SORTS.find((option) => option.value === sort.value)?.label
       </VButton>
     </template>
 
-    <!-- `selected` says which one is in effect right now. It colours the row and is
-         announced as the current choice, so the tick beside it is decoration rather
-         than the information itself. -->
     <VMenuItem
       v-for="option in SORTS"
       :key="option.value"

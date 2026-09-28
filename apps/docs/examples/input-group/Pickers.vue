@@ -7,8 +7,6 @@ const time = ref<string | null>('09:30')
 </script>
 
 <template>
-  <!-- Two anchored panels in one row. Each is anchored to its own field's box rather
-       than to the group, so each opens under the segment it belongs to. -->
   <VInputGroup label="Scheduled for" hint="The date, then the time of day">
     <VDateInput v-model="date" show-picker aria-label="Date" />
     <VTimeInput v-model="time" show-picker aria-label="Time" class="time" />

@@ -10,8 +10,6 @@ const COLORS = [
 
 <template>
   <div class="row">
-    <!-- The unfilled ring's shade is derived from the colour against the theme, so one
-         value is enough and it stays right in dark mode. -->
     <div v-for="colour in COLORS" :key="colour.value" class="cell">
       <VProgressCircular :value="65" :color="colour.value" :label="`Upload, ${colour.caption}`" />
       <VTypography variant="caption" tone="muted">{{ colour.caption }}</VTypography>

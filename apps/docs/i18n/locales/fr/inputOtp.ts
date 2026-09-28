@@ -1,77 +1,72 @@
 export default {
   title: 'Code à usage unique',
-  lead: 'Un code saisi un caractère par case : un mot de passe à usage unique, une clé de licence, une référence. Un collage remplit toute la rangée, et la valeur ne contient que les caractères, jamais les séparateurs.',
-
+  lead: '<code>VInputOTP</code> saisit un code avec un caractère par case. Son <code>v-model</code> contient les caractères sans séparateurs.',
   examples: {
     labelAndHint: {
       title: 'Libellé et aide',
-      text: "<code>label</code> n'affiche rien ici : il nomme la rangée pour les technologies d'assistance. <code>hint</code> est le texte que voit le lecteur, lié à la rangée pour être lu avec le libellé.",
+      text: '<code>label</code> fournit un nom accessible au groupe sans texte visible. <code>hint</code> affiche une aide sous les cases.',
     },
     sizes: {
       title: 'Tailles',
-      text: "<code>size</code> définit la hauteur à 32, 40 ou 48 pixels, et <code>compact</code> lui retire 4px. Le caractère à l'intérieur est agrandi d'un ou deux crans au-dessus du palier de la rangée.",
+      text: '<code>size</code> définit les dimensions des cases. <code>compact</code> les réduit sans modifier le texte ni les icônes.',
     },
     length: {
       title: 'Longueur',
-      text: "<code>length</code> est le nombre de cases du code, six par défaut. Elle est ignorée dès qu'un <code>pattern</code> est donné.",
+      text: '<code>length</code> définit le nombre de cases. Un <code>pattern</code> contenant <code>#</code> prend le pas sur cette valeur.',
     },
     formats: {
       title: 'Formats',
-      text: "<code>format</code> décide des caractères dont le code est fait, filtre ce qui peut être saisi ou collé et choisit le clavier qu'offre un téléphone. Hors code numérique, la valeur est forcée en majuscules.",
+      text: '<code>format</code> accepte une saisie numérique, alphabétique ou alphanumérique. Les lettres sont converties en majuscules.',
     },
     pattern: {
       title: 'Gabarit',
-      text: "<code>pattern</code> écrit la forme du code : chaque <code>#</code> est une case à remplir et tout autre caractère un littéral dessiné entre les cases, jamais saisi et jamais compris dans la valeur. Il l'emporte sur <code>length</code>.",
+      text: 'Chaque <code>#</code> crée une case. Les autres caractères sont des séparateurs affichés et exclus de la valeur.',
     },
     separators: {
       title: 'Séparateurs',
-      text: '<code>separatorIcon</code> remplace les littéraux dessinés par un pattern, tous sans exception : elle convient donc à un gabarit dont les séparateurs ne sont que de la ponctuation.',
+      text: '<code>separatorIcon</code> remplace tous les caractères littéraux du motif. Utilisez-le si les séparateurs ne portent aucun texte significatif.',
     },
     pasting: {
       title: 'Collage et remplissage automatique',
-      text: "Un code collé n'importe où dans la rangée est réparti sur toutes les cases, les littéraux du pattern étant absorbés avec lui. La première case porte <code>autocomplete=\"one-time-code\"</code>, si bien qu'un code venu d'un SMS ou d'un gestionnaire de mots de passe est réparti de la même façon.",
+      text: 'Collez un code complet dans n’importe quelle case. La première utilise <code>autocomplete="one-time-code"</code> pour le remplissage automatique.',
     },
     reading: {
       title: 'Lire le code',
-      text: 'La valeur est une seule chaîne des caractères seuls, jamais des séparateurs. Les cases remplies partent toujours de la première : taper dans une case au-delà de la première case vide remplit cette case vide, et vider une case ramène les caractères suivants en arrière. <code>complete</code> est émis quand le code devient complet, avec le code terminé.',
+      text: 'Les caractères remplissent les cases à la suite. Supprimer un caractère décale les suivants. <code>complete</code> émet le code complet lorsqu’il change.',
     },
     form: {
       title: 'Dans un formulaire',
-      text: "La rangée se soumet comme n'importe quel champ natif. <code>name</code>, <code>form</code> et <code>required</code> atteignent un input masqué qui porte le code, et un code qui ne remplit pas toutes les cases est invalide : le navigateur refuse de soumettre le formulaire.",
+      text: 'Fournissez <code>name</code>, <code>form</code> et <code>required</code> pour gérer le formulaire natif. Un code partiel est invalide ; un code vide reste accepté sans <code>required</code>.',
     },
     states: {
       title: 'États',
-      text: "<code>disabled</code> met toute la rangée hors de portée, grisée par les tokens de couleur. <code>readonly</code> montre le code figé pendant que les cases gardent le focus et restent copiables. <code>invalid</code> colore les cases et indique aux technologies d'assistance que le code a été refusé.",
+      text: '<code>disabled</code> empêche les interactions. <code>readonly</code> conserve le focus et la copie. <code>invalid</code> signale un code refusé.',
     },
   },
-
   api: {
     VInputOTP: {
       props: {
-        length:
-          "Combien de cases compte le code. Ignorée dès qu'un <code>pattern</code> est donné.",
+        length: 'Nombre de cases, remplacé par un <code>pattern</code> contenant <code>#</code>.',
         format:
-          "De quels caractères le code est fait. Cela filtre ce qui peut être saisi ou collé, et décide du clavier qu'un téléphone propose.",
+          'Caractères autorisés : chiffres, lettres majuscules ou les deux. Filtre la saisie et le collage.',
         pattern:
-          "La forme du code : chaque <code>#</code> est une case à remplir, et tout autre caractère est un séparateur affiché entre les cases sans jamais faire partie de la valeur, <code>'GT-###'</code> ou <code>'###.###.###'</code>. Il l'emporte sur <code>length</code>.",
+          'Disposition du code. <code>#</code> crée une case ; les autres caractères sont affichés. Sans <code>#</code>, reprend <code>length</code>.',
         separatorIcon:
-          "Une icône dessinée à la place de chaque séparateur du motif. Elle convient à un gabarit dont les séparateurs sont purement décoratifs, <code>'###-###'</code>, et non à un gabarit portant du texte porteur de sens comme <code>'GT-###'</code>, que l'icône effacerait.",
-        size: 'La taille des cases : 32, 40 ou 48 pixels.',
-        compact: 'Retire 4px aux cases, en laissant le texte et les icônes tels quels.',
-        disabled: 'Rend toutes les cases inutilisables, grisées par les tokens de couleur.',
-        readonly:
-          'Affiche le code sans permettre de le changer. Les cases gardent leur focus et le code reste sélectionnable et copiable, ce qui le distingue de <code>disabled</code>.',
+          'Icône remplaçant tous les caractères littéraux du motif, y compris les préfixes textuels.',
+        size: 'Taille des cases.',
+        compact: 'Réduit les dimensions des cases sans modifier le texte ni les icônes.',
+        disabled: 'Désactive les interactions.',
+        readonly: 'Empêche les modifications par l’utilisateur et conserve le focus.',
         invalid:
-          "Marque le code comme erroné, ce qui colore les cases et le signale aux technologies d'assistance.",
+          'Définit <code>aria-invalid</code> et le style d’erreur. Ne bloque pas à lui seul l’envoi du formulaire.',
         label:
-          "Ce que les lecteurs d'écran annoncent pour la rangée dans son ensemble. Il retombe sur le dictionnaire du design system.",
-        hint: "Une ligne d'aide sous les cases, pour dire où le code a été envoyé ou combien de temps il vaut. Elle est liée à la rangée pour les technologies d'assistance, donc lue avec le libellé. Contrairement à <code>label</code>, qui nomme la rangée sans rien afficher, ce texte est visible.",
-        vModel:
-          'Le code en une seule chaîne, sans les séparateurs : un gabarit <code>GT-###</code> donne tout de même trois caractères. Il est vide au départ, et plus court que la longueur complète pendant la saisie.',
+          'Nom accessible du groupe. N’affiche aucun texte ; utilise le dictionnaire de la bibliothèque par défaut.',
+        hint: 'Texte d’aide lié par <code>aria-describedby</code>.',
+        vModel: 'Chaîne du code sans séparateurs. Vaut une chaîne vide par défaut.',
       },
       events: {
         complete:
-          "Le code vient de devenir complet, avec le code terminé. C'est le signal pour le vérifier. Retaper un caractère d'un code complet à l'identique ne le réémet pas.",
+          'Émet un code complet modifié. Ressaisir le même code ne déclenche pas un nouvel événement.',
       },
     },
   },

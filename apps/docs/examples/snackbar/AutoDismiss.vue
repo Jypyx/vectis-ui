@@ -4,10 +4,6 @@ import { VButton, snackbar } from 'vectis-ui'
 
 <template>
   <div class="demo">
-    <!--
-      The countdown holds while the pointer rests on the bar and while the keyboard is inside
-      it, so an action being reached for is never taken away mid-reach.
-    -->
     <VButton
       variant="outline"
       tone="neutral"

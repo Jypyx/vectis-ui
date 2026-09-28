@@ -12,8 +12,6 @@ import {
 
 const type = ref('img')
 
-/* `icon` takes what every icon prop in the library takes. A row without one starts
-   straight at its label rather than reserving a blank column. */
 const types: ComboboxOption[] = [
   { value: 'doc', label: 'Document', icon: description },
   { value: 'img', label: 'Image', icon: image },

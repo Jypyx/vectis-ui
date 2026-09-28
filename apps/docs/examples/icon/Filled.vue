@@ -25,8 +25,6 @@ const PAIRS = [notifications, checkCircle, warning, error, info, schedule]
       </div>
     </div>
 
-    <!-- An icon whose geometry filling does not change is drawn as it always was. The
-         prop is inert rather than wrong, so it can be bound without checking first. -->
     <div class="cell start">
       <span class="pair">
         <VIcon :name="search" :size="28" />

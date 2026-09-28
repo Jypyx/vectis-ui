@@ -24,10 +24,6 @@ definePageMeta({ layout: 'docs' })
 const { t } = useI18n()
 useDocsHead('hotkeys')
 
-/**
- * The vocabulary, rendered rather than described: the first column is what may be written, the
- * other two what the component draws for it.
- */
 const KEYS: { write: string[]; render: string[] }[] = [
   { write: ['mod'], render: ['mod'] },
   { write: ['meta', 'cmd', 'command', 'win', 'super'], render: ['meta'] },

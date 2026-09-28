@@ -1,28 +1,25 @@
 export default {
   title: 'Spinner',
-  lead: 'A turning ring that says something is happening. It occupies an icon box and paints an icon amount of ink, so it drops into a button or a line of text in place of a glyph.',
-
+  lead: '<code>VSpinner</code> indicates an ongoing operation and fits in an icon-sized space.',
   examples: {
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> is a number of pixels, and it names the box the spinner occupies rather than the diameter of the ring. Left out, the box measures 1em and follows the text around it.',
+      text: '<code>size</code> sets the box size in pixels. Defaults to <code>1em</code>.',
     },
     colour: {
       title: 'Colour',
-      text: 'There is no colour prop: the ring is painted in <code>currentcolor</code>, so it takes the colour of the text it sits in.',
+      text: 'The spinner uses <code>currentcolor</code> and inherits the text colour.',
     },
     icon: {
       title: 'In place of an icon',
-      text: "The box is an icon's box, so a VIcon and a VSpinner given the same size are interchangeable. That is what lets VButton, VInput, VTextarea and VCombobox draw one at the size of the glyph it replaces.",
+      text: 'Use the same <code>size</code> as an icon to replace it with a spinner.',
     },
   },
-
   api: {
     VSpinner: {
       props: {
-        size: "A size in pixels, as a number or a numeric string, understood exactly as VIcon's: it is the box the spinner occupies, not the diameter of the ring, which is drawn slightly smaller inside it. Left out, the box measures 1em and follows the size of the text around it, which is how the spinner stays proportionate inside a button without being told anything.",
-        label:
-          'What screen readers announce while it turns. It falls back to the design system dictionary, in the current language.',
+        size: 'Box size in pixels, as a number or numeric string. Defaults to <code>1em</code>.',
+        label: 'Accessible loading text. Defaults to the library dictionary.',
       },
     },
   },

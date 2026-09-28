@@ -18,8 +18,7 @@ const rows = [
   { name: 'Éclair', owner: 'Xavier', status: 'Archived', commits: 296 },
 ]
 
-/* The filtering is yours: the table shows the rows it is given, and the search field it
-   provides narrows them further. */
+/* Apply the custom filter before the table's own search. */
 const status = ref('All')
 const filtered = computed(() =>
   status.value === 'All' ? rows : rows.filter((row) => row.status === status.value),

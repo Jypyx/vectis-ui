@@ -5,9 +5,7 @@ import { ICON_VIEW_BOX, cloud_upload as cloudUpload, code, search } from 'vectis
 
 import firefoxLogo from '~/assets/img/firefox-browser-svg.svg'
 
-/* A component icon, the shape an icon set such as Lucide ships: the contract is a
-   single <svg> root. The drawing is borrowed from the library's own registry rather
-   than redrawn here. */
+/* Component icon sources require a single SVG root. */
 const CodeIcon = () =>
   h('svg', { viewBox: ICON_VIEW_BOX, fill: 'currentColor' }, [h('path', { d: code.paths[0] })])
 </script>
@@ -29,18 +27,12 @@ const CodeIcon = () =>
       <figcaption>src, an image file</figcaption>
     </figure>
 
-    <!-- One of the library's own icons: a name travelling with its drawing. The
-         resolver is still asked for that name first, and the drawing answers when
-         nothing else does. -->
     <figure>
       <VIcon :name="search" :size="28" />
       <figcaption>name, from the library</figcaption>
     </figure>
 
-    <!--
-      Nothing in the registry answers to this one, so it is left to a ligature font, which this
-      site does not load: what you see is the fallback, the name drawn as its own text.
-    -->
+    <!-- This site has no icon font; an unresolved name displays as text. -->
     <figure>
       <VIcon name="translate" :size="28" />
       <figcaption>name, unresolved</figcaption>

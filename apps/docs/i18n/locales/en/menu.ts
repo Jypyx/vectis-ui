@@ -1,98 +1,89 @@
 export default {
   title: 'Menu',
-  lead: 'A list of commands opened by a button. It carries the full ARIA menu pattern: roving focus, nested submenus, and the browser stacking the panels so that one dismissal closes the branch.',
-
+  lead: '<code>VMenu</code> displays commands in a floating panel with keyboard navigation and nested submenus.',
   examples: {
     menuItems: {
       title: 'Menu items',
-      text: 'A row carries a label, an icon at either end, and a <code>tone</code>: <code>danger</code> for what destroys something, <code>neutral</code> for everything else. <code>disabled</code> stops it responding and the arrow keys step over it, and <code>href</code> turns it into a real link. VMenuSeparator draws a rule between two runs of commands.',
+      text: 'Use <code>VMenuItem</code> for commands or links and <code>VMenuSeparator</code> between sets. Disabled items are skipped by arrow navigation.',
     },
     sublabels: {
       title: 'Sublabels',
-      text: '<code>sublabel</code> adds a second line under the label, for what the command does that its name does not say, or for the shortcut that triggers it.',
+      text: '<code>sublabel</code> adds a second line for help text or a shortcut.',
     },
     selection: {
       title: 'Selection',
-      text: '<code>selected</code> marks the row currently in effect, colouring it and announcing it as the current choice. Choosing a row still closes the panel.',
+      text: '<code>selected</code> marks the current choice. Choosing a command still closes the menu.',
     },
     groups: {
       title: 'Groups',
-      text: 'VMenuGroup is a named block of commands. Its label is a heading: nothing happens when it is clicked and the arrow keys never stop on it.',
+      text: '<code>VMenuGroup</code> labels a set of commands. Its heading is non-interactive.',
     },
     submenus: {
       title: 'Submenus',
-      text: 'A row given a <code>#submenu</code> slot opens a panel of its own, and those panels may nest as deep as needed. Hovering the row opens it after a short delay, and the right and left arrows enter and leave it.',
+      text: 'The <code>submenu</code> slot adds nested commands. Hover opens the submenu after a delay; left and right arrows enter and leave it.',
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> sets the row height to 32, 40 or 48 pixels, and <code>compact</code> takes 4px off it. It is set once on the menu, submenus reading it from there.',
+      text: 'Set <code>size</code> and <code>compact</code> on the menu; submenus inherit them.',
     },
     width: {
       title: 'Width',
-      text: "<code>width</code> replaces the panel's own floor and ceiling with any CSS length or keyword. <code>matchTrigger</code> replaces the floor alone, so the panel can no longer be narrower than the button that opened it. Both apply to the menu itself, submenus keeping the default.",
+      text: '<code>width</code> fixes the main panel width. <code>matchTrigger</code> sets its minimum width to the trigger width. Submenus keep their default width.',
     },
     placement: {
       title: 'Placement',
-      text: '<code>placement</code> names the preferred opening direction of the panel, above or below the trigger.',
+      text: '<code>placement</code> sets the preferred panel position.',
     },
     open: {
       title: 'Knowing whether it is open',
-      text: '<code>v-model:open</code> is fed by the panel as well as read from it: a click outside, Escape or choosing a command all write back to it. A menu opened from code still anchors itself to its trigger.',
+      text: '<code>v-model:open</code> tracks opening and dismissal by outside click, Escape or command selection.',
     },
   },
-
   api: {
     VMenu: {
       props: {
-        placement:
-          'Where the panel opens relative to its trigger. The browser moves it to another side by itself when there is not enough room.',
-        size: 'How tall the rows are: 32, 40 or 48 pixels. Submenus inherit it, so it is set once on the menu as a whole.',
-        compact: 'Takes 4px off the height of every row, submenus included.',
-        width:
-          'A width for the panel: a number is read as pixels, a string as any CSS length or keyword, <code>16rem</code> or <code>max-content</code>. It applies to the menu itself; submenus keep the default width.',
-        matchTrigger:
-          'Stops the panel from being narrower than the button that opened it, while leaving it free to grow wider for its content. Submenus are unaffected.',
-        vModelOpen:
-          "Whether the menu is showing. It starts closed and is fed by the panel, so the browser's own dismissal, a click outside, Escape, or choosing a command, writes back to it.",
+        placement: 'Preferred panel position; adjusts when space is insufficient.',
+        size: 'Row size inherited by submenus.',
+        compact: 'Reduces row height, including submenus.',
+        width: 'Main panel width. Numbers use pixels; strings use CSS lengths or keywords.',
+        matchTrigger: 'Minimum main panel width matches the trigger. Does not affect submenus.',
+        vModelOpen: 'Open state synchronized with outside clicks, Escape and command selection.',
       },
       slots: {
-        trigger:
-          'The button that opens the menu. Bind the <code>triggerProps</code> it receives onto it: that is what wires the two together.',
-        default: 'The contents of the menu: VMenuItem, VMenuGroup and VMenuSeparator.',
+        trigger: 'Opening button. Bind the supplied <code>triggerProps</code>.',
+        default:
+          '<code>VMenuItem</code>, <code>VMenuGroup</code> and <code>VMenuSeparator</code> children.',
       },
     },
     VMenuItem: {
       props: {
-        label: 'What the command says. The default slot replaces it.',
-        sublabel: 'A second line under the label, for a shortcut or a short explanation.',
-        iconStart: 'An icon before the label. The <code>#start</code> slot replaces it.',
-        iconEnd: 'An icon after the label. The <code>#end</code> slot replaces it.',
-        selected:
-          'Marks this item as the one currently in effect, the chosen sort order or the active view. It is coloured and announced as such.',
-        tone: 'What the command means, in colour. <code>danger</code> marks it destructive, which is where deleting something belongs, and <code>neutral</code>, the default, covers every other command.',
-        disabled: 'Makes the item unusable: it no longer responds and the arrows skip over it.',
-        href: 'Turns the item into a link pointing at this address, for a menu that navigates rather than acts.',
+        label: 'Command label, replaced by the default slot.',
+        sublabel: 'Second line below the label.',
+        iconStart: 'Icon before the label. Replaced by <code>start</code>.',
+        iconEnd: 'Icon after the label. Replaced by <code>end</code>.',
+        selected: 'Highlights and announces the current choice.',
+        tone: 'Neutral or danger; use danger for destructive commands.',
+        disabled: 'Disables the command and skips it during arrow navigation.',
+        href: 'Link destination.',
       },
       events: {
-        select: 'The command was chosen, by click or by keyboard. The menu closes on its own.',
+        select: 'The command was activated by click or keyboard. Closes the menu.',
       },
       slots: {
-        default: 'The label, replacing the <code>label</code> prop.',
-        sublabel: 'The second line, replacing the <code>sublabel</code> prop.',
-        start: 'Free content before the label, which takes the place of <code>iconStart</code>.',
-        end: 'Free content after the label, which takes the place of <code>iconEnd</code>.',
-        submenu:
-          'The contents of a submenu: items, groups and separators, this component included, so menus may nest as deep as needed.',
+        default: 'Content replacing the label.',
+        sublabel: 'Content replacing the second line.',
+        start: 'Content replacing <code>iconStart</code>.',
+        end: 'Content replacing <code>iconEnd</code>.',
+        submenu: 'Nested menu items, groups and separators.',
       },
     },
     VMenuGroup: {
       props: {
-        label:
-          'The name of the section, replaced by the <code>#label</code> slot. One of the two is needed: it is what names the group. It is a heading, not a command: nothing happens on click.',
+        label: 'Group name. Provide this prop or its slot.',
       },
       slots: {
-        default: 'The commands belonging to this section.',
-        label: 'A name made of markup, replacing the <code>label</code> prop.',
+        default: 'Group commands.',
+        label: 'Content replacing the group name.',
       },
     },
   },

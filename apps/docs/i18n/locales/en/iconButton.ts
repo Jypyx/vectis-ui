@@ -1,61 +1,62 @@
 export default {
   title: 'Icon button',
-  lead: 'A square button carrying an icon and no label. It is VButton underneath, with two defaults of its own and a required name, since the picture is all a screen reader would otherwise get.',
-
+  lead: '<code>VIconButton</code> displays an icon for an action or link. Its required <code>label</code> provides the accessible name.',
   examples: {
     variantsAndTones: {
       title: 'Variants and tones',
-      text: 'The same four <code>variant</code>s and three <code>tone</code>s as VButton, with two defaults of its own: <code>ghost</code> rather than <code>solid</code>, and <code>neutral</code> rather than <code>accent</code>.',
+      text: 'Uses the same variants and tones as <code>VButton</code>, with <code>ghost</code> and <code>neutral</code> as defaults.',
     },
     elevated: {
       title: 'Elevated',
-      text: '<code>elevated</code> applies the shadow scale to whichever variant is in use. Ghost and outline also gain a raised surface.',
+      text: '<code>elevated</code> adds a shadow. The <code>ghost</code> and <code>outline</code> variants also gain a background.',
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> sets the box, square at each of the five steps from 24 to 56 pixels. <code>compact</code> takes 4px off both sides, so the box stays square.',
+      text: '<code>size</code> adjusts the button and icon. <code>compact</code> reduces the width and height equally.',
     },
     shapes: {
       title: 'Shapes',
-      text: "<code>shape</code> chooses the silhouette, square or circular. Inside a VButtonGroup the row's own corner rules win and a circular segment keeps square seams.",
+      text: '<code>shape</code> sets a square or circular shape. Joined buttons in <code>VButtonGroup</code> keep straight edges between segments.',
     },
     icons: {
       title: 'Icons',
-      text: '<code>icon</code> takes any icon value and <code>iconFilled</code> asks for its filled form. The default slot is the way to an icon the prop cannot express, and stays decorative: the button is named by its <code>label</code>.',
+      text: 'Use <code>icon</code> or the default slot to supply an icon. <code>iconFilled</code> requests a filled version, where supported.',
     },
     link: {
-      title: 'As a link',
-      text: '<code>href</code> renders the button as an anchor, on the terms of VButton. A disabled link keeps its place and loses its destination.',
+      title: 'Link',
+      text: '<code>href</code> renders a link. Navigation is blocked while the button is disabled or loading.',
     },
     states: {
       title: 'States',
-      text: "<code>disabled</code> greys the button out through the colour tokens. <code>loading</code> puts a spinner in the icon's own box and disables the button while it turns.",
+      text: '<code>disabled</code> prevents activation. <code>loading</code> also replaces the icon with a spinner and sets <code>aria-busy</code>.',
     },
   },
-
   api: {
     VIconButton: {
       props: {
         label:
-          'What the button does, in words. It becomes the <code>aria-label</code> and is the only thing a screen reader has to go on, so it names the action, "Close", "Next month", rather than the picture.',
+          'Accessible name, applied as <code>aria-label</code>. Name the action, such as “Close” or “Next month”.',
         variant:
-          'How much visual weight the button carries, on the VButton scale. Inside a VButtonGroup the group decides it.',
-        tone: "What the action means, in colour. An icon-only button is usually chrome, which is why it starts neutral where VButton starts accent. Left out inside a VButtonGroup it takes the group's tone.",
-        elevated: 'Raises the button with a shadow, and a raised surface on ghost and outline.',
-        size: 'The size of the square, taken from the scale shared by every control.',
-        compact: 'Takes 4px off both sides of the square, which stays square.',
-        shape:
-          'The silhouette: a square carrying the corner radius every control shares, or a circle. The box itself is square either way, only the corners change.',
-        href: 'Turns the button into an <code>&lt;a&gt;</code> pointing at this address. A disabled or loading link becomes inert: the address is dropped, so it can be neither focused nor followed.',
-        type: 'The native type of the button. It is ignored as soon as <code>href</code> makes it a link.',
-        disabled: 'Makes the button unusable, greyed out through the colour tokens.',
-        loading: 'Replaces the icon with a spinner and disables the button while it turns.',
-        icon: 'The icon to show. The default slot is the way to supply one this prop cannot express.',
-        iconFilled: "Renders the icon in its filled form, the font's <code>FILL</code> axis.",
+          'Visual style. Uses the same values as <code>VButton</code>. Overridden when <code>VButtonGroup</code> sets a variant.',
+        tone: 'Action intent. When omitted, uses the group’s tone or <code>neutral</code> if the group has none.',
+        elevated:
+          'Adds a shadow and, for <code>ghost</code> and <code>outline</code>, a background. Overridden when the group sets <code>elevated</code>.',
+        size: 'Button size. Overridden when the group sets <code>size</code>.',
+        compact:
+          'Reduces the width and height equally. Overridden when the group sets <code>compact</code>.',
+        shape: 'Square or circular shape. The width and height remain equal.',
+        href: 'Link destination. When disabled or loading, the link loses its destination and cannot receive focus or navigate.',
+        type: 'Native button type. Ignored when <code>href</code> is set.',
+        disabled: 'Prevents activation and removes the button from the tab order.',
+        loading:
+          'Disables the button, sets <code>aria-busy</code> and replaces the icon or default slot content with a spinner.',
+        icon: 'Icon to display. Accepts an <code>IconSource</code>. Takes precedence over the default slot.',
+        iconFilled:
+          'Requests a filled version of <code>icon</code>, where supported. Does not affect slot content.',
       },
       slots: {
         default:
-          'The icon, when the <code>icon</code> prop cannot express it: a VIcon, or an inline SVG marked <code>aria-hidden</code>, the button being already named by its label.',
+          'Icon content, used when <code>icon</code> is absent. Add <code>aria-hidden="true"</code> to decorative content.',
       },
     },
   },

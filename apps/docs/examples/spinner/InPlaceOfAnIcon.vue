@@ -5,14 +5,9 @@ import { search } from 'vectis-ui/icons'
 
 <template>
   <div class="demo">
-    <!-- The spinner occupies an icon's box and paints an icon's amount of ink, so one
-         stands in for the other with nothing shifting on the line. A VIcon and a
-         VSpinner given the same size are interchangeable, box for box. -->
     <p><VIcon :name="search" /> Searching the archive</p>
     <p><VSpinner /> Searching the archive</p>
 
-    <!-- Which is what lets the controls draw their own: they set the icon size and get
-         a spinner the size of the glyph it replaces, with no ratio of their own. -->
     <VButton class="control" loading>Saving</VButton>
     <VInput class="control" label="Reference" model-value="INV-2481" loading />
   </div>

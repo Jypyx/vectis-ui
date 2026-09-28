@@ -6,9 +6,6 @@ import { cloud_upload as cloudUpload, description, folder_zip as folderZip } fro
 <template>
   <aside class="sidebar">
     <VSideNavigation label="Project">
-      <!-- A second line under the label, for what the row does not already say: a
-           count, a status, a size. The row grows to hold both and the icon stays
-           centred on the pair rather than on the first line. -->
       <VSideNavigationItem href="#usage" :icon="description" sublabel="12 open tasks">
         Alpha
       </VSideNavigationItem>

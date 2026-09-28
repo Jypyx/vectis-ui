@@ -14,9 +14,6 @@ const placements: TooltipPlacement[] = [
 </script>
 
 <template>
-  <!-- Eight sides, four of them aligned to an edge of the trigger rather than centred
-       on it. The placement names a preference and not a position: with no room on that
-       side the browser moves the panel by itself. -->
   <div class="row">
     <VTooltip
       v-for="placement in placements"

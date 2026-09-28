@@ -5,8 +5,7 @@ import { VButton, VInputOTP, VTypography } from 'vectis-ui'
 const code = ref('')
 const submitted = ref<string | null>(null)
 
-/* The form reads the code through `name`, as it would from any native field. A code
-   that does not fill every box is invalid, so the browser refuses to submit it. */
+/* A partial code fails native validation; required also rejects an empty code. */
 function onSubmit(event: Event) {
   const data = new FormData(event.target as HTMLFormElement)
   submitted.value = String(data.get('code'))

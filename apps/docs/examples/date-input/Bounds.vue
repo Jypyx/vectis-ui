@@ -5,7 +5,6 @@ import { VDateInput } from 'vectis-ui'
 const booking = ref<string | null>('2026-06-15')
 const appointment = ref<string | null>('2026-06-16')
 
-/* A list or a predicate: this one closes every weekend without naming a single date. */
 function isWeekend(iso: string) {
   const day = new Date(`${iso}T00:00:00`).getDay()
   return day === 0 || day === 6

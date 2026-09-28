@@ -1,95 +1,91 @@
 export default {
   title: 'Input',
-  lead: 'A complete text field: label above, hint below, icons inside, a character counter, a clear button and a loading state, all around a real <code>&lt;input&gt;</code>.',
-
+  lead: '<code>VInput</code> is a single-line field with optional label, help text, icons and actions.',
   examples: {
     labelAndHint: {
       title: 'Label and hint',
-      text: '<code>label</code> renders above the field and focuses it when clicked. <code>hint</code> renders under the field and is tied to it through <code>aria-describedby</code>.',
+      text: '<code>label</code> names the field. <code>hint</code> adds help text linked through <code>aria-describedby</code>.',
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> sets the height to 32, 40 or 48 pixels, and <code>compact</code> takes 4px off any of them.',
+      text: '<code>size</code> adjusts the height, padding, text and icons. <code>compact</code> reduces the height only.',
     },
     icons: {
       title: 'Icons',
-      text: '<code>iconStart</code> and <code>iconEnd</code> place a decorative icon at either end of the field. The <code>#end</code> slot replaces the end icon, where <code>#start</code> is rendered after the start icon rather than in its place.',
+      text: 'Add decorative icons with <code>iconStart</code> and <code>iconEnd</code>, or custom content with <code>#start</code> and <code>#end</code>.',
     },
     clearable: {
-      title: 'Clearable',
-      text: '<code>clearable</code> adds a cross that empties the field, shown while there is something to clear and the field can be edited. <code>clearVisible</code> answers that question yourself, for a field whose value is not its text.',
+      title: 'Clear button',
+      text: '<code>clearable</code> adds a button that empties the field and restores focus. Use <code>clearVisible</code> to control its visibility.',
     },
     states: {
       title: 'States',
-      text: '<code>disabled</code> greys the field out and takes it out of the tab order. <code>readonly</code> keeps it focusable and copyable, and hides the clear cross unless told otherwise. <code>invalid</code> is for a rule the browser cannot check by itself, and <code>loading</code> puts a spinner where the end icon goes.',
+      text: '<code>disabled</code> blocks interaction. <code>readonly</code> allows focus and copying. <code>invalid</code> marks an error. <code>loading</code> shows a spinner while leaving the field editable.',
     },
     clickableIcons: {
       title: 'Clickable icons',
-      text: 'A <code>@click:icon-start</code> or <code>@click:icon-end</code> listener turns that icon into a real button, which then needs <code>iconStartLabel</code> or <code>iconEndLabel</code>.',
+      text: 'Attach <code>@click:icon-start</code> or <code>@click:icon-end</code> to make an icon a button. Provide its accessible name with <code>iconStartLabel</code> or <code>iconEndLabel</code>.',
     },
     counters: {
-      title: 'Counters',
-      text: "<code>counter</code> shows the length at the end of the field. <code>maxlength</code> is the browser's hard limit, where <code>softLimit</code> is a line the reader may cross: the text is never cut, the counter turns red and the field goes into error through the native validity. The prop counts characters, as on VTextarea; on VFileInput the same name counts files and their size.",
+      title: 'Character counter',
+      text: '<code>counter</code> displays the character count. With <code>maxlength</code>, <code>softLimit</code> allows typing past the limit and reports a native validation error.',
     },
     pattern: {
-      title: 'Pattern',
-      text: 'There is no <code>pattern</code> prop: the native attribute reaches the input through fallthrough, along with <code>inputmode</code>, <code>name</code> and everything else a form needs. The field turns red through <code>:user-invalid</code>, once the reader has left it.',
+      title: 'Native validation',
+      text: 'Native attributes such as <code>pattern</code>, <code>inputmode</code> and <code>name</code> are forwarded to the input. <code>class</code> and <code>style</code> apply to the wrapper.',
     },
   },
-
   api: {
     VInput: {
       props: {
-        size: 'The height of the field: 32, 40 or 48 pixels.',
+        size: 'Field size. Overridden when <code>VInputGroup</code> sets <code>size</code>.',
         compact:
-          'Takes 4px off the height, leaving the padding, the text and the icons as they are.',
-        type: 'The native type of the input, which is also what tells a phone which keyboard to offer: a numeric pad for <code>number</code>, an @ key for <code>email</code>.',
+          'Reduces the height without changing padding, text or icons. Overridden when <code>VInputGroup</code> sets <code>compact</code>.',
+        type: 'Native input type.',
         invalid:
-          'Marks the field as invalid whatever the browser thinks. This is the route for a rule only the server can check; anything the browser can validate on its own already colours the field without it.',
-        disabled: 'Makes the field unusable, greyed out through the colour tokens.',
+          'Sets <code>aria-invalid</code> and the error style. Does not block form submission by itself.',
+        disabled: 'Disables the field, removing it from Tab navigation and form submission.',
         readonly:
-          'Shows the value without allowing it to be changed. The field can still be focused and copied from, and it hides the clear button unless <code>clearVisible</code> answers that question explicitly.',
+          'Prevents editing while allowing focus and copying. Hides the clear button unless <code>clearVisible</code> overrides it.',
         noTyping:
-          'Refuses the keyboard without drawing the field as read-only: the native attribute is set, but the field keeps its ordinary look and its clear cross. For a field whose value comes from somewhere else, a picker or a file dialog, and which is no less editable for it.',
-        label: 'The label above the field, tied to it so that clicking it focuses the field.',
-        hint: 'A line of help under the field. It is tied to the input for assistive technology, so it is read out along with the label.',
+          'Prevents typing through native <code>readonly</code> without the read-only style. Keeps clearing available, for fields edited through a picker.',
+        label:
+          'Visible label linked to the input. When omitted, provide <code>aria-label</code> or <code>aria-labelledby</code>.',
+        hint: 'Help text below the field, linked through <code>aria-describedby</code>.',
         iconStart:
-          'An icon inside the field, at the start. It is decorative until a <code>@click:icon-start</code> listener is attached, at which point it becomes a real button and needs <code>iconStartLabel</code>.',
+          'Start icon. Becomes a button with <code>@click:icon-start</code>; then requires <code>iconStartLabel</code>.',
         iconEnd:
-          'The same at the end of the field. The <code>#end</code> slot replaces it, and the loading spinner takes its place while it turns.',
-        iconStartLabel: 'What the start icon does, in words, once it is clickable.',
-        iconEndLabel: 'What the end icon does, in words, once it is clickable.',
-        loading: 'Shows a spinner at the end of the field, in place of the end icon or slot.',
-        loadingText:
-          'What screen readers announce while the spinner turns. It falls back to the design system dictionary.',
+          'End icon. Becomes a button with <code>@click:icon-end</code>; then requires <code>iconEndLabel</code>. Replaced by <code>#end</code> or the loading spinner.',
+        iconStartLabel: 'Accessible name of the start icon button.',
+        iconEndLabel: 'Accessible name of the end icon button.',
+        loading:
+          'Replaces the end icon or <code>#end</code> content with a spinner. Does not disable the field.',
+        loadingText: 'Accessible spinner text. Defaults to the library dictionary.',
         clearable:
-          'Offers a cross that empties the field. It appears when there is something to clear and the field can be edited.',
+          'Adds a clear button when the field is non-empty and editable, unless <code>clearVisible</code> overrides visibility. Hidden when disabled.',
         clearVisible:
-          'Decides whether the cross is shown, instead of letting the field work it out from its own content. It exists for the components built on this one, where what there is to clear is not the text: VCombobox holds its selection as chips beside the field, and a read-only date or time picker changes its value through a panel rather than by typing.',
-        clearLabel:
-          'What the clear button does, in words. It falls back to the design system dictionary.',
+          'Overrides the content and read-only checks for clear-button visibility. Requires <code>clearable</code> and an enabled field.',
+        clearLabel: 'Accessible name of the clear button. Defaults to the library dictionary.',
         maxlength:
-          "The maximum number of characters. By default this is the browser's own limit, which simply refuses anything beyond it.",
+          'Native character limit. Not applied as a native attribute with <code>softLimit</code>.',
         softLimit:
-          'Turns that limit into a soft one: the reader may type past it, and the field goes into error instead of silently refusing the keystrokes. It is reported through the native validity, so a form cannot be submitted over the limit.',
+          'Allows exceeding <code>maxlength</code> and sets a native validation error until the value is within the limit.',
         counter:
-          'Shows how much has been typed, at the end of the field: 12/80 against a limit, or just 12 without one.',
+          'Character count inside the field: <code>12/80</code> with a limit, or <code>12</code> without one.',
         vModel:
-          'The value, typed as text or a number rather than text alone. On an <code>&lt;input type="number"&gt;</code> Vue converts the value to a number by itself, so a string-only model would hand a number back to a consumer who passed a string in.',
+          'Field value, a string or number. With <code>type="number"</code>, Vue converts numeric input to a number. An empty field uses an empty string.',
       },
       events: {
-        clear: 'The clear button was pressed. The value has already been emptied.',
+        clear: 'Emitted after the clear button resets the value to an empty string.',
         clickIconStart:
-          'The start icon was pressed. Attaching this listener is what turns it into a button.',
+          'Emitted when the start icon button is activated. Receives a <code>MouseEvent</code>.',
         clickIconEnd:
-          'The end icon was pressed. Attaching this listener is what turns it into a button.',
+          'Emitted when the end icon button is activated. Receives a <code>MouseEvent</code>.',
       },
       slots: {
-        start:
-          'Content at the start of the field, rendered after <code>iconStart</code> rather than in its place.',
-        valueEnd:
-          "Controls of your own inside the field, placed before the field's own: the clear cross and the end icon. It is where something that acts on the value belongs, so that the reading order and the tab order agree.",
-        end: 'Content at the end of the field, which replaces <code>iconEnd</code>. It is hidden while the field is loading, the spinner taking that place.',
+        start: 'Content after <code>iconStart</code>. Does not replace the icon.',
+        valueEnd: 'Content after the value and counter, before the clear button and end icon.',
+        end: 'Content replacing <code>iconEnd</code>. Hidden while loading.',
       },
     },
   },

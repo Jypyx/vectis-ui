@@ -13,10 +13,7 @@ function onSubmit(event: Event) {
 
 <template>
   <form class="demo" @submit.prevent="onSubmit">
-    <!--
-      Here the name reaches the form and the label reaches the thumb, which is why the `label`
-      prop is left out: it sets an aria-label, and that would win over the visible label.
-    -->
+    <!-- Use the visible native label instead of an additional accessible-only label. -->
     <label class="field-label" for="volume">Volume</label>
     <VSlider id="volume" v-model="volume" name="volume" />
 

@@ -8,10 +8,6 @@ const selected = ref<Record<string, string>>({ solid: 'week', soft: 'week', ghos
 
 <template>
   <div class="demo">
-    <!--
-      Solid is the loudest and the safest default; ghost is for a row that must stay quiet,
-      where the difference rests on the text colour alone.
-    -->
     <div v-for="variant in variants" :key="variant" class="row">
       <p class="caption">{{ variant }}</p>
       <VToggle

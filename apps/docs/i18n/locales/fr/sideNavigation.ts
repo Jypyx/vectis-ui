@@ -1,105 +1,91 @@
 export default {
   title: 'Navigation latérale',
-  lead: "La navigation d'une barre latérale : un arbre de liens, montré sur place plutôt que dans un panneau flottant, dont les branches s'ouvrent et se referment. Il s'écrit niveau par niveau avec ses propres sous-composants, jamais décrit comme une liste de données.",
-
+  lead: '<code>VSideNavigation</code> affiche une arborescence de liens et de branches repliables dans une barre latérale. Composez-la avec des éléments, des groupes et des séparateurs.',
   examples: {
     links: {
       title: 'Liens et actions',
-      text: "<code>href</code> rend une ligne sous forme de vrai lien ; sans lui, la ligne est un bouton qui rapporte son activation par <code>select</code>. <code>current</code> marque la ligne où se trouve le lecteur et l'annonce comme la page courante. Une ligne qui porte des sous-éléments ignore <code>href</code>.",
+      text: 'Les éléments avec <code>href</code> sont des liens ; les autres sont des boutons. <code>current</code> marque la page actuelle. Les branches ignorent <code>href</code>.',
     },
     sublabels: {
       title: 'Sous-libellés',
-      text: '<code>sublabel</code> ajoute une seconde ligne sous le libellé, pour un compte, un état de synchronisation ou une taille. Le slot <code>#sublabel</code> prend la même place quand cette ligne demande du balisage.',
+      text: 'Ajoutez une seconde ligne avec <code>sublabel</code> ou son slot.',
     },
     endContent: {
       title: 'Du contenu en fin de ligne',
-      text: 'Le slot <code>#end</code> place un compteur, un badge ou un petit contrôle après le libellé et avant le chevron. Sur une ligne de branche, il se retrouve dans le résumé natif de la section : tenez-vous-en donc à du contenu non interactif.',
+      text: 'Utilisez <code>end</code> pour un badge ou un compteur avant le chevron. Gardez le contenu des branches non interactif.',
     },
     groups: {
       title: 'Groupes et séparateurs',
-      text: "VSideNavigationGroup nomme un bloc de lignes et VSideNavigationSeparator trace un filet entre deux d'entre elles. Un titre n'est pas une ligne : rien ne se passe au clic et les flèches ne s'y arrêtent jamais. Un groupe n'est pas non plus un niveau de la hiérarchie, ses éléments ne sont donc pas indentés.",
+      text: '<code>VSideNavigationGroup</code> nomme un ensemble sans ajouter de niveau d’imbrication. Séparez les ensembles avec <code>VSideNavigationSeparator</code>.',
     },
     depth: {
       title: 'Imbrication',
-      text: "Une ligne à laquelle on donne un slot <code>#children</code> devient une branche, et une branche peut porter ses propres branches aussi loin que va l'arbre. Chaque niveau est indenté exactement de la place que prend une icône de début.",
+      text: 'Le slot <code>children</code> transforme un élément en branche. Les branches peuvent contenir d’autres branches.',
     },
     chevrons: {
       title: 'Le chevron des sections',
-      text: "<code>expandIcon</code> est le glyphe d'une branche fermée, pivoté de 180° à l'ouverture de la section. Nommer aussi <code>collapseIcon</code> échange plutôt un dessin pour l'autre. Les deux se posent sur la navigation entière.",
+      text: 'Définissez <code>expandIcon</code> sur la navigation. L’icône tourne à l’ouverture sauf si <code>collapseIcon</code> la remplace.',
     },
     exclusive: {
       title: 'Une section à la fois',
-      text: "<code>exclusive</code> ne garde qu'une section ouverte à la fois au sein de chaque niveau. Il est désactivé par défaut, à l'inverse de VAccordion, dont les sections se referment l'une l'autre sauf si <code>multiple</code> est posé.",
+      text: '<code>exclusive</code> conserve une seule branche ouverte par niveau. Plusieurs peuvent rester ouvertes par défaut.',
     },
     openState: {
       title: 'Savoir si une section est ouverte',
-      text: "<code>defaultOpen</code> décide de l'état initial d'une branche puis le confie au navigateur. <code>v-model:open</code> rapporte au contraire chaque pliage, et ouvre ou ferme la branche quand on y écrit.",
+      text: '<code>defaultOpen</code> définit l’état initial. Utilisez <code>v-model:open</code> pour observer ou piloter les changements suivants.',
     },
     disabled: {
       title: 'Lignes désactivées',
-      text: '<code>disabled</code> grise une ligne par les tokens de couleur et la sort du parcours clavier. Sur une branche, la section ne se déplie plus du tout.',
+      text: 'Les éléments désactivés quittent le parcours clavier ; les branches désactivées ne peuvent pas être ouvertes ou fermées.',
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> définit la hauteur des lignes à 32 ou 40 pixels, et <code>compact</code> lui retire 4px. Elle se pose une fois sur la navigation, et chaque niveau la lit de là.',
+      text: 'Définissez <code>size</code> et <code>compact</code> sur la navigation pour tous les niveaux.',
     },
   },
-
   api: {
     VSideNavigation: {
       props: {
-        label:
-          "Ce que les lecteurs d'écran annoncent pour cette navigation. Une page en compte souvent plusieurs, une principale, une latérale, une de pied de page, et c'est ce qui les distingue. Il retombe sur le dictionnaire du design system.",
-        size: 'La hauteur des lignes, 32 ou 40 pixels, héritée par tous les niveaux.',
-        compact:
-          "Retire 4px à la hauteur de chaque ligne. C'est un réglage de densité et non un rail replié en icônes seules, que ce composant ne propose pas.",
-        exclusive:
-          "Ne garde qu'une section ouverte à la fois au sein de chaque niveau, ce que le navigateur fait seul. Désactivé par défaut : une barre latérale laisse normalement plusieurs sections ouvertes.",
-        expandIcon: "Le chevron d'une section fermée.",
-        collapseIcon:
-          "Le chevron d'une section ouverte. Sans lui, celui de la section fermée est simplement pivoté de 180°.",
+        label: 'Nom accessible de la navigation. Utilise le dictionnaire par défaut.',
+        size: 'Taille des lignes héritée par tous les niveaux.',
+        compact: 'Réduit la hauteur des lignes.',
+        exclusive: 'Conserve une seule branche ouverte par niveau.',
+        expandIcon: 'Icône de branche fermée.',
+        collapseIcon: 'Icône de branche ouverte. Sans cette prop, l’icône d’ouverture tourne.',
       },
       slots: {
-        default: "Le premier niveau de l'arbre : items, groupes et séparateurs.",
+        default: 'Éléments, groupes et séparateurs du premier niveau.',
       },
     },
     VSideNavigationItem: {
       props: {
-        label: 'Ce que dit la ligne, et où elle mène. Le slot par défaut la remplace.',
-        sublabel: 'Une seconde ligne sous le libellé, pour un statut ou une courte explication.',
-        icon: 'Une icône avant le libellé. Le slot <code>#icon</code> la remplace.',
-        href: "Où mène cette ligne, ce qui en fait un lien. Elle est ignorée sur une ligne qui a des sous-items : une telle ligne s'ouvre et se referme plutôt que de naviguer.",
-        current:
-          'Marque cette ligne comme la page actuellement consultée. Elle est mise en évidence et annoncée comme la page courante.',
-        disabled:
-          'Rend la ligne inutilisable : elle se grise par les tokens de couleur et quitte le chemin du clavier.',
-        defaultOpen:
-          "Rend une branche déjà ouverte. Seule sa valeur initiale est lue : le navigateur possède l'état ensuite, et la changer plus tard ne referme pas une branche que le lecteur a ouverte.",
-        vModelOpen:
-          "Si la branche est ouverte, quand vous voulez la piloter ou l'observer. Non liée, le navigateur garde cet état pour lui et <code>defaultOpen</code> n'en donne que la valeur initiale.",
+        label: 'Libellé visible de la ligne, remplacé par le slot par défaut.',
+        sublabel: 'Seconde ligne sous le libellé.',
+        icon: 'Icône avant le libellé. Remplacée par son slot.',
+        href: 'Destination du lien. Ignorée si l’élément a des enfants.',
+        current: 'Met en évidence et annonce la page actuelle.',
+        disabled: 'Désactive les interactions.',
+        defaultOpen: 'État initial de la branche. Les changements ultérieurs ne la pilotent pas.',
+        vModelOpen: 'État ouvert de la branche à observer ou à piloter.',
       },
       events: {
-        select: 'La ligne a été activée. Une branche le rapporte comme un lien.',
+        select: 'L’élément a été activé, y compris les liens et les branches.',
       },
       slots: {
-        default:
-          'Le libellé de la ligne. Il est obligatoire : une ligne de navigation doit dire où elle mène.',
-        sublabel:
-          'Une seconde ligne faite de balisage, qui remplace la prop <code>sublabel</code>.',
-        icon: 'Du contenu libre avant le libellé, qui prend la place de <code>icon</code>.',
-        end: 'Du contenu libre à la fin de la ligne, avant le chevron : un compteur, un badge. Sur une branche il ne doit pas être focalisable, la ligne étant déjà un contrôle.',
-        children:
-          "Les sous-items, qui font de cette ligne une branche. La profondeur n'est pas limitée.",
+        default: 'Libellé de la ligne. Fournissez-le avec ce slot ou la prop.',
+        sublabel: 'Contenu remplaçant la seconde ligne.',
+        icon: 'Contenu remplaçant l’icône.',
+        end: 'Contenu avant le chevron. Doit rester non interactif sur les branches.',
+        children: 'Éléments imbriqués transformant cette ligne en branche.',
       },
     },
     VSideNavigationGroup: {
       props: {
-        label:
-          "Le nom de la section, que le slot <code>#label</code> remplace. L'un des deux est nécessaire : c'est lui qui nomme la sous-liste qu'il coiffe.",
+        label: 'Nom de section. Fournissez cette prop ou son slot.',
       },
       slots: {
-        default: 'Les items appartenant à cette section.',
-        label: 'Un nom fait de balisage, qui remplace la prop <code>label</code>.',
+        default: 'Éléments de la section.',
+        label: 'Contenu remplaçant le nom de section.',
       },
     },
   },

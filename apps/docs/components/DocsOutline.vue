@@ -70,11 +70,6 @@ onBeforeUnmount(() => {
 
 <template>
   <nav class="vd-outline" :aria-label="t('common.outline')">
-    <!--
-      `label` and not `overline`: the latter is the role that CARRIES the capitals and the
-      widened tracking that go with them, so asking for lowercase there would mean undoing half
-      a recipe. Naming the other role is how a consumer changes its mind about a type style.
-    -->
     <VTypography variant="label" as="p" class="vd-outline-title">
       {{ t('common.outline') }}
     </VTypography>

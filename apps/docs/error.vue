@@ -1,10 +1,5 @@
 <script setup lang="ts">
-/**
- * It matters more here than on most sites: GitHub Pages serves `404.html` for anything it does
- * not recognise, and nitro emits that file as an empty shell, so this component is what the
- * visitor actually sees. Without it they would get Nuxt's own default page; correct, and
- * belonging to no site in particular.
- */
+/** Provide the site's error page for static hosts serving 404.html. */
 import type { NuxtError } from '#app'
 
 import { VButton, VTypography } from 'vectis-ui'
@@ -21,11 +16,7 @@ useHead({
   title: () => (notFound.value ? t('error.notFoundTitle') : t('error.errorTitle')),
 })
 
-/*
- * It is a best effort and not a guarantee: GitHub Pages serves the single `404.html` for
- * anything it does not recognise, and that file is prerendered in the default locale; an
- * unknown `/fr/…` address therefore shows the English page before offering these two ways back.
- */
+/* Static hosts may serve the default-locale 404 page for an unknown French route. */
 const leave = (to: string) => clearError({ redirect: localePath(to) })
 </script>
 

@@ -6,7 +6,7 @@ const POSITIONS: ProgressLinearValuePosition[] = ['start', 'center', 'end']
 
 <template>
   <div class="column">
-    <!-- Whatever the slot renders must therefore be free of side effects. -->
+    <!-- The slot renders twice; keep it non-interactive and free of side effects. -->
     <div v-for="position in POSITIONS" :key="position" class="labelled">
       <VTypography variant="caption" tone="muted">valuePosition {{ position }}</VTypography>
       <VProgressLinear
@@ -18,8 +18,6 @@ const POSITIONS: ProgressLinearValuePosition[] = ['start', 'center', 'end']
       />
     </div>
 
-    <!-- The slot replaces the percentage and receives the value, the max and the
-         percentage worked out from them. -->
     <div class="labelled">
       <VTypography variant="caption" tone="muted">A slot of your own</VTypography>
       <VProgressLinear :value="7" :max="12" thickness="22" label="Files uploaded">

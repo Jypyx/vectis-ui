@@ -1,81 +1,71 @@
 export default {
   title: 'Boîte de dialogue',
-  lead: 'Un <code>&lt;dialog&gt;</code> natif ouvert en modal : le piège à focus, la page inerte derrière et la couche supérieure viennent tous du navigateur. VDialogAlert est la même boîte, resserrée sur une question à laquelle il faut répondre.',
-
+  lead: '<code>VDialog</code> ouvre un dialogue modal natif qui contient le focus. <code>VDialogAlert</code> exige une réponse explicite pour se fermer.',
   examples: {
     width: {
       title: 'Largeur',
-      text: "<code>width</code> accepte une longueur CSS dans n'importe quelle unité, 400px par défaut. La boîte ne dépasse jamais la fenêtre et garde une marge de chaque côté.",
+      text: '<code>width</code> définit la largeur du dialogue dans les limites de la zone visible.',
     },
     longContent: {
       title: 'Contenu long',
-      text: "Seul le corps défile, l'en-tête et le pied restant en place. Des filets apparaissent sous l'en-tête et au-dessus du pied tant que du contenu passe derrière eux.",
+      text: 'Le corps défile tandis que l’en-tête et le pied restent visibles.',
     },
     customHeader: {
       title: 'En-tête personnalisé',
-      text: "Le slot <code>#header</code> remplace tout le bloc titre et sous-titre. La prop <code>title</code> est alors ignorée : nommez la boîte avec un <code>aria-label</code>. La croix de fermeture n'est pas touchée.",
+      text: '<code>header</code> remplace le titre et le sous-titre. Fournissez un nom accessible avec <code>aria-label</code> ou <code>aria-labelledby</code>.',
     },
     headerActions: {
       title: "Actions d'en-tête",
-      text: "Le slot <code>#header-actions</code> ajoute des contrôles à l'en-tête, rendus avant la croix de fermeture pour que celle-ci reste au bord.",
+      text: '<code>header-actions</code> place des contrôles avant le bouton de fermeture.',
     },
     dismissal: {
       title: 'Fermeture',
-      text: "<code>hideClose</code> retire la croix, <code>persistentBackdrop</code> ignore un clic à l'extérieur et <code>persistentEscape</code> ignore la touche. Fermer toutes les issues rend un pied obligatoire.",
+      text: '<code>hideClose</code> masque le bouton de fermeture. <code>persistentBackdrop</code> désactive la fermeture au clic extérieur ; <code>persistentEscape</code> désactive Échap seulement si les deux sont activés. Fournissez une action de fermeture si toutes ces possibilités sont désactivées.',
     },
     alert: {
       title: "Boîte d'alerte",
-      text: "VDialogAlert est cette même boîte aux options figées : elle est annoncée comme une alerte, et il n'y a ni croix, ni Échap, ni clic extérieur, si bien que son pied n'est pas optionnel.",
+      text: '<code>VDialogAlert</code> n’a pas de bouton de fermeture et ignore Échap et les clics extérieurs. Fournissez des boutons de réponse dans son pied.',
     },
   },
-
   api: {
     VDialog: {
       props: {
         title:
-          "Le titre de la boîte, qui la nomme aussi pour les technologies d'assistance. Il est ignoré quand le slot <code>#header</code> remplace tout l'en-tête.",
-        subtitle: 'Une ligne sous le titre, qui explique ce que la boîte demande.',
-        width:
-          "La largeur de la boîte : un nombre est lu en pixels, une chaîne comme n'importe quelle longueur CSS. Sans valeur, elle prend le token <code>--vectis-control-size-dialog-width</code>, 400px par défaut. Elle n'est jamais autorisée à dépasser la largeur de la fenêtre.",
-        role: "Le genre de boîte. <code>alertdialog</code> est fait pour celle à laquelle il faut répondre explicitement, et il pousse les lecteurs d'écran à l'annoncer avec plus d'insistance.",
-        hideClose:
-          "Retire la croix de fermeture de l'en-tête, ne laissant au lecteur qu'Échap, l'arrière-plan et ce que le pied propose.",
-        persistentBackdrop: 'Empêche un clic hors de la boîte de la fermer.',
+          'Titre et nom accessible du dialogue. Ignoré si le slot <code>header</code> est fourni.',
+        subtitle: 'Texte complémentaire sous le titre.',
+        width: 'Largeur en pixels pour les nombres, sinon longueur CSS. Limitée à la zone visible.',
+        role: 'Rôle du dialogue. Utilisez <code>alertdialog</code> pour une réponse nécessitant une attention immédiate.',
+        hideClose: 'Masque le bouton de fermeture.',
+        persistentBackdrop: 'Empêche les clics extérieurs de fermer le dialogue.',
         persistentEscape:
-          "Empêche la touche Échap de fermer la boîte. Refuser Échap alors que l'arrière-plan ferme encore ne peut pas s'exprimer nativement : les deux voies restent alors ouvertes.",
-        closeLabel:
-          'Ce que fait la croix de fermeture, en mots. Elle retombe sur le dictionnaire du design system.',
-        vModelOpen:
-          "Si la boîte est affichée. Elle part fermée, et la liaison est bidirectionnelle : le navigateur y réécrit chaque fois que la boîte se ferme d'elle-même, par Échap ou par l'arrière-plan, si bien que vous n'avez jamais à la réinitialiser à la main.",
+          'Empêche la fermeture par Échap uniquement avec <code>persistentBackdrop</code>. Sinon, les deux possibilités de fermeture restent actives.',
+        closeLabel: 'Nom accessible du bouton de fermeture. Utilise le dictionnaire par défaut.',
+        vModelOpen: 'État ouvert du dialogue. La fermeture native met le modèle à jour.',
       },
       slots: {
-        default: "Le corps de la boîte. C'est la partie qui défile quand il y en a trop.",
-        header: 'Remplace le bloc titre et sous-titre par un contenu à vous.',
-        headerActions:
-          "Des contrôles supplémentaires dans l'en-tête, placés avant la croix de fermeture : un menu, une bascule plein écran.",
-        footer: 'Les boutons au pied de la boîte.',
-        trigger:
-          "Le bouton qui ouvre la boîte. Liez les <code>triggerProps</code> qu'il reçoit dessus. Il reste rendu en permanence, contrairement à la boîte elle-même.",
+        default: 'Corps défilant du dialogue.',
+        header:
+          'En-tête personnalisé. Fournissez <code>aria-label</code> ou <code>aria-labelledby</code> pour nommer le dialogue.',
+        headerActions: 'Contrôles d’en-tête avant le bouton de fermeture.',
+        footer: 'Actions du dialogue.',
+        trigger: 'Contrôle d’ouverture. Liez les <code>triggerProps</code> fournis.',
       },
     },
     VDialogAlert: {
       props: {
         title:
-          "La question posée, qui nomme aussi la boîte pour les technologies d'assistance. Elle est ignorée quand le slot <code>#header</code> remplace tout l'en-tête.",
-        subtitle: 'Une ligne sous le titre, qui détaille les conséquences de la réponse.',
-        width:
-          "La largeur de la boîte : un nombre est lu en pixels, une chaîne comme n'importe quelle longueur CSS. Sans valeur, elle prend le token <code>--vectis-control-size-dialog-width</code>, 400px par défaut. Elle n'est jamais autorisée à dépasser la largeur de la fenêtre.",
-        vModelOpen: "Si l'alerte est affichée. Elle part fermée, et la fermeture y réécrit.",
+          'Titre et nom accessible du dialogue. Ignoré si le slot <code>header</code> est fourni.',
+        subtitle: 'Texte complémentaire expliquant la réponse.',
+        width: 'Largeur en pixels pour les nombres, sinon longueur CSS. Limitée à la zone visible.',
+        vModelOpen: 'État ouvert du dialogue. La fermeture native met le modèle à jour.',
       },
       slots: {
-        default: "Ce que dit l'alerte.",
-        header: 'Remplace le bloc titre et sous-titre par un contenu à vous.',
-        headerActions:
-          "Des contrôles supplémentaires dans l'en-tête, là où une boîte les place avant sa croix : un lien vers l'aide, par exemple. Une alerte n'a pas de croix, ils se placent donc seuls au bout de l'en-tête.",
-        footer:
-          "Les boutons qui répondent à l'alerte. Ils ne sont pas optionnels : rien d'autre ne peut fermer cette boîte.",
-        trigger:
-          "Le bouton qui ouvre l'alerte. Liez les <code>triggerProps</code> qu'il reçoit dessus.",
+        default: 'Contenu de l’alerte.',
+        header:
+          'En-tête personnalisé. Fournissez <code>aria-label</code> ou <code>aria-labelledby</code> pour nommer le dialogue.',
+        headerActions: 'Contrôles à la fin de l’en-tête.',
+        footer: 'Actions de réponse requises. Incluez une possibilité de fermer l’alerte.',
+        trigger: 'Contrôle d’ouverture. Liez les <code>triggerProps</code> fournis.',
       },
     },
   },

@@ -6,17 +6,11 @@ const shapes: SkeletonLoaderShape[] = ['text', 'control', 'pill', 'circle', 'sur
 
 <template>
   <div class="demo">
-    <!-- Each shape sets a corner radius and a way of being sized: text follows the
-         typography around it, control, pill and circle read the control scale, and a
-         surface has a height of its own. -->
     <div v-for="shape in shapes" :key="shape" class="row">
       <p class="caption">{{ shape }}</p>
       <VSkeletonLoader :shape="shape" />
     </div>
 
-    <!-- A number is read as pixels, anything else as a CSS length of your own. Left
-         out, the silhouette takes all the width available, which is why a container
-         has to give it one. -->
     <div class="row">
       <p class="caption">width</p>
       <VSkeletonLoader shape="control" :width="180" />

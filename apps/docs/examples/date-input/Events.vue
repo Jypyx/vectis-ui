@@ -4,8 +4,6 @@ import { VDateInput, type DatePickerEvent } from 'vectis-ui'
 
 const date = ref<string | null>('2026-06-10')
 
-/* Up to three dots a day. The colour is any CSS colour, so a token keeps it in step with
-   the theme; without one the dot takes the accent. */
 const events: DatePickerEvent[] = [
   { date: '2026-06-10', label: 'Kick-off' },
   { date: '2026-06-18', color: 'var(--vectis-color-danger)', label: 'Deadline' },

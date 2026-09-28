@@ -5,10 +5,6 @@ import { close, description, search } from 'vectis-ui/icons'
 
 <template>
   <div class="demo">
-    <!-- The tooltip DESCRIBES and never names: it sets `aria-describedby` on the
-         trigger, and the trigger keeps its own accessible name. An icon button
-         therefore still carries its `label`, and the tooltip is the visual
-         confirmation of it rather than a replacement. -->
     <VTooltip text="Search everything">
       <template #default="{ triggerProps }">
         <VIconButton
@@ -33,9 +29,7 @@ import { close, description, search } from 'vectis-ui/icons'
       </template>
     </VTooltip>
 
-    <!-- A tap opens nothing, there being no hover on a touch screen and no room for a
-         panel standing over what the tap just opened. So whatever the tooltip says has
-         to exist somewhere else too: a visible label, a field hint, a panel. -->
+    <!-- Keep essential information available outside tooltips for touch users. -->
     <VTooltip text="Discard the draft">
       <template #default="{ triggerProps }">
         <VIconButton

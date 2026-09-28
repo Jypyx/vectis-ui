@@ -8,15 +8,11 @@ import {
   video_file as videoFile,
 } from 'vectis-ui/icons'
 
-// In multiple mode the value is a list, and it is never mutated in place: each change hands
-// back a new array, which wakes a watcher bound to it.
 const kinds = ref(['images', 'video'])
 </script>
 
 <template>
   <div class="demo">
-    <!-- Several items at once, which turns the exclusive choice into a set of filters.
-         Clicking a chosen item gives it up again. -->
     <VToggle v-model="kinds" multiple item-variant="outline" selected-icon-filled label="Media">
       <VToggleItem value="images" label="Images" :icon-start="image" />
       <VToggleItem value="video" label="Video" :icon-start="videoFile" />

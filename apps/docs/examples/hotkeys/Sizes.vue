@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { VHotkeys, VTypography, type HotkeysSize } from 'vectis-ui'
 
-/* Two sizes only. A shortcut is chrome beside other text, so `xs` is the default and
-   `sm` is already as large as one usefully gets. */
 const SIZES: HotkeysSize[] = ['xs', 'sm']
 </script>
 

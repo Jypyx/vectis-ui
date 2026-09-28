@@ -9,9 +9,6 @@ const page = ref(3)
 
 <template>
   <div class="column">
-    <!-- Alignment only says something in responsive mode, where the nav takes the whole
-         width it is given. Outside it the row has its own intrinsic width and sits
-         wherever its parent puts it. -->
     <div v-for="align in aligns" :key="align" class="box">
       <VPagination
         v-model="page"

@@ -19,7 +19,6 @@ const rows = [
 
 type Project = (typeof rows)[number]
 
-/* What comes back are the identities `rowKey` names, never the row objects. */
 const selected = ref<DataTableRowId[]>(['Atlas'])
 
 const selectRowLabel = (row: Project) => `Select ${row.name}`

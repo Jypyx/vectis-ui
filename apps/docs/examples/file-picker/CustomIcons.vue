@@ -5,8 +5,7 @@ import { attach_file as attachFile, description } from 'vectis-ui/icons'
 
 const files = ref<File[]>([])
 
-/* The files are built here and not at setup: `File` is a browser type, and this page is
-   rendered on the server before it ever reaches one. */
+/* Create sample File objects after mounting for server rendering. */
 onMounted(() => {
   files.value = [
     new File([new Uint8Array(24_000)], 'styles.css', { type: 'text/css' }),

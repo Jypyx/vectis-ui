@@ -6,10 +6,6 @@ import { VButton, VSeparator, VTypography } from 'vectis-ui'
   <div class="stack">
     <VButton variant="outline" tone="neutral">Continue with a passkey</VButton>
 
-    <!-- The component takes no content: a divider carrying a word is a heading with a
-         rule on either side of it, so it is built rather than configured. The rules
-         are told to grow, the base one being `flex: none`; a consumer rule is
-         unlayered, so it wins over that. -->
     <div class="divider">
       <VSeparator class="line" />
       <VTypography variant="overline" tone="muted">or</VTypography>

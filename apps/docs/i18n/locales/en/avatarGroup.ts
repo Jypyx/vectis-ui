@@ -1,46 +1,41 @@
 export default {
   title: 'Avatar group',
-  lead: 'Avatars stacked into a row, each separated from the next by a ring in the page colour. Past a limit of your choosing, the rest are summed up as a single disc.',
-
+  lead: '<code>VAvatarGroup</code> overlaps avatars in a row and can group excess avatars into a count.',
   examples: {
     overflow: {
       title: 'Overflow',
-      text: '<code>max</code> sets how many avatars are drawn before the rest are summed up as <code>+N</code> on a last disc.',
+      text: '<code>max</code> limits visible avatars. The remaining count appears as <code>+N</code>.',
     },
     size: {
       title: 'Size on the group',
-      text: '<code>size</code> on the group applies to every avatar inside, the overflow disc included. An avatar that sets a size of its own keeps it.',
+      text: 'The group’s <code>size</code> applies unless an avatar sets its own.',
     },
     compact: {
       title: 'Compact',
-      text: '<code>compact</code> on the group takes 4px off every avatar in the row.',
+      text: '<code>compact</code> reduces every avatar’s diameter.',
     },
     customOverflow: {
       title: 'Custom overflow',
-      text: 'The <code>#overflow</code> slot replaces the <code>+N</code> disc and receives <code>count</code>, the number of avatars being hidden.',
+      text: 'The <code>overflow</code> slot receives the hidden avatar <code>count</code>.',
     },
     tooltips: {
       title: 'With tooltips',
-      text: 'Each avatar can be wrapped in a VTooltip. The trigger has to be focusable, hence <code>clickable</code> here.',
+      text: 'Make tooltip avatars focusable with <code>clickable</code> or a link.',
     },
   },
-
   api: {
     VAvatarGroup: {
       props: {
-        max: 'How many avatars to show before the remaining ones are summed up as a single "+X" disc. Left out, or set to 0, every avatar is shown.',
-        size: 'The size given to the avatars inside the group. An avatar that sets a size of its own keeps it.',
-        compact:
-          'Applies the reduced density to every avatar inside. Unlike the size it is cumulative: an avatar cannot opt back out of a compact group.',
-        ringColor:
-          'The colour of the ring drawn around each disc. It defaults to the page background, which is what makes the ring read as a gap between two avatars.',
+        max: 'Maximum visible avatars before the count. Omitted or 0 shows all avatars.',
+        size: 'Default avatar size; individual avatars can override it.',
+        compact: 'Reduces every avatar’s diameter; children cannot opt out.',
+        ringColor: 'Ring colour between avatars. Defaults to the page background.',
         label:
-          'The accessible name of the group, such as "Project members": a row of faces does not say on its own who these people are. An <code>aria-label</code> or <code>aria-labelledby</code> of yours wins over it.',
+          'Accessible group name. Consumer <code>aria-label</code> or <code>aria-labelledby</code> takes precedence.',
       },
       slots: {
-        default: 'The VAvatars to stack.',
-        overflow:
-          'Replaces the "+X" disc standing for the avatars beyond <code>max</code>. It receives <code>count</code>, the number being hidden.',
+        default: 'Avatars to group.',
+        overflow: 'Content replacing the overflow count. Receives <code>count</code>.',
       },
     },
   },

@@ -3,9 +3,6 @@ import { VButton, toast } from 'vectis-ui'
 </script>
 
 <template>
-  <!-- A duration of 0 disarms the countdown: the notification then stays until it is
-       dismissed. Reserve it for something the reader has to see, a failure they can
-       act on, and leave the close cross on so there is a way out. -->
   <VButton
     variant="outline"
     tone="neutral"

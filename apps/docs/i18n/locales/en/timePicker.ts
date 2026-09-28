@@ -1,56 +1,49 @@
 export default {
   title: 'Time picker',
-  lead: 'An inline clock face, the hour and minute counterpart of VDatePicker. Its value is always a 24-hour <code>HH:mm</code> string, whichever clock is displayed.',
-
+  lead: '<code>VTimePicker</code> is an inline clock for selecting hours and minutes. Its model uses 24-hour <code>HH:mm</code> values.',
   examples: {
     minuteStep: {
       title: 'Minute step',
-      text: '<code>minuteStep</code> is the interval the hand snaps to and the arrow keys move by, on the minutes alone. The face prints only the minutes the step reaches.',
+      text: '<code>minuteStep</code> sets the pointer and keyboard step. Only reachable minutes appear on the face.',
     },
     restrictions: {
       title: 'What may be chosen',
-      text: '<code>min</code> and <code>max</code> are two inclusive bounds written as canonical <code>HH:mm</code> strings, and <code>allowedHours</code> and <code>allowedMinutes</code> each take the list of values they allow or a rule answering for one. What they rule out is left off the face, and an hour is closed only when nothing at all is left in it.',
+      text: 'Use time bounds and allowed-hour or allowed-minute rules to restrict choices. An hour is unavailable when it has no allowed minute.',
     },
     hourFormat: {
       title: 'Hour format',
-      text: "<code>format</code> picks between a 12-hour face, one ring of numerals with the AM and PM pair beside them, and a 24-hour face, two rings and no pair. Left out, the reader's language decides. The value is the same either way.",
+      text: '<code>12h</code> shows one hour ring with AM/PM controls; <code>24h</code> shows two rings. The model always uses 24 hours.',
     },
     localization: {
       title: 'Localization',
-      text: '<code>locale</code> decides the clock here: a language counting in twelve hours gets the single ring, one counting in twenty-four the double ring. It takes precedence over the global locale and falls back to it. The wording comes from the dictionary.',
+      text: 'The locale sets the hour cycle unless <code>format</code> overrides it.',
     },
   },
-
   api: {
     VTimePicker: {
       props: {
-        format:
-          "Whether the face shows a 12- or a 24-hour clock. Left out, the reader's language decides, which is almost always what one wants.",
+        format: '12- or 24-hour display. Defaults to the locale; the model always uses 24 hours.',
         locale:
-          "A BCP 47 locale, which decides the clock. It takes precedence over the design system's global locale and falls back to it, which is why it has no literal default.",
-        minuteStep:
-          'The interval the minutes snap to, both when dragging and with the arrow keys. The face prints only the minutes it can reach, so a step of a quarter of an hour marks four.',
-        min: 'The earliest time that can be chosen, inclusive, as a canonical 24-hour string. The face leaves off what falls outside it, the way it leaves off the minutes the step cannot reach.',
-        max: 'The latest time that can be chosen, inclusive, written like min.',
-        allowedHours:
-          'Which hours can be chosen: the list of them, or a rule answering for one. The hour a rule is handed is always the 24-hour one, whichever clock is on display. The hours it leaves out are not printed.',
-        allowedMinutes:
-          'Which minutes can be chosen: the list of them, or a rule answering for one. The minutes it leaves out are not printed.',
-        disabled:
-          'Makes the whole clock unusable: the hand cannot be moved, the half-day cannot be changed, and everything greys out through the colour tokens.',
+          'BCP 47 locale for time display. Overrides the global locale; <code>format</code> takes precedence.',
+        minuteStep: 'Minute step for the clock and arrow keys.',
+        min: 'Earliest allowed time, inclusive, in <code>HH:mm</code> format.',
+        max: 'Latest allowed time, inclusive, in <code>HH:mm</code> format.',
+        allowedHours: 'Allowed hours: an array or predicate receiving a 24-hour value.',
+        allowedMinutes: 'Allowed minutes: an array or predicate.',
+        disabled: 'Disables interaction.',
         readonly:
-          'Shows the time without letting it be changed. The face keeps its focus and the two numerals still switch between the hour and the minutes, so the value can be read in full.',
+          'Prevents value changes. The face remains focusable and the hour/minute display can still be switched.',
         label:
-          'The accessible name of the whole clock, its two numerals and its face together. It falls back to the dictionary, and a consumer <code>aria-label</code> wins over it. The face keeps its own name, which says whether the hand is on the hour or the minutes.',
+          'Accessible name of the clock. Defaults to the dictionary; consumer <code>aria-label</code> takes precedence.',
         vModel:
-          'The time, always as a 24-hour string whatever clock is displayed, so you never have to know which one the language uses. With no value the clock shows midnight rather than the current time: reading the clock while rendering would make a page drawn on a server disagree with the same page in the browser.',
+          'Time in 24-hour <code>HH:mm</code> format, or <code>null</code>. An empty clock shows midnight.',
       },
       events: {
         confirm:
-          "The reader has finished, with the time as it stands: the minutes were settled from the keyboard. Releasing a pointer is how one stops adjusting the hand, not how one confirms, so it does not fire. Where VDatePicker's <code>select</code> says a date was chosen, this says the choosing is over.",
+          'Keyboard confirmation of the minute selection. Receives the current time; releasing the pointer does not emit it.',
       },
       slots: {
-        footer: 'A strip at the foot of the clock, the place for actions such as Cancel and OK.',
+        footer: 'Actions below the clock.',
       },
     },
   },

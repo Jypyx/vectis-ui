@@ -1,60 +1,54 @@
 export default {
   title: 'Progression circulaire',
-  lead: "Un anneau qui se remplit à mesure que quelque chose avance, ou tourne en continu quand il n'y a aucun chiffre à rapporter. Sa géométrie est en CSS pur : changer sa taille ne recalcule rien en JavaScript.",
-
+  lead: '<code>VProgressCircular</code> affiche la progression d’une tâche sous forme d’anneau, ou d’animation si elle n’est pas mesurable.',
   examples: {
     value: {
       title: 'Valeur',
-      text: "<code>value</code> est l'avancement, face à un <code>max</code> qui dit ce qui compte comme terminé. Tout ce qui sort de la plage y est ramené.",
+      text: 'Définissez <code>value</code> et <code>max</code> pour indiquer la progression. Les valeurs sont limitées à cet intervalle.',
     },
     indeterminate: {
       title: 'Indéterminé',
-      text: "<code>indeterminate</code> sert à une attente qui ne se mesure pas : l'anneau tourne et la valeur est ignorée. Là où un indicateur tient lieu d'icône plutôt que de rendre compte d'une tâche, VSpinner est le plus petit objet à prendre.",
+      text: '<code>indeterminate</code> anime l’anneau sans pourcentage. Utilisez <code>VSpinner</code> pour un indicateur de chargement de la taille d’une icône.',
     },
     tones: {
       title: 'Tonalités',
-      text: "<code>tone</code> dit ce que signifie la progression, sous forme de couleur. Il y en a cinq plutôt que les trois d'un bouton, un anneau rendant compte d'un état plutôt que d'amorcer une action.",
+      text: '<code>tone</code> définit la couleur sémantique.',
     },
     customColors: {
       title: 'Couleurs personnalisées',
-      text: "<code>color</code> remplace le ton, en hexadécimal, en nom CSS ou en <code>oklch()</code>. La nuance de l'anneau non rempli en est dérivée face au thème.",
+      text: '<code>color</code> remplace le ton par une couleur CSS.',
     },
     sizeAndThickness: {
       title: 'Diamètre et épaisseur',
-      text: "<code>size</code> et <code>thickness</code> sont le diamètre et l'anneau, toujours en pixels qu'ils soient donnés en nombre ou en chaîne numérique, et indépendants l'un de l'autre.",
+      text: '<code>size</code> définit le diamètre et <code>thickness</code> l’épaisseur, tous deux en pixels.',
     },
     shape: {
       title: 'Forme',
-      text: "<code>shape</code> dit si les extrémités de l'arc dessiné sont arrondies ou coupées net. Cela se voit sur un anneau épais et presque pas sur un anneau fin.",
+      text: '<code>shape</code> choisit des extrémités arrondies ou carrées.',
     },
     customContent: {
       title: 'Du contenu au centre',
-      text: "<code>showValue</code> écrit le pourcentage dans le creux de l'anneau, dimensionné en proportion du diamètre. Le slot par défaut le remplace par un contenu à vous et reçoit la valeur, le max et le pourcentage qui en découle.",
+      text: '<code>showValue</code> affiche le pourcentage au centre. Le slot par défaut le remplace et reçoit <code>value</code>, <code>max</code> et <code>percent</code>.',
     },
   },
-
   api: {
     VProgressCircular: {
       props: {
         label:
-          "Ce qui progresse, en mots, pour les lecteurs d'écran. Rien ne s'affiche à l'écran, et le dictionnaire du design system sert de repli ; un <code>aria-label</code> ou un <code>aria-labelledby</code> à vous l'emporte sur lui.",
-        value: "Où en est la progression. Tout ce qui sort de l'intervalle y est ramené.",
-        max: "Ce qui compte comme terminé. L'autre extrémité est toujours zéro.",
-        indeterminate:
-          "Dit que la progression ne peut pas être mesurée : l'anneau tourne en continu et la valeur est ignorée.",
-        tone: 'Ce que la progression signifie, exprimé en couleur.',
-        color:
-          "Une couleur à vous, en hexadécimal, en nom CSS ou en <code>oklch()</code>, qui remplace le ton. La nuance de l'anneau non rempli en est dérivée face au thème, elle suit donc les deux.",
-        size: "Le diamètre, toujours EN PIXELS : <code>96</code> et <code>'96'</code> donnent tous deux 96px.",
-        thickness:
-          "L'épaisseur de l'anneau, toujours EN PIXELS : <code>8</code> et <code>'8'</code> donnent tous deux 8px.",
-        shape: "Si les extrémités de l'arc dessiné sont arrondies ou coupées net.",
-        showValue:
-          "Écrit le pourcentage au milieu de l'anneau. C'est ignoré tant que la progression n'est pas mesurable, faute de chiffre à écrire.",
+          'Nom accessible de la tâche. Utilise le dictionnaire par défaut ; les attributs ARIA de nommage fournis sont prioritaires.',
+        value: 'Valeur de progression, limitée entre 0 et <code>max</code>.',
+        max: 'Valeur représentant la fin de la tâche.',
+        indeterminate: 'Anime sans valeur mesurable. Ignore <code>value</code>.',
+        tone: 'Ton de couleur.',
+        color: 'Couleur CSS personnalisée remplaçant le ton.',
+        size: 'Diamètre de l’anneau en pixels, nombre ou chaîne numérique.',
+        thickness: 'Épaisseur en pixels, nombre ou chaîne numérique.',
+        shape: 'Extrémités arrondies ou carrées.',
+        showValue: 'Affiche le pourcentage. Ignoré en mode indéterminé.',
       },
       slots: {
         default:
-          "Ce qu'il faut mettre au milieu de l'anneau à la place du pourcentage : un nombre de fichiers, une icône, un chiffre abrégé.",
+          'Contenu central remplaçant le pourcentage. Reçoit <code>value</code>, <code>max</code> et <code>percent</code>.',
       },
     },
   },

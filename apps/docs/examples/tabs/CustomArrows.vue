@@ -8,10 +8,6 @@ const tab = ref('Paris')
 </script>
 
 <template>
-  <!-- The default icons follow the orientation, chevrons across and carets down, so
-       there is nothing to set on either axis. Replace them when the surrounding design
-       asks for another glyph; the labels are what a screen reader reads, and they fall
-       back to the dictionary in the current language. -->
   <div class="narrow">
     <VTabs
       v-model="tab"

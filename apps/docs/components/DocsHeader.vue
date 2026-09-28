@@ -19,18 +19,13 @@ const homePath = computed(() => localePath('/'))
  * comparisons.
  */
 const baseName = computed(() => {
-  // A vue-router name is typed `string | symbol`; the ones Nuxt derives from the file tree are
-  // always strings, and the guard is what states that rather than casting it away.
+  // Guard route names because vue-router also permits symbols.
   const name = routeBaseName(route)
   return typeof name === 'string' ? name : undefined
 })
 const isHome = computed(() => baseName.value === 'index')
 const isDocs = computed(() => baseName.value?.startsWith('docs') ?? false)
 
-/**
- * The whole of the "you are here": the current destination is a soft fill in the ACCENT, the
- * others are bare neutral.
- */
 const variantFor = (active: boolean) => (active ? 'soft' : 'ghost')
 const toneFor = (active: boolean) => (active ? 'accent' : 'neutral')
 

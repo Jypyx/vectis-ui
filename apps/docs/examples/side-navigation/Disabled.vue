@@ -8,9 +8,6 @@ import { description, image, table_chart as tableChart } from 'vectis-ui/icons'
     <VSideNavigation label="Workspace">
       <VSideNavigationItem href="#usage" :icon="description" current>Documents</VSideNavigationItem>
 
-      <!-- A disabled link stops leading anywhere and the arrow keys step over it. It
-           greys out through the colour tokens rather than through an opacity, so it
-           keeps its contrast against the sidebar. -->
       <VSideNavigationItem href="#usage" :icon="image" disabled>Media</VSideNavigationItem>
 
       <VSideNavigationItem :icon="tableChart" disabled>

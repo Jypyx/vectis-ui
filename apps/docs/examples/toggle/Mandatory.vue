@@ -8,10 +8,6 @@ const kinds = ref(['images'])
 
 <template>
   <div class="demo">
-    <!--
-      It is a guard and nothing more: it selects nothing on its own at the start, and a group
-      that begins empty stays empty until something is clicked.
-    -->
     <div class="row">
       <p class="caption">one choice</p>
       <VToggle v-model="period" mandatory item-variant="outline" label="Period">
@@ -21,7 +17,6 @@ const kinds = ref(['images'])
       </VToggle>
     </div>
 
-    <!-- With several, it is the last remaining one that cannot be given up. -->
     <div class="row">
       <p class="caption">several, the last one held</p>
       <VToggle v-model="kinds" multiple mandatory item-variant="outline" label="Media">

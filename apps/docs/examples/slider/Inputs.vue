@@ -8,11 +8,7 @@ const budget = ref<[number, number]>([20, 60])
 
 <template>
   <div class="demo">
-    <!--
-      What is typed is committed when the field is left or on Enter, never as it is typed, or
-      the 1 of 15 would be clamped before the 5 was pressed. An out of bounds entry is brought
-      back inside, an unreadable one puts the previous value back.
-    -->
+    <!-- Commit on blur or Enter to avoid clamping partially typed numbers. -->
     <VSlider v-model="volume" inputs="ends" label="Volume" />
     <VSlider v-model="budget" inputs="ends" range label="Budget" />
   </div>

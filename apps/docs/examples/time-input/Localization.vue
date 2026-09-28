@@ -2,8 +2,6 @@
 import { ref } from 'vue'
 import { VTimeInput } from 'vectis-ui'
 
-/* Nothing here is tabulated: the clock, the mask and the wording all come from the tag.
-   en-US and en-GB share every word and differ only in the clock they count on. */
 const locales = ref([
   { tag: 'en-US', label: 'en-US, twelve hours', time: '19:30' },
   { tag: 'en-GB', label: 'en-GB, the same words on a 24-hour clock', time: '19:30' },

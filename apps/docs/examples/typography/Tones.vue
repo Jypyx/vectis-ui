@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { VTypography, type TypographyTone } from 'vectis-ui'
 
-// `on-inverse` is left out of the loop: it only means anything against a dark ground,
-// so it is shown on one below.
+// Show on-inverse against an inverted surface.
 const tones: TypographyTone[] = [
   'default',
   'muted',
@@ -16,16 +15,10 @@ const tones: TypographyTone[] = [
 
 <template>
   <div class="demo">
-    <!--
-      That is what lets the same component sit inside a coloured toast or on an inverted surface
-      without being told which one it is on.
-    -->
     <VTypography v-for="tone in tones" :key="tone" :tone="tone">
       {{ tone }}: pack my box with five dozen jugs.
     </VTypography>
 
-    <!-- The one tone that names its ground rather than its meaning, for text the
-         inherited colour would not survive. -->
     <div class="inverse">
       <VTypography tone="on-inverse">on-inverse: pack my box with five dozen jugs.</VTypography>
     </div>

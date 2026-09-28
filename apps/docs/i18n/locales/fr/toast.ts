@@ -1,57 +1,51 @@
 export default {
   title: 'Notification',
-  lead: "Des notifications levées depuis n'importe où dans le code en appelant <code>toast()</code>, et affichées par un seul VToaster monté une fois. Plusieurs peuvent s'empiler, chacune avec son propre compte à rebours.",
-
+  lead: 'Appelez <code>toast()</code> pour afficher des notifications via un unique <code>VToaster</code> monté. Les notifications s’empilent et se ferment indépendamment.',
   examples: {
     variants: {
       title: 'Variantes et tonalités',
-      text: "<code>tone</code> dit ce que signifie la notification, en cinq valeurs, et décide de l'icône qu'elle prend quand aucune n'est donnée. <code>variant</code> est l'intensité avec laquelle ce ton est peint, teinté ou plein.",
+      text: '<code>tone</code> définit la couleur et l’icône par défaut. <code>variant</code> choisit un style atténué ou plein.',
     },
     contents: {
       title: 'Titre et message',
-      text: "<code>message</code> porte la notification, et <code>title</code> l'encadre en quelques mots quand le message seul ne dirait pas de quoi il retourne.",
+      text: '<code>message</code> est le texte de la notification. Ajoutez un <code>title</code> facultatif.',
     },
     icons: {
       title: 'Icônes',
-      text: 'Sans elle, <code>icon</code> vient du ton. En nommer une la remplace, et passer <code>false</code> la retire tout à fait.',
+      text: 'Remplacez l’<code>icon</code> du ton, ou définissez-la sur <code>false</code> pour la masquer.',
     },
     width: {
       title: 'Largeur',
-      text: "<code>width</code> accepte n'importe quelle longueur CSS et remplace le plancher et le plafond de la carte. Elle ne dépasse jamais la largeur de la fenêtre.",
+      text: '<code>width</code> définit la largeur de la carte dans les limites de la zone visible.',
     },
     placements: {
       title: 'Placements',
-      text: "<code>placement</code> pose la notification dans l'un des six coins, chacun ayant sa propre pile. Posé sur le VToaster, il est la valeur par défaut de toutes les notifications ; passé au moment d'en lever une, il n'appartient qu'à elle.",
+      text: 'Définissez le <code>placement</code> par défaut sur <code>VToaster</code> ou remplacez-le pour une notification.',
     },
     stacking: {
       title: 'Empilement',
-      text: "Les notifications s'empilent au lieu de se remplacer, chacune gardant son propre compte à rebours, si bien qu'elles partent au rythme de leur propre horloge.",
+      text: 'Chaque notification conserve son propre délai de fermeture.',
     },
     autoDismiss: {
       title: 'Combien de temps elle reste',
-      text: "<code>duration</code> est la durée d'affichage d'une notification, cinq secondes par défaut, et chacune peut demander la sienne. Le compte à rebours se suspend tant que le pointeur repose quelque part sur la pile et tant que le clavier y est, et ne repart que lorsque les deux sont partis.",
+      text: '<code>duration</code> définit la durée en millisecondes. Les délais sont suspendus tant que le pointeur ou le focus clavier reste dans la pile.',
     },
     persistent: {
       title: 'Notifications persistantes',
-      text: "Une <code>duration</code> de 0 désarme le compte à rebours et la notification reste jusqu'à ce qu'on la retire. Laissez la croix de fermeture pour qu'il y ait une sortie.",
+      text: '<code>duration: 0</code> conserve la notification ouverte. Gardez un bouton de fermeture ou fournissez une autre action.',
     },
     dismissing: {
       title: 'Renvoyer une notification',
-      text: "<code>hideClose</code> retire la croix de fermeture. <code>toast</code> rend un identifiant et <code>dismissToast</code> retire cette notification, ou toutes d'un coup lorsqu'il est appelé sans argument.",
+      text: '<code>toast()</code> renvoie un identifiant. Transmettez-le à <code>dismissToast()</code> pour fermer cette notification, ou omettez-le pour tout fermer. <code>hideClose</code> masque le bouton de fermeture.',
     },
   },
-
   api: {
     VToaster: {
       props: {
-        placement:
-          "Dans quel coin les notifications apparaissent, sauf si l'une d'elles en demande un autre.",
-        duration:
-          "Combien de temps une notification reste, en millisecondes, sauf si elle demande autre chose. Une notification à qui l'on donne 0 reste jusqu'à ce qu'elle soit fermée.",
-        closeLabel:
-          'Ce que fait la croix de fermeture, en mots. Elle retombe sur le dictionnaire du design system.',
-        label:
-          "Ce que les lecteurs d'écran annoncent pour les zones de notification elles-mêmes, qui sont des points de repère de la page. Il retombe sur le dictionnaire du design system.",
+        placement: 'Position des notifications par défaut.',
+        duration: 'Durée par défaut en millisecondes. 0 désactive la fermeture automatique.',
+        closeLabel: 'Nom accessible du bouton de fermeture. Utilise le dictionnaire par défaut.',
+        label: 'Nom accessible de la zone de notifications. Utilise le dictionnaire par défaut.',
       },
     },
   },

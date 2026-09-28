@@ -8,8 +8,6 @@ const predicate = ref(1)
 
 <template>
   <div class="column">
-    <!-- A list, for a handful of known pages. The controls STEP OVER them rather than
-         stopping at one: from page 1, next lands on 5. -->
     <div class="row">
       <VPagination
         v-model="listed"
@@ -22,8 +20,6 @@ const predicate = ref(1)
       <VTypography variant="caption" tone="muted">A list. Now on page {{ listed }}</VTypography>
     </div>
 
-    <!-- A predicate, when the rule is easier to write than to enumerate. When nothing
-         is left to step to, the control disables itself. -->
     <div class="row">
       <VPagination
         v-model="predicate"

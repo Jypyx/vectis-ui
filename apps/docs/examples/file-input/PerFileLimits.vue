@@ -5,8 +5,6 @@ import { VFileInput, type FileRejection } from 'vectis-ui'
 const files = ref<File[]>([])
 const refused = ref<FileRejection[]>([])
 
-/* One event per file, so a batch drop is reported precisely rather than as a single
-   "something went wrong". The wording is yours: the component never writes it. */
 const reasons: Record<string, string> = {
   type: 'wrong kind of file',
   size: 'too big on its own',

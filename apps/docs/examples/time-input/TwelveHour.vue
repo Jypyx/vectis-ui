@@ -2,8 +2,6 @@
 import { ref } from 'vue'
 import { VTimeInput } from 'vectis-ui'
 
-/* The value stays a 24-hour string in all three: 19:00 is what the model holds while the
-   field reads 7:00 PM. */
 const typed = ref<string | null>('07:00')
 const onTheClock = ref<string | null>('19:00')
 const fromList = ref<string | null>('19:30')

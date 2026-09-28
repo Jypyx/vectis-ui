@@ -4,11 +4,6 @@ import { VButton, snackbar } from 'vectis-ui'
 
 <template>
   <div class="demo">
-    <!--
-      There is at most one bar. Raising a second replaces the first on the spot and restarts the
-      countdown from the top, which separates a confirmation from a notification: two states can
-      be true at once, but only the last action a reader took is worth offering to undo.
-    -->
     <VButton
       variant="outline"
       tone="neutral"

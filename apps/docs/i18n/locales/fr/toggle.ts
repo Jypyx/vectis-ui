@@ -1,114 +1,109 @@
 export default {
   title: 'Groupe à bascule',
-  lead: 'Un groupe de boutons piloté par une seule valeur : un contrôle segmenté pour un choix, ou un jeu de filtres pour plusieurs. Chaque item est un VButton, donc les tons et les variantes sont ceux que vous connaissez déjà.',
-
+  lead: '<code>VToggle</code> regroupe des boutons <code>VToggleItem</code> pour sélectionner une ou plusieurs valeurs avec <code>v-model</code>.',
   examples: {
     variants: {
-      title: 'Variantes et tonalités',
-      text: "<code>itemVariant</code> peint les éléments qui ne sont pas choisis, transparents en <code>ghost</code> et contourés en <code>outline</code>. <code>tone</code> colore l'élément choisi et rien d'autre, avec les trois valeurs qu'offre un bouton.",
+      title: 'Variantes et tons',
+      text: '<code>itemVariant</code> définit le style des éléments non sélectionnés. <code>tone</code> s’applique aux éléments sélectionnés ; les autres restent neutres.',
     },
     selectedVariants: {
-      title: 'Comment la sélection est dessinée',
-      text: "<code>selectedVariant</code> est la façon dont l'élément choisi est peint dans le ton du groupe : plein en <code>solid</code>, teinté en <code>soft</code>, ou par la seule couleur de son texte en <code>ghost</code>.",
+      title: 'Style de la sélection',
+      text: '<code>selectedVariant</code> définit le style de la sélection : <code>solid</code>, <code>soft</code> ou <code>ghost</code>.',
     },
     sizes: {
       title: 'Tailles',
-      text: "<code>size</code> reprend l'échelle partagée par tous les contrôles, de 24 à 56 pixels, et <code>compact</code> lui retire 4px. Elle se pose une fois sur le groupe.",
+      text: '<code>size</code> définit la taille de tous les éléments. <code>compact</code> réduit leur hauteur.',
     },
     itemContent: {
-      title: 'Ce que porte un item',
-      text: "Un élément accepte un libellé, une icône à chaque extrémité, ou le slot par défaut pour ce qu'une chaîne ne peut pas porter. Un élément réduit à son icône demande toujours un <code>label</code>, qui est alors son nom accessible.",
+      title: 'Contenu des éléments',
+      text: 'Utilisez <code>label</code> ou le slot par défaut pour le texte visible, et <code>iconStart</code> ou <code>iconEnd</code> pour les icônes. Donnez un <code>aria-label</code> aux éléments sans texte visible.',
     },
     filledIcons: {
       title: 'Icônes pleines',
-      text: "<code>selectedIconFilled</code> dessine l'icône de début de l'élément choisi dans sa forme pleine. <code>iconFilled</code> posé sur un élément remplit ses icônes quel que soit le choix. Rien n'arrive à une icône qui n'a pas de dessin plein.",
+      text: '<code>selectedIconFilled</code> affiche l’icône de début de l’élément sélectionné en version pleine. La prop <code>iconFilled</code> d’un élément fait de même pour ses deux icônes, quelle que soit la sélection, si cette version existe.',
     },
     detached: {
-      title: 'Détaché',
-      text: '<code>detached</code> laisse les éléments en boutons séparés avec un écart entre eux, au lieu de les joindre en un contrôle segmenté.',
+      title: 'Éléments séparés',
+      text: '<code>detached</code> sépare les éléments par un espace.',
     },
     seamless: {
-      title: 'Sans coutures',
-      text: '<code>seamless</code> retire les traits dessinés entre deux éléments : la rangée se lit alors comme un cadre unique portant une surbrillance qui se déplace. Il est sans effet sous <code>detached</code>.',
+      title: 'Sans séparateurs',
+      text: '<code>seamless</code> retire les séparateurs internes. Sans effet avec <code>detached</code>.',
     },
     fullWidth: {
       title: 'Pleine largeur',
-      text: '<code>fullWidth</code> étire la rangée sur toute la largeur de son parent et donne à chaque élément une part égale de cette largeur.',
+      text: '<code>fullWidth</code> occupe toute la largeur du parent. Dans un groupe horizontal, les éléments ont la même largeur.',
     },
     elevated: {
-      title: 'Surélevé',
-      text: "<code>elevated</code> soulève la rangée, l'ombre appartenant à la rangée plutôt qu'à chaque élément.",
+      title: 'Avec une ombre',
+      text: '<code>elevated</code> ajoute une ombre au groupe, ou à chaque élément lorsqu’ils sont séparés.',
     },
     orientation: {
-      title: 'Orientation',
-      text: "<code>orientation</code> à <code>vertical</code> empile les éléments vers le bas, les jonctions et les flèches suivant l'axe.",
+      title: 'Orientation et clavier',
+      text: '<code>orientation="vertical"</code> dispose les éléments en colonne. Les flèches déplacent le focus sur cet axe ; Home et End ciblent le premier et le dernier élément non désactivé. Chaque élément non désactivé reste accessible par Tab. Espace ou Entrée modifie la sélection.',
     },
     multiple: {
-      title: 'Choisir plusieurs items',
-      text: "<code>multiple</code> permet de choisir plusieurs éléments à la fois, ce qui fait de la valeur une liste. Cliquer un élément choisi le rend, et le tableau n'est jamais muté sur place.",
+      title: 'Sélection multiple',
+      text: '<code>multiple</code> autorise plusieurs sélections et utilise un tableau pour <code>v-model</code>. Activez à nouveau un élément sélectionné pour le désélectionner.',
     },
     mandatory: {
-      title: 'Garder une sélection',
-      text: "<code>mandatory</code> refuse d'abandonner le dernier élément choisi. C'est une garde et rien de plus : il ne sélectionne rien de lui-même.",
+      title: 'Conserver une sélection',
+      text: '<code>mandatory</code> empêche de désélectionner le dernier élément sélectionné. Définissez la sélection initiale avec <code>v-model</code>.',
     },
     disabled: {
       title: 'Désactivé',
-      text: '<code>disabled</code> vaut pour tout le groupe, où rien ne répond et où aucun élément ne prend le focus, ou pour un seul élément, que les flèches enjambent alors. Les deux se grisent par les tokens de couleur.',
+      text: 'Désactivez le groupe ou un élément avec <code>disabled</code>. Les éléments désactivés ne reçoivent pas le focus et sont ignorés par la navigation avec les flèches.',
     },
   },
-
   api: {
     VToggle: {
       props: {
-        multiple:
-          'Permet de choisir plusieurs items à la fois, ce qui fait de la valeur une liste.',
+        multiple: 'Autorise plusieurs sélections. Utilisez un tableau pour <code>v-model</code>.',
         mandatory:
-          "Refuse d'abandonner le dernier item choisi, pour que quelque chose reste toujours sélectionné une fois que ça l'a été. C'est un garde-fou et rien de plus : il ne sélectionne rien de lui-même au départ.",
-        detached:
-          'Laisse les items en boutons séparés avec un écart entre eux. Sans lui, ils sont assemblés en un seul contrôle segmenté.',
+          'Empêche de désélectionner le dernier élément sélectionné. Ne choisit aucune valeur initiale et n’empêche pas les modifications externes de <code>v-model</code>.',
+        detached: 'Sépare les éléments par un espace.',
         seamless:
-          'Retire les traits entre les items assemblés, si bien que la rangée se lit comme un cadre unique plutôt que comme des segments. Sans effet sous <code>detached</code>, où les items sont déjà des boutons séparés.',
-        orientation: 'Si les items courent en travers de la page ou de haut en bas.',
+          'Retire les séparateurs internes et conserve la bordure extérieure. Sans effet avec <code>detached</code>.',
+        orientation:
+          'Disposition en ligne horizontale ou en colonne verticale. Définit le sens de navigation avec les flèches.',
         fullWidth:
-          'Étire la rangée sur toute la largeur de son parent, chaque item en prenant une part égale, aux conditions de la prop de VButtonGroup.',
+          'Occupe toute la largeur du parent. Les éléments horizontaux ont la même largeur, mais peuvent déborder si leur contenu est trop large.',
         itemVariant:
-          "Comment sont dessinés les items non sélectionnés. Ce que prend le sélectionné, c'est <code>selectedVariant</code>. Elle porte le nom des items parce que c'est ce qu'elle peint : sur VTabs et VDataTable, <code>variant</code> nomme la décoration du cadre.",
+          'Style visuel des éléments non sélectionnés : <code>ghost</code> ou <code>outline</code>.',
         selectedVariant:
-          "Comment l'item sélectionné est dessiné, dans le ton du groupe : plein avec <code>solid</code>, teinté avec <code>soft</code>, ou la couleur de son seul texte avec <code>ghost</code>.",
-        tone: 'La couleur que prend un item sélectionné. Les autres restent neutres.',
-        size: "La hauteur des items, tirée de l'échelle partagée par tous les contrôles.",
-        compact: 'Retire 4px à la hauteur de chaque item.',
-        elevated:
-          "Soulève la rangée, aux conditions de la prop de VButtonGroup : l'ombre appartient à la rangée et non à chaque item, ce qui garde les joints nets.",
-        disabled: 'Rend tout le groupe inutilisable.',
+          'Style visuel des éléments sélectionnés : <code>solid</code>, <code>soft</code> ou <code>ghost</code>.',
+        tone: 'Ton des éléments sélectionnés. Les autres restent neutres.',
+        size: 'Taille de tous les éléments.',
+        compact: 'Réduit la hauteur des éléments.',
+        elevated: 'Ajoute une ombre au groupe, ou à chaque élément avec <code>detached</code>.',
+        disabled: 'Désactive tous les éléments et les retire de la navigation par Tab.',
         selectedIconFilled:
-          "Dessine l'icône de l'item sélectionné dans sa forme pleine, une façon courante de renforcer qu'il est celui en vigueur.",
+          'Demande une icône de début pleine pour les éléments sélectionnés lorsqu’elle existe. Sans effet sur les icônes de fin ou le contenu des slots.',
         label:
-          "Ce que les lecteurs d'écran annoncent pour le groupe, « Alignement du texte », « Filtres ». Vivement recommandé : aucune valeur par défaut ne pourrait dire à quoi sert un groupe de boutons.",
+          'Nom accessible du groupe. Fournissez cette prop, un <code>aria-label</code> ou un <code>aria-labelledby</code>.',
         vModel:
-          "Ce qui est sélectionné, et sa FORME suit <code>multiple</code> : une valeur unique, ou <code>null</code> d'où elle part, quand un seul item peut être choisi, et un tableau quand plusieurs le peuvent. Une valeur nulle ou scalaire passée en mode multiple est lue comme une sélection vide. Le tableau n'est jamais muté sur place. Recliquer l'item sélectionné le désélectionne, sauf si <code>mandatory</code> est posé.",
+          'Valeur sélectionnée : une chaîne, un nombre ou <code>null</code> en sélection simple ; un tableau en sélection multiple. En mode multiple, une valeur scalaire ou <code>null</code> équivaut à une sélection vide. Activer un élément sélectionné le désélectionne, sauf si <code>mandatory</code> l’empêche.',
       },
       slots: {
-        default: 'Les items du groupe.',
+        default: 'Les composants <code>VToggleItem</code> du groupe.',
       },
     },
     VToggleItem: {
       props: {
         value:
-          "Ce que signifie le choix de cet item. C'est ce que porte la valeur du groupe quand l'item est sélectionné, et cela doit être unique au sein du groupe.",
-        label: 'Le libellé visible. Le slot par défaut le remplace.',
-        iconStart: 'Une icône avant le libellé.',
-        iconEnd:
-          "Une icône après le libellé. Elle ne passe pas à sa forme pleine sous l'effet du <code>selectedIconFilled</code> du groupe, qui nomme l'icône représentant l'item et non celle qui le suit ; <code>iconFilled</code> la remplit pour de bon.",
+          'Valeur écrite dans le <code>v-model</code> du groupe. Doit être unique au sein du groupe.',
+        label:
+          'Texte visible, remplacé par le slot par défaut. Pour les éléments sans texte visible, utilisez <code>aria-label</code>.',
+        iconStart: 'Icône avant le libellé, remplacée par le slot <code>#start</code>.',
+        iconEnd: 'Icône après le libellé, remplacée par le slot <code>#end</code>.',
         iconFilled:
-          "Rend <code>iconStart</code> et <code>iconEnd</code> dans leur forme pleine, que l'item soit sélectionné ou non. Le <code>selectedIconFilled</code> du groupe remplit toujours l'icône de début de l'item sélectionné quand celle-ci est omise.",
-        disabled:
-          "Rend cet item inutilisable : il ne répond plus, les flèches l'enjambent, et il se grise par les tokens de couleur.",
+          'Demande une version pleine des deux icônes, quelle que soit la sélection, lorsqu’elle existe. Sans effet sur le contenu des slots.',
+        disabled: 'Désactive cet élément et le retire de la navigation par Tab et par flèches.',
       },
       slots: {
-        default: "Le contenu de l'item, qui remplace la prop <code>label</code>.",
-        start: 'Un contenu avant le libellé, qui prend la place de <code>iconStart</code>.',
-        end: 'Un contenu après le libellé, qui prend la place de <code>iconEnd</code>.',
+        default: 'Contenu visible, remplaçant <code>label</code>.',
+        start: 'Contenu avant le libellé, remplaçant <code>iconStart</code>.',
+        end: 'Contenu après le libellé, remplaçant <code>iconEnd</code>.',
       },
     },
   },

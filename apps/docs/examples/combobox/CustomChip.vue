@@ -27,10 +27,7 @@ const types: ComboboxOption[] = [
       label="File types"
       placeholder="Add a type"
     >
-      <!--
-        `size` and `compact` are the step the field worked out for its chips, which cannot
-        be guessed from out here, and `remove` is what keeps the value removable.
-      -->
+      <!-- Forward size, compact and remove to preserve chip sizing and dismissal. -->
       <template #chip="{ option, label, remove, size, compact }">
         <VChip
           :icon-start="option?.icon"

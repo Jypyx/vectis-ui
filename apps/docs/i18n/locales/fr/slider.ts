@@ -1,100 +1,96 @@
 export default {
   title: 'Curseur',
-  lead: "Une valeur choisie en glissant, avec une poignée ou deux. Il est bâti sur de vrais champs range : le clavier, le formulaire et les technologies d'assistance viennent donc tous du navigateur.",
-
+  lead: '<code>VSlider</code> sélectionne un nombre ou un intervalle avec un ou deux curseurs. Des champs numériques facultatifs permettent une saisie précise.',
   examples: {
     range: {
       title: 'Intervalle',
-      text: '<code>range</code> offre deux poignées pour choisir une plage, ce qui fait de la valeur une paire. La paire reste ordonnée, une poignée emmenée au-delà de sa voisine la poussant devant elle, et chacune est annoncée comme le début ou la fin de la plage.',
+      text: '<code>range</code> utilise une paire ordonnée. Déplacer un curseur au-delà de l’autre les amène tous deux à la nouvelle valeur.',
     },
     minMax: {
       title: 'Minimum et maximum',
-      text: '<code>min</code> et <code>max</code> bornent la valeur, 0 et 100 sauf indication contraire, négatifs compris. Tout le reste se mesure par rapport à eux.',
+      text: '<code>min</code> et <code>max</code> définissent les bornes, y compris négatives.',
     },
     steps: {
       title: 'Pas',
-      text: "<code>step</code> est l'écart entre deux valeurs sur lesquelles la poignée peut s'arrêter, et le pas d'une flèche du clavier. <code>ticks</code> marque ces arrêts sur le rail, et au-delà de cinquante pas aucune graduation n'est dessinée.",
+      text: '<code>step</code> définit l’incrément. <code>ticks</code> affiche les repères jusqu’à 50 pas.',
     },
     textLabels: {
       title: 'Libellés texte',
-      text: "<code>labels</code> nomme les arrêts sous le rail, une entrée par pas, et c'est ce qu'annonce un lecteur d'écran à la place du nombre brut. Donner des libellés active les graduations de lui-même.",
+      text: '<code>labels</code> nomme chaque pas et fournit son texte de valeur accessible. Active aussi les repères.',
     },
     iconLabels: {
       title: 'Libellés icône',
-      text: "Un libellé peut porter une icône au lieu d'un mot, le libellé restant ce qui est annoncé et ce comme quoi la valeur est lue. Les deux formes se mélangent dans la même liste.",
+      text: 'Les libellés peuvent mélanger des chaînes et des objets contenant une icône et un texte accessible.',
     },
     tooltip: {
-      title: 'Montrer la valeur pendant le glissement',
-      text: "<code>tooltip</code> affiche une bulle au-dessus de la poignée pendant le glissement ou tant qu'elle a le focus clavier, une par poignée. Elle est décorative et masquée aux technologies d'assistance.",
+      title: 'Infobulle de valeur',
+      text: '<code>tooltip</code> affiche la valeur pendant le déplacement ou le focus clavier.',
     },
     inputs: {
-      title: 'Saisir la valeur exactement',
-      text: "<code>inputs</code> ajoute un champ numérique, un par extrémité en mode plage ; <code>ends</code> les place de part et d'autre du rail. Ce qui est saisi est validé à la sortie du champ ou sur Entrée, ramené dans les bornes et aligné sur le pas ; une saisie illisible remet la valeur précédente.",
+      title: 'Champs numériques',
+      text: '<code>inputs</code> ajoute des champs numériques. La perte du focus ou Entrée valide la valeur, limitée aux bornes et alignée sur le pas. Une saisie invalide restaure la valeur précédente.',
     },
     inputsPlacement: {
-      title: 'Placer les champs',
-      text: "<code>top</code> et <code>bottom</code> donnent aux champs une rangée à eux, au-dessus ou au-dessous du rail, qui prend alors toute la largeur. Chaque champ se tient au bord de la valeur qu'il porte, et les champs arrivent dans l'ordre de tabulation là où on les voit. Sur un curseur vertical, les deux deviennent ses côtés, <code>top</code> le côté de début et <code>bottom</code> le côté de fin. Avec <code>tooltip</code> et <code>top</code>, la bulle recouvre la rangée de champs pendant qu'on tient une poignée.",
+      title: 'Position des champs',
+      text: '<code>ends</code> place les champs aux extrémités de la piste ; <code>top</code> et <code>bottom</code> les placent au-dessus ou en dessous. Sur un slider vertical, ces positions deviennent les côtés de début et de fin.',
     },
     orientation: {
       title: 'Orientation',
-      text: "<code>orientation</code> à <code>vertical</code> dresse le curseur, la plus petite valeur en bas. Sa longueur vient d'un token et non de son conteneur.",
+      text: '<code>orientation="vertical"</code> place la valeur minimale en bas.',
     },
     disabled: {
       title: 'Désactivé',
-      text: "<code>disabled</code> grise le rail, la poignée et les graduations par les tokens de couleur, sort les poignées de l'ordre de tabulation et désactive les champs numériques avec elles.",
+      text: '<code>disabled</code> désactive les curseurs et les champs numériques.',
     },
     form: {
       title: 'Dans un formulaire',
-      text: "<code>name</code>, <code>id</code> et les aria-* sont redirigés sur le vrai input range sous-jacent. Le nommage passe par la prop <code>label</code>, qui pose un aria-label ; votre propre <code>aria-label</code> ou <code>aria-labelledby</code> a la priorité sur elle, et une plage nomme alors ses deux poignées à partir de ce que vous avez donné. Une plage n'a pas de valeur unique à soumettre : seule la poignée de fin porte le nom. <code>hint</code> dessine une ligne d'aide sous la piste et s'ajoute à votre propre <code>aria-describedby</code> plutôt que de le remplacer.",
+      text: '<code>label</code> nomme le slider sans texte visible. Les noms ARIA fournis prennent le pas sur cette prop. Les attributs natifs atteignent le curseur de fin ; en mode intervalle, seule cette valeur est envoyée.',
     },
     sizes: {
       title: 'Taille des champs',
-      text: "<code>size</code> règle la hauteur des champs numériques qu'ajoute <code>inputs</code>, <code>md</code> par défaut comme sur tout champ. Dans un VInputGroup, c'est la rangée qui décide, comme pour ses autres champs.",
+      text: '<code>size</code> ajuste les champs numériques. La taille définie par <code>VInputGroup</code> prend le pas sur cette valeur.',
     },
     readonly: {
       title: 'Lecture seule',
-      text: "<code>readonly</code> montre la valeur sans permettre de la changer. Une entrée de plage n'a pas de lecture seule native, donc le composant annule les touches qui déplacent une poignée et remet en place une poignée que le pointeur a déplacée. Les poignées restent focalisables et annoncées, et les champs numériques passent en lecture seule avec elles.",
+      text: '<code>readonly</code> empêche les changements par pointeur ou clavier et conserve le focus.',
     },
     invalid: {
       title: 'Invalide',
-      text: "<code>invalid</code> cercle les poignées de la couleur de danger, comme une case à cocher colore sa bordure, et le signale aux technologies d'assistance par <code>aria-invalid</code> sur chaque poignée et chaque champ.",
+      text: '<code>invalid</code> signale une erreur sur les curseurs et champs numériques avec <code>aria-invalid</code> et le style d’erreur.',
     },
   },
-
   api: {
     VSlider: {
       props: {
         readonly:
-          'Montre la valeur sans permettre de la changer. Les poignées restent focalisables et sont annoncées en lecture seule, mais ni le pointeur ni le clavier ne les déplacent, et les champs numériques passent en lecture seule avec elles.',
+          'Empêche les changements par pointeur ou clavier. Les curseurs gardent le focus ; les champs numériques passent en lecture seule.',
         invalid:
-          "Marque la valeur comme invalide, ce qui colore les poignées et le signale aux technologies d'assistance. C'est pour une règle que le navigateur ne sait pas vérifier seul.",
-        size: "La hauteur des champs numériques qu'ajoute <code>inputs</code>. Dans un VInputGroup, la taille du groupe l'emporte, comme pour chaque champ de la rangée.",
-        min: 'La valeur la plus basse que la poignée peut atteindre.',
-        max: 'La valeur la plus haute que la poignée peut atteindre.',
-        step: "L'écart entre deux valeurs sur lesquelles la poignée peut s'arrêter. C'est aussi le pas des flèches, et ce sur quoi une valeur saisie dans le champ voisin est alignée.",
-        range:
-          'Propose deux poignées pour choisir un intervalle, ce qui fait de la valeur une paire.',
-        disabled: 'Rend le curseur inutilisable.',
+          'Définit <code>aria-invalid</code> et le style d’erreur. Ne bloque pas à lui seul l’envoi du formulaire.',
+        size: 'Taille des champs numériques, remplacée si <code>VInputGroup</code> définit une taille.',
+        min: 'Valeur minimale.',
+        max: 'Valeur maximale.',
+        step: 'Incrément pour les curseurs, le clavier et les champs numériques.',
+        range: 'Active deux curseurs et une paire ordonnée pour <code>v-model</code>.',
+        disabled: 'Désactive les interactions.',
         label:
-          "Ce que les lecteurs d'écran annoncent pour le curseur. C'est un nom accessible, rien ne s'affiche à l'écran. En mode intervalle, les deux poignées sont annoncées comme le début et la fin de celui-ci.",
-        hint: "Une ligne d'aide sous la piste, qui dit ce que les nombres signifient ou jusqu'où ils peuvent aller. Elle est rattachée au curseur pour les technologies d'assistance, donc lue après le nom plutôt que comme une partie de celui-ci.",
-        orientation: 'Dresse le curseur à la verticale, la valeur la plus basse en bas.',
+          'Nom accessible sans texte visible. Les curseurs d’intervalle reçoivent des noms distincts de début et de fin.',
+        hint: 'Texte d’aide lié par <code>aria-describedby</code>.',
+        orientation: 'Sens de la piste. Les sliders verticaux placent le minimum en bas.',
         inputs:
-          "Ajoute un champ numérique pour poser la valeur exactement, un champ ou un par extrémité en mode intervalle. Glisser est rapide mais imprécis ; c'est la porte de sortie. <code>ends</code> place les champs de part et d'autre de la piste, <code>top</code> et <code>bottom</code> sur une rangée au-dessus ou au-dessous, chaque champ au bord de la valeur qu'il porte. Un curseur vertical fait de <code>top</code> et <code>bottom</code> ses côtés de début et de fin. Aucun champ n'est dessiné par défaut.",
+          'Position des champs numériques : <code>ends</code>, <code>top</code>, <code>bottom</code>, ou <code>false</code> pour les masquer. Le mode intervalle ajoute deux champs.',
         ticks:
-          "Marque chaque pas sur la piste. Fournir des libellés l'implique. Au-delà de cinquante pas, les marques formeraient un peigne illisible et ne sont pas dessinées du tout.",
+          'Affiche les repères de pas, aussi activés par <code>labels</code>. Masqués au-delà de 50 pas.',
         labels:
-          "Un libellé pour chaque pas, dans l'ordre : un texte, ou une icône avec les mots qui la nomment pour les lecteurs d'écran. Ils deviennent aussi ce qu'un lecteur d'écran annonce à la place du nombre brut.",
+          'Libellés des pas dans l’ordre, chaînes ou objets avec icône et libellé. Fournit aussi le texte de valeur accessible.',
         tooltip:
-          "Affiche la valeur dans une bulle au-dessus de la poignée pendant qu'on la déplace ou qu'elle a le focus.",
+          'Affiche la valeur pendant le déplacement ou le focus d’un curseur. Masqué aux technologies d’assistance.',
         vModel:
-          "La valeur : un nombre unique, ou une paire ordonnée dès que <code>range</code> est posé. C'est cette prop, et non la forme de cette valeur, qui décide du nombre de poignées. La paire reste ordonnée quoi que fasse le lecteur, une poignée emmenée au-delà de sa voisine la poussant devant elle.",
+          'Nombre ou paire ordonnée avec <code>range</code>. Croiser les curseurs déplace l’autre borne pour conserver l’ordre.',
       },
       events: {
-        input:
-          "La valeur est en train de changer : à chaque pas d'un glissement, et à chaque touche qui déplace une poignée. L'événement porte la valeur entière, une paire en mode intervalle, et part de l'une ou l'autre poignée.",
+        input: 'Émet la valeur complète pendant le déplacement d’un curseur.',
         change:
-          "Le lecteur s'est arrêté sur une valeur : une poignée a été relâchée ou déplacée au clavier, ou un champ numérique a été validé. L'événement porte la valeur entière, une paire en mode intervalle, et part de l'une ou l'autre poignée, là où le v-model suit chaque pas d'un glissement.",
+          'Émet la valeur validée après l’interaction avec un curseur ou la validation d’un champ numérique.',
       },
     },
   },

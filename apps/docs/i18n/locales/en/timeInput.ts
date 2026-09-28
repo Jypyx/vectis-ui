@@ -1,107 +1,94 @@
 export default {
   title: 'Time input',
-  lead: 'A time field in one of three forms: typed with a mask, filled from a clock, or a list of times at a fixed interval. The value is always a 24-hour <code>HH:mm</code> string.',
-
+  lead: '<code>VTimeInput</code> offers typed time entry, a clock picker or a searchable list. The model always uses 24-hour <code>HH:mm</code> values.',
   examples: {
     labelAndHint: {
       title: 'Label, hint and icon',
-      text: '<code>label</code> and <code>hint</code> behave as on any field. <code>pickerIcon</code> changes the glyph that opens the clock, <code>iconStart</code> puts an icon at the start of the field, and <code>loading</code> shows a spinner in place of the clock icon. <code>pickerIconLabel</code>, <code>clearLabel</code>, <code>loadingText</code> and <code>iconStartLabel</code> rename what each of them announces.',
+      text: 'Name the field with <code>label</code> and add help text with <code>hint</code>.',
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> sets the field height to 32, 40 or 48 pixels, and <code>compact</code> takes 4px off it. The clock keeps its own measurements.',
+      text: '<code>size</code> sets the field size; <code>compact</code> reduces its height.',
     },
     modes: {
       title: 'Modes',
-      text: '<code>mode</code> chooses the form of the field: <code>input</code> masks it so only digits are typed, the clock then being opt-in through <code>showPicker</code>; <code>picker</code> makes the clock the only way in, so it is forced on there; <code>list</code> drops the clock for a searchable list of times.',
+      text: '<code>input</code> allows typing, with an optional clock through <code>showPicker</code>. <code>picker</code> uses the clock alone. <code>list</code> offers searchable time options.',
     },
     steps: {
       title: 'Steps',
-      text: '<code>minuteStep</code> is what the face offers, what the arrow keys move by and what the list is cut at. It leaves the mask alone, and is worth setting on a list before anything else: the default of one minute is 1440 rows.',
+      text: '<code>minuteStep</code> sets the clock step and list interval. It does not restrict typed minutes. Choose a larger step to shorten the list.',
     },
     restrictions: {
       title: 'What may be chosen',
-      text: "<code>min</code>, <code>max</code>, <code>allowedHours</code> and <code>allowedMinutes</code> restrict what may be chosen. The list and the clock leave out what cannot be chosen; the typed field commits the entry and turns invalid through the control's own validity instead.",
+      text: '<code>min</code>, <code>max</code>, <code>allowedHours</code> and <code>allowedMinutes</code> restrict clock and list choices. A typed time outside these limits updates the model but fails native field validation.',
     },
     clearable: {
       title: 'Clearable',
-      text: '<code>clearable</code> adds a cross that empties the value, to the left of the clock icon rather than in its place. The list form takes its own cross from the combobox it is built on, wording included.',
+      text: '<code>clearable</code> adds a button to reset the time.',
     },
     states: {
       title: 'States',
-      text: '<code>invalid</code> is for a rule the browser cannot check by itself. <code>disabled</code> greys the field out and prevents the panel from opening. <code>readonly</code> shows the value frozen: nothing can be typed, no clock is rendered and the AM/PM button goes with it, while the field keeps its contrast and takes the focus.',
+      text: '<code>readonly</code> prevents all value changes while preserving focus. <code>loading</code> shows a spinner without disabling interaction.',
     },
     twelveHour: {
       title: 'Twelve-hour clock',
-      text: "The value is a 24-hour string whatever is on screen. Where the half of the day is chosen depends on the form: a button inside a typed field, the clock's own pair beside its numerals, and nothing in a list, every row spelling out its own.",
+      text: '<code>format="12h"</code> displays AM/PM controls. The model remains a 24-hour time.',
     },
     localization: {
       title: 'Localization',
-      text: '<code>locale</code> decides the clock, the mask and how a time is written out, and takes precedence over the global locale. <code>format</code> sits above both, for a field that has to be read one way whatever the language.',
+      text: '<code>locale</code> sets time display conventions. An explicit <code>format</code> overrides its hour cycle.',
     },
     placement: {
       title: 'Placement',
-      text: '<code>placement</code> names the preferred opening direction of the panel, above or below the field.',
+      text: '<code>placement</code> sets the preferred panel position.',
     },
   },
-
   api: {
     VTimeInput: {
       props: {
-        format:
-          "Whether times are shown on a 12- or a 24-hour clock. Left out, the reader's language decides, which is almost always what one wants.",
-        mode: 'Which form the field takes: one that can be typed into, a <code>picker</code> one where the clock is the only way in, so the clock is forced on there, or a list of times at a fixed interval, where a clock would make no sense. It is a different question from <code>readonly</code>, which freezes the field by every route at once.',
+        format: '12- or 24-hour display. Defaults to the locale; the model always uses 24 hours.',
+        mode: 'Typed input, clock-only picker or searchable time list.',
         showPicker:
-          'Offers the picker beside a field one can type into: an icon at the end of the field, and a panel that opens on focus. The clock follows what is typed, and with no value it opens empty. It means nothing in <code>picker</code> mode, where the clock is forced on, nor in <code>list</code> mode, where the list is the panel.',
-        minuteStep:
-          'The interval between two times that can be chosen. It applies to the picker, to the arrow keys and to the rows of the list.',
-        min: 'The earliest time that can be chosen, inclusive, as a canonical 24-hour string. The picker and the list both leave out what it rules out, and a time typed past it makes the field invalid.',
-        max: 'The latest time that can be chosen, inclusive, written like min.',
-        allowedHours:
-          'Which hours can be chosen: the list of them, or a rule answering for one. The hour a rule is handed is always the 24-hour one, whichever clock is on display.',
-        allowedMinutes:
-          'Which minutes can be chosen: the list of them, or a rule answering for one.',
+          'Adds a clock to input mode. Picker mode always includes it; list mode ignores it.',
+        minuteStep: 'Clock step and list interval in minutes. Does not restrict typed values.',
+        min: 'Earliest allowed time, inclusive, in <code>HH:mm</code> format.',
+        max: 'Latest allowed time, inclusive, in <code>HH:mm</code> format.',
+        allowedHours: 'Allowed hours: an array or predicate receiving a 24-hour value.',
+        allowedMinutes: 'Allowed minutes: an array or predicate.',
         locale:
-          "A BCP 47 locale, which decides the clock and how a time is written out. It takes precedence over the design system's global locale and falls back to it.",
-        label: 'The label above the field.',
-        hint: 'A line of help under the field.',
-        placeholder: 'What the field says while empty.',
-        size: 'The height of the field: 32, 40 or 48 pixels.',
-        compact: 'Takes 4px off the height.',
-        disabled: 'Makes the field unusable, greyed out through the colour tokens.',
-        readonly:
-          'Shows the time without letting it be changed: nothing can be typed, there is no clock and no clear cross, and the attributes announcing a panel go with it. The field keeps the focus and can be copied from, which is what separates it from <code>disabled</code>.',
-        invalid: 'Marks the field as invalid, for a rule of your own.',
+          'BCP 47 locale for time display. Overrides the global locale; <code>format</code> takes precedence.',
+        label:
+          'Visible label. Without a visible name, provide <code>aria-label</code> or <code>aria-labelledby</code>.',
+        hint: 'Help text linked through <code>aria-describedby</code>.',
+        placeholder: 'Placeholder shown when the field is empty.',
+        size: 'Component size.',
+        compact: 'Reduces the control height without changing text or icons.',
+        disabled: 'Disables interaction.',
+        readonly: 'Prevents typing, panel selection, AM/PM changes and clearing. Preserves focus.',
+        invalid:
+          'Sets <code>aria-invalid</code> and the error style. Does not block form submission by itself.',
         iconStart:
-          'An icon inside the field, at the start. Decorative until a <code>@click:icon-start</code> listener turns it into a button.',
-        iconStartLabel: 'What the start icon does, in words, once it is clickable.',
-        pickerIconLabel:
-          'What the end icon does, in words. It names the button that opens the clock, and falls back to the design system dictionary.',
-        loading:
-          'Shows a spinner in place of the clock icon. It says that something is being loaded and changes nothing else: the field can still be typed into and the panel still opens.',
+          'Start icon. A <code>@click:icon-start</code> listener makes it a button; provide <code>iconStartLabel</code>.',
+        iconStartLabel: 'Accessible name of the start icon button.',
+        pickerIconLabel: 'Accessible name of the clock button. Defaults to the library dictionary.',
+        loading: 'Replaces the clock icon with a spinner without disabling the field.',
         loadingText:
-          'What screen readers announce while the spinner turns. It falls back to the design system dictionary.',
-        clearable: 'Offers a cross that empties the value, shown before the end icon.',
-        clearLabel:
-          'What that cross does, in words. It falls back to the design system dictionary.',
-        pickerIcon:
-          'The icon that opens the clock, at the end of the field. It has no effect on the list form, whose chevron follows the combobox convention. The clear cross appears to its left rather than in its place.',
-        placement: 'Where the panel opens relative to the field.',
-        vModel:
-          "The time, always as a 24-hour string whatever clock is displayed, so you never have to know which one the reader's language uses.",
+          'Loading text and accessible spinner name. Defaults to the library dictionary.',
+        clearable: 'Adds a button to reset the value.',
+        clearLabel: 'Accessible name of the clear button. Defaults to the library dictionary.',
+        pickerIcon: 'Clock button icon. Has no effect in list mode.',
+        placement: 'Preferred panel position relative to the field.',
+        vModel: 'Time in 24-hour <code>HH:mm</code> format, or <code>null</code>.',
       },
       events: {
-        clear: 'The clear cross emptied the field. The value has already been reset.',
-        clickIconStart:
-          'The start icon was clicked. Attaching this listener is what turns that icon into a real button, which then needs <code>iconStartLabel</code>.',
+        clear: 'The time was cleared; the model is already reset.',
+        clickIconStart: 'The start icon button was clicked.',
       },
       slots: {
         footer:
-          "The strip at the foot of the clock, which replaces the Cancel and OK buttons rather than joining them. It receives both actions, and they are what make it usable: the clock writes a draft that only <code>confirm</code> commits, so a footer of your own without it would leave the value unchangeable through the panel. It also receives <code>cancel</code>, and <code>close</code>, the same function under the name VDateInput's footer hands out. It is not rendered in list mode, which has no panel of its own.",
-        valueEnd:
-          'Controls of your own inside the field, placed before the ones the field owns: the clear cross and the icon that opens the panel. Those two are the component own affordance, which is why there is no <code>end</code> slot here.',
-        start:
-          'Content at the start of the field, rendered after <code>iconStart</code> rather than in its place.',
+          'Replaces the clock’s Cancel and OK buttons. Call <code>confirm</code> to commit the draft, or <code>cancel</code> / <code>close</code> to discard it. Not rendered in list mode.',
+        valueEnd: 'Content before the clear and picker buttons.',
+        start: 'Content after <code>iconStart</code>.',
       },
     },
   },

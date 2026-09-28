@@ -6,8 +6,6 @@ const sizes = ['sm', 'md', 'lg'] as const
 </script>
 
 <template>
-  <!-- The size is set once on the menu and every row follows, submenus included: the
-       panel carries it and the rows read it from there. -->
   <VMenu v-for="size in sizes" :key="size" :size="size">
     <template #trigger="{ triggerProps }">
       <VButton v-bind="triggerProps" :size="size" variant="outline" tone="neutral">

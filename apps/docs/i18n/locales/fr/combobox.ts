@@ -1,135 +1,129 @@
 export default {
   title: 'Liste déroulante',
-  lead: "Un champ qui cherche dans une liste et retient ce qui est choisi, une valeur ou plusieurs. Les options peuvent être à plat, groupées ou séparées, et elles peuvent arriver d'un serveur à mesure que le lecteur saisit.",
-
+  lead: '<code>VCombobox</code> recherche dans une liste et sélectionne une ou plusieurs valeurs. Les options peuvent être groupées, séparées ou chargées de façon asynchrone.',
   examples: {
     labelAndHint: {
       title: "Label et texte d'aide",
-      text: "<code>label</code> affiche un texte descriptif au-dessus du champ, et <code>hint</code> affiche un texte d'aide en dessous.",
+      text: 'Utilisez <code>label</code> pour nommer le champ et <code>hint</code> pour le texte d’aide.',
     },
     sizes: {
       title: 'Tailles',
-      text: 'Définit la hauteur du champ à 32, 40 ou 48 pixels. La prop <code>compact</code> réduit cette hauteur de 4px.',
+      text: '<code>size</code> ajuste le champ et les options. <code>compact</code> réduit la hauteur du champ.',
     },
     states: {
       title: 'États',
-      text: "<code>disabled</code> rend le champ inutilisable. <code>readonly</code> empêche la modification tout en gardant le champ focalisable. <code>invalid</code> marque le champ en erreur. <code>loading</code> affiche un indicateur de chargement. <code>emptyText</code> définit le message affiché quand il n'y a aucune option. <code>clearable</code> ajoute une icône pour vider la sélection.",
+      text: 'Utilisez <code>disabled</code>, <code>readonly</code> et <code>invalid</code> pour les états du champ, <code>loading</code> pendant les requêtes et <code>clearable</code> pour effacer la sélection.',
     },
     placement: {
       title: 'Positionnement',
-      text: "Définit la direction d'ouverture préférée (au-dessus ou en dessous du champ) pour le panneau de la liste d'options.",
+      text: '<code>placement</code> définit la position préférée du panneau. Le navigateur peut l’adapter à l’espace disponible.',
     },
     groups: {
       title: 'Groupes et séparateurs',
-      text: 'La prop <code>options</code> accepte une liste simple, ou peut être structurée avec des groupes nommés et des séparateurs.',
+      text: '<code>options</code> accepte des options, des groupes nommés et des séparateurs.',
     },
     multiple: {
       title: 'Sélection multiple',
-      text: "<code>multiple</code> permet de sélectionner plusieurs valeurs, qui s'affichent sous forme de puces (chips) supprimables à l'intérieur du champ.",
+      text: '<code>multiple</code> utilise un tableau pour la sélection et affiche des puces supprimables.',
     },
     textDisplay: {
       title: 'Valeurs en texte',
-      text: '<code>display="text"</code> affiche les valeurs choisies sous forme de libellés séparés par des virgules, sur une seule ligne tronquée par des points de suspension. Le champ garde la hauteur d\'un contrôle ordinaire, et sous le focus la ligne laisse au moins la moitié de la place à la recherche. On retire une valeur en la décochant dans la liste, avec Retour arrière sur une recherche vide, ou avec la croix de <code>clearable</code>.',
+      text: '<code>display="text"</code> réunit les libellés sélectionnés sur une ligne. Désélectionnez les options dans la liste, ou retirez la dernière valeur avec Retour arrière lorsque la recherche est vide.',
     },
     maxValues: {
-      title: 'Valeurs montrées champ replié',
-      text: "<code>max</code> garde en vue les premières valeurs choisies et résume les autres en « +X », en puces comme en texte. Cela vaut tant que le champ n'a pas le focus : sous le focus, toutes les valeurs reviennent pour être vues et retirées. <code>overflowText</code> reformule le compte, et le slot <code>#overflow</code> le remplace.",
+      title: 'Limite des valeurs visibles',
+      text: '<code>max</code> limite les valeurs visibles lorsque le champ n’a pas le focus. Le focus révèle toutes les valeurs. Personnalisez le nombre masqué avec <code>overflowText</code> ou <code>#overflow</code>.',
     },
     fieldIcon: {
       title: 'Icône du champ',
-      text: "<code>iconStart</code> affiche une icône au début du champ. <code>iconStartLabel</code> fournit un label accessible si l'icône est rendue interactive au clic. <code>hideExpandIcon</code> retire le chevron, pour un champ qui se lit comme une recherche avec suggestions : la liste s'ouvre toujours au focus, et la croix d'effacement prend la fin du champ.",
+      text: '<code>iconStart</code> ajoute une icône de début. <code>hideExpandIcon</code> masque le chevron ; le focus ouvre toujours la liste.',
     },
     icons: {
       title: 'Icônes des options',
-      text: "La propriété <code>icon</code> d'une option permet d'afficher une icône à côté de son libellé dans la liste déroulante.",
+      text: 'Définissez l’<code>icon</code> d’une option pour l’afficher à côté du libellé.',
     },
     asynchronous: {
       title: 'Recherche asynchrone',
-      text: "Désactiver <code>filter</code> affiche les options exactement telles que fournies par la source. <code>searchDebounce</code> définit le délai en millisecondes avant d'émettre la recherche.",
+      text: 'Définissez <code>:filter="false"</code> pour des options filtrées par le serveur. <code>searchDebounce</code> retarde les événements de recherche.',
     },
     infiniteScroll: {
       title: 'Défilement infini',
-      text: "<code>hasMore</code> indique que d'autres pages sont disponibles, déclenchant un événement <code>load-more</code> lorsque la fin de la liste devient visible à l'écran.",
+      text: '<code>hasMore</code> active <code>load-more</code> lorsque la fin de liste devient visible. Ajoutez la page suivante à <code>options</code>.',
     },
     customOption: {
       title: 'Options personnalisées',
-      text: "Le slot <code>#option</code> permet de personnaliser le contenu et la mise en page d'une ligne (ex: ajout d'un badge ou d'une deuxième ligne de texte).",
+      text: 'Utilisez <code>#option</code> pour personnaliser le contenu des options.',
     },
     customChip: {
       title: 'Puces personnalisées',
-      text: "Le slot <code>#chip</code> permet de personnaliser l'apparence des puces (chips) des valeurs sélectionnées.",
+      text: 'Utilisez <code>#chip</code> pour personnaliser les puces sélectionnées et leur action de suppression.',
     },
   },
-
   api: {
     VCombobox: {
       props: {
         options:
-          "Ce que la liste propose. Une entrée peut être une option, un bloc nommé d'options, ou un séparateur ; une simple liste d'options reste parfaitement valable.",
-        multiple:
-          'Permet de choisir plusieurs valeurs, ce qui fait de la valeur une liste et montre ce qui a été choisi dans le champ, en puces ou en texte selon <code>display</code>.',
+          'Options, groupes nommés ou séparateurs. Chaque option possède une valeur et un libellé.',
+        multiple: 'Autorise plusieurs sélections. Utilisez un tableau pour <code>v-model</code>.',
         display:
-          'Comment les valeurs choisies sont montrées quand on peut en choisir plusieurs : une puce supprimable chacune, ou leurs libellés séparés par des virgules sur une seule ligne, tronquée par des points de suspension. Ne change rien pour une valeur unique, qui est toujours du texte.',
-        max: "Combien de valeurs choisies montrer avant de résumer les autres en « +X », en puces comme en texte. Cela vaut tant que le champ n'a pas le focus ; sous le focus, toutes les valeurs reviennent pour être vues et retirées. Omis, ou à 0, toutes les valeurs sont montrées. Ne change rien sans <code>multiple</code>.",
+          'Affichage de la sélection multiple : puces supprimables ou texte séparé par des virgules. La sélection simple utilise toujours du texte.',
+        max: 'Nombre de valeurs visibles sans focus. Le focus affiche toutes les valeurs. Omis ou nul, affiche tout. S’applique uniquement avec <code>multiple</code>.',
         overflowText:
-          'Reformule le « +X » qui représente les valeurs au-delà de <code>max</code>, « +5 produits » par exemple. Reçoit le nombre de valeurs masquées.',
-        label: "Le libellé au-dessus du champ, lié à lui pour qu'un clic dessus y place le focus.",
-        hint: "Une ligne d'aide sous le champ, lue en même temps que le libellé.",
-        size: 'La hauteur du champ : 32, 40 ou 48 pixels. Le panneau et ses lignes la suivent.',
-        compact: 'Retire 4px à la hauteur, comme partout ailleurs dans le design system.',
-        placeholder: "Ce que dit le champ tant que rien n'est choisi et que rien n'a été saisi.",
-        disabled: 'Rend le champ inutilisable, grisé par les tokens de couleur.',
+          'Formate le nombre de valeurs masquées par <code>max</code>. Reçoit ce nombre.',
+        label:
+          'Libellé visible. Sans nom visible, fournissez <code>aria-label</code> ou <code>aria-labelledby</code>.',
+        hint: 'Texte d’aide lié par <code>aria-describedby</code>.',
+        size: 'Taille du champ et des options. Le champ reprend la taille définie par <code>VInputGroup</code>.',
+        compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
+        placeholder: 'Texte indicatif lorsque le champ est vide.',
+        disabled: 'Désactive les interactions.',
         readonly:
-          "Montre ce qui a été choisi sans permettre de le changer : rien ne se tape, la liste ne s'ouvre jamais, les chips perdent leur croix et aucune croix de vidage n'est proposée. Le champ garde le focus et reste copiable, ce qui le distingue de <code>disabled</code>.",
-        invalid: 'Marque le champ comme invalide, pour une règle à vous.',
+          'Empêche la saisie et les changements de sélection. Conserve le focus et la copie ; masque les actions d’effacement et empêche l’ouverture de la liste.',
+        invalid:
+          'Définit <code>aria-invalid</code> et le style d’erreur. Ne bloque pas à lui seul l’envoi du formulaire.',
         iconStart:
-          "Une icône dans le champ, au début. Elle est rendue avant les chips et non à leur place. Décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton.",
-        iconStartLabel: "Ce que fait l'icône de début, en mots, une fois cliquable.",
+          'Icône avant les valeurs sélectionnées. Un écouteur <code>@click:icon-start</code> en fait un bouton nécessitant <code>iconStartLabel</code>.',
+        iconStartLabel: 'Nom accessible du bouton d’icône de début.',
         expandIcon:
-          "Le chevron à la fin du champ, qui pivote à l'ouverture de la liste. Un clic dessus quand la liste est ouverte la ferme. Il reste une décoration : le champ lui-même ouvre la liste et Échap la ferme au clavier, donc le chevron est masqué aux lecteurs d'écran et ne prend pas de libellé.",
+          'Chevron décoratif. Un clic ferme la liste ouverte ; le focus sur le champ ouvre la liste.',
         hideExpandIcon:
-          "Retire le chevron, pour un champ qui se lit comme une recherche avec suggestions plutôt que comme une liste où choisir. La liste s'ouvre toujours quand le champ prend le focus, et l'indicateur de chargement s'affiche toujours.",
-        clearable: 'Propose une croix qui vide à la fois la sélection et la recherche.',
+          'Masque le chevron. Le focus ouvre toujours la liste et le chargement affiche toujours un indicateur.',
+        clearable: 'Ajoute une action pour effacer la sélection et la recherche.',
         clearLabel:
-          'Ce que fait cette croix, en mots. Sa valeur par défaut vient du dictionnaire du design system.',
+          'Nom accessible du bouton d’effacement. Utilise le dictionnaire de la bibliothèque par défaut.',
         emptyText:
-          "Ce que dit le panneau quand la recherche ne correspond à rien. Un lecteur d'écran l'entend même quand le slot <code>#empty</code> dessine autre chose : renseignez les deux ensemble.",
+          'Texte annoncé lorsque la liste est vide. Gardez-le cohérent avec le contenu personnalisé de <code>#empty</code>.',
         filter:
-          'Comment la liste se resserre à la saisie. La couper signifie que les options arrivent déjà filtrées par leur source et sont montrées telles quelles. Une règle à vous reçoit la requête TELLE QUE SAISIE, simplement rognée, et non la forme insensible aux accents utilisée en interne.',
+          'Filtrage intégré insensible aux accents, filtrage désactivé ou fonction personnalisée recevant l’option et la recherche sans espaces aux extrémités.',
         searchDebounce:
-          "Combien de temps attendre avant de dire à la source ce qui est cherché, en millisecondes. Zéro le lui dit aussitôt, ce qui convient à une source qui n'est pas une requête réseau.",
+          'Délai en millisecondes avant d’émettre une recherche saisie. Zéro émet immédiatement.',
         loading:
-          'Dit que quelque chose est en cours de chargement. Sans option encore, tout le panneau le dit ; avec des options déjà listées, un indicateur apparaît au pied de la liste, puisque ce qui charge est alors la page suivante. Dans les deux cas, le champ remplace son chevron par un indicateur.',
+          'Affiche un indicateur dans le champ et un état de chargement : panneau entier sans options, ou pied de liste si des options existent.',
         loadingText:
-          "Ce qui est dit pendant le chargement, et ce comme quoi l'indicateur est annoncé. Un lecteur d'écran l'entend même quand le slot <code>#loading</code> dessine autre chose : renseignez les deux ensemble.",
-        hasMore:
-          "Dit qu'il reste des pages à venir, ce qui est ce qui pousse le composant à demander la suivante quand la fin de la liste entre dans le champ de vision.",
-        placement:
-          "Où la liste s'ouvre par rapport au champ. Le panneau est ancré en CSS, donc cette valeur nomme une préférence : un navigateur à court de place se rabat déjà tout seul.",
+          'Texte de chargement annoncé aux lecteurs d’écran. Gardez-le cohérent avec le contenu personnalisé de <code>#loading</code>.',
+        hasMore: 'Active la demande d’une nouvelle page lorsque la fin de liste devient visible.',
+        placement: 'Position préférée du panneau par rapport au champ.',
         vModel:
-          "La valeur de l'option choisie, ou leur liste quand <code>multiple</code> est posé. Elle part sur une chaîne vide, et le tableau n'est jamais muté sur place.",
+          'Chaîne ou nombre sélectionné, ou tableau avec <code>multiple</code>. Vaut une chaîne vide par défaut.',
       },
       events: {
         search:
-          "Ce qui est cherché, à envoyer à la source. C'est retardé de <code>searchDebounce</code> pendant la saisie, et émis aussitôt à l'ouverture du panneau pour qu'une première page puisse être chargée. Le même terme n'est jamais émis deux fois de suite.",
-        loadMore:
-          'La fin de la liste est entrée dans le champ de vision : envoyez la page suivante.',
-        clear: 'La croix de vidage a vidé la sélection et la recherche.',
-        clickIconStart:
-          "L'icône de début a été cliquée. Attacher cet écouteur est ce qui en fait un vrai bouton, qui demande alors <code>iconStartLabel</code>.",
+          'Émet la recherche après <code>searchDebounce</code>, ou immédiatement à l’ouverture. Les recherches identiques consécutives sont ignorées.',
+        loadMore: 'Demande la page suivante lorsque la fin de liste devient visible.',
+        clear: 'Émis après l’effacement de la sélection et de la recherche.',
+        clickIconStart: 'Émis à l’activation du bouton d’icône de début.',
       },
       slots: {
         option:
-          "Ce qu'une ligne de la liste montre, à la place du simple libellé : un sous-titre, un avatar, un badge. On lui dit si la ligne est celle mise en évidence et si elle est déjà choisie.",
-        chip: "Remplace la puce qui représente une valeur choisie. Elle reçoit <code>remove</code>, sans quoi la valeur ne pourrait plus être retirée, ainsi que la taille et la densité calculées pour tenir dans le champ, qui ne se devinent pas de l'extérieur. L'option elle-même peut manquer, si cette valeur n'a jamais figuré parmi les options.",
+          'Contenu d’une option. Reçoit l’option, son index et ses états actif et sélectionné.',
+        chip: 'Puce sélectionnée. Reçoit la valeur, le libellé, l’option éventuelle, <code>remove</code>, la taille et l’état compact. Reliez l’action de suppression.',
         overflow:
-          "Remplace le « +X » qui représente les valeurs au-delà de <code>max</code>. Reçoit <code>count</code>, le nombre de valeurs masquées, ainsi que la taille et la densité des puces du champ, pour qu'une puce à vous s'aligne sur les autres.",
-        empty: 'Ce que le panneau montre quand rien ne correspond. Il reçoit le terme cherché.',
-        loading: 'Ce que le panneau montre pendant le chargement de ses premières options.',
-        valueEnd:
-          "Des contrôles à vous à l'intérieur du champ, placés avant ceux que le champ possède : la croix d'effacement et l'icône qui ouvre le panneau. Ces deux-là sont l'affordance propre du composant, ce qui explique l'absence de slot <code>end</code> ici.",
-        start:
-          "Du contenu au début du champ, rendu après <code>iconStart</code> plutôt qu'à sa place.",
+          'Nombre de valeurs masquées. Reçoit <code>count</code>, la taille des puces et l’état compact.',
+        empty:
+          'Contenu de l’état vide. Reçoit la recherche ; définissez aussi <code>emptyText</code>.',
+        loading: 'Contenu du chargement initial. Définissez aussi <code>loadingText</code>.',
+        valueEnd: 'Contenu avant l’action d’effacement et l’icône d’ouverture.',
+        start: 'Contenu après <code>iconStart</code>, sans remplacer l’icône.',
       },
     },
   },

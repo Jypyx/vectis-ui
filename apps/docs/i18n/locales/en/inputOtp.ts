@@ -1,77 +1,68 @@
 export default {
   title: 'Input OTP',
-  lead: 'A code typed one character to a box: a one-time password, a licence key, a reference. Pasting fills the whole row, and the value is the characters alone, never the separators.',
-
+  lead: '<code>VInputOTP</code> edits a code one character per box. Its <code>v-model</code> contains the characters without separators.',
   examples: {
     labelAndHint: {
       title: 'Label and hint',
-      text: '<code>label</code> renders nothing here: it names the row for assistive technology. <code>hint</code> is the text the reader sees, tied to the row so it is read out along with the label.',
+      text: '<code>label</code> provides an accessible group name without visible text. <code>hint</code> displays help below the boxes.',
     },
     sizes: {
       title: 'Sizes',
-      text: "<code>size</code> sets the height to 32, 40 or 48 pixels, and <code>compact</code> takes 4px off it. The character inside is scaled a notch or two above the row's own step.",
+      text: '<code>size</code> sets box dimensions. <code>compact</code> reduces them without changing text or icons.',
     },
     length: {
       title: 'Length',
-      text: '<code>length</code> is how many boxes the code has, six by default. It is ignored the moment a <code>pattern</code> is given.',
+      text: '<code>length</code> sets the box count. A <code>pattern</code> containing <code>#</code> takes precedence.',
     },
     formats: {
       title: 'Formats',
-      text: '<code>format</code> decides which characters the code is made of, filtering what can be typed or pasted and choosing the keyboard a phone offers. Outside a numeric code the value is forced to capitals.',
+      text: '<code>format</code> accepts numeric, alphabetic or alphanumeric input. Letters are converted to uppercase.',
     },
     pattern: {
       title: 'Pattern',
-      text: '<code>pattern</code> writes the shape of the code out: every <code>#</code> is a box to fill and every other character a literal drawn between the boxes, never typed and never part of the value. It wins over <code>length</code>.',
+      text: 'Each <code>#</code> creates a box. Other characters are displayed separators excluded from the value.',
     },
     separators: {
       title: 'Separators',
-      text: '<code>separatorIcon</code> replaces the literals a pattern draws, every one of them, so it suits a template whose separators are punctuation and nothing else.',
+      text: '<code>separatorIcon</code> replaces every literal in the pattern. Use it when separators contain no meaningful text.',
     },
     pasting: {
       title: 'Pasting and autofill',
-      text: 'A code pasted anywhere in the row is spread across every box, the pattern\'s literals consumed with it. The first box carries <code>autocomplete="one-time-code"</code>, so a code arriving from an SMS or a password manager is spread the same way.',
+      text: 'Paste a full code into any box. The first box uses <code>autocomplete="one-time-code"</code> for autofill.',
     },
     reading: {
       title: 'Reading the code',
-      text: 'The value is one string of the characters alone, never the separators. The filled boxes always run from the first one: typing into a box past the first empty one fills that empty box, and emptying a box moves the following characters back. <code>complete</code> fires when the code becomes complete, carrying the finished code.',
+      text: 'Characters fill consecutive boxes. Deleting a character shifts following characters left. <code>complete</code> emits the completed code when it changes.',
     },
     form: {
       title: 'In a form',
-      text: 'The row submits like any native field. <code>name</code>, <code>form</code> and <code>required</code> reach a hidden input that carries the code, and a code that does not fill every box is invalid, so the browser refuses to submit it.',
+      text: 'Pass <code>name</code>, <code>form</code> and <code>required</code> for native form handling. Partial codes fail validation; an empty code is allowed without <code>required</code>.',
     },
     states: {
       title: 'States',
-      text: '<code>disabled</code> puts the whole row out of reach, greyed through the colour tokens. <code>readonly</code> shows the code frozen while the boxes keep the focus and can be copied from. <code>invalid</code> colours the boxes and tells assistive technology the code was refused.',
+      text: '<code>disabled</code> prevents interaction. <code>readonly</code> preserves focus and copying. <code>invalid</code> marks the code as rejected.',
     },
   },
-
   api: {
     VInputOTP: {
       props: {
-        length:
-          'How many boxes the code has. It is ignored as soon as a <code>pattern</code> is given.',
-        format:
-          'Which characters the code is made of. It filters what can be typed or pasted, and decides which keyboard a phone offers.',
+        length: 'Box count, overridden by a <code>pattern</code> containing <code>#</code>.',
+        format: 'Allowed characters: digits, uppercase letters or both. Filters typing and paste.',
         pattern:
-          "The shape of the code: each <code>#</code> is a box to fill, and every other character is a separator shown between the boxes without ever being part of the value, <code>'GT-###'</code> or <code>'###.###.###'</code>. It wins over <code>length</code>.",
-        separatorIcon:
-          "An icon drawn in place of every separator of the pattern. It suits a template whose separators are purely decorative, <code>'###-###'</code>, and not one carrying meaningful text such as <code>'GT-###'</code>, which the icon would erase.",
-        size: 'The size of the boxes: 32, 40 or 48 pixels.',
-        compact: 'Takes 4px off the boxes, leaving the text and the icons as they are.',
-        disabled: 'Makes every box unusable, greyed out through the colour tokens.',
-        readonly:
-          'Shows the code without letting it be changed. The boxes keep their focus and the code can still be selected and copied, which is what separates it from <code>disabled</code>.',
+          'Code layout. <code>#</code> creates a box; other characters are displayed literals. Without <code>#</code>, falls back to <code>length</code>.',
+        separatorIcon: 'Icon replacing every pattern literal, including any text prefix.',
+        size: 'Box size.',
+        compact: 'Reduces box dimensions without changing text or icons.',
+        disabled: 'Disables interaction.',
+        readonly: 'Prevents user changes while keeping the field focusable.',
         invalid:
-          'Marks the code as wrong, which colours the boxes and tells assistive technology so.',
-        label:
-          'What screen readers announce for the row as a whole. It falls back to the design system dictionary.',
-        hint: 'A line of help under the boxes, where the code was sent or how long it lasts. It is tied to the row for assistive technology, so it is read out along with the label. Unlike <code>label</code>, which names the row without rendering anything, this is text the reader sees.',
-        vModel:
-          'The code as one string, without the separators: a <code>GT-###</code> template still yields three characters. It is empty to begin with, and shorter than the full length while it is being typed.',
+          'Sets <code>aria-invalid</code> and the error style. Does not block form submission by itself.',
+        label: 'Accessible group name. Displays no text; defaults to the library dictionary.',
+        hint: 'Help text linked through <code>aria-describedby</code>.',
+        vModel: 'Code string without separators. Defaults to an empty string.',
       },
       events: {
-        complete:
-          'The code has just become complete, with the finished code. This is the cue to verify it. Retyping a character of a complete code with the same one does not fire it again.',
+        complete: 'Emits a changed, complete code. Re-entering the same code does not emit again.',
       },
     },
   },

@@ -4,8 +4,6 @@ import { VCombobox, type ComboboxItem } from 'vectis-ui'
 
 const country = ref('fr')
 
-/* An entry is an option, a named block, or a separator, and the three mix freely. A group
-   the search empties disappears with its name, and a stranded separator is dropped. */
 const items: ComboboxItem[] = [
   {
     label: 'Europe',

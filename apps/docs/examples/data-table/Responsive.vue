@@ -16,8 +16,7 @@ const rows = [
 </script>
 
 <template>
-  <!-- The threshold is the COMPONENT's own width, not the window's, so the box below is
-       resizable: drag its corner past 640px and the cards become a table again. -->
+  <!-- Resize this container to switch between row cards and a table. -->
   <div class="box">
     <VDataTable
       responsive="stack"

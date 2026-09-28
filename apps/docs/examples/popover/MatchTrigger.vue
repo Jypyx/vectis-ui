@@ -22,10 +22,6 @@ import { VButton, VPopover, VTypography } from 'vectis-ui'
       <VTypography variant="body-sm">Short.</VTypography>
     </VPopover>
 
-    <!--
-      It is a FLOOR and not a clamp: content that needs more room still gets it, which a list of
-      long labels under a short field wants.
-    -->
     <VPopover match-trigger placement="bottom-start">
       <template #trigger="{ triggerProps }">
         <VButton v-bind="triggerProps" variant="outline" tone="neutral">Narrow</VButton>

@@ -17,8 +17,7 @@ import { arrow_right_alt as arrowRightAlt, notifications, schedule } from 'vecti
 </template>
 
 <style scoped>
-/* The #start slot takes anything, not only an icon. `currentcolor` is the chip's own text
-   colour, so the dot follows the tone with nothing to declare twice. */
+/* Use currentcolor so the custom dot follows the chip tone. */
 .dot {
   inline-size: 0.5rem;
   aspect-ratio: 1;

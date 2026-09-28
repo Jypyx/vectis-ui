@@ -1,21 +1,16 @@
 export default {
   title: 'Installation',
-  lead: "Vectis UI est distribué sous la forme d'un unique paquet npm. Son intégration dans un projet Vue 3 se résume toujours à deux étapes : installer le paquet et importer la feuille de styles. Les guides ci-dessous vous montrent comment appliquer ces deux étapes selon votre configuration.",
-
+  lead: 'Installez <code>vectis-ui</code> dans votre projet Vue 3 et importez sa feuille de styles globale.',
   viteHeading: 'Avec Vite',
-  viteBody:
-    "Vectis UI s'intègre dans n'importe quelle application Vue 3, qu'elle soit générée avec <code>create-vue</code> ou un autre projet Vite. Vue étant une peer dependency, elle n'est pas directement incluse dans notre paquet. Cela évite les conflits en s'assurant qu'il n'y a toujours qu'une seule instance de Vue dans votre projet final.",
+  viteBody: 'Installez <code>vectis-ui</code> et sa peer dependency, <code>vue</code>.',
   viteStyles:
-    "Importez ensuite la feuille de styles globale une seule fois, au niveau du point d'entrée de votre application (ex. <code>main.ts</code>). Le fichier <code>styles.css</code> inclut le reset CSS, les design tokens et les styles de base communs (5,27 ko gzippé). Les styles propres à chaque composant sont quant à eux automatiquement chargés lors de leur import.",
-
+    'Importez <code>vectis-ui/styles.css</code> une seule fois dans <code>main.ts</code>. Ce fichier contient le reset CSS, les design tokens et les styles communs.',
   nuxtHeading: 'Avec Nuxt 3 ou 4',
-  nuxtBody: "Nuxt incluant déjà Vue, vous n'avez qu'à ajouter le paquet Vectis UI à votre projet.",
+  nuxtBody: 'Installez <code>vectis-ui</code>. Nuxt fournit déjà Vue.',
   nuxtStyles:
-    "Déclarez la feuille de styles directement dans <code>nuxt.config.ts</code> plutôt que de l'importer dans un fichier JavaScript. Nuxt pourra ainsi l'injecter dans le <code>&lt;head&gt;</code> de la page lors du rendu serveur (SSR), évitant un chargement asynchrone et tout flash visuel (FOUC).",
-  nuxtSsr:
-    "Aucune configuration supplémentaire n'est requise. Distribué nativement au format ESM, le paquet ne nécessite pas d'option <code>build.transpile</code>. Tous les composants sont totalement compatibles SSR : ils n'accèdent aux objets du navigateur (<code>window</code>, <code>document</code>) qu'au sein de <code>onMounted</code> ou des gestionnaires d'événements. De plus, ils utilisent le composable <code>useId()</code> de Vue pour garantir la cohérence des identifiants entre le serveur et le client.",
-
+    'Ajoutez la feuille de styles globale au tableau <code>css</code> dans <code>nuxt.config.ts</code>.',
+  nuxtSsr: 'Les composants prennent en charge le rendu côté serveur.',
   cssHeading: 'CSS des composants',
   cssBody:
-    "Le CSS de chaque composant est directement lié à celui-ci via un import statique. Les outils comme Vite, Nitro ou Webpack le transforment automatiquement en une feuille de styles prioritaire, garantissant l'affichage correct des styles même pour les routes chargées à la demande (lazy loading).",
+    'Les styles des composants sont chargés avec leurs imports. Aucune feuille de styles individuelle n’est à importer.',
 }

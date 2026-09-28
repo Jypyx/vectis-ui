@@ -6,8 +6,7 @@ const page = ref(3)
 
 const href = (n: number) => `/app/products?page=${n}`
 
-// The browser would load the address. A single-page application cancels that and routes
-// by hand, with `navigateTo(href(n))` in Nuxt or `router.push(href(n))` with Vue Router.
+// Cancel native navigation and pass the URL to your router.
 function onNavigate(_n: number, event: MouseEvent) {
   event.preventDefault()
 }

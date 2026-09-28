@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { VHotkeys, VTypography, type HotkeysPlatform } from 'vectis-ui'
 
-/*
- * The four the component knows. Without the prop it detects the one the reader is on, which the
- * shortcuts everywhere else on this page are doing.
- */
 const PLATFORMS: { value: HotkeysPlatform; label: string }[] = [
   { value: 'mac', label: 'macOS' },
   { value: 'windows', label: 'Windows' },

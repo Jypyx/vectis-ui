@@ -27,10 +27,7 @@ const text = computed(() => trim(props.source))
       <VTypography variant="overline" tone="muted" class="vd-code-lang">
         {{ lang ?? 'vue' }}
       </VTypography>
-      <!--
-        `mandatory` is what makes this a two-state switch rather than a pair of buttons: without
-        it, clicking the selected side deselects it and the card would show neither.
-      -->
+      <!-- mandatory keeps one view selected at all times. -->
       <VToggle
         v-model="mode"
         mandatory

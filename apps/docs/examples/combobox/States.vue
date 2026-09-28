@@ -32,7 +32,6 @@ const countries = [
 
     <VCombobox :options="countries" model-value="fr" disabled label="Disabled" />
 
-    <!-- Frozen rather than out of reach: it still takes the focus and can be copied from. -->
     <VCombobox
       :options="countries"
       model-value="fr"

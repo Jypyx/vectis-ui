@@ -1,49 +1,44 @@
 export default {
   title: 'Popover',
-  lead: "La plomberie sur laquelle repose chaque panneau flottant de la bibliothèque : l'élément popover natif, son ancrage et son état d'ouverture. Il ne porte ni rôle, ni clavier, ni politique de fermeture propre, qui restent à la charge de ce qui l'utilise.",
-
+  lead: '<code>VPopover</code> ancre un panneau popover natif à un déclencheur. Ajoutez le rôle et le comportement clavier requis par votre contenu.',
   examples: {
     placements: {
       title: 'Positions',
-      text: "<code>placement</code> propose douze positions par rapport au déclencheur, sur l'un ou l'autre axe et aligné sur l'un ou l'autre bord. Il nomme une préférence : le navigateur bascule le panneau de l'autre côté quand la place manque.",
+      text: '<code>placement</code> définit la position souhaitée. Le panneau change de côté si l’espace manque.',
     },
     interactiveContent: {
       title: 'Contenu interactif',
-      text: "Un panneau peut contenir de vrais contrôles : la fermeture légère ne se déclenche qu'au clic à l'extérieur, et le focus n'est pas piégé. Le composant ne fournit ni rôle, ni clavier, ni politique de fermeture.",
+      text: 'Les panneaux peuvent contenir des contrôles. Le focus n’est pas piégé ; fournissez un comportement clavier adapté au contenu.',
     },
     modes: {
       title: 'Modes',
-      text: "<code>mode</code> à <code>auto</code> confie la fermeture au navigateur, là où <code>manual</code> vous la rend et impose que le panneau offre une sortie. <code>v-model:open</code> est alimenté par le DOM, et les méthodes exposées <code>show</code> et <code>close</code> sont la voie quand l'ouverture doit être synchrone.",
+      text: '<code>auto</code> ferme au clic extérieur ou avec Échap. En mode <code>manual</code>, gérez vous-même la fermeture. Pilotez la visibilité avec <code>v-model:open</code> ou les méthodes exposées <code>show</code> et <code>close</code>.',
     },
     matchTrigger: {
       title: 'Aligner sur le déclencheur',
-      text: "<code>matchTrigger</code> empêche le panneau d'être plus étroit que ce à quoi il est ancré. C'est un plancher et non une contrainte : un contenu qui demande plus de place l'obtient toujours.",
+      text: '<code>matchTrigger</code> utilise la largeur du déclencheur comme largeur minimale du panneau.',
     },
     anchor: {
       title: 'Ancrer sur son propre élément',
-      text: "<code>anchor</code> accepte le nom d'une ancre que vous avez posée vous-même, VPopover ne rendant alors aucune enveloppe. C'est la voie obligée dès que le déclencheur est un champ texte. Posez le nom sur l'élément sous lequel le panneau doit s'ouvrir, la boîte du champ et non une enveloppe qui porte aussi un libellé, et confinez-le depuis un élément englobant.",
+      text: 'Utilisez <code>anchor</code> pour une ancre CSS existante, notamment avec un champ texte. Définissez l’ancre sur le cadre du contrôle et limitez sa portée depuis un parent.',
     },
   },
-
   api: {
     VPopover: {
       props: {
-        id: "L'identifiant du panneau, celui que la gâchette désigne. Un identifiant est généré quand aucun n'est donné : cette prop ne sert donc qu'à relier le panneau à quelque chose d'extérieur au composant.",
-        placement:
-          'Où le panneau se place par rapport à sa gâchette. Le navigateur le bascule de lui-même du côté opposé quand la place manque.',
-        mode: "Comment le panneau se ferme. <code>auto</code> laisse le navigateur le fermer sur un clic à l'extérieur ou sur Échap, et l'empiler avec d'autres panneaux ; <code>manual</code> vous laisse tout, ce dont a besoin un panneau ayant ses propres règles de focus et de fermeture.",
+        id: 'Identifiant du panneau. Généré si absent.',
+        placement: 'Position souhaitée du panneau ; change de côté si l’espace manque.',
+        mode: '<code>auto</code> utilise la fermeture native au clic extérieur et avec Échap. <code>manual</code> exige vos propres contrôles de fermeture.',
         anchor:
-          "Le nom d'une ancre que vous avez posée sur votre propre contrôle, écrit en identifiant CSS à tirets comme <code>--tooltip-anchor</code>. Le fournir remplace l'enveloppe interne, ce qui est la voie obligatoire dès que la gâchette est un champ de texte, où l'attribut <code>popovertarget</code> du navigateur n'est pas admis.",
-        bare: "Retire au panneau la surface du design system : ni fond, ni bordure, ni ombre, ni coins arrondis. C'est ce que demande un panneau dont le contenu apporte les siens, comme le fait VDatePicker.",
-        matchTrigger:
-          "Empêche le panneau d'être plus étroit que ce à quoi il est ancré. C'est un plancher : un panneau qui a sa propre largeur la dépasse toujours au lieu d'être ramené à celle du déclencheur, ce que veut une liste de libellés longs sous un champ court.",
+          'Nom d’ancre CSS existante, comme <code>--tooltip-anchor</code>. Supprime l’enveloppe du déclencheur ; requis pour les champs texte.',
+        bare: 'Retire le fond, la bordure, l’ombre et le rayon du panneau.',
+        matchTrigger: 'Définit la largeur du déclencheur comme largeur minimale du panneau.',
         vModelOpen:
-          'Si le panneau est affiché. Il part fermé et il est bidirectionnel, alimenté depuis le DOM : en mode <code>auto</code>, la fermeture légère du navigateur y réécrit. Le poser ouvre et ferme le panneau ; quand le changement doit être synchrone, utilisez plutôt les <code>show</code> et <code>close</code> exposés, ce que font VTooltip et les sélecteurs.',
+          'État ouvert synchronisé avec la fermeture native. Utilisez <code>show</code> / <code>close</code> pour des changements synchrones.',
       },
       slots: {
-        trigger:
-          "L'élément qui ouvre le panneau. Liez les <code>triggerProps</code> qu'il reçoit sur un bouton à vous : c'est ce qui relie les deux.",
-        default: 'Ce que contient le panneau.',
+        trigger: 'Contrôle déclencheur. Liez les <code>triggerProps</code> fournis à un bouton.',
+        default: 'Contenu du panneau.',
       },
     },
   },

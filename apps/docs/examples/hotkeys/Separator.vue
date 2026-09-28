@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import { VHotkeys, VTypography } from 'vectis-ui'
 
-/*
- * The caps are laid out with a gap of their own, so the separator is what is written between
- * them and never the space around it: an empty string leaves the gap alone and gives the macOS
- * convention, where the symbols simply follow one another.
- */
 const SEPARATORS = [
   { value: '+', label: 'The default' },
   { value: '', label: 'Nothing, the macOS convention' },

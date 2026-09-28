@@ -3,17 +3,13 @@ import { ref } from 'vue'
 import { VButton, VSideNavigation, VSideNavigationItem } from 'vectis-ui'
 import { description, image } from 'vectis-ui/icons'
 
-// The model is typed `boolean | null`, `null` being how the component writes "nobody is
-// driving this branch".
+// A null model leaves the branch state uncontrolled.
 const documentsOpen = ref<boolean | null>(true)
 </script>
 
 <template>
   <aside class="sidebar">
     <VSideNavigation label="Workspace">
-      <!-- Bound, the branch reports every fold back to the model, so a click on the
-           row is enough to keep it in step, and writing to the model opens or closes
-           the branch from code. -->
       <VSideNavigationItem v-model:open="documentsOpen" :icon="description">
         Documents
         <template #children>
@@ -22,8 +18,6 @@ const documentsOpen = ref<boolean | null>(true)
         </template>
       </VSideNavigationItem>
 
-      <!-- Left unbound, the browser keeps that state to itself and `defaultOpen`
-           gives only the value it starts on. -->
       <VSideNavigationItem :icon="image" default-open>
         Media
         <template #children>

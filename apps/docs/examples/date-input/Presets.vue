@@ -4,9 +4,7 @@ import { VButton, VDateInput } from 'vectis-ui'
 
 const date = ref<string | null>(null)
 
-/* The clock is read in the handler and never at setup: on the server there is no telling
-   what day it is where the reader stands, and a value picked there would not survive
-   hydration. */
+/* Read today's local date in the click handler to avoid a prerendered value. */
 function inDays(offset: number, close: () => void) {
   const day = new Date()
   day.setDate(day.getDate() + offset)

@@ -1,55 +1,53 @@
 export default {
   title: 'Case à cocher',
-  lead: "Un choix qu'un envoi exécutera, à la différence d'un interrupteur, qui agit sur-le-champ. Elle enveloppe un vrai <code>&lt;input type=\"checkbox\"&gt;</code>, donc elle s'envoie avec le formulaire.",
-
+  lead: 'Utilisez <code>VCheckbox</code> pour des choix indépendants ou une confirmation, comme l’acceptation de conditions.',
   examples: {
     labelPosition: {
       title: 'Position du libellé',
-      text: "<code>labelPosition</code> place le libellé avant la case plutôt qu'après.",
+      text: '<code>labelPosition="start"</code> place le libellé avant la case.',
     },
     spread: {
-      title: 'Écartement',
-      text: '<code>spread</code> prend toute la largeur offerte et pousse le libellé et la case aux deux extrémités de la ligne.',
+      title: 'Pleine largeur',
+      text: '<code>spread</code> occupe la largeur disponible et place le libellé et la case aux extrémités opposées.',
     },
     indeterminate: {
       title: 'Indéterminé',
-      text: "<code>indeterminate</code> affiche un tiret à la place de la coche. C'est une apparence à part : le v-model contient toujours true ou false.",
+      text: '<code>indeterminate</code> signale une sélection partielle, par exemple lorsque seuls certains éléments d’une liste sont cochés. Il ne modifie pas le <code>v-model</code> booléen.',
     },
     disabled: {
       title: 'Désactivé',
-      text: "<code>disabled</code> empêche de cocher la case et la grise par les tokens de couleur. Le clavier l'enjambe.",
+      text: '<code>disabled</code> empêche les changements et retire la case de la navigation par Tab et de l’envoi du formulaire.',
     },
     hint: {
       title: 'Aide',
-      text: '<code>label</code> écrit le texte à côté de la case, et le slot par défaut le remplace quand le libellé demande plus que du texte. <code>hint</code> ajoute une légende en dessous, reliée à la case par <code>aria-describedby</code> et gardée hors du <code>&lt;label&gt;</code> : elle est annoncée comme une description et non comme une partie du nom.',
+      text: 'Utilisez <code>label</code> ou le slot par défaut pour nommer la case. <code>hint</code> ajoute un texte d’aide lié par <code>aria-describedby</code>.',
     },
     readonly: {
       title: 'Lecture seule',
-      text: "<code>readonly</code> montre l'état sans permettre de le changer. L'attribut natif n'a aucun effet sur une case à cocher, donc le composant annule le clic, ce qui couvre aussi la barre d'espace. La case reste focalisable, s'envoie avec son formulaire et est annoncée en lecture seule. Elle participe toujours à la validation de contrainte, cela dit, donc <code>readonly</code> avec <code>required</code> et rien de coché laisse un formulaire impossible à envoyer comme à corriger.",
+      text: '<code>readonly</code> empêche les changements par clic ou Espace tout en conservant le focus et le comportement natif du formulaire. Une case en lecture seule non cochée avec <code>required</code> reste invalide pour la validation native du formulaire.',
     },
   },
-
   api: {
     VCheckbox: {
       props: {
-        label: 'Le texte à côté de la case, qui la nomme. Le slot par défaut le remplace.',
-        hint: "Une ligne d'aide sous le libellé. Elle est reliée à la case pour les technologies d'assistance, qui la lisent après le libellé et non comme une partie de celui-ci.",
+        label:
+          'Libellé visible, remplacé par le slot par défaut. Sans l’un ni l’autre, fournissez <code>aria-label</code> ou <code>aria-labelledby</code>.',
+        hint: 'Texte d’aide sous le libellé, lié par <code>aria-describedby</code>.',
         readonly:
-          "Montre l'état sans permettre de le changer. La case reste focalisable, est annoncée en lecture seule et s'envoie toujours avec son formulaire ; un clic ou la barre d'espace ne changent simplement rien.",
+          'Empêche les changements et conserve la possibilité de recevoir le focus. Définit <code>aria-readonly</code> ; l’envoi et la validation natifs du formulaire restent applicables.',
         indeterminate:
-          "Affiche la case comme partiellement cochée, un tiret au lieu d'une coche. C'est l'allure d'une case parente dont certains enfants sont cochés et d'autres non. C'est un état à part, pas une valeur que le v-model peut porter.",
-        labelPosition: 'De quel côté de la case se place le libellé.',
-        spread:
-          "Pousse le libellé et la case aux extrémités opposées de la ligne, qui prend toute la largeur disponible. C'est la forme habituelle d'une liste de réglages.",
+          'Affiche une sélection partielle. Indépendant du <code>v-model</code>, qui reste booléen.',
+        labelPosition:
+          'Libellé avant la case avec <code>start</code>, ou après avec <code>end</code>.',
+        spread: 'Occupe la largeur disponible et sépare le libellé de la case.',
         invalid:
-          "Marque le champ comme invalide, ce qui colore la case et le signale aux technologies d'assistance. À utiliser pour une règle que le navigateur ne sait pas vérifier seul ; la validité native est déjà prise en charge sans elle.",
-        disabled: 'Rend la case inutilisable, grisée par les tokens de couleur.',
+          'Définit <code>aria-invalid</code> et le style d’erreur. Ne bloque pas à lui seul l’envoi du formulaire.',
+        disabled: 'Désactive la case et l’exclut du focus et de l’envoi du formulaire.',
         vModel:
-          "Si la case est cochée. Elle part décochée, et le tiret est une troisième apparence plutôt qu'une troisième valeur : celle-là, c'est <code>indeterminate</code>.",
+          'État coché, booléen valant <code>false</code> par défaut. Utilisez les attributs natifs <code>name</code> et <code>value</code> pour l’envoi du formulaire.',
       },
       slots: {
-        default:
-          'Le libellé, quand il demande plus que le texte de la prop <code>label</code>. Il est cliquable.',
+        default: 'Contenu cliquable du libellé, remplaçant <code>label</code>.',
       },
     },
   },

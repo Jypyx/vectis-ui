@@ -6,8 +6,6 @@ const THICKNESSES = [2, 4, 8, 16]
 
 <template>
   <div class="column">
-    <!-- Always pixels, whether a number or a numeric string. The bar takes the width of
-         whatever holds it, so its length is the container's business and not a prop. -->
     <div v-for="thickness in THICKNESSES" :key="thickness" class="row">
       <VTypography variant="caption" tone="muted" class="name">{{ thickness }}px</VTypography>
       <VProgressLinear :value="60" :thickness="thickness" :label="`Upload, ${thickness}px`" />

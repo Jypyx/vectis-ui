@@ -18,9 +18,6 @@ function apply() {
 
 <template>
   <div class="column">
-    <!-- A panel holds real controls: light dismiss only fires on a click OUTSIDE, so
-         everything inside keeps working, and the focus is not trapped, a popover being
-         no dialog. -->
     <VPopover v-model:open="open" placement="bottom-start">
       <template #trigger="{ triggerProps }">
         <VButton v-bind="triggerProps" variant="outline" tone="neutral">Filters</VButton>

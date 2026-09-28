@@ -3,8 +3,7 @@ import { ref } from 'vue'
 import { VCalendar, VIcon, type CalendarEvent } from 'vectis-ui'
 import { schedule as scheduleIcon } from 'vectis-ui/icons'
 
-/* An interface of your own extending the contract: the extra fields reach the slot typed,
-   rather than as something to cast there. */
+/* Extend CalendarEvent to keep custom slot fields typed. */
 interface Booking extends CalendarEvent {
   room: string
   attendees: number

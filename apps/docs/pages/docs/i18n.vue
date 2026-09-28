@@ -67,7 +67,7 @@ setLocale('fr-FR')`
 
 const addCode = `import { registerMessages, setLocale, type MessagesInput } from 'vectis-ui'
 
-// Partial is legitimate: what is missing falls back to English.
+// Omitted keys use the English messages for this new dictionary.
 const de: MessagesInput = {
   common: { clear: 'Leeren', close: 'Schließen' },
   dataTable: { empty: 'Keine Daten' },

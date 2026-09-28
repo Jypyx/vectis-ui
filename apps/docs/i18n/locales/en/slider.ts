@@ -1,98 +1,94 @@
 export default {
   title: 'Slider',
-  lead: 'A value picked by sliding, one thumb or two. It is built on real range inputs, so the keyboard, the form and assistive technology all come from the browser.',
-
+  lead: '<code>VSlider</code> selects a number or a range with one or two thumbs. Optional number fields allow precise entry.',
   examples: {
     range: {
       title: 'Range',
-      text: '<code>range</code> offers two thumbs to pick a span, which makes the value a pair. The pair stays ordered, a thumb taken past its sibling pushing it along, and each is announced as the start or the end of the range.',
+      text: '<code>range</code> uses an ordered pair. Moving one thumb past the other pushes both to the new value.',
     },
     minMax: {
       title: 'Min and max',
-      text: '<code>min</code> and <code>max</code> bound the value, 0 and 100 unless said otherwise, negatives included. Everything else is measured against them.',
+      text: '<code>min</code> and <code>max</code> set the bounds, including negative values.',
     },
     steps: {
       title: 'Steps',
-      text: '<code>step</code> is the gap between two values the thumb can stop on, and what an arrow key moves by. <code>ticks</code> marks those stops on the track, and past fifty steps no tick is drawn.',
+      text: '<code>step</code> sets the increment. <code>ticks</code> marks stops when there are at most 50 steps.',
     },
     textLabels: {
       title: 'Text labels',
-      text: '<code>labels</code> names the stops under the track, one entry per step, and is what a screen reader announces in place of the raw number. Giving labels turns the ticks on by itself.',
+      text: '<code>labels</code> names each step and supplies its accessible value text. It also enables ticks.',
     },
     iconLabels: {
       title: 'Icon labels',
-      text: 'A label may carry an icon instead of a word, the label still being what is announced and what the value is read as. Both forms mix in the same list.',
+      text: 'Labels can mix strings and objects containing an icon and accessible text.',
     },
     tooltip: {
-      title: 'Showing the value while sliding',
-      text: '<code>tooltip</code> shows a bubble above the thumb while it is dragged or holds keyboard focus, one per thumb. It is decorative and hidden from assistive technology.',
+      title: 'Value tooltip',
+      text: '<code>tooltip</code> displays the value during dragging or keyboard focus.',
     },
     inputs: {
-      title: 'Typing the value exactly',
-      text: '<code>inputs</code> adds a number field, one per end in range mode; <code>ends</code> puts them on either side of the track. What is typed is committed when the field is left or on Enter, clamped and snapped to the step; an unreadable entry puts the previous value back.',
+      title: 'Number fields',
+      text: '<code>inputs</code> adds number fields. Blur or Enter commits the value, bounded and snapped to the step. Invalid entries restore the previous value.',
     },
     inputsPlacement: {
-      title: 'Placing the fields',
-      text: '<code>top</code> and <code>bottom</code> give the fields a row of their own above or below the track, which then takes the full width. Each field sits at the edge of the value it holds, and the fields come in the tab order where they are seen. On a vertical slider the two become its sides, <code>top</code> the start side and <code>bottom</code> the end side. With <code>tooltip</code> and <code>top</code>, the bubble covers the row of fields while a thumb is held.',
+      title: 'Field placement',
+      text: '<code>ends</code> places fields beside the track; <code>top</code> and <code>bottom</code> place them above or below. On vertical sliders, these become the start and end sides.',
     },
     orientation: {
       title: 'Orientation',
-      text: '<code>orientation</code> set to <code>vertical</code> stands the slider up, the lowest value at the bottom. Its length comes from a token rather than from its container.',
+      text: '<code>orientation="vertical"</code> places the lowest value at the bottom.',
     },
     disabled: {
       title: 'Disabled',
-      text: '<code>disabled</code> greys the track, the thumb and the ticks through the colour tokens, takes the thumbs out of the tab order and disables the number fields with them.',
+      text: '<code>disabled</code> disables thumbs and number fields.',
     },
     form: {
       title: 'In a form',
-      text: '<code>name</code>, <code>id</code> and the aria-* are redirected onto the real range input underneath. Naming goes through the <code>label</code> prop, which sets an aria-label; your own <code>aria-label</code> or <code>aria-labelledby</code> takes precedence over it, and a range then names its two thumbs from whichever you gave. A range has no single value to submit: only the end thumb carries the name. <code>hint</code> draws a line of help under the track and is appended to your own <code>aria-describedby</code> rather than replacing it.',
+      text: '<code>label</code> names the slider without visible text. Consumer ARIA names take precedence. Native attributes reach the end thumb; in range mode, only that value is submitted.',
     },
     sizes: {
       title: 'Field sizes',
-      text: '<code>size</code> sets the height of the number fields <code>inputs</code> adds, <code>md</code> by default as on every field. Inside a VInputGroup the row decides, as it does for its other fields.',
+      text: '<code>size</code> adjusts number fields. A size set by <code>VInputGroup</code> takes precedence.',
     },
     readonly: {
       title: 'Read-only',
-      text: '<code>readonly</code> shows the value without letting it change. A range input has no native read-only, so the component cancels the keys that move a thumb and puts back a thumb the pointer has moved. The thumbs stay focusable and announced, and the number fields turn read-only with them.',
+      text: '<code>readonly</code> prevents pointer and keyboard changes while preserving focus.',
     },
     invalid: {
       title: 'Invalid',
-      text: '<code>invalid</code> rings the thumbs in the danger colour, as a checkbox colours its border, and tells assistive technology through <code>aria-invalid</code> on every thumb and field.',
+      text: '<code>invalid</code> marks thumbs and number fields with <code>aria-invalid</code> and the error style.',
     },
   },
-
   api: {
     VSlider: {
       props: {
         readonly:
-          'Shows the value without allowing it to be changed. The thumbs can still be focused and are announced as read-only, but neither the pointer nor the keyboard moves them, and the number fields turn read-only with them.',
+          'Prevents pointer and keyboard changes. Thumbs remain focusable; number fields become read-only.',
         invalid:
-          'Marks the value as invalid, which colours the thumbs and tells assistive technology so. It is for a rule the browser cannot check by itself.',
-        size: "The height of the number fields <code>inputs</code> adds. Inside a VInputGroup the group's size wins, as it does for every field of the row.",
-        min: 'The lowest value the thumb can reach.',
-        max: 'The highest value the thumb can reach.',
-        step: 'The gap between two values the thumb can stop on. It is also what the arrow keys move by, and what a value typed into the companion field is snapped to.',
-        range: 'Offers two thumbs to pick a range, which makes the value a pair.',
-        disabled: 'Makes the slider unusable.',
+          'Sets <code>aria-invalid</code> and the error style. Does not block form submission by itself.',
+        size: 'Number-field size, overridden when <code>VInputGroup</code> sets a size.',
+        min: 'Minimum value.',
+        max: 'Maximum value.',
+        step: 'Value increment for thumbs, keyboard input and number fields.',
+        range: 'Enables two thumbs and an ordered pair for <code>v-model</code>.',
+        disabled: 'Disables interaction.',
         label:
-          'What screen readers announce for the slider. It is an accessible name and draws nothing on screen. In range mode the two thumbs are announced as the start and the end of it.',
-        hint: 'A line of help under the track, stating what the numbers mean or where they may go. It is tied to the slider for assistive technology, so it is read out after the name rather than as part of it.',
-        orientation: 'Turns the slider upright, with the lowest value at the bottom.',
+          'Accessible name without visible text. Range thumbs receive distinct start and end names.',
+        hint: 'Help text linked through <code>aria-describedby</code>.',
+        orientation: 'Track direction. Vertical sliders place the minimum at the bottom.',
         inputs:
-          'Adds a number field for setting the value exactly, one field or one per end in range mode. Sliding is quick but imprecise; this is the way out. <code>ends</code> puts the fields on either side of the track, <code>top</code> and <code>bottom</code> in a row above or below it, each field at the edge of the value it holds. A vertical slider turns <code>top</code> and <code>bottom</code> into its start and end sides. No field is drawn by default.',
-        ticks:
-          'Marks each step on the track. Providing labels implies it. Past fifty steps the marks would be an unreadable comb and are not drawn at all.',
+          'Number-field placement: <code>ends</code>, <code>top</code>, <code>bottom</code>, or <code>false</code> to hide them. Range mode adds two fields.',
+        ticks: 'Shows step markers, also enabled by <code>labels</code>. Hidden beyond 50 steps.',
         labels:
-          'A label for every step, in order: a piece of text, or an icon with the words that name it for screen readers. They also become what a screen reader announces in place of the raw number.',
-        tooltip: 'Shows the value in a bubble above the thumb while it is being moved or focused.',
+          'Ordered step labels, as strings or icon-and-label objects. Also supplies accessible value text.',
+        tooltip:
+          'Displays the value while a thumb is dragged or focused. Hidden from assistive technology.',
         vModel:
-          'The value: a single number, or an ordered pair once <code>range</code> is set. It is that prop and not the shape of this value that decides how many thumbs are drawn. The pair stays ordered whatever the reader does, a thumb taken past its sibling pushing it along.',
+          'Number or ordered pair with <code>range</code>. Crossing thumbs pushes the other endpoint to keep the pair ordered.',
       },
       events: {
-        input:
-          'The value is being changed: every step of a drag, and every key that moves a thumb. It carries the whole value, a pair in range mode, and fires for either thumb.',
-        change:
-          'The reader settled on a value: a thumb was released or moved by a key, or a number field was committed. It carries the whole value, a pair in range mode, and fires for either thumb, where the v-model follows every step of a drag.',
+        input: 'Emits the whole value while a thumb moves.',
+        change: 'Emits the committed value after thumb interaction or number-field validation.',
       },
     },
   },

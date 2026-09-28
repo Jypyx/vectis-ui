@@ -29,8 +29,7 @@ const rows = [
       <span class="heading"><VIcon :name="schedule" :size="16" />{{ column.label }}</span>
     </template>
 
-    <!-- On a sortable column the slot renders inside the sort button, so keep it to text
-         and decoration: a control there would be a control inside a control. -->
+    <!-- Sortable heading content sits inside a button; keep it non-interactive. -->
     <template #head-commits="{ column }">
       <span class="heading"><VIcon :name="code" :size="16" />{{ column.label }}</span>
     </template>

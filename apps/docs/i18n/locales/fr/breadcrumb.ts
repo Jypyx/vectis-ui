@@ -1,36 +1,31 @@
 export default {
   title: "Fil d'Ariane",
-  lead: "Le chemin de retour depuis la page consultée. Il est piloté par les données : une seule liste de segments, et le segment courant se déduit de l'adresse plutôt que d'être marqué à la main.",
-
+  lead: '<code>VBreadcrumb</code> affiche un fil d’Ariane à partir d’un tableau d’éléments et identifie la page actuelle par son URL.',
   examples: {
     separator: {
       title: 'Séparateur personnalisé',
-      text: "<code>separatorIcon</code> remplace le chevron dessiné entre deux segments, et accepte toute valeur d'icône.",
+      text: '<code>separatorIcon</code> remplace le séparateur entre les segments.',
     },
     icons: {
       title: 'Avec des icônes',
-      text: "Chaque segment accepte une <code>icon</code>, décorative à côté du libellé que lit un lecteur d'écran.",
+      text: 'Chaque élément peut inclure une <code>icon</code> décorative à côté du libellé.',
     },
     truncated: {
       title: 'Troncature',
-      text: 'Au-delà de <code>maxItems</code>, le fil garde son premier segment et ses deux derniers, et replie le reste derrière des points de suspension qui ouvrent un menu des segments masqués.',
+      text: 'Au-delà de <code>maxItems</code>, le fil conserve le premier élément et les deux derniers. Un menu de points de suspension liste les éléments masqués.',
     },
   },
-
   api: {
     VBreadcrumb: {
       props: {
-        items: 'Les segments du fil, ordonnés du plus général au plus profond.',
-        label:
-          "Le nom que les lecteurs d'écran annoncent pour cette navigation. Il retombe sur le dictionnaire du design system, dans la langue courante.",
+        items: 'Éléments du fil, de la racine au niveau actuel.',
+        label: 'Nom accessible de la navigation. Utilise le dictionnaire par défaut.',
         currentPath:
-          "L'adresse de la page affichée. Le segment dont le <code>href</code> lui correspond est le segment courant, même replié dans le menu. Une barre oblique finale, une requête ou une ancre d'un côté ou de l'autre ne changent rien : le chemin complet d'un routeur peut être passé tel quel.",
-        separatorIcon:
-          "L'icône dessinée entre deux segments. Elle est retournée dans une page de droite à gauche.",
-        maxItems:
-          "La longueur au-delà de laquelle le fil se replie : il ne reste que le premier segment, un bouton de points de suspension et les deux derniers, le bouton ouvrant un menu qui liste les seuls segments masqués. En dessous de 3 il n'y aurait plus rien à replier : 3 est donc le minimum effectif.",
+          'URL utilisée pour identifier l’élément actuel. Les barres obliques finales, paramètres de requête et fragments sont ignorés.',
+        separatorIcon: 'Icône de séparation. Retournée dans les dispositions de droite à gauche.',
+        maxItems: 'Seuil de troncature, avec un minimum effectif de 3.',
         ellipsisLabel:
-          "Le nom que les lecteurs d'écran annoncent pour le bouton de points de suspension. Il retombe sur le dictionnaire du design system.",
+          'Nom accessible du menu de points de suspension. Utilise le dictionnaire par défaut.',
       },
     },
   },

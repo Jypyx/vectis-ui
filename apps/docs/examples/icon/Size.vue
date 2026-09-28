@@ -14,8 +14,6 @@ const SIZES = [16, 20, 24, 32, 48]
       </div>
     </div>
 
-    <!-- Given no size, the icon takes the one its context imposes: a control sets one
-         for everything drawn inside it, so these three need nothing of their own. -->
     <div class="row">
       <VButton :icon-start="notifications" size="sm">Small</VButton>
       <VButton :icon-start="notifications">Medium</VButton>

@@ -20,9 +20,6 @@ const variants: TypographyVariant[] = [
 </script>
 
 <template>
-  <!-- Each role is a complete recipe: size, weight, line height, and where the role
-       calls for it the letter spacing and a monospaced family. Nothing here is set one
-       property at a time. -->
   <div class="table">
     <template v-for="variant in variants" :key="variant">
       <VTypography variant="code" as="span" tone="muted">{{ variant }}</VTypography>

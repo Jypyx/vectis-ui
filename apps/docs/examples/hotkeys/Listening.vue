@@ -10,16 +10,12 @@ const permissive = ref(0)
 
 <template>
   <div class="stack">
-    <!-- No platform is pinned, so the caps show what this keyboard has and the matcher
-         answers to the same thing: a Mac reader presses Command, everyone else Ctrl. -->
     <p class="line">
       <VHotkeys keys="mod+k" variant="outline" listen @trigger="opened++" />
       <VTypography as="span">Press it anywhere on the page. Fired {{ opened }} times.</VTypography>
     </p>
 
-    <!-- The browser's own binding is cancelled unless allowDefault says otherwise,
-         which is the whole point of taking over a combination it already uses. Here
-         both happen: the count goes up and the browser opens its save dialog. -->
+    <!-- allowDefault also lets the browser open its save dialog. -->
     <p class="line">
       <VHotkeys keys="mod+s" variant="outline" listen allow-default @trigger="saved++" />
       <VTypography as="span" tone="muted">

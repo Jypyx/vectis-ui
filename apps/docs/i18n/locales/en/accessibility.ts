@@ -1,36 +1,30 @@
 export default {
   title: 'Accessibility',
-  lead: 'Comprehensive keyboard navigation, native ARIA semantics, and systemic respect for <code>prefers-reduced-motion</code> across all components.',
-
-  guaranteedHeading: 'Accessibility Requirements and Guarantees',
+  lead: 'Keyboard interaction, accessible names, focus styles and motion preferences in Vectis UI.',
+  guaranteedHeading: 'Component behaviour',
   guarantees: [
-    '<strong>Keyboard Navigation & Focus Management</strong>: All interactive components are accessible and operable via keyboard following the logical DOM order, without focus traps. The focus ring is guaranteed. Upon closing a floating component (menu, drawer, dialog), focus is restored to its trigger element, and the Escape key consistently dismisses overlay views.',
-    '<strong>WAI-ARIA Semantics & Dynamic Announcements</strong>: Each component implements the appropriate ARIA pattern for its role, reflecting its dynamic states and structural relationships between sub-elements. Screen reader announcements prioritize function and behavior over visual appearance. Contextual updates are broadcast to assistive technologies via ARIA live regions.',
-    '<strong>Compile-time Constraints for Accessible Names</strong>: Visual controls relying solely on icons mandate an accessible name via their props. Omitting this label results in a compile-time typing error rather than a silent failure at runtime.',
-    '<strong>Contrast Ratios & State Tokens</strong>: Text contrast adheres to the minimum WCAG AA threshold in both light and dark themes. Disabled states are managed through dedicated color tokens rather than reduced opacity, preserving their legibility regardless of the underlying surface.',
+    '<strong>Keyboard and focus</strong>: Interactive components support keyboard use. Modal dialogs keep focus inside while open and return it to the trigger when closed. Each component’s documentation describes its keyboard controls.',
+    '<strong>ARIA</strong>: Components expose their roles, states and relationships to assistive technology. Status messages use live regions where needed.',
+    '<strong>Accessible names</strong>: Provide a name for each control. <code>VIconButton</code> requires a <code>label</code> prop that describes the action, such as “Search”.',
+    '<strong>Contrast</strong>: The default themes provide text and focus colours for light and dark backgrounds. Recheck contrast when overriding them.',
   ],
   guaranteedBody:
-    "Nearly half of the design system's behavioral JavaScript logic is dedicated exclusively to accessibility mechanisms (focus management, ARIA attributes, keyboard trapping). Components are designed with an accessibility-first paradigm: accessibility serves as the foundation before any interactive layer is added. Finally, the codebase is explicitly tagged so this proportion can be factually measured and audited, guaranteeing a quantifiable commitment rather than mere intent.",
-
+    'Test your application’s keyboard flows, accessible names and screen reader output. Component checks do not cover every combination of content and custom styles.',
   focusHeading: 'Focus',
   focusBody:
-    "The focus indicator is materialized as a 2px outline with a 2px offset, drawn outside the element's box (<code>outline</code>). This out-of-flow rendering guarantees zero reflow cost (no layout shift). When the parent component clips its content (<code>overflow: hidden</code>), the indicator is automatically inset (notably for action buttons nested within inputs, accordion summaries, or animated tree branches). Indeed, an outline projected outside a container with a clipping mask is truncated and becomes invisible.",
+    'Keep focus indicators visible when customising styles. Check that surrounding containers do not clip them. Field action buttons use an inset outline.',
   focusCaption:
-    'Navigate through them using Tab. A text field is the exception to the rule, featuring a 1px accent border plus a shadow of the same color, while the clear icon inside it retains its own focus ring.',
-
+    'Use Tab to move through the controls. Text fields highlight their border; the clear button has its own focus outline.',
   validationHeading: 'Validation',
   validationBody:
-    "Error management relies on the native <code>:user-invalid</code> pseudo-class rather than <code>:invalid</code>. Visual error feedback is only triggered once input is interrupted and the field loses focus (blur), preventing partial inputs (e.g., a half-typed email address) from being prematurely marked as invalid. For business rules that can only be validated by the server, the <code>invalid</code> prop allows programmatically forcing the component's error state.",
-
+    'Form fields use <code>:user-invalid</code> for native validation feedback after user interaction. Use the <code>invalid</code> prop for application errors, such as a server response, and provide an error message.',
   motionHeading: 'Motion',
   motionBody:
-    'When the <code>prefers-reduced-motion</code> system preference is active, state transitions are removed (<code>transition: none</code>), while looping animations are slowed down instead of being stopped. A loading spinner, for example, has its cycle extended from 1s to 3s. Maintaining this minimal motion prevents display ambiguity: a completely frozen status component is perceived by users as an application crash.',
-
-  forcedColorsHeading: 'Forced Colors',
-  forcedColorsBody:
-    'Vectis UI incorporates two architectural choices specifically designed for Windows Forced Colors Mode (High Contrast):',
+    'With <code>prefers-reduced-motion</code>, components remove or reduce animations. <code>VSpinner</code> keeps rotating at a slower speed to indicate ongoing activity.',
+  forcedColorsHeading: 'Forced colours',
+  forcedColorsBody: 'In forced-colours mode:',
   forcedColorsRules: [
-    '<strong>Icon Rendering</strong>: Icons are exclusively integrated as <code>&lt;svg&gt;</code> tags using <code>fill="currentColor"</code>. The use of CSS background masks (<code>mask-image</code>) is prohibited, as they are completely hidden by the system in forced colors mode.',
-    '<strong>Dividers and Separators</strong>: Dividers are implemented using genuine CSS borders (<code>border</code>) rather than thin containers with a background color (<code>background-color</code>). The system resets backgrounds to the Canvas system color (identical to the page background, rendering the component invisible), whereas borders fallback to <code>CanvasText</code>, ensuring their visibility.',
+    '<strong>Icons</strong>: Built-in SVG icons use <code>currentColor</code> to follow the text colour. Check any custom icons or images you provide.',
+    '<strong>Separators</strong>: CSS borders keep separators visible when the browser replaces background colours.',
   ],
 }

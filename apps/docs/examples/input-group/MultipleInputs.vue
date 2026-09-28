@@ -31,8 +31,6 @@ const tlds = [
       <VCombobox v-model="currency" :options="currencies" aria-label="Currency" class="currency" />
     </VInputGroup>
 
-    <!-- A row is not limited to two: each segment holding a field takes an equal share,
-         and the ones given a width of their own keep it. -->
     <VInputGroup label="Address" hint="The scheme, the name and the extension">
       <VCombobox v-model="scheme" :options="schemes" aria-label="Scheme" class="scheme" />
       <VInput v-model="domain" aria-label="Domain name" />

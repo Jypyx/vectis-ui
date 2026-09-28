@@ -18,7 +18,7 @@ const reference = ref('')
 const options = ref<ComboboxOption[]>([])
 const loading = ref(false)
 
-/* A token, so a slow answer to an old keystroke cannot overwrite a fresh one. */
+/* Ignore stale responses when a newer query has started. */
 let latest = 0
 
 async function onSearch(query: string) {

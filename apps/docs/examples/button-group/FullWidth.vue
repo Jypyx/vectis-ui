@@ -19,10 +19,6 @@ import { VButton, VButtonGroup } from 'vectis-ui'
 </template>
 
 <style scoped>
-/*
- * A column narrower than the page, so that filling it is something to see. The rows are aligned
- * to the start, which leaves the first at the width of its own labels.
- */
 .column {
   display: flex;
   flex-direction: column;

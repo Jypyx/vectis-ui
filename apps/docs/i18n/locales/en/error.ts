@@ -1,9 +1,8 @@
 export default {
   notFoundTitle: 'Page not found',
-  errorTitle: 'Something went wrong',
+  errorTitle: 'Page error',
   notFoundHeading: 'This page does not exist',
-  notFoundBody:
-    'The address may be out of date, or the component may be listed under another name. The search built into the documentation (Ctrl or ⌘ then K) covers every page and every component.',
+  notFoundBody: 'Check the address or search the documentation with Ctrl+K or ⌘K.',
   errorBody: 'The page could not be rendered.',
   toDocs: 'Go to the documentation',
   toHome: 'Back to the home page',

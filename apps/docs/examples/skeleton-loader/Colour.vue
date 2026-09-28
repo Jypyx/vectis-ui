@@ -4,9 +4,6 @@ import { VSkeletonLoader } from 'vectis-ui'
 
 <template>
   <div class="demo">
-    <!-- `color` replaces the background token. The highlight both animations use is
-         derived from it by a lightness delta, so it stays right on an unusual surface
-         and in either theme, with nothing else to set. -->
     <VSkeletonLoader shape="surface" color="oklch(55% 0.14 265)" />
 
     <div class="inverse">

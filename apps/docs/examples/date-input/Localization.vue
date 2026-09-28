@@ -2,8 +2,6 @@
 import { ref } from 'vue'
 import { VDateInput } from 'vectis-ui'
 
-/* The mask, the month names and the first day of the week all come from the tag. Each
-   field keeps its own value so switching one does not disturb the others. */
 const locales = ref([
   { tag: 'en-US', label: 'en-US, month first, weeks from Sunday', date: '2026-06-10' },
   { tag: 'en-GB', label: 'en-GB, day first, weeks from Monday', date: '2026-06-10' },

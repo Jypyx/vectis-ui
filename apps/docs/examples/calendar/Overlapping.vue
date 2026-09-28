@@ -4,10 +4,6 @@ import { VCalendar, type CalendarEvent } from 'vectis-ui'
 
 const DAY = '2026-06-10'
 
-/*
- * Four events crowd the morning and one stands alone after it, which shows the clustering: the
- * lunch keeps the full width the morning has to share.
- */
 const events = ref<CalendarEvent[]>([
   {
     id: 'standup',

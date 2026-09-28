@@ -40,8 +40,6 @@ const capitals: Record<string, string> = {
 .column {
   max-inline-size: 26rem;
 }
-/* The slot replaces the label, so its content is laid out inside the row the panel
-   already spaces and aligns. */
 .row {
   display: grid;
 }

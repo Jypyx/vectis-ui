@@ -1,99 +1,91 @@
 export default {
   title: 'File picker',
-  lead: 'The drop zone sibling of VFileInput: a surface rather than a field, with the same screening rules and the same list of files as its value.',
-
+  lead: '<code>VFilePicker</code> is a drop zone with a native file dialog and an optional preview list. The model is always a <code>File[]</code>.',
   examples: {
     titleAndSubtitle: {
       title: 'Title and subtitle',
-      text: '<code>title</code> is required and <code>subtitle</code> is where the rules go in plain words. Both have a slot, taking text and inline elements only.',
+      text: 'Use <code>title</code> for the instruction and <code>subtitle</code> for file constraints.',
     },
     preview: {
       title: 'The list of files',
-      text: '<code>preview</code> says where the list of chosen files goes, under the zone or beside it, or removes it. Beside, it folds back underneath as soon as the component is narrow.',
+      text: '<code>preview="bottom"</code> lists files below the zone. <code>preview="end"</code> places them beside it, moving below when the component is narrow.',
     },
     customIcons: {
       title: 'Custom icons',
-      text: '<code>icon</code> is the large glyph at the top of the zone. <code>typeIcons</code> replaces the glyph a row shows for a kind of file, naming only the kinds you want to change, and <code>removeIcon</code> the button that takes a row out.',
+      text: 'Customize the zone icon with <code>icon</code> and file-type icons with <code>typeIcons</code>.',
     },
     thumbnails: {
       title: 'Thumbnails',
-      text: 'An image is listed as itself, through a temporary address made in the page. <code>hideThumbnails</code> shows the icon for its kind instead.',
+      text: 'Image files show thumbnails. <code>hideThumbnails</code> replaces them with file-type icons.',
     },
     multiple: {
       title: 'Multiple files',
-      text: '<code>multiple</code> lets the zone take several files, the extra ones being turned away otherwise. The value is a list either way, and <code>reject</code> fires once per refused file.',
+      text: '<code>multiple</code> allows several files; <code>maxFiles</code> caps the selection.',
     },
     accept: {
       title: 'Accepted kinds',
-      text: '<code>accept</code> takes the browser syntax and filters the system dialog as well as a dropped file. A file that fails it comes back through <code>reject</code> with the reason <code>type</code>.',
+      text: '<code>accept</code> filters both dialog selections and drops. Include file extensions when MIME types may be missing.',
     },
     maxSize: {
       title: 'Maximum size',
-      text: '<code>maxSize</code> is the largest one file may be, in bytes. Each file is weighed on its own.',
+      text: '<code>maxSize</code> limits each file in bytes. Listen to <code>reject</code> to explain refusals.',
     },
     totalSize: {
       title: 'Total size and count',
-      text: '<code>maxTotalSize</code> and <code>maxFiles</code> bound the selection as a whole, counting what is already in the list. Screening runs in a fixed order: kind, then size, then count, then total size.',
+      text: '<code>maxTotalSize</code> limits the whole selection, including existing files.',
     },
     states: {
       title: 'States',
-      text: '<code>readonly</code> shows what was taken and lets nothing change it, the remove buttons included. <code>disabled</code> greys the zone out and stops it accepting anything, mid-drag included.',
+      text: '<code>readonly</code> prevents additions and removals while preserving focus. <code>loading</code> replaces the zone icon with a spinner without disabling selection.',
     },
   },
-
   api: {
     VFilePicker: {
       props: {
-        title:
-          'What the reader is being asked to drop, in one line. It is required: a drop zone with no instruction is just a rectangle. It shadows the HTML attribute of the same name, an accepted trade-off.',
-        subtitle:
-          'A second line under it, for the constraints in plain words: kinds, sizes, how many.',
-        icon: 'The large icon at the top of the zone.',
+        title: 'Required drop instruction.',
+        subtitle: 'Optional file constraints below the title.',
+        icon: 'Large icon in the drop zone.',
         hideBrowse:
-          'Hides the separator and the browse button under the instruction. That changes the nature of the zone: it then becomes the control itself, a real button, so Enter, Space and the focus come from the platform rather than from a container that merely reacts to clicks.',
+          'Hides the browse button and makes the zone itself a button, activated with Enter or Space.',
         browseText:
-          'The wording drawn on the browse button, which is also its accessible name. It falls back to the design system dictionary.',
+          'Visible text and accessible name of the browse button. Defaults to the library dictionary.',
         preview:
-          'Where the files taken are listed: under the zone, or beside it, which folds back underneath when the component is narrow, following the width it was given rather than the width of the window. By default nothing is listed at all.',
-        hideThumbnails:
-          'Shows the kind icon for every file in that list, images included, the way out when a list holds many images or very large ones. Left out, an image is shown as a thumbnail: it is given a temporary address, created in the browser only and released as soon as the file leaves the list or the component goes away.',
-        typeIcons: 'Replaces the icon of one or more kinds of file.',
-        removeIcon: 'The icon of the button removing a file from the list.',
-        multiple:
-          'Allows several files to be taken. With one only, every extra file is turned away.',
+          'Preview position: <code>false</code>, <code>bottom</code> or <code>end</code>. The side list moves below in narrow containers.',
+        hideThumbnails: 'Uses file-type icons instead of image thumbnails.',
+        typeIcons: 'Icon overrides by file kind.',
+        removeIcon: 'Icon of the file removal button.',
+        multiple: 'Allows multiple files. Otherwise, extra files are rejected.',
         accept:
-          "Which kinds of file are accepted, in the browser's own syntax. It is applied twice: as an attribute, which filters the system's file dialog, and again in code, which is the only thing that can filter a dropped file.",
-        maxSize: 'The largest one file may be, in bytes.',
-        maxTotalSize: 'The largest the whole selection may be, in bytes.',
-        maxFiles: 'How many files may be taken at most.',
-        disabled: 'Makes the zone unusable, greyed out through the colour tokens.',
+          'Accepted file types, using native syntax such as <code>image/*,.pdf</code>. Filters dialog selections and dropped files.',
+        maxSize: 'Maximum size per file, in bytes.',
+        maxTotalSize: 'Maximum total selection size, in bytes.',
+        maxFiles: 'Maximum number of selected files.',
+        disabled: 'Disables interaction.',
         readonly:
-          'Shows what was taken without allowing it to change: no dialog, no drop, no removal. Its buttons stay reachable from the keyboard, announced as unavailable.',
+          'Prevents opening the dialog, dropping files and removing them. Controls remain focusable.',
         invalid:
-          'Marks the zone as invalid, which colours its outline and is announced on the control the reader reaches. It is for a rule of your own: nothing here is checked by the browser, the real input being hidden.',
-        loading:
-          'Shows a spinner in place of the zone icon, while an upload is under way typically. It says that something is happening and changes nothing else: files can still be dropped and the dialog still opens.',
+          'Marks the control as invalid and applies the error style. Validate your file selection separately.',
+        loading: 'Shows a spinner instead of the zone icon without disabling selection.',
         loadingText:
-          'What screen readers announce while the spinner turns. It falls back to the design system dictionary.',
-        vModel:
-          'Always a list of files, whether or not several are allowed, never a file on its own. The shape does not depend on a prop, so you never have to narrow a union TypeScript cannot discriminate.',
+          'Loading text and accessible spinner name. Defaults to the library dictionary.',
+        vModel: 'Selected files as a <code>File[]</code>, even for a single file.',
       },
       events: {
-        change: 'The selection changed, with the whole list as it now stands.',
-        reject: 'A file was turned away, with which one and why.',
-        remove: 'A file was removed from the list, with which one and where it was.',
+        change: 'The selection changed. Receives the complete <code>File[]</code>.',
+        reject:
+          'Emitted for each rejected file. Receives the file and a reason: <code>type</code>, <code>size</code>, <code>count</code> or <code>total-size</code>.',
+        remove: 'A file was removed. Receives the file and its index.',
       },
       slots: {
-        icon: 'The large icon, for an illustration the icon prop cannot express. It must stay non-interactive, and so must the two below: with the browse button hidden the zone is a button, and nothing interactive may sit inside one.',
-        title: 'The instruction. Text and inline elements only, for the same reason.',
-        subtitle: 'The second line. Same contract as the instruction.',
+        icon: 'Zone illustration. Keep it non-interactive.',
+        title: 'Instruction content. Use text and non-interactive inline elements.',
+        subtitle: 'Constraint content. Use text and non-interactive inline elements.',
         browse:
-          'The browse button. Call the <code>open</code> it receives: without it a button of your own could no longer open the file dialog at all.',
-        item: 'A whole row of the list, the way out for a row showing its own upload progress. It receives everything the standard row was given.',
-        thumbnail:
-          "The square at the start of a row alone: for a thumbnail produced by your server, a video's poster frame, or a format the browser cannot decode.",
+          'Custom browse control. Receives <code>open</code> and <code>disabled</code>; call <code>open</code> to show the dialog.',
+        item: 'Entire preview row. Receives the file, index, kind, thumbnail, icon, formatted size and <code>remove</code>.',
+        thumbnail: 'Preview visual. Receives the same data as <code>item</code>.',
         remove:
-          "The control that removes a row. <code>remove</code> is the only thing that can take the file out, and <code>removeLabel</code> is the ready-made accessible name, including the file's own, without which the button would be announced as nothing at all.",
+          'Removal control. Call <code>remove</code> and use <code>removeLabel</code> as its accessible name.',
       },
     },
   },

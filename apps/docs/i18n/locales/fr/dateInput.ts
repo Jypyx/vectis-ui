@@ -1,126 +1,121 @@
 export default {
   title: 'Champ de date',
-  lead: "Un champ de texte saisissable, avec un VDatePicker dans un panneau à côté. Le masque suit la langue : l'ordre des champs, le séparateur et le gabarit sont tous dérivés de la locale.",
-
+  lead: '<code>VDateInput</code> associe un champ de date localisé à <code>VDatePicker</code>. Il accepte une date, une période ou plusieurs dates.',
   examples: {
     labelAndHint: {
       title: 'Libellé, aide et icône',
-      text: "<code>label</code> et <code>hint</code> se comportent comme sur n'importe quel champ. <code>pickerIcon</code> change le glyphe qui ouvre le calendrier, <code>iconStart</code> pose une icône au début du champ, et <code>loading</code> affiche un indicateur à la place de l'icône de calendrier. <code>pickerIconLabel</code>, <code>clearLabel</code>, <code>loadingText</code> et <code>iconStartLabel</code> renomment ce que chacun annonce.",
+      text: 'Nommez le champ avec <code>label</code> et ajoutez une aide avec <code>hint</code>.',
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> définit la hauteur du champ à 32, 40 ou 48 pixels, et <code>compact</code> lui retire 4px. Le panneau garde ses propres mesures.',
+      text: '<code>size</code> définit la taille du champ ; <code>compact</code> réduit sa hauteur.',
     },
     modes: {
       title: 'Modes',
-      text: "<code>mode</code> choisit la façon de renseigner la valeur : <code>input</code> masque le champ pour n'y saisir que des chiffres, le calendrier devenant alors optionnel via <code>showPicker</code> ; <code>picker</code> fait du calendrier la seule entrée. La saisie est réservée à une date unique.",
+      text: '<code>input</code> accepte une date numérique localisée. <code>showPicker</code> y ajoute un calendrier. <code>picker</code> utilise uniquement le calendrier ; les sélections de période et de dates multiples imposent ce mode.',
     },
     range: {
       title: 'Période',
-      text: "<code>selection</code> à <code>range</code> fait de la valeur un début et une fin, le calendrier prenant le premier clic pour l'un et le second pour l'autre.",
+      text: '<code>selection="range"</code> utilise un modèle <code>{ start, end }</code>. Chaque borne est une date ISO ou <code>null</code>.',
     },
     multiple: {
       title: 'Dates multiples',
-      text: '<code>selection</code> à <code>multiple</code> fait de la valeur une liste, un jour déjà présent en étant retiré par un nouveau clic.',
+      text: '<code>selection="multiple"</code> utilise un tableau de dates ISO. Sélectionnez à nouveau une date pour la retirer.',
     },
     presets: {
       title: 'Raccourcis',
-      text: "Le slot <code>#footer</code> est une bande au pied du panneau, pour des actions ou pour les dates les plus demandées. Il reçoit <code>close</code>, de sorte qu'un bouton peut poser la valeur et fermer le panneau d'un coup.",
+      text: 'Ajoutez des dates prédéfinies dans <code>footer</code>. Son rappel <code>close</code> ferme le panneau.',
     },
     bounds: {
       title: 'Bornes et jours fermés',
-      text: '<code>min</code> et <code>max</code> bornent à la fois le choix et la navigation. <code>disabledDates</code> ferme des jours isolés, sous forme de liste ou de fonction répondant pour une date à la fois.',
+      text: '<code>min</code> et <code>max</code> limitent la sélection et la navigation. Excluez certaines dates avec <code>disabledDates</code>.',
     },
     events: {
       title: 'Pastilles',
-      text: "<code>events</code> dessine jusqu'à trois points sous un jour. Chacun accepte n'importe quelle couleur CSS et un <code>label</code>, qui est ce que lisent les technologies d'assistance.",
+      text: '<code>events</code> ajoute trois points au maximum par jour. Les libellés des événements font partie du nom accessible du jour.',
     },
     customDay: {
       title: 'Cellules de jour personnalisées',
-      text: "Le slot <code>#day</code> remplace le nombre à l'intérieur d'un jour et reçoit la date ISO ainsi que ce que la cellule sait d'elle-même : si elle appartient au mois affiché, si elle peut être choisie, si elle est sélectionnée, aujourd'hui, ou dans une période en cours de tracé.",
+      text: 'Personnalisez le contenu des cellules avec <code>day</code>, à partir de leur date et de leur état de sélection.',
     },
     clearable: {
       title: 'Effacement',
-      text: "<code>clearable</code> ajoute une croix qui vide la valeur, à gauche de l'icône de calendrier et non à sa place.",
+      text: '<code>clearable</code> ajoute un bouton pour effacer la sélection.',
     },
     adjacentDays: {
       title: 'Jours adjacents',
-      text: '<code>showAdjacentDays</code> remplit les coins de la grille avec les mois voisins, grisés et inertes. <code>selectAdjacentDays</code> rend ces jours choisissables, et en choisir un déplace le calendrier vers son mois.',
+      text: '<code>showAdjacentDays</code> affiche les jours voisins. <code>selectAdjacentDays</code> permet aussi de les choisir et ouvre leur mois.',
     },
     states: {
       title: 'États',
-      text: "<code>invalid</code> marque le champ en erreur. <code>disabled</code> le grise et empêche l'ouverture du panneau. <code>readonly</code> montre la valeur figée : rien ne se saisit et aucun calendrier n'est rendu, mais le champ garde son contraste et prend le focus.",
+      text: '<code>readonly</code> empêche la saisie, la sélection et l’effacement tout en conservant le focus. <code>loading</code> affiche un indicateur sans désactiver le champ.',
     },
     localization: {
       title: 'Localisation',
-      text: "<code>locale</code> décide de l'ordre de saisie, du séparateur, des noms de mois et de jours et du premier jour de la semaine, et l'emporte sur la locale globale. <code>displayFormat</code> est un jeu d'options <code>Intl</code> pour écrire la date, et s'applique partout où rien n'est saisi.",
+      text: '<code>locale</code> définit les noms et l’ordre des éléments de date. <code>displayFormat</code> personnalise l’affichage en mode calendrier ; il ne modifie pas le masque de saisie.',
     },
     placement: {
       title: 'Placement',
-      text: "<code>placement</code> nomme la direction d'ouverture préférée du panneau, au-dessus ou en dessous du champ.",
+      text: '<code>placement</code> définit la position souhaitée du calendrier.',
     },
   },
-
   api: {
     VDateInput: {
       props: {
-        selection:
-          'Ce qui est choisi : une date, une période entre deux, ou plusieurs dates séparées.',
+        selection: 'Mode de sélection : une date, une période ou plusieurs dates.',
         locale:
-          "Une locale BCP 47, qui décide des noms de mois et de jours, du premier jour de la semaine et de l'ordre dans lequel le champ se saisit. Elle l'emporte sur la locale globale du design system et retombe dessus.",
+          'Locale BCP 47 pour l’affichage des dates et le début de semaine. Remplace la locale globale.',
         firstDayOfWeek:
-          'Force le jour où commencent les semaines, de 0 pour dimanche à 6 pour samedi.',
-        min: 'La première date qui peut être choisie, en chaîne ISO.',
-        max: 'La dernière date qui peut être choisie, en chaîne ISO.',
-        disabledDates: 'Les dates qui ne peuvent pas être choisies, en liste ou en fonction.',
-        showAdjacentDays: 'Remplit les coins de la grille avec les jours grisés des mois voisins.',
-        selectAdjacentDays: 'Permet de cliquer ces jours voisins, ce qui implique de les afficher.',
-        events: 'Les événements à marquer sous les jours concernés.',
-        mode: "Si le champ peut être SAISI, dans la forme numérique de la langue du lecteur, ou s'il se remplit depuis le seul calendrier, ce qui est <code>picker</code>. La saisie est réservée au choix d'une date UNIQUE : une période ou une liste retombe sur <code>picker</code>, faute de façon sensée de saisir l'une ou l'autre. C'est une autre question que <code>readonly</code>, qui gèle le champ par toutes les voies à la fois.",
-        showPicker:
-          "Propose le sélecteur de date à côté d'un champ saisissable : une icône en fin de champ, et un panneau qui s'ouvre au focus. Cela ne signifie rien en mode <code>picker</code>, où le calendrier est déjà la seule façon de choisir.",
-        label: 'Le libellé au-dessus du champ.',
-        hint: "Une ligne d'aide sous le champ.",
-        placeholder: 'Ce que dit le champ quand il est vide.',
-        size: 'La hauteur du champ : 32, 40 ou 48 pixels.',
-        compact: 'Retire 4px à la hauteur.',
-        disabled: 'Rend le champ inutilisable, grisé par les tokens de couleur.',
-        readonly:
-          "Montre la date sans permettre de la changer : rien ne se tape, il n'y a ni calendrier ni croix de vidage, et les attributs qui annonçaient un panneau disparaissent avec eux. Le champ garde le focus et reste copiable, ce qui le distingue de <code>disabled</code>.",
-        invalid: 'Marque le champ comme invalide, pour une règle à vous.',
+          'Premier jour de la semaine, de 0 (dimanche) à 6 (samedi). Dépend de la locale par défaut.',
+        min: 'Première date sélectionnable au format <code>YYYY-MM-DD</code>. Limite aussi la navigation.',
+        max: 'Dernière date sélectionnable au format <code>YYYY-MM-DD</code>. Limite aussi la navigation.',
+        disabledDates:
+          'Dates indisponibles : tableau de chaînes ISO ou prédicat. Les jours restent visibles et accessibles au clavier.',
+        showAdjacentDays: 'Affiche les jours des mois voisins.',
+        selectAdjacentDays:
+          'Permet de sélectionner les jours des mois voisins et ouvre le mois choisi. Implique <code>showAdjacentDays</code>.',
+        events:
+          'Événements représentés par trois points au maximum par jour. Chacun accepte une date, une couleur CSS et un libellé accessible.',
+        mode: '<code>input</code> pour la saisie, <code>picker</code> pour le calendrier. Les périodes et dates multiples imposent le mode calendrier.',
+        showPicker: 'Ajoute un calendrier au mode saisie. Le mode calendrier l’inclut toujours.',
+        label:
+          'Libellé visible. Sans nom visible, fournissez <code>aria-label</code> ou <code>aria-labelledby</code>.',
+        hint: 'Texte d’aide lié par <code>aria-describedby</code>.',
+        placeholder: 'Texte indicatif lorsque le champ est vide.',
+        size: 'Taille du composant.',
+        compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
+        disabled: 'Désactive les interactions.',
+        readonly: 'Empêche la saisie, la sélection et l’effacement. Le champ conserve le focus.',
+        invalid:
+          'Définit <code>aria-invalid</code> et le style d’erreur. Ne bloque pas à lui seul l’envoi du formulaire.',
         iconStart:
-          "Une icône dans le champ, au début. Décorative jusqu'à ce qu'un écouteur <code>@click:icon-start</code> en fasse un bouton.",
-        iconStartLabel: "Ce que fait l'icône de début, en mots, une fois cliquable.",
+          'Icône de début. Un écouteur <code>@click:icon-start</code> en fait un bouton ; fournissez <code>iconStartLabel</code>.',
+        iconStartLabel: 'Nom accessible du bouton d’icône de début.',
         pickerIconLabel:
-          "Ce que fait l'icône de fin, en mots. Elle nomme le bouton qui ouvre le calendrier, et sa valeur par défaut vient du dictionnaire du design system.",
+          'Nom accessible du bouton calendrier. Utilise le dictionnaire de la bibliothèque par défaut.',
         loading:
-          "Affiche une roue à la place de l'icône du calendrier. Elle dit que quelque chose se charge et ne change rien d'autre : le champ reste saisissable et le panneau s'ouvre toujours.",
+          'Remplace l’icône calendrier par un indicateur. Ne désactive ni la saisie ni le panneau.',
         loadingText:
-          "Ce que les lecteurs d'écran annoncent pendant que la roue tourne. Sa valeur par défaut vient du dictionnaire du design system.",
-        clearable: "Propose une croix qui vide la valeur, affichée avant l'icône de fin.",
+          'Texte de chargement et nom accessible de l’indicateur. Utilise le dictionnaire de la bibliothèque par défaut.',
+        clearable: 'Ajoute un bouton pour effacer la sélection.',
         clearLabel:
-          'Ce que fait cette croix, en mots. Sa valeur par défaut vient du dictionnaire du design system.',
-        pickerIcon:
-          "L'icône qui ouvre le sélecteur de date, en fin de champ. La croix d'effacement apparaît à sa gauche plutôt qu'à sa place, et aucune icône n'est rendue du tout quand il n'y a pas de panneau à ouvrir.",
+          'Nom accessible du bouton d’effacement. Utilise le dictionnaire de la bibliothèque par défaut.',
+        pickerIcon: 'Icône du bouton calendrier, affichée si un panneau est disponible.',
         displayFormat:
-          "Comment la date est ÉCRITE dans le champ. Sans effet sur un champ en cours de saisie, qui montre nécessairement la forme numérique que l'on tape : cette prop concerne donc le mode <code>picker</code>, ainsi que les sélections de période et de liste.",
-        placement: "Où le panneau s'ouvre par rapport au champ.",
+          'Options d’affichage en mode calendrier. Ne modifie pas le masque de saisie numérique.',
+        placement: 'Position souhaitée du panneau par rapport au champ.',
         vModel:
-          "La ou les dates choisies, dans la forme que <code>selection</code> réclame. Pendant la saisie, la valeur n'est écrite qu'une fois que ce qui a été entré est une date complète et acceptable ; une entrée inachevée ou refusée la laisse intacte et est annulée quand le lecteur quitte le champ.",
+          'Date ISO ou <code>null</code>, période <code>{ start, end }</code> ou tableau de dates ISO. La saisie ne modifie le modèle que si elle est complète et autorisée ; les autres valeurs sont annulées à la perte du focus.',
       },
       events: {
-        clear: 'La croix de vidage a vidé le champ. La valeur est déjà remise à zéro.',
-        clickIconStart:
-          "L'icône de début a été cliquée. Attacher cet écouteur est ce qui en fait un vrai bouton, qui demande alors <code>iconStartLabel</code>.",
+        clear: 'La sélection a été effacée ; le modèle est déjà réinitialisé.',
+        clickIconStart: 'Le bouton de l’icône de début a été activé.',
       },
       slots: {
-        day: 'Ce que montre une cellule de jour, transmis tel quel au calendrier.',
-        footer:
-          "La bande au pied du panneau : des actions, ou des dates prédéfinies comme aujourd'hui. Elle reçoit <code>close</code>, ce qui permet à l'un de ces boutons de refermer le panneau.",
-        valueEnd:
-          "Des contrôles à vous à l'intérieur du champ, placés avant ceux que le champ possède : la croix d'effacement et l'icône qui ouvre le panneau. Ces deux-là sont l'affordance propre du composant, ce qui explique l'absence de slot <code>end</code> ici.",
-        start:
-          "Du contenu au début du champ, rendu après <code>iconStart</code> plutôt qu'à sa place.",
+        day: 'Contenu d’une cellule. Reçoit les données du slot de jour de <code>VDatePicker</code>.',
+        footer: 'Pied du panneau. Reçoit <code>close</code> pour le fermer.',
+        valueEnd: 'Contenu avant les boutons d’effacement et de calendrier.',
+        start: 'Contenu après <code>iconStart</code>.',
       },
     },
   },

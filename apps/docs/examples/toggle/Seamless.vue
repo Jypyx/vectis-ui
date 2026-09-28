@@ -8,8 +8,6 @@ const seamless = ref('week')
 
 <template>
   <div class="demo">
-    <!-- Joined, a line is drawn between two items: the row reads as a set of segments,
-         each one of them a target. -->
     <div class="row">
       <p class="caption">with the seams</p>
       <VToggle v-model="segmented" item-variant="outline" label="Period, segmented">
@@ -19,9 +17,6 @@ const seamless = ref('week')
       </VToggle>
     </div>
 
-    <!-- Seamless takes those lines out, and the row reads as one frame holding a
-         highlight that moves. It has no effect under `detached`, where the items are
-         separate buttons already. -->
     <div class="row">
       <p class="caption">seamless</p>
       <VToggle v-model="seamless" seamless item-variant="outline" label="Period, seamless">

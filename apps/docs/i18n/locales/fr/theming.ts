@@ -1,55 +1,46 @@
 export default {
-  title: 'Thématisation',
-  lead: "Un thème repose sur un ensemble de variables CSS (custom properties). Personnaliser le thème consiste simplement à en redéfinir certaines, sans aucune étape de build ni recompilation. Aucun composant n'utilise de valeurs en dur (couleur, rayon de bordure, durée de transition) : tous s'appuient sur des tokens sémantiques <code>--vectis-*</code>.<br>Modifier un token répercute immédiatement le changement sur l'ensemble des composants. Le thème est piloté via l'attribut <code>data-theme</code>, qui peut être appliqué à n'importe quel élément HTML, et pas seulement à la racine de la page.",
-
+  title: 'Thèmes',
+  lead: 'Choisissez un thème clair ou sombre avec <code>data-theme</code>. Personnalisez les styles des composants en redéfinissant les variables CSS <code>--vectis-*</code>.',
   switchHeading: 'Changer de thème',
   switchBody:
-    "Vectis UI inclut deux thèmes natifs : clair et sombre. Tous deux réutilisent les mêmes tokens sémantiques en les liant à des nuances différentes des palettes. Basculer de thème ne demande aucun fichier CSS supplémentaire et n'impose aucun re-rendu de vos composants Vue. Il suffit de modifier un attribut HTML à tout moment, sans recompilation ni flash visuel (FOUC).",
+    'Ajoutez <code>data-theme="dark"</code> à <code>&lt;html&gt;</code> pour le thème sombre. Utilisez <code>data-theme="light"</code> pour le thème clair, également appliqué par défaut.',
   switchLight: 'Clair',
   switchDark: 'Sombre',
   switchScope:
-    "Les deux exemples ci-dessus partagent exactement le même balisage HTML : seul l'attribut de thème diffère. Si l'attribut est généralement appliqué sur la balise <code>&lt;html&gt;</code> pour toute l'application, il peut être défini sur n'importe quel élément du DOM. Grâce à l'héritage CSS, l'attribut le plus proche du composant prévaut sur toute son arborescence. Une barre de navigation sombre dans un layout clair, une carte de prévisualisation claire dans un éditeur sombre, ou une facture qui reste claire : aucun de ces cas ne nécessite un thème dédié, il suffit d'ajouter l'attribut sur le conteneur ciblé.",
-  switchScopeBody:
-    "Les éléments enfants héritent automatiquement du thème de leur parent tant qu'ils n'en définissent pas un nouveau. En effet, l'attribut <code>data-theme</code> ne fait que réassigner un ensemble de variables CSS, qui se propagent naturellement le long du DOM. L'imbrication de thèmes se fait ainsi sans aucun surcoût de performance et reste réversible à n'importe quelle profondeur.",
+    'Placez <code>data-theme</code> sur un conteneur pour limiter le thème à une section. Les conteneurs imbriqués peuvent utiliser un autre thème.',
   switchColorScheme:
-    "L'attribut applique également la propriété CSS <code>color-scheme</code>. Ainsi, les éléments non gérés directement par le design system s'adaptent automatiquement au thème actif au lieu de conserver leur style clair par défaut. Cela concerne principalement les barres de défilement, les contrôles de formulaire natifs et les composants propres au navigateur.",
+    'Chaque thème définit aussi <code>color-scheme</code>, qui adapte les contrôles de formulaire natifs et les barres de défilement.',
   switchSystem:
-    "Les tokens ne contiennent volontairement aucune media query <code>prefers-color-scheme</code>. Suivre la préférence du système est un choix qui appartient à l'application, pas au design system. Cela s'implémente facilement en une ligne de JavaScript pour lire la configuration système et appliquer l'attribut. Gérer cela en CSS pur rendrait impossible la surcharge manuelle par l'utilisateur.",
-
+    'La bibliothèque ne choisit pas de thème selon la préférence système. Lisez <code>prefers-color-scheme</code> dans votre application si nécessaire. Cet exemple lit la préférence une seule fois ; appliquez-la avant le premier affichage pour éviter un flash de thème.',
   tokensHeading: 'Personnaliser les couleurs et les tokens',
-  tokensBody:
-    "L'intégralité des styles de la bibliothèque repose sur des design tokens. Générés à partir d'une source TypeScript typée selon un format inspiré de la spécification DTCG du W3C, ils sont ensuite exposés sous forme de variables CSS structurées sur deux niveaux :",
+  tokensBody: 'Les design tokens sont exposés sous forme de variables CSS à deux niveaux :',
   tokensLevels: [
-    "<strong>Primitives</strong> : Cinq palettes OKLCH de 11 nuances chacune (ex. <code>--vectis-color-indigo-500</code>), ainsi que les échelles d'espacement, de typographie, de rayons, d'ombres, de durées et de transitions.",
-    'Rôles sémantiques : Les seuls tokens directement consommés par les composants : <code>--vectis-color-surface</code>, <code>--vectis-color-text-muted</code>, <code>--vectis-color-accent</code>, <code>--vectis-radius-interactive</code>, <code>--vectis-focus-ring-color</code>.',
+    '<strong>Primitives</strong> : palettes de couleurs et échelles d’espacement, de typographie, de rayons, d’ombres et d’animation.',
+    '<strong>Rôles sémantiques</strong> : variables nommées selon leur usage, comme <code>--vectis-color-surface</code> ou <code>--vectis-color-accent</code>. Utilisez-les pour personnaliser les composants.',
   ],
   tokensRoles:
-    "Un composant consomme le token d'accent, jamais une teinte spécifique comme un indigo précis. C'est ce qui rend la bibliothèque totalement personnalisable : modifiez la valeur du rôle d'accent, et l'ensemble des composants s'adapte sans jamais devoir surcharger leur CSS (boutons, badges, éléments sélectionnés, etc.).<br>L'anneau de focus dispose lui aussi d'un rôle dédié plutôt que d'être une simple déclinaison de l'accent. Ce choix répond à des exigences de contraste différentes : la couleur d'accent doit assurer la lisibilité du texte (souvent blanc), tandis que l'anneau de focus doit être immédiatement visible sur le fond de page. Veillez donc à réadapter ces deux tokens en parallèle.",
+    'Modifier un token sémantique met à jour les composants qui l’utilisent. La couleur du focus a son propre token, <code>--vectis-focus-ring-color</code>. Vérifiez le contraste du texte et du focus lorsque vous changez de palette.',
   tokensOverride:
-    "Surcharger un token se fait via une simple déclaration CSS : elle s'insère naturellement dans vos feuilles de styles, que ce soit sur <code>:root</code> pour toute l'application, sur une classe pour une zone ciblée, ou sous <code>[data-theme='dark']</code> pour varier selon le thème. Sa valeur peut être une couleur, un autre token ou une fonction <code>calc()</code>.<br>Dans l'exemple ci-dessous, six tokens d'accent sont réassignés vers une nuance corail, l'anneau de focus est ajusté pour garantir un bon contraste sur chaque fond, et le rayon des contrôles et des puces est lié au token pill. Neuf déclarations CSS suffisent, sans modifier le moindre composant.",
+    'Redéfinissez les tokens sur <code>:root</code> pour toute la page, sur une classe pour une section ou sur <code>[data-theme="dark"]</code> pour le thème sombre.',
   tokensDemoCaption:
-    "Bouton plein, bouton contour, chip, champ, zone de texte : aucun de ces composants ne spécifie de couleur ou de rayon en dur. Ils héritent donc tous automatiquement de cette redéfinition, et le comportement serait exactement le même pour n'importe quel autre composant placé dans ce panneau. La zone de texte est le cas intéressant : plus haute qu'un contrôle, elle prend le rayon qu'aurait un contrôle de même taille et reste alignée sur le champ au-dessus d'elle au lieu de devenir une ellipse.",
+    'Ce panneau redéfinit les couleurs d’accent et de focus ainsi que les rayons des angles. Le texte d’accent utilise une valeur distincte en thème sombre.',
   tokensOklch:
-    "Toutes les couleurs sont exprimées en OKLCH, et ce pour deux raisons : la clarté perceptuelle est strictement identique d'une palette à l'autre pour un même niveau de nuance, et le mélange de teintes produit des transitions naturelles sans passer par des tons grisâtres.<br>Vectis UI calcule automatiquement les états survolés, teintés ou désactivés de vos rôles grâce à la fonction <code>color-mix()</code>. Si vous fournissez une valeur issue d'un autre espace colorimétrique (où la perception de la clarté diffère), ces variations calculées risquent de perdre en cohérence. Conserver vos valeurs personnalisées en OKLCH vous garantit un rendu visuel parfaitement prévisible.",
+    'Les palettes intégrées utilisent OKLCH. Vous pouvez choisir d’autres formats de couleur CSS pour vos surcharges. Vérifiez les états survolés, appuyés et teintés obtenus, y compris ceux calculés avec <code>color-mix()</code>.',
   tokensPalettes:
-    "Vectis UI intègre uniquement cinq palettes fondamentales afin de couvrir les besoins essentiels sans alourdir le CSS : <code>gray</code> pour les surfaces, textes et bordures, <code>indigo</code> pour l'accentuation, puis <code>red</code>, <code>green</code> et <code>amber</code> pour les états d'erreur, de succès et d'avertissement. Inclure des palettes supplémentaires non utilisées ajouterait inutilement des variables CSS sur toutes vos pages.<br>L'ajout d'une teinte personnalisée relève donc de l'application. Il suffit de déclarer vos 11 nuances de variables CSS et d'y lier le rôle sémantique souhaité. La prise en compte est immédiate, sans aucune étape de compilation ni attente d'une nouvelle version de la bibliothèque",
+    'Cinq palettes sont incluses : <code>gray</code>, <code>indigo</code>, <code>red</code>, <code>green</code> et <code>amber</code>. Pour utiliser une autre palette, affectez vos couleurs aux tokens sémantiques.',
   tokensReferenceBefore:
-    'Tous les tokens sémantiques, avec ce que chacun contrôle et sa valeur par défaut dans les deux thèmes, sont listés sur la page',
+    'Les descriptions des tokens et leurs valeurs par défaut dans les deux thèmes figurent sur la page',
   tokensReferenceAfter: '.',
-
   layersHeading: 'Couches CSS',
   layersBody:
-    "Les styles de la bibliothèque sont structurés en quatre couches de cascade (<code>@layer</code>), ordonnées comme suit : <code>vectis.reset</code>, <code>vectis.tokens</code>, <code>vectis.components</code> et <code>vectis.utilities</code>. En CSS, les couches sont évaluées avant la spécificité des sélecteurs, et les styles non encapsulés (unlayered) ont la priorité sur l'ensemble des couches. Par conséquent, tout CSS rédigé hors couche dans votre projet surchargera nativement celui de la bibliothèque, quelle que soit la spécificité de votre sélecteur.",
-  layersConsequence:
-    "Ce comportement est un choix d'architecture délibéré qui élimine le recours aux contournements habituels : aucun usage de !important, aucun besoin de sur-spécifier vos sélecteurs (en ajoutant un ID ou en enchaînant des classes), et aucun conteneur superflu injecté dans le DOM uniquement pour augmenter la spécificité. Un simple nom de classe suffit à surcharger n'importe quel style d'un composant, tout en conservant une feuille de styles lisible et maintenable.",
+    'La bibliothèque déclare quatre couches, dans cet ordre : <code>vectis.reset</code>, <code>vectis.tokens</code>, <code>vectis.components</code> et <code>vectis.utilities</code>. Écrivez vos surcharges hors de ces couches pour qu’elles priment sur les déclarations normales de la bibliothèque.',
   layersTrap:
-    "<strong>Attention</strong> : N'insérez pas vos propres règles directement dans <code>@layer vectis.components</code>. Les noms de couches étant globaux, le navigateur fusionnerait vos règles au sein de la couche de la bibliothèque : la priorité dépendrait alors uniquement de l'ordre d'apparition dans le code au lieu de garantir l'application de vos surcharges. Rédigez vos surcharges hors couche ou, si votre application utilise sa propre structure @layer, veillez à déclarer vos couches après celles de la bibliothèque.",
-
-  buildHeading: 'Le CSS moderne et votre build',
+    'Si votre application utilise des couches, déclarez sa couche de surcharge après celles de la bibliothèque. Évitez d’ajouter des surcharges à <code>vectis.components</code>, où la spécificité des sélecteurs et l’ordre du code déterminent encore la priorité.',
+  buildHeading: 'Cibles de compilation CSS',
   buildBody:
-    "Vectis UI n'embarque que le CSS dont elle a besoin, sans rétrocompatibilité : <code>:dir()</code>, <code>color-mix()</code>, des couleurs OKLCH, le positionnement par ancre. Votre bundler minifie ces feuilles avec le reste de votre application, et un minifieur réglé sur des navigateurs inférieurs à ceux que la bibliothèque supporte ne se contente pas d'écarter ce qu'ils ne savent pas lire. Il le réécrit.",
+    'Alignez les cibles de compilation CSS sur les versions de navigateurs prises en charge par la bibliothèque. Des cibles plus anciennes peuvent entraîner la réécriture de fonctionnalités comme <code>:dir()</code> et les couleurs OKLCH.',
   buildDir:
-    "L'une de ces réécritures change le sens d'une règle au lieu d'approcher son résultat. Lightning CSS, le minifieur par défaut de Vite 8 et de Parcel, remplace <code>:dir(rtl)</code> par une liste de sélecteurs <code>:lang()</code> dès que ses cibles sont antérieures à Chrome 120. Cette liste teste la langue de la page, là où la bibliothèque bascule sur sa direction : sur une page <code>&lt;html dir=\"rtl\" lang=\"en\"&gt;</code>, la règle ne s'applique donc jamais. Onze composants cessent de se refléter : les flèches de la pagination, des onglets, du fil d'Ariane, du menu, du calendrier, du sélecteur de date et du carrousel, le coin du badge en surimpression, le sens de rotation de la progression circulaire, la copie de texte détourée de la progression linéaire et la vague du squelette de chargement. Rien n'échoue, et un serveur de développement n'en montre rien, puisque seul un build de production minifie.",
+    'Par exemple, convertir <code>:dir(rtl)</code> en sélecteurs de langue casse les styles liés à la direction sur une page avec <code>dir="rtl"</code> et <code>lang="en"</code>. Vérifiez le build de production en plus du serveur de développement.',
   buildFix:
-    'Vite déduit <code>build.cssTarget</code> de <code>build.target</code>, dont la valeur par défaut désigne des navigateurs très en deçà de ce que la bibliothèque exige. Y nommer le socle supporté suffit, et allège au passage la sortie : abaissée, chaque couleur OKLCH de la palette est émise deux fois, une fois en repli sRGB et une fois dans un autre espace colorimétrique.',
+    'Définissez <code>build.cssTarget</code> dans Vite ou <code>vite.build.cssTarget</code> dans Nuxt :',
 }

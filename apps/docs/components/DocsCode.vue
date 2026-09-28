@@ -8,7 +8,7 @@ import { VIconButton, VTypography } from 'vectis-ui'
 const props = defineProps<{
   /** Shown in the header, uppercased by the `overline` role: `vue`, `ts`, `css`, `bash`… */
   lang: string
-  /** The sample itself. A leading newline and trailing blanks are trimmed, so a template literal can be written on its own lines. */
+  /** Source sample, trimmed of its leading newline and trailing whitespace. */
   code: string
 }>()
 
