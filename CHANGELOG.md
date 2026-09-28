@@ -2,6 +2,25 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.10.2] - 2026-09-28
+
+No public API changes. No migration is required from 0.10.1, and the minimum supported browser versions are unchanged.
+
+### Fixed
+
+- Wrapped controls forward attributes added after an initially empty render, including native form attributes, classes and styles.
+- VInputOTP keeps keyboard focus navigation aligned with the rendered fields when its pattern changes.
+- VSideNavigationItem preserves nested disclosure grouping when its children slot is added or removed dynamically.
+
+### Changed
+
+- Simplified component state, watchers and internal rendering across dialogs, input groups, navigation, data tables and floating panels while preserving their public contracts.
+- VInputGroup no longer inspects child components to warn about missing accessible names in development. Each field still needs its own accessible name.
+- The documentation outline uses native anchor navigation and CSS scroll offsets, preserving browser history, modified clicks and reduced-motion preferences.
+- Removed unused documentation helpers and consolidated outline behaviour in its consuming component.
+
+**Full diff:** [v0.10.1...v0.10.2](https://github.com/Jypyx/vectis-ui/compare/v0.10.1...v0.10.2)
+
 ## [0.10.1] - 2026-09-27
 
 ### Changed
