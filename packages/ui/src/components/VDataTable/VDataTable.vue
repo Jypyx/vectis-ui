@@ -535,23 +535,22 @@ const emptySearch = computed(() => (props.serverSide ? committedSearch.value : s
  * and ask for the page again, and a consumer clearing `total` while it loads would send the
  * reader back to page 1.
  */
-const params = computed<DataTableParams>(() => ({
-  page: page.value,
-  perPage: perPage.value ?? null,
-  sortKey: sort.value?.key ?? null,
-  sortDirection: sort.value?.direction ?? null,
-  search: committedSearch.value,
-}))
-
 // Committing a search and going back to the first page happen one after the other, but both
 // land in the same flush, so this runs once on the final values; never two requests for what
 // the reader experienced as a single action. Compared by value: a parent handing down an equal
 // `sort` object is no new request.
-watch(params, (value, previous) => {
-  if (!props.serverSide) return
-  if (JSON.stringify(value) === JSON.stringify(previous)) return
-  emit('update:params', value)
-})
+watch(
+  [
+    page,
+    () => perPage.value ?? null,
+    () => sort.value?.key ?? null,
+    () => sort.value?.direction ?? null,
+    committedSearch,
+  ],
+  ([page, perPage, sortKey, sortDirection, search]) => {
+    if (props.serverSide) emit('update:params', { page, perPage, sortKey, sortDirection, search })
+  },
+)
 
 // The selection. The heading checkbox covers the rows currently VISIBLE and not the whole
 // table: a box that silently selected forty thousand rows would be a trap.
@@ -602,10 +601,6 @@ function rowSelectLabel(row: Row, index: number): string {
   // dictionary counts from one as a human does, the prop from zero as code does.
   const position = (paginated.value ? (currentPage.value - 1) * (perPage.value ?? 0) : 0) + index
   return props.selectRowLabel?.(row, position) ?? m.value.dataTable.selectRow(position + 1)
-}
-
-function setPerPage(option: number) {
-  perPage.value = option
 }
 
 watch(perPage, () => {
@@ -827,7 +822,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
               :key="option"
               :label="String(option)"
               :selected="option === perPage"
-              @select="setPerPage(option)"
+              @select="perPage = option"
             />
           </VMenu>
         </div>

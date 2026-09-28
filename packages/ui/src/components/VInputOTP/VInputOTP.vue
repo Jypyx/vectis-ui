@@ -157,9 +157,14 @@ function sanitize(text: string) {
   return upper.replace(filters[props.format], '')
 }
 
-const inputs = ref<(HTMLInputElement | null)[]>([])
 const rootEl = ref<HTMLElement | null>(null)
 const digits = ref<string[]>([])
+
+// @keyboard
+// Read the rendered order on demand; changing a pattern can move or replace its input cells.
+function inputAt(slot: number) {
+  return rootEl.value?.querySelectorAll<HTMLInputElement>('.v-input-otp-input')[slot]
+}
 
 function syncFromModel(value: string) {
   // A value longer than the row is simply shown cut short, and one holding characters the
@@ -173,20 +178,6 @@ watch([model, slotCount], ([value, count]) => {
   if (value !== digits.value.join('') || digits.value.length !== count) syncFromModel(value)
 })
 
-/*
- * The list of boxes is trimmed after the render, never before it. A box that disappears calls
- * its function ref with `null` while it is being unmounted, at its OLD position: trimmed in a
- * `pre` watcher, that late assignment would stretch the array back out, and a pattern that
- * shortened would keep its departed boxes as trailing entries.
- */
-watch(
-  slotCount,
-  (count) => {
-    inputs.value.length = count
-  },
-  { flush: 'post' },
-)
-
 /** The first empty box, or -1 once the code is complete. Every box before it is filled. */
 const firstEmpty = () => digits.value.findIndex((d) => !d)
 
@@ -197,7 +188,7 @@ function removeAt(slot: number) {
 }
 
 function focusBox(slot: number) {
-  const el = inputs.value[slot]
+  const el = inputAt(slot)
   el?.focus()
   // Selected, so the next keystroke REPLACES the character: a box that already has the
   // focus receives no focus event to select it.
@@ -286,7 +277,7 @@ function onInput(slotIndex: number, event: Event) {
 // box 3.
 function onFocus(slotIndex: number, event: FocusEvent) {
   const empty = firstEmpty()
-  if (empty !== -1 && slotIndex > empty) inputs.value[empty]?.focus()
+  if (empty !== -1 && slotIndex > empty) inputAt(empty)?.focus()
   else (event.target as HTMLInputElement).select()
 }
 
@@ -323,19 +314,6 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
   focusBox(target)
 }
 
-// Function refs are handed to the template once per box: an inline one is a new function on
-// every render, which Vue answers with a null-then-element call on every keystroke.
-const refSetters = new Map<number, (el: unknown) => void>()
-function inputRef(slot: number) {
-  let set = refSetters.get(slot)
-  if (!set) {
-    set = (el) => {
-      inputs.value[slot] = el as HTMLInputElement | null
-    }
-    refSetters.set(slot, set)
-  }
-  return set
-}
 /*
  * `focus` goes to the first empty box rather than to the first box outright, which is where a
  * reader resuming a half-entered code expects to land.
@@ -345,12 +323,12 @@ defineExpose({
   focus: (options?: FocusOptions) => {
     const empty = digits.value.findIndex((d) => !d)
     const target = empty === -1 ? slotCount.value - 1 : empty
-    inputs.value[target]?.focus(options)
+    inputAt(target)?.focus(options)
   },
   /** Selects the box the focus is on, as clicking into one already does. */
   select: () => {
-    const active = inputs.value.find((el) => el === document.activeElement)
-    ;(active ?? inputs.value[0])?.select()
+    const active = rootEl.value?.querySelector<HTMLInputElement>('.v-input-otp-input:focus')
+    ;(active ?? inputAt(0))?.select()
   },
   /** The row itself, for what neither of the two above covers. */
   el: rootEl,
@@ -375,7 +353,6 @@ defineExpose({
       <template v-for="(cell, i) in cells" :key="i">
         <input
           v-if="cell.type === 'slot'"
-          :ref="inputRef(cell.slotIndex)"
           type="text"
           class="v-input-otp-input"
           :inputmode="format === 'numeric' ? 'numeric' : 'text'"

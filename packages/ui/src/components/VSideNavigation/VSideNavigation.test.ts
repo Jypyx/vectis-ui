@@ -438,6 +438,30 @@ describe('VSideNavigationItem — label', () => {
 })
 
 describe('VSideNavigationItem — robustness', () => {
+  it('switches between a link and a branch when the children slot changes', async () => {
+    const show = ref(false)
+    const { container } = renderNav(
+      `<VSideNavigationItem href="/a" current>A
+        <template v-if="show" #children>
+          <VSideNavigationItem label="B"><template #children><VSideNavigationItem label="C" /></template></VSideNavigationItem>
+        </template>
+      </VSideNavigationItem>`,
+      'exclusive',
+      { show },
+    )
+    expect(container.querySelector('a')?.getAttribute('aria-current')).toBe('page')
+    show.value = true
+    await nextTick()
+    const branches = container.querySelectorAll('details')
+    expect(branches).toHaveLength(2)
+    expect(branches[0]!.getAttribute('name')).not.toBe(branches[1]!.getAttribute('name'))
+    expect(branches[0]!.querySelector('summary')?.getAttribute('aria-current')).toBe('true')
+    show.value = false
+    await nextTick()
+    expect(container.querySelector('details')).toBeNull()
+    expect(container.querySelector('a')?.getAttribute('href')).toBe('/a')
+  })
+
   it('redraws a slot the parent adds or replaces later', async () => {
     const show = ref(false)
     const { container } = renderNav(

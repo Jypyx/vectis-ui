@@ -4,7 +4,7 @@
  * state, disables summaries and makes disabled links inert.
  */
 
-import { computed, h, inject, onBeforeUpdate, provide, ref, renderSlot, useId, useSlots } from 'vue'
+import { computed, inject, provide, ref, useId, useSlots } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
@@ -103,14 +103,7 @@ defineSlots<{
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const slots = useSlots()
-/**
- * Whether this row has subitems, read from the mere PRESENCE of the slot; the same device
- * VMenuItem and VTabs use.
- */
-const hasChildren = computed(() => !!slots.children)
-const tag = computed(() =>
-  !hasChildren.value && props.href !== undefined ? ('a' as const) : ('button' as const),
-)
+const tag = computed(() => (props.href !== undefined ? 'a' : 'button'))
 
 const parent = inject(sideNavigationKey, null)
 
@@ -121,72 +114,28 @@ const parent = inject(sideNavigationKey, null)
 const expandIcon = computed(() => parent?.expandIcon ?? expandMoreIcon)
 const collapseIcon = computed(() => parent?.collapseIcon)
 
-// @ssr @core
-// The test runs once, at setup: the server and the client take the same path because they see
-// the same slot, which keeps `useId` in step across hydration, and also why the slot must not
-// come and go later.
-if (slots.children) {
-  // The name shared by this row's children. It is minted afresh at every level, and that is
-  // what keeps "one section open at a time" local to a level instead of applying across the
-  // whole document.
-  const childrenName = useId()
-
-  provide(sideNavigationKey, {
-    get name() {
-      return parent?.exclusive ? childrenName : undefined
-    },
-    get exclusive() {
-      return parent?.exclusive ?? false
-    },
-    get expandIcon() {
-      return expandIcon.value
-    },
-    get collapseIcon() {
-      return collapseIcon.value
-    },
-  })
-}
+// @ssr
+// Each level owns its exclusive group, including children supplied after the first render.
+const childrenName = useId()
+provide(sideNavigationKey, {
+  get name() {
+    return parent?.exclusive ? childrenName : undefined
+  },
+  get exclusive() {
+    return parent?.exclusive ?? false
+  },
+  get expandIcon() {
+    return expandIcon.value
+  },
+  get collapseIcon() {
+    return collapseIcon.value
+  },
+})
 
 const { openAttr, onToggle, onSummaryClick } = useDetailsOpen(open, {
   defaultOpen: () => props.defaultOpen,
   disabled: () => props.disabled,
 })
-
-const ariaCurrent = computed(() =>
-  props.current ? (tag.value === 'a' ? 'page' : 'true') : undefined,
-)
-
-/*
- * `renderSlot` is what a compiled `<slot>` calls, so each fallback behaves exactly as it would
- * in the template.
- */
-// @core
-/*
- * The tick is what makes RowBody follow the slots at all. A functional component declaring no
- * props is never updated by its parent's re-render, and `slots` is not reactive, so a sublabel
- * added behind a `v-if` or a label captured by a render function stayed as first drawn.
- */
-const slotTick = ref(0)
-onBeforeUpdate(() => slotTick.value++)
-
-const RowBody = () => (
-  void slotTick.value,
-  [
-    renderSlot(slots, 'icon', {}, () =>
-      props.icon ? [h(VIcon, { class: 'v-side-nav-icon', ...iconProps(props.icon) })] : [],
-    ),
-    h('span', { class: 'v-side-nav-content' }, [
-      h('span', { class: 'v-side-nav-label' }, [
-        renderSlot(slots, 'default', {}, () => [props.label]),
-      ]),
-      props.sublabel !== undefined || slots.sublabel
-        ? h('span', { class: 'v-side-nav-sublabel' }, [
-            renderSlot(slots, 'sublabel', {}, () => [props.sublabel]),
-          ])
-        : null,
-    ]),
-  ]
-)
 
 /*
  * Stopping the event from travelling would not help: folding is not a listener anyone
@@ -203,7 +152,7 @@ function onEndClick(event: MouseEvent) {
 // named is its row: the branch header, or the leaf's link or button.
 const rowEl = ref<HTMLElement | null>(null)
 const actionEl = ref<HTMLElement | null>(null)
-const control = () => (hasChildren.value ? rowEl.value : actionEl.value)
+const control = () => (slots.children ? rowEl.value : actionEl.value)
 defineExpose({
   /** Moves the focus to the row: the branch header, or the leaf's link or button. */
   focus: (options?: FocusOptions) => control()?.focus(options),
@@ -237,7 +186,7 @@ function onActionClick(event: MouseEvent) {
 <template>
   <li class="v-side-nav-item" :class="rootClass" :style="rootStyle">
     <details
-      v-if="hasChildren"
+      v-if="$slots.children"
       class="v-side-nav-branch v-disclosure"
       :name="parent?.name"
       :open="openAttr"
@@ -249,13 +198,23 @@ function onActionClick(event: MouseEvent) {
         class="v-side-nav-row"
         :data-current="current ? '' : undefined"
         :data-disabled="disabled ? '' : undefined"
-        :aria-current="ariaCurrent"
+        :aria-current="current ? 'true' : undefined"
         :aria-disabled="disabled || undefined"
         :tabindex="disabled ? -1 : undefined"
         v-bind="forwardedAttrs"
         @click="onSummaryClick"
       >
-        <RowBody />
+        <slot name="icon">
+          <VIcon v-if="icon" class="v-side-nav-icon" v-bind="iconProps(icon)" />
+        </slot>
+        <span class="v-side-nav-content">
+          <span class="v-side-nav-label"
+            ><slot>{{ label }}</slot></span
+          >
+          <span v-if="sublabel !== undefined || $slots.sublabel" class="v-side-nav-sublabel">
+            <slot name="sublabel">{{ sublabel }}</slot>
+          </span>
+        </span>
         <!-- This slot sits INSIDE the branch header, where ANY click folds the
              branch: without the handler, clicking a badge would close the section
              under it -->
@@ -287,12 +246,22 @@ function onActionClick(event: MouseEvent) {
         :type="tag === 'button' ? 'button' : undefined"
         :disabled="tag === 'button' ? disabled : undefined"
         :aria-disabled="link.isInertLink.value ? 'true' : undefined"
-        :aria-current="ariaCurrent"
+        :aria-current="current ? (tag === 'a' ? 'page' : 'true') : undefined"
         v-bind="link.attrs.value"
         :href="link.linkHref.value"
         @click="onActionClick"
       >
-        <RowBody />
+        <slot name="icon">
+          <VIcon v-if="icon" class="v-side-nav-icon" v-bind="iconProps(icon)" />
+        </slot>
+        <span class="v-side-nav-content">
+          <span class="v-side-nav-label"
+            ><slot>{{ label }}</slot></span
+          >
+          <span v-if="sublabel !== undefined || $slots.sublabel" class="v-side-nav-sublabel">
+            <slot name="sublabel">{{ sublabel }}</slot>
+          </span>
+        </span>
       </component>
       <span v-if="$slots.end" class="v-side-nav-end"><slot name="end" /></span>
     </div>

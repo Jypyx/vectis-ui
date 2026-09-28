@@ -138,10 +138,10 @@ function onDocumentKeydown(event: KeyboardEvent) {
   hide()
 }
 
-const listening = ref(false)
+let listening = false
 function onOpenChange(open: boolean) {
-  if (open === listening.value) return
-  listening.value = open
+  if (open === listening) return
+  listening = open
   if (open) document.addEventListener('keydown', onDocumentKeydown)
   else document.removeEventListener('keydown', onDocumentKeydown)
 }

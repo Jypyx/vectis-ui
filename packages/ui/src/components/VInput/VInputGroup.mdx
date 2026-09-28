@@ -22,9 +22,8 @@ alone would push its box a line out of the row.
 
 VInputGroup renders one label and one hint for the whole row, and names itself with them
 through `aria-labelledby` and `aria-describedby` — the ARIA pattern for a composed field.
-Each segment then needs a name of its own, which is what `aria-label` is for. A segment
-carrying a `label` or a `hint` prop is warned about in development, because the row cannot
-draw itself out of the misalignment that follows.
+Name each segment with `aria-label`. Put visible `label` and `hint` text on the group
+to keep the controls aligned.
 
 A consumer's own `aria-label` or `aria-labelledby` on the group wins, and a consumer's
 `aria-describedby` is kept: the hint is added to it rather than replacing it.

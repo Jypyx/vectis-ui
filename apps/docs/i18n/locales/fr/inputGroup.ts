@@ -9,7 +9,7 @@ export default {
     },
     naming: {
       title: 'Nommer la rangée et ses segments',
-      text: "Le groupe rend un seul <code>label</code> et un seul <code>hint</code> pour toute la rangée. Chaque segment demande alors son propre <code>aria-label</code>, et celui qui apporte son <code>label</code> fait l'objet d'un avertissement en développement.",
+      text: 'Le groupe rend un seul <code>label</code> et un seul <code>hint</code> pour toute la rangée. Nommez chaque segment avec <code>aria-label</code> et gardez les libellés visibles sur le groupe pour aligner les contrôles.',
     },
     widths: {
       title: 'Largeurs',

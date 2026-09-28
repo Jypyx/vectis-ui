@@ -5,7 +5,7 @@
  * imperative open/close and provides guarded dismissal where closedBy is absent.
  */
 
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, useId, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, useAttrs, useId, watch } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { close as closeIcon } from '../VIcon/icons/close'
@@ -115,23 +115,9 @@ const closedby = computed(() =>
 // checked element by element.
 const rootAttrs = computed(() => ({ ...attrs, closedby: closedby.value }))
 
-// Every opening therefore builds a BRAND NEW element, so it is always opened as a modal from a
-// clean slate, and closing removes it entirely; nothing is left behind to swallow clicks, and
-// reopening cannot race with a closing that is still finishing. The trigger, by contrast, stays
-// rendered always.
-const rendered = ref(open.value)
-
-/**
- * Settles once the dialog opened by the latest change of `open` is actually showing. The
- * opening waits for the element to be rendered, so it is always a tick behind the model.
- */
-let opening: Promise<void> = Promise.resolve()
-
 function show(): Promise<void> {
   open.value = true
-  // The watcher below only runs when the scheduler flushes, so `opening` is read from a
-  // tick later: read at once, it would still be the promise of the previous opening.
-  return nextTick(() => opening)
+  return nextTick()
 }
 
 function requestClose() {
@@ -145,25 +131,14 @@ const triggerProps = computed<DialogTriggerProps>(() => ({
   'aria-haspopup': 'dialog',
 }))
 
-// Opening requires a mounted element and showModal. Closing updates the model from the native
-// close event before removing the element; dialog has no matching open event.
+// Close before v-if removes the element so the browser restores the invoker's focus.
 watch(open, (value) => {
-  if (value) {
-    rendered.value = true
-    opening = nextTick(() => dialogEl.value?.showModal())
-  } else {
-    dialogEl.value?.close()
-    rendered.value = false
-  }
+  if (!value) dialogEl.value?.close()
 })
 
 // @ssr
-onMounted(() => {
-  // A watcher does not run during the server render, so a dialog asked to be open from the
-  // start would never be opened. The element is already there; the flag above was initialized
-  // from the model; it just has to be told to show itself.
-  if (open.value) dialogEl.value?.showModal()
-})
+// Template refs become available after mounting, including when hydrating an open dialog.
+watch(dialogEl, (dialog) => dialog?.showModal(), { flush: 'post' })
 
 // Ignore close events from replaced elements: the queued event from a quick close-and-reopen
 // must not close the new dialog.
@@ -212,7 +187,7 @@ function outsideBox(event: MouseEvent) {
 // edge) is not a click on the backdrop, so the press is remembered, not only the release.
 let pressedOnBackdrop = false
 function onPointerdown(event: PointerEvent) {
-  pressedOnBackdrop = event.target === dialogEl.value && outsideBox(event)
+  pressedOnBackdrop = closedbyUnsupported() && event.target === dialogEl.value && outsideBox(event)
 }
 function onBackdropClick(event: MouseEvent) {
   const onBackdrop = pressedOnBackdrop && event.target === dialogEl.value && outsideBox(event)
@@ -240,7 +215,7 @@ defineExpose({
 <template>
   <slot name="trigger" :trigger-props="triggerProps" />
   <dialog
-    v-if="rendered"
+    v-if="open"
     ref="dialogEl"
     :aria-labelledby="title ? titleId : undefined"
     :aria-describedby="subtitle ? subtitleId : undefined"

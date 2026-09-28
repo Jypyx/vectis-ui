@@ -9,7 +9,7 @@ export default {
     },
     naming: {
       title: 'Naming the row and its segments',
-      text: 'The group renders one <code>label</code> and one <code>hint</code> for the whole row. Each segment then needs an <code>aria-label</code> of its own, and one bringing its own <code>label</code> is warned about in development.',
+      text: 'The group renders one <code>label</code> and one <code>hint</code> for the whole row. Name each segment with <code>aria-label</code> and keep visible labels on the group so the controls stay aligned.',
     },
     widths: {
       title: 'Widths',

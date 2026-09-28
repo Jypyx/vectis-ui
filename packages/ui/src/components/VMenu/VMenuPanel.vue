@@ -152,10 +152,7 @@ function onKeydown(event: KeyboardEvent) {
   arrowNavigate(event, panel, items, { vertical: true })
 }
 
-const resolvedWidth = computed(() => cssSize(props.width) || undefined)
-const panelStyle = computed(() =>
-  resolvedWidth.value ? { '--menu-width': resolvedWidth.value } : undefined,
-)
+const resolvedWidth = computed(() => cssSize(props.width))
 
 // Internal to VMenu, which drives the panel from outside: opening has to be synchronous,
 // and where the focus lands depends on whether a pointer or the keyboard asked.
@@ -198,7 +195,7 @@ defineExpose({
     :data-compact="compact ? '' : undefined"
     :data-width="resolvedWidth ? '' : undefined"
     :data-match-trigger="matchTrigger ? '' : undefined"
-    :style="panelStyle"
+    :style="{ '--menu-width': resolvedWidth }"
     @beforetoggle="syncShown"
     @toggle="onToggle"
     @keydown="onKeydown"

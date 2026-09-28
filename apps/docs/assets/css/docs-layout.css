@@ -16,12 +16,15 @@
   --vd-docnav-h: calc(var(--vectis-control-height-md) + 2 * var(--vectis-space-2) + 1px);
 }
 
-/*
- * Keep this sticky-header offset aligned with useDocsOutline so native fragment navigation also
- * lands below the header.
- */
+/* Native fragment navigation keeps targets below the sticky header. */
 html {
   scroll-padding-block-start: calc(var(--vd-header-h) + var(--vectis-space-2));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 .vd-shell {
@@ -340,7 +343,8 @@ html {
    * Account for the compact bar only in prose fragment offsets; the global header offset also
    * serves pages without this bar.
    */
-  .vd-prose > :is(h2, h3) {
+  .vd-prose > :is(h2, h3),
+  .vd-code[id] {
     scroll-margin-block-start: var(--vd-docnav-h);
   }
 }
@@ -511,11 +515,6 @@ html {
   font-family: var(--vectis-text-family-code);
   font-size: var(--vectis-text-code-size);
 }
-.vd-prose > h2,
-.vd-prose > h3 {
-  scroll-margin-top: calc(var(--vd-header-h) + var(--vectis-space-4));
-}
-
 .vd-code,
 .vd-example {
   text-align: start;
@@ -634,11 +633,6 @@ html {
 .vd-table tr.vd-api-note > td {
   padding-block-start: var(--vectis-space-1);
 }
-/* Linked type definitions need the same sticky-header offset as headings. */
-.vd-code[id] {
-  scroll-margin-top: calc(var(--vd-header-h) + var(--vectis-space-4));
-}
-
 @media (min-width: 768px) {
   .vd-demo,
   .vd-example-preview {

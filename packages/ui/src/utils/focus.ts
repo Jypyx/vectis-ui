@@ -1,13 +1,5 @@
-// @a11y @fallback
-/**
- * jsdom parses focus-visible but always reports false; tests must stub visibility rather than
- * rely on the unsupported-selector fallback.
- */
+// @a11y
+/** Use the browser's focus-visible heuristic to distinguish keyboard focus. */
 export function isKeyboardFocus(target: EventTarget | null): boolean {
-  if (!(target instanceof Element)) return false
-  try {
-    return target.matches(':focus-visible')
-  } catch {
-    return true
-  }
+  return target instanceof Element && target.matches(':focus-visible')
 }

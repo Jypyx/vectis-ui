@@ -82,7 +82,7 @@ const props = withDefaults(defineProps<PopoverProps>(), {
  */
 const open = defineModel<boolean>('open', { default: false })
 
-const slots = defineSlots<{
+defineSlots<{
   /**
    * The element that opens the panel. Bind the `triggerProps` it receives onto a
    * button of your own: that is what wires the two together.
@@ -108,12 +108,6 @@ const panelId = computed(() => props.id ?? generatedId)
 // The invariant to respect here: `shown` is fed by the panel's own events and never assigned by
 // hand, so the browser stays the source of truth; it can close the panel without asking us.
 const { shown, syncShown, show, hide } = usePopover(panelEl)
-
-// A function read by the template, never a `computed`: `slots` is not reactive, so a computed
-// would keep its first answer while a slot behind a `v-if` comes and goes.
-function hasTrigger() {
-  return slots.trigger !== undefined
-}
 
 const triggerProps = computed<PopoverTriggerProps>(() => ({
   popovertarget: panelId.value,
@@ -148,7 +142,7 @@ defineExpose({
 </script>
 
 <template>
-  <span class="v-popover" :data-trigger="hasTrigger() ? '' : undefined">
+  <span class="v-popover" :data-trigger="$slots.trigger ? '' : undefined">
     <slot name="trigger" :trigger-props="triggerProps" />
     <div
       :id="panelId"

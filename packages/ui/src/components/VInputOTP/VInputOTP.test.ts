@@ -8,6 +8,17 @@ function renderOtp(props: Record<string, unknown> = {}) {
 }
 
 describe('VInputOTP', () => {
+  it('keeps keyboard focus targets current when cells move, disappear and return', async () => {
+    const { getAllByRole, rerender } = renderOtp({ modelValue: '1234', pattern: '##-##' })
+    for (const pattern of ['#-###', '##', 'GT-####', '##-##']) {
+      await rerender({ pattern })
+      const boxes = getAllByRole('textbox')
+      boxes[0]!.focus()
+      await fireEvent.keyDown(boxes[0]!, { key: 'ArrowRight' })
+      expect(document.activeElement).toBe(boxes[1])
+    }
+  })
+
   it('renders N named cells inside a labelled group', () => {
     const { getByRole, getAllByRole } = renderOtp({ length: 4 })
     expect(getByRole('group', { name: 'Verification code' })).toBeTruthy()

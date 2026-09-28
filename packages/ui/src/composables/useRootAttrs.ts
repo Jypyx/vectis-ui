@@ -19,15 +19,16 @@ export function useRootAttrs(): {
   forwardedAttrs: ComputedRef<Record<string, unknown>>
 } {
   const attrs = useAttrs()
+  // Read the styling keys even when absent: enumerating an empty attrs object tracks no reads.
+  const split = computed(() => {
+    const { class: rootClass, style: rootStyle, ...forwardedAttrs } = attrs
+    return { rootClass, rootStyle, forwardedAttrs }
+  })
 
   return {
     attrs,
-    rootClass: computed(() => attrs.class as ClassBinding),
-    rootStyle: computed(() => attrs.style as StyleValue),
-    forwardedAttrs: computed(() =>
-      Object.fromEntries(
-        Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style'),
-      ),
-    ),
+    rootClass: computed(() => split.value.rootClass as ClassBinding),
+    rootStyle: computed(() => split.value.rootStyle as StyleValue),
+    forwardedAttrs: computed(() => split.value.forwardedAttrs),
   }
 }

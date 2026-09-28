@@ -5,7 +5,7 @@
  * supplies filtering, selection and keyboard navigation unavailable to native text inputs.
  */
 
-import { computed, inject, nextTick, reactive, ref, useId, watch, watchEffect } from 'vue'
+import { computed, inject, reactive, ref, useId, watch, watchEffect } from 'vue'
 
 import VChip from '../VChip/VChip.vue'
 import type { ChipSize } from '../VChip/VChip.vue'
@@ -693,13 +693,15 @@ function hover(entry: RenderedOption) {
 // option into view; nothing was focused. It is brought into view by hand instead, and asked for
 // the SMALLEST movement that reveals it, so an option already visible does not make the panel
 // jump.
-watch(activeIndex, (index) => {
-  if (index < 0) return
-  nextTick(() => {
+watch(
+  activeIndex,
+  (index) => {
+    if (index < 0) return
     // Called optionally: the unit-test environment implements no scrolling at all.
     document.getElementById(optionId(index))?.scrollIntoView?.({ block: 'nearest' })
-  })
-})
+  },
+  { flush: 'post' },
+)
 
 // The single cut-off point of a frozen field: every route into the list; a click on the
 // control, the focus, a keystroke, typing; ends up here, so `readonly` is refused once rather

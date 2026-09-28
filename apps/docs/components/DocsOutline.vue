@@ -1,12 +1,71 @@
 <script setup lang="ts">
-/**
- * Discover headings from the rendered article. Intercept ordinary clicks for the sticky offset
- * and fragment update; preserve native modified-click navigation.
- */
+/** Native fragment links navigate; JavaScript only discovers and highlights headings. */
 import { VTypography } from 'vectis-ui'
 
-const { outline, activeId, jumpTo } = useDocsOutline()
 const { t } = useI18n()
+const route = useRoute()
+const outline = ref<{ id: string; title: string; level: number }[]>([])
+const activeId = ref('')
+let headings: HTMLElement[] = []
+let frame = 0
+let scrollLine = 0
+
+function measureOffset() {
+  // Read CSS so the active section follows the same desktop/mobile offsets as native links.
+  const padding = getComputedStyle(document.documentElement).scrollPaddingBlockStart
+  const margin = headings[0] ? getComputedStyle(headings[0]).scrollMarginBlockStart : '0'
+  scrollLine = (Number.parseFloat(padding) || 0) + (Number.parseFloat(margin) || 0) + 1
+}
+
+function highlight() {
+  let active = headings[0]?.id ?? ''
+  for (const heading of headings) {
+    if (heading.getBoundingClientRect().top <= scrollLine) active = heading.id
+  }
+  // A short final section may never reach the sticky header.
+  if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4)
+    active = headings.at(-1)?.id ?? ''
+  activeId.value = active
+}
+
+function onScroll() {
+  if (frame) return
+  frame = requestAnimationFrame(() => {
+    frame = 0
+    highlight()
+  })
+}
+
+function onResize() {
+  measureOffset()
+  onScroll()
+}
+
+async function harvest() {
+  await nextTick()
+  headings = [...document.querySelectorAll<HTMLElement>('.vd-prose > h2[id], .vd-prose > h3[id]')]
+  outline.value = headings.map((heading) => ({
+    id: heading.id,
+    title: heading.textContent ?? '',
+    level: heading.tagName === 'H3' ? 3 : 2,
+  }))
+  measureOffset()
+  highlight()
+}
+
+onMounted(() => {
+  void harvest()
+  // Hash changes are native navigation within the same article, so only its path is watched.
+  watch(() => route.path, harvest, { flush: 'post' })
+  window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('resize', onResize)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', onScroll)
+  window.removeEventListener('resize', onResize)
+  if (frame) cancelAnimationFrame(frame)
+})
 </script>
 
 <template>
@@ -25,7 +84,7 @@ const { t } = useI18n()
       :href="`#${heading.id}`"
       :data-level="heading.level"
       :data-active="heading.id === activeId ? 'true' : 'false'"
-      @click.prevent="jumpTo(heading.id)"
+      :aria-current="heading.id === activeId ? 'location' : undefined"
     >
       {{ heading.title }}
     </a>

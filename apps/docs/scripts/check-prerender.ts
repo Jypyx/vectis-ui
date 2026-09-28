@@ -7,7 +7,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { allPages, docRoutes } from '../content/nav'
-import { SITE_URL } from '../content/site'
+import { LOCALE_PREFIXES, SITE_URL } from '../content/site'
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const outDir = join(appRoot, '.output', 'public')
@@ -15,9 +15,6 @@ const outDir = join(appRoot, '.output', 'public')
 /** Nuxt writes `/a/b` as `a/b/index.html`, and the site root as `index.html`. */
 const fileFor = (route: string) =>
   join(outDir, route === '/' ? 'index.html' : join(route, 'index.html'))
-
-/** The locale segments, mirroring `LOCALE_PREFIXES` in content/site.ts. */
-const LOCALE_PREFIXES = ['', '/fr']
 
 const routes = LOCALE_PREFIXES.flatMap((prefix) => [
   `${prefix}/`,

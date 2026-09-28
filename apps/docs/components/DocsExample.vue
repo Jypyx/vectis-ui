@@ -35,7 +35,7 @@ const text = computed(() => trim(props.source))
         v-model="mode"
         mandatory
         size="xs"
-        variant="outline"
+        item-variant="outline"
         selected-variant="soft"
         tone="accent"
         :label="t('common.example.label')"

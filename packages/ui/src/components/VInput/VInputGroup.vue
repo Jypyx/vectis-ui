@@ -11,8 +11,6 @@ import VTypography from '../VTypography/VTypography.vue'
 import { buttonGroupKey } from '../VButton/context'
 
 import { useRootAttrs } from '../../composables/useRootAttrs'
-import { useSlotNodes } from '../../composables/useSlotNodes'
-import { isDev } from '../../utils/env'
 import { joinIds } from '../../utils/ids'
 
 import { inputGroupKey } from './context'
@@ -92,55 +90,6 @@ const describedBy = computed(() =>
   joinIds(attrs['aria-describedby'] as string | undefined, !!props.hint && hintId),
 )
 
-/** The components whose `label` prop renders a real `<label>` above the field. */
-const LABELLED_FIELDS = new Set([
-  'VInput',
-  'VTextarea',
-  'VCombobox',
-  'VDateInput',
-  'VTimeInput',
-  'VFileInput',
-])
-
-// A dev warning fires from a computed that the render consumes, so a slot whose content
-// depends on a model would repeat it on every keystroke. One line per offender is enough to
-// be found and fixed.
-const warned = new Set<string>()
-
-// @devwarn @ssr
-// The read has to stay inside a computed, and the computed has to be consumed by the render,
-// which `<Segments />` does. Called from a `watchEffect`, which runs before the render, Vue
-// warns "Slot invoked outside of the render function" on any slot passed as a raw function;
-// which is exactly what a unit test passes.
-const slotNodes = useSlotNodes()
-const segments = computed(() => {
-  const nodes = slotNodes.value
-
-  if (isDev) {
-    for (const node of nodes) {
-      const type = node.type as { name?: string; __name?: string } | string
-      const name =
-        typeof type === 'object' && type !== null ? (type.name ?? type.__name) : undefined
-      if (name === undefined || !LABELLED_FIELDS.has(name)) continue
-
-      for (const prop of ['label', 'hint'] as const) {
-        if (node.props?.[prop] === undefined || warned.has(`${name}.${prop}`)) continue
-        warned.add(`${name}.${prop}`)
-        console.warn(
-          `[VInputGroup] <${name}> carries its own \`${prop}\`. The group renders one for the whole row, and a segment carrying one of its own is pushed a line out of the row. Move it to VInputGroup and name the segment with \`aria-label\`.`,
-        )
-      }
-    }
-  }
-
-  return nodes
-})
-
-// A functional component is the only way to render VNodes that have already been captured:
-// `<component :is>` expects a component definition rather than a vnode. Returning an array
-// produces a Fragment, so no DOM element is inserted and the sheet's `>` combinator holds.
-const Segments = () => segments.value
-
 // Getters, so the group's props stay reactive on the other side of the injection.
 const rowContext = {
   get size() {
@@ -182,7 +131,7 @@ provide(buttonGroupKey, rowContext)
     </VTypography>
 
     <div class="v-input-group-row">
-      <Segments />
+      <slot />
     </div>
 
     <VTypography v-if="hint" :id="hintId" variant="caption" tone="muted" class="v-input-group-hint">

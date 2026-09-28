@@ -16,6 +16,19 @@ const Wrapper = defineComponent({
 })
 
 describe('useRootAttrs', () => {
+  it('forwards attributes added after an initially empty render and removes them again', async () => {
+    const { container, rerender } = render(Wrapper)
+    const control = container.querySelector('input')!
+    await rerender({ name: 'email', required: true, class: 'wide' })
+    expect(control.name).toBe('email')
+    expect(control.required).toBe(true)
+    expect(container.firstElementChild?.classList.contains('wide')).toBe(true)
+    await rerender({ name: undefined, required: undefined, class: undefined })
+    expect(control.hasAttribute('name')).toBe(false)
+    expect(control.required).toBe(false)
+    expect(container.firstElementChild?.classList.contains('wide')).toBe(false)
+  })
+
   it('keeps class/style on the root and forwards the rest to the control', () => {
     const { container } = render(Wrapper, {
       attrs: { class: 'custom', style: 'color: red', name: 'field', required: '' },

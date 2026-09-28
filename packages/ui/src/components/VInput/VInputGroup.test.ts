@@ -1,5 +1,5 @@
 import { fireEvent, render } from '@testing-library/vue'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { defineComponent, h, nextTick, ref } from 'vue'
 
 import VInput from './VInput.vue'
@@ -19,10 +19,6 @@ const root = (container: Element) => container.querySelector('.v-input-group') a
 
 /** The `.v-input` roots in render order, where each resolved prop shows up. */
 const fields = (container: Element) => [...container.querySelectorAll<HTMLElement>('.v-input')]
-
-afterEach(() => {
-  vi.restoreAllMocks()
-})
 
 describe('VInputGroup', () => {
   it('renders a role="group" holding a row', () => {
@@ -332,45 +328,6 @@ describe('VInputGroup', () => {
     })
   })
 
-  describe('development warning', () => {
-    it('warns when a segment brings its own label', () => {
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      render(VInputGroup, { slots: { default: () => h(VInput, { label: 'Country' }) } })
-      expect(warn).toHaveBeenCalledOnce()
-      expect(warn.mock.calls[0]![0]).toContain('[VInputGroup]')
-      expect(warn.mock.calls[0]![0]).toContain('VInput')
-    })
-
-    it('warns for a hint too', () => {
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      render(VInputGroup, { slots: { default: () => h(VInput, { hint: 'Digits only' }) } })
-      expect(warn).toHaveBeenCalledOnce()
-    })
-
-    it('says nothing when the segments carry neither', () => {
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      render(VInputGroup, {
-        props: { label: 'Phone' },
-        slots: { default: () => [h(VInput), h(VInput, { 'aria-label': 'Number' })] },
-      })
-      expect(warn).not.toHaveBeenCalled()
-    })
-
-    // A VIconButton's `label` is the accessible name of a control with no text, not a
-    // rendered <label>: warning about it would be wrong.
-    it('says nothing about a VIconButton label', () => {
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      render(VInputGroup, {
-        slots: { default: () => [h(VInput), h(VIconButton, { icon: 'search', label: 'Search' })] },
-      })
-      expect(warn).not.toHaveBeenCalled()
-    })
-  })
-
-  // The slot is read in a computed, and `slots` is not reactive: only what the slot READS
-  // while it runs is tracked. A parent handing down a new slot whose content was captured
-  // outside it (a render function's local, a v-for item replaced wholesale, a v-if between
-  // two slot templates) must still repaint the row.
   describe('follows a slot the parent replaces', () => {
     /** The block's single template factory (vue/one-component-per-file). */
     const renderTemplate = (template: string, bindings: Record<string, unknown>) =>
