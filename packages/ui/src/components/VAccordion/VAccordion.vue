@@ -1,12 +1,7 @@
 <script setup lang="ts">
 /**
- * An accordion is a stack of sections whose content the reader can show or hide,
- * one heading at a time. This component is built entirely on the native HTML
- * `<details>` and `<summary>` elements: the browser itself handles opening,
- * closing, the keyboard and the accessibility semantics, so there is no
- * JavaScript here keeping track of which section is currently open.
- *
- * Opening one section closes the previous one, unless `multiple` says otherwise.
+ * Native details elements own disclosure and exclusive groups; multiple removes the shared
+ * group name.
  */
 
 import { provide, useId } from 'vue'

@@ -70,7 +70,7 @@ describe('VButton', () => {
     const button = getByRole('button') as HTMLButtonElement
     expect(button.disabled).toBe(true)
     expect(button.getAttribute('aria-busy')).toBe('true')
-    // the VSpinner is rendered inside the box, hidden from AT (aria-busy is enough)
+    // The VSpinner is rendered inside the box, hidden from AT (aria-busy is enough)
     const box = button.querySelector('.v-button-spinner') as HTMLElement
     expect(box.getAttribute('aria-hidden')).toBe('true')
     expect(box.querySelector('.v-spinner')).not.toBeNull()

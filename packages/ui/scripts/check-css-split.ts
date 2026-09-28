@@ -1,19 +1,6 @@
 /**
- * Verifies the per-component CSS split in `dist/` — run as `postbuild`, so it sits
- * inside `pnpm build` and inside the project checkpoint.
- *
- * What it protects: every failure mode here is SILENT. A component sheet emitted
- * without its `import` produces an unstyled component, not an error; a missing layer
- * statement produces a wrong cascade only in the consumer's bundle, never in
- * Storybook (which runs off the source pipeline and never looks at `dist`); a
- * component rule leaking into `styles.css` puts back the flat stylesheet the split
- * removed, and only a size measurement would ever notice.
- *
- * Check 4 also REPLACES the manual `git grep` that used to guard the layer names: a
- * stray one now ships in an isolated file with no neighbours to make it obvious.
- *
- * `--report` prints the gzip cost of the core plus any number of components — the
- * command behind the figures quoted on the documentation site.
+ * Validate component CSS imports, per-sheet layer ordering and the separation of component
+ * rules from core CSS in the built package.
  */
 import { readFileSync, existsSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
@@ -57,7 +44,6 @@ const fail = (message: string) => errors.push(message)
 
 if (!existsSync(dist)) throw new Error('dist/ is missing — run `pnpm build` first.')
 
-// 1. every SFC carrying a <style> has its sheet in dist, imported by its own module.
 const sfcs = walk(resolve(pkgRoot, 'src/components'), '.vue').filter((f) =>
   /<style[^>]*>/.test(readFileSync(f, 'utf8')),
 )
@@ -83,18 +69,15 @@ for (const sheet of sheets) {
   const name = posix(sheet)
   const source = readFileSync(sheet, 'utf8')
 
-  // 2. the layer order travels with every component sheet (see shipComponentCss).
   if (name !== 'styles.css' && !source.startsWith(LAYER_ORDER))
     fail(`${name} does not open with the layer order statement.`)
 
-  // 4. no layer name outside the `vectis.*` namespace, in any sheet.
   for (const [, names] of source.matchAll(/@layer\s+([^{;]+)[{;]/g))
     for (const layer of (names ?? '').split(','))
       if (!/^vectis(\.|$)/.test(layer.trim()))
         fail(`${name} declares the layer \`${layer.trim()}\`, outside the vectis namespace.`)
 }
 
-// 3. styles.css is the core: shared chrome only, no component rule.
 const core = readFileSync(join(dist, 'styles.css'), 'utf8')
 for (const cls of new Set([...core.matchAll(/\.v-[a-z0-9-]+/g)].map((m) => m[0])))
   if (!CORE_CLASSES.has(cls)) fail(`styles.css carries \`${cls}\`, which belongs to a component.`)
@@ -115,7 +98,6 @@ function gzip(source: string | Buffer): string {
   return formatKb(gzipBytes(source))
 }
 
-// `pnpm --filter vectis-ui exec tsx scripts/check-css-split.ts --report VButton VInput`
 if (process.argv.includes('--report')) {
   const wanted = process.argv.slice(process.argv.indexOf('--report') + 1)
   const picked = sheets.filter((s) => wanted.some((w) => posix(s).endsWith(`/${w}.css`)))

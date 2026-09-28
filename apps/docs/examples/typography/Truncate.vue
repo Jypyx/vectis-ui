@@ -6,9 +6,10 @@ const LONG = 'A title far too long to sit on one line of a narrow column without
 
 <template>
   <div class="demo">
-    <!-- One line, ended with an ellipsis. The element needs a width to be cut against:
-         as a block or a flex item it takes its parent's, which is what the box below
-         gives it. -->
+    <!--
+      One line, ended with an ellipsis. The element needs a width to be cut against: as a block
+      or a flex item it takes its parent's, which the box below gives it.
+    -->
     <div class="box">
       <VTypography truncate>{{ LONG }}</VTypography>
     </div>

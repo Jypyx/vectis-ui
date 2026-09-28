@@ -114,7 +114,6 @@ export const AlphanumericFormat: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // lowercase is converted: the v-model stays canonical
     await userEvent.click(canvas.getByRole('textbox', { name: 'Character 1 of 6' }))
     await userEvent.keyboard('abc123')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('ABC123'))
@@ -135,7 +134,6 @@ export const WithPattern: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // pasting the formatted string: the separators are consumed
     await userEvent.click(canvas.getByRole('textbox', { name: 'Character 1 of 9' }))
     await userEvent.paste('123.456.789')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('123456789'))
@@ -169,7 +167,6 @@ export const InForm: Story = {
     components: { VInputOTP },
     setup: () => {
       const sent = ref('')
-      // FormData is not among the globals a template may read, so the reading lives here.
       const onSubmit = (event: Event) => {
         sent.value = String(new FormData(event.target as HTMLFormElement).get('code'))
       }
@@ -189,7 +186,6 @@ export const InForm: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const form = canvasElement.querySelector('form')!
-    // Half a code: the browser refuses the form.
     await userEvent.click(canvas.getByRole('textbox', { name: 'Character 1 of 6' }))
     await userEvent.keyboard('123')
     await expect(form.checkValidity()).toBe(false)
@@ -216,10 +212,8 @@ export const Disabled: Story = {
 }
 
 /**
- * `hint` puts a line of help under the boxes and ties it to the row for assistive
- * technology, exactly as on any other field. `label` is a different thing here: it names
- * the row for a screen reader and renders nothing, the instructions above the boxes
- * belonging to the page.
+ * `hint` puts a line of help under the boxes and ties it to the row for assistive technology,
+ * exactly as on any other field.
  */
 export const Hint: Story = {
   render: (args) => ({
@@ -232,7 +226,6 @@ export const Hint: Story = {
   play: async ({ canvasElement }) => {
     const group = canvasElement.querySelector('[role="group"]')!
     const hint = canvasElement.querySelector('.v-input-otp-hint')!
-    // The row points at the hint, so it is announced along with the row's own name.
     await expect(group).toHaveAttribute('aria-describedby', hint.id)
   },
 }

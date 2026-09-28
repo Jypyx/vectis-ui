@@ -3,9 +3,11 @@ import { VTypography } from 'vectis-ui'
 </script>
 
 <template>
-  <!-- Several roles composed into one block. The component carries no margin of its
-       own, deliberately: the space between two pieces of text belongs to the layout
-       holding them, so stacking these without a gap here would leave them touching. -->
+  <!--
+    The component carries no margin of its own, deliberately: the space between two pieces of
+    text belongs to the layout holding them, so stacking these without a gap here would leave
+    them touching.
+  -->
   <article class="article">
     <VTypography variant="overline" tone="muted">Release notes</VTypography>
     <VTypography variant="heading-3" as="h2">What changed in this version</VTypography>

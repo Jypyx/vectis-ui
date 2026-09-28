@@ -1,8 +1,6 @@
 /**
- * The tokens' nested typed groups flattened into the list of custom properties a browser
- * needs. `pnpm tokens` uses it to generate the shipped stylesheet, and it is exported
- * through `vectis-ui/tokens` so an application can do the same at runtime — a theming tool
- * regenerating the variables as a slider moves, or exporting a configuration.
+ * Flatten typed DTCG groups and aliases into CSS declarations for token generation and consumer
+ * theming tools.
  */
 import { isToken, type DesignToken, type TokenGroup } from './types'
 
@@ -12,11 +10,7 @@ export interface FlatToken {
   token: DesignToken
 }
 
-/**
- * Walks the nested groups and returns one entry per token, each carrying the name of the
- * custom property it will become: the path through the groups, joined with dashes and
- * prefixed so that nothing collides with an application's own variables.
- */
+/** Flatten nested groups into token entries with qualified CSS custom-property names. */
 export function flattenTokens(group: TokenGroup, prefix: string[] = []): FlatToken[] {
   const out: FlatToken[] = []
   for (const [key, node] of Object.entries(group)) {
@@ -32,16 +26,7 @@ export function flattenTokens(group: TokenGroup, prefix: string[] = []): FlatTok
 
 const ALIAS_RE = /\{([^}]+)\}/g
 
-/**
- * A token's value may point at another token by name, in braces, instead of stating a
- * colour or a length of its own. Each of those references becomes a reading of the
- * corresponding custom property, so the link survives into the CSS and remains
- * overridable at runtime.
- *
- * A reference to a token that does not exist STOPS the build rather than being left as
- * it is. A dangling reference in CSS resolves to nothing at all, and the component using
- * it loses its colour with nothing in the console to say why.
- */
+/** Resolve DTCG references into CSS var aliases while preserving literal values. */
 export function resolveTokenValue(value: string, known: ReadonlySet<string>): string {
   return value.replace(ALIAS_RE, (_match, ref: string) => {
     const cssName = `--vectis-${ref.trim().split('.').join('-')}`
@@ -52,7 +37,7 @@ export function resolveTokenValue(value: string, known: ReadonlySet<string>): st
   })
 }
 
-/** The final step: a list of tokens written out as the lines of a CSS rule. */
+/** Serialize flat token entries into CSS declarations. */
 export function toCssDeclarations(
   flat: FlatToken[],
   known: ReadonlySet<string>,

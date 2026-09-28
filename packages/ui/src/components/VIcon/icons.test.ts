@@ -3,13 +3,15 @@ import { describe, expect, it } from 'vitest'
 import { builtinIconNames, builtinIcons, ICON_VIEW_BOX, type IconName } from './icons'
 
 /**
- * Locks on the GENERATED file (`pnpm icons`): what is tested here is that the
- * generation ran correctly — not the icons' geometry, which belongs to visual
- * diffing (the `Library` story + Chromatic).
+ * Locks on the GENERATED file (`pnpm icons`): what is tested here is that the generation ran
+ * correctly; not the icons' geometry, which belongs to visual diffing (the `Library` story +
+ * Chromatic).
  */
 
-/** The icons the library renders itself. Any entry removed from here must also be
-    removed from `scripts/build-icons.ts` — and the other way round. */
+/**
+ * The icons the library renders itself. Any entry removed from here must also be removed from
+ * `scripts/build-icons.ts`; and the other way round.
+ */
 const EXPECTED = [
   'arrow_downward',
   'arrow_downward_alt',
@@ -61,22 +63,18 @@ describe('built-in icon registry', () => {
     expect(icon.paths.length).toBeLessThanOrEqual(2)
     for (const d of icon.paths) {
       expect(d.length).toBeGreaterThan(0)
-      // Every SVG path starts with a moveto.
       expect(d[0]!.toLowerCase()).toBe('m')
     }
   })
 
   it.each(Object.entries(builtinIcons))('%s: carries its own name', (name, icon) => {
-    // The name travelling with the drawing is what reaches the consumer's resolver —
-    // a component imports the binding and never restates the name. A generator slip
-    // here would route the resolver to the wrong icon with nothing to show for it.
+    // The name travelling with the drawing is what reaches the consumer's resolver; a component
+    // imports the binding and never restates the name. A generator slip here would route the
+    // resolver to the wrong icon with nothing to show for it.
     expect(icon.name).toBe(name)
   })
 
   it('exposes the name set alone, aligned with the registry', () => {
-    // `classIconResolver` asks the SET rather than the icons, so that a consumer who
-    // wired in their own library ships no Material path at all. The two are generated
-    // side by side, and nothing else would notice them drifting apart.
     expect([...builtinIconNames].sort()).toEqual(Object.keys(builtinIcons).sort())
   })
 
@@ -91,7 +89,6 @@ describe('built-in icon registry', () => {
     )
     expect(duplicates).toEqual([])
 
-    // And the de-duplication did not flatten everything: the filled icons exist.
     const withFilled = Object.values(builtinIcons).filter((icon) => icon.paths.length === 2)
     expect(withFilled.length).toBeGreaterThan(0)
   })

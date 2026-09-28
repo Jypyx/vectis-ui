@@ -1,18 +1,6 @@
 /**
- * French, opt-in by import: the package ships one module per file, so a project that never
- * imports this one never carries it.
- *
- * Enabling it and adding a language the library does not ship are the SAME gesture — there
- * are deliberately not two kinds of dictionary, one blessed and one hand-added:
- *
- *     import { fr, registerMessages, setLocale } from 'vectis-ui'
- *     registerMessages('fr', fr)
- *     setLocale('fr-FR')
- *
- * TRAP — the curly apostrophes below are part of the text. Some tests assert these strings
- * letter for letter, and a straight apostrophe is a different character. The same goes for
- * the no-break space (`\u00A0`) before a colon or a percent sign, which French typography
- * requires; `i18n.test.ts` checks both over the whole dictionary.
+ * Opt-in French dictionary registered through registerMessages. Preserve typographic
+ * apostrophes and message signatures.
  */
 
 import type { Messages } from './types'
@@ -126,7 +114,6 @@ export const fr: Messages = {
     choosingMinutes: 'Sélection des minutes',
     hour: 'Heure',
     minutes: 'Minutes',
-    // Singular below two, as French counts: 0 heure, 1 minute, 2 minutes.
     hourValue: (hour) => `${hour} ${hour < 2 ? 'heure' : 'heures'}`,
     minutesValue: (minute) => `${minute} ${minute < 2 ? 'minute' : 'minutes'}`,
   },
@@ -141,9 +128,9 @@ export const fr: Messages = {
   fileInput: {
     openPicker: 'Choisir des fichiers',
     clear: 'Effacer les fichiers',
-    // The French plural starts at two, the English one at zero — "0 fichier" against
-    // "0 files". Each language therefore makes the choice on its own, and there is no
-    // shared rule for either to inherit.
+    // The French plural starts at two, the English one at zero; "0 fichier" against "0 files".
+    // Each language therefore makes the choice on its own, and there is no shared rule for
+    // either to inherit.
     files: (count) => `${count} fichier${count > 1 ? 's' : ''}`,
     placeholder: 'Aucun fichier sélectionné',
   },
@@ -194,7 +181,6 @@ export const fr: Messages = {
       'Évènement saisi. Utilisez les flèches pour le déplacer, Entrée ou Espace pour le poser, Échap pour annuler.',
     dropped: 'Évènement posé.',
     reverted: 'Déplacement annulé. L’évènement est revenu à sa place.',
-    // A noun rather than a participle, which would agree with a title of any gender.
     movedTo: (title, when) => `Déplacement de ${title}\u00A0: ${when}.`,
   },
 }

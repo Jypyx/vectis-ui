@@ -139,8 +139,6 @@ describe('a card being moved', () => {
 })
 
 describe('keys the table has no business with', () => {
-  // Returning nothing is what keeps Tab, the browser shortcuts and anything a consumer has
-  // bound working: the component leaves such an event entirely alone.
   it.each(['Tab', 'a', 'F5', 'Backspace', 'Shift'])('%s is left alone everywhere', (key) => {
     expect(calendarIntent({ key }, 'cell', 15, false)).toBeUndefined()
     expect(calendarIntent({ key }, 'event', 15, false)).toBeUndefined()
@@ -153,10 +151,6 @@ describe('keys the table has no business with', () => {
   })
 })
 
-/*
- * A key held with Alt, Ctrl or Meta belongs to the browser or the system: Alt+Left is Back,
- * Ctrl+Home scrolls the page. Answering it here, and cancelling it, took those away.
- */
 describe('a key held with a modifier', () => {
   it('means nothing, in every place the focus can be', () => {
     for (const focus of ['cell', 'event', 'grabbed'] as const) {

@@ -3,12 +3,11 @@ import { VButton, snackbar } from 'vectis-ui'
 </script>
 
 <template>
-  <!-- Raised into the <VSnackbar /> mounted once at the root of the application. -->
   <div class="demo">
-    <!-- Four seconds by default, shorter than a notification's: the reader already
-         knows what the bar says, having just done it. The countdown holds while the
-         pointer rests on the bar and while the keyboard is inside it, so an action
-         being reached for is never taken away mid-reach. -->
+    <!--
+      The countdown holds while the pointer rests on the bar and while the keyboard is inside
+      it, so an action being reached for is never taken away mid-reach.
+    -->
     <VButton
       variant="outline"
       tone="neutral"

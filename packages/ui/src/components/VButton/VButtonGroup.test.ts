@@ -189,10 +189,10 @@ describe('VButtonGroup', () => {
     }
   })
 
-  // TRAP — `compact: undefined` and `elevated: undefined` must stay in the group's
-  // withDefaults. Vue casts a Boolean prop with NO default to `false`, and a group
-  // reading `false` would then swallow the compact and the elevation of every button
-  // inside it, silently: the two lines look redundant and are not.
+  // `compact: undefined` and `elevated: undefined` must stay in the group's withDefaults. Vue
+  // casts a Boolean prop with no default to `false`, and a group reading `false` would then
+  // swallow the compact and the elevation of every button inside it, silently: the two lines
+  // look redundant and are not.
   it('a silent group does not swallow a compact or elevated button', () => {
     const { container } = render(VButtonGroup, {
       slots: { default: () => h(VButton, { compact: true, elevated: true }, () => 'One') },
@@ -217,8 +217,6 @@ describe('VButtonGroup', () => {
     }
   })
 
-  // The shape of the control belongs to the row: a segment of another height or
-  // silhouette no longer lines up with its neighbours.
   it('the group wins over a button that sets its own variant, size or compact', () => {
     const { container } = render(VButtonGroup, {
       props: { variant: 'soft', size: 'sm', compact: true },
@@ -232,8 +230,6 @@ describe('VButtonGroup', () => {
     expect(segment.dataset.compact).toBe('')
   })
 
-  // The tone is meaning rather than shape, so it travels the other way: one segment in
-  // the row can be the destructive one.
   it('a button keeps its own tone, and takes the group tone without one', () => {
     const { container } = render(VButtonGroup, {
       props: { tone: 'neutral' },
@@ -257,7 +253,6 @@ describe('VButtonGroup', () => {
     expect(segment.dataset.tone).toBe('neutral')
   })
 
-  // The third arbitration: the row and the button add up, and neither lifts the other.
   describe('disabled', () => {
     it('a disabled row disables every segment', () => {
       const { container } = render(VButtonGroup, {
@@ -280,8 +275,8 @@ describe('VButtonGroup', () => {
       expect(two?.disabled).toBe(true)
     })
 
-    // The OR read the other way round: a row switched off cannot have one of its
-    // segments opt back in.
+    // The or read the other way round: a row switched off cannot have one of its segments opt
+    // back in.
     it('a segment cannot refuse a disabled row', () => {
       const { container } = render(VButtonGroup, {
         props: { disabled: true },
@@ -327,11 +322,8 @@ describe('VButtonGroup', () => {
   })
 
   /*
-   * A companion puts a wrapper between the group and the button: `.v-tooltip`,
-   * `.v-popover`, `.v-badge-host`. What is testable here is the half jsdom can see —
-   * the row still reaching the button through that wrapper, and the DOM shape the sheet
-   * is written against. The drawing itself, the pull and the corners and the seam, is
-   * measured by the `Companions` play function.
+   * What is testable here is the half jsdom can see; the row still reaching the button through
+   * that wrapper, and the DOM shape the sheet is written against.
    */
   describe('a segment carrying a companion', () => {
     it('hands the row down through the wrapper', () => {
@@ -348,8 +340,6 @@ describe('VButtonGroup', () => {
       }
     })
 
-    // The shape the sheet's second branch reaches through: the wrapper is a child of the
-    // group, and the button stands inside it.
     it('leaves the wrapper on the group and the button inside it', () => {
       const { getByRole } = render(VButtonGroup, {
         slots: { default: () => [h(VButton, () => 'One'), tooltipSegment('Two')] },
@@ -360,12 +350,6 @@ describe('VButtonGroup', () => {
       expect(wrapper?.querySelector(':scope > .v-button')?.textContent?.trim()).toBe('Two')
     })
 
-    /*
-     * Companions STACK, and each one is another element between the group and the button:
-     * a badge inside a tooltip puts it two down, which is why the sheet reaches through a
-     * descendant combinator rather than a child one. The drawing at that depth is the
-     * `Companions` play function's; what is locked here is the DOM shape it relies on.
-     */
     it('a badge inside a tooltip puts the button two wrappers down', () => {
       const { getByRole } = render(VButtonGroup, {
         slots: {
@@ -393,11 +377,9 @@ describe('VButtonGroup', () => {
     })
 
     /*
-     * VMenu adds no wrapper: it renders its trigger and its panel as SIBLINGS, so a group
-     * holding a menu has a child that is no segment at all. This is the DOM behind the
-     * sheet reading its last segment as "no real segment follows me" rather than
-     * `:not(:last-child)` — a menu closing a row would otherwise take the row's outer
-     * corner away, and every panel carries `.v-overlay` for the rule to recognize.
+     * This is the DOM behind the sheet reading its last segment as "no real segment follows me"
+     * rather than `:not(:last-child)`; a menu closing a row would otherwise take the row's
+     * outer corner away, and every panel carries `.v-overlay` for the rule to recognize.
      */
     it('a menu leaves its panel among the group children, after the trigger', () => {
       const { getByRole } = render(VButtonGroup, {

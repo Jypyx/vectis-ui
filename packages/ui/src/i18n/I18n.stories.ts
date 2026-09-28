@@ -81,8 +81,6 @@ const t = storyText({
   },
 })
 
-/* No row at all: the EMPTY state is what carries dictionary text, and the
-   selection footer stays rendered — two visible strings at once. */
 const ROWS: { name: string; total: number }[] = []
 
 const OPTIONS = [
@@ -129,14 +127,10 @@ const SHOWCASE = `
   </div>
 `
 
-/* Language names are ENDONYMS: demo data, like `Alpha`/`Bravo`, not prose — they
-   stay out of `storyText` and are what the play function queries, since they read
-   the same in every locale. The flags ride as ordinary `iconStart` sources — the
-   `{ src }` form, so VIcon sizes them and marks them decorative (no `label`) and
-   the endonym alone carries the accessible name. Kept as plain `.svg` files rather
-   than inlined: rendered as an `<img>`, each flag is its own document, so the
-   `<marker id>` the US stars hang on cannot collide with the copy of itself that
-   the trigger renders next to the list. */
+/*
+ * Load flags as separate images so SVG marker IDs cannot collide between a trigger and its list
+ * copy.
+ */
 const LANGUAGES = [
   { tag: 'en-US', flag: { src: flagUS }, label: 'English' },
   { tag: 'fr-FR', flag: { src: flagFR }, label: 'Français' },
@@ -182,10 +176,10 @@ const trail = computed(() => [
   { label: t.value.components, href: '/components' },
 ])
 
-/* The trigger READS the DS locale and the items WRITE it through `setLocale`: the
-   selector holds no state of its own, so it stays in sync with the toolbar. A
-   CONSUMER does the opposite — they keep their own ref as the source of truth,
-   `useLocale` being internal: the DS is a sink for the locale, never a source. */
+/*
+ * A CONSUMER does the opposite; they keep their own ref as the source of truth, `useLocale`
+ * being internal: the DS is a sink for the locale, never a source.
+ */
 const locale = useLocale()
 const current = computed(() => LANGUAGES.find((l) => l.tag === locale.value) ?? LANGUAGES[0])
 
@@ -208,13 +202,7 @@ function showcase(prefix = ''): Story['render'] {
   })
 }
 
-/**
- * Default configuration: English is the base, no call is needed.
- *
- * Every story here drives the locale through story-level `globals`, which the
- * `preview.ts` decorator turns into a `setLocale`. Doing it in a `beforeEach`
- * would not work: the decorator body runs after it and would win.
- */
+/** Default configuration: English is the base, no call is needed. */
 export const English: Story = {
   globals: { locale: 'en-US' },
   render: showcase(),
@@ -227,12 +215,8 @@ export const French: Story = {
 }
 
 /**
- * PARTIAL override: a few keys only, the rest keeps the English base — this is
- * also how you add a language the DS does not ship.
- *
- * The teardown is not decorative: the registry lives at module level and SURVIVES
- * Storybook navigation (the same trap as `dismissToast()` in the VToast stories).
- * Without it, every story visited afterwards would keep these strings.
+ * PARTIAL override: a few keys only, the rest keeps the English base; this is also how you add
+ * a language the DS does not ship.
  */
 export const PartialOverride: Story = {
   globals: { locale: 'en-US' },
@@ -248,29 +232,16 @@ export const PartialOverride: Story = {
 }
 
 /**
- * `setLocale('de-DE')` with no German dictionary: the WORDS stay English, but the
- * FORMATS (months, first day of week, hour cycle) already follow the tag — they
- * come from `Intl`, not from the dictionary. A coherent degraded state, not a bug.
+ * `setLocale('de-DE')` with no German dictionary: the words stay English, but the FORMATS
+ * (months, first day of week, hour cycle) already follow the tag; they come from `Intl`, not
+ * from the dictionary.
  */
 export const LanguageWithoutDictionary: Story = {
   globals: { locale: 'de-DE' },
   render: showcase(),
 }
 
-/**
- * A language selector inside the page. The dictionary is a `shallowRef`, so a
- * `setLocale` called from a click handler re-renders every ALREADY MOUNTED
- * component — nothing is remounted, nothing reloads.
- *
- * `Deutsch` is offered WITHOUT a dictionary: the formats follow the tag while the
- * words stay English, the degraded state of `LanguageWithoutDictionary`. No
- * `registerMessages` here, hence no registry to tear down — and no interference
- * with that story, which shares this docs page.
- *
- * No teardown either, unlike `PartialOverride`: the `withGlobals` decorator
- * re-applies the toolbar locale on EVERY story render, so the locale self-heals on
- * navigation. The registry, which the decorator never touches, does not.
- */
+/** A language selector inside the page. */
 export const LanguageSwitcher: Story = {
   globals: { locale: 'en-US' },
   render: showcase(SWITCHER),
@@ -279,12 +250,11 @@ export const LanguageSwitcher: Story = {
     const menu = canvasElement.querySelector('[role="menu"]') as HTMLElement
     await expect(canvas.getByText('No data')).toBeVisible()
 
-    /* The trigger is named after the CURRENT language, so it changes as we go —
-       and the flags never enter the query, being aria-hidden. */
+    /*
+     * The trigger is named after the CURRENT language, so it changes as we go; and the flags
+     * never enter the query, being aria-hidden.
+     */
     const trigger = canvas.getByRole('button', { name: 'English' })
-    /* The flag really resolved through VIcon: an unresolved source renders the
-       empty `<slot />`, a silent blank box. `.v-icon-img` is the `{ src }` branch,
-       so the query targets the flag and not the `expand_more` chevron. */
     await expect(trigger.querySelector('.v-icon-img')).not.toBeNull()
 
     await userEvent.click(trigger)
@@ -294,9 +264,10 @@ export const LanguageSwitcher: Story = {
       await expect(canvas.getByText('Aucune donnée')).toBeVisible()
     })
 
-    /* Back to English, and it is load-bearing: the locale is module-level state
-       shared by all five canvases of the docs page — a run left in French would
-       flip the siblings. */
+    /*
+     * Back to English, and it is load-bearing: the locale is module-level state shared by all
+     * five canvases of the docs page; a run left in French would flip the siblings.
+     */
     await userEvent.click(canvas.getByRole('button', { name: 'Français' }))
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
     await userEvent.click(canvas.getByRole('menuitem', { name: 'English' }))

@@ -1,15 +1,7 @@
 /**
- * Generates `src/components/VIcon/icons/`, one module per icon: the SVG paths of the icons the DS
- * renders ITSELF by default, exact replicas of Material Symbols Rounded
- * (wght 400 · GRAD 0 · opsz 24). This registry is what makes the design system
- * usable with no icon font at all.
- *
- * Run with `pnpm icons` — on demand, NOT in prebuild: the list below only moves
- * when a component gains a new default, and the build must not depend on the
- * network (the generated file is committed).
- *
- * Source: the google/material-design-icons repository, at a pinned revision
- * (REVISION). Apache-2.0 licence © Google.
+ * Generate built-in Material Symbols Rounded icons on demand; builds use the committed registry
+ * without network access. Source: google/material-design-icons at REVISION, Apache-2.0, ©
+ * Google.
  */
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
@@ -21,9 +13,9 @@ import { renderIconsModules } from './lib/icons-module'
 const REVISION = '528cb964c01fb2b09bc3b9208f82b6d8f8c1c1e2'
 
 /**
- * The icons the library renders by default — and only those: anything the
- * consumer passes in is THEIR icon source's business. Add a name here when a
- * component starts rendering a new icon by default.
+ * The icons the library renders by default; and only those: anything the consumer passes in is
+ * THEIR icon source's business. Add a name here when a component starts rendering a new icon by
+ * default.
  */
 const ICONS = [
   'arrow_downward',
@@ -62,7 +54,7 @@ const ICONS = [
   'warning',
 ] as const
 
-/** Google's export grid — the registry shares it, it is not repeated per icon. */
+/** Google's export grid; the registry shares it, it is not repeated per icon. */
 const VIEW_BOX = '0 -960 960 960'
 
 const url = (name: string, fill: boolean) =>
@@ -93,7 +85,6 @@ async function fetchPath(name: string, fill: boolean): Promise<string | undefine
   const source = url(name, fill)
   const response = await fetch(source)
   if (!response.ok) {
-    // The FILL 1 variant may be missing for a purely linear icon.
     if (fill && response.status === 404) return undefined
     throw new Error(`${source} : HTTP ${response.status}`)
   }
@@ -103,8 +94,8 @@ async function fetchPath(name: string, fill: boolean): Promise<string | undefine
 const entries = await Promise.all(
   ICONS.map(async (name) => {
     const [outline, filled] = await Promise.all([fetchPath(name, false), fetchPath(name, true)])
-    // The filled path is emitted ONLY if it changes the geometry: most icons
-    // (chevrons, arrows, close, check…) have identical FILL 0 and FILL 1.
+    // The filled path is emitted only if it changes the geometry: most icons (chevrons, arrows,
+    // close, check…) have identical FILL 0 and FILL 1.
     return [
       name,
       filled !== undefined && filled !== outline ? [outline!, filled] : [outline!],

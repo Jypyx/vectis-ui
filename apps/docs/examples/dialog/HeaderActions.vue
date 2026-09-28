@@ -21,8 +21,6 @@ const details = ref(false)
       <VButton v-bind="triggerProps">Open the preview</VButton>
     </template>
 
-    <!-- Rendered before the close cross, which keeps the cross at the edge where the
-         reader looks for it. -->
     <template #header-actions>
       <VIconButton
         :icon="info"

@@ -98,7 +98,6 @@ describe('VTabs', () => {
         tabs: `<VTab value="mon onglet" label="Un" />`,
         panels: false,
       })
-      // the panel comes from the same deriver: check the tab, with no blank
       expect(container.querySelector('[role="tab"]')?.id).not.toContain(' ')
     })
 
@@ -351,13 +350,12 @@ describe('VTabs', () => {
     })
 
     /*
-     * The only real logic on this axis (everything else is CSS, out of jsdom's
-     * reach): `outlined` is a decorated `flat`, so it does not raise the active tab
-     * — inside a card, the frame is what carries the elevation.
+     * The only real logic on this axis (everything else is CSS, out of jsdom's reach):
+     * `outlined` is a decorated `flat`, so it does not raise the active tab; inside a card, the
+     * frame is what carries the elevation.
      */
     it("only `inset` raises the active tab (mapping to VButton's elevated)", () => {
       const activeTabOf = (tabsAttrs?: string) => tabsOf(mount({ tabsAttrs }).container)[0]
-      // the variant stays ghost throughout: elevation is orthogonal to it
       expect(activeTabOf()?.getAttribute('data-variant')).toBe('ghost')
       expect(activeTabOf('variant="inset"')?.getAttribute('data-variant')).toBe('ghost')
       expect(activeTabOf()?.hasAttribute('data-elevated')).toBe(false)

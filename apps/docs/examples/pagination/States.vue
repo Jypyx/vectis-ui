@@ -21,7 +21,6 @@ const last = ref(6)
       <VTypography variant="caption" tone="muted">The whole row switched off</VTypography>
     </div>
 
-    <!-- The controls disable themselves at the ends: there is nothing to step to. -->
     <div class="row">
       <VPagination
         v-model="first"

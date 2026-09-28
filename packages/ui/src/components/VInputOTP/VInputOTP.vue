@@ -1,27 +1,8 @@
 <script setup lang="ts">
 // @keyboard @core
 /**
- * The row of boxes a one-time code is typed into, one character per box.
- *
- * The platform has no such control, so each box is a real `<input>` and the JS is what makes
- * the row behave as one field: a character moves to the next box, Backspace on an empty one
- * goes back, the arrows walk along, and a code pasted anywhere is spread across them. The
- * first box carries `autocomplete="one-time-code"`, so a code arriving from an SMS or a
- * password manager is spread the same way.
- *
- * `pattern` cuts the row up: every `#` is a box, every other character a decorative literal
- * shown between them and never part of the value. Pasting understands those literals — a
- * code copied formatted, `GT-123`, is consumed with them in place — and `format` filters the
- * rest, forcing capitals outside a numeric code so the value has one canonical form.
- *
- * The value is the filled boxes read in order, so the filled boxes always form a PREFIX:
- * typing or focusing past the first empty box lands in that box, and emptying a box closes
- * the gap. Without that invariant `1 _ 3 _` would be the value `13`, which the next sync
- * would redraw as `1 3 _ _`.
- *
- * A row of boxes is not a form control, so a visually hidden native input carries the code
- * for the form: `name`, `form` and `required` land on it, and a `pattern` of the full
- * length makes a half-typed code invalid.
+ * Coordinate character inputs because HTML has no segmented code field. JavaScript filters
+ * values, distributes paste and moves focus; pattern literals stay outside the model.
  */
 
 import { computed, ref, useAttrs, useId, watch } from 'vue'
@@ -51,16 +32,12 @@ interface InputOTPProps {
    */
   format?: InputOTPFormat
   /**
-   * The shape of the code: each `#` is a box to fill, and every other character is a
-   * separator shown between the boxes without ever being part of the value, as in
-   * `'GT-###'` or `'###.###.###'`. It wins over `length`.
+   * The shape of the code: each `#` is a box to fill, and every other character is a separator
+   * shown between the boxes without ever being part of the value, as in `'GT-###'` or
+   * `'###.###.###'`.
    */
   pattern?: string
-  /**
-   * An icon drawn in place of EVERY separator of the pattern. It suits a template
-   * whose separators are purely decorative, `'###-###'`, and should not be used with
-   * one carrying meaningful text such as `'GT-###'`, which the icon would erase.
-   */
+  /** An icon drawn in place of every separator of the pattern. */
   separatorIcon?: IconSource
   /** The size of the boxes: 32, 40 or 48 pixels. */
   size?: InputOTPSize
@@ -69,19 +46,15 @@ interface InputOTPProps {
   /** Makes every box unusable, greyed out through the colour tokens. */
   disabled?: boolean
   /**
-   * Shows the code without letting it be changed. The boxes keep their focus and the code
-   * can still be selected and copied, which is what separates it from `disabled`.
+   * Shows the code without letting it be changed. The boxes keep their focus and the code can
+   * still be selected and copied, which separates it from `disabled`.
    */
   readonly?: boolean
   /** Marks the code as wrong, which colours the boxes and tells assistive technology so. */
   invalid?: boolean
   /**
-   * What screen readers announce for the row as a whole. It falls back to the design
-   * system dictionary.
-   *
-   * Unlike the `label` of VInput and the other text fields, NOTHING is rendered from it:
-   * a row of boxes carries its own instructions above it, written by the page. Use `hint`
-   * for a line the reader can see.
+   * What screen readers announce for the row as a whole. It falls back to the design system
+   * dictionary.
    */
   label?: string
   /**
@@ -110,11 +83,9 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.inputOTP.label)
 
 // @a11y
 /*
- * The root IS the group, so the consumer's attributes belong on it — but they are bound
- * BEFORE the two the component decides itself. `aria-describedby` is a list, and the hint
- * is appended to whatever the consumer already pointed at instead of replacing it; left
- * to the fallthrough, their value would land last and take the hint out of the
- * announcement with nothing to show for it.
+ * `aria-describedby` is a list, and the hint is appended to whatever the consumer already
+ * pointed at instead of replacing it; left to the fallthrough, their value would land last and
+ * take the hint out of the announcement with nothing to show for it.
  */
 defineOptions({ inheritAttrs: false })
 
@@ -192,8 +163,8 @@ const digits = ref<string[]>([])
 
 function syncFromModel(value: string) {
   // A value longer than the row is simply shown cut short, and one holding characters the
-  // format refuses is shown filtered — but the model is NOT rewritten to match: writing
-  // back here would feed the watcher below and the two would keep correcting each other.
+  // format refuses is shown filtered; but the model is not rewritten to match: writing back
+  // here would feed the watcher below and the two would keep correcting each other.
   const clean = sanitize(value)
   digits.value = Array.from({ length: slotCount.value }, (_, i) => clean[i] ?? '')
 }
@@ -203,10 +174,10 @@ watch([model, slotCount], ([value, count]) => {
 })
 
 /*
- * TRAP — the list of boxes is trimmed AFTER the render, never before it. A box that
- * disappears calls its function ref with `null` while it is being unmounted, at its OLD
- * position: trimmed in a `pre` watcher, that late assignment would stretch the array back
- * out, and a pattern that shortened would keep its departed boxes as trailing entries.
+ * The list of boxes is trimmed after the render, never before it. A box that disappears calls
+ * its function ref with `null` while it is being unmounted, at its OLD position: trimmed in a
+ * `pre` watcher, that late assignment would stretch the array back out, and a pattern that
+ * shortened would keep its departed boxes as trailing entries.
  */
 watch(
   slotCount,
@@ -244,23 +215,16 @@ function commit() {
 
 // @core
 /**
- * Spreads a run of characters across the boxes, starting from the one that received
- * them. It walks the row: a separator swallows the incoming character when the two
- * match, which is what lets a code pasted in its formatted shape line up, and a box
- * takes the next character the format accepts.
- *
- * It returns the last box it filled, so the caller knows where to put the focus, and
- * `null` when nothing in the text was usable.
+ * Spreads a run of characters across the boxes, starting from the one that received them. It
+ * returns the last box it filled, so the caller knows where to put the focus, and `null` when
+ * nothing in the text was usable.
  */
 function distribute(raw: string, startSlot: number): number | null {
   const allCells = cells.value
   let start = allCells.findIndex((cell) => cell.type === 'slot' && cell.slotIndex === startSlot)
   const chars = [...raw]
-  // Step back over the separators immediately before that box: pasting the whole
-  // string onto the first box means pasting its prefix too, and "GT-" has to be
-  // matched rather than treated as characters of the code. Never for ONE character: a
-  // `G` typed into the first box of `GT-###` is the code's first character, not the
-  // separator, and swallowing it would make such a code impossible to type.
+  // Never for ONE character: a `G` typed into the first box of `GT-###` is the code's first
+  // character, not the separator, and swallowing it would make such a code impossible to type.
   if (chars.length > 1) while (start > 0 && allCells[start - 1]?.type === 'literal') start--
   let charIndex = 0
   let lastFilled: number | null = null
@@ -282,9 +246,9 @@ function distribute(raw: string, startSlot: number): number | null {
   return lastFilled
 }
 
-// @keyboard @core — moving the focus forward on its own is what turns a row of
-// separate inputs into something that types like one field; spreading the characters
-// is the core behaviour underneath it.
+// @keyboard @core
+// Separate inputs into something that types like one field; spreading the characters is the
+// core behaviour underneath it.
 function onInput(slotIndex: number, event: Event) {
   const el = event.target as HTMLInputElement
   const empty = firstEmpty()
@@ -299,8 +263,8 @@ function onInput(slotIndex: number, event: Event) {
     raw = raw.slice(Math.max(0, el.selectionStart - inserted), el.selectionStart)
   }
 
-  // The same path serves a single keystroke and a pasted code: both are spread from this
-  // box onwards — or from the first empty box, when this one lies past it.
+  // The same path serves a single keystroke and a pasted code: both are spread from this box
+  // onwards; or from the first empty box, when this one lies past it.
   const lastFilled = distribute(raw, filled ? slotIndex : empty)
   if (lastFilled === null) {
     // Either the box was emptied, or nothing typed was valid for this format. A filled box
@@ -317,9 +281,9 @@ function onInput(slotIndex: number, event: Event) {
   commit()
 }
 
-// @keyboard — the filled boxes form a prefix, so focusing a box past the first empty one
-// sends the focus there instead: a pointer landing on box 5 of a two-character code types
-// into box 3.
+// @keyboard
+// Sends the focus there instead: a pointer landing on box 5 of a two-character code types into
+// box 3.
 function onFocus(slotIndex: number, event: FocusEvent) {
   const empty = firstEmpty()
   if (empty !== -1 && slotIndex > empty) inputs.value[empty]?.focus()
@@ -359,8 +323,8 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
   focusBox(target)
 }
 
-// Function refs are handed to the template ONCE per box: an inline one is a new function
-// on every render, which Vue answers with a null-then-element call on every keystroke.
+// Function refs are handed to the template once per box: an inline one is a new function on
+// every render, which Vue answers with a null-then-element call on every keystroke.
 const refSetters = new Map<number, (el: unknown) => void>()
 function inputRef(slot: number) {
   let set = refSetters.get(slot)
@@ -373,9 +337,8 @@ function inputRef(slot: number) {
   return set
 }
 /*
- * The same trio every other field of the size scale exposes. `focus` goes to the FIRST
- * EMPTY box rather than to the first box outright, which is where a reader resuming a
- * half-entered code expects to land.
+ * `focus` goes to the first empty box rather than to the first box outright, which is where a
+ * reader resuming a half-entered code expects to land.
  */
 defineExpose({
   /** Moves the focus to the first empty box, or to the last one when the code is complete. */
@@ -436,9 +399,10 @@ defineExpose({
       </template>
     </div>
 
-    <!-- What a form reads: the code, under the consumer's name. Out of the tab order and
-         hidden from assistive technology, the boxes being the control; a browser focusing
-         it to report an invalid code is sent on to the box to fill. -->
+    <!--
+      Out of the tab order and hidden from assistive technology, the boxes being the control; a
+      browser focusing it to report an invalid code is sent on to the box to fill.
+    -->
     <input
       v-bind="nativeAttrs"
       class="v-input-otp-native v-visually-hidden"
@@ -507,14 +471,12 @@ defineExpose({
       background-color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  /* The states follow VInput's, in VInput's order: read-only, hover, focus, invalid,
-     disabled. Read-only, focus, invalid and disabled all weigh (0,2,0), so the source order
-     arbitrates between them and read-only has to come FIRST, or it would repaint the focus
-     and error borders grey.
-
-     A read-only row takes the sunken background and the lighter border of a read-only
-     VInput, and the state is read from [data-readonly] rather than from `:read-only`, which
-     the browser also matches on a disabled box. */
+  /*
+   * The states follow VInput's, in VInput's order: read-only, hover, focus, invalid, disabled.
+   * Read-only, focus, invalid and disabled all weigh (0,2,0), so the source order arbitrates
+   * between them and read-only has to come first, or it would repaint the focus and error
+   * borders grey.
+   */
   .v-input-otp[data-readonly] .v-input-otp-input {
     background: var(--vectis-color-surface-sunken);
     border-color: var(--vectis-color-border);
@@ -530,11 +492,11 @@ defineExpose({
     );
   }
 
-  /* The focused box appears to have a two-pixel border, exactly as in VInput and
-     VTextarea: its own 1px border plus a 1px shadow of the same colour just outside
-     it. `:focus` rather than `:focus-visible`, like any text field, which shows its focus
-     when clicked into too. The transparent outline is the safety net for Windows forced
-     colours, which drop box-shadows entirely. */
+  /*
+   * `:focus` rather than `:focus-visible`, like any text field, which shows its focus when
+   * clicked into too. The transparent outline is the safety net for Windows forced colours,
+   * which drop box-shadows entirely.
+   */
   .v-input-otp-input:focus {
     border-color: var(--vectis-color-accent);
     box-shadow: 0 0 0 1px var(--vectis-color-accent);
@@ -559,9 +521,11 @@ defineExpose({
     user-select: none;
   }
 
-  /* A disabled row greys out through the colour tokens and never through opacity, the
-     same treatment as VInput — `text-muted` inside the box, where `text-subtle` would fall
-     under 4.5:1 against `surface-muted`, and `text-subtle` for what sits on the page. */
+  /*
+   * A disabled row greys out through the colour tokens and never through opacity, the same
+   * treatment as VInput; `text-muted` inside the box, where `text-subtle` would fall under
+   * 4.5:1 against `surface-muted`, and `text-subtle` for what sits on the page.
+   */
   .v-input-otp[data-disabled] .v-input-otp-input {
     background: var(--vectis-color-surface-muted);
     color: var(--vectis-color-text-muted);

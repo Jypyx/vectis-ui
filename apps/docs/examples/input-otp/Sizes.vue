@@ -11,7 +11,6 @@ const sizes = ['sm', 'md', 'lg'] as const
       <VTypography variant="caption" tone="muted">{{ size }}</VTypography>
     </div>
 
-    <!-- Compact takes 4px off the boxes and leaves the text where it was. -->
     <div v-for="size in sizes" :key="`${size}-compact`" class="row">
       <VInputOTP :length="4" :size="size" compact :label="`Code, ${size} compact`" />
       <VTypography variant="caption" tone="muted">{{ size }} compact</VTypography>

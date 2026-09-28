@@ -8,9 +8,11 @@ const syncPanel = useTemplateRef<InstanceType<typeof VPopover>>('syncPanel')
 
 <template>
   <div class="column">
-    <!-- auto: the browser dismisses it on a click outside or on Escape, and stacks it
-         with the other panels on the page. The model is written back from the DOM, so
-         nothing has to be reset by hand. -->
+    <!--
+      Auto: the browser dismisses it on a click outside or on Escape, and stacks it with the
+      other panels on the page. The model is written back from the DOM, so nothing has to be
+      reset by hand.
+    -->
     <VPopover>
       <template #trigger="{ triggerProps }">
         <VButton v-bind="triggerProps" variant="outline" tone="neutral">auto</VButton>
@@ -20,8 +22,10 @@ const syncPanel = useTemplateRef<InstanceType<typeof VPopover>>('syncPanel')
       </VTypography>
     </VPopover>
 
-    <!-- manual: nothing dismisses it but you. This is what a panel with rules of its
-         own needs, and it means the panel must offer a way out. -->
+    <!--
+      Manual: nothing dismisses it but you. This is what a panel with rules of its own needs,
+      and it means the panel must offer a way out.
+    -->
     <VPopover v-model:open="manualOpen" mode="manual">
       <template #trigger="{ triggerProps }">
         <VButton v-bind="triggerProps" variant="outline" tone="neutral">manual</VButton>

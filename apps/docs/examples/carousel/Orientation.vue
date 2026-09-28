@@ -16,7 +16,6 @@ const hues = [220, 280, 340, 20, 90, 160]
 
   <div class="group">
     <VTypography variant="overline" tone="muted">vertical</VTypography>
-    <!-- Scrolling downwards, the height is the reference a slide takes its share of. -->
     <VCarousel orientation="vertical" height="14rem" label="Vertical gallery">
       <VCarouselItem v-for="(hue, i) in hues" :key="hue">
         <p class="slide fill" :style="{ background: `oklch(0.45 0.15 ${hue})` }">{{ i + 1 }}</p>

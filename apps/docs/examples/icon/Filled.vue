@@ -10,7 +10,6 @@ import {
   warning,
 } from 'vectis-ui/icons'
 
-/* Six of the icons whose geometry really changes when they are filled. */
 const PAIRS = [notifications, checkCircle, warning, error, info, schedule]
 </script>
 

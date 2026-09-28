@@ -1,13 +1,6 @@
 /**
- * The tokens naming a ROLE rather than a value: the page background, ordinary text, the
- * accent an application is built around, the pause before a tooltip.
- *
- * These are the ONLY tokens a component mentions, and that is the whole point — a component
- * asks for the accent and never for a particular indigo, so an application can change what
- * the accent IS without any component knowing.
- *
- * Almost every entry ALIASES a palette step in braces rather than stating a value. What is
- * written here is the LIGHT theme; `themes/dark.ts` repoints the same roles.
+ * Semantic roles alias primitives; components depend on these roles so applications can theme
+ * without rewriting component CSS.
  */
 import { color, dimension, duration, fontFamily, fontWeight, type TokenGroup } from './types'
 
@@ -70,15 +63,7 @@ export const semantic = {
       'Danger text on a neutral or tinted background: error messages, a destructive menu item',
     ),
 
-    /*
-     * Green starts one step darker than the other colours. White text on a filled button
-     * only becomes readable enough from green 700 onwards — green 600 falls well short of
-     * the threshold. Darkening the colour rather than darkening the text is what keeps one
-     * simple rule true: a filled control carries white text.
-     *
-     * The one exception is the warning colour, since no step of an amber is ever dark
-     * enough for white, which is why it alone declares a text colour of its own.
-     */
+    /* Green filled surfaces need step 700 to contrast with white text. */
     success: color('{color.green.700}', 'A positive outcome: solid chips, badges, notifications'),
     'success-hover': color('{color.green.800}', 'The success color under the pointer'),
     'success-active': color('{color.green.900}', 'The success color while pressed'),
@@ -111,27 +96,8 @@ export const semantic = {
     backdrop: color('oklch(0% 0 0 / 0.45)', 'The veil behind modal dialogs'),
 
     /*
-     * The four colours of a calendar event that names none of its own.
-     *
-     * These are the one place in the design system where a colour is DATA rather than a
-     * role: which hue an event takes is derived from its id (see `VCalendar/color.ts`),
-     * and each card turns these colours to its own hue. That is why they are written out
-     * rather than aliased to a palette — there is no palette to point at, only a wheel. The
-     * hue written here, 265, is the one a card falls back to.
-     *
-     * WHAT MAKES THEM READABLE, and what must not be changed casually. Only the HUE
-     * varies; the lightness and the chroma below are fixed, and in OKLCH lightness is
-     * perceptual — so the distance between the text at L 0.40 and the card at L 0.95 is
-     * the same perceived distance at every hue, which is what turns "an arbitrary colour"
-     * into a contrast ratio that can be relied on. Moving either number moves the contrast
-     * of every event in the calendar at once. The same pair is restated in `themes/dark.ts`
-     * with the roles swapped end for end.
-     *
-     * TRAP — they are plain colours, with no `var()` in them. A custom property is resolved
-     * where it is DECLARED, which for a token is `:root`: a hue read there is the fallback's,
-     * and every card would be painted in it whatever hue it set. The card keeps the lightness
-     * and the chroma and swaps the hue itself, with relative colour syntax, in
-     * `VCalendarEvent.vue`.
+     * Keep event colours literal: root-declared var aliases resolve their hue before cards can
+     * supply per-event hues.
      */
     'event-surface': color(
       'oklch(0.95 0.045 265)',
@@ -143,15 +109,6 @@ export const semantic = {
     ),
     'event-text': color('oklch(0.4 0.11 265)', 'The title of that calendar event'),
   },
-  /**
-   * The typography, described by role rather than by measurement: a heading, a subtitle,
-   * a caption, a piece of code.
-   *
-   * Each role is a COMPLETE recipe — a size, a weight, the space between lines, and where
-   * it matters the space between letters. Asking for a role therefore settles every one of
-   * those at once, and two pieces of text in the same role cannot drift apart. It is what
-   * the typography component renders, and what the components' own stylesheets ask for.
-   */
   text: {
     family: fontFamily('{font.family.sans}', 'The running font of every component'),
     'family-heading': fontFamily(
@@ -195,13 +152,6 @@ export const semantic = {
       weight: fontWeight('{font.weight.regular}'),
       leading: dimension('{font.leading.normal}'),
     },
-    /**
-     * The introduction that opens a page or a section, one step above the running text.
-     *
-     * It shares `body-lg`'s generous leading rather than taking a tighter one: a lead is read
-     * as prose, not as a heading, and the two therefore sit in the same column without the
-     * rhythm changing under the reader between the first paragraph and the second.
-     */
     'body-xl': {
       size: dimension('{font.size.lg}'),
       weight: fontWeight('{font.weight.regular}'),
@@ -227,13 +177,7 @@ export const semantic = {
       weight: fontWeight('{font.weight.medium}'),
       leading: dimension('{font.leading.snug}'),
     },
-    /*
-     * The text beside a checkbox, a radio or a switch. It is `label`'s size and leading at the
-     * regular weight: an option reads as a sentence to choose, not as the name of a field, and
-     * a column of them set in medium weighs as much as the headings above it. A role of its own
-     * rather than a repointed `label`, which VAccordionItem, VBreadcrumb, VSideNavigationItem
-     * and VTypography also read.
-     */
+    /* Choice text uses label dimensions at regular weight to remain distinct from field labels. */
     choice: {
       size: dimension('{font.size.sm}'),
       weight: fontWeight('{font.weight.regular}'),
@@ -255,11 +199,7 @@ export const semantic = {
       weight: fontWeight('{font.weight.regular}'),
       leading: dimension('{font.leading.normal}'),
     },
-    /*
-     * A role of a different sort: the label of a control — a button, a chip, a badge. It
-     * deliberately carries no SIZE, because a control's text size comes from the size it
-     * was given, and this recipe only settles the weight and the space between lines.
-     */
+    /* Control size comes from --control-font-size; this recipe supplies weight and leading only. */
     control: {
       weight: fontWeight('{font.weight.medium}'),
       leading: dimension('{font.leading.none}'),
@@ -275,13 +215,7 @@ export const semantic = {
       'Chips with shape="chip", which follow the interactive radius by default',
     ),
   },
-  /**
-   * How long a change takes, described by what it is: the immediate feedback of a control
-   * under the pointer, the ordinary pace of the design system, a deliberately slower move.
-   *
-   * These three are what a `transition` reaches for. Motion does not vary from one theme to
-   * the next, so unlike the colours they are stated once and never restated.
-   */
+  /** Semantic transition durations are theme-independent. */
   duration: {
     fast: duration('{duration.150}', 'Color and border changes on hover, focus and press'),
     base: duration('{duration.200}', 'The default: a panel opening, a value moving'),
@@ -431,11 +365,8 @@ export const semantic = {
       'The thumbnail square of a VFilePicker preview row (an image, or its type icon)',
     ),
     /*
-     * A card is exactly as tall as its event is long — there is deliberately no floor — so
-     * this value alone decides how much room the shortest event gets. At 4rem an hour, a
-     * quarter of one is 16px, which holds a line of the title once its leading is tightened;
-     * VCalendarEvent does that by measuring the card rather than by counting minutes. Lower
-     * it much and the shortest events stop being readable at all.
+     * This hour height must leave room for a readable title in short events; cards have no
+     * minimum height.
      */
     'size-calendar-hour': dimension('4rem', "The height of one hour in VCalendar's time grid"),
     'size-calendar-gutter': dimension(
@@ -447,11 +378,8 @@ export const semantic = {
       "How far an hour's rule runs back into VCalendar's gutter, tying the label to its line",
     ),
     /*
-     * TRAP — the twin of `EDGE_BAND` in `VCalendar/edgeStep.ts`, which is the same strip
-     * measured in JavaScript. This value is what the reader SEES light up; that one is where
-     * the calendar actually starts counting down to turn the page. Move one alone and the
-     * calendar pages from somewhere other than where it said it would, with nothing to point
-     * at it.
+     * Keep this visual edge-strip width aligned with EDGE_BAND in VCalendar/edgeStep.ts so
+     * paging starts where the highlight appears.
      */
     'size-calendar-edge': dimension(
       '3rem',
@@ -492,10 +420,8 @@ export const semantic = {
       "The narrowest a mini-month of VCalendar's year view gets before the year reflows",
     ),
     /*
-     * Sized so the default `monthEventLimit` of three chips AND the "+N more" line beneath
-     * them fit without being clipped: 136px, less the padding, the border and the 32px day
-     * button, leaves 85px against 76px of chips and a 14px more-line. Shrinking it silently
-     * costs the third chip, since the cell clips rather than scrolls.
+     * Keep enough cell height for monthEventLimit chips and the overflow line; clipped cells do
+     * not scroll to reveal hidden rows.
      */
     'size-calendar-month-cell': dimension(
       '8.5rem',

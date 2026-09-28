@@ -1,13 +1,7 @@
-// @ssr @core — module-wide: every export below is @core unless tagged otherwise.
+// @ssr @core
 /**
- * What the CLOCK and the FIELD need of the time domain: the AM/PM arithmetic, the dial's
- * geometry, the typing mask and the list of times. VTimePicker and VTimeInput are its only
- * consumers; `./time` holds what VCalendar reads as well, and this is kept apart so that
- * no calendar pays for a dial it never draws.
- *
- * The dial's geometry lives here rather than in the component for a practical reason: jsdom
- * lays nothing out and measures every element at zero, so a calculation kept inside the
- * component is untestable.
+ * Clock- and input-specific time arithmetic stays outside the smaller time module imported by
+ * calendar views.
  */
 import { digitsOf, pad2 } from './text'
 import { formatTime, parseTime, formatTimeDisplay } from './time'
@@ -50,26 +44,18 @@ export function withMeridiem(time: string | null | undefined, meridiem: Meridiem
   return parts ? formatTime(hourWithMeridiem(parts.hour, meridiem), parts.minute) : null
 }
 
-/**
- * Snaps a minute to the nearest allowed step and wraps it back inside the hour.
- *
- * Both ends need the wrap: 58 snapped to five-minute steps lands on 60, which is 0, and
- * stepping back from 0 with the keyboard passes through -1, which is 59.
- */
+/** Snaps a minute to the nearest allowed step and wraps it back inside the hour. */
 export function snapMinute(minute: number, step: number): number {
-  // A step is whole minutes: 7.5 divides 60, and wrote `09:7.5` into the model.
   const size = Math.round(step)
   const snapped = size <= 1 ? Math.round(minute) : Math.round(minute / size) * size
   return ((snapped % 60) + 60) % 60
 }
 
 /**
- * Which mark a pointer offset from the dial's centre is aiming at. Marks are numbered
- * clockwise from twelve o'clock and the nearest wins. `dy` is negated because screen
- * coordinates grow DOWNWARD and the angle is measured from the top.
+ * Which mark a pointer offset from the dial's centre is aiming at. Marks are numbered clockwise
+ * from twelve o'clock and the nearest wins.
  */
 export function angleToIndex(dx: number, dy: number, segments: number): number {
-  // The angle from twelve o'clock, clockwise-positive, as a fraction of a full turn.
   const angle = Math.atan2(dx, -dy)
   const turn = (angle / (2 * Math.PI) + 1) % 1
   return Math.round(turn * segments) % segments
@@ -81,25 +67,15 @@ export function distanceFraction(dx: number, dy: number, radius: number): number
 }
 
 /**
- * How close to the centre a pointer must land to be aiming at the INNER ring, the one
- * holding the small hours of a 24-hour dial: the halfway mark between the two rings.
- *
- * TRAP: the number is DERIVED from the dial tokens. A 256px dial with 48px numerals puts
- * the rings' centres at 104px and 56px from the middle, whose midpoint is 0.625 of the
- * radius. Change either token without changing this and the threshold no longer separates
- * the two rings: a tap near the boundary quietly sets the wrong hour.
+ * The number is DERIVED from the dial tokens. A 256px dial with 48px numerals puts the rings'
+ * centres at 104px and 56px from the middle, whose midpoint is 0.625 of the radius.
  */
 export const DIAL_INNER_THRESHOLD = 0.625
 
 /**
- * How close to the centre a pointer lands on NOTHING. At the very centre there is no angle
- * at all (`atan2(0, 0)` answers half a turn, which would set six o'clock), and the centre dot
- * drawn there is not a numeral.
- *
- * TRAP: derived from the same tokens as the threshold above: the inner ring's numerals
- * start 32px from the middle (56px less half a 48px numeral), 0.25 of the radius, so the
- * dead zone stops short of them. Grow it past 0.25 and the inner small hours lose their
- * inner half to it.
+ * Derived from the same tokens as the threshold above: the inner ring's numerals start 32px
+ * from the middle (56px less half a 48px numeral), 0.25 of the radius, so the dead zone stops
+ * short of them. Grow it past 0.25 and the inner small hours lose their inner half to it.
  */
 export const DIAL_DEAD_ZONE = 0.2
 
@@ -112,7 +88,7 @@ export function dialIndexToHour24(index: number, ring: 'outer' | 'inner'): numbe
   return index === 0 ? 0 : index + 12
 }
 
-/** The way back, which is what tells the hand where to point. */
+/** The way back, which tells the hand where to point. */
 export function hour24ToDial(hour: number): { index: number; ring: 'outer' | 'inner' } {
   if (hour === 0) return { index: 0, ring: 'inner' }
   if (hour === 12) return { index: 0, ring: 'outer' }
@@ -121,20 +97,16 @@ export function hour24ToDial(hour: number): { index: number; ring: 'outer' | 'in
 }
 
 export interface TimeOption {
-  /** The canonical time, which is what the component's value will be set to. */
+  /** The canonical time, which the component's value will be set to. */
   value: string
   /** The same time written out for the reader: "07:30", or "7:30 AM". */
   label: string
 }
 
 /**
- * Every time of the day at a given interval, midnight to the last one before the next.
- *
- * It knows nothing of the restrictions: VTimeInput filters the rows it offers, so the list
- * itself stays one table per step and locale.
- *
- * A nonsensical step (zero, a fraction, more than an hour) falls back to hourly, so the
- * list stays FINITE even when the component's warning about it was ignored.
+ * Every time of the day at a given interval, midnight to the last one before the next. A
+ * nonsensical step (zero, a fraction, more than an hour) falls back to hourly, so the list
+ * stays FINITE even when the component's warning about it was ignored.
  */
 export function timeList(step: number, locale: string, format: HourFormat): TimeOption[] {
   const safe = Number.isInteger(step) && step >= 1 && step <= 60 ? step : 60
@@ -147,10 +119,9 @@ export function timeList(step: number, locale: string, format: HourFormat): Time
 }
 
 /*
- * Unlike a date's separator this one is UNIVERSAL: every language writes a time with a
- * colon, and only the 12/24-hour cycle varies. It therefore stays out of the dictionary,
- * where the empty field's `hh:mm` placeholder does belong — that one is made of the
- * initials of words.
+ * Unlike a date's separator this one is UNIVERSAL: every language writes a time with a colon,
+ * and only the 12/24-hour cycle varies. It therefore stays out of the dictionary, where the
+ * empty field's `hh:mm` placeholder does belong; that one is made of the initials of words.
  */
 const TIME_SEPARATOR = ':'
 
@@ -164,12 +135,9 @@ export function formatTimeMask(digits: string): string {
 }
 
 /**
- * Where the caret belongs to sit just after `n` digits. A closed formula rather than
- * `date.ts`'s scan, the colon always being in the same place.
- *
- * `skipSeparator` means something was INSERTED, and the caret then steps over the colon
- * into the minutes. On a DELETION it stays in front of it, or the next Backspace steps
- * over the colon instead of erasing a digit and the key appears to do nothing.
+ * Where the caret belongs to sit just after `n` digits. On a DELETION it stays in front of it,
+ * or the next Backspace steps over the colon instead of erasing a digit and the key appears to
+ * do nothing.
  */
 export function timeCaret(n: number, skipSeparator = false): number {
   if (n < 2) return n

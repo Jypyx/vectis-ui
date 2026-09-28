@@ -126,7 +126,7 @@ export const Default: Story = {
       )
     })
 
-    // clicking again: without `mandatory`, the item deselects
+    // Clicking again: without `mandatory`, the item deselects
     await userEvent.click(canvas.getByRole('button', { name: 'Centre' }))
     await waitFor(async () => {
       await expect(canvas.getByRole('button', { name: 'Centre' })).toHaveAttribute(
@@ -199,11 +199,7 @@ export const SelectedVariants: Story = {
       </div>
     `,
   }),
-  /*
-   * `soft` and `ghost` leave VButton's border transparent, which would open a gap in an
-   * outline row's frame for the width of the selected segment. None of this is visible
-   * in jsdom, which computes no styles at all.
-   */
+  /* None of this is visible in jsdom, which computes no styles at all. */
   play: async ({ canvasElement }) => {
     const TRANSPARENT = 'rgba(0, 0, 0, 0)'
     const selectedIn = (row: string, selected: string) =>
@@ -216,18 +212,13 @@ export const SelectedVariants: Story = {
       const neighbour = item.previousElementSibling as HTMLElement
       const frame = getComputedStyle(item)
 
-      // the frame closes over the selection, in the colour the rest of the row paints
       await expect(frame.borderBlockStartColor).toBe(
         getComputedStyle(neighbour).borderBlockStartColor,
       )
       await expect(frame.borderBlockEndColor).not.toBe(TRANSPARENT)
-      // The row is lined here, so the shared edges are painted too and the border runs
-      // right round the segment. Seamless is where the two rules arbitrate, and that
-      // case is the `Seamless` story's.
       await expect(frame.borderInlineStartColor).not.toBe(TRANSPARENT)
     }
 
-    // a ghost row has no frame, so nothing is restored there
     await expect(getComputedStyle(selectedIn('ghost', 'soft')).borderBlockStartColor).toBe(
       TRANSPARENT,
     )
@@ -260,15 +251,9 @@ export const Seamless: Story = {
     `,
   }),
   /*
-   * What the seamless row itself does — no seam, no shared borders — belongs to
-   * VButtonGroup and is asserted in its own `Seamless` story. What is only true HERE is
-   * the arbitration between the two sheets, and this is the case that exercises it: the
-   * SELECTED segment is `soft`, so VToggle restores its four borders to close the outline
-   * frame, and the group then has to take the two shared ones back off. Those rules are
-   * doubled to (0,6,0) for exactly this, and at equal specificity the winner would be
-   * whichever sheet the bundler put last.
-   *
-   * The middle item is the selected one, which is why it is the one read.
+   * Those rules are doubled to (0,6,0) for exactly this, and at equal specificity the winner
+   * would be whichever sheet the bundler put last. The middle item is the selected one, which
+   * is why it is the one read.
    */
   play: async ({ canvasElement }) => {
     const TRANSPARENT = 'rgba(0, 0, 0, 0)'
@@ -276,10 +261,8 @@ export const Seamless: Story = {
     const [, plain] = [...canvasElement.querySelectorAll<HTMLElement>('.v-toggle')]
 
     const centre = getComputedStyle(itemsOf(plain as HTMLElement)[1] as HTMLElement)
-    // The group wins on the edges the segment shares…
     await expect(centre.borderInlineStartColor).toBe(TRANSPARENT)
     await expect(centre.borderInlineEndColor).toBe(TRANSPARENT)
-    // …and the frame stands everywhere else, which is what keeps it closed.
     await expect(centre.borderBlockStartColor).not.toBe(TRANSPARENT)
     await expect(centre.borderBlockEndColor).not.toBe(TRANSPARENT)
   },
@@ -340,7 +323,6 @@ export const Multiple: Story = {
   }),
   args: { multiple: true, label: 'Format' },
   play: async ({ canvasElement }) => {
-    // An item with an icon and no label is squared by VButton's own `[data-icon-only]` rule.
     const boxes = [...canvasElement.querySelectorAll<HTMLElement>('.v-toggle-item')]
     await expect(boxes.length).toBeGreaterThan(0)
     for (const box of boxes) {
@@ -366,7 +348,7 @@ export const Mandatory: Story = {
   args: { mandatory: true },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // clicking the only selection again does not remove it
+    // Clicking the only selection again does not remove it
     await userEvent.click(canvas.getByRole('button', { name: 'Left' }))
     await expect(canvas.getByRole('button', { name: 'Left' })).toHaveAttribute(
       'aria-pressed',
@@ -491,7 +473,6 @@ export const Companions: Story = {
     const [day, week, month] = within(row).getAllByRole('button')
     const box = (el: HTMLElement) => el.getBoundingClientRect()
 
-    // Pulled onto its neighbour by the pixel the seam is laid over, wrapper or not.
     await expect(box(day!).right - box(week!).left).toBeCloseTo(1, 0)
     await expect(box(week!).right - box(month!).left).toBeCloseTo(1, 0)
 
@@ -500,7 +481,6 @@ export const Companions: Story = {
     await expect(frame.borderBlockStartColor).toBe(getComputedStyle(day!).borderBlockStartColor)
     await expect(frame.borderInlineStartColor).not.toBe(TRANSPARENT)
 
-    // The corners are carved on the item itself, one level inside the segment.
     await expect(frame.borderStartStartRadius).toBe('0px')
     await expect(getComputedStyle(month!).borderStartStartRadius).toBe('0px')
     await expect(parseFloat(getComputedStyle(month!).borderStartEndRadius)).toBeGreaterThan(0)
@@ -537,7 +517,7 @@ export const Keyboard: Story = {
 
     await userEvent.keyboard('{ArrowRight}')
     await expect(canvas.getByRole('button', { name: 'Centre' })).toHaveFocus()
-    // focus does not select
+    // Focus does not select
     await expect(canvas.getByRole('button', { name: 'Centre' })).toHaveAttribute(
       'aria-pressed',
       'false',

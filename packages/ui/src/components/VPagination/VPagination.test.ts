@@ -47,7 +47,6 @@ describe('VPagination', () => {
         })
 
         expect(pageLabels(container)).toEqual(expected)
-        // ellipses included: the bar keeps exactly the same width
         expect(slotCount(container)).toBe(7)
         unmount()
       }
@@ -83,7 +82,7 @@ describe('VPagination', () => {
       expect(last?.hasAttribute('data-edge')).toBe(true)
       expect(before?.dataset.distance).toBe('1')
       expect(after?.dataset.distance).toBe('1')
-      // the current page can never be hidden
+      // The current page can never be hidden
       expect(current?.hasAttribute('data-distance')).toBe(false)
     })
   })
@@ -157,7 +156,6 @@ describe('VPagination', () => {
 
       expect(ellipsis?.getAttribute('aria-hidden')).toBe('true')
       expect(ellipsis?.disabled).toBe(true)
-      // Nobody can reach it, so it names nothing, and it is squared like an icon button.
       expect(ellipsis?.hasAttribute('aria-label')).toBe(false)
       expect(ellipsis?.hasAttribute('data-icon-only')).toBe(true)
     })
@@ -181,8 +179,8 @@ describe('VPagination', () => {
   })
 
   describe('disabled pages', () => {
-    // the inertness itself is native (<button disabled>, supplied by VButton):
-    // jsdom bypasses it by dispatching the event, so only the marking is asserted
+    // The inertness itself is native (<button disabled>, supplied by VButton): jsdom bypasses
+    // it by dispatching the event, so only the marking is asserted
     it('accepts a list', () => {
       const { getByRole } = render(VPagination, {
         props: { length: 5, modelValue: 2, disabledPages: [3] },
@@ -321,10 +319,8 @@ describe('VPagination', () => {
     })
 
     /*
-     * The elevation is the one appearance prop routed through the group rather than
-     * through each button: joined, VButtonGroup draws the shadow for the ROW and the
-     * segments give theirs up. Only the wiring is observable here, the `:has()` rule
-     * that moves the shadow being CSS jsdom never evaluates.
+     * Only the wiring is observable here, the `:has()` rule that moves the shadow being CSS
+     * jsdom never evaluates.
      */
     it('elevated reaches every button through the group', () => {
       const { container } = render(VPagination, {

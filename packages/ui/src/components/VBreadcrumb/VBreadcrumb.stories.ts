@@ -57,7 +57,7 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(canvas.getByRole('navigation', { name: 'Breadcrumb' })).toBeVisible()
-    // the active item is detected through currentPath: a clickable link + aria-current
+    // The active item is detected through currentPath: a clickable link + aria-current
     await expect(canvas.getByRole('link', { name: 'Settings' })).toHaveAttribute(
       'aria-current',
       'page',
@@ -67,9 +67,8 @@ export const Default: Story = {
 }
 
 export const IconSeparator: Story = {
-  // A string is ALWAYS an icon name; an image is declared as `{ src }` (see
-  // ImageSeparator). RTL note: a directional icon does not flip automatically — check
-  // it with the toolbar toggle.
+  // A string is always an icon name; an image is declared as `{ src }` (see ImageSeparator).
+  // RTL note: a directional icon does not flip automatically; check it with the toolbar toggle.
   render: () => ({
     components: { VBreadcrumb },
     setup: () => ({
@@ -86,7 +85,6 @@ export const IconSeparator: Story = {
   play: async ({ canvasElement }) => {
     const separators = canvasElement.querySelectorAll('.v-breadcrumb-separator')
     await expect(separators).toHaveLength(3)
-    // the first item is preceded by no separator (the :first-child rule)
     await expect(separators[0]).not.toBeVisible()
     await expect(separators[1]).toBeVisible()
     await expect(separators[2]).toBeVisible()
@@ -94,7 +92,6 @@ export const IconSeparator: Story = {
 }
 
 export const ImageSeparator: Story = {
-  // An explicit `{ src }` render — no guessing about the string's content.
   render: () => ({
     components: { VBreadcrumb },
     setup: () => ({
@@ -154,7 +151,6 @@ export const Truncated: Story = {
     const canvas = within(canvasElement)
     const menu = canvasElement.querySelector('[role="menu"]') as HTMLElement
 
-    // visible: first, second-to-last, last (active) + the ellipsis button
     await expect(canvas.getAllByRole('listitem')).toHaveLength(4)
     await expect(canvas.getByRole('link', { name: 'Home' })).toBeVisible()
     await expect(canvas.getByRole('link', { name: 'Breadcrumb' })).toBeVisible()
@@ -163,10 +159,10 @@ export const Truncated: Story = {
       'page',
     )
 
-    // when closed, the menu panel is out of the layout: it does not cover the neighbouring links
+    // When closed, the menu panel is out of the layout: it does not cover the neighbouring
+    // links
     await expect(getComputedStyle(menu).display).toBe('none')
 
-    // the ellipsis opens the menu of the hidden items only, which are links
     const trigger = canvas.getByRole('button', { name: 'Show intermediate pages' })
     await userEvent.click(trigger)
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))

@@ -16,9 +16,10 @@ const tones: TypographyTone[] = [
 
 <template>
   <div class="demo">
-    <!-- `default` sets no colour at all, so the text takes whatever surrounds it. That
-         is what lets the same component sit inside a coloured toast or on an inverted
-         surface without being told which one it is on. -->
+    <!--
+      That is what lets the same component sit inside a coloured toast or on an inverted surface
+      without being told which one it is on.
+    -->
     <VTypography v-for="tone in tones" :key="tone" :tone="tone">
       {{ tone }}: pack my box with five dozen jugs.
     </VTypography>

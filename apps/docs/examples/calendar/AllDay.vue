@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { VCalendar, type CalendarEvent } from 'vectis-ui'
 
 const events = ref<CalendarEvent[]>([
-  // Marked `allDay`, so it goes to the band above the grid although it sits on one day.
   {
     id: 'holiday',
     title: 'Bank holiday',
@@ -13,7 +12,6 @@ const events = ref<CalendarEvent[]>([
     endTime: '23:59',
     allDay: true,
   },
-  // These two run from one day to the next, which puts them in the band on their own.
   {
     id: 'workshop',
     title: 'Workshop',

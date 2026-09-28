@@ -55,7 +55,6 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const grid = canvas.getByRole('grid')
-    // the 10th is the initially focusable cell (roving tabindex 0)
     const start = within(grid).getByRole('button', { name: '10' })
     start.focus()
     await userEvent.keyboard('{ArrowRight}{Enter}')
@@ -102,7 +101,6 @@ export const MinMax: Story = {
   }),
 }
 
-// Weekends made non-selectable (struck through) through a predicate.
 export const DisabledDates: Story = {
   render: (args) => ({
     components: { VDatePicker },
@@ -117,7 +115,6 @@ export const DisabledDates: Story = {
   }),
 }
 
-// The days of the adjacent months, displayed AND clickable.
 export const AdjacentMonths: Story = {
   render: (args) => ({
     components: { VDatePicker },
@@ -128,7 +125,6 @@ export const AdjacentMonths: Story = {
   }),
 }
 
-// Event dots under the dates.
 export const Events: Story = {
   render: (args) => ({
     components: { VDatePicker },
@@ -146,7 +142,6 @@ export const Events: Story = {
   }),
 }
 
-// The #day slot: displaying a price under the number (plane tickets, for instance).
 export const DaySlot: Story = {
   render: (args) => ({
     components: { VDatePicker },
@@ -155,9 +150,6 @@ export const DaySlot: Story = {
       const prices: Record<number, string> = { 10: '€89', 11: '€120', 12: '€75', 15: '€99' }
       return { args, value, prices }
     },
-    // --vectis-control-size-date-picker-day enlarges the discs (48×48); the price line is ALWAYS
-    // rendered (empty when absent, and on the adjacent days the slot also applies to) so
-    // that every number lines up.
     template: `
       <VDatePicker v-bind="args" v-model="value" show-adjacent-days style="--vectis-control-size-date-picker-day: 48px">
         <template #day="{ day, inMonth, selected }">
@@ -171,7 +163,6 @@ export const DaySlot: Story = {
   }),
 }
 
-// The footer zone: presets + actions.
 export const WithFooter: Story = {
   render: (args) => ({
     components: { VDatePicker, VButton },
@@ -222,9 +213,8 @@ export const Localization: Story = {
 }
 
 /**
- * `readonly` shows what is selected without letting it be changed, and the calendar can
- * still be walked through: another month, another year. `disabled` takes the whole thing
- * out of use, arrows included, and greys it through the colour tokens.
+ * `readonly` shows what is selected without letting it be changed, and the calendar can still
+ * be walked through: another month, another year.
  */
 export const States: Story = {
   render: (args) => ({
@@ -258,12 +248,7 @@ export const States: Story = {
   },
 }
 
-/**
- * The month arrows in a right-to-left page. A chevron points at a physical direction, so the
- * logical properties do not mirror it and the design system flips it by hand; this is the
- * mechanical guard on that rule, which VPagination, VTabs, VBreadcrumb, VMenu and VCalendar
- * carry untested. Verified red with the `:dir(rtl)` block removed.
- */
+/** The month arrows in a right-to-left page. */
 export const Rtl: Story = {
   globals: { direction: 'rtl' },
   args: { modelValue: '2026-06-10' },

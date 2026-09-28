@@ -69,8 +69,8 @@ const meta = {
     duration: { control: 'number' },
   },
   args: { placement: 'bottom-center', duration: 4000 },
-  // the bar is module state that survives navigation between stories: it is cleared
-  // before each render to avoid any pollution
+  // The bar is module state that survives navigation between stories: it is cleared before each
+  // render to avoid any pollution
   decorators: [
     (story) => {
       dismissSnackbar()
@@ -101,24 +101,14 @@ export const Default: Story = {
     const canvas = within(canvasElement)
     const host = canvasElement.querySelector('.v-snackbar-host') as HTMLElement
 
-    // programmatic trigger: the container moves to the top layer
     await userEvent.click(canvas.getByRole('button', { name: 'Delete' }))
     await waitFor(() => expect(host.matches(':popover-open')).toBe(true))
-    // waitFor: the bar transitions in from opacity 0 (@starting-style)
     await waitFor(() => expect(within(host).getByText('Message deleted.')).toBeVisible())
     await waitFor(() => expect(within(host).getByRole('button', { name: 'Undo' })).toBeVisible())
   },
 }
 
-/**
- * The two tones, both painted solid. `neutral` is the design system's canonical
- * text/surface inversion — dark on a light theme, light on a dark one — and `danger` is
- * the only other one a confirmation ever needs.
- *
- * The play function ends with a bar OPEN on purpose: axe only audits what is on screen,
- * and without a click no confirmation exists at all. It is the only contrast check this
- * new colour surface gets, in either theme.
- */
+/** The two tones, both painted solid. */
 export const Tones: Story = {
   args: { duration: 0 },
   render: (args) => ({
@@ -152,7 +142,6 @@ export const Tones: Story = {
     await waitFor(() => expect(within(host).getByText('Conversation archived.')).toBeVisible())
     await waitFor(() => expect(within(host).getByRole('button', { name: 'Undo' })).toBeVisible())
 
-    // The danger bar replaces the neutral one, and stays on screen for axe to judge.
     await userEvent.click(canvas.getByRole('button', { name: 'Failing action' }))
     await waitFor(() =>
       expect(within(host).getByText('Could not save your changes.')).toBeVisible(),
@@ -306,7 +295,7 @@ export const AutoDismiss: Story = {
 }
 
 /**
- * The bar bounds its text, and the action stays CENTRED on a message that wraps — where a
+ * The bar bounds its text, and the action stays CENTRED on a message that wraps; where a
  * notification would hook it to the first line.
  */
 export const LongText: Story = {
@@ -337,13 +326,10 @@ export const LongText: Story = {
     const barBox = bar.getBoundingClientRect()
     const actionBox = action.getBoundingClientRect()
 
-    // The message really does wrap here — without that the assertion below would hold
-    // under `align-items: flex-start` too, and prove nothing.
+    // The message really does wrap here; without that the assertion below would hold under
+    // `align-items: flex-start` too, and prove nothing.
     expect(barBox.height).toBeGreaterThan(actionBox.height * 2)
 
-    // Centred against the WHOLE bar, not hooked to its first line. Verified red with
-    // `align-items: flex-start`, which parks the button in the top corner. The tolerance
-    // absorbs sub-pixel layout, nothing more.
     const barCentre = barBox.top + barBox.height / 2
     const actionCentre = actionBox.top + actionBox.height / 2
     expect(Math.abs(actionCentre - barCentre)).toBeLessThan(1.5)

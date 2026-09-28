@@ -1,32 +1,6 @@
 /*
- * The chassis shared by the messages floated above the page: VToast's card and
- * VSnackbar's bar. Both are the same object on screen — a raised box one line of body
- * text tall, holding a message and, at its end, one small ghost button — so the radius,
- * the shadow, the entry motion, the message block and that button's placement live here
- * and cannot move on one surface without moving on the other.
- *
- * RULE, as in `panel.css`: only declarations no consumer redeclares. `.v-banner` and
- * `.v-toast`/`.v-snackbar` are all (0,1,0) and each component ships its own sheet, so a
- * shared declaration would be arbitrated by whatever order the consumer's bundler
- * chooses. Padding, widths, `align-items` and the whole tone painting therefore stay
- * with each component, which is exactly where the two differ. To redeclare anyway, use
- * the compound `.v-banner.v-toast`.
- *
- * The CONTAINERS (`.v-toast-stack`, `.v-snackbar-host`) are not here, although their rules
- * are the same: this sheet is paid for by every consumer, and the containers' forty lines
- * cost more than the size gate allows. Each component keeps an aligned copy.
- *
- * Two custom properties make the contract:
- *
- *   --banner-line     set here. The height of one line of message text, which an icon or
- *                     a trailing control is sized against through EQUAL margins above and
- *                     below. Unequal ones shift the item's centre by half the difference
- *                     and push the flex line taller than the text.
- *
- *   --banner-enter-y  read here, POSED BY THE CONTAINER, so a card slides in from its own
- *                     edge without this sheet knowing where that edge is. The `, 0`
- *                     fallback lets a card render outside any container — and makes a
- *                     missing declaration cost the slide silently.
+ * Shared toast/snackbar chrome. Include only declarations consumers do not redeclare so
+ * separate stylesheet order cannot change their appearance.
  */
 @layer vectis.components {
   .v-banner {
@@ -40,10 +14,7 @@
     line-height: var(--vectis-text-body-md-leading);
   }
 
-  /* Entry only. Animating the exit would mean holding a card in its queue for the length
-     of the fade, which is not worth the flourish; the container fades when it empties,
-     and each component does that for itself. `@starting-style` is an enhancement — where
-     it is unsupported the card simply appears. */
+  /* Animate card entry only; the host fades when empty without delaying queue removal. */
   .v-banner {
     transition:
       opacity var(--vectis-duration-base) var(--vectis-ease-default),
@@ -57,9 +28,7 @@
     }
   }
 
-  /* The message block: it takes the room left by the icon and the control, and a message
-     holding something with nowhere to break — a URL, a file name — wraps anyway rather than
-     widening the card. */
+  /* Allow long, unbroken message text to wrap rather than widen the card. */
   .v-banner-text {
     flex: 1;
     min-inline-size: 0;
@@ -67,32 +36,19 @@
   }
 
   /*
-   * The trailing control: VToast's close cross, VSnackbar's action. Both are a `sm` ghost
-   * button at the end of a `--vectis-space-4` gutter.
-   *
-   * TRAP — `--banner-control-height` restates the size both templates give that button. The
-   * height the button computes lives inside its own subtree, out of reach from here, so a
-   * template moving to another size must move this too. The control is taller than a line of
-   * text, so the margin comes out negative: under start alignment it hooks the control to the
-   * first line, under centring it moves nothing and only keeps the card one line tall.
+   * Keep --banner-control-height aligned with both templates' button size; the button's private
+   * height cannot be read from this ancestor.
    */
   .v-banner-control {
     --banner-control-height: var(--vectis-control-height-sm);
     margin-block: calc((var(--banner-line) - var(--banner-control-height)) / 2);
-    /* The button brings padding of its own, which against the card's gutter would read as a
-       hole: pulled back by it instead of the card taking a smaller padding. */
+    /* Pull back the control's padding so it does not double the card gutter. */
     margin-inline-end: calc(-1 * var(--vectis-space-2));
   }
 
   /*
-   * The control is an ordinary neutral ghost button, recoloured by rebinding the variables its
-   * own tone table reads to the surrounding text colour, the one thing guaranteed readable on
-   * a solid card. Without it a neutral ghost paints `--vectis-color-text`, which is the very
-   * colour of a solid neutral card's background: invisible, in both themes.
-   *
-   * (0,3,0) on purpose: it beats the tone table twice (specificity and layer), and it stays
-   * BELOW VToast's soft-variant rebind at (0,4,0), which tints the cross with the tone instead.
-   * Guarded by VSnackbar's `Tones` play function, which ends with a bar open so axe judges it.
+   * Use currentcolor so neutral ghost controls remain visible on inverted cards. Keep
+   * specificity below VToast's soft-variant override.
    */
   .v-banner .v-banner-control[data-tone] {
     --tone-text-tinted: currentcolor;

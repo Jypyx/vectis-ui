@@ -38,7 +38,6 @@ const PLACEMENTS: PopoverPlacement[] = [
   grid-template-columns: repeat(3, max-content);
   justify-content: center;
   gap: var(--vectis-space-4);
-  /* Room on every side, so nothing is flipped for want of space in the demo. */
   padding: var(--vectis-space-10) var(--vectis-space-12);
 }
 </style>

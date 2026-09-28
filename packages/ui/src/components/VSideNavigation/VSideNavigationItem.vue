@@ -1,22 +1,7 @@
 <script setup lang="ts">
 /**
- * One row of a sidebar navigation, in one of two shapes depending on whether it was given
- * subitems — and the difference runs deeper than it looks.
- *
- * A BRANCH is a `<details>`, so its open state, the toggle keyboard, the exclusivity with a
- * neighbouring section and the animation all come from the browser. Its row IS the
- * `<summary>`, which must contain the whole line, `#end` included — hence the click handler
- * there, or anything put in it would fold the branch. The documented consequence is that
- * only NON-focusable content belongs in it: a control would be nested inside a control (WCAG
- * 4.1.2, axe `nested-interactive`), and a `<summary>`'s subtree also serves as its
- * accessible name, which some screen readers flatten.
- *
- * A LEAF is the opposite: the row is a plain container with the action stretched over it by
- * an absolute `::after`, so the whole row is clickable while `#end` stays a SIBLING of the
- * action rather than inside it — which is what keeps a real control there legitimate.
- *
- * The branch's open state and its disabled summary go through `useDetailsOpen`, shared with
- * VAccordionItem.
+ * Branches use native details and leaves use links or buttons. JavaScript synchronizes open
+ * state, disables summaries and makes disabled links inert.
  */
 
 import { computed, h, inject, onBeforeUpdate, provide, ref, renderSlot, useId, useSlots } from 'vue'
@@ -56,16 +41,11 @@ interface SideNavigationItemProps {
    * keyboard path.
    */
   disabled?: boolean
-  /**
-   * Renders a branch already open. Only its initial value is read: the browser owns the
-   * state from then on, so changing this prop later will not fold a branch the reader
-   * has opened. Bind `v-model:open` to drive it instead.
-   */
+  /** Renders a branch already open. Bind `v-model:open` to drive it instead. */
   defaultOpen?: boolean
 }
 
-// The root element is a list item, which is structure and not the control. Without
-// redirecting them, `target`, `rel`, `download` and the aria-* would land on that list
+// Without redirecting them, `target`, `rel`, `download` and the aria-* would land on that list
 // item instead of on the link or the branch header.
 defineOptions({ inheritAttrs: false })
 
@@ -79,9 +59,9 @@ const props = withDefaults(defineProps<SideNavigationItemProps>(), {
   defaultOpen: false,
 })
 
-// TRAP — "not bound" is written as `null` and not `undefined`. A model typed as a plain
-// boolean is declared as such at runtime, and Vue casts an ABSENT boolean prop to `false`,
-// which would silently overwrite `defaultOpen` on every branch. The explicit default disarms that cast.
+// "not bound" is written as `null` and not `undefined`. A model typed as a plain boolean is
+// declared as such at runtime, and Vue casts an ABSENT boolean prop to `false`, which would
+// silently overwrite `defaultOpen` on every branch.
 /**
  * Whether the branch is open, when the consumer wants to drive or observe it. Left
  * unbound, the browser keeps that state to itself, `defaultOpen` giving only the initial
@@ -90,9 +70,8 @@ const props = withDefaults(defineProps<SideNavigationItemProps>(), {
 const open = defineModel<boolean | null>('open', { default: null })
 
 const emit = defineEmits<{
-  // TRAP — never declare a `click` emit alongside it. Vue removes a declared event from
-  // the forwarded attributes, and a consumer's own `@click` would then stop reaching the
-  // link entirely.
+  // Never declare a `click` emit alongside it. Vue removes a declared event from the forwarded
+  // attributes, and a consumer's own `@click` would then stop reaching the link entirely.
   /** A row WITHOUT subitems was activated, by click or by keyboard. */
   select: []
 }>()
@@ -125,12 +104,8 @@ const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const slots = useSlots()
 /**
- * Whether this row has subitems, read from the mere PRESENCE of the slot — the same
- * device VMenuItem and VTabs use. The answer is the same on the server and in the
- * browser, so there is no registry to fill in and no hydration mismatch.
- *
- * The trade-off is that a slot present but empty still makes the row a branch, chevron
- * included, over an empty list.
+ * Whether this row has subitems, read from the mere PRESENCE of the slot; the same device
+ * VMenuItem and VTabs use.
  */
 const hasChildren = computed(() => !!slots.children)
 const tag = computed(() =>
@@ -147,14 +122,13 @@ const expandIcon = computed(() => parent?.expandIcon ?? expandMoreIcon)
 const collapseIcon = computed(() => parent?.collapseIcon)
 
 // @ssr @core
-// Only a BRANCH has children to hand a context to, so a leaf — most rows of a sidebar —
-// mints no id and provides nothing. The test runs once, at setup: the server and the
-// client take the same path because they see the same slot, which is what keeps `useId`
-// in step across hydration, and also why the slot must not come and go later.
+// The test runs once, at setup: the server and the client take the same path because they see
+// the same slot, which keeps `useId` in step across hydration, and also why the slot must not
+// come and go later.
 if (slots.children) {
-  // The name shared by THIS row's children. It is minted afresh at every level, and that
-  // is what keeps "one section open at a time" local to a level instead of applying
-  // across the whole document.
+  // The name shared by this row's children. It is minted afresh at every level, and that is
+  // what keeps "one section open at a time" local to a level instead of applying across the
+  // whole document.
   const childrenName = useId()
 
   provide(sideNavigationKey, {
@@ -178,24 +152,19 @@ const { openAttr, onToggle, onSummaryClick } = useDetailsOpen(open, {
   disabled: () => props.disabled,
 })
 
-// A link says "page"; a button, a branch header included, can only say "true".
 const ariaCurrent = computed(() =>
   props.current ? (tag.value === 'a' ? 'page' : 'true') : undefined,
 )
 
 /*
- * The icon and the label column, identical in both row shapes. A functional component
- * rather than two copies of the markup, a Vue template having no reusable fragment.
- * `renderSlot` is what a compiled `<slot>` calls, so each fallback behaves exactly as it
- * would in the template.
+ * `renderSlot` is what a compiled `<slot>` calls, so each fallback behaves exactly as it would
+ * in the template.
  */
 // @core
 /*
- * TRAP — the tick is what makes RowBody follow the slots at all. A functional component
- * declaring no props is never updated by its parent's re-render, and `slots` is not
- * reactive, so a sublabel added behind a `v-if` or a label captured by a render function
- * stayed as first drawn. Every re-render of the item (which is what a new slot causes)
- * bumps it, and reading it is what re-renders RowBody: the `useSlotNodes` device.
+ * The tick is what makes RowBody follow the slots at all. A functional component declaring no
+ * props is never updated by its parent's re-render, and `slots` is not reactive, so a sublabel
+ * added behind a `v-if` or a label captured by a render function stayed as first drawn.
  */
 const slotTick = ref(0)
 onBeforeUpdate(() => slotTick.value++)
@@ -220,14 +189,9 @@ const RowBody = () => (
 )
 
 /*
- * A branch's end slot sits INSIDE the header, so a click there would fold the branch.
  * Stopping the event from travelling would not help: folding is not a listener anyone
- * registered, it is the click's DEFAULT action, and only cancelling that prevents it.
- *
- * The exception is a click that already landed on something activable. There the click
- * belongs to that control, the branch is not concerned, and cancelling the default
- * would break its own behaviour — a link would stop navigating. The same filter as in
- * `useFieldPanel`, for the same reason.
+ * registered, it is the click's default action, and only cancelling that prevents it. The
+ * exception is a click that already landed on something activable.
  */
 // @core
 function onEndClick(event: MouseEvent) {
@@ -299,8 +263,6 @@ function onActionClick(event: MouseEvent) {
           ><slot name="end"
         /></span>
         <VIcon class="v-side-nav-chevron v-disclosure-chevron" v-bind="iconProps(expandIcon)" />
-        <!-- Both chevrons are always in the DOM; the open state decides which one
-             shows, in CSS alone -->
         <VIcon
           v-if="collapseIcon"
           class="v-side-nav-chevron v-side-nav-chevron-open v-disclosure-chevron v-disclosure-chevron-open"
@@ -340,16 +302,10 @@ function onActionClick(event: MouseEvent) {
 <style>
 @layer vectis.components {
   /*
-   * How deep an item sits, counted entirely in CSS: no registry, nothing provided down
-   * the tree, no inline style, and no `level` prop for the consumer to keep track of.
-   * The markup gives two elements per level — the item, then the list of its children —
-   * and each of them reads a name the other DECLARES.
-   *
-   * TRAP — the obvious one-name form, incrementing a variable by reading itself, is a
-   * CYCLE as far as CSS is concerned, even though the value being read is the inherited
-   * one. The property then falls to invalid, every read falls back to zero, and the
-   * whole tree renders FLAT — with nothing in the console to say why. The two
-   * alternating names are what avoid it.
+   * The obvious one-name form, incrementing a variable by reading itself, is a CYCLE as far as
+   * CSS is concerned, even though the value being read is the inherited one. The property then
+   * falls to invalid, every read falls back to zero, and the whole tree renders FLAT; with
+   * nothing in the console to say why.
    */
   .v-side-nav-item {
     --side-nav-parent-level: var(--side-nav-level, 0);
@@ -361,40 +317,15 @@ function onActionClick(event: MouseEvent) {
 
   .v-side-nav-row {
     /*
-     * Every dimension comes from the variables the nav sets and this row inherits — it
-     * is the only element carrying the shared size class. The icons follow with nothing
-     * written for them, their own variables belonging to that same block.
-     *
-     * The type is composite, as in a menu row: the SIZE comes from the scale, but the
-     * line height stays that of body text — a unitless ratio, so it still follows the
-     * size — and the weight stays regular. The full `control` type role would set its
-     * lines tight against each other, and a row may carry a second line under the label.
-     *
-     * The label and that second line TRUNCATE rather than wrap: a sidebar has a fixed
-     * width, and a row that grew a line would break the rhythm of the list. VMenuItem
-     * follows the same recipe.
-     *
-     * TRAP — the indent is computed HERE and not stored in a variable set higher up. A
-     * custom property is substituted on the element that DECLARES it, so a padding
-     * computed on the nav would be frozen at level zero for the whole tree.
+     * The indent is computed here and not stored in a variable set higher up. A custom property
+     * is substituted on the element that DECLARES it, so a padding computed on the nav would be
+     * frozen at level zero for the whole tree.
      */
 
     /*
-     * The corner takes the role every clickable box in the DS takes, so a brand that
-     * squares its controls or rounds them into pills carries the sidebar along in the
-     * one override.
-     *
-     * TRAP — the cap has to stay derived from --control-height. A browser scales down
-     * any radius it cannot fit, so a row exactly one control tall already paints half
-     * that height under a pill override; min() applies the same reduction to a row that
-     * grew past it. Written bare, a row carrying a second line paints half of ITS OWN
-     * height instead, and two rows of the same list come out with different corners. At
-     * the shipped 6px this resolves to 6px on both sizes and under compact, so nothing
-     * at the default value can see the line go — only the PillRadius play function can.
-     *
-     * The variable is what keeps the row and the stretched overlay below in step: that
-     * overlay is positioned against this element, so the two are the same box, and its
-     * ring is drawn on the radius found here.
+     * The cap has to stay derived from --control-height. A browser scales down any radius it
+     * cannot fit, so a row exactly one control tall already paints half that height under a
+     * pill override; min() applies the same reduction to a row that grew past it.
      */
     --side-nav-row-radius: min(var(--vectis-radius-interactive), calc(var(--control-height) / 2));
 
@@ -437,11 +368,10 @@ function onActionClick(event: MouseEvent) {
   }
 
   /*
-   * This is what stretches the link over the WHOLE row without having to wrap the end
-   * slot inside it. It is an invisible box, positioned, so it is painted above the
-   * chevron — which is not positioned — while passing UNDER the end slot, which is
-   * positioned too and comes later in the document. That layering is exactly what
-   * makes the whole row clickable while leaving a control in the end slot usable.
+   * This is what stretches the link over the whole row without having to wrap the end slot
+   * inside it. It is an invisible box, positioned, so it is painted above the chevron; which is
+   * not positioned; while passing UNDER the end slot, which is positioned too and comes later
+   * in the document.
    */
   .v-side-nav-action::after {
     content: '';
@@ -508,7 +438,6 @@ function onActionClick(event: MouseEvent) {
     outline: none;
   }
 
-  /* The row of the page currently being viewed. */
   .v-side-nav-row[data-current] {
     background: var(--vectis-color-accent-surface);
     color: var(--vectis-color-accent-text);
@@ -525,8 +454,10 @@ function onActionClick(event: MouseEvent) {
   }
 
   .v-side-nav-row[data-current]:not([data-disabled]):hover {
-    /* The current row is already tinted, so its hover deepens that tint rather than
-       replacing it with the neutral highlight — the VMenuItem idiom. */
+    /*
+     * The current row is already tinted, so its hover deepens that tint rather than replacing
+     * it with the neutral highlight; the VMenuItem idiom.
+     */
     background: color-mix(
       in oklab,
       var(--vectis-color-accent-surface),

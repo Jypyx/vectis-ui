@@ -37,7 +37,6 @@ describe('VSkeletonLoader', () => {
 
   it('lines is floored at one whole line: 0, negative and decimal', async () => {
     const { container, rerender } = render(VSkeletonLoader, { props: { lines: 0 } })
-    // `v-for="n in 0"` would render nothing: an invisible skeleton, hence a silent bug
     expect(itemsOf(container)).toHaveLength(1)
 
     await rerender({ lines: -3 })
@@ -46,7 +45,6 @@ describe('VSkeletonLoader', () => {
     await rerender({ lines: 3.7 })
     expect(itemsOf(container)).toHaveLength(3)
 
-    // Math.max(1, NaN) is NaN, which renders nothing at all.
     await rerender({ lines: Number.NaN })
     expect(itemsOf(container)).toHaveLength(1)
 
@@ -60,7 +58,6 @@ describe('VSkeletonLoader', () => {
 
     await rerender({ shape: 'surface', animation: 'none' })
     expect(rootOf(container).getAttribute('data-shape')).toBe('surface')
-    // the attribute stays set: the consumer can target [data-animation='none']
     expect(rootOf(container).getAttribute('data-animation')).toBe('none')
   })
 
@@ -81,7 +78,6 @@ describe('VSkeletonLoader', () => {
     expect(styleOf(container)).toContain('--skeleton-loader-w: 200px')
     expect(styleOf(container)).toContain('--skeleton-loader-h: 48px')
 
-    // a free unit, unlike `px()`: the string is not interpreted
     await rerender({ width: '100%', height: '12ch' })
     expect(styleOf(container)).toContain('--skeleton-loader-w: 100%')
     expect(styleOf(container)).toContain('--skeleton-loader-h: 12ch')

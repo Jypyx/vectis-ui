@@ -12,8 +12,10 @@ const page = ref(8)
       the first page, the last and the current one never do.
     </VTypography>
 
-    <!-- The row asks about its OWN width rather than the window's, so it sheds pages
-         inside a narrow panel while the page around it stays wide. -->
+    <!--
+      The row asks about its own width rather than the window's, so it sheds pages inside a
+      narrow panel while the page around it stays wide.
+    -->
     <div class="box">
       <VPagination
         v-model="page"

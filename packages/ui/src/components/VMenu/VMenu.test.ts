@@ -11,8 +11,6 @@ import { SUBMENU_HOVER_DELAY } from './context'
 function renderHarness(
   template: string,
   onSelect = vi.fn(),
-  /* Extra bindings the template needs. A second `defineComponent` in this file would
-     trip `vue/one-component-per-file`, so everything goes through this one. */
   extra: () => Record<string, unknown> = () => ({}),
 ) {
   const Harness = defineComponent({
@@ -39,14 +37,7 @@ function renderMenu(onSelect = vi.fn()) {
   )
 }
 
-/**
- * Forces the answer `:focus-visible` gives for one element, and returns the undo.
- *
- * It has to be forced rather than arranged: jsdom parses the pseudo-class but answers
- * `false` for everything, a genuinely focused element included, so no amount of calling
- * `.focus()` produces a keyboard answer. What the tests below lock is therefore that
- * VMenu ASKS and branches on it — never what jsdom would have said (the VCarousel idiom).
- */
+/** Forces the answer `:focus-visible` gives for one element, and returns the undo. */
 function stubModality(el: Element, keyboard: boolean): () => void {
   const own = Object.getOwnPropertyDescriptor(el, 'matches')
   el.matches = function (this: Element, selectors: string) {
@@ -60,21 +51,12 @@ function stubModality(el: Element, keyboard: boolean): () => void {
   }
 }
 
-/**
- * Opens the root panel (the jsdom popover stub) and makes the menu queryable.
- *
- * The modality is what decides where the focus lands — the first item from the keyboard,
- * the panel itself from a pointer — so it is named at every call rather than left to the
- * environment. `showPopover` dispatches `toggle` synchronously, so the stub only has to
- * stand during the call itself.
- */
+/** Opens the root panel (the jsdom popover stub) and makes the menu queryable. */
 async function openMenu(
   container: Element,
   modality: 'keyboard' | 'pointer' = 'keyboard',
 ): Promise<HTMLElement> {
   const menu = container.querySelector('[role="menu"]') as HTMLElement
-  // `document.activeElement` is what VMenu asks, and in these tests that is the body:
-  // nothing here clicks a real trigger.
   const restore = stubModality(document.activeElement ?? document.body, modality === 'keyboard')
   try {
     menu.showPopover()
@@ -132,9 +114,9 @@ describe('VMenu', () => {
     expect(sub?.hasAttribute('data-width')).toBe(false)
   })
 
-  // The floor itself (`min-inline-size: anchor-size(width)`) is not observable here
-  // — jsdom resolves neither the anchor nor the layout: the `VMenu/Width` play
-  // function is what covers it. Only the wiring is left.
+  // The floor itself (`min-inline-size: anchor-size(width)`) is not observable here; jsdom
+  // resolves neither the anchor nor the layout: the `VMenu/Width` play function is what covers
+  // it. Only the wiring is left.
   it('matchTrigger prop: data-match-trigger on the root panel alone', () => {
     const { container } = renderHarness(`
       <VMenu match-trigger>
@@ -167,7 +149,6 @@ describe('VMenu', () => {
   })
 
   it('sets the ARIA contract on the trigger and on the panel', () => {
-    // closed menu ([popover] is display:none): query outside the accessibility tree
     const { getByTestId, container } = renderMenu()
     const trigger = getByTestId('trigger')
     const menu = container.querySelector('[role="menu"]') as HTMLElement
@@ -178,11 +159,10 @@ describe('VMenu', () => {
   })
 
   /*
-   * A popover opened through `popovertarget` takes its invoker as its implicit anchor.
-   * Opened from code with no `source` it has none, and the browser paints the panel at
-   * the corner of the viewport — silently, the panel being otherwise perfectly usable
-   * there. jsdom neither anchors nor lays anything out, so what is locked here is the
-   * ONE observable thing: that the trigger is named as the source.
+   * Opened from code with no `source` it has none, and the browser paints the panel at the
+   * corner of the viewport; silently, the panel being otherwise perfectly usable there. jsdom
+   * neither anchors nor lays anything out, so what is locked here is the ONE observable thing:
+   * that the trigger is named as the source.
    */
   describe('opened from code, the trigger is named as the popover source', () => {
     function renderModelMenu(initiallyOpen = false) {
@@ -215,8 +195,7 @@ describe('VMenu', () => {
       expect(spy).toHaveBeenCalledWith({ source: getByTestId('trigger') })
     })
 
-    // @ssr — the watcher never ran on the server, so mounting replays the initial
-    // state. That replay is a separate call site and misses the source just as easily.
+    // @ssr
     it('and when it is open from the very first render', async () => {
       const spy = vi.spyOn(HTMLElement.prototype, 'showPopover')
       const { getByTestId } = renderModelMenu(true)
@@ -235,17 +214,10 @@ describe('VMenu', () => {
   })
 
   /*
-   * The pointer branch. In a menu the focus IS the highlight, so taking the first item
-   * would single out a command nobody asked for; the panel takes the focus instead.
-   *
-   * TRAP — what these four DO NOT prove is the reason the panel is focused at all. They
-   * dispatch each keydown ON the panel, so `event.target` is the panel whatever holds
-   * the focus, and the handler's guard passes even when nothing was focused: drop
-   * `focusPanel()` and only the first of them goes red. In a real browser the keystroke
-   * would be dispatched at `document.body` and never reach the panel's listener, leaving
-   * the whole menu keyboard dead. That half belongs to the `Default` play function,
-   * which presses a key straight after the click without touching the focus — the same
-   * split as every other focus behaviour jsdom cannot see.
+   * What these four DO not prove is the reason the panel is focused at all. They dispatch each
+   * keydown on the panel, so `event.target` is the panel whatever holds the focus, and the
+   * handler's guard passes even when nothing was focused: drop `focusPanel()` and only the
+   * first of them goes red.
    */
   describe('opened with a pointer', () => {
     it('focuses the panel itself, singling out no item', async () => {
@@ -259,10 +231,6 @@ describe('VMenu', () => {
     it('the arrows enter the list from the panel, each at its own end', async () => {
       const { getByRole, container } = renderMenu()
       const menu = await openMenu(container, 'pointer')
-      // Each press starts FROM the panel, and that is asserted rather than assumed: the
-      // whole point of these four is where the list is entered from nowhere, and a
-      // `menu.focus()` silently doing nothing would leave them asserting a plain hop
-      // from the previously focused item — which passes for the wrong reason.
       const press = (key: string) => {
         menu.focus()
         expect(menu).toBe(document.activeElement)
@@ -273,8 +241,8 @@ describe('VMenu', () => {
       expect(getByRole('menuitem', { name: 'Rename' })).toBe(document.activeElement)
 
       press('ArrowUp')
-      // the LAST item, not the first: entering a menu from its far end. "Archive" is
-      // disabled, so the last reachable one is "Delete".
+      // The last item, not the first: entering a menu from its far end. "Archive" is disabled,
+      // so the last reachable one is "Delete".
       expect(getByRole('menuitem', { name: 'Delete' })).toBe(document.activeElement)
 
       press('Home')
@@ -343,11 +311,11 @@ describe('VMenu', () => {
     await openMenu(container)
     const danger = getByRole('menuitem', { name: 'Delete' })
 
-    // hovering transfers the focus: a single highlight at a time
+    // Hovering transfers the focus: a single highlight at a time
     danger.dispatchEvent(new Event('pointerenter'))
     expect(danger).toBe(document.activeElement)
 
-    // hovering a disabled item does not move the focus
+    // Hovering a disabled item does not move the focus
     getByRole('menuitem', { name: 'Archive' }).dispatchEvent(new Event('pointerenter'))
     expect(danger).toBe(document.activeElement)
   })
@@ -500,7 +468,7 @@ describe('VMenu', () => {
       const group = getByRole('group', { name: 'File' })
       const labelId = group.getAttribute('aria-labelledby') as string
       expect(document.getElementById(labelId)?.textContent).toBe('File')
-      // the group label is not an item: never focused by the roving
+      // The group label is not an item: never focused by the roving
       expect(getByRole('menuitem', { name: 'Rename' })).toBe(document.activeElement)
       menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }))
       expect(getByRole('menuitem', { name: 'Rename' })).toBe(document.activeElement)
@@ -534,7 +502,6 @@ describe('VMenu', () => {
       arrowDown()
       expect(getByRole('menuitem', { name: 'Duplicate' })).toBe(document.activeElement)
       arrowDown()
-      // the separator (role="separator") is ignored: the next item is outside the group
       expect(getByRole('menuitem', { name: 'Delete' })).toBe(document.activeElement)
       expect(getByRole('separator')).toBeTruthy()
     })
@@ -575,7 +542,7 @@ describe('VMenu', () => {
       expect(parent.getAttribute('aria-expanded')).toBe('false')
       expect(parent.getAttribute('popovertarget')).toBe(sub.id)
       expect(parent.getAttribute('aria-controls')).toBe(sub.id)
-      // the subpanel is a DOM descendant of the parent panel (the native stack)
+      // The subpanel is a DOM descendant of the parent panel (the native stack)
       expect(panels(container)[0]?.contains(sub)).toBe(true)
       expect(parent.querySelector<HTMLElement>('.v-menu-item-chevron')?.dataset.icon).toBe(
         'chevron_right',
@@ -617,7 +584,7 @@ describe('VMenu', () => {
         )
       arrowDown()
       expect(getByRole('menuitem', { name: 'PNG' })).toBe(document.activeElement)
-      // wrapping inside the subpanel: never a leak towards the parent's items
+      // Wrapping inside the subpanel: never a leak towards the parent's items
       arrowDown()
       expect(getByRole('menuitem', { name: 'PDF' })).toBe(document.activeElement)
     })
@@ -702,7 +669,6 @@ describe('VMenu', () => {
         const sub = panels(container)[1] as HTMLElement
 
         parent.dispatchEvent(new Event('pointerenter'))
-        // no opening before the intent delay
         expect(sub.hasAttribute('data-popover-open')).toBe(false)
         vi.advanceTimersByTime(SUBMENU_HOVER_DELAY)
         expect(sub.hasAttribute('data-popover-open')).toBe(true)
@@ -725,7 +691,7 @@ describe('VMenu', () => {
         parent.focus()
         parent.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
         await nextTick()
-        // the focus is on "PDF", inside the subpanel
+        // The focus is on "PDF", inside the subpanel
 
         parent.dispatchEvent(new Event('pointerleave'))
         vi.advanceTimersByTime(SUBMENU_HOVER_DELAY)
@@ -759,7 +725,6 @@ describe('VMenu', () => {
       const item = getByRole('menuitem', { name: 'Profile' })
       expect(item.tagName).toBe('A')
       expect(item.getAttribute('href')).toBe('#profile')
-      // the item with no href stays a <button>
       expect(getByRole('menuitem', { name: 'Action' }).tagName).toBe('BUTTON')
     })
 
@@ -780,7 +745,6 @@ describe('VMenu', () => {
       const inert = getByRole('menuitem', { name: 'Archives' })
       expect(inert.hasAttribute('href')).toBe(false)
       expect(inert.getAttribute('aria-disabled')).toBe('true')
-      // "Archives" is skipped by the arrow navigation
       expect(getByRole('menuitem', { name: 'Profile' })).toBe(document.activeElement)
       menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
       expect(getByRole('menuitem', { name: 'Action' })).toBe(document.activeElement)
@@ -793,8 +757,6 @@ describe('VMenuItem — tone', () => {
     const { getByRole, container } = renderMenu()
     await openMenu(container)
     expect(getByRole('menuitem', { name: 'Delete' }).dataset.tone).toBe('danger')
-    // The default is written out too: a union is always mirrored, where a boolean would
-    // only appear when true.
     expect(getByRole('menuitem', { name: 'Rename' }).dataset.tone).toBe('neutral')
   })
 })
@@ -865,7 +827,6 @@ describe('VMenu — touch, direction and modifiers', () => {
     try {
       const { container, panels, parent } = setup()
       await openMenu(container)
-      // A tap: enter, leave, then the click that opens the submenu natively.
       parent.dispatchEvent(pointer('pointerenter', 'touch'))
       parent.dispatchEvent(pointer('pointerleave', 'touch'))
       panels()[1]!.showPopover()

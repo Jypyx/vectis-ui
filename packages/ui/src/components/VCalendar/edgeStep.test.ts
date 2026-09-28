@@ -5,10 +5,9 @@ import { defineComponent, h } from 'vue'
 import { EDGE_BAND, EDGE_STEP_DELAY, useEdgeStep, type EdgeDirection } from './edgeStep'
 
 /*
- * `useEdgeStep` calls `useTimer`, which registers `onBeforeUnmount` — so it has to run inside
- * a component instance or the timer is never cleaned up. The harness mounts a bare one and
- * hands the module back, which is also what lets the unmount test exist. Same shape as
- * `composables/useTimer.test.ts`.
+ * `useEdgeStep` calls `useTimer`, which registers `onBeforeUnmount`; so it has to run inside a
+ * component instance or the timer is never cleaned up. The harness mounts a bare one and hands
+ * the module back, which is also what lets the unmount test exist.
  */
 function harness(delay = () => EDGE_STEP_DELAY) {
   const steps: EdgeDirection[] = []
@@ -93,9 +92,9 @@ describe('leaving and changing edges', () => {
   })
 
   /*
-   * TRAP — re-arming on every move would mean a hand trembling by a pixel never reached the
-   * delay, and the calendar would simply never page for anyone unsteady. Being told the same
-   * edge again has to leave the running timer alone.
+   * Re-arming on every move would mean a hand trembling by a pixel never reached the delay, and
+   * the calendar would simply never page for anyone unsteady. Being told the same edge again
+   * has to leave the running timer alone.
    */
   it('leaves the countdown alone when told the same edge again', () => {
     const { steps, api } = harness()
@@ -138,9 +137,9 @@ describe('what the stylesheet reads', () => {
 
 describe('the delay', () => {
   /*
-   * TRAP — `useTimer` runs a delay of zero or less SYNCHRONOUSLY, and the callback re-arms
-   * itself, so arming at zero would recurse until the stack gave out. Refusing to arm is both
-   * the guard and the consumer's off switch.
+   * `useTimer` runs a delay of zero or less synchronously, and the callback re-arms itself, so
+   * arming at zero would recurse until the stack gave out. Refusing to arm is both the guard
+   * and the consumer's off switch.
    */
   it('never arms at zero, which is what switches paging off', () => {
     const { steps, api } = harness(() => 0)
@@ -156,7 +155,6 @@ describe('the delay', () => {
     expect(steps).toEqual([])
   })
 
-  // A getter, so binding it to zero mid-drag stops the paging on the spot.
   it('is read at the moment the edge is reached, not once at the start', () => {
     let wait = 0
     const { steps, api } = harness(() => wait)
@@ -186,12 +184,9 @@ describe('cleanup', () => {
 describe('the edge band', () => {
   /*
    * The one constant here worth pinning, because it has a TWIN:
-   * `--vectis-control-size-calendar-edge` is 3rem, which is 48px at a 16px root, and it is
-   * what the stylesheet lights up. They describe the same strip, so drifting apart would mean
-   * the calendar paged from somewhere other than where it said it would.
-   *
-   * The delay is deliberately not pinned: it is a matter of feel with nothing coupled to it,
-   * and a test on it would only make retuning it look like a regression.
+   * `--vectis-control-size-calendar-edge` is 3rem, which is 48px at a 16px root, and it is what
+   * the stylesheet lights up. They describe the same strip, so drifting apart would mean the
+   * calendar paged from somewhere other than where it said it would.
    */
   it('is the same strip the stylesheet paints', () => {
     expect(EDGE_BAND).toBe(48)

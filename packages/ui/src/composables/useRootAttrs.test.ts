@@ -4,8 +4,6 @@ import { defineComponent, h } from 'vue'
 
 import { useRootAttrs } from './useRootAttrs'
 
-// Minimal wrapper-root component: a root carrying class/style, a functional child
-// carrying everything else.
 const Wrapper = defineComponent({
   inheritAttrs: false,
   setup() {
@@ -27,7 +25,7 @@ describe('useRootAttrs', () => {
 
     expect(root.classList.contains('custom')).toBe(true)
     expect(root.style.color).toBe('red')
-    // the name and the constraint must land on the control, not on the wrapper
+    // The name and the constraint must land on the control, not on the wrapper
     expect(root.hasAttribute('name')).toBe(false)
     expect(control.getAttribute('name')).toBe('field')
     expect(control.hasAttribute('required')).toBe(true)

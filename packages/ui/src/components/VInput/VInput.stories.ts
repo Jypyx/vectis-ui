@@ -156,7 +156,6 @@ export const LabelAndHint: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // the for/id association makes the field queryable by its label
     const input = canvas.getByLabelText('Email address')
     const hint = canvas.getByText('Used only for order confirmation.')
     await expect(input.getAttribute('aria-describedby')).toContain(hint.id)
@@ -166,7 +165,6 @@ export const LabelAndHint: Story = {
 export const Icons: Story = {
   args: { iconStart: 'search', iconEnd: 'tune' },
   play: async ({ canvasElement }) => {
-    // decorative icons: no button inside the field
     await expect(within(canvasElement).queryByRole('button')).toBeNull()
   },
 }
@@ -201,7 +199,7 @@ export const Counter: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const input = canvas.getByLabelText('Nickname') as HTMLInputElement
-    // native maxlength: input is truncated at 20
+    // Native maxlength: input is truncated at 20
     await userEvent.type(input, 'abcdefghijklmnopqrstuvwxy')
     await waitFor(() => expect(input.value).toHaveLength(20))
     await expect(canvas.getByText('20/20')).toBeInTheDocument()
@@ -223,18 +221,16 @@ export const SoftCounter: Story = {
     const canvas = within(canvasElement)
     const input = canvas.getByLabelText('Title') as HTMLInputElement
     await userEvent.type(input, 'far too long a value')
-    // the input is not truncated, the counter goes into overflow
     await waitFor(() => expect(input.value).toBe('far too long a value'))
     await expect(canvas.getByText('20/10')).toHaveAttribute('data-over')
-    // the overflow invalidates the field through setCustomValidity. Assert on
-    // native validity, not on :user-invalid: that pseudo-state requires a
-    // *trusted* interaction, which synthetic events do not provide.
+    // Assert on native validity, not on :user-invalid: that pseudo-state requires a *trusted*
+    // interaction, which synthetic events do not provide.
     await waitFor(() => expect(input.validity.customError).toBe(true))
     await expect(input.matches(':invalid')).toBe(true)
   },
 }
 
-/** `pattern` stays the native attribute through fallthrough — zero JS. */
+/** `pattern` stays the native attribute through fallthrough; zero JS. */
 export const Pattern: Story = {
   render: () => ({
     components: { VInput },
@@ -251,8 +247,8 @@ export const Pattern: Story = {
   play: async ({ canvasElement }) => {
     const input = within(canvasElement).getByLabelText('Postcode') as HTMLInputElement
     await userEvent.type(input, 'abc')
-    // native validity: patternMismatch (:user-invalid cannot be asserted, as it
-    // requires a *trusted* interaction — see SoftCounter)
+    // Native validity: patternMismatch (:user-invalid cannot be asserted, as it requires a
+    // *trusted* interaction; see SoftCounter)
     await waitFor(() => expect(input.validity.patternMismatch).toBe(true))
     await expect(input.matches(':invalid')).toBe(true)
   },
@@ -284,7 +280,7 @@ export const Clearable: Story = {
     const clear = await canvas.findByRole('button', { name: 'Clear' })
     await userEvent.click(clear)
     await waitFor(() => expect(input.value).toBe(''))
-    // the button disappears and focus returns to the field
+    // The button disappears and focus returns to the field
     await expect(canvas.queryByRole('button', { name: 'Clear' })).toBeNull()
     await expect(input).toHaveFocus()
   },
@@ -322,10 +318,10 @@ export const Readonly: Story = {
 }
 
 /**
- * `readonly` and `invalid` compose: the sunken background and the red border are
- * two independent decisions. On a read-only field the error can only come from
- * the `invalid` prop (`aria-invalid`) — a `<input readonly>` is barred from
- * constraint validation, so `:user-invalid` never applies to it.
+ * `readonly` and `invalid` compose: the sunken background and the red border are two
+ * independent decisions. On a read-only field the error can only come from the `invalid` prop
+ * (`aria-invalid`); a `<input readonly>` is barred from constraint validation, so
+ * `:user-invalid` never applies to it.
  */
 export const ReadonlyInvalid: Story = {
   render: () => ({
@@ -352,15 +348,16 @@ export const ReadonlyInvalid: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    // data-testid lands on the <input> (inheritAttrs: false), hence the closest().
+    // Data-testid lands on the <input> (inheritAttrs: false), hence the closest().
     const border = (id: string) =>
       getComputedStyle(
         canvasElement.querySelector(`[data-testid="${id}"]`)!.closest('.v-input-field')!,
       ).borderColor
 
-    /* Every state block weighs (0,3,0) — :has() takes the specificity of its
-       argument — so source order alone decides. Verified red by moving the
-       [data-readonly] block back after the invalid one. */
+    /*
+     * Every state block weighs (0,3,0); :has() takes the specificity of its argument; so source
+     * order alone decides.
+     */
     await expect(border('both')).toBe(border('invalid'))
     await expect(border('both')).not.toBe(border('readonly'))
   },
@@ -399,7 +396,6 @@ export const NativeValidation: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const input = canvas.getByRole('textbox') as HTMLInputElement
-    // typing an invalid value then attempting to submit triggers :user-invalid
     await userEvent.type(input, 'not-an-email')
     await userEvent.click(canvas.getByRole('button', { name: 'Subscribe' }))
     await expect(input.validity.valid).toBe(false)

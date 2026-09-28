@@ -1,9 +1,6 @@
 /**
- * Les mots de la table des matières.
- *
- * Les noms de composants sont traduits parce que le rail est une table des matières : ce que le
- * lecteur y cherche, c'est la chose, pas l'identifiant. L'identifiant, lui, ne bouge jamais :
- * chaque page écrit `VButton` dans sa prose comme dans son code.
+ * Les mots de la table des matières. Les noms de composants sont traduits parce que le rail est
+ * une table des matières : ce que le lecteur y cherche, c'est la chose, pas l'identifiant.
  */
 import type { NavMessages } from '../en/nav'
 

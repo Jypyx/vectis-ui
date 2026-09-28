@@ -37,10 +37,9 @@ describe('VIcon', () => {
   })
 
   it("a resolver still wins over one of the DS's own icons", () => {
-    // THE invariant of the split. The drawing travels with its NAME, so a consumer
-    // who wired in their own icon library moves the design system's internals across
-    // with one `setIconResolver` call — where a bare `{ path }` default would take
-    // the `render` route and never be offered to them.
+    // The drawing travels with its NAME, so a consumer who wired in their own icon library
+    // moves the design system's internals across with one `setIconResolver` call; where a bare
+    // `{ path }` default would take the `render` route and never be offered to them.
     setIconResolver(() => ({ text: 'xmark' }))
     const { container } = render(VIcon, { props: { name: closeIcon } })
     expect(container.querySelector('.v-icon-symbol')?.textContent).toBe('xmark')
@@ -72,7 +71,6 @@ describe('VIcon', () => {
       checkCircleIcon.paths[1],
     )
 
-    // `close` has no distinct FILL variant: the outline serves both.
     const trait = render(VIcon, { props: { name: closeIcon, filled: true } })
     expect(trait.container.querySelector('.v-icon-svg path')?.getAttribute('d')).toBe(
       closeIcon.paths[0],
@@ -98,8 +96,6 @@ describe('VIcon', () => {
   })
 
   it('a name containing "/" or ":" stays a NAME (no URL detection)', () => {
-    // This is what lets Iconify-style conventions (`mdi:close`) reach the icon
-    // resolver instead of going out as an <img>.
     const { container } = render(VIcon, { props: { name: 'mdi:close' } })
     expect(container.querySelector('.v-icon-symbol')?.textContent).toBe('mdi:close')
     expect(container.querySelector('img')).toBeNull()

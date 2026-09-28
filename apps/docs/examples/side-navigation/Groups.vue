@@ -17,18 +17,16 @@ import { description, image, schedule, table_chart as tableChart } from 'vectis-
            announced as nothing: real grouping is the group's job. -->
       <VSideNavigationSeparator />
 
-      <!-- A named block. The heading is not a row: nothing happens when it is clicked
-           and the arrow keys never stop on it. It takes the height of a row all the
-           same, which is what keeps the vertical rhythm of the list. What it names is
-           the sublist under it, so a screen reader reads the section and its items as
-           one thing. -->
+      <!--
+        The heading is not a row: nothing happens when it is clicked and the arrow keys never
+        stop on it. It takes the height of a row all the same, which keeps the vertical rhythm
+        of the list.
+      -->
       <VSideNavigationGroup label="Content">
         <VSideNavigationItem href="#usage" :icon="description">Documents</VSideNavigationItem>
         <VSideNavigationItem href="#usage" :icon="image">Media</VSideNavigationItem>
       </VSideNavigationGroup>
 
-      <!-- A group is not a level of the hierarchy: its items are indented as if it
-           were not there. -->
       <VSideNavigationGroup>
         <!-- The slot takes markup where the prop takes a string. One of the two is
              needed, since this is what names the sublist. -->

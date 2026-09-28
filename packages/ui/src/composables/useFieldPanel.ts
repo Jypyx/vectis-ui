@@ -33,28 +33,15 @@ export interface UseFieldPanelOptions {
   onOpen?: () => void
   /** What it needs to do as the panel closes: clear an announcement, for instance. */
   onClose?: () => void
-  /**
-   * Whether focusing the field opens the panel. It does not by default.
-   *
-   * A field one TYPES into says yes, and its panel then opens WITHOUT taking the caret, so
-   * typing carries on and the down arrow remains the one explicit way in. A click on such a
-   * field leaves the focus where it is for the same reason.
-   */
+  /** Whether focusing the field opens the panel. It does not by default. */
   openOnFocus?: () => boolean
 }
 
 // @a11y @keyboard @core
 /**
- * The "field + `VPopover` in `mode="manual"`" shell of VDateInput and VTimeInput.
- *
- * A `manual` popover does nothing on its own: no light dismiss, no focus move, no focus
- * return. This is exactly that minimum; what is particular to either component arrives
- * through `onOpen`/`onClose`.
- *
- * TRAP: the panel is WRITTEN imperatively and READ back by model. Bind `open` as
- * `v-model:open` so the DOM feeds it, but the write must stay synchronous: the `rAF` that
- * moves focus assumes the panel is already open when it is armed, and the model would put
- * a tick in between.
+ * The panel is written imperatively and read back by model. Bind `open` as `v-model:open` so
+ * the DOM feeds it, but the write must stay synchronous: the `rAF` that moves focus assumes the
+ * panel is already open when it is armed, and the model would put a tick in between.
  */
 export function useFieldPanel(options: UseFieldPanelOptions) {
   const open = ref(false)
@@ -64,13 +51,8 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
   const panelId = useId()
 
   // @core
-  // TRAP — this stops a VButtonGroup's or a VInputGroup's row context at the field's
-  // boundary. The picker in the panel sizes its own buttons — VDatePicker writes `size="sm"`
-  // on its navigation, VTimePicker `size="lg"` on its hour and minute cells — and a group
-  // WINS over a button's prop: without this line a VInputGroup would resize them to its own
-  // height, which only shows once the panel is open and nothing in the sheet or the template
-  // would say why. It is the JS counterpart of the `.v-overlay` guard every VButtonGroup
-  // selector carries — a floating panel is not a segment of the row that opened it.
+  // Stop row contexts at the field boundary so the picker keeps its own button sizes instead of
+  // inheriting the enclosing input group's shape.
   provide(buttonGroupKey, NO_BUTTON_GROUP)
 
   /*
@@ -90,8 +72,8 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
     options.onOpen?.()
     options.panelRef.value?.show()
     // @a11y
-    // A `manual` popover moves focus nowhere, so it is moved by hand — a frame later,
-    // the panel not being painted yet, and nothing invisible can take focus.
+    // A `manual` popover moves focus nowhere, so it is moved by hand; a frame later, the panel
+    // not being painted yet, and nothing invisible can take focus.
     if (moveFocus) {
       cancelFocusFrame()
       focusFrame = requestAnimationFrame(() => {
@@ -112,10 +94,10 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
   onBeforeUnmount(cancelFocusFrame)
 
   // @core
-  // TRAP — a panel refused WHILE it is open (the field turned read-only or disabled, the
-  // picker switched off) is unmounted by its `v-if`, and an unmounted popover sends no
-  // `toggle` to bring `open` back down. The model then stays true, and the next time the
-  // panel is mounted VPopover's mount replay shows it again with nobody having asked.
+  // A panel refused WHILE it is open (the field turned read-only or disabled, the picker
+  // switched off) is unmounted by its `v-if`, and an unmounted popover sends no `toggle` to
+  // bring `open` back down. The model then stays true, and the next time the panel is mounted
+  // VPopover's mount replay shows it again with nobody having asked.
   watch(options.disabled, (refused) => {
     if (!refused || !open.value) return
     closePanel()
@@ -124,22 +106,13 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
 
   // @a11y
   /*
-   * TRAP — handing the focus back to the field is what makes a field that opens ON FOCUS
-   * reopen the panel that was just closed: the two would chase each other and the panel
-   * would never close. The lock covers the focus call, which is synchronous.
-   *
-   * EVERY focus this shell or a component gives the field must go through `focusField`,
-   * `closeAndFocus` included. Focusing the field directly brings the loop straight back.
+   * Handing the focus back to the field is what makes a field that opens on FOCUS reopen the
+   * panel that was just closed: the two would chase each other and the panel would never close.
+   * The lock covers the focus call, which is synchronous.
    */
   let refocusing = false
 
-  /**
-   * Puts the focus on the field without opening the panel.
-   *
-   * A component emptying its value calls it BEFORE the field focuses itself, and that order
-   * is the point: focusing an element that already has the focus emits no event at all, so
-   * the field's own call that follows is inert and the panel stays shut.
-   */
+  /** Puts the focus on the field without opening the panel. */
   function focusField() {
     refocusing = true
     options.field.value?.focus()
@@ -159,26 +132,20 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
     openPanel(false)
   }
 
-  /**
-   * The icon at the end of the field. Clicking it is an explicit request for the panel, and
-   * the focus has already left the field for the button — so carrying it into the panel is
-   * right whatever `openOnFocus` says.
-   */
+  /** The icon at the end of the field. */
   function toggleFromIcon() {
     if (open.value) closeAndFocus()
     else openPanel(true)
   }
 
   /**
-   * Whether an event started on one of the controls the field holds: the clear cross, the
-   * AM/PM word, a clickable icon, or a button of the consumer's own in a slot. What happens
-   * there is that control's business, for the pointer and the keyboard alike.
+   * Whether an event started on one of the controls the field holds: the clear cross, the AM/PM
+   * word, a clickable icon, or a button of the consumer's own in a slot.
    */
   const fromOwnControl = (event: Event) =>
     !!(event.target as HTMLElement | null)?.closest?.('button, a[href]')
 
   function onControlClick(event: MouseEvent) {
-    // Reacting here too would open the panel the clear cross has just given a reason to close.
     if (fromOwnControl(event)) return
     openPanel()
   }
@@ -188,16 +155,9 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
 
   // @a11y
   /*
-   * TRAP — clicking a non-focusable pixel of the panel (padding, the gutter between cells)
-   * hands focus back to `<body>`. `onFocusout` above then fires with a null `relatedTarget`,
-   * reads it as an exit — rightly — and closes a panel the reader has just clicked.
-   *
-   * The filter is essential: VCombobox's unconditional `preventDefault` is safe there
-   * because focus never leaves its field, but here it would rob the days and the navigation
-   * arrows of focus and desynchronize VDatePicker's roving.
-   *
-   * Invisible in jsdom, where clicking moves no focus — the `ClicDansLeVide` play functions
-   * of both components cover it.
+   * Clicking a non-focusable pixel of the panel (padding, the gutter between cells) hands focus
+   * back to `<body>`. `onFocusout` above then fires with a null `relatedTarget`, reads it as an
+   * exit; rightly; and closes a panel the reader has just clicked.
    */
   function onPanelMousedown(event: MouseEvent) {
     const target = event.target as HTMLElement | null
@@ -213,11 +173,8 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
       }
       return
     }
-    // TRAP — a key already consumed INSIDE the panel is ignored. An Enter that selected a
-    // day has just CLOSED the panel, and without the guard would reopen it as it bubbles.
-    // TRAP — the same goes for a key typed on one of the field's own buttons. Its Enter is
-    // what becomes the click that clears the field or flips the half of the day: cancelled
-    // here to open the panel, the button would never be pressed from the keyboard at all.
+    // A key already consumed INSIDE the panel is ignored. An Enter that selected a day has just
+    // CLOSED the panel, and without the guard would reopen it as it bubbles.
     if (
       (event.key === 'ArrowDown' || event.key === 'Enter') &&
       !open.value &&

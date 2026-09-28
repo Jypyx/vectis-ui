@@ -24,7 +24,6 @@ const meeting = ref<string | null>(null)
       :picker-icon="expandMore"
     />
 
-    <!-- The start icon is rendered before whatever else fills that end of the field. -->
     <VTimeInput
       v-model="start"
       label="Filter by time"

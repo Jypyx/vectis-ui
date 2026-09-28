@@ -1,12 +1,7 @@
 <script setup lang="ts">
 /**
- * A named block of options inside a VCombobox's list. It is internal: the component
- * renders it from the entries of its own options prop, and a consumer never writes it.
- *
- * A block of this kind is one of the two things a list is allowed to contain — it is the
- * equivalent of the grouping a native list offers. Its name can be neither focused nor
- * chosen: the keyboard counts through the flat list of options and therefore never
- * encounters this element at all.
+ * Group generated options under their accessible label; groups and options are the listbox's
+ * permitted children.
  */
 
 import { useId } from 'vue'
@@ -35,10 +30,11 @@ const labelId = useId()
 
 <style>
 @layer vectis.components {
-  /* It refuses to shrink, where a menu group has no need to: this panel is a column of
-     bounded height that scrolls, and a block left free to shrink would be squashed to
-     make its content fit — the same reason the state rows and the foot of the list refuse
-     it too. */
+  /*
+   * It refuses to shrink, where a menu group has no need to: this panel is a column of bounded
+   * height that scrolls, and a block left free to shrink would be squashed to make its content
+   * fit; the same reason the state rows and the foot of the list refuse it too.
+   */
   .v-combobox-group {
     display: flex;
     flex: none;

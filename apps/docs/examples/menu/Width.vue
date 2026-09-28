@@ -3,7 +3,6 @@ import { VButton, VMenu, VMenuItem } from 'vectis-ui'
 </script>
 
 <template>
-  <!-- Left alone, the panel sits between a floor and a ceiling of its own. -->
   <VMenu>
     <template #trigger="{ triggerProps }">
       <VButton v-bind="triggerProps" variant="outline" tone="neutral">Default</VButton>
@@ -13,7 +12,6 @@ import { VButton, VMenu, VMenuItem } from 'vectis-ui'
     <VMenuItem label="50" />
   </VMenu>
 
-  <!-- Any CSS length or keyword. `max-content` shrinks the panel to its longest row. -->
   <VMenu width="max-content">
     <template #trigger="{ triggerProps }">
       <VButton v-bind="triggerProps" variant="outline" tone="neutral">max-content</VButton>
@@ -31,8 +29,6 @@ import { VButton, VMenu, VMenuItem } from 'vectis-ui'
     <VMenuItem label="Duplicate" />
   </VMenu>
 
-  <!-- The panel can no longer be narrower than the button that opened it, while
-       staying free to grow for a longer row. -->
   <VMenu match-trigger>
     <template #trigger="{ triggerProps }">
       <VButton v-bind="triggerProps" variant="outline" tone="neutral">

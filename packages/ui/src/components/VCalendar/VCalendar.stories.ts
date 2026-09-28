@@ -7,15 +7,9 @@ import { storyText } from '../../stories/storyText'
 import VCalendarSfc from './VCalendar.vue'
 import type { CalendarEvent } from './types'
 
-// A generic SFC: its generic function signature is not assignable to Storybook's Component
-// types — it is erased for the stories, exactly as VDataTable's is.
 const VCalendar = VCalendarSfc as unknown as Component
 
-/**
- * A consumer's own event type. Extending the interface is how extra fields are carried
- * through the v-model and reach the `#event` slot still typed — which is the whole reason
- * the component is generic rather than carrying an index signature.
- */
+/** A consumer's own event type. */
 interface Booking extends CalendarEvent {
   room: string
 }
@@ -51,11 +45,6 @@ const t = storyText({
   },
 })
 
-/*
- * A fixed reference week — June 2026, whose 8th is a Monday — so that every story shows the
- * same thing on every run, and so Chromatic has nothing to diff but real changes. Demo
- * dates stay as they are: only prose goes through the dictionary.
- */
 const ANCHOR = '2026-06-10'
 
 const week = (): CalendarEvent[] => [
@@ -114,12 +103,9 @@ const meta: Meta = {
   title: 'Components/Calendar',
   component: VCalendar as Meta['component'],
   /*
-   * No `locale` arg: the calendar then follows the design system's global locale, so the
-   * Locale toolbar drives its day names, month names and clock along with its words. The
-   * Localization story pins explicit locales instead.
-   *
-   * Every story gives a DISTINCT `label`. The root is a region, which is a landmark, and
-   * `landmark-unique` is one of the best-practice rules the accessibility addon does run.
+   * No `locale` arg: the calendar then follows the design system's global locale, so the Locale
+   * toolbar drives its day names, month names and clock along with its words. The Localization
+   * story pins explicit locales instead.
    */
   args: { date: ANCHOR, view: 'week', label: 'Team schedule' },
   parameters: { layout: 'fullscreen' },
@@ -141,7 +127,6 @@ export const Default: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // The grid opens on the working day rather than at midnight, so the events are in view.
     await waitFor(() => expect(canvas.getByRole('grid')).toBeVisible())
     expect(canvas.getAllByRole('button', { name: /Standup/ }).length).toBeGreaterThan(0)
   },
@@ -168,7 +153,6 @@ export const Views: Story = {
     await userEvent.click(canvas.getByRole('button', { name: /^View:/ }))
     const menu = await canvas.findByRole('menu')
     await userEvent.click(within(menu).getByRole('menuitem', { name: 'Day' }))
-    // The toolbar renames its own controls after the step they now take.
     await waitFor(() => expect(canvas.getByRole('button', { name: 'Next day' })).toBeVisible())
   },
 }
@@ -222,10 +206,8 @@ export const Month: Story = {
 }
 
 /**
- * The year view is for orientation: twelve months, each marking the days that have
- * something on them and saying how many. The days here are deliberately not controls —
- * three hundred and sixty-five tab stops would make the view unusable to anyone reaching it
- * by keyboard — so it is the month that can be chosen, which opens it.
+ * The year view is for orientation: twelve months, each marking the days that have something on
+ * them and saying how many.
  */
 export const Year: Story = {
   args: { view: 'year', views: ['year', 'month'], label: 'Year' },
@@ -321,7 +303,6 @@ export const Overnight: Story = {
       </div>
     `,
   }),
-  // Two cards for the one event, and no bar: below a whole day the band is not where it goes.
   play: async ({ canvasElement }) => {
     await waitFor(() => expect(canvasElement.querySelectorAll('.v-calendar-block')).toHaveLength(2))
     await expect(canvasElement.querySelector('.v-calendar-allday')).toBeNull()
@@ -329,9 +310,8 @@ export const Overnight: Story = {
 }
 
 /**
- * A line is drawn across today's column at the time it is now, with a dot on its leading
- * edge, and it ticks at the top of each minute; `hideCurrentTime` leaves it out. This story
- * anchors itself on the real current day, so it is the one place the line can be seen.
+ * A line is drawn across today's column at the time it is now, with a dot on its leading edge,
+ * and it ticks at the top of each minute; `hideCurrentTime` leaves it out.
  */
 export const CurrentTime: Story = {
   args: { view: 'day', label: 'Current time' },
@@ -351,8 +331,8 @@ export const CurrentTime: Story = {
 }
 
 /**
- * `dayStart` and `dayEnd` crop the grid to the hours that matter, and `weekdays` decides
- * which days appear at all — here a Monday-to-Friday week from eight in the morning.
+ * `dayStart` and `dayEnd` crop the grid to the hours that matter, and `weekdays` decides which
+ * days appear at all; here a Monday-to-Friday week from eight in the morning.
  */
 export const WorkingWeek: Story = {
   args: {
@@ -435,9 +415,7 @@ export const Overlapping: Story = {
 
 /**
  * An event without a `color` takes a hue derived from its id, so it keeps the same colour
- * however the list is filtered or sorted. One with a `color` uses it for its edge and a
- * wash of its face — never underneath the title, which is what keeps an arbitrary value
- * readable in both themes.
+ * however the list is filtered or sorted.
  */
 export const Colours: Story = {
   args: { view: 'day', dayStart: 8, dayEnd: 20, label: 'Event colours' },
@@ -525,8 +503,7 @@ export const Colours: Story = {
     const canvas = within(canvasElement)
     await waitFor(() => expect(canvas.getAllByRole('button', { name: /–/ })).toHaveLength(8))
 
-    // Each card turns the event colours to its own hue. Resolved in the tokens instead, the
-    // seven ids below all came out in the same indigo, which jsdom has no styles to notice.
+    // Each card turns the event colours to its own hue.
     const auto = canvasElement.querySelectorAll<HTMLElement>('.v-calendar-event:not([data-custom])')
     const faces = new Set(Array.from(auto, (card) => getComputedStyle(card).backgroundColor))
     await expect(faces.size).toBe(7)
@@ -578,9 +555,7 @@ export const EventSlot: Story = {
 
 /**
  * Drag a card to move it, drag its bottom edge to change how long it lasts, and, this story
- * asking for `creatable`, draw an empty stretch of a day out, up or down. A move or a stretch is
- * written to the model once, when the gesture ends; a drawn slot is only reported, and the
- * output below shows its times.
+ * asking for `creatable`, draw an empty stretch of a day out, up or down.
  */
 export const Editing: Story = {
   args: {
@@ -641,7 +616,6 @@ export const Editing: Story = {
         }),
       )
 
-    // Two hours further down the day, which at the default hour height is a real distance.
     fire('pointerdown', from.y)
     fire('pointermove', from.y + 40)
     fire('pointermove', from.y + box.height * 2)
@@ -650,20 +624,16 @@ export const Editing: Story = {
     await waitFor(() => expect(canvas.getByText(/^11:00–12:00$/)).toBeVisible())
 
     /*
-     * Act two: the same gesture, let go OFF the calendar, which must write nothing at all.
-     *
-     * It runs here rather than in the unit suite for the same reason as act one — only a real
-     * browser lays the view out, so only here is there an inside and an outside to be on. And it
-     * follows act one deliberately: the event is at 11:00 by now, so what the revert has to
-     * restore is the CURRENT value and not the one the story was written with.
+     * Act two: the same gesture, let go OFF the calendar, which must write nothing at all. It
+     * runs here rather than in the unit suite for the same reason as act one; only a real
+     * browser lays the view out, so only here is there an inside and an outside to be on.
      */
     const root = canvasElement.querySelector('.v-calendar-view')!
     const view = root.getBoundingClientRect()
 
     /*
-     * The card is looked up AGAIN on every use, and the moves are sent to the root rather than
-     * to it. A dragged card is re-rendered as it travels and the element is not the same one
-     * afterwards, so a reference taken once goes stale mid-gesture — and an event dispatched on
+     * A dragged card is re-rendered as it travels and the element is not the same one
+     * afterwards, so a reference taken once goes stale mid-gesture; and an event dispatched on
      * a node that has left the document reaches no handler at all. The root is the element the
      * move and release handlers are bound to, and it is there for the whole story.
      */
@@ -677,12 +647,6 @@ export const Editing: Story = {
     const centre = { x: view.left + view.width / 2, y: view.top + view.height / 2 }
     at(dragged(), 'pointerdown', centre.x, centre.y)
     at(root, 'pointermove', centre.x, centre.y + 40)
-    /*
-     * Off the TOP of the calendar, and deliberately centred on the other axis. Past a side would
-     * be outside too, but it is also what asks the calendar to turn the page — the day would
-     * change under the test and the event would no longer be on the one being shown. Above the
-     * top only auto-scrolls, which leaves the card where it is.
-     */
     at(root, 'pointermove', centre.x, view.top - 40)
     await waitFor(() => expect(dragged()).toHaveAttribute('data-rejected'))
 
@@ -696,12 +660,7 @@ export const Editing: Story = {
     await waitFor(() => expect(dragged()).not.toHaveAttribute('data-rejected'))
     await waitFor(() => expect(canvas.getByText(/^11:00–12:00$/)).toBeVisible())
 
-    /*
-     * Act three: a slot drawn UP from an empty hour. The press lands two pixels under the top of
-     * the 15:00 row and the pointer travels to the same place in the 14:00 row, so the slot runs
-     * from 14:00 to the end of the quarter pressed. It is reported and never drawn: once let go,
-     * the event from act one is the only card left.
-     */
+    /* It is reported and never drawn: once let go, the event from act one is the only card left. */
     const rowAt = (minutes: number) =>
       canvasElement.querySelector<HTMLElement>(`.v-calendar-cell[data-minutes="${minutes}"]`)!
     rowAt(900).scrollIntoView({ block: 'center' })
@@ -717,11 +676,7 @@ export const Editing: Story = {
   },
 }
 
-/**
- * The same three gestures, without a pointer. `Space` takes hold of an event, the arrows
- * move it and `Shift` with them changes when it ends, `Enter` places it and `Escape` puts it
- * back. Every step is announced. `Enter` on a card at rest opens it instead.
- */
+/** The same three gestures, without a pointer. `Enter` on a card at rest opens it instead. */
 export const KeyboardEditing: Story = {
   args: { view: 'week', dayStart: 8, dayEnd: 18, label: 'Keyboard editing' },
   render: (args) => ({
@@ -804,7 +759,6 @@ export const OpenOnClick: Story = {
     const cellAt = (minutes: number) =>
       canvasElement.querySelector<HTMLElement>(`.v-calendar-cell[data-minutes="${minutes}"]`)!
 
-    // Each report is preceded by a different one, so every assertion proves its own step.
     await userEvent.click(cellAt(840))
     await waitFor(() => expect(output).toHaveTextContent('cell 14:00'))
 
@@ -841,12 +795,7 @@ export const OpenOnClick: Story = {
   },
 }
 
-/**
- * Events move in the month view too — by whole days, keeping their length. Drag a chip onto
- * one of the greyed days of the neighbouring month to move it there, or hold it against the
- * left or right edge for a moment and the calendar turns the month with the chip still under
- * the pointer.
- */
+/** Events move in the month view too; by whole days, keeping their length. */
 export const MonthDragging: Story = {
   args: { view: 'month', views: ['month', 'day'], label: 'Dragging across months' },
   render: (args) => ({

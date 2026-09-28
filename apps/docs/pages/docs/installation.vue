@@ -5,13 +5,10 @@ const { t } = useI18n()
 useDocsHead('installation')
 
 /*
- * The samples are NOT translated, here or anywhere on the site: a demo has to match the code
- * printed beside it, and the code is the same in every language. The heading `id`s are not
- * translated either — they are the site's permalinks, and a reader who bookmarks
- * `#component-css` must land there whichever language they read it in.
- *
- * The two install COMMANDS are deliberately not written here: they depend on the manager the
- * reader uses, so DocsInstall composes each one from the packages that route needs.
+ * The heading `id`s are not translated either; they are the site's permalinks, and a reader who
+ * bookmarks `#component-css` must land there whichever language they read it in. The two
+ * install COMMANDS are deliberately not written here: they depend on the manager the reader
+ * uses, so DocsInstall composes each one from the packages that route needs.
  */
 const viteStylesCode = `// main.ts
 import 'vectis-ui/styles.css'`
@@ -39,11 +36,7 @@ export default defineNuxtConfig({
   <DocsCode lang="ts" :code="nuxtStylesCode" />
   <DocsProse keypath="installation.nuxtSsr" />
 
-  <!--
-    Component CSS is a section of its own and no longer a subsection of the Nuxt one: it
-    describes what the package does in both, so hanging it under either would have made it look
-    like a property of that one. The `id` is unchanged, the heading having only moved a level.
-  -->
+  <!-- The `id` is unchanged, the heading having only moved a level. -->
   <h2 id="component-css">{{ t('installation.cssHeading') }}</h2>
   <DocsProse keypath="installation.cssBody" />
 </template>

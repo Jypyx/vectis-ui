@@ -9,8 +9,10 @@ import { VHotkeys, VTypography } from 'vectis-ui'
       <VTypography variant="caption" tone="muted">One cap per key</VTypography>
     </div>
 
-    <!-- The decoration moves from each cap to the shortcut as a whole, which is what
-         puts the separator inside the key instead of between two of them. -->
+    <!--
+      The decoration moves from each cap to the shortcut as a whole, which puts the separator
+      inside the key instead of between two of them.
+    -->
     <div class="cell">
       <VHotkeys keys="mod+shift+k" attached variant="outline" />
       <VTypography variant="caption" tone="muted">attached</VTypography>

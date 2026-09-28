@@ -4,10 +4,9 @@ import { defineComponent, h, nextTick, ref } from 'vue'
 
 import VDatePicker from './VDatePicker.vue'
 
-// Reference grid: June 2026 (the 10th is a Wednesday).
-// Several tests pass `locale: 'fr-FR'` on purpose: the `locale` prop is what they
-// assert, so their expectations are French month and day names. The DS dictionary is a
-// separate axis — the navigation buttons stay in the base locale (English).
+// Reference grid: June 2026 (the 10th is a Wednesday). Several tests pass `locale: 'fr-FR'` on
+// purpose: the `locale` prop is what they assert, so their expectations are French month and
+// day names.
 const JUNE = '2026-06-10'
 
 function keydown(el: Element, key: string, opts: KeyboardEventInit = {}) {
@@ -22,7 +21,6 @@ describe('VDatePicker', () => {
     expect(container.querySelectorAll('[role="gridcell"]')).toHaveLength(42)
     const headers = container.querySelectorAll('[role="columnheader"]')
     expect(headers).toHaveLength(7)
-    // fr-FR → the first column is Monday
     expect(headers[0]?.getAttribute('aria-label')?.toLowerCase()).toContain('lundi')
   })
 
@@ -41,8 +39,6 @@ describe('VDatePicker', () => {
   })
 
   it('select carries the NEW value under a parent v-model', async () => {
-    // With an update listener, defineModel waits for the parent before updating its
-    // local copy, so re-reading the model after writing it would hand back the old date.
     const { container, emitted } = render(VDatePicker, {
       props: { modelValue: JUNE, 'onUpdate:modelValue': () => {} },
     })
@@ -57,15 +53,13 @@ describe('VDatePicker', () => {
     const { container, emitted } = render(VDatePicker, {
       props: { selection: 'range', modelValue: { start: null, end: null } },
     })
-    // No starting modelValue is given → the current month. The month is therefore driven
-    // by clicking days of the displayed month rather than by navigating.
     const days = [
       ...container.querySelectorAll('.v-date-picker-day:not([data-outside])'),
     ] as HTMLElement[]
     const d20 = days.find((d) => d.textContent?.trim() === '20')!
     const d10 = days.find((d) => d.textContent?.trim() === '10')!
-    await fireEvent.click(d20) // start
-    await fireEvent.click(d10) // end < start → reordered
+    await fireEvent.click(d20)
+    await fireEvent.click(d10)
     const last = (emitted('update:modelValue')?.at(-1) as unknown[])?.[0] as {
       start: string
       end: string
@@ -116,7 +110,6 @@ describe('VDatePicker', () => {
   })
 
   it('hides the adjacent days when showAdjacentDays is false', () => {
-    // by default selectAdjacentDays=false → adjacent days are rendered as static spans
     const withAdjacent = render(VDatePicker, {
       props: { modelValue: JUNE, showAdjacentDays: true },
     })
@@ -138,7 +131,6 @@ describe('VDatePicker', () => {
   })
 
   it('strikes through the adjacent days outside [min,max]', () => {
-    // June 2026 (starting on a Monday) → July days at the end of the grid, all > max
     const { container } = render(VDatePicker, {
       props: { modelValue: JUNE, max: '2026-06-24', showAdjacentDays: true },
     })
@@ -147,7 +139,7 @@ describe('VDatePicker', () => {
   })
 
   it('applies the #day slot to the static adjacent days', () => {
-    // otherwise multi-line content would only apply to the days of the month and would
+    // Otherwise multi-line content would only apply to the days of the month and would
     // vertically shift the numbers of the adjacent days
     const { container } = render(VDatePicker, {
       props: { modelValue: JUNE, showAdjacentDays: true },
@@ -162,7 +154,6 @@ describe('VDatePicker', () => {
     const { container } = render(VDatePicker, {
       props: { modelValue: JUNE, showAdjacentDays: true, selectAdjacentDays: true },
     })
-    // they become buttons marked data-outside
     expect(
       container.querySelectorAll('button.v-date-picker-day[data-outside]').length,
     ).toBeGreaterThan(0)
@@ -210,7 +201,6 @@ describe('VDatePicker', () => {
     const { container } = render(VDatePicker, {
       props: { modelValue: JUNE, min: '01/01/2024', max: 'not-a-date' },
     })
-    // Two toggles carry the class: [0] opens the months view, [1] the years view.
     const toggle = container.querySelectorAll('.v-date-picker-view-toggle')[1] as HTMLElement
     await fireEvent.click(toggle)
     // 2026 ± 100 → the fallback range, rendered rather than crashed.
@@ -231,7 +221,6 @@ describe('VDatePicker', () => {
     const list = render(VDatePicker, {
       props: { selection: 'multiple', modelValue: ['nope', JUNE], locale: 'fr-FR' },
     })
-    // The first VALID entry is what the calendar opens on.
     expect(list.getByRole('grid').getAttribute('aria-label')?.toLowerCase()).toContain('juin')
   })
 
@@ -269,7 +258,7 @@ describe('VDatePicker', () => {
     const grid = container.querySelector('[role="grid"]') as HTMLElement
     const focused = container.querySelector('.v-date-picker-day[tabindex="0"]') as HTMLElement
     focused.focus()
-    keydown(grid, 'ArrowRight') // 10 → 11
+    keydown(grid, 'ArrowRight')
     await nextTick()
     keydown(grid, 'Enter')
     await nextTick()
@@ -343,7 +332,6 @@ describe('VDatePicker — reading and walking', () => {
   })
 
   it('unticking the earliest date of a list leaves the month on screen alone', async () => {
-    // A parent v-model, played by the listener handing the value straight back.
     const parent: { rerender?: (props: object) => Promise<void> } = {}
     const { container, rerender } = render(VDatePicker, {
       props: {
@@ -423,8 +411,6 @@ describe('VDatePicker — hydration', () => {
     const { renderToString } = await import('vue/server-renderer')
     vi.useFakeTimers({ toFake: ['Date'] })
     try {
-      // The server renders in September, the browser opens the page on 1 October: a
-      // prerendered page, or a server a timezone behind its visitor.
       vi.setSystemTime(new Date(2026, 8, 30, 23))
       const html = await renderToString(createSSRApp(VDatePicker))
       vi.setSystemTime(new Date(2026, 9, 1, 9))

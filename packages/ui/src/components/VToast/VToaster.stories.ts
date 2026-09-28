@@ -90,8 +90,8 @@ const meta = {
     duration: { control: 'number' },
   },
   args: { placement: 'bottom-right', duration: 5000 },
-  // the queue is module state that survives navigation between stories: it is
-  // emptied before each render to avoid any pollution
+  // The queue is module state that survives navigation between stories: it is emptied before
+  // each render to avoid any pollution
   decorators: [
     (story) => {
       dismissToast()
@@ -124,10 +124,8 @@ export const Default: Story = {
       ".v-toast-stack[data-placement='bottom-right']",
     ) as HTMLElement
 
-    // programmatic trigger: the stack moves to the top layer
     await userEvent.click(canvas.getByRole('button', { name: 'Notify' }))
     await waitFor(() => expect(stack.matches(':popover-open')).toBe(true))
-    // waitFor: the toast transitions in from opacity 0 (@starting-style)
     await waitFor(() => expect(within(stack).getByText('Changes saved.')).toBeVisible())
   },
 }
@@ -172,10 +170,10 @@ export const Solid: Story = {
       </div>
     `,
   }),
-  // axe only audits what is left ON SCREEN, and a toast only exists once its
-  // trigger is clicked: without this the solid variant is never contrast-checked.
-  // `neutral` is the tone that earns the play function — it is the one whose solid
-  // is an inversion, so it is also the one whose two themes differ the most.
+  // Axe only audits what is left on SCREEN, and a toast only exists once its trigger is
+  // clicked: without this the solid variant is never contrast-checked. `neutral` is the tone
+  // that earns the play function; it is the one whose solid is an inversion, so it is also the
+  // one whose two themes differ the most.
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const stack = canvasElement.querySelector(
@@ -184,7 +182,6 @@ export const Solid: Story = {
 
     await userEvent.click(canvas.getByRole('button', { name: 'neutral' }))
     await waitFor(() => expect(stack.matches(':popover-open')).toBe(true))
-    // waitFor: the toast transitions in from opacity 0 (@starting-style)
     await waitFor(() =>
       expect(within(stack).getByText('A notification in the solid variant.')).toBeVisible(),
     )
@@ -237,7 +234,6 @@ export const Persistent: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Notify' }))
     await waitFor(() => expect(stack.matches(':popover-open')).toBe(true))
 
-    // manual dismissal through the "Close" VIconButton
     await userEvent.click(within(stack).getByRole('button', { name: 'Close' }))
     await waitFor(() => expect(stack.matches(':popover-open')).toBe(false))
   },
@@ -266,7 +262,6 @@ export const AutoDismiss: Story = {
 
     await userEvent.click(canvas.getByRole('button', { name: 'Notify' }))
     await waitFor(() => expect(stack.matches(':popover-open')).toBe(true))
-    // automatic dismissal after the requested duration
     await waitFor(() => expect(stack.matches(':popover-open')).toBe(false), { timeout: 3000 })
   },
 }
@@ -361,7 +356,6 @@ export const Stacking: Story = {
     await userEvent.click(button)
     await userEvent.click(button)
     await userEvent.click(button)
-    // the three toasts coexist in the same stack
     await waitFor(() => expect(canvasElement.querySelectorAll('.v-toast')).toHaveLength(3))
   },
 }

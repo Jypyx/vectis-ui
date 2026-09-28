@@ -4,7 +4,6 @@ definePageMeta({ layout: 'docs' })
 const { t } = useI18n()
 useDocsHead('cssClasses')
 
-/* Not the API table's Prop/Type/Default: this one names a class and what carries it. */
 const classColumns = computed(() => [t('cssClasses.columnClass'), t('cssClasses.columnCarries')])
 
 const vhCode = `.v-visually-hidden {

@@ -3,16 +3,8 @@ import type { Ref } from 'vue'
 
 /**
  * The open state of a native `<details>`, shared by the design system's two consumers of one:
- * VAccordionItem and VSideNavigationItem. Bind `openAttr` to `:open`, `onToggle` to `@toggle`
- * and `onSummaryClick` to the `<summary>`'s `@click`.
- *
- * The element is the source of truth and the `v-model:open` is fed BY it. Left unbound, the
- * model follows the element, so Vue never has anything to patch back and the native toggling
- * stays sovereign.
- *
- * `defaultOpen` is read ONCE, here, and never again: it is an initial state, so a prop changed
- * later must not close a section the reader has opened. Read inside the computed instead, a
- * parent re-rendering with another value would silently fold it.
+ * VAccordionItem and VSideNavigationItem. Read inside the computed instead, a parent
+ * re-rendering with another value would silently fold it.
  */
 export function useDetailsOpen(
   open: Ref<boolean | null>,
@@ -30,10 +22,9 @@ export function useDetailsOpen(
     if (open.value === value) return
     open.value = value
     /*
-     * TRAP — a CONTROLLED model may refuse the change (`:open="false"` and no handler, or one
-     * that says no). Nothing then moves in the props, so Vue has nothing to patch, and the
-     * element would stay open under a model that says closed. It is put back once the
-     * parent has answered.
+     * A controlled model may refuse the change (`:open="false"` and no handler, or one that
+     * says no). Nothing then moves in the props, so Vue has nothing to patch, and the element
+     * would stay open under a model that says closed.
      */
     void nextTick(() => {
       if (open.value !== null && element.open !== open.value) element.open = open.value
@@ -44,8 +35,7 @@ export function useDetailsOpen(
   /*
    * A `<summary>` has no `disabled` attribute, so cancelling the click is the only way to stop
    * a disabled section from folding. The keyboard needs nothing: the component takes the
-   * summary out of the tab order. Deliberately not `pointer-events: none`, which would also
-   * remove the forbidden cursor telling the reader why nothing happens.
+   * summary out of the tab order.
    */
   function onSummaryClick(event: MouseEvent) {
     if (options.disabled()) event.preventDefault()

@@ -9,8 +9,6 @@ import VTypography from '../VTypography/VTypography.vue'
 import VDataTableSfc from './VDataTable.vue'
 import type { DataTableParams, DataTableRowId } from './VDataTable.vue'
 
-// A generic SFC: its generic function signature is not assignable to Storybook's
-// Component types — it is erased for the stories.
 const VDataTable = VDataTableSfc as unknown as Component
 
 const t = storyText({
@@ -158,21 +156,18 @@ export const Search: Story = {
     const field = canvas.getByRole('searchbox', { name: 'Search the table' })
 
     /*
-     * The title is a VTypography, so `.v-data-table-title` and `.v-typography` sit on the
-     * same element at equal specificity. The colour goes through the custom property
-     * `.v-typography` reads, and NOT through a `color` declaration that would collide
-     * with it and be arbitrated by an order nothing controls once each sheet ships
-     * separately. A revert to `color:` empties this property — that is what goes red.
+     * The title is a VTypography, so `.v-data-table-title` and `.v-typography` sit on the same
+     * element at equal specificity. The colour goes through the custom property `.v-typography`
+     * reads, and not through a `color` declaration that would collide with it and be arbitrated
+     * by an order nothing controls once each sheet ships separately.
      */
     const title = canvasElement.querySelector('.v-data-table-title') as HTMLElement
     await expect(getComputedStyle(title).getPropertyValue('--typography-color')).not.toBe('')
 
-    // accent-insensitive filtering: "brume" matches, the other rows drop out
     await userEvent.type(field, 'brume')
     await waitFor(() => {
       expect(canvasElement.querySelectorAll('tbody tr').length).toBe(1)
     })
-    // the clear cross (VInput clearable) restores the list
     await userEvent.click(canvas.getByRole('button', { name: 'Clear' }))
     await waitFor(() => {
       expect(canvasElement.querySelectorAll('tbody tr').length).toBe(4)
@@ -226,7 +221,6 @@ export const RowsPerPage: Story = {
     await userEvent.click(option)
     await waitFor(() => {
       expect(canvasElement.querySelectorAll('tbody tr').length).toBe(10)
-      // back to page 1: the first row of the set reappears
       expect(canvasElement.querySelector('tbody tr td:nth-child(1)')?.textContent).toContain(
         'Vectis',
       )
@@ -259,21 +253,17 @@ export const Selection: Story = {
     const canvas = within(canvasElement)
     const master = canvas.getByRole('checkbox', { name: 'Select all' }) as HTMLInputElement
 
-    // the master box → every box of the visible page checked (the hidden inputs are in
+    // The master box → every box of the visible page checked (the hidden inputs are in
     // pointer-events: none, so the enclosing <label>s are clicked)
     await userEvent.click(master.closest('label')!)
     await waitFor(() => {
       const boxes = canvas.getAllByRole('checkbox').filter((box) => box !== master)
-      // `for…of` rather than `forEach`: Storybook instruments `expect`, so the callback
-      // would be handing a promise to a signature that expects void.
       for (const box of boxes) expect(box).toBeChecked()
     })
-    // the count appears on the left of the footer
     await waitFor(() => {
       expect(canvas.getByText('5 items selected')).toBeInTheDocument()
     })
 
-    // unchecking a row → the master box goes back to indeterminate
     await userEvent.click(canvas.getByRole('checkbox', { name: 'Select row 1' }).closest('label')!)
     await waitFor(() => {
       expect(master.indeterminate).toBe(true)
@@ -338,7 +328,10 @@ export const CustomHeaders: Story = {
   }),
 }
 
-/** Decoration of the container — the same scale as VAccordion: `flat` (the default) and `outlined`. */
+/**
+ * Decoration of the container; the same scale as VAccordion: `flat` (the default) and
+ * `outlined`.
+ */
 export const Variants: Story = {
   args: { searchable: true },
   render: (args) => ({
@@ -374,9 +367,8 @@ export const Compact: Story = {
 }
 
 /**
- * A frozen header: it assumes a bounded scroll area — here through `height`, which
- * bounds the whole component (the toolbar and the pagination included). A parent with a
- * defined height works too, see `FullHeight`.
+ * A frozen header: it assumes a bounded scroll area; here through `height`, which bounds the
+ * whole component (the toolbar and the pagination included).
  */
 export const StickyHeader: Story = {
   args: { stickyHeader: true, height: 320 },
@@ -388,10 +380,9 @@ export const StickyHeader: Story = {
 }
 
 /**
- * A height driven by the parent: the table takes 100% of its container and does NOT
- * shrink on an incomplete page — the last page (2 rows) is exactly the same height as a
- * full one, and the pagination stays stuck to the bottom. No prop needed: `stickyHeader`
- * works here without `height`, the scroller being bounded by the parent.
+ * A height driven by the parent: the table takes 100% of its container and does not shrink on
+ * an incomplete page; the last page (2 rows) is exactly the same height as a full one, and the
+ * pagination stays stuck to the bottom.
  */
 export const FullHeight: Story = {
   args: {
@@ -415,12 +406,11 @@ export const FullHeight: Story = {
     const wrapper = canvasElement.querySelector('.v-data-table') as HTMLElement
     const scroller = canvasElement.querySelector('.v-data-table-scroller') as HTMLElement
 
-    // the component matches the parent, and the overflow scrolls (instead of being
-    // cropped by the outlined variant's `overflow: clip`)
+    // The component matches the parent, and the overflow scrolls (instead of being cropped by
+    // the outlined variant's `overflow: clip`)
     expect(Math.round(wrapper.getBoundingClientRect().height)).toBe(460)
     expect(scroller.scrollHeight).toBeGreaterThan(scroller.clientHeight)
 
-    // the last page: only 2 rows, the component's height unchanged
     await userEvent.click(canvas.getByRole('button', { name: 'Page 3' }))
     await waitFor(() => {
       expect(canvasElement.querySelectorAll('tbody tr').length).toBe(2)
@@ -439,7 +429,7 @@ export const Striped: Story = {
   }),
 }
 
-/** Stack mode: under 640px of CONTAINER, the rows become cards — pure CSS. */
+/** Stack mode: under 640px of CONTAINER, the rows become cards; pure CSS. */
 export const ResponsiveStack: Story = {
   args: { responsive: 'stack', selectable: true },
   render: (args) => ({
@@ -466,9 +456,9 @@ export const ResponsiveStack: Story = {
 }
 
 /**
- * Server mode: the component applies NEITHER filter NOR sort NOR slicing — every state
- * change emits `update:params` and the consumer answers (here a pseudo-server: a
- * simulated latency + filter/sort/slice on the full set).
+ * Server mode: the component applies NEITHER filter NOR sort NOR slicing; every state change
+ * emits `update:params` and the consumer answers (here a pseudo-server: a simulated latency +
+ * filter/sort/slice on the full set).
  */
 export const ServerSide: Story = {
   args: {

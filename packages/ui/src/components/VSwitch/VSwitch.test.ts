@@ -85,7 +85,6 @@ describe('VSwitch — label, hint and readonly', () => {
     expect(slotted.getByRole('switch', { name: 'From the slot' })).toBeTruthy()
   })
 
-  // The hint sits OUTSIDE the <label>: inside it, it would be read as part of the name.
   it('hint: a description aggregated with the consumer one, never part of the name', () => {
     const { getByRole, getByText } = render(VSwitch, {
       props: { label: 'Notifications', hint: 'Sent once a day' },
@@ -129,9 +128,8 @@ describe('VSwitch — label, hint and readonly', () => {
   })
 })
 
-// A validation library marks the field invalid through the attribute. The component's own
-// `invalid` binding comes after the forwarded attributes, so it must hand the consumer's value
-// through rather than overwrite it with nothing.
+// The component's own `invalid` binding comes after the forwarded attributes, so it must hand
+// the consumer's value through rather than overwrite it with nothing.
 describe('VSwitch — a consumer aria-invalid', () => {
   it('reaches the control when `invalid` is not set', () => {
     const { getByRole } = render(VSwitch, {

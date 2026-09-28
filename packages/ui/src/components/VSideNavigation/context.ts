@@ -1,17 +1,4 @@
-/**
- * What each level of a VSideNavigation passes down to the level below it. An item
- * reads the context of ITS level and provides a fresh one to its own children, and
- * that renewal is precisely what keeps "only one section open at a time" local to a
- * level rather than global to the whole sidebar.
- *
- * Two things deliberately do NOT travel through here:
- *
- * - the size and the density, which the CSS variables carry by inheritance from the
- *   nav down; passing them here as well would be the same information in two places,
- *   free to disagree;
- * - the DEPTH of an item, which is counted by the cascade itself (see the alternating
- *   variables in VSideNavigationItem) — no registry, and no inline style.
- */
+/** Share navigation behaviour only; CSS inheritance carries size, compact and branch depth. */
 
 import type { InjectionKey } from 'vue'
 

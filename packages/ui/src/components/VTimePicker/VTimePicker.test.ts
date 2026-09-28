@@ -6,7 +6,6 @@ import VTimePicker from './VTimePicker.vue'
 
 const face = (container: Element) => container.querySelector('[role="slider"]') as HTMLElement
 
-// The two numerals are named with the figure they show, so they are found by their place.
 const cell = (container: Element, which: 'hour' | 'minute') =>
   container.querySelectorAll('.v-time-picker-cell')[which === 'hour' ? 0 : 1] as HTMLButtonElement
 
@@ -51,23 +50,20 @@ describe('VTimePicker', () => {
     const { container, emitted } = render(VTimePicker, {
       props: { modelValue: '09:30', format: '24h' },
     })
-    // On the hour, Enter merely moves the step on.
     await fireEvent.keyDown(face(container), { key: 'Enter' })
     expect(emitted('confirm')).toBeUndefined()
     await fireEvent.keyDown(face(container), { key: 'Enter' })
-    // It carries the time as it stands, as VDatePicker's `select` carries the date.
     expect(emitted('confirm')).toEqual([['09:30']])
   })
 
   it('never confirms when the pointer is merely released', async () => {
-    // Letting go of the hand is how one stops adjusting it, not how one confirms — which
-    // is why a drag across dozens of times cannot commit anything.
+    // Letting go of the hand is how one stops adjusting it, not how one confirms; which is why
+    // a drag across dozens of times cannot commit anything.
     const { container, emitted } = render(VTimePicker, {
       props: { modelValue: '09:30', format: '24h' },
     })
     await fireEvent.pointerDown(face(container), { clientX: 10, clientY: 10 })
     await fireEvent.pointerUp(face(container))
-    // The step moved on, but nothing was confirmed.
     expect(face(container).getAttribute('aria-label')).toBe('Minutes')
     expect(emitted('confirm')).toBeUndefined()
   })
@@ -105,7 +101,6 @@ describe('VTimePicker', () => {
     })
     await fireEvent.click(pm(container))
     expect(emitted('update:modelValue')).toBeUndefined()
-    // It applies to the first hour actually chosen: 9 in the afternoon, not in the morning.
     await fireEvent.keyDown(face(container), { key: 'ArrowUp' })
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['13:00'])
   })
@@ -139,22 +134,19 @@ describe('VTimePicker', () => {
     expect(numerals(container)).toEqual(['00', '15', '30', '45'])
 
     // Below a step of five, twelve numerals is already as many as a face can carry, so the
-    // five-minute grid stays — and a step of two, which cannot reach five past, loses half
-    // of it rather than all of it.
+    // five-minute grid stays; and a step of two, which cannot reach five past, loses half of it
+    // rather than all of it.
     await rerender({ minuteStep: 2 })
     expect(numerals(container)).toEqual(['00', '10', '20', '30', '40', '50'])
 
-    // The default reaches everything, so the face is the clock's own reading grid.
     await rerender({ minuteStep: 1 })
     expect(numerals(container)).toHaveLength(12)
     expect(numerals(container)[1]).toBe('05')
   })
 
   it('draws the hand small only on a minute with no marker of its own', async () => {
-    // At full size the tip covers a numeral, which is what says "this one". Between two of
-    // them it would cover both and point at neither, so it shrinks. Five past is the case
-    // the marks decide rather than the clock: it is on the five-minute grid, and a face
-    // stepping by a quarter of an hour does not print it.
+    // Five past is the case the marks decide rather than the clock: it is on the five-minute
+    // grid, and a face stepping by a quarter of an hour does not print it.
     const { container, rerender } = render(VTimePicker, {
       props: { modelValue: '09:05', format: '24h', minuteStep: 15 },
     })
@@ -167,22 +159,16 @@ describe('VTimePicker', () => {
   })
 
   it('leaves what the restrictions rule out off the face', async () => {
-    // The minute step's own rule, held to for all four restrictions: the face prints what
-    // can be chosen and nothing else. Noon and the whole inner ring are past the bound,
-    // so 21 of the 24 hours go and three numerals are left.
     const { container } = render(VTimePicker, {
       props: { modelValue: '09:00', format: '24h', min: '09:00', max: '11:00' },
     })
     expect(numerals(container)).toEqual(['9', '10', '11'])
 
-    // Nothing rules the minutes of ten o'clock out, so the whole five-minute grid stands.
     await fireEvent.click(cell(container, 'minute'))
     expect(numerals(container)).toHaveLength(12)
   })
 
   it('cuts an hour in half rather than closing it', async () => {
-    // The case the whole thing turns on: nine o'clock is still reachable under a bound of
-    // half past nine, and it is its first thirty minutes that go.
     const { container } = render(VTimePicker, {
       props: { modelValue: '09:45', format: '24h', min: '09:30' },
     })
@@ -193,17 +179,10 @@ describe('VTimePicker', () => {
   })
 
   it('does nothing at all where a numeral was left off, the step included', async () => {
-    // The pointer catches nothing it was not aimed at: an empty sector holds no value, so
-    // no value is written — and no step is moved on either, which is what leaves the
-    // reader on the face they aimed at rather than on the next one.
-    //
-    // jsdom measures the face at zero, which puts its centre on the origin: a point
-    // straight below it is six o'clock, and one straight above it is the hour.
-    //
-    // TRAP — a 24-hour face is unusable here for the same reason: `distanceFraction`
-    // answers 0 for a box of no size, so every point reads as the INNER ring and the
-    // hours 13 to 23 are all a pointer can ever reach. These two go through a 12-hour
-    // face, which has one ring and no such question.
+    // A 24-hour face is unusable here for the same reason: `distanceFraction` answers 0 for a
+    // box of no size, so every point reads as the inner ring and the hours 13 to 23 are all a
+    // pointer can ever reach. These two go through a 12-hour face, which has one ring and no
+    // such question.
     const { container, emitted, rerender } = render(VTimePicker, {
       props: { modelValue: '11:00', format: '12h', allowedHours: [9, 10, 11] },
     })
@@ -212,9 +191,6 @@ describe('VTimePicker', () => {
     expect(emitted('update:modelValue')).toBeUndefined()
     expect(face(container).getAttribute('aria-label')).toBe('Hour')
 
-    // The same on the minutes, where the step's own snapping stands and what it snaps to
-    // still has to be on the face: the hour is not there to be caught under a bound of
-    // half past, and neither is anything else.
     await rerender({ modelValue: '09:30', allowedHours: undefined, min: '09:30', minuteStep: 15 })
     await fireEvent.click(cell(container, 'minute'))
     await fireEvent.pointerDown(face(container), { clientX: 0, clientY: -100 })
@@ -222,13 +198,9 @@ describe('VTimePicker', () => {
   })
 
   it('moves the step on for a drag that landed, wherever it was released', async () => {
-    // The gesture is what chose an hour, not the pixel it was let go of: a drag that
-    // wandered off the ring on its way out has still chosen one.
     const { container, emitted } = render(VTimePicker, {
       props: { modelValue: '11:00', format: '12h', allowedHours: [9, 10, 11] },
     })
-    // The left of the face is nine o'clock, which the restrictions leave open; straight
-    // below it is six, which they do not.
     await fireEvent.pointerDown(face(container), { clientX: -100, clientY: 0 })
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['09:00'])
     await fireEvent.pointerMove(face(container), { clientX: 0, clientY: 100 })
@@ -245,7 +217,6 @@ describe('VTimePicker', () => {
     await fireEvent.keyDown(face(container), { key: 'ArrowDown' })
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['09:30'])
 
-    // With nothing restricted a minute off the step is the consumer's own and is kept.
     await rerender({ modelValue: '10:07', min: undefined, minuteStep: 15 })
     await fireEvent.keyDown(face(container), { key: 'ArrowDown' })
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['09:07'])
@@ -255,7 +226,6 @@ describe('VTimePicker', () => {
     const { container, emitted } = render(VTimePicker, {
       props: { modelValue: '09:00', format: '24h', allowedHours: [9, 10, 11] },
     })
-    // 8 is closed, so the key finds the next hour that is not — going the long way round.
     await fireEvent.keyDown(face(container), { key: 'ArrowDown' })
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['11:00'])
   })
@@ -283,8 +253,8 @@ describe('VTimePicker', () => {
   })
 
   it('holds still when a bound leaves nowhere to go', async () => {
-    // Against a bound the walk comes back empty, which is what a bound means. The key
-    // must not wrap round to the other end of the day to find something.
+    // Against a bound the walk comes back empty, which a bound means. The key must not wrap
+    // round to the other end of the day to find something.
     const { container, emitted } = render(VTimePicker, {
       props: { modelValue: '09:00', format: '24h', min: '09:00', max: '11:00' },
     })
@@ -307,8 +277,6 @@ describe('VTimePicker', () => {
   })
 
   it('keeps the hour when the half of the day allows it, and moves it when it does not', async () => {
-    // What is chosen on that control is the HALF OF THE DAY, so the hour gives way to it
-    // rather than the write being refused, which would snap the control back.
     const { container, emitted } = render(VTimePicker, {
       props: { modelValue: '09:00', format: '12h', allowedHours: [9, 14, 15] },
     })
@@ -317,8 +285,6 @@ describe('VTimePicker', () => {
   })
 
   it('exposes focus and reset, the two things a panel around it needs', async () => {
-    // Both are reached the way VTimeInput reaches them — through a template ref — since
-    // that is the whole contract being locked here.
     const api: { focus?: () => void; reset?: () => void } = {}
     const Host = {
       components: { VTimePicker },
@@ -342,7 +308,7 @@ describe('VTimePicker', () => {
     const live = () => (container.querySelector('[aria-live="polite"]') as HTMLElement).textContent
     expect(live()!.trim()).toBe('Selecting the minutes')
 
-    // `reset` puts the step back AND clears the announcement, without announcing anything
+    // `reset` puts the step back and clears the announcement, without announcing anything
     // itself: a panel reopening on the hour is not something the reader did.
     api.reset!()
     await nextTick()
@@ -355,7 +321,6 @@ describe('VTimePicker — the live region', () => {
   it('announces a step the reader moved, and stays silent on a reset', async () => {
     const { container } = render(VTimePicker, { props: { modelValue: '09:30', format: '24h' } })
     const live = () => (container.querySelector('[aria-live="polite"]') as HTMLElement).textContent
-    // Nothing is announced before anything happens.
     expect(live()!.trim()).toBe('')
     await fireEvent.click(cell(container, 'minute'))
     await nextTick()
@@ -376,7 +341,6 @@ describe('VTimePicker — disabled and readonly', () => {
     expect(slider.getAttribute('tabindex')).toBe('0')
     await fireEvent.keyDown(slider, { key: 'ArrowUp' })
     expect(emitted('update:modelValue')).toBeUndefined()
-    // Switching between the hour and the minutes is reading, not writing.
     await fireEvent.click(getByRole('button', { name: /minute/i }))
     await nextTick()
     expect(container.querySelector('.v-time-picker')?.getAttribute('data-step')).toBe('minute')

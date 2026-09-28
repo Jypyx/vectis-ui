@@ -4,8 +4,10 @@ import { VButton, VChip } from 'vectis-ui'
 
 const ALL = ['Vue', 'TypeScript', 'CSS', 'Vite']
 
-/* The chip only asks to be removed. Taking it out of the list is this component's
-   decision, which is what lets the same event archive, undo or confirm instead. */
+/*
+ * The chip only asks to be removed. Taking it out of the list is this component's decision,
+ * which lets the same event archive, undo or confirm instead.
+ */
 const tags = ref([...ALL])
 
 function remove(tag: string) {

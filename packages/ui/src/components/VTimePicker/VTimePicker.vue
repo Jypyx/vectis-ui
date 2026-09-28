@@ -1,23 +1,8 @@
 <script setup lang="ts">
 // @a11y @keyboard @core
 /**
- * An inline clock for choosing a time, the hour-and-minute counterpart of VDatePicker.
- * VTimeInput does no more than dress it in a field and a popover; it is usable on its own.
- *
- * Three parts: two large numerals saying what has been chosen and switching between hours
- * and minutes, the AM/PM toggle beside them on a 12-hour clock, and the face below, where a
- * time is POINTED AT rather than stepped through.
- *
- * Nothing native covers choosing a value by angle, so the JS does two things — turning a
- * point on the face into a time (the face measured once, then pure trigonometry in
- * `utils/clock`) and implementing a slider's keyboard.
- *
- * Everything one SEES is CSS: the numerals are placed around the circle and the hand turned,
- * both from one unitless turn fraction set inline.
- *
- * Exactly ONE focusable element on the face, announced as a slider. The numerals are
- * `aria-hidden` markers reached by angle rather than one cell at a time, which is why that
- * single element has to carry the whole spoken value.
+ * CSS places clock numerals and the hand. JavaScript maps pointer angles and keyboard steps to
+ * a time because HTML has no interactive clock-face primitive.
  */
 
 import { computed, inject, ref, watchEffect } from 'vue'
@@ -81,19 +66,11 @@ interface TimePickerProps {
    * prints only the minutes it can reach, so a step of a quarter of an hour marks four.
    */
   minuteStep?: number
-  /**
-   * The earliest time that can be chosen, inclusive, as a canonical 24-hour `'HH:mm'`.
-   * What it rules out is LEFT OFF the face, the way `minuteStep` leaves off the minutes
-   * it cannot reach: the clock prints what can be chosen and nothing else.
-   */
+  /** The earliest time that can be chosen, inclusive, as a canonical 24-hour `'HH:mm'`. */
   min?: string
   /** The latest time that can be chosen, inclusive, written like `min`. */
   max?: string
-  /**
-   * Which hours can be chosen: the list of them, or a rule answering for one. The hour
-   * handed to a rule is always the 24-hour one, whichever clock is on display, so the
-   * same rule holds on both faces. The hours it leaves out are not printed.
-   */
+  /** Which hours can be chosen: the list of them, or a rule answering for one. */
   allowedHours?: TimePickerAllowed
   /**
    * Which minutes can be chosen: the list of them, or a rule answering for one. The
@@ -105,16 +82,11 @@ interface TimePickerProps {
    * changed, and everything greys out through the colour tokens.
    */
   disabled?: boolean
-  /**
-   * Shows the time without letting it be changed. The face keeps its focus and the two
-   * numerals still switch between the hour and the minutes, so the value can be read in
-   * full. That is what separates it from `disabled`.
-   */
+  /** Shows the time without letting it be changed. */
   readonly?: boolean
   /**
-   * The accessible name of the whole clock, its two numerals and its face together. It
-   * falls back to the dictionary, and a consumer `aria-label` wins over it. The face
-   * keeps its own name, which says whether the hand is on the hour or the minutes.
+   * The accessible name of the whole clock, its two numerals and its face together. It falls
+   * back to the dictionary, and a consumer `aria-label` wins over it.
    */
   label?: string
 }
@@ -132,23 +104,13 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
   label: undefined,
 })
 
-/**
- * The time, always as a 24-hour "HH:mm" string whatever clock is displayed. A consumer
- * therefore never has to know which clock the reader's language uses.
- *
- * With no value at all the clock shows midnight, or noon once PM has been chosen. It is
- * deliberately NOT the current time: reading the clock while rendering would make a page
- * drawn on a server disagree with the same page in the browser. A component that wants to
- * open on the current time sets it from a handler, which is what VTimeInput does.
- */
+/** The time, always as a 24-hour "HH:mm" string whatever clock is displayed. */
 const model = defineModel<string | null>({ default: null })
 
 const emit = defineEmits<{
   /**
-   * The reader has FINISHED, carrying the time as it stands: the minutes were settled from
-   * the keyboard. Releasing the pointer does not count: on a clock face, letting go of the
-   * hand is how one stops adjusting it, not how one confirms. VTimeInput listens to it to
-   * commit its draft and close its panel.
+   * The reader has FINISHED, carrying the time as it stands: the minutes were settled from the
+   * keyboard.
    */
   confirm: [value: string | null]
 }>()
@@ -171,12 +133,7 @@ const resolvedFormat = computed<TimePickerFormat>(
 /** The restrictions, resolved once for the whole render. */
 const limits = computed(() => resolveLimits(props))
 
-/**
- * The hours the restrictions still leave something in, worked out once per set of
- * restrictions. Every hour on the face, both AM/PM buttons and every key ask the question,
- * and each answer walks a whole hour of minutes: asked afresh, a drag re-walked all 24 of
- * them at pointer rate.
- */
+/** The hours the restrictions still leave something in, worked out once per set of restrictions. */
 const availableHours = computed(() => {
   const hours = new Set<number>()
   for (let candidate = 0; candidate < 24; candidate += 1)
@@ -188,7 +145,6 @@ const availableHours = computed(() => {
 const isAvailableHour = (candidate: number) => availableHours.value.has(candidate)
 
 // @devwarn
-// Silent inside a host that forwards these props and reports on them itself (utils/hostWarns).
 if (isDev && !inject(hostWarnsKey, false)) {
   watchEffect(() => {
     if (!Number.isInteger(props.minuteStep) || props.minuteStep < 1 || 60 % props.minuteStep !== 0)
@@ -222,18 +178,12 @@ const minute = computed(() => parts.value.minute)
 
 /**
  * Writing the hour. An hour with nothing left in it has no minute to fall back on, which
- * is what refuses it; one that is only PARTLY available pulls the minutes to what it does
- * allow, since `min: '09:30'` must not be left holding 09:00.
- *
- * The minute in force is kept whenever it is allowed, which is also what leaves an
- * unrestricted clock exactly as it was: a value off the step, 09:07 on a quarter-hour
- * face, belongs to the consumer and is not ours to round.
+ * refuses it; one that is only PARTLY available pulls the minutes to what it does allow, since
+ * `min: '09:30'` must not be left holding 09:00.
  */
 function setHour(value: number | null) {
-  // The two writers below are the ONLY way the value ever changes — pointer, keys and the
-  // half-day control all come through them — so the two states are refused here and
-  // nowhere else. Changing which face is shown stays allowed under `readonly`: reading
-  // the minutes is not changing them.
+  // Changing which face is shown stays allowed under `readonly`: reading the minutes is not
+  // changing them.
   if (props.disabled || props.readonly) return
   if (value === null) return
   const minutes = isTimeAllowed(value, minute.value, limits.value)
@@ -252,13 +202,8 @@ function setMinute(value: number | null) {
 
 // @a11y
 /*
- * Which step the clock is on is otherwise carried by the face's own name alone, and a
- * change of name is not reliably announced. A politely announced region says it a second
- * time. The wording has no prop: the dictionary is where it is changed.
- *
- * It is written HERE, by the function the reader's own gestures go through, rather than by
- * a watcher on the step: putting the clock back on the hour between two openings — what
- * `reset` does — must stay silent, and a watcher could not tell the two apart.
+ * Which step the clock is on is otherwise carried by the face's own name alone, and a change of
+ * name is not reliably announced. A politely announced region says it a second time.
  */
 const liveMessage = ref('')
 
@@ -281,27 +226,14 @@ interface DialCell {
   selected: boolean
 }
 
-/**
- * The hour a position on the face stands for. On a 12-hour clock that is what the half of
- * the day in force turns it into, and it is the 24-hour hour either way: the one the
- * restrictions answer about, and the one written.
- */
+/** The hour a position on the face stands for. */
 function hourAt(index: number, ring: 'outer' | 'inner'): number {
   return resolvedFormat.value === '24h'
     ? dialIndexToHour24(index, ring)
     : to24h(index === 0 ? 12 : index, currentMeridiem.value)
 }
 
-/**
- * The minutes the face prints. A numeral one can point at and not land on is a lie, which
- * the hand tells the moment it settles beside it rather than on it, so a marker is only
- * ever a minute `minuteStep` actually reaches AND the restrictions allow.
- *
- * How MANY of them is the other half of the question: sixty numerals would be unreadable,
- * so a step fine enough to offer more than twelve values keeps the five-minute grid a
- * clock is read on — minus, again, whatever it cannot reach, a step of two printing ten
- * past and not five past.
- */
+/** The minutes the face prints. */
 const minuteMarks = computed(() => {
   const interval = minuteInterval(props.minuteStep)
   const spacing = 60 / interval <= 12 ? interval : 5
@@ -313,11 +245,10 @@ const minuteMarks = computed(() => {
 })
 
 /*
- * The face prints what can be chosen and nothing else — the minute step's own rule, held
- * to for all four restrictions rather than for one of them. A numeral that is only there
- * to be refused says nothing the missing numeral does not say better, and it says it in
- * grey text a screen reader has no way to reach: the markers are `aria-hidden`, so what
- * the restrictions leave is spoken by the face's own value and by nothing else.
+ * A numeral that is only there to be refused says nothing the missing numeral does not say
+ * better, and it says it in grey text a screen reader has no way to reach: the markers are
+ * `aria-hidden`, so what the restrictions leave is spoken by the face's own value and by
+ * nothing else.
  */
 const cells = computed<DialCell[]>(() => {
   if (step.value === 'minute') {
@@ -329,9 +260,9 @@ const cells = computed<DialCell[]>(() => {
       selected: minute.value === minutes,
     }))
   }
-  // Each position's hour is worked out ONCE, since on a 12-hour face that takes the half of
-  // the day in force. The selection there still compares numerals and not hours: an empty
-  // clock holding a PM choice sits on midnight, and its hand points at the 12 all the same.
+  // Each position's hour is worked out once, since on a 12-hour face that takes the half of the
+  // day in force. The selection there still compares numerals and not hours: an empty clock
+  // holding a PM choice sits on midnight, and its hand points at the 12 all the same.
   const twelve = resolvedFormat.value === '12h'
   const shown12 = to12h(hour.value).hour
   const rings: DialCell['ring'][] = twelve ? ['outer'] : ['outer', 'inner']
@@ -377,21 +308,12 @@ const displayHourText = computed(() =>
   pad2(resolvedFormat.value === '12h' ? to12h(hour.value).hour : hour.value),
 )
 
-/**
- * Which half of the day is chosen while NO time is set at all. The AM/PM control always
- * needs a value — it refuses to have none — and "nothing" is not one.
- *
- * It starts at AM rather than at whatever the current time happens to be, which keeps the
- * component's first render identical on a server and in a browser, and its tests free of
- * a clock. VTimeInput keeps one for its own AM/PM button, on the same terms.
- */
+/** Which half of the day is chosen while no time is set at all. */
 const pendingMeridiem = ref<Meridiem>('AM')
 
 /**
- * The half of the day in force: the value's own once there is one, the remembered choice
- * until then. Every hour written on a 12-hour face goes through it — without which a
- * reader who picks PM on an empty clock and then an hour would get the morning back, the
- * value having no half-day of its own to read.
+ * The half of the day in force: the value's own once there is one, the remembered choice until
+ * then.
  */
 const currentMeridiem = computed<Meridiem>(() =>
   model.value ? to12h(hour.value).meridiem : pendingMeridiem.value,
@@ -428,9 +350,9 @@ const meridiemAvailable = computed<Record<Meridiem, boolean>>(() => ({
 }))
 
 // @a11y
-// The entire spoken value of the face. The numerals are hidden from screen
-// readers, so these four attributes are the ONLY thing assistive technology has: what the
-// value is, what its bounds are, and how to say it.
+// The entire spoken value of the face. The numerals are hidden from screen readers, so these
+// four attributes are the only thing assistive technology has: what the value is, what its
+// bounds are, and how to say it.
 const ariaValueNow = computed(() => {
   if (step.value === 'minute') return minute.value
   return resolvedFormat.value === '12h' ? to12h(hour.value).hour : hour.value
@@ -452,36 +374,24 @@ const ariaValueText = computed(() => {
 })
 
 /**
- * A step has been settled: after the hour come the minutes, and after the minutes the
- * whole thing is confirmed — but by KEYBOARD only, for the reason given on the emit.
+ * A step has been settled: after the hour come the minutes, and after the minutes the whole
+ * thing is confirmed; but by KEYBOARD only, for the reason given on the emit.
  */
 function settleStep(via: 'pointer' | 'keyboard') {
   if (step.value === 'hour') setStep('minute')
   else if (via === 'keyboard') emit('confirm', model.value)
 }
 
-// Pointing at the face, by click or by drag.
 const faceEl = ref<HTMLElement | null>(null)
 const dragging = ref(false)
-/**
- * Whether anything in the gesture under way landed on a numeral. It is the whole gesture
- * and not its last point: a drag that chose an hour and wandered off the ring before
- * being released has still chosen one, and the step follows the value rather than the
- * pixel let go of.
- */
+/** Whether anything in the gesture under way landed on a numeral. */
 let landed = false
 
 /**
- * Where a point on the face lands, and whether there was anything there at all. A
- * position the restrictions took a numeral off holds nothing to aim at, so the gesture
- * does nothing whatever: no value, and — through the answer returned here — no step moved
- * on either. The pointer catches nothing it was not aimed at.
- *
- * The question asked is the FACE's, `isAvailableHour`/`isTimeAllowed` being the pair
- * `cells` prints from, so "there is a numeral here" and "this can be written" cannot come
- * apart. The write itself still goes through `setHour`/`setMinute` and their own guards,
- * which is why `readonly` is refused THERE and not here: a frozen clock is still one
- * whose numerals are real, and a tap on one moves the step on as it always did.
+ * Where a point on the face lands, and whether there was anything there at all. The write
+ * itself still goes through `setHour`/ `setMinute` and their own guards, which is why
+ * `readonly` is refused THERE and not here: a frozen clock is still one whose numerals are
+ * real, and a tap on one moves the step on as it always did.
  */
 function applyPoint(event: PointerEvent): boolean {
   const face = faceEl.value
@@ -493,7 +403,6 @@ function applyPoint(event: PointerEvent): boolean {
   const rect = face.getBoundingClientRect()
   const dx = event.clientX - (rect.left + rect.width / 2)
   const dy = event.clientY - (rect.top + rect.height / 2)
-  // `<=` so that the exact centre is refused even on a face measured at zero.
   if (Math.hypot(dx, dy) <= DIAL_DEAD_ZONE * (rect.width / 2)) return false
   if (step.value === 'minute') {
     // The step's own snapping stands: a point between two markers has always been pulled
@@ -517,14 +426,12 @@ function applyPoint(event: PointerEvent): boolean {
 
 function onPointerdown(event: PointerEvent) {
   // @fallback
-  // Capturing the pointer is what keeps the drag alive when it wanders off the face. It
-  // is wrapped because a pointer event fired by a TEST refers to no real pointer, and the
-  // call then throws. Failing to capture merely means the drag stops at the edge, which
-  // no test is checking.
+  // Capture keeps dragging active outside the clock face; synthetic events may not reference a
+  // capturable pointer.
   try {
     faceEl.value?.setPointerCapture(event.pointerId)
   } catch {
-    /* a synthetic pointer: nothing to capture */
+    /* Synthetic pointers cannot be captured. */
   }
   dragging.value = true
   landed = applyPoint(event)
@@ -549,12 +456,10 @@ function onPointercancel() {
 // @keyboard @a11y
 // The keyboard a slider is expected to have.
 /*
- * Every key below walks until it finds something it MAY land on, rather than stopping at
- * the first thing it may not: with scattered hours a key that stopped would die at the
- * first hole and never reach what lies past it. Against a bound there is nothing past the
- * hole, so the same walk comes back empty and the key holds still, which is what a bound
- * means. Restrict nothing and the first candidate answers: the walk is then the plain step
- * it has always been.
+ * Every key below walks until it finds something it MAY land on, rather than stopping at the
+ * first thing it may not: with scattered hours a key that stopped would die at the first hole
+ * and never reach what lies past it. Against a bound there is nothing past the hole, so the
+ * same walk comes back empty and the key holds still, which a bound means.
  */
 function moveHour(delta: number) {
   if (resolvedFormat.value === '24h') {
@@ -585,19 +490,13 @@ function edgeHour(edge: 'first' | 'last'): number | null {
 }
 
 /**
- * The minute a key lands on: the first step of the grid at least `distance` minutes away,
- * that way round, and then the next one the hour allows.
- *
- * It walks the GRID rather than adding a step and rounding: from a minute off the grid,
- * 09:07 on a quarter-hour face, rounding sent the down arrow to :45 and let PageUp round
- * straight back to where it started. Past the end of the hour it wraps, onto the grid's own
- * first step, which is also what keeps a step that does not divide sixty on its grid.
+ * The minute a key lands on: the first step of the grid at least `distance` minutes away, that
+ * way round, and then the next one the hour allows.
  */
 function minuteToward(direction: 1 | -1, distance: number): number | null {
   const grid = minuteGrid(props.minuteStep)
   const target = (((minute.value + direction * distance) % 60) + 60) % 60
   const n = grid.length
-  // The first step at or past the target that way round, the grid's own end when none is.
   let start = direction > 0 ? 0 : n - 1
   for (let k = 0; k < n; k += 1) {
     const i = direction > 0 ? k : n - 1 - k
@@ -622,8 +521,8 @@ function onKeydown(event: KeyboardEvent) {
     settleStep('keyboard')
     return
   }
-  // The arrows are NOT flipped in a right-to-left page: a clock face is never mirrored —
-  // clockwise means the same thing everywhere — so forward stays forward.
+  // The arrows are not flipped in a right-to-left page: a clock face is never mirrored;
+  // clockwise means the same thing everywhere; so forward stays forward.
   const delta =
     event.key === 'ArrowUp' || event.key === 'ArrowRight'
       ? 1
@@ -651,12 +550,11 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 defineExpose({
-  /** Moves the focus onto the clock face, which is what the arrow keys drive. */
+  /** Moves the focus onto the clock face, which the arrow keys drive. */
   focus: (options?: FocusOptions) => faceEl.value?.focus(options),
   /**
-   * Puts the clock back on the hour and clears the announcement, WITHOUT announcing
-   * anything itself. A component holding this one in a panel calls it as the panel opens
-   * and closes, so that every visit starts on the hour.
+   * Puts the clock back on the hour and clears the announcement, WITHOUT announcing anything
+   * itself.
    */
   reset: () => {
     step.value = 'hour'
@@ -674,13 +572,11 @@ defineExpose({
     :data-disabled="disabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
   >
-    <!-- The two large numerals switch between adjusting the hour and the minutes. The one
-         being adjusted takes the accent tone, which on a quiet button shows as the colour
-         of the numeral rather than as a filled background.
-
-         The choice of half-day sits beside them, on the same row: it is read as part of
-         the time itself rather than as a property of the face. On a 24-hour clock there
-         is no such choice, and the row then holds the numerals alone. -->
+    <!--
+      The two large numerals switch between adjusting the hour and the minutes. The one being
+      adjusted takes the accent tone, which on a quiet button shows as the colour of the numeral
+      rather than as a filled background.
+    -->
     <div class="v-time-picker-header">
       <div class="v-time-picker-time">
         <VButton
@@ -786,12 +682,11 @@ defineExpose({
     color: var(--vectis-color-text);
   }
 
-  /* The numerals and the choice of half-day on one row, the second beside the first. The
-     gap is logical, so the control follows the reading direction; the numerals inside it
-     stay in a group of their own, which is what keeps the direction they force off it.
-
-     The centring is what places the row whether or not that control is rendered — a
-     24-hour clock has none, and the numerals then come out centred on their own. */
+  /*
+   * The numerals and the choice of half-day on one row, the second beside the first. The gap is
+   * logical, so the control follows the reading direction; the numerals inside it stay in a
+   * group of their own, which keeps the direction they force off it.
+   */
   .v-time-picker-header {
     display: flex;
     align-items: center;
@@ -810,16 +705,13 @@ defineExpose({
     direction: ltr;
   }
 
-  /* The two large numerals are ordinary quiet buttons. What is overridden here is the
-     "large numeral" look alone — the width and the type; the height, the states, the
-     focus ring and the transitions all come from the button itself.
-
-     The type is the `heading-1` recipe taken WHOLE, and the colon the `heading-2` one:
-     read in halves, a consumer repointing `--vectis-text-heading-1-weight` would move every
-     heading but these two numerals.
-
-     The selector is qualified by an attribute that button always renders, which is what
-     makes it win whatever order the two sheets end up in. */
+  /*
+   * What is overridden here is the "large numeral" look alone; the width and the type; the
+   * height, the states, the focus ring and the transitions all come from the button itself. The
+   * type is the `heading-1` recipe taken whole, and the colon the `heading-2` one: read in
+   * halves, a consumer repointing `--vectis-text-heading-1-weight` would move every heading but
+   * these two numerals.
+   */
   .v-time-picker-cell[data-size] {
     width: var(--control-height);
     font-size: var(--vectis-text-heading-1-size);
@@ -844,10 +736,12 @@ defineExpose({
 
   .v-time-picker-face {
     position: relative;
-    /* The row above is wider than the face as soon as the half-day control is rendered,
-       and the column is only as wide as its widest child: without this the clock would
-       hang at the start edge of that row instead of under the middle of it. The face
-       itself stays physical — a clock is never mirrored. */
+    /*
+     * The row above is wider than the face as soon as the half-day control is rendered, and the
+     * column is only as wide as its widest child: without this the clock would hang at the
+     * start edge of that row instead of under the middle of it. The face itself stays physical;
+     * a clock is never mirrored.
+     */
     align-self: center;
     inline-size: var(--vectis-control-size-time-picker-dial);
     block-size: var(--vectis-control-size-time-picker-dial);
@@ -858,13 +752,11 @@ defineExpose({
     touch-action: none;
     user-select: none;
     cursor: pointer;
-    /* How far from the centre the numerals sit — the outer circle. The numerals and the
-       hand both read it, and the inner circle redefines it for itself.
-
-       TRAP — this is coupled to the threshold that decides which of the two circles a
-       point belongs to, in `utils/clock`. Changing one without the other makes the face
-       answer with the wrong ring, and no test can catch it: the unit tests measure
-       nothing. */
+    /*
+     * This is coupled to the threshold that decides which of the two circles a point belongs
+     * to, in `utils/clock`. Changing one without the other makes the face answer with the wrong
+     * ring, and no test can catch it: the unit tests measure nothing.
+     */
     --dial-radius: calc(
       var(--vectis-control-size-time-picker-dial) / 2 -
         var(--vectis-control-size-time-picker-number) / 2
@@ -877,12 +769,9 @@ defineExpose({
   }
 
   /*
-   * The numerals are placed around the circle by CSS trigonometry, from the fraction of a
-   * turn each one was given — no coordinates are computed in code.
-   *
-   * The properties used are PHYSICAL on purpose, where the rest of the design system
-   * prefers logical ones: a clock face is never mirrored, clockwise meaning the same thing
-   * in every language.
+   * The properties used are PHYSICAL on purpose, where the rest of the design system prefers
+   * logical ones: a clock face is never mirrored, clockwise meaning the same thing in every
+   * language.
    */
   .v-time-picker-number {
     position: absolute;
@@ -898,8 +787,10 @@ defineExpose({
        length on a phone, not scanned like a label. */
     font-size: var(--vectis-text-body-lg-size);
     color: var(--vectis-color-text);
-    /* Above the hand, so that the numeral being pointed at reads ON its dot rather than
-       being covered by it. */
+    /*
+     * Above the hand, so that the numeral being pointed at reads on its dot rather than being
+     * covered by it.
+     */
     z-index: 1;
     pointer-events: none;
   }
@@ -922,12 +813,9 @@ defineExpose({
   }
 
   /*
-   * The hand: a stroke anchored at the centre and turned by the same fraction of a turn.
-   *
-   * TRAP — the rotation is deliberately NOT animated. Going from 55 minutes to 0 takes the
-   * angle from nearly a full turn back to none, and an interpolation would sweep the hand
-   * all the way round anticlockwise. That is an accepted departure from the Material
-   * design it follows otherwise.
+   * The rotation is deliberately not animated. Going from 55 minutes to 0 takes the angle from
+   * nearly a full turn back to none, and an interpolation would sweep the hand all the way
+   * round anticlockwise.
    */
   .v-time-picker-hand {
     position: absolute;
@@ -940,8 +828,10 @@ defineExpose({
     rotate: calc(var(--dial-turn) * 1turn);
   }
 
-  /* The dot at the tip of the hand. It is exactly the size of a numeral's cell, so it
-     covers the one being pointed at — whose text turns to the colour that reads on it. */
+  /*
+   * The dot at the tip of the hand. It is exactly the size of a numeral's cell, so it covers
+   * the one being pointed at; whose text turns to the colour that reads on it.
+   */
   .v-time-picker-hand::before {
     content: '';
     position: absolute;
@@ -961,14 +851,8 @@ defineExpose({
   }
 
   /*
-   * On a minute with no marker of its own, the dot covers no numeral and at full size
-   * would spill onto both neighbours, reading as pointing at neither. Shrunk, it becomes
-   * the precise marker itself — which is also why the pale centre Material draws inside it
-   * is dropped here: at this size it would turn the dot into a ring.
-   *
-   * TRAP — only the DOT's own size changes. Redefining the numeral size variable here
-   * would also move the radius derived from it, and with it the hand's length and the
-   * position of both circles.
+   * Only the DOT's own size changes. Redefining the numeral size variable here would also move
+   * the radius derived from it, and with it the hand's length and the position of both circles.
    */
   .v-time-picker-hand[data-minor]::before {
     inline-size: var(--vectis-control-size-time-picker-hand-minor);
@@ -997,11 +881,7 @@ defineExpose({
   }
 
   /*
-   * A disabled clock greys out through the colour tokens and never through opacity: the
-   * hand and its centre dot are the two accent-painted parts, and the numeral under the
-   * dot is painted for an accent background it no longer has.
-   *
-   * The whole block sits AFTER the rules it overrides, every one of them at the same
+   * The whole block sits after the rules it overrides, every one of them at the same
    * specificity: this is one sheet, so its own order is what settles them.
    */
   .v-time-picker[data-disabled] .v-time-picker-hand,
@@ -1016,7 +896,6 @@ defineExpose({
     color: var(--vectis-color-text-subtle);
   }
 
-  /* The foot of the clock, separated from the face the way VDatePicker's is from its grid. */
   .v-time-picker-footer {
     display: flex;
     align-items: center;

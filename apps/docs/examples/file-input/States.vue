@@ -37,7 +37,6 @@ const uploading = ref(chosen())
       hint="Greyed through the colour tokens, and out of the tab order"
     />
 
-    <!-- Purely visual: files can still be dropped and the dialog still opens. -->
     <VFileInput
       v-model="uploading"
       loading

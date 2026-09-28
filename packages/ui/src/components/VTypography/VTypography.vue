@@ -1,14 +1,7 @@
 <script setup lang="ts">
 /**
- * The design system's text element. Rather than setting a size here and a weight
- * there, the writer names the ROLE the text plays — a heading, a caption, a label —
- * and `variant` applies the complete typographic recipe that goes with it: family,
- * size, weight, line height and letter spacing, all read from the semantic tokens.
- * `tone` does the same for colour.
- *
- * It renders a single element and adds no behaviour, so the attributes it is given
- * (id, for, aria-*…) land straight on that element. This is what lets it serve as a
- * real field label, with `as="label"` and a `for`.
+ * Apply complete semantic typography recipes by role; choose native heading levels unless as
+ * explicitly overrides the element.
  */
 import { computed } from 'vue'
 
@@ -47,16 +40,12 @@ interface TypographyProps {
    */
   as?: string
   /**
-   * The colour of the text. `default` sets none at all, so the text inherits from
-   * whatever surrounds it, which is what lets the same component be used on an
-   * inverted surface or inside a coloured toast.
+   * The colour of the text. `default` sets none at all, so the text inherits from whatever
+   * surrounds it, which lets the same component be used on an inverted surface or inside a
+   * coloured toast.
    */
   tone?: TypographyTone
-  /**
-   * Cuts the text to one line and ends it with an ellipsis. The element needs a
-   * width to be cut against (being a block, or a flex item), otherwise there is
-   * nothing to overflow and the text simply stays whole.
-   */
+  /** Cuts the text to one line and ends it with an ellipsis. */
   truncate?: boolean
 }
 
@@ -72,10 +61,7 @@ defineSlots<{
   default(): unknown
 }>()
 
-/**
- * The tag each variant renders when `as` says nothing — the one whose meaning
- * matches the role.
- */
+/** The tag each variant renders when `as` says nothing; the one whose meaning matches the role. */
 const DEFAULT_TAGS: Record<TypographyVariant, string> = {
   display: 'p',
   'heading-1': 'h1',
@@ -111,37 +97,35 @@ const tag = computed(() => props.as ?? DEFAULT_TAGS[props.variant])
 <style>
 @layer vectis.components {
   .v-typography {
-    /* These two defaults are re-declared on every instance because custom properties
-       INHERIT: nested inside a variant that sets letter spacing, or inside a `code`,
-       a VTypography would otherwise pick up its ancestor's tracking and monospaced
-       family. The [data-variant] blocks below, being more specific, still win.
-
-       Size, weight and leading need no such reset, and that is an INVARIANT rather than
-       an oversight: every variant block sets all three, so none can be inherited. A new
-       variant that leaves one out takes it from whichever VTypography encloses it — the
-       same bug these two lines exist to prevent, one step further out. */
+    /*
+     * These two defaults are re-declared on every instance because custom properties INHERIT:
+     * nested inside a variant that sets letter spacing, or inside a `code`, a VTypography would
+     * otherwise pick up its ancestor's tracking and monospaced family. The [data-variant]
+     * blocks below, being more specific, still win.
+     */
     --typography-family: var(--vectis-text-family);
     --typography-tracking: normal;
 
-    margin: 0; /* the space around a text block belongs to the layout holding it */
+    margin: 0;
     font-family: var(--typography-family);
     font-size: var(--typography-size);
     font-weight: var(--typography-weight);
     line-height: var(--typography-leading);
     letter-spacing: var(--typography-tracking);
-    /* With the `default` tone no colour variable is set, and the fallback makes the
-       text inherit — which is what allows the component to be dropped inside an
-       already coloured context, an inverted surface or a tinted toast. */
+    /*
+     * With the `default` tone no colour variable is set, and the fallback makes the text
+     * inherit; which allows the component to be dropped inside an already coloured context, an
+     * inverted surface or a tinted toast.
+     */
     color: var(--typography-color, inherit);
     overflow-wrap: break-word;
   }
 
-  /* TRAP — the colour variable inherits like any other, so without this reset a `default`
-     VTypography nested in a toned one took the OUTER tone's colour instead of the colour of
-     whatever sits between them. `initial` makes it guaranteed-invalid, which is what lets
-     the fallback above apply. At zero specificity, so the tone rules below and the sheets
-     that route a colour through the variable (VDataTable's title, VFilePicker's subtitle)
-     win over it whatever order the sheets land in. */
+  /*
+   * The colour variable inherits like any other, so without this reset a `default` VTypography
+   * nested in a toned one took the OUTER tone's colour instead of the colour of whatever sits
+   * between them. `initial` makes it guaranteed-invalid, which lets the fallback above apply.
+   */
   :where(.v-typography) {
     --typography-color: initial;
   }

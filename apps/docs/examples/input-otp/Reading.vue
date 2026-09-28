@@ -26,8 +26,6 @@ function verify(value: string) {
       @update:model-value="verdict = null"
     />
 
-    <!-- The value is the characters alone and is shorter than the row while it is
-         being typed. -->
     <VTypography variant="body-sm" tone="muted">
       Value: {{ code || 'empty' }} ({{ code.length }} of 6)
     </VTypography>

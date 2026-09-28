@@ -36,8 +36,6 @@ describe('time limits', () => {
   })
 
   it('compares the bounds as the clock reads them', () => {
-    // A canonical time is zero-padded and fixed-width, which is the whole reason a string
-    // comparison is exact here: '09:30' has to fall before '17:00'.
     const limits = limitsOf({ min: '09:30', max: '17:00' })
     expect(isTimeAllowed(9, 29, limits)).toBe(false)
     expect(isTimeAllowed(9, 30, limits)).toBe(true)
@@ -46,8 +44,6 @@ describe('time limits', () => {
   })
 
   it('closes an hour only when nothing is left in it', () => {
-    // The point of the whole exercise: a bound cuts an hour in half rather than removing
-    // it, so nine o'clock stays reachable and it is its first minutes that go.
     const limits = limitsOf({ min: '09:30' })
     expect(isHourAllowed(9, limits)).toBe(true)
     expect(isHourAllowed(8, limits)).toBe(false)
@@ -56,8 +52,6 @@ describe('time limits', () => {
   })
 
   it('reads an hour against the interval the minutes are reachable on', () => {
-    // Only the minutes a step can land on count as somewhere to go: at a quarter of an
-    // hour, a bound at 09:50 leaves nine o'clock with nothing.
     expect(isHourAllowed(9, limitsOf({ min: '09:50', minuteStep: 15 }))).toBe(false)
     expect(isHourAllowed(9, limitsOf({ min: '09:50', minuteStep: 5 }))).toBe(true)
   })
@@ -66,8 +60,6 @@ describe('time limits', () => {
     const limits = limitsOf({ allowedMinutes: [0, 30] })
     expect(nearestAllowedMinute(9, 20, limits)).toBe(30)
     expect(nearestAllowedMinute(9, 10, limits)).toBe(0)
-    // 15 is as far from one as from the other, and walking the clock forward past a time
-    // the reader could have meant is the worse of the two answers.
     expect(nearestAllowedMinute(9, 15, limits)).toBe(0)
     expect(nearestAllowedMinute(9, 0, limitsOf({ allowedHours: [10] }))).toBeNull()
   })
@@ -80,8 +72,6 @@ describe('time limits', () => {
   })
 
   it('walks a cycle until something is allowed, and gives up after a full turn', () => {
-    // What makes a key skip a hole rather than die in it — and what keeps it from looping
-    // for ever when there is no hole to come out of.
     const hours = [9, 10, 11, 14]
     const allowed = (hour: number) => hours.includes(hour)
     expect(firstAllowed(23, (i) => (11 + i) % 24, allowed)).toBe(14)

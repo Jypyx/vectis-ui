@@ -47,11 +47,10 @@ describe('VTooltip', () => {
     expect(panel.hasAttribute('data-popover-open')).toBe(true)
 
     wrapper.dispatchEvent(new Event('pointerleave'))
-    // After the short grace that lets the pointer cross onto the bubble.
     vi.advanceTimersByTime(100)
     expect(panel.hasAttribute('data-popover-open')).toBe(false)
 
-    // delay cancelled: entering then leaving before it fires must open nothing
+    // Delay cancelled: entering then leaving before it fires must open nothing
     wrapper.dispatchEvent(new Event('pointerenter'))
     wrapper.dispatchEvent(new Event('pointerleave'))
     vi.advanceTimersByTime(500)
@@ -64,8 +63,8 @@ describe('VTooltip', () => {
     const wrapper = container.querySelector('.v-tooltip') as HTMLElement
     const panel = container.querySelector('[role="tooltip"]') as HTMLElement
 
-    // jsdom answers `false` to `:focus-visible` for everything, focused elements included,
-    // so the branch is chosen by hand here (see utils/focus). What that locks is that the
+    // Jsdom answers `false` to `:focus-visible` for everything, focused elements included, so
+    // the branch is chosen by hand here (see utils/focus). What that locks is that the
     // component ASKS the question, never jsdom's answer to it.
     vi.spyOn(trigger, 'matches').mockReturnValue(true)
     trigger.dispatchEvent(new Event('focusin', { bubbles: true }))
@@ -75,11 +74,8 @@ describe('VTooltip', () => {
     expect(panel.hasAttribute('data-popover-open')).toBe(false)
   })
 
-  // A focus that is not the keyboard's opens nothing, and the case is not theoretical: a
-  // panel opened from this trigger hands the focus BACK to it as it closes, which arrives
-  // here as an ordinary `focusin` — the tooltip would then stand over a page the reader has
-  // just dismissed something on. jsdom's `matches` already answers `false`, which is exactly
-  // the pointer branch, so nothing is stubbed.
+  // Pointer-returned focus must not open a tooltip; jsdom's false focus-visible result
+  // exercises that branch.
   it('ignores a focus the keyboard did not give', () => {
     const { getByTestId, container } = render(Harness)
     const panel = container.querySelector('[role="tooltip"]') as HTMLElement
@@ -90,7 +86,7 @@ describe('VTooltip', () => {
 
   // The exit that matters for a trigger opening a panel: Safari on macOS does not focus a
   // button on click, so `focusout` never fires and only this one closes the tooltip. The
-  // pointer is deliberately never moved here — that is the whole point of the case.
+  // pointer is deliberately never moved here; that is the whole point of the case.
   it('closes when the trigger is pressed, with the pointer still on it', () => {
     const { container } = render(Harness)
     const wrapper = container.querySelector('.v-tooltip') as HTMLElement
@@ -104,8 +100,8 @@ describe('VTooltip', () => {
     expect(panel.hasAttribute('data-popover-open')).toBe(false)
   })
 
-  // A press must also disarm a delay that has not fired yet, or the tooltip would appear
-  // AFTER the panel the click opened — the same lingering tooltip, just late.
+  // A press must also disarm a delay that has not fired yet, or the tooltip would appear after
+  // the panel the click opened; the same lingering tooltip, just late.
   it('a press cancels a pending delay', () => {
     const { container } = render(Harness)
     const wrapper = container.querySelector('.v-tooltip') as HTMLElement
@@ -179,7 +175,6 @@ describe('VTooltip — WCAG 1.4.13', () => {
   it('can be hovered: the pointer crossing the gap onto the tooltip does not close it', () => {
     const { wrapper, isOpen, hover } = setup()
     hover()
-    // Leaving the trigger, then entering the tooltip, a DOM descendant of the wrapper.
     wrapper.dispatchEvent(new Event('pointerleave'))
     vi.advanceTimersByTime(50)
     expect(isOpen()).toBe(true)

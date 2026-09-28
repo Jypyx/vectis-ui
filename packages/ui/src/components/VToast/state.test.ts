@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { dismissToast, toast, toasts } from './state'
 
 describe('toast (module state)', () => {
-  // the state is global to the module: explicit isolation between tests
   beforeEach(() => dismissToast())
 
   it('returns increasing ids and appends to the queue', () => {
@@ -20,7 +19,6 @@ describe('toast (module state)', () => {
       variant: 'soft',
       hideClose: false,
     })
-    // placement and duration stay undefined: they are resolved by the VToaster
     expect(toasts[0]?.placement).toBeUndefined()
     expect(toasts[0]?.duration).toBeUndefined()
   })

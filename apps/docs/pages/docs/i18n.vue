@@ -20,22 +20,8 @@ const { t, locale } = useI18n()
 useDocsHead('i18n')
 
 /**
- * The demo's two choices, and why they are two.
- *
- * The LANGUAGE picks the dictionary, and there is no way to do that for one component: the
- * dictionary is module-level state, so the button really does call `setLocale` and really does
- * move the whole page, the header included. That is the honest demonstration of the limit this
- * page describes, and the page puts the site's own language back when the reader leaves it.
- *
- * The FORMATS are the `locale` prop, which takes precedence over the global locale and is
- * scoped to the one field. German and Japanese are on the list because the library ships no
- * dictionary for either: what moves under them is `Intl`'s doing, what stays is the
- * dictionary's.
- *
- * The file field is in the demo for one reason: it is the only one of the three with a
- * dictionary word ON SCREEN while nothing is open. Its placeholder is `fileInput.placeholder`,
- * so the language button moves it in place, where the date and time fields keep their words
- * inside panels a reader has to open.
+ * The demo's two choices, and why they are two. The FORMATS are the `locale` prop, which takes
+ * precedence over the global locale and is scoped to the one field.
  */
 const LANGUAGES = [
   { value: 'en-GB', label: 'English' },
@@ -62,9 +48,7 @@ function chooseLanguage(value: string) {
   setLocale(value)
 }
 
-// The header's own switcher moves the site AND the design system, through the Nuxt plugin.
-// Following it here is what stops the button from naming a language the components no longer
-// speak.
+// The header's own switcher moves the site and the design system, through the Nuxt plugin.
 watch(siteTag, (next) => {
   language.value = next
 })
@@ -97,18 +81,7 @@ type DictionaryLanguage = 'en' | 'fr'
 
 /**
  * Every parameterised message, written out as it is written in the library: the parameters it
- * takes and the English it builds from them.
- *
- * Transcribed from `i18n/en.ts` and `i18n/fr.ts` rather than read off the shipped functions,
- * because neither half survives the trip. A built bundle has minified parameter names, and
- * `Function.toString` gives back a body nobody wants to read. What a reader needs here is
- * exactly what they will have to write themselves, down to where the value lands in the
- * sentence, which is also why the French is kept: its plurals and its punctuation are not the
- * English ones.
- *
- * `ParameterisedKey` is computed from `Messages`, so the LIST cannot drift: a message
- * that appears upstream, disappears, or stops being a function fails `nuxt typecheck` here.
- * The text on the right is not guarded that way. It is copied by hand, and a default reworded
+ * takes and the English it builds from them. It is copied by hand, and a default reworded
  * upstream has to be recopied.
  */
 type ParameterisedKey = {
@@ -173,17 +146,9 @@ const PARAMETERISED: Record<DictionaryLanguage, Record<ParameterisedKey, string>
 }
 
 /**
- * The whole dictionary, flattened for the reference table at the foot of the page.
- *
- * Read from the shipped dictionary rather than transcribed, so a key added upstream appears
- * here with nothing to remember. WHICH dictionary follows the language the site is being read
- * in: a French reader is shown the French words, since those are the ones they would override.
- * Declaration order is kept: it groups a namespace's keys the way they are used, where
- * alphabetical order would scatter them, and `Object.keys` gives the same order in Node and in
- * the browser, so hydration has nothing to disagree about.
- *
- * A parameterised message has no plain default to print, so its row carries the function
- * itself, from the table above: the parameters it takes, and the English it builds with them.
+ * The whole dictionary, flattened for the reference table at the foot of the page. A
+ * parameterised message has no plain default to print, so its row carries the function itself,
+ * from the table above: the parameters it takes, and the English it builds with them.
  */
 const DICTIONARIES: Record<DictionaryLanguage, Messages> = { en: enMessages, fr: frMessages }
 

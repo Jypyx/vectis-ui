@@ -1,11 +1,6 @@
 /**
- * Generates, from the typed source (`src/tokens/`):
- *   - `src/styles/tokens.css`: custom properties inside `@layer vectis.tokens`
- *     (`:root` = primitives, `:root, [data-theme='light']` = light semantics,
- *     `[data-theme='dark']` = the dark overrides)
- *   - `src/tokens/tokens.json`: raw JSON export (external tooling)
- *
- * Run with `pnpm tokens` (executed automatically in pre(build|storybook)).
+ * Generate layered tokens.css and DTCG tokens.json from the typed token sources. prebuild and
+ * prestorybook run this generator.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, relative, resolve } from 'node:path'
@@ -69,10 +64,9 @@ const outputs: [path: string, content: string][] = [
 ]
 
 /*
- * `--check` verifies the committed artefacts match the TS source instead of rewriting
- * them. Both are git-tracked AND regenerated in `prebuild`, so drift is invisible to
- * `pnpm test` and `pnpm typecheck`: nothing else would ever notice a hand-edited
- * `tokens.css`. Non-zero exit, naming the file, so CI reads as a fixable instruction.
+ * `--check` verifies the committed artefacts match the TS source instead of rewriting them.
+ * Both are git-tracked and regenerated in `prebuild`, so drift is invisible to `pnpm test` and
+ * `pnpm typecheck`: nothing else would ever notice a hand-edited `tokens.css`.
  */
 if (process.argv.includes('--check')) {
   const stale = outputs.filter(

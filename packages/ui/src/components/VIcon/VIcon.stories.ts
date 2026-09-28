@@ -142,7 +142,7 @@ export const FourSources: Story = {
   }),
 }
 
-/** The icons the library renders itself — embedded, no font required. */
+/** The icons the library renders itself; embedded, no font required. */
 export const Library: Story = {
   render: () => ({
     components: { VIcon },
@@ -160,8 +160,7 @@ export const Library: Story = {
 
 /**
  * The acceptance criterion for the autonomy: the icon font is neutralized
- * (`--vectis-font-family-icon: sans-serif`). Anything still a ligature then shows
- * up SPELLED OUT IN FULL — the DS's own icons do not budge.
+ * (`--vectis-font-family-icon: sans-serif`).
  */
 export const WithoutFont: Story = {
   render: () => ({
@@ -182,7 +181,6 @@ export const WithoutFont: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    // None of the built-in icons depends on a font: they are all SVGs.
     const svgs = canvasElement.querySelectorAll('.v-icon-svg')
     await expect(svgs).toHaveLength(Object.keys(builtinIcons).length)
     await expect(canvasElement.querySelectorAll('.v-icon-symbol')).toHaveLength(1)
@@ -230,11 +228,7 @@ export const Filled: Story = {
   },
 }
 
-/**
- * `mirrored` flips a directional glyph under a right-to-left direction and nowhere else.
- * The rule reads `:dir(rtl)`, which jsdom does not evaluate, so the play function is the
- * only guard on the one declaration every arrow of the design system relies on.
- */
+/** `mirrored` flips a directional glyph under a right-to-left direction and nowhere else. */
 export const Mirrored: Story = {
   render: () => ({
     components: { VIcon },
@@ -261,21 +255,19 @@ export const Mirrored: Story = {
 }
 
 /**
- * The DS invariant: whatever the SOURCE of the icon, its size stays that of the
- * context (here the VButton's — lg → 24px, xs → 16px). Measured for real: jsdom
- * does no layout, so this check exists only here.
+ * The DS invariant: whatever the source of the icon, its size stays that of the context (here
+ * the VButton's; lg → 24px, xs → 16px).
  */
 export const SizeInvariant: Story = {
   beforeEach: () => {
-    // Fake "component" set (Lucide-style): HARDCODED dimensions, which the DS's
-    // CSS must beat — they are presentation attributes, so they lose.
+    // Fake "component" set (Lucide-style): HARDCODED dimensions, which the DS's CSS must beat;
+    // they are presentation attributes, so they lose.
     const Lucide = defineComponent({
       setup: () => () =>
         h('svg', { width: 24, height: 24, viewBox: '0 0 24 24', 'data-testid': 'component' }, [
           h('path', { d: 'M6 6l12 12M18 6L6 18', stroke: 'currentcolor', 'stroke-width': 2 }),
         ]),
     })
-    // Fake class font (Font Awesome / Phosphor style): glyph in a ::before.
     const style = document.createElement('style')
     style.textContent = `.fake-glyph::before { content: '\\2716' }`
     document.head.append(style)
@@ -325,7 +317,6 @@ export const SizeInvariant: Story = {
         await expect(Math.round(box.width)).toBe(expected)
         await expect(Math.round(box.height)).toBe(expected)
 
-        // A child SVG fills the square, even with a hardcoded width/height.
         const svg = icon.querySelector('svg')
         if (svg) {
           const inner = svg.getBoundingClientRect()
@@ -360,22 +351,16 @@ export const DrivenByParent: Story = {
 }
 
 /*
- * Third-party icon fonts (setIconResolver).
- *
- * The CDN stylesheets are loaded by `.storybook/preview-head.html` — no npm
- * dependency is added to the package. Each story sets ITS resolver in
- * `beforeEach` and removes it in the cleanup function: the state is module-level
- * and would otherwise leak from one story to the next (the same discipline as the
- * `dismissToast()` decorator in the VToast stories).
- *
- * The alias tables below were checked class by class against each library's real
- * CSS. A non-existent name throws nothing: it renders an empty square.
+ * Each story sets ITS resolver in `beforeEach` and removes it in the cleanup function: the
+ * state is module-level and would otherwise leak from one story to the next (the same
+ * discipline as the `dismissToast()` decorator in the VToast stories). The alias tables below
+ * were checked class by class against each library's real CSS.
  */
 
-/** Component icon factory, in the manner of a Lucide-style SVG set: a
-    `currentcolor` stroke, a single `<svg>` root, and hardcoded dimensions (24)
-    that the DS's CSS must beat. Functional components: with no declared `props`,
-    everything arrives in the argument, hence the spread. */
+/**
+ * Component icon factory, in the manner of a Lucide-style SVG set: a `currentcolor` stroke, a
+ * single `<svg>` root, and hardcoded dimensions (24) that the DS's CSS must beat.
+ */
 const strokeSvg = (d: string) => (props: Record<string, unknown>) =>
   h(
     'svg',
@@ -383,8 +368,10 @@ const strokeSvg = (d: string) => (props: Record<string, unknown>) =>
     [h('path', { d, stroke: 'currentcolor', 'stroke-linecap': 'round' })],
   )
 
-/** Shared showcase: components whose DEFAULT icons come from the DS — that is what
-    makes a library switch visible at a glance. */
+/**
+ * Shared showcase: components whose default icons come from the DS; that is what makes a
+ * library switch visible at a glance.
+ */
 const SHOWCASE_COMPONENTS = {
   VAccordion,
   VAccordionItem,
@@ -423,15 +410,13 @@ const SHOWCASE = `
   </div>
 `
 
-/* A computed, not a plain array built from `t.value`: reading `.value` in the
-   setup body would freeze the labels in the language of the first render. */
 const trail = computed(() => [
   { label: t.value.home, href: '/' },
   { label: t.value.projects, href: '/projects' },
   { label: 'Vectis', href: '/projects/vectis' },
 ])
 
-/** Story factory for "one icon library" — same showcase, different resolver. */
+/** Story factory for "one icon library"; same showcase, different resolver. */
 function fontShowcase(resolver: IconResolver): Story {
   return {
     beforeEach: () => {
@@ -568,9 +553,8 @@ const BOOTSTRAP: Record<IconName, string> = {
 }
 
 /**
- * **Phosphor** — a class font, with two classes on the same element (`ph` for the
- * weight, `ph-<name>` for the glyph). `filled` switches to the `ph-fill` family,
- * which requires importing `@phosphor-icons/web/fill`.
+ * **Phosphor**; a class font, with two classes on the same element (`ph` for the weight,
+ * `ph-<name>` for the glyph).
  */
 export const PhosphorFont: Story = {
   ...fontShowcase(
@@ -580,25 +564,17 @@ export const PhosphorFont: Story = {
     }),
   ),
   play: async ({ canvasElement }) => {
-    // The resolver really is wired in: the VChip's cross carries the Phosphor classes.
     const cross = canvasElement.querySelector("[data-icon='close'] .v-icon-glyph")
     await expect(cross).toHaveClass('ph', 'ph-x')
-    // …and the LOGICAL name survives the library switch.
     await expect(canvasElement.querySelector("[data-icon='search']")).toBeTruthy()
   },
 }
 
 /**
- * **Font Awesome 6 (CSS mode)** — the family class carries the `content`
- * (`.fa-solid:before { content: var(--fa) }`) and the icon class the value
- * (`.fa-xmark { --fa: "\\f00d" }`). FA's "SVG with JS" mode is NOT supported: it
- * replaces the elements in the DOM from under Vue's feet.
- *
- * `fa-solid` unconditionally, and that matters: the **Free** tier only draws a
- * small fraction of the catalogue in Regular (25 kB of glyphs against 158 kB in
- * Solid). Mapping `filled: false` onto `fa-regular` — the reflex — therefore
- * renders empty squares for the vast majority of icons. FA's outline/filled
- * distinction requires the Pro tier (`fa-light`, `fa-thin`, `fa-duotone`).
+ * **Font Awesome 6 (CSS mode)**; the family class carries the `content` (`.fa-solid:before {
+ * content: var(--fa) }`) and the icon class the value (`.fa-xmark { --fa: "\\f00d" }`). FA's
+ * "SVG with JS" mode is not supported: it replaces the elements in the DOM from under Vue's
+ * feet.
  */
 export const FontAwesomeFont: Story = {
   ...fontShowcase(
@@ -613,7 +589,7 @@ export const FontAwesomeFont: Story = {
   },
 }
 
-/** **Bootstrap Icons** — a single family class (`bi`) and no filled variant. */
+/** *Bootstrap Icons**; a single family class (`bi`) and no filled variant. */
 export const BootstrapIconsFont: Story = {
   ...fontShowcase(
     classIconResolver({
@@ -628,11 +604,8 @@ export const BootstrapIconsFont: Story = {
 }
 
 /**
- * **Material Symbols as a ligature** — `ligatureIconResolver()` sends the DS's
- * icons back to the FONT instead of the built-in registry. The only benefit:
- * getting back the optical axis `--vectis-icon-opsz` (20 in xs/sm/md, 24 in
- * lg/xl), which the registry — drawn at opsz 24 — cannot reproduce. It also
- * serves ligature IcoMoon builds and the Outlined/Sharp variants.
+ * **Material Symbols as a ligature**; `ligatureIconResolver()` sends the DS's icons back to the
+ * FONT instead of the built-in registry.
  */
 export const LigatureFont: Story = {
   ...fontShowcase(ligatureIconResolver()),
@@ -643,13 +616,8 @@ export const LigatureFont: Story = {
 }
 
 /**
- * **SVG set as components** (Lucide, Untitled UI…) through `componentIconResolver`.
- * Here the components are built on the spot — the DS adds no dependency — but the
- * contract is the real one: a single `<svg>` root, since that is what
- * `.v-icon > svg` sizes, even against a hardcoded `width`/`height`.
- *
- * The table is deliberately PARTIAL: unmapped icons fall back to the built-in
- * registry. That is what makes a progressive adoption possible.
+ * **SVG set as components** (Lucide, Untitled UI…) through `componentIconResolver`. The table
+ * is deliberately PARTIAL: unmapped icons fall back to the built-in registry.
  */
 export const ComponentSet: Story = {
   ...fontShowcase(
@@ -666,7 +634,6 @@ export const ComponentSet: Story = {
     }),
   ),
   play: async ({ canvasElement }) => {
-    // Mapped → component; unmapped (notifications) → built-in registry.
     await expect(canvasElement.querySelector("[data-icon='close'] [data-set]")).toBeTruthy()
     await expect(
       canvasElement.querySelector("[data-icon='notifications'] .v-icon-svg"),
@@ -675,10 +642,9 @@ export const ComponentSet: Story = {
 }
 
 /**
- * **Partial mapping** — five Phosphor aliases only, `strict` left at its default.
- * The other fifteen DS icons stay embedded SVGs instead of becoming non-existent
- * `ph-swap_vert` (hence empty squares), and the consumer's own names still pass,
- * even when absent from the table.
+ * **Partial mapping**; five Phosphor aliases only, `strict` left at its default. The other
+ * fifteen DS icons stay embedded SVGs instead of becoming non-existent `ph-swap_vert` (hence
+ * empty squares), and the consumer's own names still pass, even when absent from the table.
  */
 export const PartialMapping: Story = fontShowcase(
   classIconResolver({

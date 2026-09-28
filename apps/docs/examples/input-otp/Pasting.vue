@@ -7,8 +7,6 @@ const SAMPLE = 'GT-4F2'
 const code = ref('')
 const copied = ref(false)
 
-/* A plain clipboard write from a click handler, so nothing touches the browser
-   outside an event. */
 async function copy() {
   await navigator.clipboard.writeText(SAMPLE)
   copied.value = true

@@ -24,8 +24,10 @@ function renderWith(accordionAttrs = '', firstItemAttrs = '', state: Record<stri
 // the other mode and its assertions go on passing while covering nothing.
 const renderAccordion = (multiple = false) => renderWith(`:multiple="${multiple}"`, 'default-open')
 
-/** Names of the <VIcon> rendered inside an item — `data-icon` is set whatever the
-    effective source (embedded SVG, ligature, third-party font). */
+/**
+ * Names of the <VIcon> rendered inside an item; `data-icon` is set whatever the effective
+ * source (embedded SVG, ligature, third-party font).
+ */
 function icones(item: Element) {
   return [...item.querySelectorAll<HTMLElement>('summary .v-icon')].map((el) => el.dataset.icon)
 }
@@ -72,7 +74,6 @@ describe('VAccordion', () => {
     await nextTick()
     expect(details.open).toBe(true)
 
-    // the element is the source of truth: the model is fed by `toggle`
     details.open = false
     await fireEvent(details, new Event('toggle'))
     expect(open.value).toBe(false)
@@ -109,7 +110,6 @@ describe('VAccordion', () => {
   it('icon: a dedicated icon before the title, distinct from the chevron', () => {
     const { container } = renderWith('', 'icon="settings"')
     const [first, second] = [...container.querySelectorAll('details')]
-    // both icons coexist: the start icon, then the chevron
     expect(icones(first as Element)).toEqual(['settings', 'expand_more'])
     expect(first?.querySelector<HTMLElement>('.v-accordion-icon')?.dataset.icon).toBe('settings')
     expect(second?.querySelector('.v-accordion-icon')).toBeNull()
@@ -136,7 +136,6 @@ describe('VAccordion', () => {
     const [first, second] = [...container.querySelectorAll('summary')]
     expect(first?.getAttribute('aria-disabled')).toBe('true')
     expect(first?.getAttribute('tabindex')).toBe('-1')
-    // the marker sits on the row, as on VSideNavigationItem, not on the <details>
     expect(first?.hasAttribute('data-disabled')).toBe(true)
     expect(first?.parentElement?.hasAttribute('data-disabled')).toBe(false)
     expect(second?.hasAttribute('aria-disabled')).toBe(false)

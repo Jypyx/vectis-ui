@@ -8,8 +8,8 @@ import {
   video_file as videoFile,
 } from 'vectis-ui/icons'
 
-// In multiple mode the value is a list, and it is never mutated in place: each change
-// hands back a new array, which is what wakes a watcher bound to it.
+// In multiple mode the value is a list, and it is never mutated in place: each change hands
+// back a new array, which wakes a watcher bound to it.
 const kinds = ref(['images', 'video'])
 </script>
 

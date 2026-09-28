@@ -35,7 +35,6 @@ const NAMES = [
 ]
 const OWNERS = ['Xavier', 'Nadia', 'Louis', 'Emma']
 
-/* What a database would hold. Nothing here is ever handed to the table whole. */
 const DATA = NAMES.map((name, index) => ({
   name,
   owner: OWNERS[index % OWNERS.length],
@@ -78,7 +77,6 @@ function load(params: DataTableParams) {
   }, 600)
 }
 
-/* Nothing is emitted when the table appears, so the first page is asked for here. */
 onMounted(() => load({ page: 1, perPage: 5, sortKey: null, sortDirection: null, search: '' }))
 </script>
 

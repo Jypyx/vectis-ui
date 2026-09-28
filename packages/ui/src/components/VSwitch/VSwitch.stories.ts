@@ -62,10 +62,8 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   play: async ({ canvasElement }) => {
-    // role="switch": correct semantics for screen readers
     const sw = within(canvasElement).getByRole('switch', { name: 'Notifications' })
     await expect(sw).not.toBeChecked()
-    // the hidden input is pointer-events: none, so the wrapping <label> is clicked
     await userEvent.click(sw.closest('label')!)
     await waitFor(() => expect(sw).toBeChecked())
   },
@@ -123,9 +121,8 @@ export const WithoutLabel: Story = {
 }
 
 /**
- * `invalid` rings the track in the danger colour and sets `aria-invalid` on the input,
- * the same pair VCheckbox and VRadio use. It is for a rule the browser cannot check on
- * its own; native validity already colours the switch without it.
+ * `invalid` rings the track in the danger colour and sets `aria-invalid` on the input, the same
+ * pair VCheckbox and VRadio use.
  */
 export const Invalid: Story = {
   render: () => ({

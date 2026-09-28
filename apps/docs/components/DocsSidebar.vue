@@ -1,16 +1,4 @@
 <script setup lang="ts">
-/**
- * The documentation rail — and the site's own largest demonstration, since it IS
- * VSideNavigation doing the job it was written for.
- *
- * The tree is rendered inline from `content/nav.ts` rather than handed to the component as
- * data, which is the component's own contract: it composes from subcomponents and never
- * takes an `items` prop. `current` is manual there too — VSideNavigation knows nothing about
- * a router — so the current route is compared here.
- *
- * Every row is a real `<a href>`; `navigate` from NuxtLink turns an ordinary click into a
- * client-side transition and leaves middle-click and Ctrl-click to the browser.
- */
 import {
   VSideNavigation,
   VSideNavigationGroup,
@@ -25,11 +13,7 @@ const { closeNav } = useDocsNav()
 const { t } = useI18n()
 const localePath = useLocalePath()
 
-/*
- * Compared against the LOCALISED path, not a literal `/docs/${slug}`: on the French site every
- * route carries the `/fr` segment, so the literal would match nothing and no row would ever be
- * marked current — a rail that looks identical on all fifty pages.
- */
+/* Compare against localePath so French routes also mark the current navigation item. */
 const isCurrent = (slug: string) => route.path === localePath(`/docs/${slug}`)
 
 /** Below 1024px the rail is an overlay over the article: following a link has to fold it. */

@@ -1,29 +1,14 @@
 <script setup lang="ts">
 /**
- * The API section of a component page: props, events, slots, named types and CSS variables.
- *
- * It renders the whole section, headings included, so that forty-four pages cannot each grow
- * their own shape. The structure comes from `content/api/<slug>.ts`, which a script extracts
- * from the library source; the words come from the page's catalogue.
- *
- * TRAP — this component has SEVERAL ROOTS on purpose, and must keep them. `useDocsOutline`
- * harvests `.vd-prose > h2[id], .vd-prose > h3[id]`, and every prose rule in docs-layout.css is
- * a direct-child chain from `.vd-prose`. A Vue fragment renders its roots as siblings, with
- * comment nodes rather than elements for anchors, so both keep matching. Wrapping this in a
- * `<div>` would cost every page its API headings AND their entries in the outline rail, with
- * nothing failing.
- *
- * Each kind gets ONE heading, and a family lists its components as table captions underneath
- * rather than as headings of their own: three sub-headings per component would bury the four
- * entries a reader actually navigates by, and a caption is what assistive technology reads as
- * a table's name anyway.
+ * Shared API tables and type definitions. Keep fragment roots: prose styling and outline
+ * discovery require headings directly under .vd-prose.
  */
 import type { ApiEntry, ComponentApi, PageApi } from '~/content/api/types'
 
 import { anchorOf, keyOf } from '~/content/api/types'
 
 const props = defineProps<{
-  /** The page's catalogue namespace, e.g. `switch` — the root of every description keypath. */
+  /** The page's catalogue namespace, e.g. `switch`; the root of every description keypath. */
   page: string
   /** The generated API of the family. */
   api: PageApi
@@ -40,12 +25,10 @@ const eventColumns = computed(() => [t('common.table.event'), t('common.table.ty
 const slotColumns = computed(() => [t('common.table.slot'), t('common.table.type')])
 const tokenColumns = computed(() => [t('common.table.token'), t('common.table.value')])
 
-/** A page documenting a single component has nothing to disambiguate, so its tables have no name. */
 function captionOf(component: ComponentApi): string | undefined {
   return props.api.components.length > 1 ? component.name : undefined
 }
 
-/** Where a row's description lives: `tabs.api.VTabPanel.props.lazy`. */
 function keypathOf(component: ComponentApi, kind: string, entry: ApiEntry): string {
   return `${props.page}.api.${component.name}.${kind}.${keyOf(entry)}`
 }
@@ -128,12 +111,6 @@ const withSlots = computed(() => props.api.components.filter((one) => one.slots?
     </DocsTable>
   </template>
 
-  <!--
-    The shapes the tables above could not print in a cell, each under the anchor its Type column
-    links to. A `.vd-code` card and not a DocsCode: a definition is read, never pasted — a
-    consumer imports the type instead of copying it — so the language tag and the copy button
-    would be chrome around nine blocks that nobody presses.
-  -->
   <template v-if="api.types?.length">
     <h3 id="types">{{ t('common.api.types') }}</h3>
     <DocsProse tag="p" keypath="common.api.typesLead" />

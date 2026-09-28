@@ -209,8 +209,6 @@ describe('VInputOTP — the code stays positional', () => {
     expect(emitted('complete')).toHaveLength(1)
   })
 
-  // A filled box whose content was not selected receives the new character NEXT to the old
-  // one: it is the new character that counts.
   it('a character typed next to the old one in a filled box replaces it', async () => {
     const { getAllByRole, emitted } = renderOtp({ length: 4, modelValue: '1234' })
     const inputs = boxes(getAllByRole)

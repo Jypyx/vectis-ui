@@ -1,14 +1,8 @@
 <script setup lang="ts">
 // @a11y
 /**
- * The card one notification is drawn on. It holds no state and decides nothing: the
- * VToaster renders it, and it is internal to the component — never exported.
- *
- * How insistently it is announced follows its tone. A failure or a warning interrupts
- * whatever a screen reader is saying; anything else waits for a pause. There is a
- * known trade-off in the polite case: some screen readers miss the FIRST notification
- * of a stack, because the region that announces it comes into existence already
- * holding its text. The interruptive ones are always announced.
+ * Presentation-only notification card; VToaster owns queue state and polite/assertive
+ * announcements to avoid duplicate status messages.
  */
 
 import { computed } from 'vue'
@@ -87,19 +81,16 @@ const icon = computed(() =>
 
 <style>
 @layer vectis.components {
-  /* The box, the decoration, the typography and the entry motion come from the shared
-     `.v-banner` class set on this same element — the chassis this card has in common
-     with the snackbar, in `styles/banner.css`, along with the message block
-     (`.v-banner-text`) and the close cross's margins (`.v-banner-control`). What stays here
-     is what the two genuinely differ on: the alignment, the padding, the width, and the
-     whole of the tone painting.
-     `--banner-line`, the one-line alignment unit both use, is defined there. */
+  /*
+   * Shared banner chrome supplies decoration and motion; toast owns alignment, dimensions and
+   * tone painting.
+   */
   .v-toast {
-    /* A notification hooks its icon and its cross to the FIRST line of the message: it
-       may carry a title and several lines, and the eye reads the icon against the text it
-       introduces, not against the middle of a paragraph. The `--banner-line` margins are
-       what make that identical to centring on a single line. (VSnackbar centres instead —
-       one short sentence, and a control that would sit in a corner otherwise.) */
+    /*
+     * The `--banner-line` margins are what make that identical to centring on a single line.
+     * (VSnackbar centres instead; one short sentence, and a control that would sit in a corner
+     * otherwise.)
+     */
     align-items: flex-start;
     padding: var(--vectis-space-3) var(--vectis-space-4);
     inline-size: var(--toast-width, var(--vectis-control-size-toast-width));
@@ -108,27 +99,20 @@ const icon = computed(() =>
     max-inline-size: calc(100dvi - 2 * var(--vectis-space-4));
   }
 
-  /* The tone table itself lives in styles/tones.css, in a layer below the components,
-     and is shared with VButton and VChip. The rules below read that shared contract
-     directly rather than restating any of its colours.
-
-     One local name survives, and for a precise reason: the close cross rebinds the
-     tone's text colour inside its own subtree further down, so pointing this variable
-     at that one would turn into a self-reference. It is resolved here, on the card, so
-     that the cross inherits a value already computed rather than recomputing it in a
-     context where it no longer means the same thing. */
+  /*
+   * The tone table itself lives in styles/tones.css, in a layer below the components, and is
+   * shared with VButton and VChip. The rules below read that shared contract directly rather
+   * than restating any of its colours.
+   */
   .v-toast {
     --toast-accent: var(--tone-text-tinted);
   }
 
-  /* The neutral tone is overridden here, and for the soft variant only. A notification
-     floats above the page rather than sitting in it, so it takes the overlay
-     background and the plain border that goes with it, where the shared table assumes
-     a surface within the page.
-
-     The solid pair is deliberately left alone: its text and surface inversion is
-     canonical across the design system. This block sits one layer above the table, so
-     it wins whatever order the two sheets end up in. */
+  /*
+   * The neutral tone is overridden here, and for the soft variant only. A notification floats
+   * above the page rather than sitting in it, so it takes the overlay background and the plain
+   * border that goes with it, where the shared table assumes a surface within the page.
+   */
   .v-toast[data-tone='neutral'] {
     --tone-bg-soft: var(--vectis-color-surface-overlay);
     --tone-border-soft: var(--vectis-color-border);
@@ -156,13 +140,9 @@ const icon = computed(() =>
   }
 
   /*
-   * On a tinted card the close cross takes the tone's own accent. On a solid one it keeps
-   * the surrounding text colour the shared `.v-banner-control` rule gives it — the only thing
-   * guaranteed readable against that background.
-   *
-   * TRAP — (0,4,0) is load-bearing: the shared rebind is (0,3,0) in the same layer and ships
-   * in another sheet, so at equal specificity the winner would be whichever sheet the
-   * consumer's bundler put last.
+   * (0,4,0) is load-bearing: the shared rebind is (0,3,0) in the same layer and ships in
+   * another sheet, so at equal specificity the winner would be whichever sheet the consumer's
+   * bundler put last.
    */
   .v-toast[data-variant='soft'] .v-toast-close[data-tone] {
     --tone-text-tinted: var(--toast-accent);
@@ -176,14 +156,14 @@ const icon = computed(() =>
 
   .v-toast-title {
     margin-block-end: var(--vectis-space-1);
-    /* The heavier weight marks the title against its own message, which is emphasis
-       rather than a typographic role — hence a font token read directly. */
+    /*
+     * The heavier weight marks the title against its own message, which is emphasis rather than
+     * a typographic role; hence a font token read directly.
+     */
     font-weight: var(--vectis-font-weight-semibold);
   }
 
-  /* Windows forced colors flattens the solid card's background to Canvas and drops its
-     shadow, which were its only edge (the soft card carries a border): it would float over
-     the page with no boundary at all. An outline draws one without moving the layout. */
+  /* An outline draws one without moving the layout. */
   @media (forced-colors: active) {
     .v-toast[data-variant='solid'] {
       outline: 1px solid CanvasText;

@@ -14,7 +14,6 @@ const slide = ref(0)
 </template>
 
 <style scoped>
-/* A slide has no height of its own: it takes the one its content brings. */
 .slide {
   display: grid;
   place-items: center;

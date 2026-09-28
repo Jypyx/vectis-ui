@@ -81,7 +81,6 @@ describe('VRadio', () => {
     expect(slotted.getByRole('radio', { name: 'From the slot' })).toBeTruthy()
   })
 
-  // The hint sits OUTSIDE the <label>: inside it, it would be read as part of the name.
   it('hint: a description aggregated with the consumer one, never part of the name', () => {
     const { getByRole, getByText } = render(VRadio, {
       props: { value: 'a', label: 'Notifications', hint: 'Sent once a day' },
@@ -134,10 +133,9 @@ describe('VRadio', () => {
   })
 })
 
-// A validation library marks the field invalid through the attribute. The component's own
-// `invalid` binding therefore comes BEFORE the forwarded attributes: bound after them,
-// `mergeProps` copies its key even when the value is `undefined` and the consumer's verdict
-// is silently erased. This test goes red the moment the binding moves back down.
+// The component's own `invalid` binding therefore comes before the forwarded attributes: bound
+// after them, `mergeProps` copies its key even when the value is `undefined` and the consumer's
+// verdict is silently erased. This test goes red the moment the binding moves back down.
 describe('VRadio — a consumer aria-invalid', () => {
   it('reaches the control when `invalid` is not set', () => {
     const { getByRole } = render(VRadio, {

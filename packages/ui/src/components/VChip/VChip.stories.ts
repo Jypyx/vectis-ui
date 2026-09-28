@@ -141,16 +141,14 @@ export const CustomRadius: Story = {
     const [chip, pill] = canvasElement.querySelectorAll<HTMLElement>('.v-chip')
     const button = canvasElement.querySelector<HTMLElement>('.v-button')!
     await expect(getComputedStyle(chip!).borderTopLeftRadius).toBe('0px')
-    // The pill keeps its own token, and the button the interactive radius.
     await expect(getComputedStyle(pill!).borderTopLeftRadius).not.toBe('0px')
     await expect(getComputedStyle(button).borderTopLeftRadius).not.toBe('0px')
   },
 }
 
 /**
- * `color` (hex, a CSS name or oklch()) replaces the tone: every shade is derived by
- * color-mix from the theme tokens and adapts light/dark. In `solid` the text is
- * white: the contrast against a light colour is the consumer's responsibility.
+ * `color` (hex, a CSS name or oklch()) replaces the tone: every shade is derived by color-mix
+ * from the theme tokens and adapts light/dark.
  */
 export const CustomColor: Story = {
   render: () => ({
@@ -237,8 +235,6 @@ export const SelectableWithCheck: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    // `data-icon` names the icon whatever its source — the tick comes from the
-    // built-in registry (SVG), `palette` from the consumer's font (a ligature).
     const icon = (name: string) => canvasElement.querySelector(`.v-icon[data-icon='${name}']`)
     await expect(icon('check')).toBeVisible()
     await expect(icon('palette')).toBeNull()
@@ -349,7 +345,7 @@ export const SelectableAndDismissible: Story = {
   }),
 }
 
-/** xs 24px (the default) / sm 32px; `compact` removes 4px of height. */
+/** Xs 24px (the default) / sm 32px; `compact` removes 4px of height. */
 export const Sizes: Story = {
   render: () => ({
     components: { VChip },

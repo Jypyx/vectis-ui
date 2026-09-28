@@ -17,9 +17,10 @@ function choose(city: string) {
 </script>
 
 <template>
-  <!-- The wrapper CONFINES the name to this instance. Without it, a shown popover moves
-       to the top layer and is resolved against the whole document, so every panel on the
-       page would attach to the last element that named the anchor. -->
+  <!--
+    Without it, a shown popover moves to the top layer and is resolved against the whole
+    document, so every panel on the page would attach to the last element that named the anchor.
+  -->
   <div class="field-wrapper">
     <!-- A plain input, because that is the case the prop exists for: `popovertarget` is
          not valid on a text field, so the panel cannot be wired to it that way. -->

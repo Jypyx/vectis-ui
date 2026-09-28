@@ -1,12 +1,6 @@
 /**
- * What a carousel passes down to its slides. Everything is exposed through getters, which
- * is what keeps the props and the dictionary reactive on the other side of the injection.
- *
- * A slide's own POSITION deliberately does NOT travel through here: the carousel hands it
- * to each slide as it renders them. Passed through the context instead, it would have to
- * be registered by the slides as they mounted — and such a register holds nothing during
- * the server render and everything in the browser, so the "3 of 8" announced would differ
- * between the two.
+ * Context getters preserve reactive props and messages; slide positions are supplied during
+ * rendering.
  */
 
 import type { InjectionKey } from 'vue'

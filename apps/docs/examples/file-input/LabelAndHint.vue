@@ -19,7 +19,6 @@ const found = ref<File[]>([
       placeholder="No file chosen yet"
     />
 
-    <!-- The start icon is rendered before the chips, so a chip display keeps both. -->
     <VFileInput
       v-model="found"
       multiple

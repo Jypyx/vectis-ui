@@ -6,9 +6,10 @@ const sizes: SkeletonLoaderSize[] = ['xs', 'sm', 'md', 'lg', 'xl']
 
 <template>
   <div class="demo">
-    <!-- The control scale, 24 to 56 pixels: an md skeleton is exactly the height of
-         an md button, which is what lets a silhouette hold the place of the control
-         it stands in for. -->
+    <!--
+      The control scale, 24 to 56 pixels: an md skeleton is exactly the height of an md button,
+      which lets a silhouette hold the place of the control it stands in for.
+    -->
     <div class="row">
       <p class="caption">circle</p>
       <div class="inline">
@@ -21,7 +22,6 @@ const sizes: SkeletonLoaderSize[] = ['xs', 'sm', 'md', 'lg', 'xl']
       <VSkeletonLoader v-for="size in sizes" :key="size" shape="control" :size="size" />
     </div>
 
-    <!-- compact takes 4px off the height, as everywhere else in the design system. -->
     <div class="row">
       <p class="caption">md, then md compact</p>
       <VSkeletonLoader shape="control" size="md" />

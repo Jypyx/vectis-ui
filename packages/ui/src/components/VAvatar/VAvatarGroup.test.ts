@@ -51,7 +51,6 @@ describe('VAvatarGroup', () => {
       props: { max: 2 },
       slots: { default: () => avatars(['Ada', 'Linus', 'Grace', 'Alan']) },
     })
-    // 2 visible + the aggregate, which is itself a VAvatar
     expect(discs(container)).toHaveLength(3)
     expect(container.textContent).toContain('+2')
   })
@@ -89,11 +88,7 @@ describe('VAvatarGroup', () => {
     const { container } = render(VAvatarGroup, {
       props: { max: 2 },
       slots: {
-        default: () => [
-          h(VAvatar, { name: 'Ada' }),
-          avatars(['Linus', 'Grace']), // an array → a Fragment
-          '\n  ', // whitespace between tags
-        ],
+        default: () => [h(VAvatar, { name: 'Ada' }), avatars(['Linus', 'Grace']), '\n  '],
       },
     })
     expect(container.textContent).toContain('+1')
@@ -117,8 +112,6 @@ describe('VAvatarGroup', () => {
       slots: { default: () => avatars(['Ada']) },
     })
     const root = container.querySelector('.v-avatar-group') as HTMLElement
-    // `v-control` on the GROUP is what keeps --control-height defined for the overlap
-    // even when a child is wrapped.
     expect(root.classList.contains('v-control')).toBe(true)
     expect(root.dataset.size).toBe('lg')
     expect(root.dataset.compact).toBe('')

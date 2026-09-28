@@ -8,7 +8,6 @@ import { arrow_right_alt as arrowRightAlt, notifications, schedule } from 'vecti
   <VChip :icon-end="arrowRightAlt" tone="accent">End icon</VChip>
   <VChip :icon-start="schedule" :icon-end="arrowRightAlt" tone="accent">Both</VChip>
 
-  <!-- No label at all: the chip becomes square, and the button it already is takes the name. -->
   <VChip :icon-start="notifications" tone="danger" clickable aria-label="Notifications" />
 
   <VChip tone="success">

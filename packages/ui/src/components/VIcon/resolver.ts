@@ -1,58 +1,35 @@
-// @ssr @core — module-level state, to be set at module level and never
-// client-only: a resolver installed after hydration is a mismatch.
-/**
- * The way to plug a third-party icon library into the design system. A resolver is a
- * function turning a name into something to draw, and it is consulted BEFORE the
- * icons built into the library — which is what lets a consumer move ALL of them onto
- * their own icon set rather than ending up with two styles side by side.
- *
- * The resolver is held in module-level state rather than provided through a Vue
- * plugin, because it is configuration: identical for every request a process
- * handles, and settable from any `.ts` file — a Nuxt plugin, `main.ts` — without a
- * component being involved.
- */
+// @ssr @core
+// Install the icon resolver before SSR and hydration so server and client resolve the same
+// drawings.
+/** The way to plug a third-party icon library into the design system. */
 
 import { shallowRef, type Component } from 'vue'
 
 import { builtinIconNames, type IconName } from './icons/names'
 import type { IconContext, IconRender } from './types'
 
-/* A lookup by name that answers only for the table's OWN keys: `aliases['constructor']` would
-   otherwise hand back a function from Object.prototype, and the "I do not know this name"
-   contract (`undefined`) would break for any name that happens to be one of its members. */
+/*
+ * A lookup by name that answers only for the table's own keys: `aliases['constructor']` would
+ * otherwise hand back a function from Object.prototype, and the "I do not know this name"
+ * contract (`undefined`) would break for any name that happens to be one of its members.
+ */
 function own<T>(table: Record<string, T> | undefined, name: string): T | undefined {
   return table !== undefined && Object.hasOwn(table, name) ? table[name] : undefined
 }
 
 /**
- * Turns an icon name into a description of what to draw. Answering `undefined` means
- * "I do not know this name", and not "draw nothing": VIcon then falls back to the
- * built-in icons, and after that to the ligature font. That distinction is what
- * makes a PARTIAL mapping usable: map the five names you care about and let the
- * rest be.
+ * Turns an icon name into a description of what to draw. Answering `undefined` means "I do not
+ * know this name", and not "draw nothing": VIcon then falls back to the built-in icons, and
+ * after that to the ligature font.
  */
 export type IconResolver = (name: string, ctx: IconContext) => IconRender | undefined
 
-/**
- * A table mapping the design system's icon names to your own. The IDE suggests the
- * names the library ships with, and any other key is accepted too, so your
- * application's own icons can be aliased through the same table.
- */
+/** A table mapping the design system's icon names to your own. */
 export type IconAliases = Partial<Record<IconName, string>> & Record<string, string>
 
 const resolver = shallowRef<IconResolver | undefined>(undefined)
 
-/**
- * Installs the resolver every VIcon will consult, or removes it when passed
- * `undefined`.
- *
- * Call it at MODULE level (from a Nuxt plugin or from `main.ts`) and never inside
- * a component's `setup()`. Two traps follow from where the state lives. On a server
- * it belongs to the process rather than to a request, which is right for
- * configuration and wrong for anything varying per visitor. And installing it on the
- * client only, from a `plugins/*.client.ts`, makes the browser draw different icons
- * from the ones the server sent, which is a hydration mismatch.
- */
+/** Installs the resolver every VIcon will consult, or removes it when passed `undefined`. */
 export function setIconResolver(next: IconResolver | undefined): void {
   resolver.value = next
 }
@@ -63,13 +40,10 @@ export function resolveIcon(name: string, ctx: IconContext): IconRender | undefi
 }
 
 /**
- * A resolver for a LIGATURE font: Material Symbols in any of its variants, or an
- * IcoMoon build made that way. It answers to every name, since the font itself
- * decides what it recognizes.
- *
- * Installing it is also how to have the design system's own icons drawn by the font
- * instead of by the SVGs shipped with the library, and therefore how to get the
- * optical size axis back: those SVGs are drawn at one optical size and cannot follow
+ * A resolver for a LIGATURE font: Material Symbols in any of its variants, or an IcoMoon build
+ * made that way. Installing it is also how to have the design system's own icons drawn by the
+ * font instead of by the SVGs shipped with the library, and therefore how to get the optical
+ * size axis back: those SVGs are drawn at one optical size and cannot follow
  * `--vectis-icon-opsz`.
  */
 export function ligatureIconResolver(options: { aliases?: IconAliases } = {}): IconResolver {
@@ -78,14 +52,9 @@ export function ligatureIconResolver(options: { aliases?: IconAliases } = {}): I
 }
 
 /**
- * A resolver for a font driven by a CLASS and a pseudo-element: Font Awesome,
- * Phosphor, Bootstrap Icons and their kind.
- *
- * `strict`, which is the default, protects the design system's own icons. One of its
- * names that is NOT in your alias table would otherwise be turned into a class the
- * font does not define, and the icon would render as an empty square; refusing to
- * answer instead lets it fall back to the SVG shipped with the library. Names of
- * your own always pass, since they are already written in your vocabulary.
+ * A resolver for a font driven by a CLASS and a pseudo-element: Font Awesome, Phosphor,
+ * Bootstrap Icons and their kind. `strict`, which is the default, protects the design system's
+ * own icons.
  */
 export function classIconResolver(options: {
   aliases?: IconAliases
@@ -99,22 +68,18 @@ export function classIconResolver(options: {
   const { aliases, className, strict = true } = options
   return (name, ctx) => {
     const mapped = own(aliases, name)
-    // The SET of names, never the icons themselves: this asks whether the design
-    // system ships the name, and reaching for the drawings to answer it would make a
-    // consumer who wired in their OWN icon library download all 34 Material paths.
+    // The SET of names, never the icons themselves: this asks whether the design system ships
+    // the name, and reaching for the drawings to answer it would make a consumer who wired in
+    // their own icon library download all 34 Material paths.
     if (mapped === undefined && strict && builtinIconNames.has(name)) return undefined
     return { class: className(mapped ?? name, ctx.filled) }
   }
 }
 
 /**
- * A resolver for an icon set shipped as Vue COMPONENTS: Lucide, Untitled UI and
- * their kind. It is strict by construction, since a name absent from the table has
- * no component to return: it falls back to the built-in icons, and then to the
- * ligature.
- *
- * One contract to honour: each component must have a single `<svg>` as its root,
- * because that is the element the stylesheet sizes.
+ * A resolver for an icon set shipped as Vue COMPONENTS: Lucide, Untitled UI and their kind. It
+ * is strict by construction, since a name absent from the table has no component to return: it
+ * falls back to the built-in icons, and then to the ligature.
  */
 export function componentIconResolver(options: {
   components: Partial<Record<IconName, Component>> & Record<string, Component>

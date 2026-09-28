@@ -1,17 +1,8 @@
 /**
- * The documentation's table of contents, and the ONE list of it.
- *
- * Four consumers read this file: the sidebar rail, the search index, `nuxt.config.ts` — which
- * turns it into the prerender route list — and the post-build check that every one of those
- * routes really produced a file. Keeping them on one source is what makes it impossible to add
- * a page to the navigation and forget to build it, or to build a page nobody can reach.
- *
- * There is deliberately NO title here. Titles are language, and this file is read by two NODE
- * contexts (`nuxt.config.ts` and `scripts/check-prerender.ts`) where no vue-i18n exists; they
- * only ever needed the slugs. The words live in the message catalogue under `nav.<slug>`, and
- * `DocsSlug` below is what keeps the two in step: the catalogue is typed as a record over that
- * union, so adding an entry here without translating it fails `nuxt typecheck` rather than
- * printing a raw key in the sidebar.
+ * The words live in the message catalogue under `nav.<slug>`, and `DocsSlug` below is what
+ * keeps the two in step: the catalogue is typed as a record over that union, so adding an entry
+ * here without translating it fails `nuxt typecheck` rather than printing a raw key in the
+ * sidebar.
  */
 
 export interface NavEntry {
@@ -27,7 +18,7 @@ export interface NavGroup {
 
 /*
  * The literal `S` is what makes `DocsSlug` a union of the fifty slugs rather than plain
- * `string` — without the generic, TypeScript widens each one at the call site and the record
+ * `string`; without the generic, TypeScript widens each one at the call site and the record
  * type below would accept anything.
  */
 const entry = <S extends string>(slug: S) => ({ slug }) as const
@@ -44,9 +35,8 @@ export const intro = [
 ] as const
 
 /**
- * One entry per exported component FAMILY — a family being a component and the subcomponents
+ * One entry per exported component FAMILY; a family being a component and the subcomponents
  * that only exist inside it (VTabs owns VTab and VTabPanel, VDialog owns VDialogAlert).
- * Alphabetical, because a reader looking for one knows its name and not its category.
  */
 export const components = [
   entry('accordion'),
@@ -109,13 +99,13 @@ export const groups: NavGroup[] = [
   { id: 'utils', entries: [...utils] },
 ]
 
-/** Every slug the documentation offers — the type the message catalogue is a record over. */
+/** Every slug the documentation offers; the type the message catalogue is a record over. */
 export type DocsSlug =
   | (typeof intro)[number]['slug']
   | (typeof components)[number]['slug']
   | (typeof utils)[number]['slug']
 
-/** Every page, flattened, each carrying the group it came from — the search index. */
+/** Every page, flattened, each carrying the group it came from; the search index. */
 export const allPages: (NavEntry & { section: NavGroupId })[] = groups.flatMap((group) =>
   group.entries.map((page) => ({ ...page, section: group.id })),
 )
@@ -126,13 +116,8 @@ export function pageOf(slug: string): (NavEntry & { section: NavGroupId }) | und
 }
 
 /**
- * The prerender route list, consumed by nuxt.config.ts and by the post-build check.
- *
- * `prefix` is the locale segment the i18n strategy adds — empty for the default locale, `/fr`
- * for the other. Passing it here rather than mapping the result at each call site is what keeps
- * the two consumers producing the SAME list: a route built one way in the config and another
- * way in the check would let a missing page pass unnoticed, which is the one thing this file
- * exists to prevent.
+ * The prerender route list, consumed by nuxt.config.ts and by the post-build check. `prefix` is
+ * the locale segment the i18n strategy adds; empty for the default locale, `/fr` for the other.
  */
 export function docRoutes(prefix = ''): string[] {
   return allPages.map((page) => `${prefix}/docs/${page.slug}`)

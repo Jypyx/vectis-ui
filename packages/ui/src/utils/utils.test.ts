@@ -33,8 +33,6 @@ describe('px', () => {
     expect(px('auto')).toBeUndefined()
   })
 
-  // `parseFloat` reads a numeric PREFIX, so a length in another unit came out in pixels:
-  // `12rem` silently became `12px`.
   it('refuses a string that is not wholly a number, and an empty one', () => {
     expect(px('12rem')).toBeUndefined()
     expect(px('12px')).toBeUndefined()
@@ -58,7 +56,6 @@ describe('createNormalizedCache', () => {
     const normalizedOf = createNormalizedCache<typeof owner>()
     expect(normalizedOf(owner, owner.label)).toBe('eclair')
     expect(normalizedOf(owner, 'Brûlé', 'other')).toBe('brule')
-    // Edited in place: the raw text no longer matches what was remembered.
     owner.label = 'Émile'
     expect(normalizedOf(owner, owner.label)).toBe('emile')
     expect(normalizedOf(owner, 'Brûlé', 'other')).toBe('brule')

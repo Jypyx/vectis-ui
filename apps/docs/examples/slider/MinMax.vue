@@ -8,8 +8,6 @@ const rating = ref(3)
 
 <template>
   <div class="demo">
-    <!-- The bounds are 0 and 100 by default, and both may be anything, negatives
-         included. -->
     <div class="row">
       <p class="caption">Temperature, -10 to 40</p>
       <VSlider v-model="temperature" :min="-10" :max="40" label="Temperature" />

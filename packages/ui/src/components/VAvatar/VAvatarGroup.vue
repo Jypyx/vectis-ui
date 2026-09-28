@@ -1,18 +1,8 @@
 <script setup lang="ts">
-// @ssr @core — the number of avatars is read from the slot's VNODES through
-// `useSlotNodes`, never from a registry the children would fill at mount: such a
-// registry is empty during the server render and full on the client, which is a
-// hydration mismatch.
+// @ssr @core
 /**
- * Several VAvatars stacked into an overlapping row — a team, the participants in a
- * conversation. Each disc bites into the one before it and, coming later in the document, is
- * painted over it: the browser's paint order does the work, with no positioning code. A ring
- * in `--avatar-ring-color` keeps the overlapping edges distinct.
- *
- * Two things need JS. Counting the avatars given and keeping only the first few, so the rest
- * can be summed up as one "+N" disc, is expressible in neither HTML nor CSS — and the count
- * comes from the slot's VNODES, never a registry, which would render 0 on the server and N
- * in the browser. And the group's size and density reach the avatars through provide/inject.
+ * Count avatars through slot VNodes for SSR-consistent overflow; useSlotNodes keeps that count
+ * reactive when the parent replaces its slot.
  */
 
 import { computed, provide } from 'vue'
@@ -48,8 +38,8 @@ interface AvatarGroupProps {
    */
   compact?: boolean
   /**
-   * The colour of the ring drawn around each disc. It defaults to the page
-   * background, which is what makes the ring read as a gap between two avatars.
+   * The colour of the ring drawn around each disc. It defaults to the page background, which
+   * makes the ring read as a gap between two avatars.
    */
   ringColor?: string
   /**
@@ -90,7 +80,7 @@ provide(avatarGroupKey, {
 
 const items = useSlotNodes()
 // `max: 0` means "no limit", as documented, and so does a negative one: `slice(0, -1)` would
-// drop the LAST avatar and sum it into a "+1" disc.
+// drop the last avatar and sum it into a "+1" disc.
 const visibleItems = computed(() =>
   props.max !== undefined && props.max > 0 ? items.value.slice(0, props.max) : items.value,
 )
@@ -104,11 +94,10 @@ const rootStyle = computed<StyleValue>(() =>
   props.ringColor !== undefined ? { '--avatar-ring-color': props.ringColor } : undefined,
 )
 
-// The group carries v-control so that --control-height is defined at ITS level,
-// which keeps the overlap computable even when a child is wrapped — a VTooltip, for
-// instance, inserts a <span> between the group and the VAvatar. An avatar given a
-// size of its own redefines --control-height on itself, so its own overlap follows
-// that size rather than the group's.
+// The group carries v-control so that --control-height is defined at ITS level, which keeps the
+// overlap computable even when a child is wrapped; a VTooltip, for instance, inserts a <span>
+// between the group and the VAvatar. An avatar given a size of its own redefines
+// --control-height on itself, so its own overlap follows that size rather than the group's.
 const resolvedGroupSize = computed<AvatarSize>(() => props.size ?? AVATAR_DEFAULT_SIZE)
 </script>
 
@@ -137,12 +126,10 @@ const resolvedGroupSize = computed<AvatarSize>(() => props.size ?? AVATAR_DEFAUL
     align-items: center;
   }
 
-  /* The overlap itself: each disc bites into the previous one by a fraction of its
-     own height, and the DOM order is what makes the following one paint over it.
-     The selector deliberately targets the direct child whatever it is — a bare
-     VAvatar as well as a VTooltip wrapper — which is why --control-height has to
-     come from the group; an avatar carrying its own size overrides it on itself.
-     The ratio is unitless so it scales with whichever height applies. */
+  /*
+   * Take overlap height from the group so wrappers and differently sized avatars share one row
+   * contract.
+   */
   .v-avatar-group > * + * {
     margin-inline-start: calc(var(--control-height) * -0.3);
   }

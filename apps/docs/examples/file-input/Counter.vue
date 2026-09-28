@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import { VFileInput } from 'vectis-ui'
 
-/* A real byte length, so the figure the counter prints is a real one. */
 const start = () => [
   new File([new Uint8Array(240_000)], 'quarterly-report.pdf', { type: 'application/pdf' }),
   new File([new Uint8Array(96_000)], 'cover-photo.jpg', { type: 'image/jpeg' }),

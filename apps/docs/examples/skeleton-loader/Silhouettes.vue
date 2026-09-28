@@ -7,8 +7,6 @@ import { VAvatar, VButton, VChip, VInput, VSkeletonLoader, VTypography } from 'v
     <VTypography variant="overline" tone="muted" as="p">Component</VTypography>
     <VTypography variant="overline" tone="muted" as="p">Skeleton</VTypography>
 
-    <!-- A control silhouette at the same size as the button, given the width the
-         label would have taken. -->
     <VButton size="md">Save</VButton>
     <VSkeletonLoader shape="control" size="md" :width="128" />
 
@@ -18,7 +16,6 @@ import { VAvatar, VButton, VChip, VInput, VSkeletonLoader, VTypography } from 'v
     <VChip size="xs">Active filter</VChip>
     <VSkeletonLoader shape="pill" size="xs" :width="88" />
 
-    <!-- A field is two silhouettes: the label is a line of text, the box a control. -->
     <VInput size="md" label="Name" model-value="Ada Lovelace" />
     <div class="field">
       <VSkeletonLoader width="40%" />

@@ -1,14 +1,6 @@
 /**
- * The cost of accent-insensitive matching, which runs on every keystroke.
- *
- * `normalizeText` is the filter behind VCombobox and VDataTable: both normalize the search
- * term AND every candidate cell on each input event, so its real workload is not one call
- * but one call per row. VDataTable additionally normalizes across every declared column.
- *
- * The interesting question is what NFD costs on text that has nothing to decompose, since
- * that is the overwhelmingly common case — an ASCII list filtered by an ASCII term. If the
- * two are close, the helper is free and the WeakMap caches around it are what matter; if
- * they diverge, a fast path is worth considering. Both are measured rather than guessed.
+ * Benchmark accent-insensitive search across a full candidate list, matching the per-keystroke
+ * workload.
  */
 import { bench, describe } from 'vitest'
 

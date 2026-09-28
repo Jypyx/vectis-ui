@@ -1,16 +1,6 @@
 /**
- * The cross that empties a field, shared by VInput and VTextarea — and, through
- * `canClear`, the answer the fields composed on top of VInput give it.
- *
- * The two halves of it are one decision: WHEN the cross is shown, and what pressing it does.
- * They were written out in both components and had already started to drift — one asked
- * `props.disabled` where the other asked the value resolved against the row it sits in — which
- * is the kind of divergence nothing catches, the cross simply staying visible in a disabled
- * VInputGroup.
- *
- * The focus is the accessibility half and is not optional: the cross VANISHES the instant it
- * empties the field, so without that call the focus would be left on a button that no longer
- * exists and fall back to the top of the document.
+ * Share clear-button visibility and activation. Restore field focus because clearing removes
+ * the button currently holding it.
  */
 import { computed } from 'vue'
 import type { ComputedRef, Ref } from 'vue'
@@ -21,7 +11,7 @@ interface ClearableOptions {
   /**
    * The consumer's EXPLICIT answer to "is there anything to clear?", which holds even on a
    * read-only field: the value of a read-only date or time picker changes through its panel
-   * rather than by typing. Left undefined, the field answers for itself.
+   * rather than by typing.
    */
   clearVisible: () => boolean | undefined
   /** Whether the field is unusable, the row it sits in taken into account. */
@@ -38,13 +28,7 @@ interface ClearableOptions {
 
 /**
  * Whether a field offers its cross: it asks for one, it can be used and changed, and it holds
- * something. The fields composed on top of VInput: VCombobox, VDateInput, VTimeInput,
- * VFileInput, hold their value somewhere other than the text, so they work out `filled`
- * themselves and hand VInput the result as `clearVisible`; the other terms are the same for
- * every field and are written here once.
- *
- * `disabled` is passed apart from the props because it is the value RESOLVED against the row
- * the field sits in, which the prop alone is not.
+ * something.
  */
 export function canClear(
   props: { clearable: boolean; readonly: boolean },

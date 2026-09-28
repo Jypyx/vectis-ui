@@ -1,15 +1,5 @@
 <script setup lang="ts">
-/**
- * The Type cell of an API table: the type as the library writes it, and what it admits.
- *
- * One question, two answers, and which one a reader gets follows from what the type IS. A closed
- * set of values is printed under the name rather than instead of it, the name being what a
- * consumer imports and the values what they choose between. A shape cannot be read in a cell, so
- * the name becomes a link to the definition the page prints under its Types heading.
- *
- * The generator is what guarantees a reader always gets one of the two: a name standing as the
- * whole of a cell whose values it expanded carries no definition, and every other mention does.
- */
+/** Render closed unions below their type name; link structured types to their declarations. */
 import type { ApiEntry, TypeEntry } from '~/content/api/types'
 
 import { anchorOf } from '~/content/api/types'
@@ -21,10 +11,7 @@ const props = defineProps<{
   types?: TypeEntry[]
 }>()
 
-/**
- * LONGEST NAME FIRST. An alternation matches whichever branch is written earliest, so a name that
- * is the prefix of another would claim the first half of it and leave the rest as plain text.
- */
+/** Match longer type names first so a prefix cannot consume part of another name. */
 const pattern = computed(() => {
   const names = (props.types ?? []).map((one) => one.name).sort((a, b) => b.length - a.length)
   return names.length > 0 ? new RegExp(`\\b(${names.join('|')})\\b`, 'g') : undefined
@@ -73,10 +60,6 @@ const segments = computed<Segment[]>(() => {
 </template>
 
 <style scoped>
-/* The values go UNDER the name, muted: the table is read down its Type column, and a second line
-   in the text colour would read as a second entry rather than as a gloss on the one above it.
-   `max-inline-size` is what keeps a twelve-member placement union lengthening the cell instead of
-   widening the table, the wrapping being free — a `<code>` does not preserve whitespace. */
 .vd-api-values {
   display: block;
   max-inline-size: 22rem;

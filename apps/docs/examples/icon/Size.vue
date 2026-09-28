@@ -22,7 +22,6 @@ const SIZES = [16, 20, 24, 32, 48]
       <VButton :icon-start="notifications" size="lg">Large</VButton>
     </div>
 
-    <!-- And with no context either, it falls back to 1em and follows the text it sits in. -->
     <div class="prose">
       <VTypography variant="body-sm">
         Small text, with a <VIcon :name="notifications" /> in it.

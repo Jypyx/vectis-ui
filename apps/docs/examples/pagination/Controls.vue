@@ -15,8 +15,6 @@ const page = ref(3)
 
 <template>
   <div class="column">
-    <!-- One prop rather than a boolean beside a union: you pick a member, you do not
-         turn one off. -->
     <div v-for="display in DISPLAYS" :key="String(display.value)" class="row">
       <VPagination
         v-model="page"
@@ -28,9 +26,10 @@ const page = ref(3)
       <VTypography variant="caption" tone="muted">{{ display.caption }}</VTypography>
     </div>
 
-    <!-- The icons and the wording are yours. A label is both the visible text and the
-         accessible name, which is what keeps the control named once its text is hidden
-         at a narrow width. -->
+    <!--
+      The icons and the wording are yours. A label is both the visible text and the accessible
+      name, which keeps the control named once its text is hidden at a narrow width.
+    -->
     <div class="row">
       <VPagination
         v-model="page"

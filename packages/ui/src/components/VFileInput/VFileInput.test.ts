@@ -14,8 +14,10 @@ function fileOf(name: string, size = 10, type = ''): File {
   return file
 }
 
-/** jsdom has no `FileList` constructor: an iterable array with `item()` is enough
-    for the only thing the component does with it (a spread). */
+/**
+ * Jsdom has no `FileList` constructor: an iterable array with `item()` is enough for the only
+ * thing the component does with it (a spread).
+ */
 const fileListOf = (files: File[]) =>
   Object.assign(files.slice(), { item: (i: number) => files[i] ?? null }) as unknown as FileList
 
@@ -25,11 +27,7 @@ async function pick(input: HTMLInputElement, files: File[]) {
   await fireEvent.change(input)
 }
 
-/**
- * Records the writes to `input.value`. A spy is the only way to check the reset:
- * jsdom derives the `value` GETTER from its internal file list, which our
- * `files` override does not touch — so reading it back proves nothing.
- */
+/** Records the writes to `input.value`. */
 function trackReset(input: HTMLInputElement) {
   const writes: string[] = []
   Object.defineProperty(input, 'value', {
@@ -160,8 +158,8 @@ describe('VFileInput', () => {
   })
 
   it('resets the native input on every path — selection, refusal, removal, clear', async () => {
-    // jsdom has no `DataTransfer`, so the input is emptied rather than synced (the
-    // form-facing half is the "form sees the selection" block below).
+    // Jsdom has no `DataTransfer`, so the input is emptied rather than synced (the form-facing
+    // half is the "form sees the selection" block below).
     const { native, container, getByRole, rerender } = renderPicker({
       multiple: true,
       display: 'chip',
@@ -215,7 +213,6 @@ describe('VFileInput', () => {
     // accessible name.
     expect(getByTitle(long)).toBeTruthy()
     expect(getByRole('button', { name: `Remove ${long}` })).toBeTruthy()
-    // A name that was not cut carries no redundant title.
     expect(container.querySelectorAll('[title]')).toHaveLength(1)
   })
 
@@ -233,7 +230,6 @@ describe('VFileInput', () => {
   })
 
   it('the cross empties everything, and only shows when asked for and there is something to clear', async () => {
-    // The cross is opt-in, like every other field's.
     const off = renderPicker({ modelValue: [fileOf('a.pdf')] })
     expect(off.container.querySelector('.v-input-clear')).toBeNull()
 
@@ -299,9 +295,8 @@ describe('VFileInput', () => {
     native.click = vi.fn()
     const field = container.querySelector('.v-input-control')!
 
-    // Dispatched by hand: `fireEvent` swallows the dispatch result, and
-    // `defaultPrevented` is exactly what is under test — a read-only text field
-    // is still a submit trigger.
+    // Dispatched by hand: `fireEvent` swallows the dispatch result, and `defaultPrevented` is
+    // exactly what is under test; a read-only text field is still a submit trigger.
     for (const key of ['Enter', ' ']) {
       const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })
       field.dispatchEvent(event)
@@ -323,7 +318,6 @@ describe('VFileInput', () => {
   })
 })
 
-// Drag & drop
 describe('VFileInput — the field props', () => {
   it('iconStart is rendered beside the chips, not in their place', () => {
     const { container } = renderPicker({
@@ -336,8 +330,6 @@ describe('VFileInput — the field props', () => {
     expect(container.querySelectorAll('.v-chip')).toHaveLength(2)
   })
 
-  // The chip display lifts the END icon out of the wrapping flow by its class. A clickable
-  // START icon is a `.v-input-action` too, so only a position class tells the two apart.
   it('a clickable start icon and the attach button carry distinct position classes', () => {
     const { container } = render(VFileInput, {
       props: {
@@ -360,7 +352,6 @@ describe('VFileInput — the field props', () => {
   it('loading: a spinner takes the attach icon place, dropping still works', () => {
     const { container, queryByRole } = renderPicker({ loading: true })
     expect(container.querySelector('.v-spinner')).not.toBeNull()
-    // Purely visual: the attach button goes with the icon, but nothing else is cut off.
     expect(queryByRole('button', { name: 'Choose files' })).toBeNull()
     expect(container.querySelector('.v-file-input')?.hasAttribute('data-disabled')).toBe(false)
   })
@@ -388,7 +379,6 @@ describe('VFileInput drag & drop', () => {
     await fireEvent.dragEnter(el)
     expect(el.hasAttribute('data-dragging')).toBe(true)
 
-    // The first leave is the pointer crossing into a child: still dragging.
     await fireEvent.dragLeave(el)
     expect(el.hasAttribute('data-dragging')).toBe(true)
 
@@ -437,7 +427,7 @@ describe('VFileInput drag & drop', () => {
   )
 })
 
-// Dev guards — they address the integrator, so they are never translated.
+// Dev guards; they address the integrator, so they are never translated.
 describe('VFileInput dev warnings', () => {
   it.each([
     ['display="chip" without multiple', { display: 'chip' }, /display="chip" ignored/],
@@ -482,8 +472,6 @@ describe('truncateMiddle', () => {
     expect(cut).toHaveLength(10)
   })
 
-  // Counted in code points: a UTF-16 slice would cut the emoji in half and
-  // render a replacement character.
   it('never splits a surrogate pair', () => {
     expect(truncateMiddle('🎉🎉🎉🎉🎉🎉', 5)).toBe('🎉🎉…🎉🎉')
   })
@@ -498,7 +486,6 @@ describe('VFileInput — remove', () => {
     const crosses = container.querySelectorAll<HTMLElement>('.v-chip button')
     crosses[1]!.click()
     expect(emitted('remove')?.[0]).toEqual([files[1], 1])
-    // `change` follows with what is left, as it does after every other change.
     expect(emitted('change')?.[0]).toEqual([[files[0]]])
   })
 })
@@ -531,8 +518,6 @@ describe('VFileInput — slots and keys', () => {
     expect(emitted('update:modelValue')).toBeUndefined()
   })
 
-  // Keyed by index, removing the first chip re-keys every chip after it, and Vue patches
-  // the first chip's element into the second's place instead of dropping it.
   it('keys the chips by file identity, so a removal keeps the elements of the rest', async () => {
     const { container, getByRole } = render(VFileInput, {
       props: {
@@ -573,7 +558,7 @@ describe('VFileInput — its field is not drawn read-only', () => {
 })
 
 describe('VFileInput — the form sees the selection', () => {
-  /** jsdom has no `DataTransfer`: a list is all the component asks of one. */
+  /** Jsdom has no `DataTransfer`: a list is all the component asks of one. */
   class FakeTransfer {
     list: File[] = []
     items = { add: (file: File) => this.list.push(file) }
@@ -614,7 +599,6 @@ describe('VFileInput — the form sees the selection', () => {
     expect(input.names()).toEqual(['a.pdf'])
     await input.choose([fileOf('b.pdf')])
     expect(input.names()).toEqual(['a.pdf', 'b.pdf'])
-    // A value set from outside reaches it too.
     await rerender({ modelValue: [] })
     expect(input.names()).toEqual([])
   })

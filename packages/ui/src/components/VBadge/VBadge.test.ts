@@ -165,8 +165,8 @@ describe('VBadge', () => {
     expect(bare.querySelector('.v-badge')!.getAttribute('style')).toBeNull()
   })
 
-  // The two colours share one inline style, which is what a return to a single
-  // ternary on `color` would silently break.
+  // The two colours share one inline style, which a return to a single ternary on `color` would
+  // silently break.
   it('color and ringColor are carried by the same style attribute', () => {
     const { container } = render(VBadge, {
       props: { count: 3, bordered: true, color: 'hotpink', ringColor: 'rebeccapurple' },

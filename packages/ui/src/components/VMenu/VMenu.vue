@@ -1,21 +1,8 @@
 <script setup lang="ts">
 // @a11y @core
 /**
- * A menu of actions, opened by a button and closed as soon as one is chosen. It follows the
- * ARIA menu pattern, which is what tells a screen reader these are commands rather than
- * links or options.
- *
- * It rests on `popover="auto"`: the panel light-dismisses without a line of code and
- * positions itself in CSS against its `popovertarget` invoker, which is its implicit anchor.
- *
- * The JS covers only what the platform does not — keeping `v-model:open` in step, moving
- * focus into the panel and handing it back to the trigger. The keyboard inside the panel
- * lives in VMenuPanel.
- *
- * HOW FAR the focus goes in depends on how the menu was opened: from the keyboard it settles
- * on the first command, ready to be chosen; by pointer it stops at the panel, so nothing is
- * singled out for someone who has not asked for a choice yet. The arrows still enter the
- * list from there.
+ * Native auto popovers own light dismissal and anchoring. JavaScript supplies the model bridge
+ * and ARIA menu focus management.
  */
 
 import { computed, provide, ref, useId } from 'vue'
@@ -52,7 +39,6 @@ interface MenuProps {
   matchTrigger?: boolean
 }
 
-// Deliberately not assigned to a variable: the template reads the props directly.
 withDefaults(defineProps<MenuProps>(), {
   placement: 'bottom-start',
   size: 'sm',
@@ -104,32 +90,18 @@ const triggerProps = computed<MenuTriggerProps>(() => ({
 provide(menuKey, { closeAll: () => panelRef.value?.close() })
 
 // @a11y
-// The focus half of the bridge: into the panel when it opens, back to the
-// trigger when it closes. Keeping the state in step alone would leave a keyboard user
-// stranded at the top of the page every time a menu opened or closed.
-//
-// WHERE it lands in the panel is the whole question, and the browser is the one that
-// answers it. In a menu the focus IS the highlight (see the rule in VMenuItem), so
-// taking the first item singles out a command — which is what someone arriving on the
-// arrows wants, and what someone who has just clicked never asked for. `:focus-visible`
-// is exactly that distinction, read off whatever holds the focus at this instant: the
-// trigger, since opening a popover through `popovertarget` does not move the focus.
-//
-// The pointer branch focuses the PANEL rather than nothing at all, and that is
-// structural: every key the menu answers to is listened for on the panel element, so
-// focus left outside it — on a trigger that is a DOM sibling — would silence the arrows,
-// Home/End and the Tab that closes the menu. Both ways of being wrong are mild and
-// symmetric: a misread pointer costs one extra keystroke, a misread keyboard gives back
-// the older behaviour.
+// The focus half of the bridge: into the panel when it opens, back to the trigger when it
+// closes. Keeping the state in step alone would leave a keyboard user stranded at the top of
+// the page every time a menu opened or closed.
 function onToggle(value: boolean) {
   open.value = value
   if (value) {
     if (isKeyboardFocus(document.activeElement)) panelRef.value?.focusFirst()
     else panelRef.value?.focusPanel()
   } else {
-    // The browser's own dismissal — a click outside, Escape — leaves the focus
-    // nowhere, on the page body. Only then is it handed back to the trigger: if the
-    // focus has already moved somewhere else deliberately, it must be left alone.
+    // The browser's own dismissal; a click outside, Escape; leaves the focus nowhere, on the
+    // page body. Only then is it handed back to the trigger: if the focus has already moved
+    // somewhere else deliberately, it must be left alone.
     const active = document.activeElement
     if (!active || active === document.body || panelRef.value?.el?.contains(active)) {
       menuInvoker(menuId)?.focus()
@@ -138,14 +110,10 @@ function onToggle(value: boolean) {
 }
 
 /*
- * TRAP — every opening that does not come from a click on the trigger has to NAME that
- * trigger. A popover opened through `popovertarget` takes its invoker as its implicit
- * anchor; opened from code with no `source`, it has no anchor at all and the browser
- * paints it at the corner of the viewport. Nothing errors, and the panel is otherwise
- * perfectly functional there.
- *
- * The invoker is searched for rather than held: it is rendered by the consumer, in a
- * slot this component cannot reach into.
+ * Every opening that does not come from a click on the trigger has to NAME that trigger. A
+ * popover opened through `popovertarget` takes its invoker as its implicit anchor; opened from
+ * code with no `source`, it has no anchor at all and the browser paints it at the corner of the
+ * viewport.
  */
 function openAtTrigger() {
   panelRef.value?.show(menuInvoker(menuId) ?? undefined)
@@ -161,9 +129,8 @@ usePopoverModel(
 )
 
 /*
- * The same trio VDialog, VDialogAlert and VPopover answer. It is a relay onto the panel,
- * which has held it all along: opening a menu from code was otherwise only possible through
- * the model, which inserts a tick where a focus move cannot afford one.
+ * Relay the imperative panel API so programmatic opening can move focus immediately without
+ * waiting for a model render.
  */
 defineExpose({
   /** Opens the menu at once, without waiting for the model to come round. */

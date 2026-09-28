@@ -1,19 +1,8 @@
 ﻿<script setup lang="ts" generic="Row extends Record<string, unknown>">
 // @core
 /**
- * A table of data with everything usually built around one: a title, a search field, sortable
- * columns, a selection and pagination.
- *
- * A real `<table>` underneath, with a caption, proper column headers and `aria-sort` — which
- * is what lets a screen reader say "row 3 of 40, column Name" rather than read a grid of
- * unrelated text. The furniture is composed from the library's own components.
- *
- * The JS is almost all derivation — filter, then sort, then slice — plus two effects
- * explained where they sit.
- *
- * Narrow-space behaviour and height-filling are both entirely CSS: `stack` turns each row
- * into a card once the COMPONENT is narrow, measured by a container query rather than by
- * code, and the root is a flex column in which only the scroller stretches.
+ * Native table semantics remain intact. JavaScript adds sorting, paging, selection and
+ * debounced search; browser measurements stay in browser tests.
  */
 
 import { computed, ref, useId, useSlots, watch, watchEffect } from 'vue'
@@ -132,23 +121,16 @@ export type DataTableVariant = 'flat' | 'outlined'
 /** What a narrow container does to the rows. */
 export type DataTableResponsive = 'scroll' | 'stack'
 
-// TRAP — this interface is exported rather than kept local, and it is generic rather than
-// referring to the component's own type parameter.
-//
-// A component typed over its rows inlines the whole signature of its props into the
-// declarations it emits, so a name that is not exported cannot be written there and the
-// build of the type declarations fails. And being lifted out of the component's scope, it
-// has no access to that parameter and must take one of its own.
+// This interface is exported rather than kept local, and it is generic rather than referring to
+// the component's own type parameter. A component typed over its rows inlines the whole
+// signature of its props into the declarations it emits, so a name that is not exported cannot
+// be written there and the build of the type declarations fails.
 export interface DataTableProps<Row extends Record<string, unknown>> {
   /** The columns to show, in order. */
   columns: DataTableColumn[]
   /** The rows to show. */
   rows: Row[]
-  /**
-   * Which field identifies a row. Without it a row is identified by its position, which
-   * is enough for display but not for a selection: it must be given as soon as rows can
-   * be selected, or the selection follows the positions rather than the rows.
-   */
+  /** Which field identifies a row. */
   rowKey?: string
   /**
    * A sentence describing what the table holds. It is announced before the table itself,
@@ -174,14 +156,7 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   loadingText?: string
   /** What is said when there is no row to show. It falls back to the design system dictionary. */
   emptyText?: string
-  /**
-   * A title above the table, on the left of its toolbar.
-   *
-   * With no `caption` it also names the table for screen readers.
-   *
-   * Note that this prop shadows the HTML attribute of the same name on the component
-   * itself, an accepted trade-off: a tooltip over a whole table would be of little use.
-   */
+  /** A title above the table, on the left of its toolbar. */
   title?: string
   /** Adds a search field to the toolbar. */
   searchable?: boolean
@@ -208,9 +183,9 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   /** Tightens the cells by one step, and everything the table renders with them. */
   compact?: boolean
   /**
-   * The height of the WHOLE component, toolbar and pagination included: a number is read
-   * as pixels, anything else as a CSS length. Left out, the table takes its parent's
-   * height whenever the parent has one.
+   * The height of the whole component, toolbar and pagination included: a number is read as
+   * pixels, anything else as a CSS length. Left out, the table takes its parent's height
+   * whenever the parent has one.
    */
   height?: number | string
   /** The heading icon of a column that can be sorted but currently is not. */
@@ -248,10 +223,9 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
    */
   selectionText?: (count: number) => string
   /**
-   * What a row's checkbox is announced as. "Select row" tells a screen reader user
-   * nothing about WHICH row, so this is worth supplying with something from the row
-   * itself. `index` is the row's position in the whole table, from 0, not in the page.
-   * It falls back to the design system dictionary, which numbers the rows from 1.
+   * What a row's checkbox is announced as. "Select row" tells a screen reader user nothing
+   * about WHICH row, so this is worth supplying with something from the row itself. It falls
+   * back to the design system dictionary, which numbers the rows from 1.
    */
   selectRowLabel?: (row: Row, index: number) => string
   /**
@@ -305,17 +279,9 @@ const resolvedSearchLabel = computed(() => props.searchLabel ?? m.value.dataTabl
 const resolvedPerPageText = computed(() => props.perPageText ?? m.value.dataTable.perPage)
 const resolvedSelectAllLabel = computed(() => props.selectAllLabel ?? m.value.dataTable.selectAll)
 
-/**
- * Which column the rows are sorted by, and in which direction. Nothing is sorted to begin
- * with. It may be driven from outside or simply left to the table, which sets it as headers
- * are clicked; changing it does not send the reader back to the first page.
- */
+/** Which column the rows are sorted by, and in which direction. */
 const sort = defineModel<DataTableSort | null>('sort', { default: null })
-/**
- * The page being shown, counted from 1. It starts on the first, and searching or changing
- * the page size sends it back there. It is clamped by derivation rather than written to, so
- * a page beyond the last simply displays the last.
- */
+/** The page being shown, counted from 1. */
 const page = defineModel<number>('page', { default: 1 })
 /**
  * How many rows a page holds. Any value above zero turns the pagination on, so passing
@@ -323,18 +289,12 @@ const page = defineModel<number>('page', { default: 1 })
  */
 const perPage = defineModel<number | undefined>('perPage', { default: undefined })
 /*
- * "No value" is spelled two ways on purpose. `sort` is `null` because the TABLE writes that
- * state itself, a third click on a heading clearing the order, and a model the component
- * writes needs a value a consumer can store and compare. `perPage` is `undefined` because
- * nothing here ever clears it: it is simply a model that was not given. `DataTableParams`
- * reports both as `null`, being a request body rather than a model.
+ * `sort` is `null` because the TABLE writes that state itself, a third click on a heading
+ * clearing the order, and a model the component writes needs a value a consumer can store and
+ * compare. `perPage` is `undefined` because nothing here ever clears it: it is simply a model
+ * that was not given.
  */
-/**
- * The selected rows, as the identities `rowKey` gives them, never the row objects
- * themselves. Nothing is selected to begin with, and a selection SURVIVES a change of page:
- * the header checkbox covers the visible page alone, which is why it can be indeterminate.
- * The footer counts this list as it stands, identities of rows no longer shown included.
- */
+/** The selected rows, as the identities `rowKey` gives them, never the row objects themselves. */
 const selected = defineModel<DataTableRowId[]>('selected', { default: () => [] })
 /**
  * What is typed in the search field, empty to begin with. Only the declared columns are
@@ -345,12 +305,8 @@ const search = defineModel<string>('search', { default: '' })
 
 const emit = defineEmits<{
   /**
-   * What the table is now being asked for, when a server is answering: the page, the
-   * page size, the sort or the search has changed, the last one after its delay. An equal
-   * value handed down again asks for nothing.
-   *
-   * Nothing is emitted when the component appears: fetching the first page is the
-   * consumer's own business, and emitting would make every table fetch twice.
+   * What the table is now being asked for, when a server is answering: the page, the page size,
+   * the sort or the search has changed, the last one after its delay.
    */
   'update:params': [params: DataTableParams]
 }>()
@@ -371,9 +327,9 @@ defineSlots<{
   empty?(scope: DataTableEmptySlotProps): unknown
 }>()
 
-// `class` and `style` stay on the wrapper, where a consumer expects to place the
-// component; everything else — an id, the aria-* — goes to the `<table>` itself, the only
-// element they validly describe.
+// `class` and `style` stay on the wrapper, where a consumer expects to place the component;
+// everything else; an id, the aria-*; goes to the `<table>` itself, the only element they
+// validly describe.
 defineOptions({ inheritAttrs: false })
 const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 const slots = useSlots()
@@ -388,9 +344,9 @@ defineExpose({
 
 // @a11y
 /*
- * The title names the table when nothing else does. A caption already does, and so does a
- * consumer's own `aria-label` or `aria-labelledby`, which a reference to the title would
- * override. Bound BEFORE the forwarded attributes, like every state the component owns.
+ * A caption already does, and so does a consumer's own `aria-label` or `aria-labelledby`, which
+ * a reference to the title would override. Bound before the forwarded attributes, like every
+ * state the component owns.
  */
 const titleId = useId()
 const tableLabelledBy = computed(() =>
@@ -440,10 +396,10 @@ if (isDev) {
 }
 
 /*
- * TRAP — a key that is already a string or a number is returned AS IT IS. The selection
- * holds these identities and is looked up with a Set, which tells the number 7 from the
- * string "7": turned into text, a table keyed by numeric ids never found a selected row
- * again, so every checkbox stayed unticked.
+ * A key that is already a string or a number is returned AS IT IS. The selection holds these
+ * identities and is looked up with a Set, which tells the number 7 from the string "7": turned
+ * into text, a table keyed by numeric ids never found a selected row again, so every checkbox
+ * stayed unticked.
  */
 function rowIdentity(row: Row, index: number): DataTableRowId {
   if (!props.rowKey) return index
@@ -451,16 +407,11 @@ function rowIdentity(row: Row, index: number): DataTableRowId {
   return typeof key === 'string' || typeof key === 'number' ? key : String(key)
 }
 
-// From here on: filter, then sort, then cut into pages — three derivations, each reading
-// the one before it.
-//
-// The search only ever looks at the columns that are DISPLAYED. Searching fields the
-// reader cannot see would return rows for reasons nothing on screen explains.
+// Searching fields the reader cannot see would return rows for reasons nothing on screen
+// explains.
 /*
- * The cells in accent-insensitive form, memoized per row and column and re-checked against
- * the raw value, so a value edited in place is noticed. The filter below re-reads the whole
- * table on every keystroke: ten thousand rows across five columns is fifty thousand
- * normalizations per character typed without it.
+ * The filter below re-reads the whole table on every keystroke: ten thousand rows across five
+ * columns is fifty thousand normalizations per character typed without it.
  */
 const normalizedOf = createNormalizedCache<Row>()
 const normalizedCell = (row: Row, key: string) => normalizedOf(row, String(row[key] ?? ''), key)
@@ -475,14 +426,6 @@ const filteredRows = computed(() => {
 })
 
 /*
- * The collator is built ONCE per locale rather than per comparison.
- *
- * `String.localeCompare` reuses an engine-cached collator only when the locale AND the
- * options are both `undefined`; passing either takes the slow path and constructs an
- * `Intl.Collator` per call — the cost class `utils/date.ts` fights, construction running one
- * to two orders of magnitude longer than use. Nor is it paid once: `search` feeds
- * `filteredRows` feeds this, so a sorted table re-sorts on every keystroke.
- *
  * The locale must nonetheless stay EXPLICIT: an `undefined` one resolves differently in Node
  * and in the browser, so the row order would diverge across hydration.
  */
@@ -490,9 +433,7 @@ const collator = computed(() => new Intl.Collator(vectisLocale.value, { numeric:
 
 /*
  * What a cell is compared by. A `Date` by its instant: as text it collates on `toString()`,
- * which opens with the WEEKDAY, so Monday the 5th sorted before Saturday the 3rd. A number
- * written as text by its value: the collator's `numeric` option reads digit runs and
- * nothing else, so it put "-5" before "-10" and "1.5" before "1.25".
+ * which opens with the WEEKDAY, so Monday the 5th sorted before Saturday the 3rd.
  */
 const NUMERIC_TEXT = /^\s*[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?\s*$/i
 function sortKey(value: unknown): unknown {
@@ -563,17 +504,10 @@ function sortIconFor(column: DataTableColumn): IconSource {
   return sort.value.direction === 'asc' ? props.sortAscIcon : props.sortDescIcon
 }
 
-// The two effects the search needs.
-//
-// A changed search invalidates where one was: page 4 of the old results has nothing to
-// do with page 4 of the new ones, so the reader goes back to the first. And when a server
-// answers, nothing native waits before asking it, so that has to be written.
-//
-// The waiting is delegated to `useTimer` — a delay of zero running at once, cancellation
-// when the component goes away — and the term that was actually committed is what the
-// parameters below report.
-// It starts from the search the table was GIVEN: starting empty, a table mounted with a
-// search already in place reported an empty one in every request until the reader typed.
+// And when a server answers, nothing native waits before asking it, so that has to be written.
+// The waiting is delegated to `useTimer`; a delay of zero running at once, cancellation when
+// the component goes away; and the term that was actually committed is what the parameters
+// below report.
 const committedSearch = ref(search.value)
 const searchTimer = useTimer()
 
@@ -593,15 +527,13 @@ watch(search, () => {
   searchTimer.start(commitSearch, props.searchDebounce)
 })
 
-// The search the rows on show answer to: the committed one when a server does the searching.
 const emptySearch = computed(() => (props.serverSide ? committedSearch.value : search.value))
 
-// What the table is asking for, as one value.
 /*
- * TRAP — `page` is the MODEL, never the clamped `currentPage`. The clamp reads `total`,
- * which is the server's own answer: read here, a response that changed the total would move
- * the parameters and ask for the page again, and a consumer clearing `total` while it loads
- * would send the reader back to page 1.
+ * `page` is the model, never the clamped `currentPage`. The clamp reads `total`, which is the
+ * server's own answer: read here, a response that changed the total would move the parameters
+ * and ask for the page again, and a consumer clearing `total` while it loads would send the
+ * reader back to page 1.
  */
 const params = computed<DataTableParams>(() => ({
   page: page.value,
@@ -611,10 +543,10 @@ const params = computed<DataTableParams>(() => ({
   search: committedSearch.value,
 }))
 
-// Committing a search and going back to the first page happen one after the other, but
-// both land in the same flush, so this runs ONCE on the final values — never two requests
-// for what the reader experienced as a single action.
-// Compared by value: a parent handing down an equal `sort` object is no new request.
+// Committing a search and going back to the first page happen one after the other, but both
+// land in the same flush, so this runs once on the final values; never two requests for what
+// the reader experienced as a single action. Compared by value: a parent handing down an equal
+// `sort` object is no new request.
 watch(params, (value, previous) => {
   if (!props.serverSide) return
   if (JSON.stringify(value) === JSON.stringify(previous)) return
@@ -666,7 +598,7 @@ function toggleMaster() {
 // Without this every checkbox in the column would be announced identically, and a screen
 // reader user would have no way of knowing which row they were about to select.
 function rowSelectLabel(row: Row, index: number): string {
-  // The position in the WHOLE table, or every page would have its own "Select row 1". The
+  // The position in the whole table, or every page would have its own "Select row 1". The
   // dictionary counts from one as a human does, the prop from zero as code does.
   const position = (paginated.value ? (currentPage.value - 1) * (perPage.value ?? 0) : 0) + index
   return props.selectRowLabel?.(row, position) ?? m.value.dataTable.selectRow(position + 1)
@@ -676,8 +608,6 @@ function setPerPage(option: number) {
   perPage.value = option
 }
 
-// Whoever changes it, the menu or the parent: the page the reader was on no longer starts
-// on the same row, so it goes back to the first one.
 watch(perPage, () => {
   page.value = 1
 })
@@ -686,12 +616,9 @@ const colCount = computed(() => props.columns.length + (props.selectable ? 1 : 0
 
 // @a11y
 /**
- * What the footer says about the selection.
- *
- * TRAP — it is rendered, EMPTY, as soon as rows can be selected at all. A region meant to
- * announce its own changes must already exist before the first change: inserted into the
- * page at the same moment as its text, it announces nothing, and the first row selected
- * would pass in silence.
+ * It is rendered, empty, as soon as rows can be selected at all. A region meant to announce its
+ * own changes must already exist before the first change: inserted into the page at the same
+ * moment as its text, it announces nothing, and the first row selected would pass in silence.
  */
 const selectionSummary = computed(() => {
   const count = selected.value.length
@@ -708,13 +635,9 @@ const rangeSummary = computed(() => {
   return props.rangeText?.({ start, end, total }) ?? m.value.dataTable.range({ start, end, total })
 })
 
-// The height is applied to the WHOLE component and not as a ceiling on the scrolling
-// area. The component then takes exactly the height asked for and the scrolling area
-// absorbs whatever is left, so a page with three rows on it no longer makes the table
-// shrink around them.
-//
-// A soft ceiling remains available to the consumer through a maximum height of their own:
-// the component is a column whose scrolling area can be compressed.
+// The height is applied to the whole component and not as a ceiling on the scrolling area. A
+// soft ceiling remains available to the consumer through a maximum height of their own: the
+// component is a column whose scrolling area can be compressed.
 const heightStyle = computed<StyleValue | undefined>(() =>
   props.height !== undefined ? { blockSize: cssSize(props.height) } : undefined,
 )
@@ -750,8 +673,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       />
     </div>
 
-    <!-- Only the table itself scrolls; the toolbar above and the footer below stay
-         where they are. -->
     <div class="v-data-table-scroller">
       <table
         ref="tableEl"
@@ -774,8 +695,10 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                 :aria-label="resolvedSelectAllLabel"
                 @update:model-value="toggleMaster"
               />
-              <!-- Its hidden box would leave the heading EMPTY in the stacked layout (axe
-                   empty-table-header), so it keeps its name as text there. -->
+              <!--
+                Its hidden box would leave the heading empty in the stacked layout (axe
+                empty-table-header), so it keeps its name as text there.
+              -->
               <span class="v-data-table-stack-label">{{ resolvedSelectAllLabel }}</span>
             </th>
             <th
@@ -810,8 +733,10 @@ const heightStyle = computed<StyleValue | undefined>(() =>
           </tr>
         </thead>
         <tbody>
-          <!-- The order matters: loading is checked BEFORE emptiness, so a table waiting
-               for its rows never claims there are none. -->
+          <!--
+            The order matters: loading is checked before emptiness, so a table waiting for its
+            rows never claims there are none.
+          -->
           <tr v-if="loading">
             <td :colspan="colCount" class="v-data-table-state">
               <slot name="loading">
@@ -835,10 +760,11 @@ const heightStyle = computed<StyleValue | undefined>(() =>
               :key="visibleIds[index]"
               :data-selected="selectable && isSelected(visibleIds[index]!) ? '' : undefined"
             >
-              <!-- TRAP — the selection is marked with a plain attribute and NOT with the
-                   ARIA selected state, which is invalid on the row of a table: it belongs
-                   to a grid. What tells assistive technology that a row is selected is
-                   its checkbox being checked. -->
+              <!--
+                The selection is marked with a plain attribute and not with the ARIA selected
+                state, which is invalid on the row of a table: it belongs to a grid. What tells
+                assistive technology that a row is selected is its checkbox being checked.
+              -->
               <td v-if="selectable" class="v-data-table-select">
                 <VCheckbox
                   :model-value="isSelected(visibleIds[index]!)"
@@ -908,10 +834,11 @@ const heightStyle = computed<StyleValue | undefined>(() =>
         <span v-if="showRange" class="v-data-table-range" aria-live="polite">{{
           rangeSummary
         }}</span>
-        <!-- Named after the table rather than with the generic pagination wording: a page
-             holding this table AND a pagination of its own would otherwise expose two
-             navigation landmarks with the same name, and a screen reader user could not
-             tell them apart. -->
+        <!--
+          Named after the table rather than with the generic pagination wording: a page holding
+          this table and a pagination of its own would otherwise expose two navigation landmarks
+          with the same name, and a screen reader user could not tell them apart.
+        -->
         <VPagination
           v-model="page"
           :label="m.dataTable.pagination"
@@ -929,9 +856,10 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 <style>
 @layer vectis.components {
   .v-data-table {
-    /* The density, expressed as the cells' padding and tightened by one step in the
-       compact form. It does not go through the shared control scale — there is no single
-       control height in a table — which is the same case VAccordion is in. */
+    /*
+     * It does not go through the shared control scale; there is no single control height in a
+     * table; which is the same case VAccordion is in.
+     */
     --data-table-pad-block: var(--vectis-space-3);
     --data-table-pad-inline: var(--vectis-space-3);
     --data-table-head-pad-block: var(--vectis-space-2);
@@ -945,14 +873,9 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     font-family: var(--vectis-text-family);
 
     /*
-     * A column of three: toolbar, scroller, footer. The root takes its parent's height and
-     * the scroller absorbs what is left, which stops a last page of two rows shrinking the
-     * whole table and keeps the footer at the bottom. With no height on the parent, a
-     * percentage of `auto` resolves to `auto`, so this costs nothing and measures nothing.
-     *
-     * TRAP — deliberately NO `min-block-size: 0` here. Inside a flex column parent too short
-     * for it, the automatic minimum is what keeps the table at its natural height instead of
-     * letting it be crushed to nothing.
+     * Deliberately no `min-block-size: 0` here. Inside a flex column parent too short for it,
+     * the automatic minimum is what keeps the table at its natural height instead of letting it
+     * be crushed to nothing.
      */
     display: flex;
     flex-direction: column;
@@ -965,8 +888,10 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     --data-table-head-pad-block: var(--vectis-space-1);
   }
 
-  /* The card. The unframed default has nothing to undo, since it declares no decoration
-     at all — whatever surrounds the table is what provides the surface then. */
+  /*
+   * The card. The unframed default has nothing to undo, since it declares no decoration at all;
+   * whatever surrounds the table is what provides the surface then.
+   */
   .v-data-table[data-variant='outlined'] {
     --data-table-frame-pad: var(--data-table-pad-inline);
 
@@ -974,30 +899,18 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     border: 1px solid var(--vectis-color-border);
     border-radius: var(--vectis-radius-surface);
     /*
-     * The price of the rounded corners: striped and selected row backgrounds, the sticky
-     * heading's opaque background and the scroller's square corners would all spill past.
-     *
-     * TRAP — `clip` and not `hidden`. Hiding the overflow would make this element a scroll
-     * container of its own, and the sticky heading would then anchor to IT rather than to
-     * the area that actually scrolls — which is to say it would not stick at all.
-     *
-     * Confined to the framed form on purpose: unframed, the toolbar and footer sit flush
-     * with the edge and the clip would crop their focus rings.
+     * `clip` and not `hidden`. Hiding the overflow would make this element a scroll container
+     * of its own, and the sticky heading would then anchor to IT rather than to the area that
+     * actually scrolls; which is to say it would not stick at all.
      */
     overflow: clip;
   }
 
   /*
-   * The ONE part that scrolls, taking whatever the toolbar and footer leave. The `auto`
-   * basis grows it from its CONTENT, so the whole arrangement is inert while there is no
-   * free space: a table shorter than its container stays exactly as tall as it is.
-   *
-   * `min-block-size: 0` is load-bearing — a flex item refuses by default to shrink below its
+   * `min-block-size: 0` is load-bearing; a flex item refuses by default to shrink below its
    * content, so without it the area never compresses and the table overflows instead of
-   * scrolling.
-   *
-   * Deliberately NOT confined to `data-responsive='scroll'`: a table taller than its host
-   * must scroll in `stack` too, or `outlined`'s clip crops it and the rows below become
+   * scrolling. Deliberately not confined to `data-responsive='scroll'`: a table taller than its
+   * host must scroll in `stack` too, or `outlined`'s clip crops it and the rows below become
    * unreachable.
    */
   .v-data-table-scroller {
@@ -1007,7 +920,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   .v-data-table-toolbar {
-    flex: none; /* stays at the top, outside whatever scrolls */
+    flex: none;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -1018,13 +931,11 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     padding-inline: var(--data-table-frame-pad);
   }
 
-  /* The title is rendered by VTypography, and its colour is stated explicitly because the
-     toolbar may well sit inside a context whose text is dimmed.
-
-     TRAP — it is set through the colour VARIABLE that component reads, and not with a
-     plain colour declaration. That declaration would collide with VTypography's own at
-     equal specificity, and the winner would be decided by whichever sheet the consumer's
-     bundler put last. */
+  /*
+   * It is set through the colour VARIABLE that component reads, and not with a plain colour
+   * declaration. That declaration would collide with VTypography's own at equal specificity,
+   * and the winner would be decided by whichever sheet the consumer's bundler put last.
+   */
   .v-data-table-title {
     --typography-color: var(--vectis-color-text);
   }
@@ -1057,14 +968,17 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     padding: var(--data-table-head-pad-block) var(--data-table-pad-inline);
     text-align: start;
     font-size: var(--vectis-text-body-md-size);
-    /* The heavier weight distinguishes a heading from the data under it, which is
-       emphasis rather than a typographic role — hence a font token read directly. */
+    /*
+     * The heavier weight distinguishes a heading from the data under it, which is emphasis
+     * rather than a typographic role; hence a font token read directly.
+     */
     font-weight: var(--vectis-font-weight-semibold);
     color: var(--vectis-color-text-muted);
-    /* The heading row gets a tint of its own so it reads apart from the data. `muted` and
-       not `sunken`: the striped rows already take `sunken`, and a heading painted the same
-       would read as one more stripe. Opaque in both themes, which is also what a frozen
-       heading needs, the rows scrolling underneath it. */
+    /*
+     * The heading row gets a tint of its own so it reads apart from the data. `muted` and not
+     * `sunken`: the striped rows already take `sunken`, and a heading painted the same would
+     * read as one more stripe.
+     */
     background-color: var(--vectis-color-surface-muted);
     border-block-end: 1px solid var(--vectis-color-border);
   }
@@ -1117,9 +1031,11 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     }
   }
 
-  /* TRAP — a frozen heading relies on the opaque background every `th` already carries: the
-     rows scroll underneath it, and a consumer restyling that background with a translucent
-     colour will see them through. */
+  /*
+   * A frozen heading relies on the opaque background every `th` already carries: the rows
+   * scroll underneath it, and a consumer restyling that background with a translucent colour
+   * will see them through.
+   */
   .v-data-table[data-sticky-header] th {
     position: sticky;
     inset-block-start: 0;
@@ -1127,9 +1043,11 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   .v-data-table-sort {
-    /* The icon context for the sort glyph. Without it the icon would fall back to one em
-       — the heading's own text size — and come out visibly smaller than every other icon
-       in the component. */
+    /*
+     * The icon context for the sort glyph. Without it the icon would fall back to one em; the
+     * heading's own text size; and come out visibly smaller than every other icon in the
+     * component.
+     */
     --vectis-icon-size: var(--vectis-icon-size-md);
     --vectis-icon-opsz: 20;
 
@@ -1180,7 +1098,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   .v-data-table-footer {
-    flex: none; /* stays at the bottom, outside whatever scrolls */
+    flex: none;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -1193,12 +1111,9 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
   /*
    * The right-hand zone is pushed to the edge by an automatic margin rather than by an
-   * alignment on the footer. The two zones are siblings in the same row, and the count on
-   * the left has to stay at the OPPOSITE edge: any alignment set on the footer would move
-   * both of them together.
-   *
-   * The margin also does the right thing when there is no count at all, the zone simply
-   * being pushed against the far edge on its own.
+   * alignment on the footer. The two zones are siblings in the same row, and the count on the
+   * left has to stay at the OPPOSITE edge: any alignment set on the footer would move both of
+   * them together.
    */
   .v-data-table-footer-end {
     display: flex;
@@ -1222,13 +1137,11 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     gap: var(--vectis-space-2);
   }
 
-  /* The stacked form: once the COMPONENT is narrow, each row becomes a card carrying its
-     own headings. It is entirely CSS, and the threshold is written as a literal length —
-     these queries accept no variables.
-
-     The column headings are not removed but hidden the way visually hidden text is: they
-     still name each column for a screen reader, which reads the cells in the same order
-     either way. */
+  /*
+   * The stacked form: once the COMPONENT is narrow, each row becomes a card carrying its own
+   * headings. It is entirely CSS, and the threshold is written as a literal length; these
+   * queries accept no variables.
+   */
   @container (max-width: 640px) {
     .v-data-table[data-responsive='stack'] .v-data-table-head {
       position: absolute;
@@ -1283,8 +1196,10 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       color: var(--vectis-color-text-muted);
     }
 
-    /* The checkbox cell carries no column name — there is none — so it gets no heading
-       and opens the card on its own line. */
+    /*
+     * The checkbox cell carries no column name; there is none; so it gets no heading and opens
+     * the card on its own line.
+     */
     .v-data-table[data-responsive='stack'] td.v-data-table-select {
       justify-content: flex-start;
     }

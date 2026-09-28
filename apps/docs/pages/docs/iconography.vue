@@ -17,28 +17,17 @@ const { t } = useI18n()
 useDocsHead('iconography')
 
 /**
- * The whole registry, for the gallery at the foot of the page.
- *
- * Importing the barrel is legitimate HERE and nowhere in the library: a component doing it
- * would put the flat table back into every consumer's bundle and undo the per-icon split. This
- * page is the one place that genuinely wants all 34 — it is showing them.
- *
- * `Object.values` already returns a fresh array, so sorting it in place moves nothing but the
- * copy. Sorted by CODE POINT and never with `localeCompare`: an `undefined` locale resolves
- * differently in Node and in the browser, so the order — which is rendered markup — would come
- * out different on the two sides of hydration.
+ * The whole registry, for the gallery at the foot of the page. Sorted by CODE POINT and never
+ * with `localeCompare`: an `undefined` locale resolves differently in Node and in the browser,
+ * so the order; which is rendered markup; would come out different on the two sides of
+ * hydration.
  */
 const iconGallery = Object.values(builtinIcons).sort((a, b) => (a.name < b.name ? -1 : 1))
 
 /*
- * The samples are NOT translated, here or anywhere on the site: a demo has to match the code
+ * The samples are not translated, here or anywhere on the site: a demo has to match the code
  * printed beside it, and the code is the same in every language. The heading `id`s are not
- * translated either — they are the site's permalinks.
- *
- * The three resolver samples are written against the real factory signatures: `className`
- * receives the mapped name and the filled flag, `components` is a table, `props` is optional.
- * A sample that would not compile is worse than no sample, so read `VIcon/resolver.ts` before
- * changing one.
+ * translated either; they are the site's permalinks.
  */
 const importCode = `import { close, search } from 'vectis-ui/icons'`
 
@@ -197,8 +186,8 @@ const orderCode = `<!-- an explicit render wins over everything else -->
   <DocsProse keypath="iconography.listFilled" />
   <!--
     A real <ul>: the gallery is an enumeration, and saying so is what lets a screen reader
-    announce how many icons there are. The drawings are decorative — the NAME beside each one
-    is the information, and it is the thing a reader has come to copy.
+    announce how many icons there are. The drawings are decorative; the NAME beside each one is
+    the information, and it is the thing a reader has come to copy.
   -->
   <ul class="vd-icon-grid">
     <li v-for="icon in iconGallery" :key="icon.name">

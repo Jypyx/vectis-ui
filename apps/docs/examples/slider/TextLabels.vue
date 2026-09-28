@@ -7,10 +7,10 @@ const size = ref(2)
 
 <template>
   <div class="demo">
-    <!-- One label per step, in order. They name the stops on the track, and they also
-         become what a screen reader announces in place of the raw number: this slider
-         says "M" and not "2". Giving labels turns the ticks on by itself, a label with
-         no mark to sit under having nothing to point at. -->
+    <!--
+      One label per step, in order. They name the stops on the track, and they also become what
+      a screen reader announces in place of the raw number: this slider says "M" and not "2".
+    -->
     <VSlider v-model="size" :min="0" :max="4" :labels="['XS', 'S', 'M', 'L', 'XL']" label="Size" />
   </div>
 </template>

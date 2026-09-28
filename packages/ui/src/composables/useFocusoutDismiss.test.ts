@@ -4,11 +4,10 @@ import { ref } from 'vue'
 import { useFocusoutDismiss } from './useFocusoutDismiss'
 
 /**
- * The contract is entirely about WHERE the focus went, and both branches matter: a
- * floating panel stays a DOM descendant of the root even when painted in the top
- * layer (so `contains` is enough, with nothing to watch at document level), and a
- * null `relatedTarget` is an exit too — that is the case a naive `contains(next)`
- * would treat as "still inside" and never close on.
+ * The contract is entirely about WHERE the focus went, and both branches matter: a floating
+ * panel stays a DOM descendant of the root even when painted in the top layer (so `contains` is
+ * enough, with nothing to watch at document level), and a null `relatedTarget` is an exit too;
+ * that is the case a naive `contains(next)` would treat as "still inside" and never close on.
  */
 function setup() {
   const root = document.createElement('div')

@@ -1,19 +1,7 @@
 <script setup lang="ts">
 /**
- * A round avatar standing for a person or an entity. It shows the best of what it
- * was given, in that order: the picture, failing that an icon, failing that the
- * initials taken from the name, and failing that whatever the default slot holds —
- * the escape hatch VAvatarGroup uses to render its "+X" overflow badge.
- *
- * Four things here genuinely need JavaScript. A picture that fails to download
- * reports it as a DOM event and nothing else, so the script listens for it and
- * hands over to the initials rather than leaving an empty circle. The initials and
- * the automatic colour are both computed from the name, which is arithmetic no
- * stylesheet can do. A disabled link has no native equivalent of a disabled
- * button, so it is turned inert by hand (composables/useInertLink). Finally the attributes
- * the consumer passes are split so that `style` never reaches the element
- * directly: the component has to merge its own `--avatar-hue`/`--custom-color`
- * into it first, and a plain fallthrough would overwrite them.
+ * Resolve image, icon and initials in priority order. JavaScript handles failed images, inert
+ * links and merging private colour variables with consumer styles.
  */
 
 import { computed, inject, onMounted, ref, useAttrs, useSlots, useTemplateRef, watch } from 'vue'
@@ -43,17 +31,11 @@ interface AvatarProps {
    * given both an icon and a name shows the icon.
    */
   icon?: IconSource
-  /**
-   * The person's full name. It does three things at once: it names the avatar for assistive
-   * technology, its initials are what shows when there is no picture and no icon, and it is
-   * the seed the automatic colour is derived from, so the same person keeps the same colour
-   * everywhere.
-   */
+  /** The person's full name. */
   name?: string
   /**
    * The accessible name, when it should not simply be `name`: an avatar standing for a team
    * rather than a person, say. It wins over `name`, and a consumer `aria-label` wins over it.
-   * On a picture it is the image's `alt` text.
    */
   alt?: string
   /**
@@ -68,11 +50,7 @@ interface AvatarProps {
    * here; on its own it is `md`.
    */
   size?: AvatarSize
-  /**
-   * Takes 4px off the diameter, as it does on every other control. Unlike `size` it is
-   * cumulative: inside a compact VAvatarGroup the avatar is compact whatever this says, and
-   * setting it on one avatar of a regular group makes that one compact alone.
-   */
+  /** Takes 4px off the diameter, as it does on every other control. */
   compact?: boolean
   /**
    * Turns the avatar into an `<a>` pointing at this address. A disabled link becomes inert:
@@ -132,7 +110,6 @@ const {
   attrs: () => Object.fromEntries(Object.entries(attrs).filter(([key]) => key !== 'style')),
 })
 
-/* Interactivity priority: href > clickable > static. */
 const isInteractive = computed(() => isLink.value || props.clickable)
 const tag = computed(() => (isLink.value ? 'a' : props.clickable ? 'button' : 'span'))
 
@@ -147,9 +124,11 @@ watch(
 )
 const showImage = computed(() => Boolean(props.src) && !failed.value)
 
-/* TRAP — on a server-rendered page the browser may give up on the picture BEFORE hydration
-   attaches `@error`, and that event is never sent again: the disc would stay an empty
-   circle. A picture already settled with no pixels at mount is one that failed. */
+/*
+ * On a server-rendered page the browser may give up on the picture before hydration attaches
+ * `@error`, and that event is never sent again: the disc would stay an empty circle. A picture
+ * already settled with no pixels at mount is one that failed.
+ */
 const imageEl = useTemplateRef<HTMLImageElement>('image')
 onMounted(() => {
   const img = imageEl.value
@@ -181,15 +160,9 @@ const initials = computed(() => {
 
 // @core
 /*
- * Auto hue: a pure JS hash of the name → an OKLCH hue (0–359). Only the hue is
- * inline (a unitless scalar); the CSS composes background/text with L/C fixed per
- * theme (light/dark adaptation without depending on contrast-color). A colour
- * computed outside the tokens, a deliberate exception. SSR-safe: no browser API.
- *
- * VCalendar derives an event's hue the same way (`VCalendar/color.ts`, `hueOf`) with a hash
- * of its own, and the two stay apart ON PURPOSE: changing this one would give every person
- * already shown in an application a new colour. Nothing ties an avatar's hue to an event's,
- * so a person and an event sharing a string do not share a colour.
+ * Only the hue is inline (a unitless scalar); the CSS composes background/text with L/C fixed
+ * per theme (light/dark adaptation without depending on contrast-color). A colour computed
+ * outside the tokens, a deliberate exception.
  */
 const hue = computed(() => {
   if (!props.name) return null
@@ -202,8 +175,8 @@ const hue = computed(() => {
 const isAuto = computed(() => props.color === undefined && hue.value !== null)
 
 // @a11y
-// A static avatar with no picture is an image named by `alt`/`name`. Anything else keeps the
-// role that arrived in the attributes — `link` on an inert link, a consumer's own otherwise.
+// A static avatar with no picture is an image named by `alt`/ `name`. Anything else keeps the
+// role that arrived in the attributes; `link` on an inert link, a consumer's own otherwise.
 const role = computed(() =>
   !isInteractive.value && !showImage.value && named.value
     ? 'img'
@@ -286,29 +259,23 @@ const rootStyle = computed<StyleValue>(() => [
     line-height: var(--vectis-text-control-leading);
     text-decoration: none;
     user-select: none;
-    /* `--avatar-ring-color` is a contract with VAvatarGroup, which is the only thing that
-       ever sets it — a private name shared across two sheets, like the `anchor-name`
-       idents. The `transparent` fallback is what lets a lone avatar render ringless, and
-       it is also what makes a divergence silent: rename it on one side and the discs in a
-       group simply stop being separated, with no error and nothing missing from the box. */
+    /*
+     * The `transparent` fallback is what lets a lone avatar render ringless, and it is also
+     * what makes a divergence silent: rename it on one side and the discs in a group simply
+     * stop being separated, with no error and nothing missing from the box.
+     */
     box-shadow: 0 0 0 var(--vectis-control-size-avatar-ring) var(--avatar-ring-color, transparent);
     transition:
       background-color var(--vectis-duration-fast) var(--vectis-ease-default),
       box-shadow var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  /* `--avatar-hue` is set inline by the script, which derives it from the name — so these
-     pairs cannot be tokens: only the hue varies, and it is not known until render. The two
-     themes are written out separately for the same reason relative colours are not used
-     elsewhere in the library: OKLCH's lightness is perceptual, so the dark pair is a
-     design decision rather than a delta off the light one.
-
-     TRAP — the lightness/chroma pairs are set on the THEME scopes and INHERITED, rather
-     than written in a `[data-theme='dark'] .v-avatar` rule: a descendant selector matches
-     ANY dark ancestor, so a light subtree nested in a dark page kept the dark discs. An
-     inherited value is resolved by the NEAREST scope, which is exactly how the semantic
-     tokens behave. The selectors and their order are `tokens.css`'s own: all three are
-     (0,1,0), so on a dark root the later block wins. */
+  /*
+   * The lightness/chroma pairs are set on the THEME scopes and inherited, rather than written
+   * in a `[data-theme='dark'] .v-avatar` rule: a descendant selector matches ANY dark ancestor,
+   * so a light subtree nested in a dark page kept the dark discs. An inherited value is
+   * resolved by the NEAREST scope, which is exactly how the semantic tokens behave.
+   */
   :root,
   [data-theme='light'] {
     --avatar-auto-bg-lc: 0.9 0.06;
@@ -338,7 +305,6 @@ const rootStyle = computed<StyleValue>(() => [
     object-fit: cover;
   }
 
-  /* The icon occupies ~55% of the disc (a unitless ratio, like the font-size). */
   .v-avatar-icon {
     --vectis-icon-size: calc(var(--control-height) * 0.55);
   }
@@ -368,9 +334,7 @@ const rootStyle = computed<StyleValue>(() => [
     }
   }
 
-  /* Forced colours repaint the disc as Canvas and drop the separation ring, a shadow, so
-     an avatar has no edge and the discs of a group run into one another. The outline gives
-     each disc its circle back; the focus ring, at (0,2,0), still wins over it. */
+  /* The outline gives each disc its circle back; the focus ring, at (0,2,0), still wins over it. */
   @media (forced-colors: active) {
     .v-avatar {
       outline: var(--vectis-control-border-width) solid CanvasText;

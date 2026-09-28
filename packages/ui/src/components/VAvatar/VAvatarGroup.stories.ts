@@ -100,18 +100,11 @@ export const CustomOverflow: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(canvas.getByRole('group', { name: 'Project members' })).toBeInTheDocument()
-    // The consumer's name reaches the button: the "+3" text alone would say nothing.
     await expect(canvas.getByRole('button', { name: '3 more members' })).toBeInTheDocument()
   },
 }
 
-/**
- * A VTooltip per VAvatar (the name) + a VTooltip on the aggregate (the hidden
- * members). Each VAvatar is `clickable` (hence focusable) and receives
- * `triggerProps` through fallthrough. The VTooltip wraps the trigger in a `<span>`:
- * the group's stacking stays correct because it targets the direct child, wrapper
- * included.
- */
+/** A VTooltip per VAvatar (the name) + a VTooltip on the aggregate (the hidden members). */
 export const WithTooltips: Story = {
   render: () => {
     const max = 4
@@ -141,7 +134,6 @@ export const WithTooltips: Story = {
     }
   },
   play: async ({ canvasElement }) => {
-    // hovering the +X aggregate → a tooltip listing the hidden members
     const overflow = within(canvasElement).getByText('+2')
     await expect(overflow).toHaveAccessibleName('2 other members')
     await userEvent.hover(overflow)

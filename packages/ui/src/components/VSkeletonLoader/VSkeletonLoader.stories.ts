@@ -73,8 +73,6 @@ const meta = {
   render: (args) => ({
     components: { VSkeletonLoader },
     setup: () => ({ args }),
-    // a silhouette needs a width to be seen: the component has no intrinsic one,
-    // it is up to the container to give it (the VProgressLinear idiom)
     template: '<div style="width: 320px"><VSkeletonLoader v-bind="args" /></div>',
   }),
 } satisfies Meta<typeof VSkeletonLoader>
@@ -92,14 +90,8 @@ export const Default: Story = {
       expect(getComputedStyle(item, '::after').animationName).toBe('v-skeleton-loader-wave'),
     )
 
-    // Relative colour syntax canary: were `oklch(from …)` unsupported,
-    // `--skeleton-loader-highlight` would be invalid at computed-value time, the whole
-    // declaration would go with it (it contains a var()) and the gradient would fall
-    // back to `none` — an invisible band, with no console error at all.
     await expect(getComputedStyle(item, '::after').backgroundImage).not.toBe('none')
 
-    // The last line of a paragraph is shortened: that detail is what reads as a
-    // "block of text" rather than a "table".
     const items = canvasElement.querySelectorAll('.v-skeleton-loader-item')
     const first = items[0]!.getBoundingClientRect().width
     const last = items[items.length - 1]!.getBoundingClientRect().width
@@ -128,23 +120,18 @@ export const Shapes: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    // one silhouette per shape, in the order of the `shapes` array
     const items = canvasElement.querySelectorAll('.v-skeleton-loader-item')
 
-    // the circle transfers its width from its height
     const circle = items[3]!.getBoundingClientRect()
     await waitFor(() => expect(circle.width).toBeCloseTo(circle.height, 0))
-    // the surface takes the height of its token (96px)
     await expect(items[4]!.getBoundingClientRect().height).toBeCloseTo(96, 0)
-    // the line of text is at the font's height, not a control's
     await expect(items[0]!.getBoundingClientRect().height).toBeLessThan(24)
   },
 }
 
 /**
- * Both animations lighten the silhouette with the same highlight derived from the
- * background: `wave` sends it across, `pulse` raises and lowers it in place. `none`
- * freezes. The wave reads mostly on large surfaces.
+ * Both animations lighten the silhouette with the same highlight derived from the background:
+ * `wave` sends it across, `pulse` raises and lowers it in place.
  */
 export const Animations: Story = {
   render: () => ({
@@ -162,23 +149,18 @@ export const Animations: Story = {
   play: async ({ canvasElement }) => {
     const [wave, pulse, none] = canvasElement.querySelectorAll('.v-skeleton-loader-item')
 
-    // Both animations share the layer and LIGHTEN: a pulse rendered through the
-    // silhouette's opacity would fade towards the page background, hence darken in a
-    // dark theme. The pulse's layer is a flat fill.
     await waitFor(() =>
       expect(getComputedStyle(pulse!, '::after').animationName).toBe('v-skeleton-loader-pulse'),
     )
     await expect(getComputedStyle(pulse!, '::after').backgroundImage).toBe('none')
     await expect(getComputedStyle(wave!, '::after').backgroundImage).not.toBe('none')
-    // `none` sets no layer at all: the rule is qualified by data-animation
     await expect(getComputedStyle(none!, '::after').content).toBe('none')
   },
 }
 
 /**
- * `size` and `compact` take the design system's control scale (24/32/40/48/56px): an
- * `md` skeleton is exactly the height of an `md` VButton. No effect on `text` and
- * `surface`, which have a rule of their own.
+ * `size` and `compact` take the design system's control scale (24/32/40/48/56px): an `md`
+ * skeleton is exactly the height of an `md` VButton.
  */
 export const Sizes: Story = {
   render: () => ({
@@ -203,9 +185,9 @@ export const Sizes: Story = {
 }
 
 /**
- * In `shape="text"`, the height is `1em` and the gutter the leading: N lines occupy
- * exactly N lines of text, whatever the parent's typography — replacing them with the
- * real content does not shift the layout.
+ * In `shape="text"`, the height is `1em` and the gutter the leading: N lines occupy exactly N
+ * lines of text, whatever the parent's typography; replacing them with the real content does
+ * not shift the layout.
  */
 export const Paragraph: Story = {
   render: () => ({
@@ -224,9 +206,8 @@ export const Paragraph: Story = {
 }
 
 /**
- * The component's promise: reproducing the silhouette of any design system
- * component. On the left the real component, on the right its skeleton — same shape,
- * same size, same rhythm.
+ * The component's promise: reproducing the silhouette of any design system component. On the
+ * left the real component, on the right its skeleton; same shape, same size, same rhythm.
  */
 export const DesignSystemSilhouettes: Story = {
   render: () => ({
@@ -266,11 +247,7 @@ export const DesignSystemSilhouettes: Story = {
   }),
 }
 
-/**
- * There is no wrapper mode: the component never measures the content it replaces.
- * The idiom is a `v-if`/`v-else`, with `aria-busy` on the container — it is the
- * container that carries the announcement, not the placeholder.
- */
+/** There is no wrapper mode: the component never measures the content it replaces. */
 export const ProgressiveReplacement: Story = {
   render: () => ({
     components: { VSkeletonLoader, VButton, VTypography },
@@ -299,8 +276,6 @@ export const ProgressiveReplacement: Story = {
       0,
     )
 
-    // `userEvent.click` and not the DOM's own `.click()`, which returns void: the
-    // `await` in front of it was awaiting nothing, so the story raced its own state.
     await userEvent.click(canvas.getByRole('button', { name: 'Load' }))
     await waitFor(() => expect(canvasElement.querySelector('.v-skeleton-loader')).toBeNull())
   },

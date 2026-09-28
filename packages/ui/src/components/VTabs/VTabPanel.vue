@@ -1,12 +1,7 @@
 <script setup lang="ts">
 /**
- * The panel a tab shows, matched to it by the same `value`.
- *
- * Every panel is rendered at all times, and the inactive ones are hidden with the
- * native `hidden` attribute rather than removed. That costs no JavaScript, and it
- * means the state of what they contain survives a change of tab: a half-typed field
- * keeps its text, a scrolled list its position, and a form's fields are still
- * submitted.
+ * Keep every panel root mounted for aria-controls. lazy defers its content until first
+ * activation, then preserves that content.
  */
 
 import { computed, inject, ref, watch } from 'vue'
@@ -39,12 +34,9 @@ const tabId = computed(() => tabs?.tabId(props.value))
 const panelId = computed(() => tabs?.panelId(props.value))
 
 /*
- * Once a deferred panel has been shown it stays built, so nothing it holds is lost.
- *
- * The `&&` is what keeps a panel that is not lazy out of the selection's dependencies: its
- * getter stops at `props.lazy`, so changing tab re-runs nothing for it. `immediate` latches
- * a lazy panel that starts selected during setup, on the server too, so its content is in
- * the first render rather than one tick later.
+ * Once a deferred panel has been shown it stays built, so nothing it holds is lost. The `&&` is
+ * what keeps a panel that is not lazy out of the selection's dependencies: its getter stops at
+ * `props.lazy`, so changing tab re-runs nothing for it.
  */
 const revealed = ref(false)
 watch(
@@ -72,15 +64,9 @@ watch(
 <style>
 @layer vectis.components {
   /*
-   * A guard. The `hidden` attribute only hides an element through the browser's own
-   * stylesheet, which ANY author declaration of a display overrides — a consumer's
-   * `.v-tabs-panel { display: flex }` included, and it would then reveal every panel
-   * at once.
-   *
-   * It is deliberately left overridable, with no `!important`: that would make this
-   * the one component of the design system a consumer could not restyle. To give the
-   * panel a display of your own, exclude the hidden ones —
-   * `.v-tabs-panel:not([hidden])`.
+   * A guard. The `hidden` attribute only hides an element through the browser's own stylesheet,
+   * which ANY author declaration of a display overrides; a consumer's
+   * `.v-tabs-panel { display: flex }` included, and it would then reveal every panel at once.
    */
   .v-tabs-panel[hidden] {
     display: none;

@@ -10,13 +10,11 @@ const currencies = [
 
 <template>
   <div class="column">
-    <!-- Left alone, the two fields share the row equally. -->
     <VInputGroup label="Equal shares">
       <VCombobox :options="currencies" model-value="eur" aria-label="Currency" />
       <VInput aria-label="Amount" />
     </VInputGroup>
 
-    <!-- An inline flex on the segment fixes its width; the other one takes the rest. -->
     <VInputGroup label="A fixed currency field">
       <VCombobox :options="currencies" model-value="eur" aria-label="Currency" class="currency" />
       <VInput aria-label="Amount" />

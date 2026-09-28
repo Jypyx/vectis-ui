@@ -93,10 +93,6 @@ export const Variants: Story = {
   }),
 }
 
-/* One group per tone, each pairing the plain row with the raised one: the shadow
-   applies to all four variants, while ghost and outline additionally take the raised
-   surface. The tone is not just a label here — it feeds --tone-text-tinted, which is
-   what the raised background mixes towards on hover and press. */
 export const Elevated: Story = {
   render: () => ({
     components: { VButton },
@@ -138,9 +134,6 @@ export const Sizes: Story = {
   }),
 }
 
-/* The same pair of buttons in two identical 220px columns: on the left as wide as
-   their label, on the right filling the column. Both columns align their items to the
-   start, so the width really does come from the prop and not from the layout. */
 export const FullWidth: Story = {
   render: () => ({
     components: { VButton },
@@ -283,10 +276,10 @@ export const Loading: Story = {
     await expect(button).toBeDisabled()
     await expect(button).toHaveAttribute('aria-busy', 'true')
 
-    // The spinner replaces the start icon, so its ring must be the size of an icon's
-    // ink and not of an icon's box: VSpinner draws it at five sixths of the box it is
-    // given, the proportion Material Symbols draws `progress_activity` at. Nothing of
-    // this is observable in jsdom, which lays nothing out — hence the measurement here.
+    // The spinner replaces the start icon, so its ring must be the size of an icon's ink and
+    // not of an icon's box: VSpinner draws it at five sixths of the box it is given, the
+    // proportion Material Symbols draws `progress_activity` at. Nothing of this is observable
+    // in jsdom, which lays nothing out; hence the measurement here.
     const box = canvasElement.querySelector('.v-button-spinner') as HTMLElement
     const ring = box.querySelector('.v-spinner-circle') as HTMLElement
     const ratio = ring.getBoundingClientRect().width / box.getBoundingClientRect().width

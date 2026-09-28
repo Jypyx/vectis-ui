@@ -1,22 +1,6 @@
 /*
- * The chrome shared by the panels that list rows (VMenu, VCombobox): surface, border,
- * shadow, internal rhythm. The decoration counterpart of `floating.css`, which positions the
- * same panels. Set by VPopover on every panel it is not told is `bare`, and by VMenuPanel
- * directly.
- *
- * RULE: only declarations no panel redeclares. `.v-panel` and `.v-menu`/`.v-combobox-panel`
- * are all (0,1,0) and each ships its own sheet, so a shared declaration would be arbitrated
- * by the bundler's order. Dimensions therefore stay with each panel — `min/max-inline-size`,
- * `max-block-size`, `overflow`, the subpanel margin, `[data-width]`. To redeclare anyway,
- * use the compound `.v-popover-panel.v-x-panel`.
- *
- * Nothing about SIZES: the panel carries `v-control` and its rows read the inherited
- * `--control-*`. The VIcon context is deliberately not set here either — this sheet applies
- * to every panel, so a submenu would overwrite what it inherits from its root.
- *
- * Still FORBIDDEN: one panel parameterized by `role`. That would absorb the ARIA role, the
- * keyboard, the focus and the dismissal policy, which are exactly what separates a menu from
- * a listbox and belong with each component.
+ * Shared panel chrome excludes dimensions and icon context; those must remain component-owned
+ * or inherited by submenus.
  */
 @layer vectis.components {
   .v-panel {

@@ -1,15 +1,7 @@
 <script setup lang="ts">
 /**
- * One section of an accordion: a heading the reader can click, and the content it
- * reveals. It is a native `<details>`/`<summary>` pair, so the browser owns the
- * open and closed state, the keyboard and the accessibility semantics. The only JS
- * is the `v-model:open` bridge, fed by the element, and the click a disabled summary
- * has to cancel, both shared with VSideNavigationItem through `useDetailsOpen`.
- *
- * The opening is animated entirely in CSS, with `::details-content` and
- * `interpolate-size` (`styles/disclosure.css`). Both are recent additions to the
- * language: where they are missing the section simply appears at once, which is the
- * intended fallback.
+ * Native details owns disclosure. useDetailsOpen bridges v-model and cancels activation of
+ * disabled summaries.
  */
 
 import { computed, inject, provide } from 'vue'
@@ -25,11 +17,8 @@ import { useDetailsOpen } from '../../composables/useDetailsOpen'
 
 interface AccordionItemProps {
   /**
-   * The heading of the section, the line that stays visible when it is closed. Use
-   * the `#title` slot instead when the heading needs markup rather than plain text.
-   *
-   * Note that this prop shadows the HTML attribute of the same name on the component,
-   * so no tooltip can be set through it.
+   * The heading of the section, the line that stays visible when it is closed. Use the `#title`
+   * slot instead when the heading needs markup rather than plain text.
    */
   title?: string
   /**
@@ -38,25 +27,13 @@ interface AccordionItemProps {
    */
   subtitle?: string
   /**
-   * An icon placed before the title: an icon name, or an explicit render
-   * (`{ src }`, `{ component }`…). The `#icon` slot replaces it.
-   *
-   * It carries no side in its name because there is only one: the end of the row belongs
-   * to the chevron, so there is nothing for a start to be told apart from. That is the
-   * rule every single-icon component of the design system follows, and its slot is named
-   * `#icon` for the same reason.
+   * An icon placed before the title: an icon name, or an explicit render (`{ src }`,
+   * `{ component }`…). The `#icon` slot replaces it.
    */
   icon?: IconSource
-  /**
-   * Renders the section already open. Only its initial value is read: the browser
-   * owns the state afterwards, so changing this prop later will not close a section
-   * the reader has opened. Bind `v-model:open` to drive it instead.
-   */
+  /** Renders the section already open. Bind `v-model:open` to drive it instead. */
   defaultOpen?: boolean
-  /**
-   * Makes the section inert. It can no longer be opened, the keyboard skips over
-   * it, and it is greyed out through the colour tokens.
-   */
+  /** Makes the section inert. */
   disabled?: boolean
 }
 
@@ -68,9 +45,9 @@ const props = withDefaults(defineProps<AccordionItemProps>(), {
   disabled: false,
 })
 
-// TRAP — "not bound" is written as `null` and not `undefined`. A model typed as a plain
-// boolean is declared as such at runtime, and Vue casts an ABSENT boolean prop to `false`,
-// which would silently overwrite `defaultOpen`. The explicit default disarms that cast.
+// "not bound" is written as `null` and not `undefined`. A model typed as a plain boolean is
+// declared as such at runtime, and Vue casts an ABSENT boolean prop to `false`, which would
+// silently overwrite `defaultOpen`.
 /**
  * Whether the section is open, when the consumer wants to drive or observe it. Left
  * unbound, the browser keeps that state to itself, `defaultOpen` giving only the initial
@@ -140,7 +117,6 @@ const { openAttr, onToggle, onSummaryClick } = useDetailsOpen(open, {
         >
       </span>
       <VIcon class="v-accordion-chevron v-disclosure-chevron" v-bind="iconProps(expandIcon)" />
-      <!-- Both icons are always in the DOM; [open] decides which one shows, in CSS alone -->
       <VIcon
         v-if="collapseIcon"
         class="v-accordion-chevron v-accordion-chevron-open v-disclosure-chevron v-disclosure-chevron-open"

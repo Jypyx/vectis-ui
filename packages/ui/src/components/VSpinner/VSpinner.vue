@@ -1,14 +1,8 @@
 <script setup lang="ts">
 // @a11y
 /**
- * A turning ring saying that something is under way. The animation is pure CSS; what
- * makes the component more than a decorated circle is that it also announces itself:
- * it carries `role="status"` and a label only screen readers see, so the wait is
- * heard as well as seen, without adding any text to the design.
- *
- * The single line of JavaScript reads the label from the dictionary, which is what
- * makes its default translatable. It is not behaviour: no event, no lifecycle, no
- * DOM access.
+ * Animate the ring in CSS; JavaScript resolves its accessible status label and normalizes
+ * icon-compatible dimensions.
  */
 import { computed } from 'vue'
 
@@ -17,11 +11,9 @@ import { px } from '../../utils/css'
 
 interface SpinnerProps {
   /**
-   * A size in pixels, as a number or a numeric string, understood exactly as VIcon's: it
-   * is the BOX the spinner occupies, not the diameter of the ring, which is drawn slightly
-   * smaller inside it. Left out, the box measures 1em and therefore follows the size of the
-   * text around it, which is how the spinner stays proportionate inside a button or a
-   * paragraph without being told anything.
+   * A size in pixels, as a number or a numeric string, understood exactly as VIcon's: it is the
+   * BOX the spinner occupies, not the diameter of the ring, which is drawn slightly smaller
+   * inside it.
    */
   size?: number | string
   /**
@@ -54,17 +46,7 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
 <style>
 @layer vectis.components {
   .v-spinner {
-    /* `--spinner-size` is the BOX the spinner occupies, exactly as `--vectis-icon-size`
-       is for VIcon — and not the diameter of the ring. Sized in `em`, that box follows
-       the text of whatever contains it, so a consumer can size it through font-size
-       alone — VButton, VInput and VTextarea do exactly that, from their icon size. The
-       `size` prop writes this same variable in pixels, inline, and therefore wins.
-
-       The ring is then drawn at five sixths of the box, because that is the proportion
-       Material Symbols draws `progress_activity` at: on its 960 grid the outer radius
-       is 400, so the ink spans 800 of the 960 the glyph is scaled into. Anything a
-       spinner stands in for is an icon, and matching that fraction is what makes the
-       two read as the same size instead of the spinner looking a size up. */
+    /* Draw at five sixths of the icon box to match the Material Symbols spinner's visible size. */
     --spinner-size: 1em;
     --spinner-ring: calc(var(--spinner-size) * 5 / 6);
     display: inline-flex;
@@ -78,11 +60,12 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
   .v-spinner-circle {
     width: var(--spinner-ring);
     height: var(--spinner-ring);
-    /* The stroke is a tenth of the ring's diameter, the same source again: the glyph's
-       outer radius is 400 and its inner one 320, so its stroke is 80 of those 800. It
-       stays in proportion at every size, with a one-pixel floor below which the ring
-       would disappear — a floor that only bites under a 12px box, which no size of the
-       design system reaches. A bare ratio is tolerated here, like the opacities. */
+    /*
+     * The stroke is a tenth of the ring's diameter, the same source again: the glyph's outer
+     * radius is 400 and its inner one 320, so its stroke is 80 of those 800. It stays in
+     * proportion at every size, with a one-pixel floor below which the ring would disappear; a
+     * floor that only bites under a 12px box, which no size of the design system reaches.
+     */
     border: max(1px, calc(var(--spinner-ring) / 10)) solid
       color-mix(in oklab, currentcolor, transparent 75%);
     border-block-start-color: currentcolor;
@@ -105,10 +88,10 @@ const resolvedLabel = computed(() => props.label ?? m.value.common.loading)
     }
   }
 
-  /* Forced colours paint every side of a border in the same system colour, which turns
-     the ring into a uniform circle whose rotation can no longer be seen. The track is
-     drawn in GrayText and the moving quarter keeps the forced text colour, which
-     `currentcolor` still reads here since only the circle opts out of the forcing. */
+  /*
+   * The track is drawn in GrayText and the moving quarter keeps the forced text colour, which
+   * `currentcolor` still reads here since only the circle opts out of the forcing.
+   */
   @media (forced-colors: active) {
     .v-spinner-circle {
       forced-color-adjust: none;

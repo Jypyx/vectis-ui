@@ -25,9 +25,8 @@ const { t } = useI18n()
 useDocsHead('hotkeys')
 
 /**
- * The vocabulary, rendered rather than described: the first column is what may be
- * written, the other two what the component draws for it. Only the first two rows
- * differ from one system to the next, which is the point the table makes on its own.
+ * The vocabulary, rendered rather than described: the first column is what may be written, the
+ * other two what the component draws for it.
  */
 const KEYS: { write: string[]; render: string[] }[] = [
   { write: ['mod'], render: ['mod'] },

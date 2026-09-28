@@ -113,8 +113,8 @@ export const Default: Story = {
     const canvas = within(canvasElement)
     const bar = canvas.getByRole('progressbar', { name: 'Progress' })
     await expect(bar).toHaveAttribute('aria-valuenow', '40')
-    // real geometry: the fill is 40% of the track — the root IS the track
-    // (unverifiable in jsdom)
+    // Real geometry: the fill is 40% of the track; the root IS the track (unverifiable in
+    // jsdom)
     const fill = bar.querySelector('.v-progress-linear-fill')!
     await waitFor(() =>
       expect(fill.getBoundingClientRect().width).toBeCloseTo(
@@ -142,9 +142,9 @@ export const Tones: Story = {
 }
 
 /**
- * `color` replaces the tone: the fill takes the raw colour, and the track is derived
- * from it by `color-mix` towards the surface — hence adapted automatically to the
- * light theme as well as the dark one.
+ * `color` replaces the tone: the fill takes the raw colour, and the track is derived from it by
+ * `color-mix` towards the surface; hence adapted automatically to the light theme as well as
+ * the dark one.
  */
 export const CustomColor: Story = {
   render: () => ({
@@ -177,10 +177,9 @@ export const Thickness: Story = {
 }
 
 /**
- * The text is rendered as two complementary copies: one on the track, the other on the
- * filled portion and contrasted on the fill, each cut to its own side of the fill's
- * edge. It therefore stays readable at 5% as well as at 95%. The default thickness (4px)
- * cannot host it: displaying text implies a `thickness`.
+ * The text is rendered as two complementary copies: one on the track, the other on the filled
+ * portion and contrasted on the fill, each cut to its own side of the fill's edge. The default
+ * thickness (4px) cannot host it: displaying text implies a `thickness`.
  */
 export const Value: Story = {
   render: () => ({
@@ -199,12 +198,10 @@ export const Value: Story = {
     const canvas = within(canvasElement)
     const bar = canvas.getByRole('progressbar', { name: 'Centre' })
     const [base, onFill] = [...bar.querySelectorAll('.v-progress-linear-text')]
-    // the contrasted copy is coloured by contrast: a colour distinct from the base's
     await expect(getComputedStyle(base!).color).not.toBe(getComputedStyle(onFill!).color)
     /*
-     * Both copies are cut, on opposite sides of the fill's edge. The base copy's clip is
-     * what stops the two colours from being painted over each other — without it the
-     * glyphs on the filled portion carry a halo, and nothing else here goes red.
+     * The base copy's clip is what stops the two colours from being painted over each other;
+     * without it the glyphs on the filled portion carry a halo, and nothing else here goes red.
      */
     const baseClip = getComputedStyle(base!).clipPath
     const onFillClip = getComputedStyle(onFill!).clipPath
@@ -262,10 +259,9 @@ export const Indeterminate: Story = {
 }
 
 /**
- * `orientation="vertical"`: 0 at the bottom, max at the top, through a plain
- * `writing-mode` on the root — the fill, the text and the indeterminate animation all
- * switch axis with no duplicated rule. The length is set in CSS (`height`), like the
- * width in horizontal.
+ * `orientation="vertical"`: 0 at the bottom, max at the top, through a plain `writing-mode` on
+ * the root; the fill, the text and the indeterminate animation all switch axis with no
+ * duplicated rule.
  */
 export const Vertical: Story = {
   render: () => ({
@@ -286,9 +282,6 @@ export const Vertical: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // Upright, a bar fills from the bottom in BOTH reading directions: a right-to-left
-    // page flips the inline axis of a vertical writing mode, which is what put the fill
-    // at the top.
     for (const name of ['Default', 'Right to left']) {
       const bar = canvas.getByRole('progressbar', { name })
       const fill = bar.querySelector('.v-progress-linear-fill') as HTMLElement
@@ -327,7 +320,6 @@ export const Progression: Story = {
     const bar = canvas.getByRole('progressbar', { name: 'Upload' })
     await userEvent.click(canvas.getByRole('button', { name: '80%' }))
     await waitFor(() => expect(bar).toHaveAttribute('aria-valuenow', '80'))
-    // the transition converges on the target width
     const fill = bar.querySelector('.v-progress-linear-fill')!
     await waitFor(() =>
       expect(fill.getBoundingClientRect().width).toBeCloseTo(

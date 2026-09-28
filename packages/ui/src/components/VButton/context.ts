@@ -1,28 +1,6 @@
 /**
- * What a VButtonGroup passes down to the buttons it joins. A segmented control is one
- * object, so how it is drawn is a decision that belongs to the row rather than to each
- * of its segments, and the group announces it once instead of the writer repeating the
- * same props on every child.
- *
- * The arbitration is deliberately NOT symmetric, and takes three forms:
- *
- * - `variant`, `size`, `compact` and `elevated` are the SHAPE of the control, and the
- *   group wins. A segment of another height, silhouette or elevation no longer lines up
- *   with its neighbours, and the merged border and shared corners stop reading as a
- *   single object (`group?.x ?? props.x`).
- * - `tone` is meaning rather than shape, so the button wins. One action in a row can be
- *   the destructive one, and the row has to be able to say so (`props.tone ?? group.tone
- *   ?? 'accent'`).
- * - `disabled` is neither, and is the one member read as an OR (`group?.disabled ||
- *   props.disabled`). The two answers are cumulative: a row switched off cannot have one
- *   of its segments opt back in, and a segment disabled on its own is not revived by a
- *   row that says nothing.
- *
- * Everything is exposed through getters, which is what keeps the group's props reactive
- * on the other side of the injection. Every member is optional: a group that sets none of
- * them provides `undefined` throughout, which `??` hands straight back to the child's own
- * prop, so a bare VButtonGroup changes nothing about what it contains. That is also what
- * makes a NESTED group shadow the outer one, VToggle rendering a VButtonGroup of its own.
+ * Group shape wins; each button may override tone. Disabled is cumulative so no child can
+ * reactivate a disabled row.
  */
 
 import type { InjectionKey } from 'vue'
@@ -47,15 +25,7 @@ export interface ButtonGroupContext {
 export const buttonGroupKey: InjectionKey<ButtonGroupContext> = Symbol('v-button-group')
 
 /**
- * The EMPTY context a component provides to stop a row's at its own boundary. Every member
+ * The empty context a component provides to stop a row's at its own boundary. Every member
  * being `undefined`, `??` and `||` hand each button below it back its own prop.
- *
- * It exists because `provide` reaches the whole subtree, floating panels included, and a
- * panel holds buttons that are not segments of the row that opened it: VDatePicker writes
- * `size="sm"` on its navigation, VTimePicker `size="lg"` on its hour and minute cells. Since
- * a group WINS over a button's own prop, a VInputGroup in `lg` would otherwise blow the
- * calendar arrows up to `lg`, and it only shows once the panel is open.
- *
- * This is the JS counterpart of the `.v-overlay` guard every VButtonGroup selector carries.
  */
 export const NO_BUTTON_GROUP: ButtonGroupContext = Object.freeze({})

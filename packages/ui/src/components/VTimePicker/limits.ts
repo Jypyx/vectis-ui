@@ -1,33 +1,19 @@
 // @core
 /**
- * Which times a clock may offer: the two bounds and the two rules, plus everything a
- * component has to derive from them — whether an hour still holds anything, which minute
- * to fall back on, where a key lands next.
- *
- * It sits in this folder rather than in `utils/time.ts` for the reasons `../VTimeInput/search.ts`
- * gives for its own neighbour: that module is in the import closure of every VCalendar
- * component through `VCalendar/layout`, so a rule only a time picker consults would be
- * weighed on every calendar that restricts nothing. VTimePicker owns the contract and
- * VTimeInput reads it, the `VIcon/iconProps` arrangement.
- *
- * Pure, which is what makes any of it testable: jsdom lays no dial out, so what the face
- * decides has to be decidable from numbers alone.
+ * Pure, which makes any of it testable: jsdom lays no dial out, so what the face decides has to
+ * be decidable from numbers alone.
  */
 import { resolveMatcher } from '../../utils/matcher'
 import { memo } from '../../utils/memo'
 import { formatTime } from '../../utils/time'
 
-/**
- * Which values are ALLOWED: the list of them, or a rule answering for one. The polarity is
- * the opposite of `DatePickerMatcher`, which names what is excluded, hence a name that
- * says so rather than a shared suffix.
- */
+/** Which values are ALLOWED: the list of them, or a rule answering for one. */
 export type TimePickerAllowed = number[] | ((value: number) => boolean)
 
 /**
- * The restrictions in force, resolved ONCE: the matchers already turned into functions,
- * and the interval the minutes are reachable on carried alongside them, since whether an
- * hour has anything left in it depends on that too.
+ * The restrictions in force, resolved once: the matchers already turned into functions, and the
+ * interval the minutes are reachable on carried alongside them, since whether an hour has
+ * anything left in it depends on that too.
  */
 export interface TimeLimits {
   /** The earliest time allowed, inclusive, as a canonical 24-hour `'HH:mm'`. */
@@ -38,7 +24,7 @@ export interface TimeLimits {
   hour: (hour: number) => boolean
   /** Whether a minute is allowed. */
   minute: (minute: number) => boolean
-  /** The interval the minutes snap to, which is what makes one reachable at all. */
+  /** The interval the minutes snap to, which makes one reachable at all. */
   step: number
 }
 
@@ -51,17 +37,10 @@ export interface TimeLimitProps {
   minuteStep: number
 }
 
-/** Allowing everything, which is what a restriction nobody wrote has to mean. */
+/** Allowing everything, which a restriction nobody wrote has to mean. */
 const allowEverything = () => true
 
-/**
- * The props as the resolved form. Call it inside a `computed`: the matchers become
- * functions here, an allowed LIST becoming a `Set` on the way, so no lookup rescans it.
- *
- * `resolveMatcher` answers "is this one of them", which is exactly what an allowed list
- * asks of it, but a prop that is ABSENT has to allow everything, where the helper's own
- * empty case answers no. That inversion is the one thing it cannot be left to do.
- */
+/** The props as the resolved form. */
 export function resolveLimits(props: TimeLimitProps): TimeLimits {
   return {
     min: props.min,
@@ -73,11 +52,10 @@ export function resolveLimits(props: TimeLimitProps): TimeLimits {
 }
 
 /**
- * The interval a `minuteStep` actually walks by. A step at or below one minute is every
- * minute, which is what `snapMinute` reads it as.
+ * The interval a `minuteStep` actually walks by. A step at or below one minute is every minute,
+ * which `snapMinute` reads it as.
  */
 export function minuteInterval(step: number): number {
-  // Whole minutes, as `snapMinute` reads it: a fractional step would put 7.5 on the face.
   const size = Math.round(step)
   return size > 1 ? size : 1
 }
@@ -85,10 +63,8 @@ export function minuteInterval(step: number): number {
 const minuteGrids = new Map<number, readonly number[]>()
 
 /**
- * The minutes an interval leaves reachable inside an hour, built once per step. Every
- * question about an hour walks this list, and the face asks it for each of its 24 hours on
- * every render, so rebuilding it per call allocated for nothing. The list is shared:
- * read-only.
+ * The minutes an interval leaves reachable inside an hour, built once per step. The list is
+ * shared: read-only.
  */
 export function minuteGrid(step: number): readonly number[] {
   return memo(minuteGrids, step, () => {
@@ -100,11 +76,9 @@ export function minuteGrid(step: number): readonly number[] {
 }
 
 /**
- * Whether the restrictions allow a time.
- *
- * TRAP: the bounds are compared as STRINGS. That works only because a canonical time is
- * zero-padded and fixed-width, which makes '09:30' < '17:00' order the way the clock does;
- * hand it a value that never went through `formatTime` and the comparison is quietly wrong.
+ * The bounds are compared as STRINGS. That works only because a canonical time is zero-padded
+ * and fixed-width, which makes '09:30' < '17:00' order the way the clock does; hand it a value
+ * that never went through `formatTime` and the comparison is quietly wrong.
  */
 export function isTimeAllowed(hour: number, minute: number, limits: TimeLimits): boolean {
   if (!limits.hour(hour) || !limits.minute(minute)) return false
@@ -129,11 +103,7 @@ export function isHourAllowed(hour: number, limits: TimeLimits): boolean {
   return minuteGrid(limits.step).some((minute) => isTimeAllowed(hour, minute, limits))
 }
 
-/**
- * The minute nearest the one asked for that the hour allows, `null` when it allows none.
- * A tie goes to the earlier of the two: choosing an hour must not walk the clock past a
- * time the reader could have meant.
- */
+/** The minute nearest the one asked for that the hour allows, `null` when it allows none. */
 export function nearestAllowedMinute(
   hour: number,
   minute: number,
@@ -154,8 +124,7 @@ export function nearestAllowedMinute(
 
 /**
  * The allowed time nearest the one asked for, as a canonical string, `null` when the
- * restrictions allow nothing at all. It is what a panel opens on when the field is empty:
- * the current time, pulled to something the reader is actually able to confirm.
+ * restrictions allow nothing at all.
  */
 export function nearestAllowedTime(
   hour: number,
@@ -180,11 +149,8 @@ export function nearestAllowedTime(
 
 /**
  * Walking a cycle until a value is allowed: `at` produces the candidate `i` steps away,
- * counting from one, and `allowed` answers for it. It gives up after a full turn instead
- * of looping for ever, which is what a set of restrictions allowing nothing would do.
- *
- * This is what makes a key SKIP: with nothing restricted the first candidate answers, so
- * the walk costs one call and lands exactly where a plain step would have.
+ * counting from one, and `allowed` answers for it. It gives up after a full turn instead of
+ * looping for ever, which a set of restrictions allowing nothing would do.
  */
 export function firstAllowed(
   turn: number,
@@ -198,11 +164,7 @@ export function firstAllowed(
   return null
 }
 
-/**
- * What is wrong with a set of restrictions, in a sentence, or nothing at all. Both
- * components print it under their own name: the mistake is the consumer's either way, and
- * only they know which of the two they wrote.
- */
+/** What is wrong with a set of restrictions, in a sentence, or nothing at all. */
 export function limitsProblem(limits: TimeLimits): string | null {
   if (limits.min && limits.max && limits.min > limits.max)
     return `min "${limits.min}" falls after max "${limits.max}", so no time can be chosen.`

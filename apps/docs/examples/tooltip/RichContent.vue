@@ -3,11 +3,11 @@ import { VButton, VHotkeys, VTooltip, VTypography } from 'vectis-ui'
 </script>
 
 <template>
-  <!-- The slot wins over the `text` prop when both are given. It has to stay
-       non-interactive: the tooltip closes as soon as the pointer leaves the trigger,
-       so a link inside could never be reached, and the description is flattened to
-       plain text for a screen reader anyway. Anything one can act on belongs in a
-       panel that stays open. -->
+  <!--
+    It has to stay non-interactive: the tooltip closes as soon as the pointer leaves the
+    trigger, so a link inside could never be reached, and the description is flattened to plain
+    text for a screen reader anyway. Anything one can act on belongs in a panel that stays open.
+  -->
   <VTooltip placement="bottom-start">
     <template #default="{ triggerProps }">
       <VButton variant="outline" tone="neutral" v-bind="triggerProps">Search</VButton>

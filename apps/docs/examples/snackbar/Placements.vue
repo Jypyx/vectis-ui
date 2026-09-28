@@ -5,7 +5,6 @@ const placements: SnackbarPlacement[] = ['bottom-left', 'bottom-center', 'bottom
 </script>
 
 <template>
-  <!-- Raised into the <VSnackbar /> mounted once at the root of the application. -->
   <div class="demo">
     <!-- Along the bottom edge and nowhere else: a confirmation belongs where it is out
          of the content's way and close to what the reader was doing. Set on the

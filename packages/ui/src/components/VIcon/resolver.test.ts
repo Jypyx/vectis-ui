@@ -13,7 +13,6 @@ import {
   setIconResolver,
 } from './resolver'
 
-// The state is module-level (like VToast/state.ts): it survives from one test to the next.
 afterEach(() => setIconResolver(undefined))
 
 /** Fake component icon set (Lucide-style) — functional, so a single component
@@ -153,7 +152,7 @@ describe('classIconResolver', () => {
   })
 
   it('strict (the default): an un-aliased DS icon falls back to the embedded SVG', () => {
-    // Without that guard, `swap_vert` would produce `fa-swap_vert` — an empty square.
+    // Without that guard, `swap_vert` would produce `fa-swap_vert`; an empty square.
     setIconResolver(resolver())
     expect(iconOf({ name: swapVertIcon }).querySelector('.v-icon-svg')).not.toBeNull()
 

@@ -17,9 +17,11 @@ const variants = ['solid', 'soft', 'outline', 'ghost'] as const
     />
   </div>
 
-  <!-- Loading puts a spinner where the icon was and disables the button while it turns,
-       so the same action cannot be asked for twice. The spinner takes the icon's box,
-       which is what keeps the square from changing size. -->
+  <!--
+    Loading puts a spinner where the icon was and disables the button while it turns, so the
+    same action cannot be asked for twice. The spinner takes the icon's box, which keeps the
+    square from changing size.
+  -->
   <div class="row">
     <VIconButton :icon="notifications" loading label="Refreshing" />
     <VIconButton :icon="notifications" variant="outline" loading label="Checking" />

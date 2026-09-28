@@ -8,8 +8,10 @@ const detached = ref('week')
 
 <template>
   <div class="demo">
-    <!-- Joined by default: the items melt into one segmented control, which is what
-         says they are one choice. -->
+    <!--
+      Joined by default: the items melt into one segmented control, which says they are one
+      choice.
+    -->
     <div class="row">
       <p class="caption">joined, the default</p>
       <VToggle v-model="joined" item-variant="outline" label="Period, joined">

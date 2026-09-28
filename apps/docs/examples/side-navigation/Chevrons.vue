@@ -31,9 +31,11 @@ import {
 
     <aside class="sidebar">
       <p class="caption">Two icons, swapped</p>
-      <!-- Naming both swaps one drawing for the other instead, which is what a file
-           tree wants: a chevron pointing along the reading direction when the branch
-           is closed, and down when it is open. -->
+      <!--
+        Naming both swaps one drawing for the other instead, which a file tree wants: a chevron
+        pointing along the reading direction when the branch is closed, and down when it is
+        open.
+      -->
       <VSideNavigation
         label="Swapped chevrons"
         :expand-icon="chevronRight"

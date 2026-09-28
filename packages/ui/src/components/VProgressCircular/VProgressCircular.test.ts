@@ -16,7 +16,6 @@ describe('VProgressCircular', () => {
     const bar = getByRole('progressbar', { name: 'Envoi' })
     expect(bar.getAttribute('aria-valuenow')).toBe('30')
     expect(bar.getAttribute('aria-valuemin')).toBe('0')
-    // a faithful upper bound, with no normalization to 100
     expect(bar.getAttribute('aria-valuemax')).toBe('60')
     expect(styleOf(container)).toContain('--fill-fraction: 0.5')
   })
@@ -63,7 +62,6 @@ describe('VProgressCircular', () => {
     expect(bar.hasAttribute('aria-valuenow')).toBe(false)
     expect(bar.hasAttribute('data-indeterminate')).toBe(true)
     expect(container.querySelector('.v-progress-circular-label')).toBeNull()
-    // always set, or the dashoffset's calc() would be invalid
     expect(styleOf(container)).toContain('--fill-fraction: 0')
   })
 
@@ -77,11 +75,9 @@ describe('VProgressCircular', () => {
     await rerender({ size: 96, thickness: 8 })
     expect(styleOf(container)).toContain('--progress-diameter: 96px')
     expect(styleOf(container)).toContain('--progress-thickness: 8px')
-    // numeric strings: the same result, still pixels
     await rerender({ size: '96', thickness: '8' })
     expect(styleOf(container)).toContain('--progress-diameter: 96px')
     expect(styleOf(container)).toContain('--progress-thickness: 8px')
-    // non-numeric values: ignored rather than invalid custom properties
     await rerender({ size: 'auto', thickness: 'auto' })
     expect(styleOf(container)).not.toContain('--progress-diameter')
     expect(styleOf(container)).not.toContain('--progress-thickness')
@@ -153,9 +149,8 @@ describe('VProgressCircular', () => {
       props: { value: 40 },
       attrs: { 'aria-label': 'Name through fallthrough' },
     })
-    // a consumer aria-label wins over the dictionary default, as it would over `label`
+    // A consumer aria-label wins over the dictionary default, as it would over `label`
     expect(getByRole('progressbar', { name: 'Name through fallthrough' })).toBeTruthy()
-    // the fraction is a PRIVATE custom property: nothing public is exposed
     expect(styleOf(container)).not.toContain('--vectis-progress-value')
   })
 

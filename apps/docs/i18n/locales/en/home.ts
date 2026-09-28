@@ -1,6 +1,4 @@
 /**
- * The home page.
- *
  * `heroTitle` carries its own `<br>` and its own accent `<span>`, because where a headline
  * breaks is a decision about the sentence and not about the layout: English breaks after
  * "library", French after "moderne", and neither can be derived from the other.
@@ -13,11 +11,8 @@ export default {
   heroCta: 'Install the library',
 
   /*
-   * The six feature cards, and the section that holds them.
-   *
-   * Written in French first, unusually for this site: the wording was dictated in that language,
-   * so the English below is a rewrite rather than the source the French is measured against.
-   * Idiom over calque: "soupe de classes" is class soup, "guerres de sélecteurs" selector wars.
+   * The six feature cards, and the section that holds them. Idiom over calque: "soupe de
+   * classes" is class soup, "guerres de sélecteurs" selector wars.
    */
   standardsHeading: "An architecture aligned with the web's own standards",
   standardsSubtitle:
@@ -47,7 +42,6 @@ export default {
   iconsBody:
     'Never locked into someone else’s icon set. The system is entirely agnostic and lets you plug in any icon font or library, off the shelf or your own.',
 
-  /* Written in French first, like the cards above. The English is a rewrite, not a calque. */
   accessibilityHeading: 'Accessibility as a standard, not as an option.',
   accessibilitySubtitle:
     'Vectis UI is inclusive out of the box and ready for production. Built to meet what the web asks of an interface today, it holds to strict conformance while targeting the newest rendering engines.',
@@ -57,12 +51,6 @@ export default {
    * themselves (`0`, `4.5:1`, `3:1`) are digits and universal punctuation, which the dictionary
    * boundary leaves in the template, the rule VBadge's `99+` and the `N/M` counter already
    * follow.
-   *
-   * Each is a guarantee something MECHANICAL holds, which is the whole reason the band shows
-   * measures rather than sentences: axe runs after every play function with `test: 'error'`, so
-   * a violation fails the suite, and CI runs that suite once per theme on every push and pull
-   * request. Nothing here drifts with the size of the library, so nothing here can rot the way
-   * a component count would.
    */
   a11yViolationsLabel: 'axe violations',
   a11yViolationsNote: 'in both themes',
@@ -72,15 +60,9 @@ export default {
   a11yFocusNote: 'visible on every control',
 
   /*
-   * The three steps, shown in a mock editor window. Written in French first, like the two bands
-   * above, so the English is a rewrite rather than the source.
-   *
-   * TRAP: `stepXBody` is prose that ends up INSIDE a code block, as a comment above the sample.
-   * That makes it the one place on this site where a code sample is localised, against the rule
-   * that they stay English. The rule protects the agreement between a LIVE demo and its printed
-   * snippet, and there is no demo here: the comment IS the prose, so leaving it in English on a
-   * French page would be the actual defect. Keep these sentences SHORT, since a long one turns
-   * into a long monospaced line and opens a horizontal scrollbar on the block.
+   * `stepXBody` is prose that ends up INSIDE a code block, as a comment above the sample. That
+   * makes it the one place on this site where a code sample is localised, against the rule that
+   * they stay English.
    */
   installHeading: 'Install, import, build',
   installSubtitle:

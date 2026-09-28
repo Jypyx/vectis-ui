@@ -29,7 +29,6 @@ function switchOrder() {
       placeholder="Search a topic"
     />
 
-    <!-- The icon is rendered before the chips, so a multiple field keeps both. -->
     <VCombobox
       v-model="tags"
       :options="options"

@@ -1,12 +1,7 @@
-// @core — module-wide: mask, caret and commit are the field's own behaviour.
+// @core
 /**
- * The masked field of VDateInput and VTimeInput: the reader types digits, the separators
- * appear as they go. The FIELD half, `useFieldPanel` being the panel half.
- *
- * Only the mask's vocabulary is injected — how many digits, how they become text, where the
- * caret lands, how the text becomes a value. A date's separator is locale-dependent where a
- * time's is universal, so the two compute the caret differently; nothing here cares beyond
- * telling them whether the edit was an INSERTION.
+ * Share digit masking, caret preservation and commit logic between date and time fields; each
+ * component supplies its format and parser.
  */
 import { computed, ref, watch, type Ref, type WritableComputedRef } from 'vue'
 
@@ -17,7 +12,7 @@ export interface MaskedFieldOptions<T extends string> {
   fieldEl: Ref<HTMLInputElement | null>
   /** Whether the field can be typed into at all. Everything here is inert when it cannot. */
   typing: () => boolean
-  /** What the field shows when it is NOT being typed into: the value, written out in full. */
+  /** What the field shows when it is not being typed into: the value, written out in full. */
   displayText: () => string
   /** The current value, or nothing. */
   readValue: () => T | null
@@ -28,20 +23,13 @@ export interface MaskedFieldOptions<T extends string> {
   /** Lays a run of digits out as masked text. */
   format: (digits: string) => string
   /**
-   * Where the caret goes so as to sit after a given number of digits.
-   *
-   * The flag says whether something was INSERTED rather than deleted, and it matters: on
-   * a deletion the caret must stay IN FRONT of the separator, or the next press of the key
-   * would step over it instead of erasing, and the key would appear to do nothing.
+   * Where the caret goes so as to sit after a given number of digits. The flag says whether
+   * something was INSERTED rather than deleted, and it matters: on a deletion the caret must
+   * stay in FRONT of the separator, or the next press of the key would step over it instead of
+   * erasing, and the key would appear to do nothing.
    */
   caret: (text: string, digitsBefore: number, inserting: boolean) => number
-  /**
-   * Reads masked text back into a value, or nothing when it is not one yet.
-   *
-   * The flag marks the FINAL reading, when the reader leaves the field. A date expands a
-   * two-digit year only there: "26" must not be committed as 2026 while it may still be on
-   * its way to becoming it.
-   */
+  /** Reads masked text back into a value, or nothing when it is not one yet. */
   parse: (text: string, final: boolean) => T | null
   /** Writes a value as masked text, and nothing at all for no value. */
   toMask: (value: T | null) => string
@@ -54,11 +42,7 @@ export interface MaskedFieldOptions<T extends string> {
 
 /** What a component adds to the mask's own keys. */
 export interface MaskedKeyHooks {
-  /**
-   * A key that is not a digit was typed: a separator, most often. Its character never
-   * reaches the field; what it MEANS is the component's: a date pads the field being typed
-   * and moves on to the next, a time pads the hour.
-   */
+  /** A key that is not a digit was typed: a separator, most often. */
   onSeparator: (el: HTMLInputElement) => void
   /**
    * The down arrow, which a component with a panel turns into the way into it. It answers
@@ -74,10 +58,10 @@ export interface MaskedField<T extends string> {
   /** The text currently in the field while it is being typed into. */
   draft: Ref<string>
   /**
-   * TRAP: bind with `v-model` and NEVER `:model-value`. Without an `onUpdate:modelValue`
-   * listener, `useModel` keeps an internal copy of the RAW typed text and rewrites it on the
-   * next patch, erasing the mask exactly when the masked text did NOT change: a rejected
-   * character, or a digit past the last. Both components lock it with a test.
+   * Bind with `v-model` and never `:model-value`. Without an `onUpdate:modelValue` listener,
+   * `useModel` keeps an internal copy of the RAW typed text and rewrites it on the next patch,
+   * erasing the mask exactly when the masked text did not change: a rejected character, or a
+   * digit past the last.
    */
   fieldModel: WritableComputedRef<string | number>
   /**
@@ -93,11 +77,7 @@ export interface MaskedField<T extends string> {
   onFieldInput: (event: Event) => void
   /** The handler for the field's keydown event, with what the component adds to it. */
   onKeydown: (event: KeyboardEvent, hooks: MaskedKeyHooks) => void
-  /**
-   * The handler for the field's paste event. `recognize` reads the pasted text as a WHOLE
-   * value when it is one (a date in ISO form or a canonical time) and answers nothing
-   * otherwise, in which case only the digits of what was pasted are taken.
-   */
+  /** The handler for the field's paste event. */
   onPaste: (event: ClipboardEvent, recognize: (pasted: string) => T | null) => void
 }
 
@@ -106,17 +86,17 @@ export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>)
   const acceptable = options.acceptable ?? (() => true)
 
   /*
-   * The value as masked text. Being a computed it also tracks what the conversion reads —
-   * the locale's mask, the hour cycle — so neither component lists those dependencies.
+   * The value as masked text. Being a computed it also tracks what the conversion reads; the
+   * locale's mask, the hour cycle; so neither component lists those dependencies.
    */
   const maskedValue = computed(() => options.toMask(options.readValue()))
 
   watch(
     maskedValue,
     (next) => {
-      // TRAP — the anti-loop guard. A commit made while typing writes the value, which comes
-      // straight back here; without the test, the text being typed and its caret would be
-      // overwritten by text identical to what is already there.
+      // The anti-loop guard. A commit made while typing writes the value, which comes straight
+      // back here; without the test, the text being typed and its caret would be overwritten by
+      // text identical to what is already there.
       if (next !== draft.value) draft.value = next
     },
     { immediate: true },
@@ -142,13 +122,7 @@ export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>)
     if (value && acceptable(value) && value !== options.readValue()) options.writeValue(value)
   }
 
-  /**
-   * Commits what was typed, or SILENTLY reverts to the current value.
-   *
-   * An entry that is incomplete, impossible (31 February), out of bounds or excluded simply
-   * disappears. There is deliberately no error state of our own competing with the `invalid`
-   * prop the consumer controls.
-   */
+  /** Commits what was typed, or SILENTLY reverts to the current value. */
   function commitOrRevert() {
     if (!options.typing()) return
     if (!digitsOf(draft.value)) {
@@ -159,7 +133,6 @@ export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>)
     const value = options.parse(draft.value, true)
     if (value && acceptable(value)) {
       if (value !== options.readValue()) options.writeValue(value)
-      // Rewritten in full: "5/6/26" becomes "05/06/2026".
       writeField(options.toMask(value))
       return
     }
@@ -167,12 +140,9 @@ export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>)
   }
 
   /**
-   * Reformats the field on every keystroke.
-   *
-   * The invariant to keep is that the number of digits to the LEFT of the caret survives
-   * the reformatting. Restoring an absolute position instead would misplace the caret on
-   * exactly the keystrokes that matter: a position jumps by one the moment a separator
-   * appears or disappears.
+   * Reformats the field on every keystroke. Restoring an absolute position instead would
+   * misplace the caret on exactly the keystrokes that matter: a position jumps by one the
+   * moment a separator appears or disappears.
    */
   function onFieldInput(event: Event) {
     if (!options.typing()) return
@@ -188,14 +158,9 @@ export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>)
   }
 
   /*
-   * Backspace over a SEPARATOR, which erases the digit in front of it instead.
-   *
-   * TRAP — a separator is placed by the mask and never typed, so erasing one has to erase
-   * the DIGIT before it, which is what the reader believes they are erasing. Left alone, the
-   * mask writes the separator straight back and the key looks dead.
-   *
-   * It answers whether it handled the press: `false` means the caret was not sitting after a
-   * separator and the browser's own Backspace should run.
+   * A separator is placed by the mask and never typed, so erasing one has to erase the DIGIT
+   * before it, which the reader believes they are erasing. Left alone, the mask writes the
+   * separator straight back and the key looks dead.
    */
   function backspaceOverSeparator(el: HTMLInputElement) {
     const start = el.selectionStart
@@ -271,10 +236,6 @@ export function useMaskedField<T extends string>(options: MaskedFieldOptions<T>)
    * Pasting. Without the whole-value path, pasting "2026-06-10" into a field expecting day,
    * month, year would produce "20/26/0610": the digits would be taken in order and the
    * separators ignored.
-   *
-   * A whole value is written as it stands rather than read back from the mask, which is not
-   * a detail on a 12-hour clock: "19:05" shows as "07:05", and reading that text back would
-   * take the half of the day from the AM/PM button instead of from what was pasted.
    */
   function onPaste(event: ClipboardEvent, recognize: (pasted: string) => T | null) {
     if (!options.typing()) return

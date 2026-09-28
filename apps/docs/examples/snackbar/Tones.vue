@@ -3,11 +3,11 @@ import { VButton, snackbar } from 'vectis-ui'
 </script>
 
 <template>
-  <!-- Raised into the <VSnackbar /> mounted once at the root of the application. -->
   <div class="demo">
-    <!-- Two tones and deliberately no more: a confirmation says either "done" or "that
-         did not work". Success, warning and the accent are states, which is what a
-         notification reports. -->
+    <!--
+      Two tones and deliberately no more: a confirmation says either "done" or "that did not
+      work". Success, warning and the accent are states, which a notification reports.
+    -->
     <VButton
       variant="outline"
       tone="neutral"

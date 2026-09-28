@@ -1,17 +1,7 @@
 <script setup lang="ts">
 /**
- * One row of a VCombobox's list. Internal to that component, never exported.
- *
- * Focus never comes here — it stays in the field throughout — so the highlight is TOLD to
- * this row through `active` rather than deduced from anything it holds. Choosing it does not
- * close the panel either; the component above decides that.
- *
- * TRAP — a disabled option carries `aria-disabled` and NOT the native attribute. It has to
- * stay in the accessibility tree the field walks with `aria-activedescendant`, and the
- * native attribute would take it out.
- *
- * Its surface is deliberately reduced to what VCombobox uses: the label through the slot,
- * and a single icon at the start, the end of the row being taken by the selection tick.
+ * Options use aria-disabled while field focus stays on aria-activedescendant; do not apply
+ * native disabling to the active-descendant target.
  */
 
 import VIcon from '../VIcon/VIcon.vue'
@@ -73,13 +63,12 @@ function onClick() {
 <style>
 @layer vectis.components {
   .v-combobox-option {
-    /* Every dimension is inherited from the panel, which carries the shared size class,
-       and the icons follow through the same inheritance.
-
-       The type is composite, exactly as in a menu row: the SIZE comes from the scale, the
-       line height stays that of body text — a unitless ratio, so it follows the size —
-       and the weight stays regular, since a row may wrap. The corner is a menu row's too,
-       capped at half a control height so a wrapped option keeps its neighbours' corner. */
+    /*
+     * Every dimension is inherited from the panel, which carries the shared size class, and the
+     * icons follow through the same inheritance. The type is composite, exactly as in a menu
+     * row: the SIZE comes from the scale, the line height stays that of body text; a unitless
+     * ratio, so it follows the size; and the weight stays regular, since a row may wrap.
+     */
     display: flex;
     align-items: center;
     gap: var(--control-gap);
@@ -116,8 +105,10 @@ function onClick() {
     color: var(--vectis-color-accent-text);
   }
 
-  /* Matched on the ARIA state and not on the native one, which this component
-     deliberately never sets — see the introduction. */
+  /*
+   * Matched on the ARIA state and not on the native one, which this component deliberately
+   * never sets; see the introduction.
+   */
   .v-combobox-option[aria-disabled='true'] {
     background: transparent;
     color: var(--vectis-color-text-subtle);

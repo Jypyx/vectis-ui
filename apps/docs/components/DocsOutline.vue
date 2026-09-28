@@ -1,14 +1,7 @@
 <script setup lang="ts">
 /**
- * "On this page" — the article's own headings, and the one being read.
- *
- * Each entry is a real fragment link, so it works with no JavaScript at all and can be
- * copied out of the address bar. The click is intercepted only to add the sticky header's
- * offset and to write the fragment without navigating, neither of which `scroll-behavior` and
- * `:target` can do on their own; a middle-click still opens the anchor in a new tab.
- *
- * The rail is hidden below 1440px by docs-layout.css, but it is still mounted and still
- * harvesting: the headings it measures are in the prose, not in itself.
+ * Discover headings from the rendered article. Intercept ordinary clicks for the sticky offset
+ * and fragment update; preserve native modified-click navigation.
  */
 import { VTypography } from 'vectis-ui'
 
@@ -40,10 +33,6 @@ const { t } = useI18n()
 </template>
 
 <style scoped>
-/* The title is as prominent as the entry being read, and more so than the rest of the list:
-   it is what names the rail. `tone` is left at its default, which inherits, and the colour is
-   then stated here rather than through the design system's private `--typography-*` variables
-   — an unlayered consumer declaration is the sanctioned override path. */
 .vd-outline-title {
   color: var(--vectis-color-text);
 }
@@ -66,8 +55,7 @@ const { t } = useI18n()
   outline-offset: var(--vectis-focus-ring-offset);
   border-radius: var(--vectis-radius-xs);
 }
-/* The section being read. Last of the colour rules, so it wins over :hover at equal
-   specificity — the reader moving the pointer down the list must not lose their place. */
+/* Keep the current-entry colour after hover rules so hovering cannot hide the reading position. */
 .vd-outline a[data-active='true'] {
   color: var(--vectis-color-accent-text);
   font-weight: var(--vectis-font-weight-medium);

@@ -1,16 +1,7 @@
 // @a11y @ssr
 /**
- * The ids tying a wrapped field to its label, its hint and its counter — VInput and VTextarea, and the hint
- * of VCheckbox, VRadio and VSwitch.
- *
- * A consumer `id` WINS over the generated one, or a label they wrote outside the component
- * would point at nothing. `aria-describedby` is a space-separated LIST, so the component's
- * hint is APPENDED to whatever the consumer already pointed at rather than replacing it,
- * and the counter after it: a screen reader then reads "12/80" out on focus, where it would
- * otherwise only ever be seen.
- *
- * Ids come from `useId()` rather than a counter of our own, which is what keeps them
- * identical across the server render and hydration.
+ * Use hydration-stable IDs and append hint/counter references to consumer aria-describedby
+ * rather than replacing it.
  */
 
 import { computed, useId, type ComputedRef } from 'vue'

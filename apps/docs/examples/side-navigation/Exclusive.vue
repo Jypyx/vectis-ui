@@ -5,10 +5,10 @@ import { description, image, table_chart as tableChart } from 'vectis-ui/icons'
 
 <template>
   <aside class="sidebar">
-    <!-- Opening one section closes the one beside it. The browser does this on its
-         own, through the name the sections of a level share, so there is no state to
-         keep. The exclusivity is local to each level: opening a subsection leaves its
-         parent's neighbours alone. -->
+    <!--
+      Opening one section closes the one beside it. The browser does this on its own, through
+      the name the sections of a level share, so there is no state to keep.
+    -->
     <VSideNavigation label="Workspace" exclusive>
       <VSideNavigationItem :icon="description" default-open>
         Documents

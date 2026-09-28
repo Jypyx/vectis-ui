@@ -6,9 +6,7 @@ const POSITIONS: ProgressLinearValuePosition[] = ['start', 'center', 'end']
 
 <template>
   <div class="column">
-    <!-- The text is rendered TWICE: once over the empty track, once over the fill in a
-         contrasting colour, the second copy clipped at the fill's edge. Whatever the
-         slot renders must therefore be free of side effects. -->
+    <!-- Whatever the slot renders must therefore be free of side effects. -->
     <div v-for="position in POSITIONS" :key="position" class="labelled">
       <VTypography variant="caption" tone="muted">valuePosition {{ position }}</VTypography>
       <VProgressLinear

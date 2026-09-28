@@ -1,26 +1,13 @@
 /**
- * Generates `icons/icons.ts`: the icons the DOCUMENTATION SITE draws and the library does
- * not ship.
- *
- * The library's built-in registry holds the 34 icons its own components render by default.
- * Anything else is the consumer's business — and with no Material Symbols font loaded, an
- * unknown name falls through to the ligature and renders as its own NAME in plain text. The
- * six icons below are the site's chrome, so the site supplies them, through
- * `setIconResolver` (see plugins/vectis.ts).
- *
- * Run with `pnpm --filter vectis-docs icons` — on demand, NOT in a build hook: the list
- * only moves when the site's chrome does, and the build must not depend on the network. The
- * generated file is committed.
- *
- * Same source, same pinned revision and same grid as `packages/ui/scripts/build-icons.ts`,
- * so the two sets are drawn identically: the google/material-design-icons repository,
- * Material Symbols Rounded (wght 400 · GRAD 0 · opsz 24). Apache-2.0 licence © Google.
+ * Generate site-owned icons on demand from the pinned Material Symbols Rounded source. Builds
+ * use the committed registry without network access. Source: google/material-design-icons,
+ * Apache-2.0, © Google.
  */
 import { writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-/** Pinned revision of the source repository — kept in step with the library's script. */
+/** Pinned revision of the source repository; kept in step with the library's script. */
 const REVISION = '528cb964c01fb2b09bc3b9208f82b6d8f8c1c1e2'
 
 /**
@@ -34,23 +21,20 @@ const ICONS = [
   'menu',
   'open_in_new',
   'translate',
-  // The home page's six feature cards, one icon each.
   'bolt',
   'public',
   'palette',
   'layers',
   'dns',
   'interests',
-  // The home page's accessibility accordion.
   'keyboard',
   'record_voice_over',
   'contrast_square',
-  // The pair the Accordion page's icon example swaps, one for the other.
   'add',
   'remove',
 ] as const
 
-/** Google's export grid — the library's registry shares it, hence no per-icon viewBox. */
+/** Google's export grid; the library's registry shares it, hence no per-icon viewBox. */
 const VIEW_BOX = '0 -960 960 960'
 
 const url = (name: string, fill: boolean) =>
@@ -81,7 +65,6 @@ async function fetchPath(name: string, fill: boolean): Promise<string | undefine
   const source = url(name, fill)
   const response = await fetch(source)
   if (!response.ok) {
-    // The FILL 1 variant may be missing for a purely linear icon.
     if (fill && response.status === 404) return undefined
     throw new Error(`${source} : HTTP ${response.status}`)
   }
@@ -91,7 +74,6 @@ async function fetchPath(name: string, fill: boolean): Promise<string | undefine
 const entries = await Promise.all(
   ICONS.map(async (name) => {
     const [outline, filled] = await Promise.all([fetchPath(name, false), fetchPath(name, true)])
-    // The filled path is emitted ONLY if it changes the geometry.
     return [
       name,
       filled !== undefined && filled !== outline ? [outline!, filled] : [outline!],

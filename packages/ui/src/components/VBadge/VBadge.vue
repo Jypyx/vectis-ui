@@ -1,19 +1,8 @@
 <script setup lang="ts">
 // @core
 /**
- * A small pill carrying one piece of information at a glance: a count of unread
- * items, or a single icon. It is never interactive — there is nothing to click and
- * nothing to focus — and it either stands on its own, sits next to an element, or
- * is pinned to one of that element's corners.
- *
- * It is made of HTML and CSS alone. The only JavaScript decides what to render:
- * whether a target element was given at all, capping the counter at "99+", and
- * handing the two colours a consumer may choose to the stylesheet as
- * `--custom-color` and `--badge-ring-color`.
- *
- * Beside a target the pill is `aria-hidden`: read on its own, "3" means nothing, and the
- * target is what a reader reaches, so the count belongs in the target's own name
- * ("Notifications, 3 unread") where it would otherwise be announced twice.
+ * Render the default slot once: inspect its VNodes to decide whether a noninteractive badge has
+ * content.
  */
 import { computed, h } from 'vue'
 import type { FunctionalComponent } from 'vue'
@@ -33,10 +22,9 @@ export type BadgeOverlayPosition = 'top' | 'bottom'
 
 interface BadgeProps {
   /**
-   * How strongly the badge is painted: filled with the full colour (`solid`, the
-   * default), or a tinted background with the text in the colour (`soft`), for a
-   * count that should not draw the eye. A `dot` is always solid: with no content to
-   * tint, a soft dot would be a pale disc barely distinguishable from the page.
+   * How strongly the badge is painted: filled with the full colour (`solid`, the default), or a
+   * tinted background with the text in the colour (`soft`), for a count that should not draw
+   * the eye.
    */
   variant?: BadgeVariant
   /**
@@ -46,11 +34,10 @@ interface BadgeProps {
    */
   tone?: BadgeTone
   /**
-   * A colour of your own (hex, CSS name or `oklch()`), which replaces the tone. On a
-   * solid badge, browsers that support `contrast-color()` turn the text black or
-   * white by themselves; everywhere else it falls back to white, so with a light
-   * colour the contrast is yours to check. A soft badge derives its background and
-   * text from that colour mixed with the theme's surface and text.
+   * A colour of your own (hex, CSS name or `oklch()`), which replaces the tone. On a solid
+   * badge, browsers that support `contrast-color()` turn the text black or white by themselves;
+   * everywhere else it falls back to white, so with a light colour the contrast is yours to
+   * check.
    */
   color?: string
   /**
@@ -75,24 +62,16 @@ interface BadgeProps {
    */
   overlay?: boolean
   /**
-   * Which corner an `overlay` badge is pinned to: the top one by default, the
-   * bottom one for a marker that belongs at the foot of its target, such as a presence dot
-   * under an avatar. The horizontal side follows the reading
-   * direction and is not configurable. It does nothing without `overlay`.
+   * Which corner an `overlay` badge is pinned to: the top one by default, the bottom one for a
+   * marker that belongs at the foot of its target, such as a presence dot under an avatar.
    */
   overlayPosition?: BadgeOverlayPosition
   /**
-   * Draws a 2px ring around the badge, in the colour of the surface behind it,
-   * which detaches it from a busy target such as a picture. That colour defaults to
-   * the page background and is named through `ringColor` on any other surface.
+   * Draws a 2px ring around the badge, in the colour of the surface behind it, which detaches
+   * it from a busy target such as a picture.
    */
   bordered?: boolean
-  /**
-   * The colour of the ring drawn by `bordered`. It defaults to the page background,
-   * which is what makes the ring read as a gap around the badge; on another surface
-   * (a card, a coloured banner), pass that surface's colour. It does nothing without
-   * `bordered`.
-   */
+  /** The colour of the ring drawn by `bordered`. */
   ringColor?: string
 }
 
@@ -112,24 +91,19 @@ const props = withDefaults(defineProps<BadgeProps>(), {
 })
 
 const slots = defineSlots<{
-  /**
-   * The element the badge belongs to. Without it the badge stands on its own; with
-   * it, the badge is placed beside the element, or in its corner under `overlay`, and is
-   * hidden from assistive technology: say the count in the element's own name.
-   */
+  /** The element the badge belongs to. */
   default?(): unknown
 }>()
 
-// TRAP — a function read by the template, never a `computed`: `slots` is not reactive, so a
-// computed would keep its first answer while a slot behind a `v-if` comes and goes.
+// A function read by the template, never a `computed`: `slots` is not reactive, so a computed
+// would keep its first answer while a slot behind a `v-if` comes and goes.
 function hasTarget() {
   return slots.default !== undefined
 }
 
 /**
  * The counter as it is actually displayed: a whole number, zero or more, and anything past 99
- * becomes "99+". A count that is not a number (a division by a total not yet known) draws
- * nothing rather than the word "NaN".
+ * becomes "99+".
  */
 const displayCount = computed(() => {
   const count = props.count
@@ -138,9 +112,9 @@ const displayCount = computed(() => {
 })
 
 /*
- * The pill itself, written once. The template has two roots — one wrapping a target, one
- * standing alone — and both render the same badge; a functional component is the one way
- * to put the same markup in two places of a template without writing it twice.
+ * The template has two roots; one wrapping a target, one standing alone; and both render the
+ * same badge; a functional component is the one way to put the same markup in two places of a
+ * template without writing it twice.
  */
 const Pill: FunctionalComponent = () =>
   h(
@@ -166,9 +140,9 @@ const Pill: FunctionalComponent = () =>
           ? undefined
           : String(displayCount.value),
   )
-// TRAP — the empty list is not decoration. A functional component that declares no props lets
-// only `class`, `style` and listeners fall through, so a standalone badge, whose root this is,
-// would silently drop every other attribute a consumer set on VBadge (an `id`, a `data-*`).
+// The empty list is not decoration. A functional component that declares no props lets only
+// `class`, `style` and listeners fall through, so a standalone badge, whose root this is, would
+// silently drop every other attribute a consumer set on VBadge (an `id`, a `data-*`).
 Pill.props = []
 </script>
 
@@ -191,7 +165,7 @@ Pill.props = []
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: var(--vectis-space-2); /* the space between the target and the badge, in inline mode */
+    gap: var(--vectis-space-2);
   }
 
   /* The pill is painted by the shared `.v-variant` rules (styles/variants.css) over the
@@ -221,12 +195,11 @@ Pill.props = []
     line-height: var(--vectis-text-control-leading);
   }
 
-  /* On a solid pill the text picks black or white against whatever the fill ended up
-     with, where the function exists; elsewhere it keeps the table's `--tone-text-solid`.
-     TRAP — the class is compounded to (0,3,0): `.v-variant[data-variant='solid']` sets
-     `color` at (0,2,0) from another sheet, and a tie would be settled by sheet order. The
-     soft pill keeps the tone's own text colour, which says the tone where black or white
-     would not. */
+  /*
+   * The class is compounded to (0,3,0): `.v-variant[data-variant='solid']` sets `color` at
+   * (0,2,0) from another sheet, and a tie would be settled by sheet order. The soft pill keeps
+   * the tone's own text colour, which says the tone where black or white would not.
+   */
   @supports (color: contrast-color(red)) {
     .v-badge.v-variant[data-variant='solid'] {
       color: contrast-color(var(--tone-bg-solid));
@@ -254,11 +227,13 @@ Pill.props = []
     box-shadow: 0 0 0 var(--vectis-control-size-badge-ring) var(--badge-ring-color);
   }
 
-  /* The tuck-in offset is a ratio of the badge's own size, so it stays proportionate
-     across the pill, the dot and the icon. Each half of it is held in its own
-     variable: the corner and the reading direction each flip ONE axis, and writing
-     the whole `translate` again in each branch would make the two multiply — four
-     rules to keep in step by hand for two independent decisions. */
+  /*
+   * The tuck-in offset is a ratio of the badge's own size, so it stays proportionate across the
+   * pill, the dot and the icon. Each half of it is held in its own variable: the corner and the
+   * reading direction each flip ONE axis, and writing the whole `translate` again in each
+   * branch would make the two multiply; four rules to keep in step by hand for two independent
+   * decisions.
+   */
   .v-badge-host[data-overlay] > .v-badge {
     --badge-overlay-x: 25%;
     --badge-overlay-y: -25%;
@@ -267,15 +242,10 @@ Pill.props = []
     inset-block: 0 auto;
     inset-inline-end: 0;
     translate: var(--badge-overlay-x) var(--badge-overlay-y);
-    /* TRAP — an overlaid badge deliberately leaves its target's box, so it lands on
-       whatever sits beside it, and the host opens no stacking context of its own
-       (`position: relative` with `z-index: auto`). Left at `auto` the badge is painted
-       with the other positioned boxes in TREE ORDER, which means anything positioned
-       after it covers it: inside a VButtonGroup, where every segment is positioned, the
-       badge on one segment disappears under the borders of the next. The lift takes it
-       past that step, and no further: the segment it leans into comes later in tree
-       order, so that segment's focus ring, raised to this same level, is still drawn
-       over the badge rather than under it. */
+    /*
+     * Raise overlaid badges above later positioned siblings; tree order alone lets neighbouring
+     * segments cover them.
+     */
     z-index: 1;
   }
 
@@ -285,9 +255,11 @@ Pill.props = []
     inset-block: auto 0;
   }
 
-  /* In a right-to-left direction the logical corner moves to the left, so the
-     horizontal half of the translation has to flip with it — `translate` is a
-     physical property and knows nothing about direction. */
+  /*
+   * In a right-to-left direction the logical corner moves to the left, so the horizontal half
+   * of the translation has to flip with it; `translate` is a physical property and knows
+   * nothing about direction.
+   */
   .v-badge-host[data-overlay]:dir(rtl) > .v-badge {
     --badge-overlay-x: -25%;
   }

@@ -1,15 +1,8 @@
 <script setup lang="ts">
 // @core
 /**
- * A multi-line field, with the same label, hint, icons, counter, loading state and clear
- * cross as VInput, arranged around a real `<textarea>`.
- *
- * Two things differ. It grows with what is typed, which is pure CSS (`field-sizing`) — a
- * browser without it keeps a fixed height and its usual scrollbar. And the counter goes
- * UNDER the field rather than inside it, where several lines of text would run into it.
- *
- * As in VInput: the attrs split, validation stays the browser's, and the only behavioural JS
- * is the v-model and the clear cross, which hands focus back to the field it just emptied.
+ * Native textarea owns editing and validity. JavaScript bridges the model, text limits and
+ * clear-button focus; CSS controls optional content-based height.
  */
 import { computed, ref } from 'vue'
 
@@ -39,15 +32,13 @@ interface TextareaProps {
    */
   compact?: boolean
   /**
-   * How many lines of text the field shows: the native `rows` attribute, which is
-   * what gives the field its height. Anything under 1 is raised to 1, and at 1 the
-   * field is exactly as tall as a VInput of the same size.
+   * How many lines of text the field shows: the native `rows` attribute, which gives the field
+   * its height.
    */
   rows?: number
   /**
-   * Lets the field grow as the text is typed, instead of scrolling inside the height
-   * `rows` gives it, which stays its starting height. It is pure CSS; where the
-   * browser does not support it, the field simply behaves like an ordinary textarea.
+   * Lets the field grow as the text is typed, instead of scrolling inside the height `rows`
+   * gives it, which stays its starting height.
    */
   autoGrow?: boolean
   /**
@@ -70,10 +61,9 @@ interface TextareaProps {
    */
   hint?: string
   /**
-   * An icon inside the field, at the start. It is decorative by default and becomes a
-   * real button as soon as a `@click:icon-start` listener is attached, in which case
-   * it needs `iconStartLabel`. The `#start` slot is rendered after it, so the two can
-   * be given together.
+   * An icon inside the field, at the start. It is decorative by default and becomes a real
+   * button as soon as a `@click:icon-start` listener is attached, in which case it needs
+   * `iconStartLabel`.
    */
   iconStart?: IconSource
   /**
@@ -98,10 +88,8 @@ interface TextareaProps {
    */
   clearable?: boolean
   /**
-   * Decides whether the cross is shown, instead of letting the field work it out from its
-   * own content (a read-only field included). It is the same escape hatch VInput offers,
-   * for the same reason: a component built on top of this one may hold what there is to
-   * clear somewhere other than the text.
+   * Decides whether the cross is shown, instead of letting the field work it out from its own
+   * content (a read-only field included).
    */
   clearVisible?: boolean
   /** What the clear button does, in words. It falls back to the design system dictionary. */
@@ -112,9 +100,8 @@ interface TextareaProps {
    */
   maxlength?: number
   /**
-   * Turns that limit into a soft one: the reader may type past it, and the field goes
-   * into error instead of silently refusing the keystrokes. It is reported through
-   * the native validity, so a form cannot be submitted over the limit.
+   * Turns that limit into a soft one: the reader may type past it, and the field goes into
+   * error instead of silently refusing the keystrokes.
    */
   softLimit?: boolean
   /**
@@ -171,9 +158,8 @@ defineSlots<{
    */
   end?(): unknown
   /**
-   * Controls of your own inside the field, placed before the field's own: the clear cross
-   * and the end icon. It is the slot for something that acts on the VALUE rather than on
-   * the field, and it is VInput's slot of the same name.
+   * Controls of your own inside the field, placed before the field's own: the clear cross and
+   * the end icon.
    */
   'value-end'?(): unknown
 }>()
@@ -263,10 +249,12 @@ defineExpose({
       :style="{ '--textarea-rows': resolvedRows }"
       :data-auto-grow="autoGrow ? '' : undefined"
     >
-      <!-- The start icon is rendered BEFORE the slot, where the end icon is the slot's own
-           fallback. The asymmetry is VInput's, mirrored here so the two fields answer the
-           same way: what a composed field puts in that zone is OTHER content beside the
-           icon, not another way of drawing it. -->
+      <!--
+        The start icon is rendered before the slot, where the end icon is the slot's own
+        fallback. The asymmetry is VInput's, mirrored here so the two fields answer the same
+        way: what a composed field puts in that zone is OTHER content beside the icon, not
+        another way of drawing it.
+      -->
       <button
         v-if="iconStart && hasIconStartHandler"
         type="button"
@@ -348,68 +336,58 @@ defineExpose({
     font-family: var(--vectis-text-family);
   }
 
-  /* The label and the hint are rendered by VTypography, which carries their type. The
-     .v-textarea-label and .v-textarea-hint classes remain as hooks: a consumer
-     overrides through them, and the disabled state below reaches them that way. */
+  /*
+   * The .v-textarea-label and .v-textarea-hint classes remain as hooks: a consumer overrides
+   * through them, and the disabled state below reaches them that way.
+   */
 
-  /* This is the box that carries the border, the background, the focus ring and the
-     resize handle — which is why it also hides its overflow, `resize` having no
-     effect on a box whose overflow is visible. `--field-border-color` is the single
-     source of truth for its colour, and the hover, error and disabled states do
-     nothing but redefine it. */
+  /*
+   * This is the box that carries the border, the background, the focus ring and the resize
+   * handle; which is why it also hides its overflow, `resize` having no effect on a box whose
+   * overflow is visible. `--field-border-color` is the single source of truth for its colour,
+   * and the hover, error and disabled states do nothing but redefine it.
+   */
   .v-textarea-field {
     --field-border-color: var(--vectis-color-border-strong);
 
     /*
-     * Nothing here restates the size scale: the `--control-*` variables are inherited
-     * from the v-control root (styles/control-size.css), the icon context included.
-     *
-     * The field carries NO height of its own: it is the `rows` attribute on the
-     * textarea that sets one, and the field is simply as tall as the control it wraps.
-     * That is what makes dragging the resize handle behave like a bare textarea — the
-     * field shrinks and the control scrolls — instead of stopping at a CSS floor.
+     * Nothing here restates the size scale: the `--control-*` variables are inherited from the
+     * v-control root (styles/control-size.css), the icon context included. The field carries no
+     * height of its own: it is the `rows` attribute on the textarea that sets one, and the
+     * field is simply as tall as the control it wraps.
      */
 
-    /* The leading is named ONCE and feeds two things that have to agree by
-       construction: the field's own `line-height`, and the first line box below,
-       against which everything sitting beside the text is offset. */
+    /*
+     * The leading is named once and feeds two things that have to agree by construction: the
+     * field's own `line-height`, and the first line box below, against which everything sitting
+     * beside the text is offset.
+     */
     --textarea-leading: var(--vectis-text-body-md-leading);
 
-    /* The height of the FIRST line box, the row the icons and the buttons align on.
-
-       TRAP — it is DERIVED and must never be written as `1lh`. The `lh` unit resolves
-       against the element the property is USED on, and the children do not share the
-       field's font: an icon carries `--vectis-icon-size` (20px against the field's
-       14px), so `1lh` measured a 30px line there and dropped every icon 4.5px below
-       the text and the buttons it is supposed to line up with. The buttons happened to
-       be right only because the reset gives them `font: inherit`. */
+    /*
+     * It is DERIVED and must never be written as `1lh`. The buttons happened to be right only
+     * because the reset gives them `font: inherit`.
+     */
     --textarea-line: calc(var(--control-font-size) * var(--textarea-leading));
 
     display: flex;
     align-items: flex-start;
     gap: var(--control-gap);
     padding-inline: var(--control-padding-inline-field);
-    /* Half of what is left of the control height once its two 1px borders and one line
-       box are taken out — so at `rows="1"` the field is exactly a VInput of the same
-       size, and every further row adds precisely one line box.
-
-       It reads --control-height and not --control-height-base, which is what carries
-       the density here: with no height of its own left to shrink, the padding is the
-       only lever `compact` has, and 2px off each edge is the -4px the whole scale
-       promises. */
+    /*
+     * Derive padding from control height minus borders and one line. Read the compact-adjusted
+     * height so rows=1 matches VInput and each additional row adds one line.
+     */
     padding-block: calc((var(--control-height) - 2px - var(--textarea-line)) / 2);
     background: var(--vectis-color-surface);
     color: var(--vectis-color-text);
     border: 1px solid var(--field-border-color);
-    /* TRAP — the cap is what carries the VInput identity above into the OTHER row counts,
-       and it has to stay derived from --control-height. A browser scales down any radius it
-       cannot fit, so on a one-row field a pill override is already painted as half the
-       control height; min() applies that same reduction to a field that is taller. Written
-       bare, the identical override paints half of a FIVE-row box instead: 60px corners on a
-       120px field, an ellipse sitting beside buttons that kept 20px, and the same again on
-       every drag of the resize handle. At the shipped 6px it resolves to 6px on every size,
-       compact included, so nothing at the default value can see this line go — only the
-       PillRadius play function can. */
+    /*
+     * The cap is what carries the VInput identity above into the OTHER row counts, and it has
+     * to stay derived from --control-height. A browser scales down any radius it cannot fit, so
+     * on a one-row field a pill override is already painted as half the control height; min()
+     * applies that same reduction to a field that is taller.
+     */
     border-radius: min(var(--vectis-radius-interactive), calc(var(--control-height) / 2));
     font-size: var(--control-font-size);
     /* Text running over several lines takes the body line height. The `control` type
@@ -433,29 +411,19 @@ defineExpose({
     background: none;
     color: inherit;
     font: inherit;
-    outline: none; /* the focus ring is drawn by the field around it, not here */
-    resize: none; /* the resize handle belongs to the field, so there is only one */
+    outline: none; /* The focus ring is drawn by the field around it, not here */
+    resize: none;
   }
 
   .v-textarea-control::placeholder {
     color: var(--vectis-color-text-subtle);
   }
 
-  /* The icons and buttons align with the FIRST line of text rather than with the
-     middle of a field whose height varies: half the difference between the line box and
-     the element centres it there. On a single line that comes out identical to the
-     centring VInput gets from its fixed height, which is the point.
-
-     The measure is `--textarea-line` and never `1lh` — see the trap where it is
-     declared: `lh` would be resolved against each child's own font, which differs from
-     the field's.
-
-     TRAP — the margin is SYMMETRIC, the VToast rule. It looks redundant under
-     `align-items: flex-start`, where only the start side moves anything, but the end
-     side is what keeps the item's OUTER box down to one line box. Left off, a clear
-     cross (24px against a 21px line) would be the tallest thing in the flex line and
-     the field would be 1.5px taller than the rows asked for — 2px at `lg` — which is
-     exactly the gap that stops `rows="1"` from being a VInput. */
+  /*
+   * The margin is SYMMETRIC, the VToast rule. It looks redundant under
+   * `align-items: flex-start`, where only the start side moves anything, but the end side is
+   * what keeps the item's OUTER box down to one line box.
+   */
   .v-textarea-field > .v-icon,
   .v-textarea-field > .v-spinner {
     margin-block: calc((var(--textarea-line) - var(--vectis-icon-size)) / 2);
@@ -475,19 +443,12 @@ defineExpose({
     font-size: var(--vectis-icon-size);
   }
 
-  /* A read-only field sinks slightly into the page but keeps its text at full
-     strength — the value is there to be read — and still shows the accent focus ring.
-     The state is read from [data-readonly] and never from `:read-only`, which the
-     browser also matches on a disabled field.
-
-     TRAP — this block must stay FIRST in the sequence of states: read-only, then
-     hover, focus, invalid and disabled. The read-only, focus, invalid and disabled
-     selectors all weigh (0,3,0), `:has()` taking the specificity of what it contains, so
-     nothing but the source order arbitrates between them. Hover alone weighs more, (0,6,0):
-     its `:not()` keeps it off a focused, invalid or disabled field, and on a read-only
-     one it darkens the border as on any other. Moved further down, this rule would repaint the
-     error border and the accent focus ring grey, with no error anywhere. What belongs
-     to a read-only field is its BASE colour alone. */
+  /*
+   * This block must stay first in the sequence of states: read-only, then hover, focus, invalid
+   * and disabled. The read-only, focus, invalid and disabled selectors all weigh (0,3,0),
+   * `:has()` taking the specificity of what it contains, so nothing but the source order
+   * arbitrates between them.
+   */
   .v-textarea[data-readonly] .v-textarea-field {
     --field-border-color: var(--vectis-color-border);
 
@@ -508,18 +469,12 @@ defineExpose({
     );
   }
 
-  /* The focused field appears to have a two-pixel border: it is really its own 1px
-     border plus a 1px shadow of the same colour just outside it, which costs no
-     layout and therefore makes nothing jump.
-
-     The selector watches the CONTROL's focus and not `:focus-within`, so that when one
-     of the field's own buttons takes keyboard focus, only that button's outline
-     lights up: two indicators at once would be unreadable. And it is `:focus` rather
-     than `:focus-visible`, because a text field shows its focus even when it was
-     reached with the mouse.
-
-     The transparent outline is the safety net for Windows forced colours, which drop
-     box-shadows entirely; an outline survives and keeps the field marked. */
+  /*
+   * The selector watches the control's focus and not `:focus-within`, so that when one of the
+   * field's own buttons takes keyboard focus, only that button's outline lights up: two
+   * indicators at once would be unreadable. And it is `:focus` rather than `:focus-visible`,
+   * because a text field shows its focus even when it was reached with the mouse.
+   */
   .v-textarea-field:has(.v-textarea-control:focus) {
     --field-border-color: var(--vectis-color-accent);
 
@@ -527,24 +482,21 @@ defineExpose({
     outline: var(--vectis-focus-ring-width) solid transparent;
   }
 
-  /* The invalid state, from the browser's own verdict first and from the `invalid`
-     prop second. Only the colour variable is changed, which is why the border AND the
-     focus ring both turn red without either being restated. */
+  /*
+   * Only the colour variable is changed, which is why the border and the focus ring both turn
+   * red without either being restated.
+   */
   .v-textarea-field:has(.v-textarea-control:user-invalid),
   .v-textarea-field:has(.v-textarea-control[aria-invalid='true']) {
     --field-border-color: var(--vectis-color-danger);
   }
 
-  /* A disabled field greys out through the colour tokens, the same ones VCheckbox and
-     VRadio use, and never through opacity. It comes LAST in the sequence of states,
-     which at equal specificity is what makes it win over all of them, the error
-     included: a disabled field is not submitted, so it has nothing to report.
-
-     The text here is `text-muted` and not the `text-subtle` used by the label and the
-     hint below, because those sit on the page surface where this sits on
-     `surface-muted` — against which subtle falls to a 4.4:1 contrast. The control
-     itself is exempt from that rule, being natively disabled, but the icons the field
-     CONTAINS are not, and they inherit this colour. */
+  /*
+   * A disabled field greys out through the colour tokens, the same ones VCheckbox and VRadio
+   * use, and never through opacity. It comes last in the sequence of states, which at equal
+   * specificity is what makes it win over all of them, the error included: a disabled field is
+   * not submitted, so it has nothing to report.
+   */
   .v-textarea[data-disabled] .v-textarea-field {
     --field-border-color: var(--vectis-color-border);
 
@@ -570,20 +522,19 @@ defineExpose({
     cursor: not-allowed;
   }
 
-  /* Growing with the content is pure CSS: `field-sizing` makes the textarea's height
-     follow what is typed, and the field around it follows in turn. The resize handle
-     goes, there being nothing left to resize by hand. A browser without support keeps
-     the fixed height and its scrollbar, which is the intended fallback. */
+  /*
+   * A browser without support keeps the fixed height and its scrollbar, which is the intended
+   * fallback.
+   */
   .v-textarea-field[data-auto-grow] {
     resize: none;
   }
 
-  /* `field-sizing: content` sizes the control to what has been typed and ignores `rows`
-     outright, so an auto-growing field would open one line tall whatever the prop said.
-     The floor hands the STARTING height back to `rows` and leaves the growing to the
-     browser. It is scoped to this branch and must not be lifted onto the control at
-     large: a floor there would stop the control shrinking with the resize handle, and
-     the field, which hides its overflow, would clip it instead of scrolling. */
+  /*
+   * It is scoped to this branch and must not be lifted onto the control at large: a floor there
+   * would stop the control shrinking with the resize handle, and the field, which hides its
+   * overflow, would clip it instead of scrolling.
+   */
   .v-textarea-field[data-auto-grow] .v-textarea-control {
     field-sizing: content;
     min-block-size: calc(var(--textarea-rows) * var(--textarea-line));

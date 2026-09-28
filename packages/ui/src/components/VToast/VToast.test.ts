@@ -17,10 +17,7 @@ const renderToast = (overrides: Partial<ToastItem> = {}) =>
   render(VToast, { props: { item: makeItem(overrides), closeLabel: 'Close' } })
 
 describe('VToast (internal card)', () => {
-  // The announcement belongs to VToaster's permanent live regions: a card created with its
-  // message is no live region of its own, or it would announce twice, or not at all.
   it('carries no live role of its own', () => {
-    // several renders in the same test: the attribute is read on each root
     const roleOf = (tone: ToastItem['tone']) =>
       (renderToast({ tone }).container.firstElementChild as HTMLElement).getAttribute('role')
     for (const tone of ['neutral', 'success', 'danger', 'warning'] as const)

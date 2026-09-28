@@ -1,15 +1,7 @@
 // @a11y
 /**
- * The accessible name of a labelled container — a tablist, a group, a nav — resolved
- * `aria-labelledby` > consumer `aria-label` > the `label` prop.
- *
- * `label` is therefore only a default: `aria-label` replaces it, and `aria-labelledby`
- * removes it outright, or the element would carry two names at once.
- *
- * The arbitration is only NEEDED where a component both spreads `$attrs` and binds its own
- * `:aria-label` on the same element (VTabs, VToggle): nothing would choose, and both would
- * apply. Elsewhere fallthrough already lets the consumer win and this just drops a default
- * that has become redundant.
+ * Resolve accessible names in order: aria-labelledby, consumer aria-label, label fallback.
+ * Suppress aria-label when aria-labelledby names the element.
  */
 
 import { computed, useAttrs, type ComputedRef } from 'vue'

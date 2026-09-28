@@ -1,11 +1,4 @@
-/**
- * The dark theme: ROLES repointed, never the palette they draw from. The palette is the same
- * in both themes; what changes is which step each role names.
- *
- * Every key here must already exist in `semantic.ts`, and the build fails otherwise. A theme
- * may reassign a role, never invent one — a token existing in only one theme leaves a
- * component unstyled in the other.
- */
+/** Dark mode repoints existing semantic roles while retaining the shared primitive palette. */
 import { color, type TokenGroup } from '../types'
 
 export const dark = {
@@ -36,15 +29,8 @@ export const dark = {
     'accent-text': color('{color.indigo.300}'),
 
     /*
-     * Danger and success keep exactly the steps the light theme gives them, brightness
-     * included. A filled button in either colour carries white text, and white only
-     * reaches the required contrast from red 600 and green 700 onwards — so there is no
-     * lighter step for the dark theme to move to. They therefore go DARKER on hover here,
-     * the opposite direction from the accent and the warning.
-     *
-     * These entries are deliberately identical to the light ones. Deleting them as
-     * redundant would let a later change to the roles quietly drag the dark theme back
-     * into the range where the text cannot be read.
+     * Retain explicit red/green steps for white-text contrast. Their dark-theme hover steps
+     * grow darker, unlike accent and warning.
      */
     danger: color('{color.red.600}'),
     'danger-hover': color('{color.red.700}'),
@@ -69,18 +55,7 @@ export const dark = {
 
     backdrop: color('oklch(0% 0 0 / 0.6)'),
 
-    /*
-     * The calendar event colours, with the two roles swapped end for end: the card becomes
-     * the dark value and the title the light one. The hue still arrives from the card
-     * itself, so only the lightness and the chroma are restated here — which is the whole
-     * point of splitting them that way, since the contrast between a fixed 0.90 and a fixed
-     * 0.30 holds at every hue exactly as its light counterpart does. See `semantic.ts` for
-     * the full reasoning; the two blocks have to be read together.
-     *
-     * The chroma is lower than in light on purpose: a saturated colour reads as brighter
-     * against a dark ground, and matching the light values would make a wall of events
-     * glare.
-     */
+    /* Swap event surface and text lightness in dark mode; each card still supplies its own hue. */
     'event-surface': color('oklch(0.3 0.05 265)'),
     'event-border': color('oklch(0.42 0.08 265)'),
     'event-text': color('oklch(0.9 0.06 265)'),

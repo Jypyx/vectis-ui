@@ -135,17 +135,13 @@ export const Default: Story = {
     const branch = beta.closest('details') as HTMLDetailsElement
     const chevron = beta.querySelector('.v-side-nav-chevron') as HTMLElement
 
-    // The indent is the room an icon takes (icon + gutter): a subitem's label lands
-    // on the SAME VERTICAL as its parent's.
     const labelEdge = (name: string) => canvas.getByText(name).getBoundingClientRect().left
     await expect(labelEdge('Alpha')).toBe(labelEdge('Projects'))
 
-    // when collapsed, the sublist is "skipped": its content is not focusable
     const hidden = branch.querySelector('a') as HTMLElement
     hidden.focus()
     await expect(hidden).not.toHaveFocus()
 
-    // clicking the row toggles the branch, and the chevron flips
     await userEvent.click(beta)
     await waitFor(() => expect(branch.open).toBe(true))
     await waitFor(() => expect(getComputedStyle(chevron).rotate).toBe('180deg'))
@@ -189,10 +185,9 @@ export const Sizes: Story = {
       (el) => (el.closest('.v-side-nav-row') as HTMLElement).getBoundingClientRect().height,
     )
     const [sm, md, compact] = rows
-    await expect(md! - sm!).toBe(8) // 40px − 32px
-    await expect(md! - compact!).toBe(4) // the DS compact delta
+    await expect(md! - sm!).toBe(8)
+    await expect(md! - compact!).toBe(4)
 
-    // The section header holds the height of a row, at all three densities.
     const labels = [...canvasElement.querySelectorAll('.v-side-nav-group-label')].map(
       (el) => (el as HTMLElement).getBoundingClientRect().height,
     )
@@ -233,17 +228,15 @@ export const Depth: Story = {
       return Number.parseFloat(getComputedStyle(row).paddingInlineStart)
     }
 
-    // The CSS counter with TWO alternating names: the self-referential form
-    // (`--side-nav-level: calc(var(--side-nav-level, 0) + 1)`) is a cycle and would
-    // make these four values equal, with no console error at all.
+    // The CSS counter with two alternating names: the self-referential form (`--side-nav-level:
+    // calc(var(--side-nav-level, 0) + 1)`) is a cycle and would make these four values equal,
+    // with no console error at all.
     const indents = ['Level 0', 'Level 1', 'Level 2', 'Level 3'].map(indentOf)
     for (let i = 1; i < indents.length; i++) {
       await expect(indents[i]).toBeGreaterThan(indents[i - 1]!)
     }
     await expect(indents[1]! - indents[0]!).toBe(indents[3]! - indents[2]!)
 
-    // …and that step is the room an icon takes: at every level, a subitem's label
-    // falls back on the vertical of its parent branch's label.
     const edge = (name: string) => canvas.getByText(name).getBoundingClientRect().left
     for (const level of [0, 1, 2]) {
       await expect(edge(`Level ${level + 1}`)).toBe(edge(`Level ${level} (branch)`))
@@ -284,24 +277,19 @@ export const EndContent: Story = {
     const action = row.querySelector('.v-side-nav-action') as HTMLElement
     const button = canvas.getByTestId('action')
 
-    // Leaf: the action's clickable area covers the WHOLE row — including the empty
-    // gutter in front of the end slot…
     const box = row.getBoundingClientRect()
     const buttonBox = button.getBoundingClientRect()
     await expect(document.elementFromPoint(buttonBox.left - 4, box.top + box.height / 2)).toBe(
       action,
     )
 
-    // …but the end slot is painted ABOVE it, so it stays clickable (`contains`: the
-    // point lands on the icon's glyph, inside the button).
     const target = document.elementFromPoint(
       buttonBox.left + buttonBox.width / 2,
       buttonBox.top + buttonBox.height / 2,
     )
     await expect(button.contains(target)).toBe(true)
 
-    // Branch: a click in the end slot does not toggle the <details> — neither on an
-    // inert badge…
+    // Branch: a click in the end slot does not toggle the <details>; neither on an inert badge…
     const projects = canvas.getByText('Projects').closest('summary') as HTMLElement
     const branch = projects.closest('details') as HTMLDetailsElement
     await userEvent.click(projects.querySelector('.v-side-nav-end') as HTMLElement)
@@ -309,10 +297,10 @@ export const EndContent: Story = {
     await userEvent.click(projects)
     await waitFor(() => expect(branch.open).toBe(true))
 
-    // …nor on plain text. A BRANCH's #end is inside its <summary>, so it must hold
-    // nothing focusable: a control there would be a control nested inside a control
-    // (WCAG 4.1.2). The interactive case belongs to a leaf — "Messages" above, where
-    // the end slot is a SIBLING of the action instead.
+    // A BRANCH's #end is inside its <summary>, so it must hold nothing focusable: a control
+    // there would be a control nested inside a control (WCAG 4.1.2). The interactive case
+    // belongs to a leaf; "Messages" above, where the end slot is a SIBLING of the action
+    // instead.
     const team = canvas.getByText('Team').closest('details') as HTMLDetailsElement
     await userEvent.click(canvas.getByTestId('count'))
     await expect(team.open).toBe(false)
@@ -340,7 +328,7 @@ export const Exclusive: Story = {
     const [projects, team] = [...canvasElement.querySelectorAll('details')]
     await expect(projects!.open).toBe(true)
 
-    // NATIVE exclusivity (<details name>): opening a sibling closes the other
+    // Native exclusivity (<details name>): opening a sibling closes the other
     await userEvent.click(canvas.getByText('Team').closest('summary') as HTMLElement)
     await waitFor(() => expect(team!.open).toBe(true))
     await expect(projects!.open).toBe(false)
@@ -365,9 +353,8 @@ export const Sublabels: Story = {
 
 /**
  * Pointing `--vectis-radius-interactive` at the pill token is how a consumer asks for pill
- * controls, and the rows follow that override — as they follow a brand that squares its controls.
- * Each row takes the corner a control of its own size takes, so a row carrying a second line keeps
- * the corners of the plain row above it.
+ * controls, and the rows follow that override; as they follow a brand that squares its
+ * controls.
  */
 export const PillRadius: Story = {
   render: (args) => ({
@@ -396,19 +383,16 @@ export const PillRadius: Story = {
     const plain = rowOf('plain-row')
     const withSublabel = rowOf('sublabel-row')
 
-    /* The plain row is what defines the corner: it is exactly one control tall, so whatever the
-       override says, the browser paints half its height. The row below has to COMPUTE that same
-       number.
-
-       `getComputedStyle` reports the COMPUTED radius and never the painted one: scaling a radius
-       down to fit its box is a used-value step and leaves nothing behind here. That is what makes
-       the assertion sharp — uncapped, it reads back 9999px. jsdom sees none of it, applying no
-       stylesheet and laying nothing out. */
+    /*
+     * `getComputedStyle` reports the COMPUTED radius and never the painted one: scaling a
+     * radius down to fit its box is a used-value step and leaves nothing behind here. That is
+     * what makes the assertion sharp; uncapped, it reads back 9999px. jsdom sees none of it,
+     * applying no stylesheet and laying nothing out.
+     */
     const half = plain.getBoundingClientRect().height / 2
     const radius = getComputedStyle(withSublabel).borderTopLeftRadius
     await expect(Math.abs(Number.parseFloat(radius) - half)).toBeLessThan(0.5)
 
-    // …on a row that really is taller than a control, or the claim above is vacuous.
     await expect(withSublabel.getBoundingClientRect().height).toBeGreaterThan(
       plain.getBoundingClientRect().height,
     )

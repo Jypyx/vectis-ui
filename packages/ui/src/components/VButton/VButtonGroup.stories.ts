@@ -104,8 +104,6 @@ const meta = {
     variant: 'outline',
     tone: 'neutral',
   },
-  // The buttons carry none of the appearance props: the group does, which is what the
-  // controls above drive.
   render: (args) => ({
     components: { VButtonGroup, VButton },
     setup: () => ({ args, t }),
@@ -128,7 +126,6 @@ export const Variants: Story = {
   render: () => ({
     components: { VButtonGroup, VButton },
     setup: () => ({ t }),
-    // One variant per row, named once on the group.
     template: `
       <div style="display: grid; gap: 16px">
         <VButtonGroup variant="solid" label="Solid">
@@ -155,8 +152,6 @@ export const Detached: Story = {
   render: () => ({
     components: { VButtonGroup, VButton },
     setup: () => ({ t }),
-    // The same row twice: joined, then simply spaced. Detached, each button keeps its own
-    // corners and its own borders, and the group is left holding the gap alone.
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
         <VButtonGroup variant="outline" tone="neutral" :label="t.joined">
@@ -194,14 +189,8 @@ export const Seamless: Story = {
     `,
   }),
   /*
-   * Two things make a row seamless, and both are asserted: the seam is not generated at
-   * all, and NEITHER side of a shared edge is painted, while the outer edges stay. jsdom
-   * lays nothing out and computes no style, so this is the only place the rules are
-   * reachable.
-   *
-   * The seam is read as the `content` of the pseudo-element: `""` when it is generated,
-   * and whatever the initial value is when the rule never matched — which is the point,
-   * so the assertion is written against the generated form rather than against `none`.
+   * Assert computed seams in the browser: jsdom cannot verify either pseudo-elements or border
+   * geometry.
    */
   play: async ({ canvasElement }) => {
     const TRANSPARENT = 'rgba(0, 0, 0, 0)'
@@ -218,7 +207,6 @@ export const Seamless: Story = {
     await expect(getComputedStyle(week!, '::before').content).not.toBe(GENERATED)
     await expect(getComputedStyle(day!).borderInlineEndColor).toBe(TRANSPARENT)
     await expect(getComputedStyle(month!).borderInlineStartColor).toBe(TRANSPARENT)
-    // The outer edges are untouched: what goes is the shared ones, and only those.
     await expect(getComputedStyle(day!).borderInlineStartColor).not.toBe(TRANSPARENT)
     await expect(getComputedStyle(month!).borderInlineEndColor).not.toBe(TRANSPARENT)
   },
@@ -228,8 +216,6 @@ export const ToneOverride: Story = {
   render: () => ({
     components: { VButtonGroup, VButton },
     setup: () => ({ t }),
-    // The tone is the one prop a segment keeps against its group: the row is neutral,
-    // the destructive action says so.
     template: `
       <VButtonGroup variant="outline" tone="neutral" :label="t.rowActions">
         <VButton>{{ t.rename }}</VButton>
@@ -252,9 +238,7 @@ export const Elevated: Story = {
       </VButtonGroup>
     `,
   }),
-  // The shadow is the ROW's: three per-segment shadows would each paint one onto the
-  // neighbour they overlap and fill the joints with a dark band. Nothing of this is
-  // observable in jsdom, which lays nothing out and computes no style.
+  // Nothing of this is observable in jsdom, which lays nothing out and computes no style.
   play: async ({ canvasElement }) => {
     const group = within(canvasElement).getByRole('group', { name: 'Alignment' })
     await expect(getComputedStyle(group).boxShadow).not.toBe('none')
@@ -279,8 +263,6 @@ export const Vertical: Story = {
   }),
 }
 
-/* The same row twice in one 360px column: as wide as its labels, then filling the
-   column with the three segments sharing that width equally. */
 export const FullWidth: Story = {
   render: () => ({
     components: { VButtonGroup, VButton },
@@ -306,8 +288,6 @@ export const FullWidth: Story = {
       </div>
     `,
   }),
-  // Neither half is observable in jsdom, which lays nothing out: the row filling its
-  // parent and the segments sharing that width are measured here or nowhere.
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const natural = canvas.getByRole('group', { name: 'Natural width' })
@@ -317,10 +297,6 @@ export const FullWidth: Story = {
     await expect(full.getBoundingClientRect().width).toBeCloseTo(parentWidth, 1)
     await expect(natural.getBoundingClientRect().width).toBeLessThan(parentWidth)
 
-    // Equal shares, which is what a `1fr` track buys over the free space alone: the three
-    // labels are of different lengths, and the segments are not. The two carrying the
-    // negative margin measure exactly one pixel more, and that pixel is the overlap the
-    // seam is laid over: it is the whole difference between them.
     const widths = within(full)
       .getAllByRole('button')
       .map((button) => button.getBoundingClientRect().width)
@@ -328,8 +304,6 @@ export const FullWidth: Story = {
     await expect(widths[1]).toBeCloseTo(widths[0]! + 1, 1)
     await expect(widths[2]).toBeCloseTo(widths[0]! + 1, 1)
 
-    // Nothing of the joining is given up: the segments still overlap by the pixel the
-    // seam is laid over, so the three of them measure more than the row they fill.
     await expect(widths[0]! + widths[1]! + widths[2]!).toBeGreaterThan(parentWidth)
   },
 }
@@ -338,8 +312,6 @@ export const WithIconButton: Story = {
   render: () => ({
     components: { VButtonGroup, VIconButton },
     setup: () => ({ t }),
-    // role="toolbar" (overriding the default role): a text-formatting toolbar. The icon
-    // buttons take the group's appearance the same way a VButton does.
     template: `
       <VButtonGroup role="toolbar" variant="outline" tone="neutral" :label="t.formatting">
         <VIconButton :label="t.bold">
@@ -356,11 +328,6 @@ export const WithIconButton: Story = {
   }),
 }
 
-/* A segment is not always the button: a VTooltip, a VPopover and a VBadge each put a
-   wrapper around what they are attached to, and a VMenu renders its panel as a sibling of
-   its trigger. The row is drawn through whatever they stack up, so the last segment here
-   carries all three at once: a menu it opens, a tooltip describing it and a badge
-   counting on it, with the button two wrappers down. */
 export const Companions: Story = {
   render: () => ({
     components: { VButtonGroup, VButton, VIconButton, VTooltip, VBadge, VMenu, VMenuItem },
@@ -409,13 +376,9 @@ export const Companions: Story = {
     `,
   }),
   /*
-   * None of this is observable in jsdom, which lays nothing out and computes no style,
-   * and each assertion answers one half of the sheet's second branch: the PULL lands on
-   * the wrapper, the PAINT on the button inside it.
-   *
-   * The menu is what the last two assertions are really about. Its panel is a sibling of
-   * its trigger, so the trigger is not the group's `:last-child`, and a row reading its
-   * end that way would drop the outer corner there with nothing to say why.
+   * None of this is observable in jsdom, which lays nothing out and computes no style, and each
+   * assertion answers one half of the sheet's second branch: the PULL lands on the wrapper, the
+   * PAINT on the button inside it. The menu is what the last two assertions are really about.
    */
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -423,23 +386,17 @@ export const Companions: Story = {
     const [rename, duplicate, comments, more] = within(row).getAllByRole('button')
     const edges = (el: HTMLElement) => el.getBoundingClientRect()
 
-    // Every segment is pulled onto its neighbour by the pixel the seam is laid over,
-    // wrapper or no wrapper: the negative margin is on the flex item the group lays out.
     await expect(edges(rename!).right - edges(duplicate!).left).toBeCloseTo(1, 0)
     await expect(edges(duplicate!).right - edges(comments!).left).toBeCloseTo(1, 0)
     await expect(edges(comments!).right - edges(more!).left).toBeCloseTo(1, 0)
 
-    // The corners and the seam are painted on the BUTTON, one level down.
     await expect(getComputedStyle(duplicate!).borderStartStartRadius).toBe('0px')
     await expect(getComputedStyle(duplicate!, '::before').content).toBe('""')
     await expect(getComputedStyle(comments!).borderStartStartRadius).toBe('0px')
 
     /*
-     * An overlaid badge leans out of its own segment and onto the next one, which is the
-     * whole of its placement — and every segment here is positioned, so with the badge
-     * left at `z-index: auto` the neighbour, painted later in tree order, would draw its
-     * borders straight over it. The reach is asserted first: without it the lift below
-     * would be a declaration agreeing with itself.
+     * The reach is asserted first: without it the lift below would be a declaration agreeing
+     * with itself.
      */
     const badge = row.querySelector('.v-badge') as HTMLElement
     await expect(badge.getBoundingClientRect().right).toBeGreaterThan(edges(more!).left)
@@ -455,15 +412,12 @@ export const Companions: Story = {
     await expect(more!.closest('.v-badge-host')).not.toBeNull()
     await expect(stacked.parentElement).toBe(row)
 
-    // And it stays SQUARE: a VIconButton sets its own width from `--control-height`, and
-    // the rule that fills a stretched segment is heavier than that. Nothing is stretched
-    // in a plain row, so nothing overrides it — remove the guard on that rule and this
-    // button collapses to the width of its glyph.
+    // Nothing is stretched in a plain row, so nothing overrides it; remove the guard on that
+    // rule and this button collapses to the width of its glyph.
     const square = more!.getBoundingClientRect()
     await expect(square.width).toBeCloseTo(square.height, 1)
     await expect(square.width).toBeCloseTo(40, 1)
 
-    // The two ends of the row keep their outer corners, and give up their inner ones.
     await expect(parseFloat(getComputedStyle(rename!).borderStartStartRadius)).toBeGreaterThan(0)
     await expect(getComputedStyle(rename!).borderStartEndRadius).toBe('0px')
     await expect(parseFloat(getComputedStyle(more!).borderStartEndRadius)).toBeGreaterThan(0)
@@ -471,11 +425,8 @@ export const Companions: Story = {
 
     /*
      * A wrapped segment takes its equal share of a full-width row like any other, and the
-     * button inside fills the share the wrapper was given. This is the assertion the row
-     * is shared out in TRACKS for: a flex basis is shared over content boxes, so the
-     * wrapped segment came out one button's worth of padding narrower than its
-     * neighbours, 34px on this row, which is what makes the two cases comparable at all.
-     * The middle and last segments measure a pixel more, the overlap the seam sits on.
+     * button inside fills the share the wrapper was given. The middle and last segments measure
+     * a pixel more, the overlap the seam sits on.
      */
     const widths = within(canvas.getByRole('group', { name: 'Full width' }))
       .getAllByRole('button')
@@ -494,7 +445,6 @@ export const Companions: Story = {
 export const Sizes: Story = {
   render: () => ({
     components: { VButtonGroup, VButton },
-    // The size is a property of the row, so it is named once, on the group.
     template: `
       <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap">
         <VButtonGroup size="sm" variant="outline" tone="neutral" label="Small">
@@ -540,27 +490,20 @@ export const Playground: Story = {
     const buttons = within(group).getAllByRole('button')
     await expect(buttons).toHaveLength(3)
 
-    // The buttons are given nothing: what they render is what the group decided.
     for (const button of buttons) {
       await expect(button).toHaveAttribute('data-variant', 'outline')
       await expect(button).toHaveAttribute('data-tone', 'neutral')
     }
 
-    // A focused segment rises for its ring, and it is the only state that does: a raised
-    // segment paints over the one pixel its neighbour overlaps it by, and that pixel is
-    // the seam. The hover half of the rule cannot be asserted here, `:hover` coming
-    // from the browser's own input pipeline rather than from a synthetic pointer event.
+    // The hover half of the rule cannot be asserted here, `:hover` coming from the browser's
+    // own input pipeline rather than from a synthetic pointer event.
     await userEvent.tab()
     await expect(buttons[0]).toHaveFocus()
     await expect(getComputedStyle(buttons[0]!).zIndex).toBe('1')
     await expect(getComputedStyle(buttons[1]!).zIndex).toBe('auto')
 
-    // The seam is a 1px BORDER on a box of its own, and it runs the WHOLE length of the
-    // segment: the neighbour's own border would be mitred where it meets the transparent
-    // top and bottom ones and end in a notch, and a background would be forced to Canvas
-    // under Windows forced-colors, taking the separation away. `content` is what proves
-    // the box is generated at all, the properties below computing just as well on a
-    // pseudo-element the browser never builds.
+    // `content` is what proves the box is generated at all, the properties below computing just
+    // as well on a pseudo-element the browser never builds.
     const seam = getComputedStyle(buttons[1]!, '::before')
     await expect(seam.content).toBe('""')
     await expect(seam.borderInlineStartStyle).toBe('solid')

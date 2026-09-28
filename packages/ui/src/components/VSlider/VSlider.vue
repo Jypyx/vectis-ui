@@ -1,18 +1,8 @@
 <script setup lang="ts">
 // @core
 /**
- * A value chosen by sliding a thumb along a track, optionally a range between two.
- *
- * Underneath is a native `<input type="range">`, which brings the keyboard, the ARIA and the
- * form behaviour. The JS covers only what it cannot: keeping the pair of a range ordered —
- * there is no native two-thumb control, so a range is two superimposed — refusing a change
- * when `readonly`, which a range input has no native form of, feeding the optional number
- * fields, and computing the positions of the ticks and labels.
- *
- * Those positions reach the stylesheet as unitless inline fractions, and that is the whole
- * binding between the two. They matter because a thumb's CENTRE does not travel the full
- * width of the track: it runs from half a thumb in to half a thumb from the end, and
- * everything meant to line up with it has to follow that same run.
+ * Native range inputs own thumb interaction. JavaScript keeps range endpoints ordered and
+ * synchronizes optional number fields, labels and ARIA values.
  */
 
 import { computed, inject, reactive, ref, watch, watchEffect } from 'vue'
@@ -31,8 +21,8 @@ import { clamp } from '../../utils/number'
 import { useMessages } from '../../i18n/state'
 
 /**
- * What one step of the track is called: a piece of text, or an icon paired with the words
- * that name it, which is what a screen reader reads in place of the raw number.
+ * What one step of the track is called: a piece of text, or an icon paired with the words that
+ * name it, which a screen reader reads in place of the raw number.
  */
 export type SliderLabel = string | { icon: IconSource; label: string }
 
@@ -96,11 +86,8 @@ interface SliderProps {
   /** Turns the slider upright, with the lowest value at the bottom. */
   orientation?: SliderOrientation
   /**
-   * Adds a number field for setting the value exactly: one, or one per end in range mode.
-   * Sliding is quick but imprecise; this is the way out. `ends` puts the fields on either
-   * side of the track, `top` and `bottom` in a row above or below it, each field at the
-   * edge of the value it holds. An upright slider turns `top` and `bottom` into its start
-   * and end sides. No field is drawn by default.
+   * Adds a number field for setting the value exactly: one, or one per end in range mode. No
+   * field is drawn by default.
    */
   inputs?: SliderInputs
   /**
@@ -136,26 +123,15 @@ const props = withDefaults(defineProps<SliderProps>(), {
   tooltip: false,
 })
 
-/**
- * The value: a single number, 0 to begin with, or an ordered pair once `range` is set. It
- * is that prop and not the shape of this value that decides how many thumbs are drawn.
- * The pair stays ordered whatever the reader does, a thumb taken past its sibling pushing
- * it along rather than stopping against it.
- */
+/** The value: a single number, 0 to begin with, or an ordered pair once `range` is set. */
 const model = defineModel<SliderValue>({ default: 0 })
 
 const emit = defineEmits<{
-  /**
-   * The value is BEING changed: every step of a drag, and every key that moves a thumb.
-   * It carries the whole value, a pair in range mode, and fires for either thumb. It is
-   * declared rather than left to fall through, because a range is two native controls and
-   * an attribute only ever reaches one of them.
-   */
+  /** The value is BEING changed: every step of a drag, and every key that moves a thumb. */
   input: [value: SliderValue]
   /**
    * The reader has SETTLED on a value: a thumb was released or moved by a key, or a number
-   * field was committed. It carries the whole value, a pair in range mode, and fires for
-   * either thumb, where the v-model follows every step of a drag.
+   * field was committed.
    */
   change: [value: SliderValue]
 }>()
@@ -196,17 +172,11 @@ const thumbValue = (which: Thumb) => (which === 'start' ? startValue.value : end
  */
 const frac = (v: number) => clamp((v - props.min) / (props.max - props.min || 1), 0, 1)
 
-// @core — the ONE place a thumb is written, so what keeps the pair ordered exists once for
-// the thumbs and the number fields alike. A range is two native controls laid over one
-// another, and there is no dual-thumb control to inherit this behaviour from. It returns
-// what was written, which is what each caller reads back: a model that lags a parent
-// `v-model` would still hold the value from before.
-//
-// TRAP — the thumb being held PUSHES its sibling; it must not stop against it. Two thumbs
-// resting on the same value are one thumb as far as the pointer is concerned, the end one
-// being last in the DOM and therefore the only one it can reach — so a range stopped at
-// `[100, 100]` could only ever be raised, and at the maximum it could not move at all. The
-// pair stays ordered either way; what changes is which thumb gives way.
+// @core
+// The thumb being held PUSHES its sibling; it must not stop against it. Two thumbs resting on
+// the same value are one thumb as far as the pointer is concerned, the end one being last in
+// the DOM and therefore the only one it can reach; so a range stopped at `[100, 100]` could
+// only ever be raised, and at the maximum it could not move at all.
 function writeThumb(which: Thumb, n: number): SliderValue {
   const next: SliderValue = !props.range
     ? n
@@ -231,7 +201,6 @@ function onThumbInput(which: Thumb, event: Event) {
     el.value = String(thumbValue(which))
     return
   }
-  // Written back to the DOM as well: a thumb dragged past its sibling stops against it.
   const next = writeThumb(which, Number(el.value))
   el.value = String(writtenFor(next, which))
   emit('input', next)
@@ -257,14 +226,9 @@ function onThumbKeydown(event: KeyboardEvent) {
 
 // @core
 /*
- * A range is two native controls, and a consumer's `@change` could only ever reach ONE of
- * them through the forwarded attributes: moving the start thumb told nobody. So `change` is
- * declared and fed by both.
- *
- * TRAP — the settled value is read off the THUMB, never off the model. A key press fires
- * `input` and `change` back to back in one task, and under a parent `v-model` the model's
- * local copy only catches up when the parent re-renders, so it would still hold the value
- * from before the key.
+ * The settled value is read off the THUMB, never off the model. A key press fires `input` and
+ * `change` back to back in one task, and under a parent `v-model` the model's local copy only
+ * catches up when the parent re-renders, so it would still hold the value from before the key.
  */
 function onThumbChange(which: Thumb, event: Event) {
   if (props.readonly) return
@@ -274,11 +238,7 @@ function onThumbChange(which: Thumb, event: Event) {
   else emit('change', [Math.min(value, startValue.value), value])
 }
 
-/**
- * How many whole steps the thumb can actually stop on. It matters when the range does
- * not divide evenly by the step: the native control stops at the last step that fits,
- * short of the maximum, and the ticks have to agree with it.
- */
+/** How many whole steps the thumb can actually stop on. */
 const stepCount = computed(() =>
   props.step > 0 ? Math.floor((props.max - props.min) / props.step + 1e-9) : 0,
 )
@@ -296,13 +256,7 @@ const showTicks = computed(
     (props.ticks || props.labels !== undefined) && stepCount.value >= 1 && stepCount.value <= 50,
 )
 
-/**
- * Each step's value and the style that places it, shared by the ticks and the labels. Only
- * the bounds and the step move them, so dragging a thumb rebuilds none of it: each style
- * object keeps its identity from one render to the next, and Vue skips a binding whose
- * object has not changed. Which ticks are FILLED does follow the value, and is asked
- * separately, in `isFilled`.
- */
+/** Each step's value and the style that places it, shared by the ticks and the labels. */
 const stepPlaces = computed(() => {
   const length = Math.max(showTicks.value ? stepCount.value + 1 : 0, props.labels?.length ?? 0)
   return Array.from({ length }, (_, i) => {
@@ -326,21 +280,10 @@ function labelTextAt(value: number): string {
 }
 
 // @a11y
-/* What each thumb is announced as. There is no prop for the two halves: the wording
-   comes from the dictionary, which is also where it is changed.
-
-   With a single thumb there is nothing to distinguish: that thumb IS the value, so it
-   simply takes the resolved label, and is left unnamed when none was given. The
-   generic fallback applies to the NUMBER FIELD alone, which cannot go unnamed: a bare
-   field in a form has to say what it holds.
-
-   TRAP — the name has to be RESOLVED against the consumer's attributes rather than read
-   off the prop. The `:aria-label` below is bound AFTER the forwarded attributes, which is
-   what lets a range give its two thumbs distinct names; bound from a bare `props.label`
-   it ALSO overwrote an `aria-label` the consumer had written, with `undefined`, and
-   `mergeProps` copies the key all the same. `useAriaLabel` is that resolution: it hands
-   back the consumer's own name when there is one, and nothing at all under an
-   `aria-labelledby`, which names the thumb by itself. */
+/*
+ * Resolve the label against consumer ARIA attributes before deriving distinct range-thumb
+ * names; an undefined prop must not erase their accessible name.
+ */
 const m = useMessages()
 const resolvedLabel = useAriaLabel(() => props.label)
 const startLabel = computed(() =>
@@ -361,14 +304,10 @@ const endValueText = computed(() => (props.labels ? labelTextAt(endValue.value) 
 
 // @a11y
 /*
- * The wrapper-root split. The root here is a layout box holding the labels, the track and
- * the optional number fields, so a consumer's `name`, `id`, `required` and `aria-*` have
- * to be redirected onto the real `<input type="range">` — left on the wrapper, a `name`
- * submits nothing and a `<label for>` points at a div.
- *
- * They go to the END thumb, which is the one always rendered. A RANGE has two thumbs and
- * therefore no single value to submit, which the warning below says out loud rather than
- * letting a form come back with half the answer.
+ * The wrapper-root split. The root here is a layout box holding the labels, the track and the
+ * optional number fields, so a consumer's `name`, `id`, `required` and `aria-*` have to be
+ * redirected onto the real `<input type="range">`; left on the wrapper, a `name` submits
+ * nothing and a `<label for>` points at a div.
  */
 defineOptions({ inheritAttrs: false })
 const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
@@ -432,18 +371,14 @@ if (isDev) {
 }
 
 // @core
-// The text held by the number fields, kept apart from the slider's own value.
-//
-// It is typed as text OR a number because these are number fields, whose value Vue
-// converts to a number as soon as it can be read as one — while an empty field, or one
-// holding a half-typed "1-", stays text. That is why the value is turned back into text
-// when it is committed. The start field exists in range mode only, and so does its sync.
+// It is typed as text or a number because these are number fields, whose value Vue converts to
+// a number as soon as it can be read as one; while an empty field, or one holding a half-typed
+// "1-", stays text. That is why the value is turned back into text when it is committed.
 const fieldText = reactive<Record<Thumb, string | number>>({
   start: String(startValue.value),
   end: String(endValue.value),
 })
 
-// Sliding the thumb keeps the fields in step, continuously.
 watch(startValue, (v) => {
   if (props.range) fieldText.start = String(v)
 })
@@ -470,31 +405,22 @@ const fieldLabel = (which: Thumb) => (which === 'start' ? startLabel.value : fie
 
 // @core
 /**
- * Takes what was typed in a field and makes it the value — but only once the reader has
- * finished, on leaving the field or on Enter. Reading it as they type would clamp the
- * "1" of "15" to the minimum before the 5 was ever pressed.
- *
- * Anything unreadable, an empty field included, silently puts the previous value back.
+ * Takes what was typed in a field and makes it the value; but only once the reader has
+ * finished, on leaving the field or on Enter.
  */
 function commitField(which: Thumb) {
   const raw = fieldText[which]
-  // TRAP — parsed rather than converted: an empty string parses to nothing, which is
-  // what triggers the revert below, where converting it would give ZERO and quietly
-  // overwrite the value with it.
+  // Parsed rather than converted: an empty string parses to nothing, which triggers the revert
+  // below, where converting it would give ZERO and quietly overwrite the value with it.
   const parsed = Number.parseFloat(String(raw))
   if (Number.isNaN(parsed)) {
     resyncFields()
     return
   }
-  // Brought onto the nearest step. The rounding that follows removes the noise decimal
-  // steps leave behind — a tenth cannot be represented exactly, so 0.1 × 3 comes out as
-  // 0.30000000000000004.
-  //
-  // TRAP — the ceiling is the last step that FITS, never `max` itself. A native range
-  // stops there (that is what `stepCount` counts), so clipped to a `max` the step does not
-  // reach, the model held a value the thumb could not: the browser sanitized its input back
-  // down, and the number, the thumb and the fill then said three different things. A step
-  // that cannot move anything leaves the clamped value alone rather than dividing by it.
+  // The ceiling is the last step that FITS, never `max` itself. A native range stops there
+  // (that is what `stepCount` counts), so clipped to a `max` the step does not reach, the model
+  // held a value the thumb could not: the browser sanitized its input back down, and the
+  // number, the thumb and the fill then said three different things.
   const clamped = clamp(parsed, props.min, props.max)
   const snapped =
     props.step > 0
@@ -503,13 +429,13 @@ function commitField(which: Thumb) {
   const value = Math.min(lastStop.value, Math.round(snapped * 1e10) / 1e10)
   const previous = thumbValue(which)
   const next = writeThumb(which, value)
-  // Emitted only when the value MOVED, as a native range emits nothing for a key that
-  // cannot move its thumb — and the payload is `next`, the model's local copy lagging a
-  // parent `v-model` (see `onThumbChange`).
+  // Emitted only when the value MOVED, as a native range emits nothing for a key that cannot
+  // move its thumb; and the payload is `next`, the model's local copy lagging a parent
+  // `v-model` (see `onThumbChange`).
   if (writtenFor(next, which) !== previous) emit('change', next)
-  // Put back explicitly, because a commit that does not change the value — typing 200
-  // where the maximum is 100 — changes nothing for the watchers to react to, and the
-  // field would go on showing what was typed.
+  // Put back explicitly, because a commit that does not change the value; typing 200 where the
+  // maximum is 100; changes nothing for the watchers to react to, and the field would go on
+  // showing what was typed.
   resyncFields()
 }
 
@@ -520,9 +446,8 @@ function resyncFields() {
 
 const endThumbEl = ref<HTMLInputElement | null>(null)
 
-// The root is a layout box, so a template ref on the component reaches the wrapper and not
-// the control. Both members point at the END thumb: it is the one always rendered, and the
-// one the consumer's `id` lands on, so `focus()` goes where a `<label for>` would send it.
+// Both members point at the END thumb: it is the one always rendered, and the one the
+// consumer's `id` lands on, so `focus()` goes where a `<label for>` would send it.
 defineExpose({
   /** Moves the focus to the end thumb, the only thumb outside range mode. */
   focus: (options?: FocusOptions) => endThumbEl.value?.focus(options),
@@ -596,15 +521,13 @@ defineExpose({
           @input="onThumbInput('start', $event)"
           @change="onThumbChange('start', $event)"
         />
-        <!-- The consumer's attributes come FIRST, so what the component decides for
-             itself — the bounds, the value and the disabled state — cannot be
-             overwritten by one of them, and so that an ARIA state the consumer sets is
-             not erased by an `undefined` of ours. `aria-valuetext` is one of those: the
-             component has one to say only when `labels` was given.
-
-             The accessible NAME is the exception, and it is bound after on purpose: a
-             range has two thumbs and needs a distinct word for each. It reads a name
-             already resolved against these same attributes, so nothing is lost. -->
+        <!--
+          The consumer's attributes come first, so what the component decides for itself; the
+          bounds, the value and the disabled state; cannot be overwritten by one of them, and so
+          that an ARIA state the consumer sets is not erased by an `undefined` of ours.
+          `aria-valuetext` is one of those: the component has one to say only when `labels` was
+          given.
+        -->
         <input
           ref="endThumbEl"
           :aria-invalid="invalid || undefined"
@@ -684,18 +607,11 @@ defineExpose({
   }
 
   /*
-     The zones the root lays out, one template per combination of fields, range and labels.
-     Each combination is written with exactly the conditions that define it, so a richer
-     one always carries one condition more than the poorer ones it also matches and wins on
-     WEIGHT, never on source order: `[data-inputs='ends'][data-range]:has(.v-slider-labels)`
-     is (0,4,0) against the (0,3,0) of the two it builds on. `:has()` weighs its argument.
-     The vertical block further down restates each case with `[data-orientation]` added,
-     one condition more again, and must keep doing so: a vertical template left at the
-     weight of its horizontal twin would be decided by order alone.
-
-     `top` and `bottom` give the fields a row of their own, the start field at the start
-     edge and the end field at the end one, above the values they hold. The empty middle
-     column is what keeps the two apart; a single field leaves the first column empty. */
+   * Each combination is written with exactly the conditions that define it, so a richer one
+   * always carries one condition more than the poorer ones it also matches and wins on WEIGHT,
+   * never on source order: `[data-inputs='ends'][data-range]:has(.v-slider-labels)` is (0,4,0)
+   * against the (0,3,0) of the two it builds on. `:has()` weighs its argument.
+   */
   .v-slider:has(.v-slider-labels) {
     grid-template-areas: 'rail' 'labels';
   }
@@ -759,16 +675,12 @@ defineExpose({
   }
 
   /*
-     Where a thumb's CENTRE sits for the fraction `--fill-fraction`, written once for every
-     element lined up with it: half a thumb in, then the fraction of the run that is left.
-
-     TRAP — it must be declared on the element that CARRIES the fraction, never on an
-     ancestor. A custom property's `var()` is resolved where the property is declared, so
-     set on the root it would read a `--fill-fraction` the root does not have and turn
-     invalid, and every tick, label and bubble would drop to its static position at the
-     start of the track, with no error. The `100%`, on the other hand, stays a percentage
-     until it is used, and resolves against the box of the property that reads it — the
-     inline size of the track for an inset, the block size in the vertical rules. */
+   * It must be declared on the element that CARRIES the fraction, never on an ancestor. A
+   * custom property's `var()` is resolved where the property is declared, so set on the root it
+   * would read a `--fill-fraction` the root does not have and turn invalid, and every tick,
+   * label and bubble would drop to its static position at the start of the track, with no
+   * error.
+   */
   .v-slider-fill,
   .v-slider-tick,
   .v-slider-tooltip,
@@ -811,18 +723,11 @@ defineExpose({
     background: var(--vectis-color-text-on-accent);
   }
 
-  /* The two controls lie exactly on top of one another, so only their thumbs are allowed
-     to receive the pointer. Without that, the one on top would swallow every click and
-     the other thumb could never be grabbed.
-
-     The thumb's paint lives in variables set HERE, on the control, and read once by each
-     vendor pseudo-element below. That is what lets every state be written a single time:
-     a state pseudo-class written after the thumb's own pseudo-element is unreliable across
-     browsers, so a state has to be read on the control either way, and the thumb inherits
-     the variables from it.
-
-     The thumb is white in BOTH themes, the VSwitch thumb's colour: on a dark page a thumb
-     painted in `surface` sinks into the track instead of standing out as the handle. */
+  /*
+   * Without that, the one on top would swallow every click and the other thumb could never be
+   * grabbed. The thumb's paint lives in variables set here, on the control, and read once by
+   * each vendor pseudo-element below.
+   */
   .v-slider-input {
     --slider-thumb-bg: var(--vectis-color-text-on-accent);
     --slider-thumb-border: var(--vectis-color-accent);
@@ -841,19 +746,22 @@ defineExpose({
     pointer-events: none;
   }
 
-  /* With a single thumb there is nothing underneath to protect, so the whole control
-     takes the pointer again — which is what makes clicking the track jump the value
-     there and start dragging at once, natively and with no code at all. The accepted
-     side effect is that the thumb lights up when the pointer is anywhere over the
-     track. */
+  /*
+   * With a single thumb there is nothing underneath to protect, so the whole control takes the
+   * pointer again; which makes clicking the track jump the value there and start dragging at
+   * once, natively and with no code at all. The accepted side effect is that the thumb lights
+   * up when the pointer is anywhere over the track.
+   */
   .v-slider:not([data-range]) .v-slider-input {
     pointer-events: auto;
     cursor: pointer;
   }
 
-  /* TRAP — the two vendor pseudo-elements stay in two separate rules. A selector list
-     holding one a browser does not know is dropped WHOLE, so merged, each engine would
-     throw away the other's thumb and draw its native one. */
+  /*
+   * The two vendor pseudo-elements stay in two separate rules. A selector list holding one a
+   * browser does not know is dropped whole, so merged, each engine would throw away the other's
+   * thumb and draw its native one.
+   */
   .v-slider-input::-webkit-slider-thumb {
     appearance: none;
     pointer-events: auto;
@@ -903,8 +811,6 @@ defineExpose({
     outline: none;
   }
 
-  /* The muted text colour a read-only VCheckbox takes, on the fill and the thumb's ring:
-     the value stays plainly readable, the accent no longer invites a drag. */
   .v-slider[data-readonly] .v-slider-input {
     --slider-thumb-bg: var(--vectis-color-surface);
     --slider-thumb-border: var(--vectis-color-text-muted);
@@ -920,15 +826,15 @@ defineExpose({
     background: var(--vectis-color-surface);
   }
 
-  /* The border colour VCheckbox and VRadio take when invalid, on the thumb's ring. */
   .v-slider[data-invalid] .v-slider-input {
     --slider-thumb-border: var(--vectis-color-danger);
   }
 
-  /* The bubble showing the value. It looks like a VTooltip but is placed by arithmetic
-     rather than anchored to the thumb: a native thumb is a pseudo-element, and the
-     browser's anchoring cannot attach anything to one. The fraction it follows is the one
-     the root already carries for the fill. */
+  /*
+   * It looks like a VTooltip but is placed by arithmetic rather than anchored to the thumb: a
+   * native thumb is a pseudo-element, and the browser's anchoring cannot attach anything to
+   * one. The fraction it follows is the one the root already carries for the fill.
+   */
   .v-slider-tooltip {
     position: absolute;
     inset-block-end: calc(100% + var(--vectis-space-2));
@@ -965,7 +871,6 @@ defineExpose({
     color: var(--vectis-color-text-on-inverse);
     font-size: var(--vectis-text-caption-size);
     line-height: var(--vectis-text-caption-leading);
-    /* VTooltip's bubble corner, so the two tooltips of the design system stay one shape. */
     border-radius: min(var(--vectis-radius-interactive), calc(0.5lh + var(--vectis-space-1)));
     box-shadow: var(--vectis-shadow-sm);
     white-space: nowrap;
@@ -1020,10 +925,7 @@ defineExpose({
     inline-size: var(--vectis-control-size-slider-field);
   }
 
-  /* Compounded with `.v-input` for the same reason as the width above: these land on an
-     element VInput's own sheet styles, and at (0,1,0) they would TIE with `.v-input`. They
-     set a `grid-area`, which VInput does not, so nothing is wrong today; the point is that
-     one of the three rules on this element was hardened and two were not. */
+  /* Qualify number-field selectors so their layout cannot depend on VInput stylesheet order. */
   .v-slider-field-start.v-input {
     grid-area: field-start;
   }
@@ -1064,11 +966,12 @@ defineExpose({
     grid-template-columns: auto auto;
   }
 
-  /* Upright, `top` and `bottom` become the two SIDES, the inline start and the inline end:
-     the fields stack in a column beside the track, the end field level with its top and
-     the start field with its bottom, where the values they hold sit. The track spans the
-     three rows and gives them their height, the middle one taking whatever the fields
-     leave. The labels stay against the track, so `bottom` puts the fields past them. */
+  /*
+   * Upright, `top` and `bottom` become the two SIDES, the inline start and the inline end: the
+   * fields stack in a column beside the track, the end field level with its top and the start
+   * field with its bottom, where the values they hold sit. The track spans the three rows and
+   * gives them their height, the middle one taking whatever the fields leave.
+   */
   .v-slider[data-orientation='vertical'][data-inputs='top'] {
     grid-template-areas: 'field-end rail' '. rail' 'field-start rail';
     grid-template-columns: auto auto;
@@ -1102,12 +1005,10 @@ defineExpose({
     block-size: var(--vectis-control-size-slider-length);
   }
 
-  /* Only this inner box is turned upright, and that is the whole trick: the track, the
-     fill and the ticks are all placed with logical properties, so they follow the change
-     of axis with no rule written a second time — while the bubbles and the labels stay
-     outside that box, and therefore keep their text horizontal.
-
-     The direction is reversed with it so that the lowest value ends up at the bottom. */
+  /*
+   * Rotate only the track box and reverse its direction; labels remain horizontal and the
+   * minimum value stays at the bottom.
+   */
   .v-slider[data-orientation='vertical'] .v-slider-control {
     writing-mode: vertical-lr;
     direction: rtl;
@@ -1138,9 +1039,11 @@ defineExpose({
     justify-content: flex-start;
   }
 
-  /* A disabled slider greys out through the colour tokens, the same ones VCheckbox and
-     VSwitch use, and never through opacity. It comes LAST among the states, so a slider
-     both disabled and read-only or invalid is drawn disabled. */
+  /*
+   * A disabled slider greys out through the colour tokens, the same ones VCheckbox and VSwitch
+   * use, and never through opacity. It comes last among the states, so a slider both disabled
+   * and read-only or invalid is drawn disabled.
+   */
   .v-slider[data-disabled] {
     cursor: not-allowed;
   }
@@ -1157,8 +1060,10 @@ defineExpose({
     background: var(--vectis-color-text-subtle);
   }
 
-  /* A tick sitting on the greyed fill takes the light colour back, so that it stays
-     visible against it — the same inversion VCheckbox applies to its disabled tick. */
+  /*
+   * A tick sitting on the greyed fill takes the light colour back, so that it stays visible
+   * against it; the same inversion VCheckbox applies to its disabled tick.
+   */
   .v-slider[data-disabled] .v-slider-tick[data-filled] {
     background: var(--vectis-color-surface-muted);
   }
@@ -1175,14 +1080,10 @@ defineExpose({
     cursor: not-allowed;
   }
 
-  /* Windows forced colors erase every author colour, and the slider is painted almost
-     entirely in backgrounds: the track, the fill and the ticks all flatten to `Canvas` and
-     the bar disappears, leaving a thumb whose border is the only thing left on screen. The
-     track draws its own edge as an inset ring here, the fill takes the system Highlight
-     pair the rest of the design system uses for a selected state, and the ticks fall back
-     to the text colour, inverted over the fill the way they already are over the accent.
-
-     (0,4,0) is enough: nothing in this sheet reaches past (0,3,0). */
+  /*
+   * Forced colours erase background-only tracks and ticks. Restore the track edge and use
+   * system Highlight/HighlightText for selected portions.
+   */
   @media (forced-colors: active) {
     .v-slider .v-slider-track {
       forced-color-adjust: none;

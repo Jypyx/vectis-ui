@@ -1,20 +1,6 @@
 /*
- * The recipe of a native <details>, shared by the design system's only two consumers of it:
- * VAccordionItem and VSideNavigationItem. What lives here is what a <details> needs whatever
- * it holds; the row's box, its type and its states stay with each component.
- *
- * `::details-content` targets the box the browser wraps the content in, and
- * `interpolate-size` is what makes a transition towards `auto` possible at all. A browser
- * missing either simply opens the section instantly, which is the intended fallback.
- *
- * Both draw a chevron, both turn it the same way, and both turn it around a HORIZONTAL axis,
- * so neither needs the mirroring VMenu's sideways chevron does. Which icon each renders stays
- * with the component; when a second one is supplied (`data-swap`), each state hides one of the
- * two instead of rotating a single one.
- *
- * TRAP — every selector reaching the summary or the chevron goes through `>`. Navigation
- * branches NEST: a descendant selector on an open branch would turn the chevrons of every
- * closed branch inside it too.
+ * Use direct-child selectors for disclosure summaries and chevrons so an open navigation branch
+ * cannot rotate nested closed branches.
  */
 @layer vectis.components {
   .v-disclosure {
@@ -33,8 +19,10 @@
     block-size: auto;
   }
 
-  /* The summary is laid out as flex by each component, which already drops the list marker;
-     WebKit draws its triangle through this pseudo-element instead. */
+  /*
+   * WebKit's summary marker needs a pseudo-element reset even when flex removes the standard
+   * list marker.
+   */
   .v-disclosure > summary::-webkit-details-marker {
     display: none;
   }
@@ -54,8 +42,7 @@
     display: none;
   }
 
-  /* The chevron defaults to a colour DARKER than the one a disabled label takes: left alone it
-     would come out stronger than the label itself. */
+  /* Make the chevron inherit disabled colour rather than retain its stronger default. */
   .v-disclosure > summary[data-disabled] > .v-disclosure-chevron {
     color: inherit;
   }

@@ -42,8 +42,6 @@ describe('VInputGroup', () => {
     for (const field of fields(container)) expect(field.parentElement).toBe(row)
   })
 
-  // The row carries no `--control-*` variable of its own, and `.v-control` set a second time
-  // above a subtree that already has it would drop the compact its fields applied.
   it('the root carries neither v-control nor data-size', () => {
     const { container } = render(VInputGroup, {
       props: { size: 'lg', compact: true },
@@ -61,7 +59,6 @@ describe('VInputGroup', () => {
       })
       const labels = container.querySelectorAll('.v-input-group-label')
       expect(labels).toHaveLength(1)
-      // A `<label for>` points at ONE control, and this names a row of them.
       expect(labels[0]!.tagName).toBe('SPAN')
       expect(root(container).getAttribute('aria-labelledby')).toBe(labels[0]!.id)
     })
@@ -81,8 +78,8 @@ describe('VInputGroup', () => {
       expect(root(container).hasAttribute('aria-describedby')).toBe(false)
     })
 
-    // aria-labelledby wins over aria-label in the name computation, so emitting ours on top
-    // of a consumer's aria-label would silently cancel it.
+    // Aria-labelledby wins over aria-label in the name computation, so emitting ours on top of
+    // a consumer's aria-label would silently cancel it.
     it('a consumer aria-label holds ours back', () => {
       const { container } = render(VInputGroup, {
         props: { label: 'Phone' },
@@ -112,8 +109,8 @@ describe('VInputGroup', () => {
       expect(root(container).getAttribute('aria-describedby')).toBe(hints[0]!.id)
     })
 
-    // aria-describedby is a LIST: the hint is ADDED to whatever the consumer pointed at.
-    // Left to fallthrough it would be REPLACED, and the hint would stop being announced.
+    // Aria-describedby is a LIST: the hint is ADDED to whatever the consumer pointed at. Left
+    // to fallthrough it would be REPLACED, and the hint would stop being announced.
     it('the hint is added to a consumer aria-describedby, never replacing it', () => {
       const { container } = render(VInputGroup, {
         props: { hint: 'Include the country code' },
@@ -176,8 +173,6 @@ describe('VInputGroup', () => {
       expect(container.querySelector<HTMLInputElement>('.v-input-control')?.disabled).toBe(true)
     })
 
-    // `undefined` everywhere is what "the group has no opinion" means, and it is what makes a
-    // bare group leave what it contains exactly as it was.
     it('a silent group changes nothing about a segment', () => {
       const { container } = render(VInputGroup, {
         slots: { default: () => h(VInput, { size: 'sm', compact: true }) },
@@ -251,15 +246,12 @@ describe('VInputGroup', () => {
               multiple: true,
               modelValue: ['fr'],
               options: [{ value: 'fr', label: 'France' }],
-              // A size of its own, which the row overrides: this is the idempotence of the
-              // double resolution, VCombobox resolving once and its inner VInput again.
               size: 'sm',
             }),
         },
       })
       expect((container.querySelector('.v-combobox') as HTMLElement).dataset.size).toBe('lg')
       expect(fields(container)[0]!.dataset.size).toBe('lg')
-      // The chips sit one step below the field: sm for an lg row, per `chipScaleFor`.
       expect((container.querySelector('.v-chip') as HTMLElement).dataset.size).toBe('sm')
       expect((container.querySelector('.v-combobox-panel') as HTMLElement).dataset.size).toBe('lg')
     })
@@ -278,9 +270,6 @@ describe('VInputGroup', () => {
         slots: { default: () => h(VTimeInput, { format: '12h' }) },
       })
       expect(fields(container)[0]!.dataset.size).toBe('lg')
-      // Its AM/PM button lives INSIDE the field, so a 12 hour segment is a single box and
-      // the row has nothing of its own to join. Anything of it outside the field would be
-      // a second box the next segment would join instead.
       expect(container.querySelector('.v-input-field .v-time-input-meridiem')).toBeTruthy()
       expect(container.querySelectorAll('.v-time-input > *')).toHaveLength(1)
     })
@@ -304,9 +293,6 @@ describe('VInputGroup', () => {
       expect(container.querySelector('.v-file-input')!.hasAttribute('data-disabled')).toBe(true)
     })
 
-    // VTextarea is out of scope by construction: its bordered box is `.v-textarea-field`,
-    // which no selector in the group's sheet names, so it is left wholly alone rather than
-    // half painted.
     it('VTextarea is left untouched', () => {
       const { container } = render(VInputGroup, {
         props: { size: 'lg' },
@@ -316,9 +302,6 @@ describe('VInputGroup', () => {
     })
   })
 
-  // The row's context reaches the whole subtree, floating panels included, and a panel holds
-  // buttons that are not segments. This is the test that goes red if either
-  // `provide(buttonGroupKey, NO_BUTTON_GROUP)` is removed.
   describe('the row stops at a panel', () => {
     it("VDateInput: the calendar's own navigation keeps its size", async () => {
       const { container } = render(VInputGroup, {

@@ -110,16 +110,14 @@ describe('snapMinute', () => {
 
 describe('angleToIndex', () => {
   it('resolves the four cardinal points (sector 0 at twelve, clockwise)', () => {
-    expect(angleToIndex(0, -1, 12)).toBe(0) // haut
-    expect(angleToIndex(1, 0, 12)).toBe(3) // droite
-    expect(angleToIndex(0, 1, 12)).toBe(6) // bas
-    expect(angleToIndex(-1, 0, 12)).toBe(9) // gauche
+    expect(angleToIndex(0, -1, 12)).toBe(0)
+    expect(angleToIndex(1, 0, 12)).toBe(3)
+    expect(angleToIndex(0, 1, 12)).toBe(6)
+    expect(angleToIndex(-1, 0, 12)).toBe(9)
   })
 
   it("rounds to the nearest sector and wraps around twelve o'clock", () => {
-    // Just before twelve on the left (~ -1°): comes back to sector 0, not 12.
     expect(angleToIndex(-0.01, -1, 12)).toBe(0)
-    // Halfway between 1 and 2 o'clock (45°): tips to the upper sector (round).
     expect(angleToIndex(1, -1, 12)).toBe(2)
   })
 
@@ -184,8 +182,6 @@ describe('timeList', () => {
   })
 
   it('localizes the labels according to the format', () => {
-    // The same formatting as the field (`formatTimeDisplay`): what you pick in the
-    // list is exactly what will be shown — hence "0:30" and not "00:30".
     expect(timeList(30, 'fr-FR', '24h')[1]?.label).toBe('0:30')
     expect(timeList(30, 'fr-FR', '24h')[28]?.label).toBe('14:00')
     expect(timeList(60, 'en-US', '12h')[9]?.label).toMatch(/AM/)
@@ -205,21 +201,21 @@ describe('HH:MM mask', () => {
     expect(formatTimeMask('09')).toBe('09:')
     expect(formatTimeMask('093')).toBe('09:3')
     expect(formatTimeMask('0930')).toBe('09:30')
-    expect(formatTimeMask('093012')).toBe('09:30') // extra digits are ignored
+    expect(formatTimeMask('093012')).toBe('09:30')
   })
 
   it('places the caret in closed form, stepping over the separator while typing', () => {
     expect(timeCaret(0)).toBe(0)
     expect(timeCaret(1)).toBe(1)
-    expect(timeCaret(2)).toBe(2) // deletion: stays before the ":"
-    expect(timeCaret(2, true)).toBe(3) // insertion: enters the minutes
+    expect(timeCaret(2)).toBe(2)
+    expect(timeCaret(2, true)).toBe(3)
     expect(timeCaret(3)).toBe(4)
     expect(timeCaret(4)).toBe(5)
   })
 
   it('formats a canonical value according to the displayed format', () => {
     expect(timeToMask('19:05', '24h')).toBe('19:05')
-    expect(timeToMask('19:05', '12h')).toBe('07:05') // the meridiem lives outside the mask
+    expect(timeToMask('19:05', '12h')).toBe('07:05')
     expect(timeToMask('00:30', '12h')).toBe('12:30')
     expect(timeToMask(null, '24h')).toBe('')
   })
@@ -229,7 +225,7 @@ describe('HH:MM mask', () => {
     expect(parseTimeMask('0930', '24h')).toBe('09:30')
     expect(parseTimeMask('24:00', '24h')).toBeNull()
     expect(parseTimeMask('09:60', '24h')).toBeNull()
-    expect(parseTimeMask('09:3', '24h')).toBeNull() // incomplete
+    expect(parseTimeMask('09:3', '24h')).toBeNull()
     expect(parseTimeMask('', '24h')).toBeNull()
   })
 
@@ -237,7 +233,7 @@ describe('HH:MM mask', () => {
     expect(parseTimeMask('07:00', '12h', 'PM')).toBe('19:00')
     expect(parseTimeMask('12:00', '12h', 'AM')).toBe('00:00')
     expect(parseTimeMask('12:00', '12h', 'PM')).toBe('12:00')
-    expect(parseTimeMask('00:30', '12h', 'AM')).toBeNull() // 0 is outside 1–12
+    expect(parseTimeMask('00:30', '12h', 'AM')).toBeNull()
     expect(parseTimeMask('13:00', '12h', 'PM')).toBeNull()
   })
 })
@@ -262,14 +258,12 @@ describe('withMeridiem', () => {
 })
 
 describe('a minute step that is not a whole number', () => {
-  // 7.5 divides 60, and wrote `09:7.5` into the model: a step is read as whole minutes.
   it('snaps to a whole minute', () => {
     expect(Number.isInteger(snapMinute(10, 7.5))).toBe(true)
   })
 })
 
 describe('a 12-hour clock in a language that counts from zero', () => {
-  // Japanese writes the first hour after midnight as 0 on a 12-hour clock, not 12.
   it('follows the language rather than imposing twelve', () => {
     expect(formatTimeDisplay('00:05', 'ja-JP', '12h')).toContain('0:05')
     expect(formatTimeDisplay('00:05', 'en-US', '12h')).toContain('12:05')

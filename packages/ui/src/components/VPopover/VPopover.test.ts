@@ -22,10 +22,9 @@ describe('VPopover', () => {
     const panel = panelOf(container)
     expect(panel.getAttribute('popover')).toBe('auto')
     expect(panel.getAttribute('data-placement')).toBe('bottom-start')
-    // closed-panel guard + placements: see styles/floating.css
+    // Closed-panel guard + placements: see styles/floating.css
     expect(panel.classList.contains('v-overlay')).toBe(true)
     expect(panel.classList.contains('v-floating')).toBe(true)
-    // default surface (styles/panel.css)
     expect(panel.classList.contains('v-panel')).toBe(true)
   })
 
@@ -81,7 +80,6 @@ describe('VPopover', () => {
     const panel = panelOf(container)
     const trigger = getByRole('button', { name: 'Open' })
 
-    // the wrapper then carries the anchor-name (see .v-popover[data-trigger])
     expect(container.querySelector('.v-popover')?.hasAttribute('data-trigger')).toBe(true)
     expect(trigger.getAttribute('popovertarget')).toBe(panel.id)
     expect(trigger.getAttribute('aria-controls')).toBe(panel.id)
@@ -115,8 +113,8 @@ describe('VPopover', () => {
     await nextTick()
     expect(open.value).toBe(false)
 
-    // idempotence: a second hidePopover() would throw InvalidStateError without
-    // usePopover's guard
+    // Idempotence: a second hidePopover() would throw InvalidStateError without usePopover's
+    // guard
     expect(() => panel.hidePopover()).not.toThrow()
   })
 
@@ -134,7 +132,6 @@ describe('VPopover', () => {
     expect(panel.getAttribute('role')).toBe('dialog')
     expect(panel.getAttribute('aria-label')).toBe('Details')
     expect(panel.getAttribute('data-x')).toBe('1')
-    // class/style go on the panel TOO (the wrapper is only an anchor)
     expect(panel.classList.contains('v-custom')).toBe(true)
     expect(container.querySelector('.v-popover')?.classList.contains('v-custom')).toBe(false)
   })
@@ -151,7 +148,6 @@ describe('VPopover — the imperative pair', () => {
     await nextTick()
     expect(panel.hasAttribute('data-popover-open')).toBe(true)
 
-    // `close`, not `hide`: the same verb VDialog uses for the same gesture.
     panelRef.value?.close()
     await nextTick()
     expect(panel.hasAttribute('data-popover-open')).toBe(false)

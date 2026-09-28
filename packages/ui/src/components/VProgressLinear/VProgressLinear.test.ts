@@ -16,7 +16,6 @@ describe('VProgressLinear', () => {
     const bar = getByRole('progressbar')
     expect(bar.getAttribute('aria-valuenow')).toBe('30')
     expect(bar.getAttribute('aria-valuemin')).toBe('0')
-    // a faithful upper bound ("30 of 60"), with no normalization to 100
     expect(bar.getAttribute('aria-valuemax')).toBe('60')
     expect(styleOf(container)).toContain('--fill-fraction: 0.5')
   })
@@ -78,7 +77,6 @@ describe('VProgressLinear', () => {
     const bar = getByRole('progressbar')
     expect(bar.hasAttribute('aria-valuenow')).toBe(false)
     expect(bar.hasAttribute('data-indeterminate')).toBe(true)
-    // always set, or calc(100% * var(--fill-fraction)) would be invalid
     expect(styleOf(container)).toContain('--fill-fraction: 0')
   })
 
@@ -120,10 +118,8 @@ describe('VProgressLinear', () => {
     expect(styleOf(container)).not.toContain('--progress-thickness')
     await rerender({ thickness: 12 })
     expect(styleOf(container)).toContain('--progress-thickness: 12px')
-    // a numeric string: the same result, still pixels
     await rerender({ thickness: '12' })
     expect(styleOf(container)).toContain('--progress-thickness: 12px')
-    // a non-numeric value: ignored rather than an invalid custom property
     await rerender({ thickness: 'auto' })
     expect(styleOf(container)).not.toContain('--progress-thickness')
   })
@@ -143,8 +139,6 @@ describe('VProgressLinear', () => {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
-    // The default branch is written out too, so a consumer styling the horizontal case
-    // from their own sheet has something to select.
     expect(getByRole('progressbar').getAttribute('data-orientation')).toBe('horizontal')
     await rerender({ orientation: 'vertical' })
     expect(getByRole('progressbar').getAttribute('data-orientation')).toBe('vertical')
@@ -158,10 +152,8 @@ describe('VProgressLinear', () => {
     const copies = [...container.querySelectorAll('.v-progress-linear-text')]
     expect(copies).toHaveLength(2)
     for (const copy of copies) expect(copy.textContent?.trim()).toBe('50%')
-    // the base copy: announced by no one (children presentational) but not hidden
     expect(copies[0]!.hasAttribute('data-on-fill')).toBe(false)
     expect(copies[0]!.hasAttribute('aria-hidden')).toBe(false)
-    // the contrasted copy: it duplicates visible text → hidden
     expect(copies[1]!.hasAttribute('data-on-fill')).toBe(true)
     expect(copies[1]!.getAttribute('aria-hidden')).toBe('true')
   })
@@ -173,7 +165,6 @@ describe('VProgressLinear', () => {
     })
     const root = getByRole('progressbar')
     expect(root.classList.contains('v-progress-linear')).toBe(true)
-    // no intermediate track element
     expect(container.querySelector('.v-progress-linear-track')).toBeNull()
     expect(root.children).toHaveLength(1)
     expect(root.firstElementChild!.classList.contains('v-progress-linear-fill')).toBe(true)

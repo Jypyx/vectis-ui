@@ -1,14 +1,6 @@
 /**
- * Post-build guard: every route the navigation offers must exist as a file in the artefact.
- *
- * A static site has exactly one silent failure mode — a route that never rendered. Nothing
- * errors: the build succeeds, the link is in the sidebar, and the visitor gets GitHub Pages'
- * own 404. This walks the same `content/nav.ts` the sidebar and the prerender list are built
- * from, so the three cannot disagree without the build going red.
- *
- * It also checks `.nojekyll`, without which GitHub Pages silently drops every path beginning
- * with an underscore — which is where Nuxt puts its build assets, so the site would load
- * with no CSS and no JavaScript at all.
+ * Post-build guard: every route the navigation offers must exist as a file in the artefact. A
+ * static site has exactly one silent failure mode; a route that never rendered.
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -24,13 +16,7 @@ const outDir = join(appRoot, '.output', 'public')
 const fileFor = (route: string) =>
   join(outDir, route === '/' ? 'index.html' : join(route, 'index.html'))
 
-/**
- * The locale segments, mirroring `LOCALE_PREFIXES` in content/site.ts.
- *
- * The list is written out again rather than imported from `content/site.ts`, and deliberately:
- * this script must be able to fail when the configuration and the navigation disagree, which it
- * cannot do if it derives its expectations from the very files it is checking.
- */
+/** The locale segments, mirroring `LOCALE_PREFIXES` in content/site.ts. */
 const LOCALE_PREFIXES = ['', '/fr']
 
 const routes = LOCALE_PREFIXES.flatMap((prefix) => [
@@ -55,8 +41,8 @@ if (!existsSync(join(outDir, '.nojekyll'))) {
 
 /*
  * Every slug in the inventory must have a page file of its own. There is no stub route to fall
- * back on any more, so a slug without one is a 404 the crawler would report as a missing route
- * — but only if it happened to be linked. Checking the files directly says which one, and why.
+ * back on any more, so a slug without one is a 404 the crawler would report as a missing route;
+ * but only if it happened to be linked.
  */
 const pageless = allPages.filter(
   (page) => !existsSync(join(appRoot, 'pages', 'docs', `${page.slug}.vue`)),
@@ -75,16 +61,10 @@ if (missing.length > 0) {
 }
 
 /*
- * The two SEO files, and what the sitemap says.
- *
  * Both are server routes, so both are RENDERED rather than copied: a route dropped from the
- * prerender list leaves no file and nothing else complains, and a sitemap that lost a page is
- * a page a crawler is never told about. Comparing the URLs it lists against the navigation is
- * the same guard the routes above get, applied to the file that advertises them.
- *
- * The origin comes from the same constant the route builds its URLs from, so this cannot catch
- * a wrong domain. What it catches is drift between the sitemap and the inventory, which is the
- * failure that actually happens.
+ * prerender list leaves no file and nothing else complains, and a sitemap that lost a page is a
+ * page a crawler is never told about. Comparing the URLs it lists against the navigation is the
+ * same guard the routes above get, applied to the file that advertises them.
  */
 const seoFiles = ['robots.txt', 'sitemap.xml'].filter((file) => !existsSync(join(outDir, file)))
 
@@ -119,16 +99,10 @@ if (unlisted.length > 0 || strays.length > 0) {
 }
 
 /*
- * The card image, and the two numbers the head declares about it.
- *
- * `og:image:width` and `og:image:height` are typed into `app.vue` about a file nothing in the
- * build ever opens, so re-exporting the picture at another size leaves them quietly wrong and a
- * client reserves a box of the declared shape to lay the card out around. Both formats state
- * their own size in their header, which is enough to settle it here.
- *
- * The file NAME comes from the declared `og:image` rather than being written out again: the
- * check then follows whatever `app.vue` publishes, so swapping the picture, its format included,
- * stays one line there instead of two places to keep in step.
+ * The card image, and the two numbers the head declares about it. `og:image:width` and
+ * `og:image:height` are typed into `app.vue` about a file nothing in the build ever opens, so
+ * re-exporting the picture at another size leaves them quietly wrong and a client reserves a
+ * box of the declared shape to lay the card out around.
  */
 const home = readFileSync(fileFor('/'), 'utf8')
 
@@ -155,14 +129,7 @@ if (!existsSync(join(outDir, cardName))) {
   process.exit(1)
 }
 
-/**
- * The intrinsic size of a PNG or a JPEG, read off its header.
- *
- * A PNG states it in the IHDR chunk, which the format requires to come first. A JPEG hides it
- * in whichever frame marker its encoder chose, so the segments have to be walked: the ones
- * carrying a length are skipped by it, the standalone ones (padding, restarts) by two bytes,
- * and past the start of scan there is nothing but entropy-coded data left to read.
- */
+/** The intrinsic size of a PNG or a JPEG, read off its header. */
 function imageSize(file: Buffer) {
   if (file.subarray(1, 4).toString() === 'PNG') {
     return { width: file.readUInt32BE(16), height: file.readUInt32BE(20) }

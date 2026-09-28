@@ -1,15 +1,6 @@
 <script setup lang="ts">
 import type { TokenValue } from '~/content/designTokens'
 
-/**
- * One default value in the Design tokens tables: what the token resolves to, then the reference
- * the stylesheet writes when it points at another token.
- *
- * The swatch is painted with the RESOLVED value, inline, and never with `var(--vectis-…)`: this
- * site repoints its own accent, so reading the live property would show the site's violet in a
- * table documenting the library's indigo, and a dark-theme swatch would take the colour of
- * whichever theme the page is in.
- */
 defineProps<{
   value: TokenValue
   /** Draws a colour swatch before the value. */

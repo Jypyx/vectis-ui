@@ -7,8 +7,6 @@ const following = ref(false)
 </script>
 
 <template>
-  <!-- The slot replaces the title, so the dialog is named with an `aria-label` instead:
-       there is no longer a `title` prop for it to point at. -->
   <VDialog v-model:open="open" width="440px" aria-label="Nadia Rousseau">
     <template #trigger="{ triggerProps }">
       <VButton v-bind="triggerProps">Open the profile</VButton>

@@ -1,14 +1,8 @@
 <script setup lang="ts">
 // @ssr @core
 /**
- * The path leading to the page being read, from the broadest section down to the current
- * one: a `<nav>` holding an `<ol>`, built entirely from the `items` prop. Nothing is read
- * from the browser, so the server and the client render the same thing.
- *
- * The separators are decorative `aria-hidden` icons, and the first is removed in CSS rather
- * than by a condition in the markup. The current page is found by comparing each address
- * with `currentPath`, carries `aria-current="page"` and stays a working link, as the ARIA
- * practices recommend. Past `maxItems`, the middle segments fold into a VMenu behind an "…".
+ * Mark the matching link aria-current without disabling it. CSS hides the first separator so
+ * SSR needs no child registry.
  */
 
 import { computed } from 'vue'
@@ -48,11 +42,7 @@ interface BreadcrumbProps {
    * wording of the DS dictionary, in the current language.
    */
   label?: string
-  /**
-   * The address of the page being displayed. The segment whose `href` matches it is
-   * the current one, even when it is folded into the menu. A trailing slash, a query and
-   * a hash on either side make no difference, so a router's full path can be passed as is.
-   */
+  /** The address of the page being displayed. */
   currentPath?: string
   /**
    * The icon drawn between two segments: an icon name, or an explicit render,
@@ -60,10 +50,8 @@ interface BreadcrumbProps {
    */
   separatorIcon?: IconSource
   /**
-   * The length past which the trail folds: only the first segment, an "…" button and
-   * the last two remain, the button opening a menu that lists the hidden segments
-   * alone. Below 3 there would be nothing left to fold, so 3 is the effective
-   * minimum.
+   * The length past which the trail folds: only the first segment, an "…" button and the last
+   * two remain, the button opening a menu that lists the hidden segments alone.
    */
   maxItems?: number
   /**
@@ -86,16 +74,14 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.breadcrumb.label)
 const resolvedEllipsisLabel = computed(() => props.ellipsisLabel ?? m.value.breadcrumb.ellipsis)
 
 /**
- * Drops the query, the hash and a trailing slash, so that `/docs`, `/docs/` and a
- * router's full path `/docs?tab=2#intro` compare as the same page; the root `/` is left
- * alone. Pure string handling, hence safe to run on the server.
+ * Drops the query, the hash and a trailing slash, so that `/docs`, `/docs/` and a router's full
+ * path `/docs?tab=2#intro` compare as the same page; the root `/` is left alone.
  */
 function normalize(path: string): string {
   const bare = path.replace(/[?#].*$/, '')
   return bare.length > 1 && bare.endsWith('/') ? bare.slice(0, -1) : bare
 }
 
-// Normalized once per change of the prop rather than once per segment on every render.
 const normalizedCurrent = computed(() =>
   props.currentPath === undefined ? undefined : normalize(props.currentPath),
 )
@@ -113,8 +99,8 @@ const truncated = computed(
 /** The segments folded into the menu: everything between the first and the last two. */
 const hiddenItems = computed(() => (truncated.value ? props.items.slice(1, -2) : []))
 /**
- * The segments actually rendered in the list — when the trail is folded, the first
- * one followed by the last two.
+ * The segments actually rendered in the list; when the trail is folded, the first one followed
+ * by the last two.
  */
 const visibleItems = computed(() =>
   truncated.value ? [props.items[0] as BreadcrumbItem, ...props.items.slice(-2)] : props.items,
@@ -192,10 +178,12 @@ const visibleItems = computed(() =>
     color: var(--vectis-color-text-muted);
   }
 
-  /* TRAP — every item renders its own leading separator and the first one is hidden HERE,
-     which is what keeps the template free of an index test. Delete this rule and the trail
-     opens on a stray chevron; both child combinators are load-bearing too, so wrapping an
-     item or the list in anything puts that chevron straight back. */
+  /*
+   * Every item renders its own leading separator and the first one is hidden here, which keeps
+   * the template free of an index test. Delete this rule and the trail opens on a stray
+   * chevron; both child combinators are load-bearing too, so wrapping an item or the list in
+   * anything puts that chevron straight back.
+   */
   .v-breadcrumb-list > .v-breadcrumb-item:first-child > .v-breadcrumb-separator {
     display: none;
   }

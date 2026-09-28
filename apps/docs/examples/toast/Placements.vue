@@ -12,7 +12,6 @@ const placements: ToastPlacement[] = [
 </script>
 
 <template>
-  <!-- Raised into the <VToaster /> mounted once at the root of the application. -->
   <div class="demo">
     <!-- Six corners, each with a stack of its own, so notifications aimed at different
          ones never queue behind each other. Set on the VToaster the placement is the

@@ -1,12 +1,7 @@
 // @a11y
 /**
- * A `@focusout` handler closing the component when focus leaves it, panel included.
- *
- * A popover stays a DOM descendant of its owner even while painted in the top layer, so
- * `contains` is the whole test and nothing has to be watched at document level. A null
- * `relatedTarget` — focus gone to the body, or out of the window — counts as leaving.
- *
- * Only `manual` popovers need this. VMenu's `auto` panel is dismissed by the browser.
+ * Close when focus leaves the owner and panel. Top-layer popovers remain DOM descendants, so
+ * contains covers both without document listeners.
  */
 
 import type { Ref } from 'vue'

@@ -1,34 +1,8 @@
 <script setup lang="ts">
 // @core
 /**
- * A panel that floats above the page, next to whatever opened it. It is built on the
- * browser's own popover support and positions itself entirely in CSS, so there is no
- * positioning library involved and no JavaScript measuring anything.
- *
- * What it carries is deliberately only the PLUMBING every panel of the design system
- * needs: the popover element and how it opens, the bridge between the browser's own
- * open state and `v-model:open`, the anchoring and the placement, and the surface a
- * panel is drawn on — its background, border and shadow, which `bare` strips away.
- *
- * What it carries NOT is just as deliberate: no ARIA role, no keyboard, no focus
- * management and no rule about when to close. Those are exactly what makes a menu
- * different from a listbox or a tooltip, and they stay with the components building
- * on it — VTooltip, VCombobox, VDateInput, VTimeInput. Turning this into one panel
- * with a `role` prop would put all four sets of behaviour back into a single file.
- *
- * There are two ways of anchoring it, and they exclude one another:
- *
- * - the `#trigger` slot, where the component wraps the trigger and names that
- *   wrapper as the anchor. The name is shared by every instance and confined to each
- *   wrapper's own subtree, which is what makes a panel resolve ITS trigger rather
- *   than the last one named on the page — a real risk, since an open panel moves to
- *   the top layer and counts as coming after the whole document.
- * - the `anchor` prop, for a consumer that already owns its root and its control —
- *   VCombobox and the pickers do. They name the anchor themselves and pass the name
- *   in, and the wrapper then disappears from the layout entirely.
- *
- * The only JavaScript is the bridge between `v-model:open` and the browser's own
- * imperative popover methods.
+ * Bridge native popover state to v-model while CSS anchors the panel. Roles, keyboard handling
+ * and dismissal policy belong to the consuming widget.
  */
 import { computed, ref, useId } from 'vue'
 
@@ -49,10 +23,8 @@ export type PopoverPlacement =
   | 'right-end'
 
 /**
- * What the trigger has to carry for the browser to open the panel and for assistive
- * technology to know what it controls. It is the disclosure pattern and nothing more:
- * no role and no `aria-haspopup` are imposed, since only the consumer knows what kind
- * of panel it is opening.
+ * What the trigger has to carry for the browser to open the panel and for assistive technology
+ * to know what it controls.
  */
 export type PopoverTriggerProps = {
   popovertarget: string
@@ -75,11 +47,7 @@ interface PopoverProps {
    * opposite side by itself when there is not enough room.
    */
   placement?: PopoverPlacement
-  /**
-   * How the panel closes. `auto` lets the browser dismiss it on a click outside or on
-   * Escape, and stack it with other panels; `manual` leaves everything to the
-   * consumer, which is what a panel with its own focus and dismissal rules needs.
-   */
+  /** How the panel closes. */
   mode?: PopoverMode
   /**
    * The name of an anchor the consumer has set on its own control, written as a CSS
@@ -94,11 +62,7 @@ interface PopoverProps {
    * asks for, as VDatePicker does.
    */
   bare?: boolean
-  /**
-   * Stops the panel being narrower than whatever it is anchored to. It is a FLOOR, so a
-   * panel with a width of its own still grows past it rather than being clamped to the
-   * trigger, which is what a list of long labels under a short field wants.
-   */
+  /** Stops the panel being narrower than whatever it is anchored to. */
   matchTrigger?: boolean
 }
 
@@ -112,10 +76,9 @@ const props = withDefaults(defineProps<PopoverProps>(), {
 })
 
 /**
- * Whether the panel is showing. It starts closed and is BIDIRECTIONAL, fed from the DOM: in
- * `auto` mode the browser's own light dismiss writes back to it. Setting it opens and closes
- * the panel; a consumer needing the change to be synchronous uses the exposed `show`/`close`
- * instead, which is what VTooltip and the pickers do.
+ * Whether the panel is showing. Setting it opens and closes the panel; a consumer needing the
+ * change to be synchronous uses the exposed `show`/ `close` instead, which VTooltip and the
+ * pickers do.
  */
 const open = defineModel<boolean>('open', { default: false })
 
@@ -130,13 +93,11 @@ const slots = defineSlots<{
 }>()
 
 /*
- * Everything the consumer passes — the ARIA role, the aria-*, the data-*, class,
- * style and the listeners — goes on the PANEL rather than on the anchoring wrapper,
- * because the panel is what the consumer is really describing and styling.
- *
- * This is a deliberate departure from the design system's usual wrapper pattern,
- * which keeps class and style on the root; `useRootAttrs` therefore does not apply
- * here.
+ * Everything the consumer passes; the ARIA role, the aria-*, the data-*, class, style and the
+ * listeners; goes on the PANEL rather than on the anchoring wrapper, because the panel is what
+ * the consumer is really describing and styling. This is a deliberate departure from the design
+ * system's usual wrapper pattern, which keeps class and style on the root; `useRootAttrs`
+ * therefore does not apply here.
  */
 defineOptions({ inheritAttrs: false })
 
@@ -144,14 +105,12 @@ const panelEl = ref<HTMLElement | null>(null)
 const generatedId = useId()
 const panelId = computed(() => props.id ?? generatedId)
 
-// The open state and the guards that keep the calls idempotent live in usePopover.
-// The invariant to respect here: `shown` is fed by the panel's own events and never
-// assigned by hand, so the browser stays the source of truth — it can close the panel
-// without asking us.
+// The invariant to respect here: `shown` is fed by the panel's own events and never assigned by
+// hand, so the browser stays the source of truth; it can close the panel without asking us.
 const { shown, syncShown, show, hide } = usePopover(panelEl)
 
-// TRAP — a function read by the template, never a `computed`: `slots` is not reactive, so a
-// computed would keep its first answer while a slot behind a `v-if` comes and goes.
+// A function read by the template, never a `computed`: `slots` is not reactive, so a computed
+// would keep its first answer while a slot behind a `v-if` comes and goes.
 function hasTrigger() {
   return slots.trigger !== undefined
 }
@@ -162,13 +121,8 @@ const triggerProps = computed<PopoverTriggerProps>(() => ({
   'aria-controls': panelId.value,
 }))
 
-// Both anchoring modes are served by one CSS declaration: the panel reads this variable,
-// which names either the consumer's anchor or the wrapper's own.
-//
-// TRAP — it is set inline in BOTH modes, never left to a fallback. A custom property
-// INHERITS: left unset in the `#trigger` mode, the panel read whatever an ancestor had
-// set — a VPopover placed in VDateInput's `#footer` inherited the date field's anchor and
-// opened under the field instead of under its own trigger, with no error anywhere.
+// Set the anchor explicitly in both trigger modes; an unset custom property would inherit an
+// ancestor popover's anchor.
 const panelStyle = computed(() => ({
   '--popover-anchor-name': props.anchor ?? '--popover-anchor',
 }))
@@ -217,57 +171,44 @@ defineExpose({
 <style>
 @layer vectis.components {
   /*
-   * Without a trigger the wrapper has nothing to wrap, so `display: contents` takes
-   * it out of the layout entirely — the panel is positioned against the viewport and
-   * does not depend on it. Left as an empty inline-block it would still create a line
-   * box, and therefore add height, inside every component using this route.
+   * Without a trigger the wrapper has nothing to wrap, so `display: contents` takes it out of
+   * the layout entirely; the panel is positioned against the viewport and does not depend on
+   * it. Left as an empty inline-block it would still create a line box, and therefore add
+   * height, inside every component using this route.
    */
   .v-popover {
     display: contents;
   }
 
   /*
-   * With a trigger the wrapper must generate a box, since that box is the ANCHOR —
-   * which is why `display: contents` stops at the rule above. It is FLEX rather than
-   * inline-block, the `.v-badge-host` and `.v-tooltip` form: both are inline-level
-   * atomic boxes, so text flows around them identically, but an inline-block opens an
-   * inline formatting context for the trigger, which then lands on a line box and adds
-   * the strut's descender to the wrapper. The wrapper being the anchor, that offsets
-   * the panel as well as the row.
-   *
-   * `align-items: center` covers the rest: a wrapper stretched by a parent in
-   * `align-items: stretch` would otherwise stretch the trigger with it, where the
-   * inline-block form left it at its natural height.
+   * With a trigger the wrapper must generate a box, since that box is the ANCHOR; which is why
+   * `display: contents` stops at the rule above. It is FLEX rather than inline-block, the
+   * `.v-badge-host` and `.v-tooltip` form: both are inline-level atomic boxes, so text flows
+   * around them identically, but an inline-block opens an inline formatting context for the
+   * trigger, which then lands on a line box and adds the strut's descender to the wrapper.
    */
   .v-popover[data-trigger] {
     display: inline-flex;
     align-items: center;
     anchor-name: --popover-anchor;
-    /* Confining the name to this subtree is indispensable, not tidy: an open panel
-       moves to the top layer, where anchor resolution treats it as coming after the
-       whole document. Without the confinement every panel on the page would attach
-       itself to the LAST wrapper carrying this name. */
+    /*
+     * Without the confinement every panel on the page would attach itself to the last wrapper
+     * carrying this name.
+     */
     anchor-scope: --popover-anchor;
   }
 
   /*
-   * The panel gets this one declaration and no dimension whatsoever. Widths, heights
-   * and overflow differ from one consumer to the next, and since each component ships
-   * its own stylesheet, a declaration here would sit at equal specificity with theirs
-   * — leaving the winner to whichever order the consumer's bundler happens to
-   * produce.
+   * Widths, heights and overflow differ from one consumer to the next, and since each component
+   * ships its own stylesheet, a declaration here would sit at equal specificity with theirs;
+   * leaving the winner to whichever order the consumer's bundler happens to produce.
    */
   .v-popover-panel {
     position-anchor: var(--popover-anchor-name);
   }
 
   /*
-   * A `bare` panel is bare of the BROWSER's decoration too. The UA sheet gives every
-   * `[popover]` a border, a padding, a Canvas background and `overflow: auto`, and `.v-panel`
-   * is what normally overrides them: without it they came back, a solid line and a white box
-   * around content promised "no background, no border".
-   *
-   * TRAP — `:where()` keeps this at (0,1,0). A bare consumer restyles its panel through the
+   * `:where()` keeps this at (0,1,0). A bare consumer restyles its panel through the
    * `.v-popover-panel.v-x-panel` compound (VTooltip), at (0,2,0), which must win; a (0,2,0)
    * rule here would tie with it across two sheets.
    */
@@ -280,14 +221,10 @@ defineExpose({
   }
 
   /*
-   * The one dimension this sheet does carry, and it is a FLOOR rather than a size: a panel
-   * may not come out narrower than what it is anchored to. It is written here rather than in
-   * each consumer because `anchor-size()` resolves against `position-anchor`, which is the
-   * declaration above — the same reason the anchoring itself lives here.
-   *
-   * A minimum beats a maximum, so a consumer's own `max-inline-size` does not clamp it: a
-   * trigger wider than the ceiling widens the panel past it, which is intended. VMenu carries
-   * the twin of this rule, being deliberately outside VPopover, and answers to the same word.
+   * It is written here rather than in each consumer because `anchor-size()` resolves against
+   * `position-anchor`, which is the declaration above; the same reason the anchoring itself
+   * lives here. A minimum beats a maximum, so a consumer's own `max-inline-size` does not clamp
+   * it: a trigger wider than the ceiling widens the panel past it, which is intended.
    */
   .v-popover-panel[data-match-trigger] {
     min-inline-size: anchor-size(width);

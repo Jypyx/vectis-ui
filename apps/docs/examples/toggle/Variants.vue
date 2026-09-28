@@ -11,8 +11,10 @@ const byTone = ref<Record<string, string>>({ accent: 'week', neutral: 'week', da
 
 <template>
   <div class="demo">
-    <!-- `itemVariant` paints the items that are NOT chosen: transparent under `ghost`,
-         outlined under `outline`. What the chosen one takes is a separate decision. -->
+    <!--
+      `itemVariant` paints the items that are not chosen: transparent under `ghost`, outlined
+      under `outline`. What the chosen one takes is a separate decision.
+    -->
     <div v-for="variant in itemVariants" :key="variant" class="row">
       <p class="caption">itemVariant {{ variant }}</p>
       <VToggle v-model="byVariant[variant]" :item-variant="variant" :label="`Period, ${variant}`">

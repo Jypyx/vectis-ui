@@ -3,10 +3,10 @@ import { onMounted, ref } from 'vue'
 import { VCalendar, type CalendarEvent } from 'vectis-ui'
 
 /*
- * This page is prerendered, so the clock cannot be read while the markup is being built:
- * the build date would be written into the HTML and the browser would disagree with it.
- * The schedule below therefore starts on a fixed week and moves onto the current one once
- * the page is in the browser, which is what the theme does here for the same reason.
+ * This page is prerendered, so the clock cannot be read while the markup is being built: the
+ * build date would be written into the HTML and the browser would disagree with it. The
+ * schedule below therefore starts on a fixed week and moves onto the current one once the page
+ * is in the browser, which the theme does here for the same reason.
  */
 const REFERENCE_MONDAY = '2026-01-05'
 
@@ -24,17 +24,14 @@ function isoOf(date: Date): string {
   return `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())}`
 }
 
-/** The Monday of the week a date falls in. */
 function mondayOf(date: Date): string {
   const monday = new Date(date)
   monday.setDate(date.getDate() - ((date.getDay() + 6) % 7))
   return isoOf(monday)
 }
 
-/** The same three appointments, on whichever week starts on the Monday given. */
 function scheduleFor(monday: string): CalendarEvent[] {
   const day = (offset: number) => {
-    // The time keeps the parse local: a bare `YYYY-MM-DD` is read as UTC.
     const date = new Date(`${monday}T00:00:00`)
     date.setDate(date.getDate() + offset)
     return isoOf(date)

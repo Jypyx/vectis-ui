@@ -1,16 +1,7 @@
 <script setup lang="ts">
 /**
- * Progress drawn as a ring, an SVG whose geometry is described entirely in CSS with no JS
- * computing anything.
- *
- * Two things make that possible. There is no `viewBox`, so one user unit is one pixel and
- * the circles take plain lengths — a fixed coordinate system would mean converting the
- * thickness into its units, hence knowing the ratio in code and recomputing it at every
- * change of size. And `pathLength="100"` declares the outline 100 units long whatever its
- * real circumference, so the portion drawn is a percentage with no π anywhere.
- *
- * NAMING — pass a `label` saying what is progressing. The figure in the middle cannot
- * serve: `role="progressbar"` makes its content presentational, so it is never announced.
+ * CSS draws the progress arc. JavaScript normalizes values shared by geometry, slots and
+ * progressbar ARIA attributes.
  */
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useProgressValue } from '../../composables/useProgressValue'
@@ -44,10 +35,6 @@ interface ProgressCircularProps {
   label?: string
   /** What counts as finished. The other end is always zero. */
   max?: number
-  /**
-   * Says that the progress cannot be measured: the ring turns continuously and the
-   * value is ignored.
-   */
   indeterminate?: boolean
   /** What the progress means, expressed as a colour. */
   tone?: ProgressCircularTone
@@ -57,9 +44,9 @@ interface ProgressCircularProps {
    * and the dark one.
    */
   color?: string
-  /** The diameter, always IN PIXELS: `96` and `'96'` both give 96px. */
+  /** The diameter, always in PIXELS: `96` and `'96'` both give 96px. */
   size?: number | string
-  /** How thick the ring is, always IN PIXELS: `8` and `'8'` both give 8px. */
+  /** How thick the ring is, always in PIXELS: `8` and `'8'` both give 8px. */
   thickness?: number | string
   /** Whether the ends of the drawn arc are rounded or cut square. */
   shape?: ProgressCircularShape
@@ -147,8 +134,10 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
 
 <style>
 @layer vectis.components {
-  /* The two dimensions are declared here as defaults, on the very element the props
-     write to inline — which is what makes an explicit size or thickness always win. */
+  /*
+   * The two dimensions are declared here as defaults, on the very element the props write to
+   * inline; which makes an explicit size or thickness always win.
+   */
   .v-progress-circular {
     --progress-diameter: var(--vectis-control-size-progress-circular-diameter);
     --progress-thickness: var(--vectis-control-size-progress-circular-thickness);
@@ -177,17 +166,20 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
     rotate: -90deg;
   }
 
-  /* In a right-to-left page the ring fills the other way round, following the reading
-     direction. These individual properties are applied in a fixed order — move, turn,
-     then mirror — so the mirroring is taken into account before the quarter turn above. */
+  /*
+   * In a right-to-left page the ring fills the other way round, following the reading
+   * direction. These individual properties are applied in a fixed order; move, turn, then
+   * mirror; so the mirroring is taken into account before the quarter turn above.
+   */
   .v-progress-circular:dir(rtl) .v-progress-circular-svg {
     scale: 1 -1;
   }
 
-  /* The geometry, entirely in CSS and in plain lengths. Percentages are avoided
-     deliberately: a radius given as a percentage is resolved against a normalized
-     diagonal rather than against the width, and there is no reason to expose the
-     component to that when the diameter is always a length to begin with. */
+  /*
+   * Percentages are avoided deliberately: a radius given as a percentage is resolved against a
+   * normalized diagonal rather than against the width, and there is no reason to expose the
+   * component to that when the diameter is always a length to begin with.
+   */
   .v-progress-circular-track,
   .v-progress-circular-bar {
     cx: calc(var(--progress-diameter) / 2);
@@ -220,29 +212,33 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
     display: flex;
     align-items: center;
     justify-content: center;
-    /* TRAP — this centres the BOX itself in its cell, and it is not redundant with the
-       centring above. The maximum width below stops the box from being stretched to
-       fill the cell, and a stretch that cannot apply falls back to the START edge: the
-       figure would end up against the side of the ring. */
+    /*
+     * This centres the BOX itself in its cell, and it is not redundant with the centring above.
+     * The maximum width below stops the box from being stretched to fill the cell, and a
+     * stretch that cannot apply falls back to the START edge: the figure would end up against
+     * the side of the ring.
+     */
     place-self: center;
     max-inline-size: calc(var(--progress-diameter) - var(--progress-thickness) * 2);
     color: var(--vectis-color-text);
     font-family: var(--vectis-text-family);
-    /* Sized as a fraction of the diameter so it stays in proportion at every size — the
-       same tolerance already granted to VSpinner's stroke — with a floor at the smallest
-       type token, below which it would be unreadable. */
+    /*
+     * Sized as a fraction of the diameter so it stays in proportion at every size; the same
+     * tolerance already granted to VSpinner's stroke; with a floor at the smallest type token,
+     * below which it would be unreadable.
+     */
     font-size: max(var(--vectis-text-caption-size), calc(var(--progress-diameter) / 4));
     font-weight: var(--vectis-text-control-weight);
     line-height: var(--vectis-text-control-leading);
     text-align: center;
   }
 
-  /* When the progress cannot be measured, two animations run at once: the whole ring
-     turns, and the arc drawn on it lengthens and shortens. Their periods are deliberately
-     not multiples of one another — were the arc to restart on every rotation, the pair
-     would repeat the same picture over and over and read as a mechanical beat. At 1s and
-     1.5s they only realign every third turn; the slowed-down pair below is 3s and 5s, so
-     every fifth. Keep any change to those four values out of a whole-number ratio. */
+  /*
+   * Their periods are deliberately not multiples of one another; were the arc to restart on
+   * every rotation, the pair would repeat the same picture over and over and read as a
+   * mechanical beat. At 1s and 1.5s they only realign every third turn; the slowed-down pair
+   * below is 3s and 5s, so every fifth.
+   */
   .v-progress-circular[data-indeterminate] .v-progress-circular-svg {
     animation: v-progress-circular-spin var(--vectis-duration-1000) linear infinite;
   }
@@ -262,8 +258,6 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
     }
   }
 
-  /* Both ends of the arc move, so it lengthens, shortens and travels around the circle
-     at once. */
   @keyframes v-progress-circular-dash {
     0% {
       stroke-dasharray: 5 100;
@@ -286,8 +280,6 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
       transition: none;
     }
 
-    /* Slowed down and not stopped: a motionless loader no longer says that anything is
-       happening, which is the one thing it exists to say. */
     .v-progress-circular[data-indeterminate] .v-progress-circular-svg {
       animation-duration: var(--vectis-duration-3000);
     }

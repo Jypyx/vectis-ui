@@ -1,21 +1,4 @@
-/**
- * The cost of VCalendar's layout maths, which is the DS's heaviest pure computation.
- *
- * WHY THESE FOUR. Every one of them runs on a render, and two of them run again during a
- * drag — `VCalendarTimeGrid` rebuilds `placed` from `timedSegments` + `packDayColumn` each
- * time a timed card changes slot (`packAllDay` only when a bar changes day), and
- * `VCalendarMonth` rebuilds `byDay` each time a chip changes day. So their cost is not paid
- * once when the view opens; it is paid at the rate a hand crosses slots.
- *
- * WHAT THE NUMBERS ARE FOR. The month case sets `eventsByDay` beside the shape it replaced —
- * one filter and one sort per cell over the whole event list, written out below since nothing
- * ships it — so the gap stays a number anyone can re-run rather than a claim.
- *
- * The scales are deliberately spread. A calendar with 50 events is the ordinary case and
- * has to stay free; 2000 is a busy shared agenda, where an O(cells × events) pass either
- * disappears into the noise or dominates the frame. Reading only one of the two would tell
- * you nothing about the slope, which is the whole question.
- */
+/** Benchmark pure calendar layout for overlapping, multi-day and dense schedules. */
 import { bench, describe } from 'vitest'
 
 import {
@@ -53,14 +36,7 @@ function isoAt(dayOffset: number): string {
   return date.toISOString().slice(0, 10)
 }
 
-/**
- * A month's worth of events, spread over its days and its hours.
- *
- * Every seventh is all-day, which is what gives `packAllDay` something to stack and
- * `timedSegments` something to skip — a fixture of one kind only would measure half of
- * each function's real work. Nothing here is random: a benchmark that varies its input
- * between runs cannot be compared against its own previous number.
- */
+/** A month's worth of events, spread over its days and its hours. */
 function makeEvents(count: number): CalendarEvent[] {
   const events: CalendarEvent[] = []
   for (let i = 0; i < count; i++) {
@@ -71,7 +47,6 @@ function makeEvents(count: number): CalendarEvent[] {
       id: i,
       title: `Event ${i}`,
       start: day,
-      // A tenth of the all-day events run over two days, so a span is exercised too.
       end: allDay && i % 70 === 0 ? isoAt((i % 30) + 1) : day,
       ...(allDay
         ? {}
@@ -105,9 +80,7 @@ for (const count of SCALES) {
 
   describe(`${count} events`, () => {
     /*
-     * The month view's real workload, measured both ways.
-     *
-     * The naive shape is one filter per cell, each filtering AND sorting the whole list —
+     * The naive shape is one filter per cell, each filtering and sorting the whole list;
      * `cells × events`, with 42 sorts. The second is what VCalendarMonth does.
      */
     bench('byDay — a filter and a sort per month cell (the naive shape)', () => {
@@ -125,7 +98,6 @@ for (const count of SCALES) {
       eventsByDay(events, [isoAt(3)])
     })
 
-    // The time grid's two halves, each rebuilt when a drag of its own kind changes slot.
     bench('timedSegments — a week', () => {
       timedSegments(events, week, WINDOW, 15)
     })

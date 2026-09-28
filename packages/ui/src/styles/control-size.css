@@ -1,40 +1,12 @@
 /*
- * Control size table — the single CSS incarnation of the design system's mapping
- * (height / icon / opsz / type / paddings per size, xs → xl).
- *
- * Every interactive component sets `v-control` on its ROOT (the one carrying
- * `data-size`/`data-compact`) and consumes the `--control-*` variables in its own
- * CSS; they inherit down to the children (e.g. VInput's field). The blocks define
- * ONLY custom properties — never a layout property — so there is no specificity
- * conflict with the SFCs.
- *
- * Two padding-inline columns: `--control-padding-inline` for solid controls
- * (VButton, VChip, panel rows…), `--control-padding-inline-field` for text inputs
- * (VInput, VTextarea, VDateInput), which are tighter.
- * `--control-gap`: internal spacing (icon/label, OTP cells…).
- *
- * The table is NOT complete on purpose: a column is only written for the steps something
- * reads it at. The text fields stop at sm–lg, so the field padding has no xs or xl entry,
- * and nothing at xl holds a field action (`--control-action-size`), so neither has that
- * one. This sheet is paid for by every consumer; a step added to a component's scale that
- * needs one of these columns adds the entry here.
- *
- * `--vectis-icon-size`/`--vectis-icon-opsz` = VIcon's public context API; the
- * opsz stays a literal (a Material Symbols font axis: a technical contract, not a
- * design token — see VIcon.vue).
+ * Place v-control on the element carrying data-size/data-compact; inherited --control-*
+ * variables size its children.
  */
 @layer vectis.components {
   .v-control {
     /*
-     * Height in two steps: the sizes set --control-height-base, and compact
-     * derives the effective height (-4px, padding/type/icons unchanged).
-     *
-     * TRAP — this re-derivation is unconditional, so `v-control` set a second time INSIDE
-     * a subtree that already has it resets the height from the base and drops the compact
-     * the parent had applied. That is why a nested panel takes the class only when it is
-     * not a subpanel (VMenuPanel's `:class="{ 'v-control': !submenu }"`), and why the
-     * shared panel sheet sets no icon context of its own. The symptom is a nested control
-     * four pixels too tall, with nothing anywhere to say so.
+     * A nested v-control resets inherited compact height. Apply it only to root menu panels and
+     * leave submenu icon context inherited.
      */
     --control-height: var(--control-height-base);
   }

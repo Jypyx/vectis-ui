@@ -1,10 +1,4 @@
-/**
- * The parent→items contract: the shared name set on each <details> is what makes the
- * BROWSER close the previous item (the `name` attribute, Baseline 2024) — a single item
- * open, with no JS at all. The icons are set on the group (homogeneous density and iconography);
- * `compact` does NOT travel here, it descends through CSS inheritance (the
- * --accordion-* variables set on the root).
- */
+/** Share group icons through context; compact spacing inherits through CSS variables. */
 
 import type { InjectionKey } from 'vue'
 

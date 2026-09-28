@@ -8,24 +8,17 @@ import VCarousel from './VCarousel.vue'
 import VCarouselItem from './VCarouselItem.vue'
 
 /**
- * Harness: the v-model must be live (without a local ref the indicators would
- * change nothing) and the ref is returned so the emitted value can be asserted.
- *
- * Nothing here can observe layout: jsdom has no IntersectionObserver, no
- * scrolling and no computed styles. The sizing formula, the snapping, the
- * read-back and the effects are covered by the play functions.
+ * Harness: the v-model must be live (without a local ref the indicators would change nothing)
+ * and the ref is returned so the emitted value can be asserted.
  */
 function mount(
   options: {
-    /** Raw attributes set on <VCarousel>. Do NOT set `autoplay` here — see below. */
+    /** Raw attributes set on <VCarousel>. Do not set `autoplay` here; see below. */
     attrs?: string
     /** Body of the default slot; three slides by default. */
     slides?: string
     initial?: number
-    /**
-     * Bound REACTIVELY, and returned, because the prop is the component's only stop
-     * control now that it renders no pause button: a test has to be able to move it.
-     */
+    /** Bind autoplay reactively so tests can exercise its public stop control. */
     autoplay?: number
   } = {},
 ) {
@@ -53,12 +46,7 @@ const indicatorsOf = (container: Element) => [
   ...container.querySelectorAll<HTMLButtonElement>('.v-carousel-indicator'),
 ]
 
-/**
- * jsdom ships no IntersectionObserver, so the read-back is normally out of reach
- * here. This stub hands the callback back — and the ENTRIES it is handed are inert,
- * since the reading is positional: what a test stubs is the layout, through
- * `layout()` below. The callback is only the tick that makes the component take it.
- */
+/** Jsdom ships no IntersectionObserver, so the read-back is normally out of reach here. */
 function stubIntersectionObserver() {
   let notify: ((entries: Partial<IntersectionObserverEntry>[]) => void) | undefined
   vi.stubGlobal(
@@ -75,19 +63,10 @@ function stubIntersectionObserver() {
 }
 
 /**
- * The layout jsdom does not have. `measure()` reads slide RECTS, the port's own rect and
- * its client size — nothing else, `scrollWidth` deliberately included, since a running
- * animation inflates it — so stubbing those is enough to exercise the page arithmetic
- * outside a browser, which the ratio-based reading it replaces could never be. Slides are
- * laid out at `index * step`, the whole strip shifted back by `offset`: that IS a scroll
- * position.
- *
- * A slide is narrower than `step` by the gap, and the width is DERIVED from `scrollWidth`
- * rather than asked for, so the strip spans exactly the number a browser would report at
- * rest. `scrollWidth` is still stubbed, and a test can then inflate it ALONE — which is what
- * a running animation does to it — and watch the reading stay put.
- *
- * `configurable`, so one test can move the scroller and re-stub.
+ * The layout jsdom does not have. `measure()` reads slide RECTS, the port's own rect and its
+ * client size; nothing else, `scrollWidth` deliberately included, since a running animation
+ * inflates it; so stubbing those is enough to exercise the page arithmetic outside a browser,
+ * which the ratio-based reading it replaces could never be.
  */
 function layout(
   container: Element,
@@ -295,14 +274,13 @@ describe('VCarousel', () => {
       model.value = 4
       await nextTick()
       await nextTick()
-      // One page back: the travel IS the transition, so no `behavior` and CSS governs.
       expect(scrollBy).toHaveBeenCalledWith({ left: -300, top: 0 })
     })
 
     /*
-     * The parity is the restart mechanism, not decoration: a CSS animation restarts on a
-     * change of `animation-name` and on nothing else, so two jumps in a row must not leave
-     * the same value on the attribute — the second would play nothing.
+     * The parity is the restart mechanism, not decoration: a CSS animation restarts on a change
+     * of `animation-name` and on nothing else, so two jumps in a row must not leave the same
+     * value on the attribute; the second would play nothing.
      */
     it('alternates the one-shot phase and signs its direction', async () => {
       const { container } = mount({ slides: SIX })
@@ -320,11 +298,9 @@ describe('VCarousel', () => {
       await fireEvent.click(indicatorsOf(container)[0] as HTMLElement)
       await nextTick()
       expect(root.getAttribute('data-jump')).not.toBe(first)
-      // Backwards, so a `slide` one-shot enters from the side the track rewinds towards.
       expect(root.style.getPropertyValue('--carousel-jump-dir')).toBe('-1')
     })
 
-    // A wrap is a jump like any other, and the widest move the component ever makes.
     it('cuts a loop wrap, whatever asked for it', async () => {
       const { container } = mount({ slides: SIX, attrs: 'loop', initial: 5 })
       const scrollBy = vi.fn()
@@ -336,7 +312,6 @@ describe('VCarousel', () => {
       expect(scrollBy).toHaveBeenCalledWith({ left: -1500, top: 0, behavior: 'instant' })
     })
 
-    // The step the arrows make outside a wrap is the one move that keeps its travel.
     it('leaves a control step alone', async () => {
       const { container } = mount({ slides: SIX, initial: 2 })
       const scrollBy = vi.fn()
@@ -349,10 +324,10 @@ describe('VCarousel', () => {
     })
 
     /*
-     * `noJump` is a single term in the same condition, so it covers every route at once —
-     * and it must take the ONE-SHOT with it, which is what the absent attribute locks: an
-     * arrival animation played over a travel still in flight would hold a slide at its own
-     * value while the scroller was several pages from where the animation says it is.
+     * `noJump` is a single term in the same condition, so it covers every route at once; and it
+     * must take the ONE-SHOT with it, which the absent attribute locks: an arrival animation
+     * played over a travel still in flight would hold a slide at its own value while the
+     * scroller was several pages from where the animation says it is.
      */
     it('`noJump` gives every route its travel back, the wrap included', async () => {
       const { container } = mount({ slides: SIX, attrs: 'no-jump loop', initial: 5 })
@@ -365,7 +340,6 @@ describe('VCarousel', () => {
       expect(scrollBy).toHaveBeenCalledWith({ left: -1500, top: 0 })
       expect(root.hasAttribute('data-jump')).toBe(false)
 
-      // And the wrap, which has the widest delta of all: `previous` on the first page.
       scrollBy.mockClear()
       at(container, 0)
       await fireEvent.click(container.querySelector('.v-carousel-control') as HTMLElement)
@@ -375,10 +349,10 @@ describe('VCarousel', () => {
     })
 
     /*
-     * The touch-drag saccade. The read-back writes the model on every frame of a drag, and
-     * without the guard each write comes back as a programmatic scroll FIGHTING the finger:
-     * the scroller jumps to the slide just named, the release snaps it again, one gesture
-     * plays two animations. The scroller is already there, so model → DOM has nothing to do.
+     * The read-back writes the model on every frame of a drag, and without the guard each write
+     * comes back as a programmatic scroll FIGHTING the finger: the scroller jumps to the slide
+     * just named, the release snaps it again, one gesture plays two animations. The scroller is
+     * already there, so model → DOM has nothing to do.
      */
     it('a read-back write does not come back as a programmatic scroll', async () => {
       const notify = stubIntersectionObserver()
@@ -386,10 +360,8 @@ describe('VCarousel', () => {
       await nextTick()
 
       /*
-       * 260px of a 300px step travelled — MID-DRAG on purpose, which is also what the
-       * bug above is about. At a snap position `scrollToIndex`'s own "already there"
-       * test would return before the flag was ever consulted, and this would pass
-       * green without it.
+       * Measure mid-drag: a settled snap position would return before the drag guard and fail
+       * to exercise it.
        */
       const port = layout(container, { step: 300, offset: 260, clientWidth: 300, scrollWidth: 900 })
       const scrollBy = vi.fn()
@@ -405,19 +377,16 @@ describe('VCarousel', () => {
   })
 
   /*
-   * The MEASURED count, which the prop fallback below only stands in for. It is testable
-   * here because the reading is POSITIONAL: every number `measure()` takes is stubbable, so
-   * geometries a ratio-based reading could only exercise in a browser — a peek, an active
-   * floor — are locked in jsdom. The play functions verify a real browser produces them.
+   * It is testable here because the reading is positional: every number `measure()` takes is
+   * stubbable, so geometries a ratio-based reading could only exercise in a browser; a peek, an
+   * active floor; are locked in jsdom. The play functions verify a real browser produces them.
    */
   describe('measured pages', () => {
     const six = [0, 1, 2, 3, 4, 5].map((i) => `<VCarouselItem>S${i}</VCarouselItem>`).join('\n')
 
     /*
-     * The reported bug: 6 slides two at a time with a 64px peek. The last START-aligned
-     * position is 3, `step - peek` short of the end of the track, so the sixth slide
-     * was never fully revealed and no control could ask for it. The end of the track is
-     * the fifth page, and the slide LEADING there is the fifth.
+     * With six slides, two per view and a 64px peek, the final page must align to the track end
+     * to reveal the last slide fully.
      */
     it('mints the end of the track as a page when a peek leaves a leftover', async () => {
       const { container, model } = mount({
@@ -443,14 +412,7 @@ describe('VCarousel', () => {
       expect(model.value).toBe(4)
     })
 
-    /*
-     * A scroller's scrollable overflow takes in the TRANSFORMED boxes of its descendants,
-     * and only towards the END edge, so anything animating a translate inside a slide
-     * inflates `scrollWidth` for as long as it runs — the jump one-shot in its `slide` form
-     * being the case that reported it. A measurement taken in that window minted a page, and
-     * nothing re-measures once an animation is over, so the phantom dot stayed for good. The
-     * count comes from the slide rects, which are never transformed.
-     */
+    /* The count comes from the slide rects, which are never transformed. */
     it('ignores an inflated scrollWidth, which a running animation produces', async () => {
       const { container } = mount({ attrs: ':items-per-view="3"', slides: six })
       const port = layout(container, { step: 300, offset: 0, clientWidth: 900, scrollWidth: 1800 })
@@ -458,7 +420,6 @@ describe('VCarousel', () => {
       await nextTick()
       expect(indicatorsOf(container)).toHaveLength(4)
 
-      // A tenth of a slide, which is what the `slide` one-shot translates by.
       Object.defineProperty(port, 'scrollWidth', { value: 1830, configurable: true })
       await fireEvent(port, new Event('scrollend'))
       await nextTick()
@@ -480,10 +441,10 @@ describe('VCarousel', () => {
     })
 
     /*
-     * `scrollWidth` and `clientWidth` are integers where the flex layout is fractional,
-     * so an exactly flush track can measure a pixel long. Minting a page there would
-     * hand out a dot that scrolls by nothing — and would make the count depend on the
-     * canvas width, which is the `Pages` play function going flaky.
+     * `scrollWidth` and `clientWidth` are integers where the flex layout is fractional, so an
+     * exactly flush track can measure a pixel long. Minting a page there would hand out a dot
+     * that scrolls by nothing; and would make the count depend on the canvas width, which is
+     * the `Pages` play function going flaky.
      */
     it('a sub-pixel leftover mints nothing', async () => {
       const { container } = mount({ attrs: ':items-per-view="3"', slides: six })
@@ -494,11 +455,10 @@ describe('VCarousel', () => {
     })
 
     /*
-     * The backward case, and the reason `scrollend` measures at all. With a peek the
-     * outgoing slide never stops being fully visible, so the observer's last delivery is a
-     * MID-FLIGHT one naming the page being left. Lowering the guard without measuring sends
-     * that stale reading into the model while `readBack` suppresses the correcting scroll,
-     * and the dot sits one page ahead of the content for good.
+     * With a peek the outgoing slide never stops being fully visible, so the observer's last
+     * delivery is a MID-FLIGHT one naming the page being left. Lowering the guard without
+     * measuring sends that stale reading into the model while `readBack` suppresses the
+     * correcting scroll, and the dot sits one page ahead of the content for good.
      */
     it('scrollend re-measures at the arrival position, so a stale reading never lands', async () => {
       const notify = stubIntersectionObserver()
@@ -521,13 +481,11 @@ describe('VCarousel', () => {
       await nextTick()
       await nextTick()
 
-      // …the observer fires MID-FLIGHT, where the scroller is still nearer page 4…
       layout(container, { step: 294, offset: 1050, clientWidth: 640, scrollWidth: 1752 })
       notify([{ target: slidesOf(container)[4] as Element, intersectionRatio: 1 }])
       await nextTick()
       expect(model.value).toBe(3)
 
-      // …and the ARRIVAL is what `scrollend` reads, not that last delivery.
       layout(container, { step: 294, offset: 882, clientWidth: 640, scrollWidth: 1752 })
       await fireEvent(port, new Event('scrollend'))
       await nextTick()
@@ -535,17 +493,11 @@ describe('VCarousel', () => {
     })
   })
 
-  /*
-   * `pageCount` falls back to a pure function of the props with no layout, so this is
-   * the one place the multi-item arithmetic is testable at all. In the browser it is
-   * measured off the scroller — see the `Pages` and `Peek` play functions.
-   */
   describe('pages', () => {
     const six = [0, 1, 2, 3, 4, 5].map((i) => `<VCarouselItem>S${i}</VCarouselItem>`).join('\n')
 
     it('renders one indicator per REACHABLE position, not one per slide', () => {
       const { container } = mount({ attrs: ':items-per-view="3"', slides: six })
-      // 6 slides three at a time: the scroller can only lead with 1 to 4
       expect(indicatorsOf(container).map((el) => el.getAttribute('aria-label'))).toEqual([
         '1 of 6',
         '2 of 6',
@@ -581,7 +533,6 @@ describe('VCarousel', () => {
         vi.advanceTimersByTime(1000)
         await nextTick()
       }
-      // 6 slides three at a time: it stops on the last PAGE, not the last slide
       expect(model.value).toBe(3)
     })
 
@@ -623,11 +574,9 @@ describe('VCarousel', () => {
       const { container, model } = mount({ attrs: 'loop', initial: 2 })
       const [previous, next] = controlsOf(container)
 
-      // 3 slides one at a time: page 2 is the last, and the next one is the first
       await fireEvent.click(next!)
       expect(model.value).toBe(0)
 
-      // and back the other way, which is the case a single `%` would send to -1
       await fireEvent.click(previous!)
       expect(model.value).toBe(2)
     })
@@ -660,7 +609,6 @@ describe('VCarousel', () => {
       expect(model.value).toBe(0)
     })
 
-    // The arrows step, so they wrap; Home and End NAME a position, so they do not.
     it('wraps the arrow keys but leaves Home and End absolute', async () => {
       const { container, model } = mount({ attrs: 'loop', initial: 2 })
       const port = container.querySelector('.v-carousel-viewport') as HTMLElement
@@ -680,12 +628,6 @@ describe('VCarousel', () => {
       expect(model.value).toBe(0)
     })
 
-    /*
-     * The mirror of `autoplay › advances on the interval and stops at the last slide`,
-     * and it needs no code of its own: `rotating` reads `atEnd`, which looping makes
-     * permanently false. What this locks is that the timer keeps being RE-ARMED past
-     * the end rather than firing once and stopping.
-     */
     it('keeps autoplay rotating past the last page', async () => {
       vi.useFakeTimers()
       const { model } = mount({ attrs: 'loop', autoplay: 1000 })
@@ -725,15 +667,9 @@ describe('VCarousel', () => {
 
     it('renders no pause control of its own', () => {
       const { container } = mount({ autoplay: 1000 })
-      // previous and next, and nothing else
       expect(container.querySelectorAll('.v-carousel-stage button')).toHaveLength(2)
     })
 
-    /*
-     * The prop IS the stop control, and it is the only one the component offers now
-     * that no button is rendered: a consumer builds their own by binding it, so the
-     * reactivity has to be locked here.
-     */
     it('binding autoplay back to 0 cancels the timer on the spot', async () => {
       vi.useFakeTimers()
       const { model, autoplay } = mount({ autoplay: 1000 })
@@ -766,10 +702,10 @@ describe('VCarousel', () => {
     })
 
     /*
-     * `matches` is stubbed on both sides rather than trusted: whether jsdom's selector
-     * engine knows `:focus-visible` is not what these two lock — what they lock is that
-     * the component ASKS, and branches on the answer. `focusin` bubbles, so dispatching
-     * on the element is what gives the root handler the right `event.target`.
+     * `matches` is stubbed on both sides rather than trusted: whether jsdom's selector engine
+     * knows `:focus-visible` is not what these two lock; what they lock is that the component
+     * ASKS, and branches on the answer. `focusin` bubbles, so dispatching on the element is
+     * what gives the root handler the right `event.target`.
      */
     it('pauses on KEYBOARD focus, and resumes when focus leaves', async () => {
       vi.useFakeTimers()
@@ -790,9 +726,8 @@ describe('VCarousel', () => {
     })
 
     /*
-     * The regression: a POINTER click leaves the focus on the control it hit, so a
-     * plain `focusin` flag pinned the pause until the user clicked somewhere outside
-     * the carousel entirely — long after the pointer had left.
+     * A pointer click leaves focus on its control; only visible keyboard focus should keep
+     * autoplay paused after the pointer leaves.
      */
     it('a pointer click on a control does not pin the pause', async () => {
       vi.useFakeTimers()
@@ -803,7 +738,7 @@ describe('VCarousel', () => {
       await fireEvent.focusIn(next)
       vi.advanceTimersByTime(1000)
       await nextTick()
-      // still rotating: the focus sits on the button, but the user is not on the keyboard
+      // Still rotating: the focus sits on the button, but the user is not on the keyboard
       expect(model.value).toBe(1)
     })
 
@@ -814,18 +749,13 @@ describe('VCarousel', () => {
     })
   })
 
-  /*
-   * The placement itself is CSS and needs a browser (see the `ControlsCentring` and
-   * `ControlsOutside` play functions). What jsdom CAN lock is the nesting the CSS
-   * rests on — and that is the cheap layer for it.
-   */
+  /* What jsdom CAN lock is the nesting the CSS rests on; and that is the cheap layer for it. */
   describe('layout structure', () => {
     it('the indicator bar is a SIBLING of the stage, never a child of it', () => {
       const { container } = mount({ attrs: 'indicators="outside"' })
       const root = container.querySelector('.v-carousel')
       const stage = container.querySelector('.v-carousel-stage') as HTMLElement
       const bar = container.querySelector('.v-carousel-indicators') as HTMLElement
-      // inside the stage it would join the height the controls are centred on
       expect(stage.contains(bar)).toBe(false)
       expect(bar.parentElement).toBe(root)
     })
@@ -852,7 +782,6 @@ describe('VCarousel', () => {
       const { container } = mount({ attrs: ':items-per-view="3" item-min-size="16rem" :peek="40"' })
       const style = container.querySelector<HTMLElement>('.v-carousel')?.style
       expect(style?.getPropertyValue('--carousel-per-view')).toBe('3')
-      // free unit for a string, px for a number — the `cssSize` contract
       expect(style?.getPropertyValue('--carousel-item-min')).toBe('16rem')
       expect(style?.getPropertyValue('--carousel-peek')).toBe('40px')
       expect(style?.getPropertyValue('--carousel-gap')).toBe('')

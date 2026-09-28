@@ -71,7 +71,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-/** Keyboard focus opens immediately (with no delay) — WCAG. */
+/** Keyboard focus opens immediately (with no delay); WCAG. */
 export const OpenOnFocus: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -81,18 +81,16 @@ export const OpenOnFocus: Story = {
     await userEvent.tab()
     await expect(trigger).toHaveFocus()
     await waitFor(() => expect(tooltip.matches(':popover-open')).toBe(true))
-    // the trigger is described by the tooltip
     await expect(trigger).toHaveAttribute('aria-describedby', tooltip.id)
 
     /*
-     * `.v-popover-panel.v-tooltip-panel`: the compound is what makes the panel's own
-     * chrome immune to `.v-panel`'s, at equal specificity, the day `bare` flips
-     * (VTooltip passes it today). If the compound stopped matching, every
-     * declaration below it would go with it — the padding first.
+     * `.v-popover-panel.v-tooltip-panel`: the compound is what makes the panel's own chrome
+     * immune to `.v-panel`'s, at equal specificity, the day `bare` flips (VTooltip passes it
+     * today). If the compound stopped matching, every declaration below it would go with it;
+     * the padding first.
      */
     await expect(getComputedStyle(tooltip).padding).toBe('4px 8px')
 
-    // Escape closes (WCAG 1.4.13)
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(tooltip.matches(':popover-open')).toBe(false))
   },
@@ -173,12 +171,7 @@ export const Placements: Story = {
   }),
 }
 
-/**
- * Rich content through the `#content` slot (which wins over the `text` prop).
- * Reserved for NON-interactive content: the tooltip closes as soon as the pointer
- * leaves the trigger, and `aria-describedby` flattens the content to text — a link
- * or a button would be unreachable there (use VPopover in that case).
- */
+/** Rich content through the `#content` slot (which wins over the `text` prop). */
 export const RichContent: Story = {
   render: (args) => ({
     components: { VTooltip, VButton },
@@ -208,10 +201,9 @@ export const RichContent: Story = {
 }
 
 /**
- * Automatic flipping at the screen edge (`position-try-fallbacks: flip-block,
- * flip-inline` — see floating.css): each trigger is stuck to a viewport edge with a
- * placement pointing at that edge. With no room, the browser flips the panel to the
- * opposite side, with no JS at all.
+ * Automatic flipping at the screen edge (`position-try-fallbacks: flip-block, flip-inline`; see
+ * floating.css): each trigger is stuck to a viewport edge with a placement pointing at that
+ * edge.
  */
 export const EdgeFlipping: Story = {
   parameters: { layout: 'fullscreen' },

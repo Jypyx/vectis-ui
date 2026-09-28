@@ -13,11 +13,10 @@ function onSubmit(event: Event) {
 
 <template>
   <form class="demo" @submit.prevent="onSubmit">
-    <!-- The root is a layout box, so `name`, `id` and the aria-* are redirected onto
-         the real range input: left on the wrapper a name would submit nothing and a
-         label would point at a div. Here the name reaches the form and the label
-         reaches the thumb, which is why the `label` prop is left out: it sets an
-         aria-label, and that would win over the visible label. -->
+    <!--
+      Here the name reaches the form and the label reaches the thumb, which is why the `label`
+      prop is left out: it sets an aria-label, and that would win over the visible label.
+    -->
     <label class="field-label" for="volume">Volume</label>
     <VSlider id="volume" v-model="volume" name="volume" />
 

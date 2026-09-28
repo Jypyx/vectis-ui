@@ -1,21 +1,6 @@
 /*
- * How a tone is PAINTED: the four variants, over the `--tone-*` contract the table in
- * `tones.css` sets on the same element. Adopted by VButton and VChip.
- *
- * TRAP — it is in `vectis.components` and NOT in `vectis.tokens` beside the table it reads,
- * although that is where a shared sheet naturally goes. The tone table only sets CUSTOM
- * PROPERTIES, which a component rule in a higher layer then reads; these rules set REAL ones,
- * and a layer below the components loses to every component rule whatever its specificity —
- * VButton's own `border: 1px solid transparent` would win over the outline variant's
- * `border-color`, painting every outline button's border away. Verified red exactly that way.
- *
- * The consequence is that specificity decides again. Each rule here weighs (0,2,0), which
- * beats a component's own base (0,1,0) and TIES with anything the component qualifies by an
- * attribute — so a component overriding a variant compounds the two classes, as
- * `.v-variant.v-chip[data-selected]` does.
- *
- * VHotkeys stays out although it has a `soft` of its own: it carries no tone at all, and its
- * three variants derive every paint from `currentcolor` instead of from this contract.
+ * Variants paint real properties and must stay in vectis.components; putting them below
+ * component rules would erase outline borders regardless of specificity.
  */
 @layer vectis.components {
   .v-variant[data-variant='solid'] {

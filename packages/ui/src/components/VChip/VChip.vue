@@ -1,18 +1,8 @@
 <script setup lang="ts">
 // @a11y
 /**
- * A small labelled pill standing for a value: a filter in force, a tag, a chosen file, a
- * person picked in a field.
- *
- * What it renders follows what it is asked to DO, each shape being the native element for
- * it, so focus, keyboard and disabling come free: selectable is a button with `aria-pressed`,
- * `href` is a link, `clickable` is a button, and none of those is plain text with no hover.
- *
- * A dismissible chip carries a SECOND button BESIDE the first, never inside it — a button
- * within a button is invalid HTML and unreachable by keyboard.
- *
- * The only JS makes a disabled link inert, the platform having no `disabled` for links, and
- * splits the consumer's attributes between the pill and the element that acts.
+ * Choose native links or buttons for chip actions. Dismissal is a sibling button because nested
+ * buttons are invalid and inaccessible; inert links need a JS bridge.
  */
 
 import { computed, onMounted, ref, useAttrs } from 'vue'
@@ -20,8 +10,8 @@ import type { StyleValue, VNode } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
-// TRAP — neither import may be named after a prop (`check`, `checkIcon`): every top-level
-// binding of a `<script setup>` reaches the template, where it shadows the prop of that name.
+// Neither import may be named after a prop (`check`, `checkIcon`): every top-level binding of a
+// `<script setup>` reaches the template, where it shadows the prop of that name.
 import { check as checkMark } from '../VIcon/icons/check'
 import { close as closeIcon } from '../VIcon/icons/close'
 import type { IconSource } from '../VIcon/types'
@@ -53,16 +43,10 @@ interface ChipProps {
   variant?: ChipVariant
   /**
    * What the chip means, expressed as a colour: `neutral` by default, then `accent` for
-   * something singled out and `danger`/`success`/`warning` for a state being reported. A
-   * chip may report a state where a button may not, which is why it offers five.
+   * something singled out and `danger`/ `success`/ `warning` for a state being reported.
    */
   tone?: ChipTone
-  /**
-   * A colour of your own (hex, CSS name or `oklch()`), which REPLACES the tone. Every
-   * shade it needs (the tinted background, the text, the hover) is derived from that
-   * one colour, so it follows the light and the dark theme with nothing to rebuild.
-   * Only the contrast of the text on a fully coloured chip is yours to check.
-   */
+  /** A colour of your own (hex, CSS name or `oklch()`), which REPLACES the tone. */
   color?: string
   /** The silhouette: softly rounded corners, or a full pill. */
   shape?: ChipShape
@@ -166,9 +150,7 @@ defineOptions({ inheritAttrs: false })
 // element that is focused, named and clicked, so everything else goes there.
 const { rootClass, rootStyle: consumerStyle, forwardedAttrs } = useRootAttrs()
 
-/* What the chip does, in order of precedence: staying selected wins over leading
-   somewhere, which wins over merely reacting to clicks; asked for none of them, it is
-   plain text. A selectable chip is therefore never a link, whatever `href` says. */
+/* A selectable chip is therefore never a link, whatever `href` says. */
 const {
   isLink,
   isInertLink,
@@ -189,8 +171,8 @@ const actionEl = ref<HTMLElement | null>(null)
 
 const showCheck = computed(() => props.check && props.selectable && selected.value)
 
-// TRAP — a function read by the template, never a `computed`: `slots` is not reactive, so a
-// computed would keep its first answer while a slot behind a `v-if` comes and goes.
+// A function read by the template, never a `computed`: `slots` is not reactive, so a computed
+// would keep its first answer while a slot behind a `v-if` comes and goes.
 /**
  * An icon and no label at all: the chip becomes a square, as wide as it is tall. The default
  * slot is asked what it RENDERS, not whether it was passed: a wrapper forwarding an empty
@@ -206,8 +188,7 @@ function iconOnly() {
 // @devwarn
 // A chip drawn with an icon alone has no accessible name: the icon is decorative, so a
 // clickable, selectable or linked one is announced as a bare button or link. Nothing fails
-// visibly, hence the message. Read once, on mount, off the rendered pill: calling the slot
-// here, outside the render, would draw a Vue warning of its own.
+// visibly, hence the message.
 if (isDev) {
   const attrs = useAttrs()
   onMounted(() => {
@@ -322,10 +303,11 @@ defineExpose({
     --tone-border-soft: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 60%);
   }
 
-  /* A selected chip is painted in the full colour of its CURRENT tone, whichever variant it
-     was given. It COMPOUNDS `.v-variant`: the variant table weighs (0,2,0) like this rule and
-     lives in another sheet, so at equal specificity the winner would be whichever one the
-     consumer's bundler put last. At (0,3,0) it wins by construction. */
+  /*
+   * It COMPOUNDS `.v-variant`: the variant table weighs (0,2,0) like this rule and lives in
+   * another sheet, so at equal specificity the winner would be whichever one the consumer's
+   * bundler put last. At (0,3,0) it wins by construction.
+   */
   .v-variant.v-chip[data-selected] {
     background: var(--tone-bg-solid);
     color: var(--tone-text-solid);
@@ -404,15 +386,10 @@ defineExpose({
     outline-offset: var(--vectis-focus-ring-offset);
   }
 
-  /* The removal button carries no background of its own, not even on hover — the same
-     treatment as a field's inner buttons — and the cursor is what signals it can be
-     used.
-
-     Its icon takes the chip's colour AT FULL strength. Dimming it, as one would
-     instinctively do for a secondary control, took the cross down to 3.9:1 on a tinted
-     chip and 2.8:1 on a solid one. That matters because the cross is drawn from the
-     icon font here, and a glyph from a font is real text, to which the contrast rule
-     applies. */
+  /*
+   * That matters because the cross is drawn from the icon font here, and a glyph from a font is
+   * real text, to which the contrast rule applies.
+   */
   .v-chip-dismiss {
     display: inline-flex;
     align-items: center;
@@ -434,8 +411,10 @@ defineExpose({
     outline-offset: calc(-1 * var(--vectis-focus-ring-width));
   }
 
-  /* A disabled chip greys out through the colour tokens, which is what makes it follow
-     the dark theme without a rule of its own. */
+  /*
+   * A disabled chip greys out through the colour tokens, which makes it follow the dark theme
+   * without a rule of its own.
+   */
   .v-variant.v-chip[data-disabled] {
     background: var(--vectis-color-surface-muted);
     color: var(--vectis-color-text-subtle);
@@ -458,14 +437,9 @@ defineExpose({
   }
 
   /*
-   * Windows forced colors replace every background with the page's, so a selected chip would look
-   * exactly like the others there: the fill is its only cue, the state being in an ARIA
-   * attribute a sighted reader never sees. It takes the system's own selection pair
-   * instead, and opts out of the forcing for that element alone so the pair is painted.
-   *
-   * TRAP — the class is repeated to reach (0,6,0). The variant, hover and active rules
-   * reach (0,5,0), and with the forcing turned off any of them that still won would paint
-   * its tone over the selection, with HighlightText on top of it.
+   * The class is repeated to reach (0,6,0). The variant, hover and active rules reach (0,5,0),
+   * and with the forcing turned off any of them that still won would paint its tone over the
+   * selection, with HighlightText on top of it.
    */
   @media (forced-colors: active) {
     .v-chip.v-chip.v-chip.v-chip[data-selected]:not([data-disabled]) {

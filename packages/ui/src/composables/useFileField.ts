@@ -1,19 +1,7 @@
 // @core
 /**
- * The hidden `<input type="file">` gate of VFileInput and VFilePicker.
- *
- * The JS here is imposed by the platform, not chosen: a dialog opens ONLY from a real click
- * on a file input, and a `FileList` cannot be written from a template. So what the reader
- * clicks can never BE the file input, and the file input can only ever be a SOURCE of files.
- *
- * Hence `.click()` and not `showPicker()` — both need a transient user activation, but
- * `showPicker()` THROWS without one where `.click()` is merely inert — and hence
- * `syncNative()` on every path, which writes the selection back into the input so the form
- * submits it, and so re-picking a file that left the selection is a change again.
- *
- * Everything the two components did identically lives here, so the two cannot drift: the
- * attributes of the hidden input, the screening of what comes in, the removal of one file and
- * the emptying of all of them, and the development warnings both of them owe the integrator.
+ * Bridge native file selection, screening and form state for both file components. Synchronize
+ * the accepted File[] through DataTransfer where supported.
  */
 import {
   computed,
@@ -29,15 +17,7 @@ import { isDev } from '../utils/env'
 import { screenFiles, type FileRejection } from '../utils/file'
 
 // @a11y
-/**
- * The attributes belonging on the hidden file input rather than on the visible control.
- *
- * The wrapper-root pattern assumes ONE functional element and there are two here, so the
- * attrs split in three: `class`/`style` on the root, these four on the input because they
- * are what the FORM reads, everything else on the element the READER focuses. The buckets
- * must not overlap — a duplicated `id` breaks a consumer's `<label for>`, a duplicated
- * `name` gets the field announced twice.
- */
+/** The attributes belonging on the hidden file input rather than on the visible control. */
 const NATIVE_ONLY = ['name', 'required', 'form', 'capture']
 
 /** The props both components declare under the same names, read at the moment they matter. */
@@ -70,11 +50,7 @@ export interface FileFieldOptions {
    * `disabled` prop answers alone.
    */
   disabled?: Ref<boolean>
-  /**
-   * Attributes to withhold from the visible control too. VFileInput withholds
-   * `aria-describedby`, which it re-aggregates itself: a binding written after the spread
-   * would replace the consumer's rather than merge with it.
-   */
+  /** Attributes to withhold from the visible control too. */
   excludeFromControl?: readonly string[]
   /** Called once the selection has been emptied by `clear`, before `change` is emitted. */
   onClear?: () => void
@@ -92,7 +68,7 @@ export function useFileField(options: FileFieldOptions) {
 
   const disabled = () => options.disabled?.value ?? props.disabled
 
-  /** Whether files may come in or go out — no dialog, no drop and no removal otherwise. */
+  /** Whether files may come in or go out; no dialog, no drop and no removal otherwise. */
   const enabled = computed(() => !disabled() && !props.readonly)
 
   const controlAttrs = computed(() => {
@@ -106,15 +82,10 @@ export function useFileField(options: FileFieldOptions) {
 
   // @core
   /**
-   * Writes the selection back into the hidden input, which is what the FORM reads: `name`,
-   * `form` and `required` land there, and an input left holding the last batch the dialog
-   * produced (or emptied) would submit that rather than the selection, or nothing at all.
-   * A `FileList` cannot be built, but a `DataTransfer` hands one out.
-   *
-   * TRAP — it also keeps every file that LEFT the selection pickable again. The input holds
-   * exactly the selection, so choosing a file that was cleared, removed or refused differs
-   * from what it holds and fires `change`; left holding it, the dialog would answer the
-   * same file with no event at all.
+   * It also keeps every file that LEFT the selection pickable again. The input holds exactly
+   * the selection, so choosing a file that was cleared, removed or refused differs from what it
+   * holds and fires `change`; left holding it, the dialog would answer the same file with no
+   * event at all.
    */
   function syncNative() {
     const el = fileEl.value
@@ -135,13 +106,7 @@ export function useFileField(options: FileFieldOptions) {
   // input the same way.
   watch(model, syncNative, { flush: 'post' })
 
-  /**
-   * The single entry into the model: the dialog and a drop both arrive here.
-   *
-   * A refused file never enters the model at all, and every refusal is reported so the
-   * component can say why. The screening is a pure function in `utils/file`, which is what
-   * makes the ORDER of the reasons testable without a mount.
-   */
+  /** The single entry into the model: the dialog and a drop both arrive here. */
   function acceptFiles(incoming: File[]) {
     const current = props.multiple ? model.value : []
     const { accepted, rejected } = screenFiles(incoming, current, {
@@ -155,7 +120,6 @@ export function useFileField(options: FileFieldOptions) {
 
     for (const rejection of rejected) emit('reject', rejection)
 
-    // The dialog has just written ITS batch into the input, whatever happens to it here.
     syncNative()
     if (accepted.length === 0) return
 
@@ -191,11 +155,7 @@ export function useFileField(options: FileFieldOptions) {
   }))
 
   // @fallback
-  /**
-   * `.click()` and not `showPicker()`. Both need a transient user activation, but
-   * `showPicker()` THROWS without one — and inside a cross-origin iframe — where a click is
-   * simply inert. On a file input there is nothing to gain in exchange.
-   */
+  /** `.click()` and not `showPicker()`. */
   function openPicker() {
     if (!enabled.value) return
     fileEl.value?.click()
@@ -204,7 +164,7 @@ export function useFileField(options: FileFieldOptions) {
   /**
    * Takes ONE file out of the selection, and says which: `remove` with the file and the
    * position it held, then `change` with what is left. It returns the file removed, or
-   * `undefined` when nothing was — so the component knows whether it has a focus to catch.
+   * `undefined` when nothing was; so the component knows whether it has a focus to catch.
    */
   function removeAt(index: number): File | undefined {
     const file = model.value[index]

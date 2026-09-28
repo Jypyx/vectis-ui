@@ -8,10 +8,10 @@ const pages = ref<Record<string, number>>({ solid: 3, soft: 3, ghost: 3 })
 
 <template>
   <div class="column">
-    <!-- How the current page is drawn, in the row's tone: filled with `solid`, tinted
-         with `soft`, or the colour of its text alone with `ghost`. Solid is the loudest
-         and the safest default; ghost is for a row that must stay quiet, where the
-         difference rests on the text colour alone. -->
+    <!--
+      Solid is the loudest and the safest default; ghost is for a row that must stay quiet,
+      where the difference rests on the text colour alone.
+    -->
     <div v-for="variant in variants" :key="variant" class="row">
       <VTypography variant="caption" tone="muted">{{ variant }}</VTypography>
       <VPagination

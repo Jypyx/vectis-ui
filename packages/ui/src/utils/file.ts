@@ -1,11 +1,7 @@
-// @core — module-wide: pure domain logic, no a11y, no DOM, no environment guard.
+// @core
 /**
- * The FILE domain: whether a file is of an accepted kind, how its size is written out, and
- * which of a batch may come in. Grouped by subject rather than by shared code, like `text.ts`.
- *
- * Nothing here knows about components, which is what shapes the screening: it RETURNS its
- * refusals instead of emitting them. One body then serves VFileInput, which reports them one
- * at a time, and a test that reads them all as a list without a mount.
+ * Pure file screening and formatting; return accepted files and rejection reasons for
+ * components to emit.
  */
 import { memo } from './memo'
 
@@ -28,20 +24,9 @@ export function parseAccept(accept?: string): string[] {
 }
 
 /**
- * Whether a file matches an `accept` list, written exactly as the HTML attribute is:
- * `.pdf` (case-insensitive), `image/*`, or one precise MIME type. An empty list accepts
- * everything.
- *
- * The rule is applied in JS because the ATTRIBUTE only governs the dialog the browser
- * opens: a DROPPED file bypasses it entirely. Without this second reading, dropping
- * smuggles anything past a restriction the consumer believes is enforced.
- *
- * The list may be handed over already read by `parseAccept`, which is what a batch does:
- * screening a hundred dropped files would otherwise split the same string a hundred times.
- *
- * TRAP: `file.type` is the browser's GUESS and is often empty (an unknown extension, some
- * Linux setups). A list written only in MIME types then turns away a perfectly good file,
- * which is why the docs ask for extensions alongside: `image/*,.heic`, not `image/*` alone.
+ * `file.type` is the browser's GUESS and is often empty (an unknown extension, some Linux
+ * setups). A list written only in MIME types then turns away a perfectly good file, which is
+ * why the docs ask for extensions alongside: `image/*,.heic`, not `image/*` alone.
  */
 export function matchesAccept(file: FileCandidate, accept?: string | readonly string[]): boolean {
   const tokens = typeof accept === 'string' || accept === undefined ? parseAccept(accept) : accept
@@ -58,14 +43,7 @@ export function matchesAccept(file: FileCandidate, accept?: string | readonly st
   })
 }
 
-/**
- * A stable key per FILE OBJECT, for the `v-for` of a file list.
- *
- * An index-based key re-keys every row after a removal, which remounts them — a thumbnail's
- * `<img>` included — and a name is not unique across folders. A File travels through a
- * v-model unproxied (reactivity only wraps plain objects and collections), so its identity is
- * a key that survives both. The map is weak, so a file that leaves every list is not held.
- */
+/** A stable key per FILE OBJECT, for the `v-for` of a file list. */
 const fileIds = new WeakMap<File, number>()
 let nextFileId = 0
 
@@ -78,13 +56,13 @@ export function fileKey(file: File): number {
   return id
 }
 
-/** The units a size can be written in, smallest first — the rungs of the ladder. */
+/** The units a size can be written in, smallest first; the rungs of the ladder. */
 const UNITS = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte'] as const
 
 /**
- * Building a number formatter costs one to two orders of magnitude more than using one,
- * and a running total is rewritten every time a file is added — so one is built per
- * language and rung, and kept for as long as the page lives.
+ * Building a number formatter costs one to two orders of magnitude more than using one, and a
+ * running total is rewritten every time a file is added; so one is built per language and rung,
+ * and kept for as long as the page lives.
  */
 const formatters = new Map<string, Intl.NumberFormat>()
 
@@ -107,15 +85,7 @@ function formatterFor(locale: string, step: number): Intl.NumberFormat {
   )
 }
 
-/**
- * A file size as a reader expects it: 1 200 000 gives "1.2 MB" in English, "1,2 Mo" in
- * French. Nothing here is translatable: `Intl` knows the unit names and the decimal mark.
- *
- * SI base 1000, which is what the unit names `Intl` prints actually mean. The computing
- * convention of 1024 would show a 1024-byte file as "1.02 kB", a discrepancy no reader can
- * explain to themselves. A negative or non-finite size reads as 0: the number comes straight
- * off the file, and a size beside a name must never be the thing that breaks.
- */
+/** A file size as a reader expects it: 1 200 000 gives "1.2 MB" in English, "1,2 Mo" in French. */
 export function formatBytes(bytes: number, locale: string): string {
   const n = Number.isFinite(bytes) && bytes > 0 ? bytes : 0
 
@@ -136,17 +106,7 @@ export function formatBytes(bytes: number, locale: string): string {
   return formatterFor(locale, step).format(value)
 }
 
-/**
- * Why a file was turned away: its kind, its size, how many there already are, or the
- * total.
- *
- * VFileInput and VFilePicker screen a batch through the same `screenFiles` below, so the
- * two report the same thing and the type is declared ONCE, here, rather than copied into
- * each of them under a name of its own. It is the `TimePickerAllowed` arrangement: the type
- * lives beside the rule that produces it, and `index.ts` is what makes it public. The
- * MODULE stays internal, and a handler written for one of the two components can be
- * handed to the other.
- */
+/** Why a file was turned away: its kind, its size, how many there already are, or the total. */
 export type FileRejectReason = 'type' | 'size' | 'count' | 'total-size'
 
 /** One file that was turned away, and the reason it was. */
@@ -167,18 +127,9 @@ export interface FileLimits {
 }
 
 /**
- * Screens an arriving batch against what is already chosen, returning the accepted files
- * and one rejection per refusal.
- *
- * The order `type → size → count → total-size` is a contract both `.mdx` pages state, and
- * it is the order a reader can act on: a file of the wrong KIND is reported as such even
- * when it is also too big, since being told to shrink a file that would never be accepted
- * is worse than useless.
- *
- * Duplicates are deliberately NOT a reason: two files in different folders may share a
- * name, and there is no reliable way to tell one from another. What is already chosen
- * counts towards both the count and the running total, so a second drop obeys the same
- * limits as the first instead of starting over.
+ * Screens an arriving batch against what is already chosen, returning the accepted files and
+ * one rejection per refusal. What is already chosen counts towards both the count and the
+ * running total, so a second drop obeys the same limits as the first instead of starting over.
  */
 export function screenFiles(
   incoming: readonly File[],

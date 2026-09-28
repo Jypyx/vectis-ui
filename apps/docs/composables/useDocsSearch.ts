@@ -1,17 +1,4 @@
-/**
- * The Ctrl/⌘+K search over the documentation's own table of contents.
- *
- * It indexes page TITLES and slugs, and nothing else — no full-text index, no build step, no
- * dependency. That is a deliberate ceiling rather than a first draft: the thing a reader
- * reaches for the shortcut to do is jump to a component they can already name.
- *
- * The titles come from the message catalogue, so the index is in the reader's language, and the
- * slug stays searchable in both — an English reader's muscle memory for `side-navigation` finds
- * the page on the French site too.
- *
- * The open state is shared, because the trigger lives in the header and the dialog is a
- * sibling of it in the layout.
- */
+/** Share search state between the header trigger and the sibling dialog. */
 import { allPages, type NavEntry } from '~/content/nav'
 
 export interface SearchResult extends NavEntry {
@@ -21,15 +8,6 @@ export interface SearchResult extends NavEntry {
   to: string
 }
 
-/**
- * Accent-insensitive comparison, so "Localisation" answers to "localisation" and a French
- * reader typing "française" still finds a page spelled without the accent. Decomposing to
- * NFD is what separates a letter from its marks; `\p{Diacritic}` then drops the marks alone.
- *
- * The library has exactly this helper in `utils/text.ts`, but its internals are explicitly
- * NOT public API, so the site carries its own three lines rather than reaching past the
- * entry point.
- */
 function normalize(text: string): string {
   return text
     .normalize('NFD')

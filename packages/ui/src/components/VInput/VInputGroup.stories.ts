@@ -126,13 +126,11 @@ export const Playground: Story = {
     const gap = number.getBoundingClientRect().left - code.getBoundingClientRect().right
     expect(gap).toBeCloseTo(-1, 0)
 
-    // Only the two outer corners survive.
     expect(getComputedStyle(code).borderTopRightRadius).toBe('0px')
     expect(getComputedStyle(code).borderTopLeftRadius).not.toBe('0px')
     expect(getComputedStyle(number).borderTopLeftRadius).toBe('0px')
     expect(getComputedStyle(number).borderTopRightRadius).not.toBe('0px')
 
-    // The label names the row once, and the segments are named individually.
     const group = canvasElement.querySelector('.v-input-group') as HTMLElement
     expect(group.getAttribute('role')).toBe('group')
     expect(within(canvasElement).getByRole('group', { name: 'Phone number' })).toBe(group)
@@ -159,7 +157,6 @@ export const SearchField: Story = {
   play: async ({ canvasElement }) => {
     const [field, button] = boxes(canvasElement)
 
-    // The two boxes are the same height, which is what makes the row read as one object.
     expect(button.getBoundingClientRect().height).toBeCloseTo(
       field.getBoundingClientRect().height,
       0,
@@ -168,7 +165,6 @@ export const SearchField: Story = {
       -1,
       0,
     )
-    // The button keeps its square silhouette rather than being stretched by the row.
     expect(button.getBoundingClientRect().width).toBeCloseTo(
       button.getBoundingClientRect().height,
       0,
@@ -252,8 +248,6 @@ export const Sizes: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    // Within a row every box is the same height: the group's size beats whatever a segment
-    // would have chosen for itself.
     for (const row of canvasElement.querySelectorAll<HTMLElement>('.v-input-group-row')) {
       const heights = [...row.querySelectorAll<HTMLElement>('.v-input-field')].map(
         (box) => box.getBoundingClientRect().height,
@@ -263,11 +257,7 @@ export const Sizes: Story = {
   },
 }
 
-/**
- * The combobox panel is measured against the segment rather than the row, so a narrow code
- * field opens a narrow list. Ends with the panel OPEN, which is the only pass where axe sees
- * a listbox inside a group.
- */
+/** Ends with the panel OPEN, which is the only pass where axe sees a listbox inside a group. */
 export const WithCombobox: Story = {
   render: () => ({
     components: { VInputGroup, VInput, VCombobox },
@@ -296,7 +286,6 @@ export const WithCombobox: Story = {
         control.getBoundingClientRect().width - 1,
       ),
     )
-    // Left open on purpose: axe only audits what the play function leaves on screen.
   },
 }
 
@@ -323,10 +312,7 @@ export const DateAndTime: Story = {
     const timeField = canvasElement.querySelector('.v-time-input .v-input-field') as HTMLElement
     const meridiem = canvasElement.querySelector('.v-time-input-meridiem') as HTMLElement
 
-    // The AM/PM button is inside the time field's own box, so the row joins two segments
-    // and not three: nothing of the time field sits outside its border.
     expect(timeField.contains(meridiem)).toBe(true)
-    // The borders are merged, which is the row's whole point.
     expect(
       timeField.getBoundingClientRect().left - dateField.getBoundingClientRect().right,
     ).toBeCloseTo(-1, 0)
@@ -365,12 +351,10 @@ export const RightToLeft: Story = {
   }),
   play: async ({ canvasElement }) => {
     const [first, second] = boxes(canvasElement)
-    // Mirrored: the second segment now sits to the LEFT of the first.
     expect(first.getBoundingClientRect().left - second.getBoundingClientRect().right).toBeCloseTo(
       -1,
       0,
     )
-    // The logical corner properties follow, with no rule of their own.
     expect(getComputedStyle(first).borderTopLeftRadius).toBe('0px')
     expect(getComputedStyle(first).borderTopRightRadius).not.toBe('0px')
   },
@@ -402,7 +386,6 @@ export const EdgeCases: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    // A lone segment is both the first and the last, so it keeps every corner.
     const alone = canvasElement.querySelectorAll<HTMLElement>('.v-input-field')[2]!
     expect(getComputedStyle(alone).borderTopLeftRadius).not.toBe('0px')
     expect(getComputedStyle(alone).borderTopRightRadius).not.toBe('0px')

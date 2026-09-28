@@ -81,8 +81,6 @@ export const Default: Story = {
     const checkbox = within(canvasElement).getByRole('checkbox', {
       name: 'Receive the newsletter',
     })
-    // the hidden input is pointer-events: none, so the wrapping <label> is clicked,
-    // as a real user would
     const label = checkbox.closest('label')!
     await userEvent.click(label)
     await waitFor(() => expect(checkbox).toBeChecked())
@@ -156,11 +154,7 @@ export const Indeterminate: Story = {
   },
 }
 
-/**
- * `invalid` colours the box in the danger colour and sets `aria-invalid`. It survives the
- * pointer: the row's hover steps exclude it, so a control whose whole point is to look
- * wrong keeps looking wrong under the cursor.
- */
+/** `invalid` colours the box in the danger colour and sets `aria-invalid`. */
 export const Invalid: Story = {
   render: () => ({
     components: { VCheckbox },
@@ -203,11 +197,7 @@ export const LongLabel: Story = {
   }),
 }
 
-/**
- * `label` stands in for the default slot, and `hint` draws a caption under it. The hint
- * sits outside the `<label>`, so it is announced as the description rather than read as
- * part of the name, and it lines up with the text whatever side the box is on.
- */
+/** `label` stands in for the default slot, and `hint` draws a caption under it. */
 export const WithHint: Story = {
   render: () => ({
     components: { VCheckbox },
@@ -223,7 +213,6 @@ export const WithHint: Story = {
     const canvas = within(canvasElement)
     const box = canvas.getByRole('checkbox', { name: 'Weekly digest' })
     await expect(box).toHaveAccessibleDescription('A summary of the week, every Monday morning.')
-    // The text and the hint share a track: their start edges are the same pixel.
     const root = box.closest('.v-choice')!
     const label = root.querySelector('.v-choice-label')!.getBoundingClientRect()
     const hint = root.querySelector('.v-choice-hint')!.getBoundingClientRect()

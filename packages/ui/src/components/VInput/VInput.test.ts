@@ -221,9 +221,8 @@ describe('VInput', () => {
   })
 })
 
-// A validation library marks the field invalid through the attribute. The component's own
-// `invalid` binding comes after the forwarded attributes, so it must hand the consumer's value
-// through rather than overwrite it with nothing.
+// The component's own `invalid` binding comes after the forwarded attributes, so it must hand
+// the consumer's value through rather than overwrite it with nothing.
 describe('VInput — a consumer aria-invalid', () => {
   it('reaches the control when `invalid` is not set', () => {
     const { getByRole } = render(VInput, {

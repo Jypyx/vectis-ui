@@ -20,9 +20,6 @@ const COUNTRIES = [
   { value: 'ci', label: "Côte d'Ivoire" },
 ]
 
-// Groups and separators: an entry of `options` may be a named group
-// (`{ label, options }`), a separator (`{ separator: true }`) or a bare option — the
-// three mix freely.
 const GROUPED_COUNTRIES: ComboboxItem[] = [
   {
     label: 'Europe',
@@ -53,7 +50,6 @@ const GROUPED_COUNTRIES: ComboboxItem[] = [
     ],
   },
   { separator: true },
-  // outside any group: still a valid entry among the others
   { value: 'other', label: 'Other / not listed', icon: 'help' },
 ]
 
@@ -133,8 +129,6 @@ const t = storyText({
   },
 })
 
-// A simulated "API" for the asynchronous stories: network latency, filtering and
-// pagination on the source side (the component redoes none of it).
 const CATALOGUE: ComboboxOption[] = Array.from({ length: 120 }, (_, i) => ({
   value: `ref-${i + 1}`,
   label: `Reference ${String(i + 1).padStart(3, '0')}`,
@@ -159,7 +153,6 @@ const meta = {
     compact: { control: 'boolean' },
     clearable: { control: 'boolean' },
     loading: { control: 'boolean' },
-    // a boolean | predicate union: no control is possible
     filter: { control: false },
     hasMore: { control: false },
   },
@@ -184,7 +177,7 @@ export const Default: Story = {
     const canvas = within(canvasElement)
     const input = canvas.getByRole('combobox')
 
-    // accent-insensitive search, keyboard navigation, selection
+    // Accent-insensitive search, keyboard navigation, selection
     await userEvent.click(input)
     await userEvent.keyboard('reun')
     await waitFor(() => expect(canvas.getByRole('option', { name: /Réunion/ })).toBeVisible())
@@ -192,15 +185,14 @@ export const Default: Story = {
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('re'))
     await expect(input).toHaveValue('Réunion')
 
-    // The chevron opens the list and closes it again. Pressing it hands no focus to the
-    // page: without that, the root's focusout would close the list on the press and the
-    // click would reopen it, which jsdom cannot show since a click moves no focus there.
+    // Pressing it hands no focus to the page: without that, the root's focusout would close the
+    // list on the press and the click would reopen it, which jsdom cannot show since a click
+    // moves no focus there.
     const chevron = canvasElement.querySelector('.v-combobox-chevron')!
     await userEvent.click(chevron)
     await waitFor(() => expect(input).toHaveAttribute('aria-expanded', 'true'))
     await userEvent.click(chevron)
     await waitFor(() => expect(input).toHaveAttribute('aria-expanded', 'false'))
-    // waitFor: the panel closes on an opacity transition
     const listbox = canvas.getByRole('listbox', { hidden: true })
     await waitFor(() => expect(listbox).not.toBeVisible())
     await expect(input).toHaveFocus()
@@ -209,8 +201,7 @@ export const Default: Story = {
 
 /**
  * `label` is rendered above the field and `hint` below it, both tied to it for assistive
- * technology. The panel is anchored to the field's own box and not to the whole component,
- * so it opens against the field and covers the hint rather than starting below it.
+ * technology.
  */
 export const WithLabelAndHint: Story = {
   render: (args) => ({
@@ -243,10 +234,7 @@ export const WithLabelAndHint: Story = {
 
 /**
  * An entry of `options` may be a **named group** (`{ label, options }`, rendered as
- * `role="group"`) or a **separator** (`{ separator: true }`), mixed with bare
- * options. Groups are only rendering: the keyboard navigation crosses the list flat
- * without ever stopping on a label. On filtering, a group no option of which matches
- * disappears (label included) and the separators left orphaned are not rendered.
+ * `role="group"`) or a **separator** (`{ separator: true }`), mixed with bare options.
  */
 export const Groups: Story = {
   args: { options: GROUPED_COUNTRIES },
@@ -266,21 +254,18 @@ export const Groups: Story = {
 
     await userEvent.click(input)
     const listbox = await waitFor(() => canvas.getByRole('listbox'))
-    // waitFor: the panel opens on an opacity transition
     await waitFor(() => expect(canvas.getByRole('group', { name: 'Europe' })).toBeVisible())
 
-    // the section header holds the height of an option: the list's vertical rhythm
-    // does not break (heights are not measurable in jsdom). Tolerance: the panel
-    // carries a `transform` transition, and the rects measured at the end of the
-    // animation differ by a hundred-thousandth of a pixel.
+    // The section header holds the height of an option: the list's vertical rhythm does not
+    // break (heights are not measurable in jsdom).
     const group = canvas.getByRole('group', { name: 'Europe' })
     const heightOf = (selector: string) =>
       (group.querySelector(selector) as HTMLElement).getBoundingClientRect().height
     await expect(heightOf('.v-combobox-group-label')).toBeCloseTo(heightOf('.v-combobox-option'), 1)
 
-    // The panel overflows: the active option must be brought into view through the
-    // group wrapper (the scroll container stays the panel). Not measurable in jsdom —
-    // which is the whole point of this play function.
+    // The panel overflows: the active option must be brought into view through the group
+    // wrapper (the scroll container stays the panel). Not measurable in jsdom; which is the
+    // whole point of this play function.
     await userEvent.keyboard('{ArrowUp}')
     const last = canvas.getByRole('option', { name: /Other/ })
     await waitFor(() => {
@@ -292,8 +277,6 @@ export const Groups: Story = {
       )
     })
 
-    // filtering: "Europe" empties out, its label disappears with it, and no rule is
-    // left at the head or at the tail of the panel
     await userEvent.keyboard('mor')
     await waitFor(() => expect(canvas.queryByRole('group', { name: 'Africa' })).toBeVisible())
     expect(canvas.queryByRole('group', { name: 'Europe' })).toBeNull()
@@ -331,20 +314,17 @@ export const MultipleSelection: Story = {
     const canvas = within(canvasElement)
     const input = canvas.getAllByRole('combobox')[0]!
 
-    // multiple selection: the panel stays open, tags appear
     await userEvent.click(input)
     await userEvent.keyboard('bel')
     await userEvent.keyboard('{Enter}')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('fr,be'))
 
-    // Backspace on an empty field removes the last tag
     await userEvent.keyboard('{Backspace}')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent(/^fr$/))
 
     await userEvent.click(canvas.getByRole('button', { name: 'Remove France' }))
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent(/^$/))
 
-    // the cross (clearable) shows as soon as there is a selection, and empties it all
     await userEvent.keyboard('bel')
     await userEvent.keyboard('{Enter}')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('be'))
@@ -375,14 +355,11 @@ export const TextDisplay: Story = {
     const text = canvasElement.querySelector('.v-combobox-text') as HTMLElement
     const field = canvasElement.querySelector('.v-input-field') as HTMLElement
 
-    // Unfocused, the line fills the field and is cut short rather than wrapping: the
-    // field keeps the height of an ordinary control.
     await expect(text).toHaveTextContent('France, Belgium, Switzerland, Canada, Luxembourg')
     await expect(text.scrollWidth).toBeGreaterThan(text.clientWidth)
     await expect(input.offsetWidth).toBe(0)
     const height = field.getBoundingClientRect().height
 
-    // Focused, the search takes the other half of the row.
     await userEvent.click(input)
     await waitFor(() => expect(input.offsetWidth).toBeGreaterThan(0))
     await expect(text.getBoundingClientRect().width).toBeLessThanOrEqual(
@@ -390,7 +367,6 @@ export const TextDisplay: Story = {
     )
     await expect(field.getBoundingClientRect().height).toBeCloseTo(height, 1)
 
-    // Choosing and Backspace change the line in place.
     await userEvent.keyboard('reun{Enter}')
     await waitFor(() => expect(text).toHaveTextContent(/Luxembourg, Réunion$/))
     await userEvent.keyboard('{Backspace}')
@@ -425,24 +401,19 @@ export const MaxValues: Story = {
     const [chipsRoot, textRoot] = [...canvasElement.querySelectorAll<HTMLElement>('.v-combobox')]
     const chipsInput = canvas.getByRole('combobox', { name: 'Served countries' })
 
-    // Folded: two chips and a "+3", on a single row of the field.
     const overflowChip = chipsRoot!.querySelector('.v-combobox-overflow-chip') as HTMLElement
     await expect(overflowChip).toHaveTextContent('+3')
     await expect(chipsRoot!.querySelectorAll('.v-chip')).toHaveLength(3)
 
-    // Focused: every value is back, with its cross.
     await userEvent.click(chipsInput)
     await waitFor(() => expect(chipsRoot!.querySelector('.v-combobox-overflow-chip')).toBeNull())
     await expect(canvas.getAllByRole('button', { name: /^Remove / })).toHaveLength(5)
 
-    // Unfocused again, the summary returns.
     await userEvent.click(canvas.getByRole('button', { name: /Neighbouring/ }))
     await waitFor(() =>
       expect(chipsRoot!.querySelector('.v-combobox-overflow-chip')).toHaveTextContent('+3'),
     )
 
-    // Text: the line is cut short, the count beside it is not, and it stays inside the room
-    // the field leaves before its chevron.
     const line = textRoot!.querySelector('.v-combobox-text') as HTMLElement
     const count = textRoot!.querySelector('.v-combobox-overflow') as HTMLElement
     const chevron = textRoot!.querySelector('.v-combobox-chevron') as HTMLElement
@@ -469,8 +440,6 @@ export const NoResults: Story = {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('combobox'))
     await userEvent.keyboard('zzz')
-    // Scoped to the panel: the same words also fill the live region that announces the
-    // state, since a role="listbox" may own nothing but options.
     const panel = canvasElement.querySelector('.v-combobox-state') as HTMLElement
     await waitFor(() => expect(panel).toHaveTextContent('No country found'))
     await waitFor(() =>
@@ -504,10 +473,8 @@ export const Disabled: Story = {
 }
 
 /**
- * `readonly` shows a choice that has been made without letting it be changed: nothing can
- * be typed, the list never opens, the chips lose their crosses and no clear cross is
- * offered. Unlike `disabled` the field keeps its normal contrast, takes the focus and can
- * be copied from, which is what a value a form still submits needs.
+ * `readonly` shows a choice that has been made without letting it be changed: nothing can be
+ * typed, the list never opens, the chips lose their crosses and no clear cross is offered.
  */
 export const ReadOnly: Story = {
   args: { multiple: true, clearable: true, readonly: true },
@@ -532,17 +499,14 @@ export const ReadOnly: Story = {
     await userEvent.keyboard('{ArrowDown}')
     await expect(canvas.queryByRole('listbox')).toBeNull()
 
-    // The crosses of the chips and the cross of the field are the only buttons this
-    // component ever renders: frozen, it renders none.
     await expect(canvas.queryAllByRole('button')).toHaveLength(0)
   },
 }
 
 /**
- * `iconStart` puts an icon inside the field, at the start. It is rendered BEFORE whatever
- * fills that zone, so it survives the chips that stand for the chosen values instead of
- * being replaced by them. A `@click:icon-start` listener turns it into a real button, in
- * which case it needs `iconStartLabel`.
+ * `iconStart` puts an icon inside the field, at the start. It is rendered before whatever fills
+ * that zone, so it survives the chips that stand for the chosen values instead of being
+ * replaced by them.
  */
 export const FieldIcon: Story = {
   args: { multiple: true, iconStart: 'search' },
@@ -557,7 +521,6 @@ export const FieldIcon: Story = {
   }),
   play: async ({ canvasElement }) => {
     const field = canvasElement.querySelector('.v-input-field')!
-    // The icon comes first, the chips after it — the order the field lays out.
     await expect(field.firstElementChild).toHaveClass('v-icon')
     await expect(canvasElement.querySelectorAll('.v-chip')).toHaveLength(2)
   },
@@ -565,8 +528,7 @@ export const FieldIcon: Story = {
 
 /**
  * `hideExpandIcon` leaves the chevron out, for a field that reads as a search box with
- * suggestions. The clear cross then takes the end slot itself, and the field reserves the
- * room of that one control only.
+ * suggestions.
  */
 export const SearchField: Story = {
   args: { iconStart: 'search', hideExpandIcon: true, clearable: true },
@@ -582,8 +544,6 @@ export const SearchField: Story = {
   play: async ({ canvasElement }) => {
     const field = canvasElement.querySelector('.v-input-field') as HTMLElement
     await expect(field.querySelector('.v-combobox-chevron')).toBeNull()
-    // Measured on the glyph, the inset's own unit: alone, the cross sits on the field's
-    // padding edge rather than one slot short of it, where the chevron would have been.
     const style = getComputedStyle(field)
     const glyph = field.querySelector('.v-input-clear .v-icon')!.getBoundingClientRect()
     const edge =
@@ -591,18 +551,14 @@ export const SearchField: Story = {
       parseFloat(style.borderInlineEndWidth) -
       parseFloat(style.paddingInlineStart)
     await expect(Math.abs(edge - glyph.right)).toBeLessThan(1)
-    // and the text stops before it
     const input = field.querySelector('input')!.getBoundingClientRect()
     await expect(input.right).toBeLessThanOrEqual(glyph.left)
   },
 }
 
 /**
- * Sizes `sm` (32px), `md` (40px, the default) and `lg` (48px), combinable with
- * `compact` (-4px). In multiple mode, the Chips stay one step below the field: `xs`
- * (24px) up to `md`, `sm` (32px) at `lg` — the catch-up below the lowest step of each
- * pair goes through `compact` (20px at `sm`, 28px at `lg compact`). The options panel
- * follows the field's size.
+ * Sizes `sm` (32px), `md` (40px, the default) and `lg` (48px), combinable with `compact`
+ * (-4px).
  */
 export const Sizes: Story = {
   render: (args) => ({
@@ -650,11 +606,11 @@ export const FoldedOnBlur: Story = {
     const canvas = within(canvasElement)
     const input = canvas.getByRole('combobox') as HTMLInputElement
 
-    // on focus, the search field is expanded (a non-zero width)
+    // On focus, the search field is expanded (a non-zero width)
     await userEvent.click(input)
     await waitFor(() => expect(input.offsetWidth).toBeGreaterThan(0))
 
-    // out of focus, the field is folded away (zero width), only the Chips remain
+    // Out of focus, the field is folded away (zero width), only the Chips remain
     await userEvent.click(canvas.getByRole('button', { name: /Neighbouring/ }))
     await waitFor(() => expect(input.offsetWidth).toBe(0))
     await expect(canvas.getByRole('button', { name: 'Remove France' })).toBeVisible()
@@ -662,10 +618,8 @@ export const FoldedOnBlur: Story = {
 }
 
 /**
- * Server-side search: `filter: false` (the source has already filtered), a debounced
- * `@search` to launch the request, and `loading` during the wait. The component does
- * not cancel requests: it is up to the consumer to ignore stale responses (the call
- * token below).
+ * Server-side search: `filter: false` (the source has already filtered), a debounced `@search`
+ * to launch the request, and `loading` during the wait.
  */
 export const AsynchronousSearch: Story = {
   render: (args) => ({
@@ -682,7 +636,7 @@ export const AsynchronousSearch: Story = {
         requests.value += 1
         loading.value = true
         const { items } = await search(query, 0)
-        // a stale response (a more recent keystroke has gone out): ignore it
+        // A stale response (a more recent keystroke has gone out): ignore it
         if (current !== token) return
         options.value = items
         loading.value = false
@@ -713,11 +667,9 @@ export const AsynchronousSearch: Story = {
     const canvas = within(canvasElement)
     const input = canvas.getByRole('combobox')
 
-    // opening: the first load is immediate (no debounce)
     await userEvent.click(input)
     await waitFor(() => expect(canvas.getByRole('option', { name: /Reference 001/ })).toBeVisible())
 
-    // a burst of keystrokes: the debounce lets a single request through
     await userEvent.keyboard('042')
     await waitFor(() => expect(canvas.getByRole('option', { name: /Reference 042/ })).toBeVisible())
     await expect(Number(canvas.getByTestId('requests').textContent)).toBeLessThanOrEqual(2)
@@ -728,9 +680,8 @@ export const AsynchronousSearch: Story = {
 }
 
 /**
- * Pagination: `hasMore` renders a sentinel at the foot of the panel, whose entry into
- * view emits `load-more`. The next-page spinner appears in the same place, without
- * replacing the options already loaded.
+ * Pagination: `hasMore` renders a sentinel at the foot of the panel, whose entry into view
+ * emits `load-more`.
  */
 export const InfiniteScroll: Story = {
   render: (args) => ({
@@ -791,7 +742,6 @@ export const InfiniteScroll: Story = {
     await userEvent.click(canvas.getByRole('combobox'))
     await waitFor(() => expect(canvas.getByTestId('count')).toHaveTextContent('20 / 120'))
 
-    // scrolling to the bottom of the panel loads the next page
     const listbox = canvas.getByRole('listbox')
     listbox.scrollTop = listbox.scrollHeight
     await waitFor(() => expect(canvas.getByTestId('count')).toHaveTextContent('40 / 120'))
@@ -799,10 +749,9 @@ export const InfiniteScroll: Story = {
 }
 
 /**
- * An option's `icon` field displays an icon before its label, in the slot the row
- * provides (so aligned and spaced like the rest, unlike an icon placed in the
- * `#option` slot, which would land inside the label). It accepts a Material Symbols
- * name **or** an image/SVG URL — here both in the same list.
+ * An option's `icon` field displays an icon before its label, in the slot the row provides (so
+ * aligned and spaced like the rest, unlike an icon placed in the `#option` slot, which would
+ * land inside the label).
  */
 export const WithIcons: Story = {
   render: (args) => ({
@@ -836,19 +785,12 @@ export const WithIcons: Story = {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('combobox'))
     const options = await canvas.findAllByRole('option')
-    // the icon is the FIRST child of the row: it precedes the label, the selection
-    // tick coming after
     await expect(options[0]!.firstElementChild).not.toHaveClass('v-combobox-option-label')
-    // an option with no `icon` starts directly with its label
     await expect(options[4]!.firstElementChild).toHaveClass('v-combobox-option-label')
   },
 }
 
-/**
- * The `#chip` slot replaces the VChip of a selected value (multiple mode). It
- * receives `option` — hence its `icon` — as well as `remove` so it stays removable,
- * and `size`/`compact` to keep the template computed by the field.
- */
+/** The `#chip` slot replaces the VChip of a selected value (multiple mode). */
 export const CustomChip: Story = {
   args: { multiple: true },
   render: (args) => ({
@@ -886,10 +828,8 @@ export const CustomChip: Story = {
 }
 
 /**
- * The `#option` slot replaces the label with content of your choosing (here the
- * capital on a second line). It receives the option and its state (`active`,
- * `selected`, `index`). For a simple icon, prefer the option's `icon` field: this
- * slot's content is rendered inside the label.
+ * The `#option` slot replaces the label with content of your choosing (here the capital on a
+ * second line).
  */
 export const CustomOption: Story = {
   render: (args) => ({
@@ -931,7 +871,6 @@ export const TwoComboboxes: Story = {
 
     await userEvent.click(first!)
     await waitFor(() => expect(canvas.getByRole('option', { name: 'France' })).toBeVisible())
-    // the second stays closed and independent
     await expect(second!).toHaveAttribute('aria-expanded', 'false')
   },
 }

@@ -35,8 +35,6 @@ function bodyRowCount(container: Element) {
   return container.querySelectorAll('tbody tr').length
 }
 
-// A harness factory (a single defineComponent in this file): the SFC's generic
-// signature is incompatible with the Component type expected here.
 function harness(setup: () => Record<string, unknown>, template: string) {
   return defineComponent({
     components: { VDataTable: VDataTable as object },
@@ -75,11 +73,10 @@ describe('VDataTable', () => {
     })
     const sortButton = getByRole('button', { name: 'Total' })
     const th = sortButton.closest('th') as HTMLElement
-    // `data-icon` names the icon whatever its source (an embedded SVG, a ligature…)
     const glyph = () =>
       sortButton.querySelector<HTMLElement>('.v-data-table-sort-icon')?.dataset.icon
 
-    // the accessible name keeps only the label: the icon is decorative
+    // The accessible name keeps only the label: the icon is decorative
     expect(glyph()).toBe('swap_vert')
 
     await fireEvent.click(sortButton)
@@ -135,7 +132,6 @@ describe('VDataTable', () => {
       props: { columns: COLUMNS, rows: [], loading: true },
     })
     const state = container.querySelector('.v-data-table-state') as HTMLElement
-    // The spinner names the state once for a screen reader; the visible copy is hidden from it.
     expect(getByRole('status').textContent).toContain('Loading data…')
     expect(
       state.querySelector('.v-data-table-state-loading > span[aria-hidden="true"]')?.textContent,
@@ -191,7 +187,6 @@ describe('VDataTable', () => {
       `,
     )
     const { getByText, getByRole } = render(Harness)
-    // head-<key> is rendered inside the sort button (a sortable column)
     expect(getByRole('button', { name: 'Name (col)' })).toBeTruthy()
     expect(getByText('Total: 12').tagName).toBe('EM')
   })
@@ -203,11 +198,9 @@ describe('VDataTable', () => {
     })
     const field = getByRole('searchbox', { name: 'Search the table' })
 
-    // "eclair" (unaccented) matches "Éclair"
     await fireEvent.update(field, 'eclair')
     expect(firstColumnCells(container)).toEqual(['Éclair'])
 
-    // the `secret` field is not a declared column: no result
     await fireEvent.update(field, 'zzz')
     expect(bodyRowCount(container)).toBe(1)
     expect(getByText('No data')).toBeTruthy()
@@ -217,11 +210,10 @@ describe('VDataTable', () => {
     const { container, getByRole } = render(VDataTable, {
       props: { columns: COLUMNS, rows: ROWS_MANY, perPage: 2, page: 3, searchable: true },
     })
-    // page 3 of 3 (5 rows / 2) → the last row alone
     expect(firstColumnCells(container)).toEqual(['Granit'])
 
-    // the filter reduces it to 1 page: the display falls back to page 1 without mutating
-    // the model
+    // The filter reduces it to 1 page: the display falls back to page 1 without mutating the
+    // model
     const field = getByRole('searchbox', { name: 'Search the table' })
     await fireEvent.update(field, 'atlas')
     expect(firstColumnCells(container)).toEqual(['Atlas'])
@@ -239,19 +231,15 @@ describe('VDataTable', () => {
     expect(firstColumnCells(container)).toEqual(['Vectis', 'Éclair'])
     expect(getByRole('button', { name: 'Rows per page: 2' })).toBeTruthy()
 
-    // opened through the jsdom popover stub
+    // Opened through the jsdom popover stub
     const menu = container.querySelector('[role="menu"]') as HTMLElement
     menu.showPopover()
     await nextTick()
     await fireEvent.click(getByRole('menuitem', { name: '4' }))
-    // 4 rows per page AND a return to page 1
     expect(firstColumnCells(container)).toEqual(['Brume', 'Atlas', 'Vectis', 'Éclair'])
   })
 
-  /* The button's name is COMPOSITE: the `perPageText` prop (or its dictionary default)
-     is passed to `dataTable.perPageValue`, which places the separator — and that varies
-     by language (" : " in French, ": " with no space in English). A custom prop must
-     therefore travel through the function, not short-circuit it. */
+  /* A custom prop must therefore travel through the function, not short-circuit it. */
   it('the "rows per page" selector: a custom prop travels through the format', () => {
     const { getByRole } = render(VDataTable, {
       props: {
@@ -277,21 +265,19 @@ describe('VDataTable', () => {
     )
     const { container, getByRole } = render(Harness)
 
-    // page 2 → Vectis / Éclair visible; row 3 of the table checked → a rowKey identity
     await fireEvent.click(getByRole('checkbox', { name: 'Select row 3' }))
     expect(selected.value).toEqual(['Vectis'])
     expect(container.querySelector('tbody tr')?.hasAttribute('data-selected')).toBe(true)
 
-    // the master box half checked → the indeterminate DOM property (watchEffect flush post)
+    // The master box half checked → the indeterminate DOM property (watchEffect flush post)
     const master = getByRole('checkbox', { name: 'Select all' }) as HTMLInputElement
     await waitFor(() => expect(master.indeterminate).toBe(true))
 
-    // the master box: it completes the visible page without touching the rest
+    // The master box: it completes the visible page without touching the rest
     await fireEvent.click(master)
     expect(selected.value).toEqual(['Vectis', 'Éclair'])
     await waitFor(() => expect(master.indeterminate).toBe(false))
 
-    // clicking again: it empties the visible page only (here everything, nothing off-page)
     await fireEvent.click(master)
     expect(selected.value).toEqual([])
   })
@@ -309,7 +295,6 @@ describe('VDataTable', () => {
     const footer = container.querySelector('.v-data-table-footer') as HTMLElement
     const selection = footer.querySelector('.v-data-table-selection') as HTMLElement
 
-    // the live region is set as soon as `selectable` is (empty at zero selection)
     expect([...footer.children].indexOf(selection)).toBe(0)
     expect(selection.textContent).toBe('')
 
@@ -343,10 +328,8 @@ describe('VDataTable', () => {
         total: 9,
       },
     })
-    // a controlled sort is set but there is NO local reordering
     expect(firstColumnCells(container)).toEqual(['Brume', 'Atlas', 'Vectis'])
 
-    // the next page (through the composed VPagination) → the full state emitted
     await fireEvent.click(getByRole('button', { name: 'Next page' }))
     const payloads = emitted('update:params') as [unknown][]
     expect(payloads.at(-1)).toEqual([
@@ -372,7 +355,6 @@ describe('VDataTable', () => {
     await fireEvent.update(field, 'so')
     expect(emitted('update:params')).toBeUndefined()
 
-    // the commit (the term + the return to page 1) coalesces into ONE emission
     vi.advanceTimersByTime(200)
     await nextTick()
     const payloads = emitted('update:params') as [unknown][]
@@ -426,8 +408,6 @@ describe('VDataTable', () => {
     expect(selected.value).toEqual([8, 7])
   })
 
-  // VPagination has no `variant` prop: passed anyway, it lands on the <nav> as a stray
-  // HTML attribute.
   it('hands the pagination no attribute it does not declare', () => {
     const { container } = render(VDataTable, {
       props: { columns: COLUMNS, rows: ROWS_MANY, perPage: 2 },
@@ -446,9 +426,6 @@ describe('VDataTable', () => {
     expect(container.querySelector('table')?.getAttribute('aria-describedby')).toBe('caption')
   })
 
-  // The filling itself (the flex column, the stretchable scroll area) is the browser's
-  // business: it is covered by the `FullHeight` play function. Here only the style
-  // wiring is locked down.
   it('height: a block-size on the root, never on the scroller', () => {
     const heights: Array<number | string> = [320, '60vh']
     for (const height of heights) {
@@ -458,7 +435,6 @@ describe('VDataTable', () => {
       })
       const wrapper = container.querySelector('.v-data-table') as HTMLElement
       expect(wrapper.style.blockSize).toBe(typeof height === 'number' ? '320px' : '60vh')
-      // the consumer's style comes after the prop's: it survives
       expect(wrapper.style.width).toBe('640px')
       expect(container.querySelector('.v-data-table-scroller')?.hasAttribute('style')).toBe(false)
     }

@@ -52,14 +52,13 @@ describe('VCombobox', () => {
     await fireEvent.keyDown(input, { key: 'Enter' })
     expect(emitted('update:modelValue')).toEqual([['be']])
     expect(input.getAttribute('aria-expanded')).toBe('false')
-    // outside editing, the input displays the label
     expect(input.value).toBe('Belgium')
   })
 
   it('single selection by click: the input displays the chosen label (parent v-model)', async () => {
-    // With defineModel + a parent v-model, re-reading model.value just after writing
-    // it returns the old value — the displayed label must come from the chosen option,
-    // not from a re-derivation out of the model.
+    // With defineModel + a parent v-model, re-reading model.value just after writing it returns
+    // the old value; the displayed label must come from the chosen option, not from a
+    // re-derivation out of the model.
     const Harness = defineComponent({
       components: { VCombobox },
       setup: () => ({ options: OPTIONS, value: ref('') }),
@@ -80,7 +79,7 @@ describe('VCombobox', () => {
     expect(container.querySelector('output')?.textContent).toBe('be')
     expect(input.value).toBe('Belgium')
 
-    // 2nd choice: reopen, search France, click → the input must NOT stay on "Belgium"
+    // 2nd choice: reopen, search France, click → the input must not stay on "Belgium"
     await fireEvent.click(input)
     await fireEvent.update(input, 'France')
     await nextTick()
@@ -90,8 +89,6 @@ describe('VCombobox', () => {
     expect(input.value).toBe('France')
   })
 
-  // The panel fades out rather than vanishing: a list springing back to every option at
-  // the moment of choosing is seen growing during that fade.
   it('keeps the filtered list while closing, and offers the whole list again on reopening', async () => {
     const { getByRole, container } = renderCombobox()
     const input = getByRole('combobox') as HTMLInputElement
@@ -116,16 +113,14 @@ describe('VCombobox', () => {
   it('reopening in single mode does not filter on the chosen value (the full list, filtering on typing)', async () => {
     const { getByRole, container } = renderCombobox({ modelValue: 'fr' })
     const input = getByRole('combobox') as HTMLInputElement
-    expect(input.value).toBe('France') // the label stays displayed
+    expect(input.value).toBe('France')
     const labels = () =>
       [...container.querySelectorAll('[role="option"] .v-combobox-option-label')].map((o) =>
         o.textContent?.trim(),
       )
 
-    // the selected value is NOT a filter: the whole list is offered
     expect(labels()).toEqual(['France', 'Belgium', 'Réunion', 'Monaco'])
 
-    // the filter only kicks in on typing — and an accented query matches too
     await fireEvent.update(input, 'réun')
     expect(labels()).toEqual(['Réunion'])
   })
@@ -133,7 +128,6 @@ describe('VCombobox', () => {
   it('Enter selects the single result (even after a filter with no result)', async () => {
     const { getByRole, emitted } = renderCombobox()
     const input = getByRole('combobox') as HTMLInputElement
-    // an empty filter then narrowed to a single result, with no arrow key
     await fireEvent.update(input, 'zzz')
     await fireEvent.update(input, 'bel')
     await fireEvent.keyDown(input, { key: 'Enter' })
@@ -144,7 +138,7 @@ describe('VCombobox', () => {
     const { getByRole, container } = renderCombobox()
     const input = getByRole('combobox')
     await fireEvent.keyDown(input, { key: 'ArrowDown' })
-    // one step up from the first: wraps around, skipping Monaco (disabled)
+    // One step up from the first: wraps around, skipping Monaco (disabled)
     await fireEvent.keyDown(input, { key: 'ArrowUp' })
     expect(container.querySelector('[data-active]')?.textContent).toContain('Réunion')
   })
@@ -156,8 +150,8 @@ describe('VCombobox', () => {
 
     const event = new MouseEvent('mousedown', { bubbles: true, cancelable: true })
     option.dispatchEvent(event)
-    // without it, the focusout would close the panel before @select was handled (a dead
-    // mouse selection, invisible in jsdom)
+    // Without it, the focusout would close the panel before @select was handled (a dead mouse
+    // selection, invisible in jsdom)
     expect(event.defaultPrevented).toBe(true)
   })
 
@@ -169,7 +163,7 @@ describe('VCombobox', () => {
     const before = document.activeElement
     panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
     panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }))
-    // no option has taken the focus: it never leaves the input
+    // No option has taken the focus: it never leaves the input
     expect(document.activeElement).toBe(before)
   })
 
@@ -180,7 +174,7 @@ describe('VCombobox', () => {
     const disabled = options.find((o) => o.textContent?.includes('Monaco'))!
 
     expect(disabled.getAttribute('aria-disabled')).toBe('true')
-    // the option must stay in the a11y tree the field walks
+    // The option must stay in the a11y tree the field walks
     expect(disabled.disabled).toBe(false)
   })
 
@@ -234,7 +228,7 @@ describe('VCombobox', () => {
       modelValue: ['fr', 'be'],
       clearable: true,
     })
-    // visible without typing at all (there is a selection)
+    // Visible without typing at all (there is a selection)
     await fireEvent.click(getByRole('button', { name: 'Clear selection' }))
     expect(emitted('update:modelValue').at(-1)).toEqual([[]])
   })
@@ -257,7 +251,7 @@ describe('VCombobox', () => {
     expect(container.querySelector('.v-combobox-text')?.textContent).toBe('France, Réunion')
     expect(container.querySelector('.v-chip')).toBeNull()
     expect(queryAllByRole('button', { name: /Remove/ })).toHaveLength(0)
-    // one line: the field does not take the arrangement that lets chips wrap
+    // One line: the field does not take the arrangement that lets chips wrap
     expect(container.querySelector('.v-input-chips')).toBeNull()
 
     await fireEvent.keyDown(getByRole('combobox'), { key: 'Backspace' })
@@ -357,7 +351,7 @@ describe('VCombobox', () => {
         overflowText,
         modelValue: FIVE,
       })
-      // the count sits beside the line, never inside what the ellipsis cuts
+      // The count sits beside the line, never inside what the ellipsis cuts
       expect(container.querySelector('.v-combobox-text')?.textContent).toBe('France')
       expect(container.querySelector('.v-combobox-overflow')?.textContent?.trim()).toBe(
         '+4 countries',
@@ -389,22 +383,19 @@ describe('VCombobox', () => {
     const input = getByRole('combobox')
     const chevron = container.querySelector('.v-combobox-chevron') as HTMLElement
     const field = container.querySelector('.v-input-field') as HTMLElement
-    // `dispatchEvent` answers false when a listener cancelled the event
     const pressed = (el: Element) =>
       el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }))
 
-    // closed: a click on the chevron opens, like anywhere else on the field
     await fireEvent.click(chevron)
     expect(input.getAttribute('aria-expanded')).toBe('true')
 
-    // the press is cancelled, or the focus would leave the field and the root's focusout
-    // would close the panel before the click reopened it
+    // The press is cancelled, or the focus would leave the field and the root's focusout would
+    // close the panel before the click reopened it
     expect(pressed(chevron)).toBe(false)
     await fireEvent.click(chevron)
     expect(input.getAttribute('aria-expanded')).toBe('false')
     expect(document.activeElement).toBe(input)
 
-    // anywhere else on the field leaves an open panel open, and its press alone
     await fireEvent.click(chevron)
     await fireEvent.click(field)
     expect(input.getAttribute('aria-expanded')).toBe('true')
@@ -417,13 +408,10 @@ describe('VCombobox', () => {
       [...container.querySelectorAll<HTMLElement>('[role="option"]')].find((o) =>
         o.textContent?.includes(text),
       )
-    // France is selected → a tick; Belgium is not → no tick
     expect(optionByText('France')?.querySelector('.v-combobox-option-check')).toBeTruthy()
     expect(optionByText('Belgium')?.querySelector('.v-combobox-option-check')).toBeFalsy()
   })
 })
-
-// Groups and separators
 
 describe('VCombobox grouped', () => {
   const GROUPS = [
@@ -460,10 +448,9 @@ describe('VCombobox grouped', () => {
   it('renders a role="group" named by its label, without breaking the option order', async () => {
     const { getByRole, container } = renderGroup()
     await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
-    // aria-labelledby resolved: the group does carry its accessible name
+    // Aria-labelledby resolved: the group does carry its accessible name
     expect(getByRole('group', { name: 'Europe' })).toBeTruthy()
     expect(getByRole('group', { name: 'Africa' })).toBeTruthy()
-    // the options of a group and those outside one form ONE flat list
     expect(labels(container)).toEqual(['France', 'Belgium', 'Réunion', 'Morocco', 'Japan'])
   })
 
@@ -472,17 +459,16 @@ describe('VCombobox grouped', () => {
     const input = getByRole('combobox')
     const active = () => container.querySelector('[data-active]')?.textContent?.trim()
 
-    await fireEvent.keyDown(input, { key: 'ArrowDown' }) // opens on France
+    await fireEvent.keyDown(input, { key: 'ArrowDown' })
     expect(active()).toBe('France')
     await fireEvent.keyDown(input, { key: 'ArrowDown' })
     expect(active()).toBe('Belgium')
-    // crosses the separator AND the "Africa" label in a single step
     await fireEvent.keyDown(input, { key: 'ArrowDown' })
     expect(active()).toBe('Réunion')
     // Morocco is disabled: skipped, like a disabled option outside a group
     await fireEvent.keyDown(input, { key: 'ArrowDown' })
     expect(active()).toBe('Japan')
-    // aria-activedescendant always designates a real role="option"
+    // Aria-activedescendant always designates a real role="option"
     expect(input.getAttribute('aria-activedescendant')).toBe(
       container.querySelector('[role="option"][data-active]')?.id,
     )
@@ -502,7 +488,6 @@ describe('VCombobox grouped', () => {
     const panel = () => container.querySelector('[role="listbox"]')!
     expect(separators()).toBe(2)
 
-    // "Japan" alone: the two separators preceding it become orphans
     await fireEvent.update(getByRole('combobox') as HTMLInputElement, 'japan')
     expect(separators()).toBe(0)
 
@@ -523,8 +508,6 @@ describe('VCombobox grouped', () => {
     await fireEvent.click(option)
     expect(emitted('update:modelValue').at(-1)).toEqual([['re']])
 
-    // the VChip's label does come from the option unwrapped out of the group
-    // (`allOptions`) — queries bounded to `container`: both renders share document.body
     const second = renderGroup({ multiple: true, modelValue: ['re'] })
     expect(
       [...second.container.querySelectorAll('.v-chip [aria-label]')].map((b) =>
@@ -533,8 +516,6 @@ describe('VCombobox grouped', () => {
     ).toEqual(['Remove Réunion'])
   })
 })
-
-// Asynchronous source (server-side search, loading, pagination)
 
 describe('VCombobox asynchronous', () => {
   afterEach(() => {
@@ -570,7 +551,6 @@ describe('VCombobox asynchronous', () => {
       },
     })
     await fireEvent.update(getByRole('combobox'), '  fr  ')
-    // raw and trimmed: neither NFD-normalized nor lowercased by the component
     expect(seen).toContain('fr')
     expect(labels(container)).toEqual(['France'])
     expect(emitted('search').at(-1)).toEqual(['fr'])
@@ -585,7 +565,6 @@ describe('VCombobox asynchronous', () => {
   it('search: emitted immediately on opening (the first load)', async () => {
     const { getByRole, emitted } = renderCombobox()
     await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
-    // no debounce on opening, despite the default searchDebounce (250 ms)
     expect(emitted('search')).toEqual([['']])
   })
 
@@ -593,7 +572,7 @@ describe('VCombobox asynchronous', () => {
     vi.useFakeTimers()
     const { getByRole, emitted } = renderCombobox({ searchDebounce: 250 })
     const input = getByRole('combobox')
-    await fireEvent.keyDown(input, { key: 'ArrowDown' }) // opens: search('')
+    await fireEvent.keyDown(input, { key: 'ArrowDown' })
     await fireEvent.update(input, 'r')
     await fireEvent.update(input, 're')
     await fireEvent.update(input, 'reu')
@@ -607,9 +586,9 @@ describe('VCombobox asynchronous', () => {
     vi.useFakeTimers()
     const { getByRole, emitted } = renderCombobox({ searchDebounce: 250 })
     const input = getByRole('combobox')
-    await fireEvent.update(input, 'bel') // opens + emits 'bel' (immediately)
+    await fireEvent.update(input, 'bel')
     await fireEvent.keyDown(input, { key: 'Enter' })
-    // the timer armed by the keystroke must not fire after the close
+    // The timer armed by the keystroke must not fire after the close
     vi.advanceTimersByTime(1000)
     expect(emitted('search')).toEqual([['bel']])
   })
@@ -652,7 +631,6 @@ describe('VCombobox asynchronous', () => {
     const { getByRole, rerender } = renderCombobox({ modelValue: 'fr' })
     const input = getByRole('combobox') as HTMLInputElement
     expect(input.value).toBe('France')
-    // the next page of results: "fr" is no longer in it
     await rerender({ options: [{ value: 'be', label: 'Belgium' }] })
     expect(input.value).toBe('France')
   })
@@ -672,7 +650,7 @@ describe('VCombobox asynchronous', () => {
   it('the field displays the label as soon as the options arrive (mounted with none)', async () => {
     const { getByRole, rerender } = renderCombobox({ options: [], modelValue: 'fr' })
     const input = getByRole('combobox') as HTMLInputElement
-    // with no options, the raw value is the only possible fallback
+    // With no options, the raw value is the only possible fallback
     expect(input.value).toBe('fr')
     await rerender({ options: OPTIONS })
     expect(input.value).toBe('France')
@@ -695,7 +673,7 @@ describe('VCombobox asynchronous', () => {
     const { container } = renderCombobox({ loading: true })
     expect(container.querySelector('.v-combobox-chevron')).toBeNull()
     const spinner = container.querySelector('.v-input-field > .v-spinner')
-    // decorative: its role="status" must not double the panel's announcement
+    // Decorative: its role="status" must not double the panel's announcement
     expect(spinner?.getAttribute('aria-hidden')).toBe('true')
   })
 
@@ -706,7 +684,6 @@ describe('VCombobox asynchronous', () => {
     const chip = () => container.querySelector('.v-chip') as HTMLElement
     const panel = () => container.querySelector('[role="listbox"]') as HTMLElement
 
-    // default (md): a full xs VChip
     expect(chip().getAttribute('data-size')).toBe('xs')
     expect(chip().hasAttribute('data-compact')).toBe(false)
 
@@ -717,13 +694,11 @@ describe('VCombobox asynchronous', () => {
     await rerender({ size: 'lg', compact: false })
     expect(chip().getAttribute('data-size')).toBe('sm')
     expect(chip().hasAttribute('data-compact')).toBe(false)
-    // the panel follows the field's size (no clamp)
     expect(panel().getAttribute('data-size')).toBe('lg')
 
     await rerender({ size: 'lg', compact: true })
     expect(chip().getAttribute('data-size')).toBe('sm')
     expect(chip().hasAttribute('data-compact')).toBe(true)
-    // data-compact on the root: it is what arms the lg+compact CSS rule
     expect(container.querySelector('.v-combobox')?.hasAttribute('data-compact')).toBe(true)
   })
 
@@ -790,9 +765,7 @@ describe('VCombobox asynchronous', () => {
       HTMLElement,
       HTMLElement,
     ]
-    // a Material ligature: the icon's name is the symbol's content
     expect(withIcon.querySelector('.v-icon-symbol')?.textContent).toBe('flag')
-    // the icon precedes the label (the tick, on the other hand, comes after)
     expect(withIcon.firstElementChild?.classList.contains('v-combobox-option-label')).toBe(false)
     expect(withoutIcon.querySelector('.v-icon-symbol')).toBeNull()
     expect(withoutIcon.firstElementChild?.classList.contains('v-combobox-option-label')).toBe(true)
@@ -818,7 +791,6 @@ describe('VCombobox asynchronous', () => {
           ),
       },
     })
-    // the default VChip has indeed given way
     expect(container.querySelector('.v-chip')).toBeNull()
     const chip = container.querySelector('.v-test-chip') as HTMLElement
     expect(chip.textContent).toBe('France/—/xs')
@@ -843,8 +815,6 @@ describe('VCombobox asynchronous', () => {
     })
     expect(container.querySelector('.v-test-chip')?.textContent).toBe('France/flag')
 
-    // the next search no longer returns the option: the cache keeps it whole (without
-    // it, the VChip would display the raw identifier and lose its icon)
     await rerender({ options: [] })
     expect(container.querySelector('.v-test-chip')?.textContent).toBe('France/flag')
   })
@@ -896,8 +866,6 @@ describe('VCombobox asynchronous', () => {
       readonly: true,
     })
     expect(container.querySelectorAll('.v-chip')).toHaveLength(2)
-    // The cross of the field and the crosses of the chips are the only buttons this
-    // field ever renders: frozen, it renders none.
     expect(queryByRole('button')).toBeNull()
   })
 
@@ -913,8 +881,6 @@ describe('VCombobox asynchronous', () => {
     expect(container.querySelector('.v-chip button')).toBeNull()
   })
 
-  // Keyed by value, `1` and `'1'` (or a duplicated value) shared one position: both rows
-  // lit up as active and Vue patched them under one key.
   it('two options sharing a value keep distinct ids and a single active row', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const { getByRole, container } = renderCombobox({
@@ -977,7 +943,6 @@ describe('VCombobox asynchronous', () => {
     const { container, rerender } = renderCombobox({ hideExpandIcon: true })
     const field = container.querySelector('.v-input-field')!
     expect(container.querySelector('.v-combobox-chevron')).toBeNull()
-    // nothing at the end at all, so the pinned arrangement reserves no room for an icon
     expect(field.querySelector(':scope > .v-input-icon-end')).toBeNull()
     await rerender({ hideExpandIcon: true, loading: true })
     expect(field.querySelector(':scope > .v-combobox-spinner')).not.toBeNull()
@@ -1035,8 +1000,6 @@ describe('VCombobox state kept in step', () => {
     expect((getByRole('combobox') as HTMLInputElement).value).toBe('Réunion')
   })
 
-  // Escape that closes the list is consumed, so a surrounding VDialog stays open; on a
-  // closed list it is left alone, so the dialog closes as usual.
   it('Escape cancels its default only when it closes the list', async () => {
     const { getByRole } = renderCombobox()
     const input = getByRole('combobox')
@@ -1070,7 +1033,6 @@ describe('VCombobox state kept in step', () => {
     expect(active()).toContain('Charlie')
   })
 
-  // A value made read-only or disabled while the list is open can no longer be written.
   it('readonly set while the list is open closes it and refuses the selection', async () => {
     const { getByRole, rerender, emitted } = renderCombobox()
     const input = getByRole('combobox')

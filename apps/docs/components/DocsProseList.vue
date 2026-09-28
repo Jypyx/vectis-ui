@@ -5,14 +5,8 @@ import type { PropType } from 'vue'
 import { VTypography } from 'vectis-ui'
 
 /**
- * A bulleted list of documentation, taken from an ARRAY message.
- *
- * `tm` rather than `t` is what returns the array itself, and `rt` is what resolves each entry:
- * vue-i18n hands back compiled message functions rather than plain strings once its build-time
- * compiler has run. Mapping with `String()` instead works perfectly in dev and prints
- * `[object Object]` in the built site, since the compiler only runs on the production build.
- *
- * The raw-HTML argument and the render-function trap are `DocsProse`'s — read them there.
+ * Resolve array messages through the i18n resolver; String() can print compiled message objects
+ * in production.
  */
 export default defineComponent({
   name: 'DocsProseList',
@@ -21,12 +15,7 @@ export default defineComponent({
     keypath: { type: String, required: true },
     /** `ul` unless the order carries meaning. */
     tag: { type: String, default: 'ul' },
-    /**
-     * A VTypography role, as on DocsProse. Given one, the list is rendered by the design
-     * system's text component, so the recipe comes from the tokens. Unlike DocsProse, the
-     * content reaches it through the SLOT rather than `innerHTML`: the `<li>` are real vnodes
-     * here, and only their own text is raw markup.
-     */
+    /** A VTypography role, as on DocsProse. */
     variant: { type: String as PropType<TypographyVariant>, default: undefined },
     /** A VTypography tone. Only read when `variant` is given. */
     tone: { type: String as PropType<TypographyTone>, default: undefined },

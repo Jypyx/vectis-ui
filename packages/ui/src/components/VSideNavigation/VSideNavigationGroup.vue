@@ -1,27 +1,8 @@
 <script setup lang="ts">
-/**
- * A named section of the navigation — "Workspace", "Settings". The name is plain text:
- * it cannot be focused or clicked, and it names the sublist under it for assistive
- * technology.
- *
- * Unlike a menu group, it does NOT claim to be a group in ARIA terms. Such a role
- * cannot be a direct child of a list without breaking what that list is allowed to
- * contain. A NAMED sublist says exactly the same thing in strictly valid HTML — and it
- * gives a group the same shape as a branch, which is what keeps the styling uniform.
- *
- * A group is NOT a level of the hierarchy: it declares neither of the two variables
- * counting the depth, so that count passes through it untouched and the items inside
- * are indented as if the group were not there.
- */
-
 import { useId } from 'vue'
 
 interface SideNavigationGroupProps {
-  /**
-   * The name of the section, replaced by the `#label` slot. One of the two is
-   * REQUIRED: it is what names the sublist under it, and a section named by neither
-   * points its `aria-labelledby` at an empty element.
-   */
+  /** The name of the section, replaced by the `#label` slot. */
   label?: string
 }
 
@@ -58,8 +39,8 @@ const labelId = useId()
   }
 
   /*
-   * TRAP — the indent repeats the rows' computation rather than sharing a variable with
-   * them: a custom property set higher up would be frozen at level zero when substituted.
+   * The indent repeats the rows' computation rather than sharing a variable with them: a custom
+   * property set higher up would be frozen at level zero when substituted.
    */
   .v-side-nav-group-label {
     display: flex;

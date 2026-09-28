@@ -1,6 +1,4 @@
 /**
- * The site's chrome: the header, the search panel, the outline, the code blocks and the tables.
- *
  * Everything here is a label rather than prose, so it is a plain string and never carries
  * markup. `DocsProse` is for paragraphs, `t()` for the words on a control.
  */
@@ -76,16 +74,8 @@ export default {
     noDefault: 'none',
   },
   /*
-   * The site's footer.
-   *
-   * TRAP: the two anchors are written INTO the message, hrefs and all, which duplicates the two
-   * URLs across the locales. Both alternatives are worse. Splitting the sentence around the
-   * product names would leave "Built with" and "and" as translation units, exactly what
-   * DocsProse's own header calls untranslatable; and parameterising the message is impossible,
-   * the site's pass-through messageCompiler having removed `{…}` interpolation on purpose.
-   *
-   * The heart beside it is NOT here: a symbol made of no words stays in the template, the rule
-   * that keeps `99+` and `+N` out of the library's own dictionary.
+   * The two anchors are written INTO the message, hrefs and all, which duplicates the two URLs
+   * across the locales. Both alternatives are worse.
    */
   footer: {
     licence: 'MIT licensed, © 2026 Jypyx',
@@ -94,9 +84,8 @@ export default {
   },
 
   /*
-   * The alternative text of the card image every page carries. It describes the PICTURE and
-   * does not repeat the page: a card shows the title and the description beside the image,
-   * and both of those are already translated.
+   * It describes the PICTURE and does not repeat the page: a card shows the title and the
+   * description beside the image, and both of those are already translated.
    */
   ogImageAlt: 'The Vectis UI logo and name on a dark violet background.',
 }

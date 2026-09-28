@@ -36,9 +36,11 @@ function priceFor(iso: string) {
 .number {
   line-height: 1;
 }
-/* The price is set back from the number rather than given a colour of its own: mixing
-   `currentcolor` towards transparent keeps it legible on the page AND on the accent a
-   selected day is painted with, where a muted token would disappear. */
+/*
+ * The price is set back from the number rather than given a colour of its own: mixing
+ * `currentcolor` towards transparent keeps it legible on the page and on the accent a selected
+ * day is painted with, where a muted token would disappear.
+ */
 .price {
   font-size: var(--vectis-text-caption-size);
   line-height: 1;

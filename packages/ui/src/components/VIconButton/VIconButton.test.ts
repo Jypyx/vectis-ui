@@ -45,11 +45,6 @@ describe('VIconButton', () => {
     expect(icon.hasAttribute('data-filled')).toBe(true)
   })
 
-  /*
-   * The icon has to REPLACE itself with the spinner rather than sit beside it: the box
-   * is one control high and one control wide, so two glyphs in it overlap. It is what
-   * pins the icon to VButton's `start` slot, the only one loading swaps out.
-   */
   it('loading: the spinner replaces the icon rather than joining it', () => {
     const { getByRole } = render(VIconButton, {
       props: { label: 'Refreshing', icon: 'favorite', loading: true },

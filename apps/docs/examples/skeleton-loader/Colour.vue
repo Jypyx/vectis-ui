@@ -9,8 +9,6 @@ import { VSkeletonLoader } from 'vectis-ui'
          and in either theme, with nothing else to set. -->
     <VSkeletonLoader shape="surface" color="oklch(55% 0.14 265)" />
 
-    <!-- The case it is for: a card that paints its own ground, where the shipped grey
-         would read as a hole. -->
     <div class="inverse">
       <VSkeletonLoader shape="control" size="sm" width="60%" color="oklch(38% 0.01 260)" />
       <VSkeletonLoader :lines="3" color="oklch(38% 0.01 260)" />

@@ -4,9 +4,7 @@ import { VButton, VTooltip } from 'vectis-ui'
 
 <template>
   <div class="demo">
-    <!-- The pointer has to rest on the trigger before the tooltip appears, 300ms by
-         default, so passing over something on the way somewhere else opens nothing.
-         Keyboard focus opens it at once instead: the intent is not in doubt there. -->
+    <!-- Keyboard focus opens it at once instead: the intent is not in doubt there. -->
     <VTooltip text="Appears after the default wait">
       <template #default="{ triggerProps }">
         <VButton variant="outline" tone="neutral" v-bind="triggerProps">300ms</VButton>
@@ -19,7 +17,6 @@ import { VButton, VTooltip } from 'vectis-ui'
       </template>
     </VTooltip>
 
-    <!-- A delay of 0 disables the wait entirely. -->
     <VTooltip text="Appears at once" :delay="0">
       <template #default="{ triggerProps }">
         <VButton variant="outline" tone="neutral" v-bind="triggerProps">No wait</VButton>

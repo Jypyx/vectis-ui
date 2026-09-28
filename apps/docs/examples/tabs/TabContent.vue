@@ -8,7 +8,6 @@ const tab = ref('files')
 
 <template>
   <VTabs v-model="tab" label="Workspace">
-    <!-- A label, an icon at either end, or both. -->
     <VTab value="files" label="Files" :icon-start="description" />
     <VTab value="recent" label="Recent" :icon-start="schedule" />
 

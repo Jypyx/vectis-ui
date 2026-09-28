@@ -1,18 +1,6 @@
 /**
- * Renders `src/components/VIcon/icons/` from the paths `build-icons.ts` fetched.
- *
- * It lives apart from the script that feeds it so the generated tree can be produced
- * without touching the network — the regeneration and the download are two different
- * concerns, and only one of them needs GitHub to be reachable.
- *
- * ONE FILE PER ICON, and that is the whole point of the layout. A single table
- * indexed by a string at runtime has no key a bundler can prove reachable, so every
- * consumer would ship all 34 drawings as soon as anything rendered a VIcon at all:
- * 3.5 kB gzip, more than half the weight of a lone button. Separate modules make the
- * cost proportional by construction, with no dependence on a bundler's willingness to
- * drop an unused binding from a module it is keeping anyway. It is also what keeps
- * `scripts/bench-size.ts` honest: that gate follows IMPORTS, so a shared file would
- * have it report the whole registry against every component that touched one icon.
+ * Render one module per icon independently of downloads so the committed registry can be
+ * regenerated offline from supplied data.
  */
 
 /** An icon as the generator holds it: its name, then `[outline, filled?]`. */

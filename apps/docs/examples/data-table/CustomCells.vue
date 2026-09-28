@@ -26,7 +26,6 @@ const numbers = new Intl.NumberFormat('en-GB')
     title="Projects"
     caption="Organisation projects"
   >
-    <!-- A cell slot is named after its column key, and receives the whole row. -->
     <template #cell-owner="{ row }">
       <span class="owner">
         <VAvatar :name="row.owner" size="xs" />
@@ -40,7 +39,6 @@ const numbers = new Intl.NumberFormat('en-GB')
       </VChip>
     </template>
 
-    <!-- Sorting reads the underlying value, so a formatted number still sorts as a number. -->
     <template #cell-commits="{ row }">
       <span class="figure">{{ numbers.format(row.commits) }}</span>
     </template>

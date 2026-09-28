@@ -139,12 +139,10 @@ export const Variants: Story = {
       t,
     }),
     /*
-     * The panels are rendered: it is the WHOLE component that `outlined` encloses in
-     * a card, and the bar's track becomes the rule separating them. No padding is set
-     * on the panels: the frame's gutter is what spaces them out in `outlined`, and the
-     * two bare frames hold their content off the bar with no indent. The last bar is
-     * the `outlined` edge case with no #panels slot: nothing left to separate, so the
-     * track fades away.
+     * The panels are rendered: it is the whole component that `outlined` encloses in a card,
+     * and the bar's track becomes the rule separating them. No padding is set on the panels:
+     * the frame's gutter is what spaces them out in `outlined`, and the two bare frames hold
+     * their content off the bar with no indent.
      */
     template: `
       <div style="display: grid; gap: 32px; width: 480px">
@@ -213,7 +211,6 @@ export const Compact: Story = {
   render: () => ({
     components: { VTabs, VTab },
     setup: () => ({ normal: ref('a'), compact: ref('a') }),
-    // compact = -4px of height; padding, type and icons unchanged
     template: `
       <div style="display: grid; gap: 24px">
         <VTabs variant="inset" v-model="normal">
@@ -244,7 +241,6 @@ export const TabContent: Story = {
       </VTabs>
     `,
   }),
-  // A tab with an icon and no label is squared by VButton's own `[data-icon-only]` rule.
   play: async ({ canvasElement }) => {
     const boxes = [...canvasElement.querySelectorAll<HTMLElement>('.v-tab[data-icon-only]')]
     await expect(boxes.length).toBeGreaterThan(0)
@@ -302,10 +298,6 @@ export const Alignment: Story = {
       horizontal: ref('a'),
       vertical: ref('a'),
     }),
-    /*
-     * In vertical mode, `align` acts on the block axis: it only has an effect if the
-     * bar is given a height — hence the `height` set on each example.
-     */
     template: `
       <div style="display: grid; gap: 24px">
         <VTabs v-for="a in aligns" :key="a" :align="a" variant="inset" v-model="horizontal">
@@ -353,7 +345,7 @@ export const Disabled: Story = {
   render: () => ({
     components: { VTabs, VTab },
     setup: () => ({ tab: ref('a'), off: ref('a') }),
-    // the inert tab is a <button disabled>: greyed through tokens, skipped by the arrows; a
+    // The inert tab is a <button disabled>: greyed through tokens, skipped by the arrows; a
     // disabled VTabs switches every tab off at once
     template: `
       <div style="display: grid; gap: 24px">
@@ -425,8 +417,8 @@ export const Scrolling: Story = {
   render: () => ({
     components: { VTabs, VTab },
     setup: () => ({ cities: CITIES, tab: ref('Paris') }),
-    // the container is deliberately narrow: the list scrolls by touch, trackpad and
-    // keyboard, with no visible scrollbar
+    // The container is deliberately narrow: the list scrolls by touch, trackpad and keyboard,
+    // with no visible scrollbar
     template: `
       <div style="max-width: 420px; border: 1px dashed var(--vectis-color-border); padding: 8px">
         <VTabs v-model="tab">
@@ -464,7 +456,6 @@ export const ScrollButtons: Story = {
       first.getBoundingClientRect().left - list.getBoundingClientRect().left,
     ).toBeCloseTo(parseFloat(getComputedStyle(list).paddingInlineStart), 0)
 
-    // at the start of the line, only the downstream control is enabled
     await waitFor(async () => {
       await expect(canvas.getByRole('button', { name: 'Previous tabs' })).toBeDisabled()
       await expect(next).toBeEnabled()
@@ -514,10 +505,6 @@ export const Nested: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    /*
-     * A VTabs inside a panel of another one keeps its own layout: the outer bar is a vertical,
-     * flat one, and none of that may reach the inner, horizontal and segmented row.
-     */
     const inner = within(canvasElement).getByRole('tablist', { name: 'View' })
     await expect(getComputedStyle(inner).flexDirection).toBe('row')
     await expect(getComputedStyle(inner.parentElement!).flexDirection).toBe('row')

@@ -1,20 +1,6 @@
-/* Vectis UI docs — the site's own type layer.
- *
- * The LIBRARY ships no webfont: `--vectis-font-family-display` is defined as
- * `var(--vectis-font-family-sans)`, which is the platform stack. The two brand faces below
- * therefore belong to this site, not to the design system, and they are wired the way the
- * Font family page describes — by repointing the family tokens from an UNLAYERED sheet, so
- * they win over `vectis.tokens` with no specificity fight and no rebuild.
- *
- *   display → 'Josefin Sans'  — titles and headings ONLY. Geometric, with a notably low
- *             x-height, so it goes fuzzy below ~20px; never promote it to running text.
- *   sans    → 'Geist'         — all running text, labels and UI chrome.
- *   mono    → left alone: the platform stack the library already ships. There is no mono
- *             webfont to load, and its fallbacks handle absence.
- *
- * Each family keeps the platform stack behind it, so a failed download degrades rather than
- * breaks. NOTE: these come from Google's CDN and are not self-hosted — an offline or
- * privacy-tight build wants the woff2 files here and local @font-face rules instead.
+/*
+ * Site fonts override family tokens from an unlayered sheet. Retain platform fallbacks; Josefin
+ * Sans is reserved for headings, Geist for body text and controls.
  */
 @import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&family=Geist:wght@400;500;600;700&display=swap');
 

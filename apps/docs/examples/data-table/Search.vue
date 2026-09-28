@@ -8,7 +8,6 @@ const columns = [
   { key: 'commits', label: 'Commits', align: 'end' as const },
 ]
 
-/* `Éclair` keeps its accent: the search ignores diacritics, so eclair finds it. */
 const rows = [
   { name: 'Vectis', owner: 'Xavier', status: 'Active', commits: 320 },
   { name: 'Atlas', owner: 'Nadia', status: 'Active', commits: 87 },

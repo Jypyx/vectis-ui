@@ -8,10 +8,10 @@ const kinds = ref(['images'])
 
 <template>
   <div class="demo">
-    <!-- Clicking the chosen item normally gives it up, leaving nothing selected.
-         `mandatory` refuses that last step, so a row that has an answer keeps one. It
-         is a guard and nothing more: it selects nothing on its own at the start, and a
-         group that begins empty stays empty until something is clicked. -->
+    <!--
+      It is a guard and nothing more: it selects nothing on its own at the start, and a group
+      that begins empty stays empty until something is clicked.
+    -->
     <div class="row">
       <p class="caption">one choice</p>
       <VToggle v-model="period" mandatory item-variant="outline" label="Period">

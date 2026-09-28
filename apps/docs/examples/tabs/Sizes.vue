@@ -25,7 +25,6 @@ const selected = ref<Record<string, string>>({
       </VTabs>
     </div>
 
-    <!-- compact takes 4px off, as everywhere else. -->
     <div class="row">
       <p class="caption">md compact</p>
       <VTabs v-model="selected.compact" size="md" compact label="Project, compact">

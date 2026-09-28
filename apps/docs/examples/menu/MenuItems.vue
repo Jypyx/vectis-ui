@@ -23,8 +23,6 @@ import {
 
     <VMenuSeparator />
 
-    <!-- `href` turns the row into a real link, so it can be middle-clicked and its
-         address copied. -->
     <VMenuItem label="Documentation" href="#usage" :icon-start="info" :icon-end="arrowRightAlt" />
 
     <VMenuSeparator />

@@ -1,16 +1,8 @@
 /**
- * The Design tokens page's data: every semantic token the library ships, sorted into the
- * sections the page prints, each with its description and its default value in both themes.
- *
- * Nothing here is written by hand except the SORTING. The names, the values and the English
- * descriptions are read from `vectis-ui/tokens`, the same typed source `tokens.css` is generated
- * from, so the reference cannot list a token the stylesheet lacks or a value it no longer holds.
  * A token the sorting does not place throws when this module loads, which fails `nuxt generate`
  * rather than dropping a row from the page: adding a role to the library without deciding where
- * it is documented is the one mistake this file exists to catch.
- *
- * Only the semantic layer is listed. The primitives are what a value points at, and each value
- * shows that reference, so the palettes and scales appear here through the roles that use them.
+ * it is documented is the one mistake this file exists to catch. Only the semantic layer is
+ * listed.
  */
 import { flattenTokens, resolveTokenValue, tokens, type DesignToken } from 'vectis-ui/tokens'
 

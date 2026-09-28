@@ -45,7 +45,7 @@ const TREE = `
 
 const renderTree = (navAttrs = '') => renderNav(TREE, navAttrs)
 
-/** An item's row, by its label — a <summary> for a branch, otherwise the container. */
+/** An item's row, by its label; a <summary> for a branch, otherwise the container. */
 function row(container: Element, label: string): HTMLElement {
   const found = [...container.querySelectorAll<HTMLElement>('.v-side-nav-row')].find(
     (el) => el.querySelector('.v-side-nav-label')?.textContent?.trim() === label,
@@ -54,7 +54,7 @@ function row(container: Element, label: string): HTMLElement {
   return found
 }
 
-/** Names of a row's <VIcon>s — `data-icon` is set whatever the source. */
+/** Names of a row's <VIcon>s; `data-icon` is set whatever the source. */
 const icons = (rowEl: Element) =>
   [...rowEl.querySelectorAll<HTMLElement>('.v-icon')].map((el) => el.dataset.icon)
 
@@ -64,9 +64,9 @@ describe('VSideNavigation', () => {
       const nav = (attrs: string) => renderTree(attrs).container.querySelector('nav')
       expect(nav('')?.getAttribute('aria-label')).toBe('Navigation')
       expect(nav('label="Main menu"')?.getAttribute('aria-label')).toBe('Main menu')
-      // fallthrough: the consumer's attribute wins over the prop
+      // Fallthrough: the consumer's attribute wins over the prop
       expect(nav('label="Menu" aria-label="Sections"')?.getAttribute('aria-label')).toBe('Sections')
-      // aria-labelledby removes the default, or two names would coexist
+      // Aria-labelledby removes the default, or two names would coexist
       expect(nav('aria-labelledby="title"')?.hasAttribute('aria-label')).toBe(false)
     })
 
@@ -76,9 +76,6 @@ describe('VSideNavigation', () => {
       expect(list).not.toBeNull()
       expect(list?.querySelector(':scope > li.v-side-nav-item')).not.toBeNull()
       expect(list?.querySelector(':scope > li.v-side-nav-group')).not.toBeNull()
-      // The separator is a list item too: a <ul> may own nothing else, and ARIA is
-      // stricter still — `list` owns `listitem` alone, so not even role="separator"
-      // passes there. Hence a decorative <li>.
       const separator = list?.querySelector(':scope > li.v-side-nav-separator')
       expect(separator).not.toBeNull()
       expect(separator?.getAttribute('aria-hidden')).toBe('true')
@@ -244,7 +241,6 @@ describe('VSideNavigation', () => {
       await Promise.resolve()
       expect(details.open).toBe(true)
 
-      // the DOM is the source of truth: the model is fed by `toggle`
       details.open = false
       await fireEvent(details, new Event('toggle'))
       expect(open.value).toBe(false)
@@ -300,7 +296,6 @@ describe('VSideNavigation', () => {
     it('the same `name` between siblings, a different `name` from one level to the next', () => {
       const { container } = renderTree('exclusive')
       const [projects, beta] = [...container.querySelectorAll('details')]
-      // "Beta" is a child of "Projects": it belongs to another level
       expect(projects?.getAttribute('name')).toBeTruthy()
       expect(beta?.getAttribute('name')).toBeTruthy()
       expect(beta?.getAttribute('name')).not.toBe(projects?.getAttribute('name'))
@@ -399,8 +394,8 @@ describe('VSideNavigation', () => {
 
     it('the arrows move the focus both ways and skip disabled items', async () => {
       const { container } = renderNav(LINKS)
-      // [One, Two (disabled), Three, Hidden] — "Four" is a branch, hence a <summary>,
-      // not an <a>.
+      // [One, Two (disabled), Three, Hidden]; "Four" is a branch, hence a <summary>, not an
+      // <a>.
       const [one, , three] = [...container.querySelectorAll<HTMLElement>('a.v-side-nav-action')]
 
       one!.focus()
@@ -421,7 +416,6 @@ describe('VSideNavigation', () => {
       await fireEvent.keyDown(document.activeElement!, { key: 'End' })
       expect(document.activeElement).not.toBe(hidden)
 
-      // once open, the same row becomes the last stop of the run again
       container.querySelector('details')!.open = true
       await fireEvent.keyDown(document.activeElement!, { key: 'End' })
       expect(document.activeElement).toBe(hidden)

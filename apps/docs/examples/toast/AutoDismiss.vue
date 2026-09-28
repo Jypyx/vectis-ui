@@ -3,7 +3,6 @@ import { VButton, toast } from 'vectis-ui'
 </script>
 
 <template>
-  <!-- Raised into the <VToaster /> mounted once at the root of the application. -->
   <div class="demo">
     <!-- Five seconds by default, and every notification may ask for its own. The
          countdown holds while the pointer rests anywhere on the stack, so something

@@ -56,11 +56,10 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const rule = within(canvasElement).getByRole('separator')
 
-    // horizontal is the role's implicit orientation: the attribute would be noise
     expect(rule.hasAttribute('aria-orientation')).toBe(false)
 
-    // 1px thick and full width — neither is measurable in jsdom. The block margin
-    // proves the UA's 0.5em on <hr> is really cancelled.
+    // 1px thick and full width; neither is measurable in jsdom. The block margin proves the
+    // UA's 0.5em on <hr> is really cancelled.
     expect(rule.getBoundingClientRect().height).toBeCloseTo(1, 1)
     expect(rule.getBoundingClientRect().width).toBeGreaterThan(0)
     expect(getComputedStyle(rule).marginBlockStart).toBe('0px')
@@ -87,8 +86,8 @@ export const Vertical: Story = {
     expect(rule).toHaveAttribute('aria-orientation', 'vertical')
     expect(rule.getBoundingClientRect().width).toBeCloseTo(1, 1)
 
-    // the load-bearing assertion: the row is `align-items: center`, so without
-    // `align-self: stretch` the <hr> would have zero height — silently.
+    // The load-bearing assertion: the row is `align-items: center`, so without
+    // `align-self: stretch` the <hr> would have zero height; silently.
     expect(rule.getBoundingClientRect().height).toBeCloseTo(
       canvas.getByRole('button', { name: 'Delete' }).getBoundingClientRect().height,
       1,

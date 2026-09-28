@@ -13,7 +13,6 @@ const long = ref(7)
       <VTypography variant="caption" tone="muted">length 4</VTypography>
     </div>
 
-    <!-- Every page is rendered unless `totalVisible` says how many slots to keep. -->
     <div class="row">
       <VPagination v-model="long" :length="12" item-variant="outline" label="Twelve pages" />
       <VTypography variant="caption" tone="muted">length 12</VTypography>

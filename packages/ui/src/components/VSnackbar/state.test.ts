@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { current, dismissSnackbar, snackbar } from './state'
 
 describe('snackbar state', () => {
-  // The state is module-global and survives from one test to the next.
   beforeEach(() => dismissSnackbar())
 
   it('hands back an increasing id', () => {
@@ -21,8 +20,6 @@ describe('snackbar state', () => {
   it('fills in the tone and leaves the VSnackbar-owned options alone', () => {
     snackbar({ message: 'Deleted' })
     expect(current.value).toMatchObject({ message: 'Deleted', tone: 'neutral' })
-    // Resolved at render time, so that the component stays the source of truth for its
-    // own settings.
     expect(current.value?.duration).toBeUndefined()
     expect(current.value?.placement).toBeUndefined()
   })

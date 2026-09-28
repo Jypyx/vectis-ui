@@ -53,10 +53,10 @@ const meta = {
     mode: { control: 'inline-radio', options: ['picker', 'input'] },
     showPicker: { control: 'boolean' },
   },
-  // Neither `mode` nor `selection`: pinning them would make the Controls panel lie, as it
-  // would show a current value different from the component's default. No `locale`
-  // either — the picker then follows the design system's global locale, so the Locale
-  // toolbar drives both the mask and the month names.
+  // Neither `mode` nor `selection`: pinning them would make the Controls panel lie, as it would
+  // show a current value different from the component's default. No `locale` either; the picker
+  // then follows the design system's global locale, so the Locale toolbar drives both the mask
+  // and the month names.
   args: {
     size: 'md',
   },
@@ -84,17 +84,14 @@ export const Default: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // `textbox` and not `combobox`: with no panel the field takes no role at all — that
-    // pairing is the contract. Going through the role rather than getByLabelText also
-    // avoids matching the panel, which carries the same aria-label as the field.
+    // Going through the role rather than getByLabelText also avoids matching the panel, which
+    // carries the same aria-label as the field.
     const field = canvas.getByRole('textbox', { name: 'Date' })
 
-    // with no calendar, the field announces no popup and opens none
     await expect(field).not.toHaveAttribute('aria-haspopup')
     await userEvent.click(field)
     await expect(canvas.queryByRole('dialog')).toBeNull()
 
-    // only digits are typed, the mask places the "/" (en-US mask: mm/dd/yyyy)
     await userEvent.keyboard('06')
     await expect(field).toHaveValue('06/')
     await userEvent.keyboard('102026')
@@ -102,22 +99,20 @@ export const Default: Story = {
     await expect(field).toHaveFocus()
     await waitFor(() => expect(canvas.getByText('2026-06-10')).toBeVisible())
 
-    // the clear cross, meanwhile, stays available (this story asks for `clearable`)
     await expect(canvas.getByRole('button', { name: 'Clear date' })).toBeVisible()
 
-    // Backspace on the separator erases the digit preceding it
     await userEvent.keyboard('{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}')
     await expect(field).toHaveValue('06/1')
 
-    // leaving the field: the incomplete entry silently returns to the value
+    // Leaving the field: the incomplete entry silently returns to the value
     await userEvent.tab()
     await waitFor(() => expect(field).toHaveValue('06/10/2026'))
   },
 }
 
 /**
- * `mode="picker"`: the date can only be chosen from the calendar, which then becomes
- * the only route — `showPicker` is pointless there.
+ * `mode="picker"`: the date can only be chosen from the calendar, which then becomes the only
+ * route; `showPicker` is pointless there.
  */
 export const PickerOnly: Story = {
   args: { mode: 'picker' },
@@ -134,7 +129,7 @@ export const PickerOnly: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const field = canvas.getByRole('combobox', { name: 'Date' })
-    // opening with the keyboard (down arrow), the focus moved into the grid
+    // Opening with the keyboard (down arrow), the focus moved into the grid
     field.focus()
     await userEvent.keyboard('{ArrowDown}')
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
@@ -184,7 +179,6 @@ export const Multiple: Story = {
   }),
 }
 
-// A footer with presets that set the value and close the panel.
 export const WithPresets: Story = {
   args: { mode: 'picker' },
   render: (args) => ({
@@ -277,14 +271,8 @@ export const Disabled: Story = {
 }
 
 /**
- * `readonly` freezes the date whichever way it could have been changed: nothing can be
- * typed, no calendar is rendered and the clear cross goes with it. The attributes
- * announcing a panel go too, an `aria-controls` pointing at nothing being worse than
- * none at all. Unlike `disabled` the field keeps its contrast, takes the focus and can
- * be copied from.
- *
- * It is a different question from `mode`, which says how a field that CAN be changed is
- * filled in.
+ * `readonly` freezes the date whichever way it could have been changed: nothing can be typed,
+ * no calendar is rendered and the clear cross goes with it.
  */
 export const ReadOnly: Story = {
   args: { readonly: true, clearable: true, showPicker: true },
@@ -306,21 +294,11 @@ export const ReadOnly: Story = {
     await userEvent.keyboard('{ArrowDown}')
     await expect(canvas.queryByRole('dialog')).toBeNull()
 
-    // The calendar button and the clear cross are the only buttons this field renders.
     await expect(canvas.queryAllByRole('button')).toHaveLength(0)
   },
 }
 
-/**
- * The two ends of the field. `iconStart` puts an icon at the start, decorative until a
- * `@click:icon-start` listener turns it into a button, which then needs
- * `iconStartLabel`. At the other end `loading` shows a spinner in place of the calendar
- * icon while something is being fetched, and changes nothing else: the field is still
- * typed into and the panel still opens.
- *
- * `pickerIconLabel` and `clearLabel` rename the calendar button and the clear cross when
- * the dictionary's wording is not the right one.
- */
+/** The two ends of the field. */
 export const FieldIcon: Story = {
   render: (args) => ({
     components: { VDateInput },
@@ -342,7 +320,6 @@ export const FieldIcon: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    // The start icon sits ahead of the input, the spinner takes the calendar's place.
     await expect(canvasElement.querySelector('.v-input-field > .v-icon')).toBeInTheDocument()
     await expect(canvasElement.querySelectorAll('.v-spinner')).toHaveLength(1)
   },
@@ -350,11 +327,8 @@ export const FieldIcon: Story = {
 
 /**
  * Clicking an empty area of the panel (its padding, the gutter between cells) must close
- * NOTHING: without `useFieldPanel`'s neutralized `mousedown`, the browser would hand the
- * focus back to `<body>` and the root's `focusout` would close a panel that was just
- * clicked.
- *
- * Invisible in jsdom, which does not simulate focus on click — hence this play function.
+ * NOTHING: without `useFieldPanel`'s neutralized `mousedown`, the browser would hand the focus
+ * back to `<body>` and the root's `focusout` would close a panel that was just clicked.
  */
 export const ClickInTheVoid: Story = {
   args: { mode: 'picker' },
@@ -373,19 +347,16 @@ export const ClickInTheVoid: Story = {
     field.focus()
     await userEvent.keyboard('{ArrowDown}')
     const panel = await waitFor(() => canvas.getByRole('dialog'))
-    // the focus is moved into the grid (a `manual` panel does not do it on its own) —
-    // under a rAF, hence the waitFor
+    // The focus is moved into the grid (a `manual` panel does not do it on its own); under a
+    // rAF, hence the waitFor
     await waitFor(() => expect(panel.contains(document.activeElement)).toBe(true))
 
-    // a click on the grid ITSELF rather than on a cell: userEvent dispatches on the
-    // element passed, with no hit-testing — faithfully the click that lands in the
-    // padding or a gutter, where nothing is focusable
     await userEvent.click(canvas.getByRole('grid'))
     await expect(panel.matches(':popover-open')).toBe(true)
-    // and the focus has not been handed back to the body
+    // And the focus has not been handed back to the body
     await expect(document.body).not.toHaveFocus()
 
-    // a click on a real day, meanwhile, keeps the native behaviour (focus + choice)
+    // A click on a real day, meanwhile, keeps the native behaviour (focus + choice)
     await userEvent.click(canvas.getByRole('button', { name: '15' }))
     await waitFor(() => expect(panel.matches(':popover-open')).toBe(false))
     await expect(field).toHaveValue('Jun 15, 2026')
@@ -393,9 +364,9 @@ export const ClickInTheVoid: Story = {
 }
 
 /**
- * `showPicker` makes the calendar reachable from an input field: a clickable icon at
- * the end of the field, and a panel opened on focus — without grabbing the caret, so
- * typing continues in the field.
+ * `showPicker` makes the calendar reachable from an input field: a clickable icon at the end of
+ * the field, and a panel opened on focus; without grabbing the caret, so typing continues in
+ * the field.
  */
 export const InputWithCalendar: Story = {
   args: { showPicker: true },
@@ -413,7 +384,7 @@ export const InputWithCalendar: Story = {
     const canvas = within(canvasElement)
     const field = canvas.getByRole('combobox', { name: 'Date' })
 
-    // the click opens the panel WITHOUT grabbing the caret: typing continues
+    // The click opens the panel WITHOUT grabbing the caret: typing continues
     await userEvent.click(field)
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
     await expect(field).toHaveFocus()
@@ -432,7 +403,6 @@ export const InputWithCalendar: Story = {
     await expect(field).toHaveValue('06/10/2026')
     await expect(field).toHaveFocus()
 
-    // the down arrow is the explicit route to the grid, Escape comes back
     await userEvent.keyboard('{ArrowDown}')
     const panel = canvas.getByRole('dialog')
     await waitFor(() => expect(panel.contains(document.activeElement)).toBe(true))

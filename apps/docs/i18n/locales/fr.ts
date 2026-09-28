@@ -1,15 +1,7 @@
 /**
- * Le catalogue français.
- *
- * Le type de retour est ANNOTÉ plutôt qu'inféré : c'est cette annotation qui fait échouer
- * `nuxt typecheck` sur une clé manquante ou renommée, au lieu de laisser la clé brute
- * s'afficher dans la page. `DocsMessages` est un `import type`, donc effacé à la compilation —
- * le catalogue anglais n'entre pas dans le lot français.
- *
- * Les deux pièges de `en.ts` valent ici aussi : l'export par défaut doit rester le macro
- * `defineI18nLocale`, et son nom ne doit jamais être suivi d'une parenthèse ailleurs que dans
- * l'appel lui-même — un commentaire compris, sous peine d'une erreur de syntaxe à la
- * compilation qui désigne la dernière ligne de l'objet et non la phrase fautive.
+ * Le catalogue français. Le type de retour est ANNOTÉ plutôt qu'inféré : c'est cette annotation
+ * qui fait échouer `nuxt typecheck` sur une clé manquante ou renommée, au lieu de laisser la
+ * clé brute s'afficher dans la page.
  */
 import accessibility from './fr/accessibility'
 import accordion from './fr/accordion'

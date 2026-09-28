@@ -6,7 +6,6 @@ const LONG =
 </script>
 
 <template>
-  <!-- Raised into the <VToaster /> mounted once at the root of the application. -->
   <div class="demo">
     <!-- Left alone the card sits between a floor and a ceiling of its own, so a short
          message is not a sliver and a long one does not stretch across the page. -->
@@ -18,9 +17,10 @@ const LONG =
       Default width
     </VButton>
 
-    <!-- Any CSS length replaces both. It is never allowed past the width of the
-         viewport, margins included, so a value too large for a phone is simply
-         ignored there rather than pushing the card off the screen. -->
+    <!--
+      It is never allowed past the width of the viewport, margins included, so a value too large
+      for a phone is simply ignored there rather than pushing the card off the screen.
+    -->
     <VButton
       variant="outline"
       tone="neutral"

@@ -1,14 +1,8 @@
 <script setup lang="ts">
 // @a11y
-// The MANDATORY label is the component's whole reason to exist alongside
-// VButton: an icon on its own gives assistive technology no accessible name.
 /**
- * A button showing an icon and nothing else, square rather than oblong. It offers
- * the same appearance options as VButton and forwards them to it.
- *
- * The one difference that matters is the `label` prop, which is REQUIRED here. A
- * picture says nothing to a screen reader, so the label is what names the action —
- * without it the button would be announced as just "button".
+ * Reuse VButton appearance and behaviour while requiring an accessible name for the icon-only
+ * action.
  */
 import { computed, inject } from 'vue'
 import type { ButtonHTMLAttributes } from 'vue'
@@ -36,9 +30,8 @@ interface IconButtonProps {
    */
   variant?: ButtonVariant
   /**
-   * What the action means, in colour, from the VButton tones. An icon-only button is usually
-   * secondary, which is why it starts neutral where VButton starts accent. Left out inside
-   * a VButtonGroup it takes the group's tone; on its own it is `neutral`.
+   * What the action means, in colour, from the VButton tones. Left out inside a VButtonGroup it
+   * takes the group's tone; on its own it is `neutral`.
    */
   tone?: ButtonTone
   /** Raises the button with a shadow, and a raised surface on ghost and outline. */
@@ -99,11 +92,10 @@ defineSlots<{
 }>()
 
 /*
- * The ONE prop a VButtonGroup cannot arbitrate on its own. The four others are handed
- * to VButton as they are and the group wins there over whatever arrives, so nothing has
- * to be resolved here; the tone goes the other way, the button's own answer first, and
- * VButton would take `accent` as its last resort where an icon-only button takes
- * `neutral`. Resolving it here is what keeps that difference.
+ * The ONE prop a VButtonGroup cannot arbitrate on its own. The four others are handed to
+ * VButton as they are and the group wins there over whatever arrives, so nothing has to be
+ * resolved here; the tone goes the other way, the button's own answer first, and VButton would
+ * take `accent` as its last resort where an icon-only button takes `neutral`.
  */
 const group = inject(buttonGroupKey, null)
 const resolvedTone = computed<ButtonTone>(() => props.tone ?? group?.tone ?? 'neutral')
@@ -111,11 +103,8 @@ const resolvedTone = computed<ButtonTone>(() => props.tone ?? group?.tone ?? 'ne
 
 <template>
   <!--
-    `shape` is ours alone: VButton knows nothing about it, so the attribute travels
-    through its $attrs down to the element it renders — the same route the
-    v-icon-button class and `data-icon-only` take, the latter picked up by VButton's own
-    square rule. Everything else is a real VButton prop and has to be forwarded by hand,
-    an unforwarded one never reaching its data attribute.
+    Everything else is a real VButton prop and has to be forwarded by hand, an unforwarded one
+    never reaching its data attribute.
   -->
   <VButton
     class="v-icon-button"
@@ -133,10 +122,8 @@ const resolvedTone = computed<ButtonTone>(() => props.tone ?? group?.tone ?? 'ne
     :aria-label="label"
   >
     <!--
-      TRAP — the icon goes in VButton's `start` slot and NOT in its default one. The
-      spinner replaces the start slot alone, the default slot being the label, which a
-      loading button keeps. Rendered in the default slot the icon would sit BESIDE the
-      spinner, both of them in a box only wide enough for one.
+      The icon goes in VButton's `start` slot and not in its default one. The spinner replaces
+      the start slot alone, the default slot being the label, which a loading button keeps.
     -->
     <template #start>
       <VIcon v-if="icon" v-bind="iconProps(icon)" :filled="iconFilled" />
@@ -148,13 +135,12 @@ const resolvedTone = computed<ButtonTone>(() => props.tone ?? group?.tone ?? 'ne
 <style>
 @layer vectis.components {
   /*
-   * The square itself is VButton's `[data-icon-only]` rule, which this component opts
-   * into; what is left here is the silhouette. [data-shape] takes the selector to (0,2,0),
-   * which beats the border-radius VButton sets on that very element at (0,1,0) whatever the
-   * consumer's bundler decides about the order of the two sheets.
-   *
-   * The `square` value writes nothing — it IS the radius VButton already applies, so a
-   * consumer overriding --vectis-radius-interactive keeps a single place to change.
+   * The square itself is VButton's `[data-icon-only]` rule, which this component opts into;
+   * what is left here is the silhouette. [data-shape] takes the selector to (0,2,0), which
+   * beats the border-radius VButton sets on that very element at (0,1,0) whatever the
+   * consumer's bundler decides about the order of the two sheets. The `square` value writes
+   * nothing; it IS the radius VButton already applies, so a consumer overriding
+   * --vectis-radius-interactive keeps a single place to change.
    */
   .v-icon-button[data-shape='circular'] {
     border-radius: var(--vectis-radius-pill);

@@ -43,7 +43,6 @@ const rows = NAMES.map((name, index) => ({
 </script>
 
 <template>
-  <!-- A page size is all it takes: passing one down, bound or not, turns the pagination on. -->
   <VDataTable
     :columns="columns"
     :rows="rows"

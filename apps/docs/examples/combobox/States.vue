@@ -44,7 +44,6 @@ const countries = [
 
     <VCombobox :options="[]" loading label="Loading" placeholder="Fetching the list" />
 
-    <!-- No option and nothing loading: the panel says so rather than opening empty. -->
     <VCombobox
       :options="[]"
       empty-text="No country matches"

@@ -1,18 +1,8 @@
 <script setup lang="ts">
 // @a11y @keyboard @core
 /**
- * A calendar shown directly in the page, as a grid of days, with a month view and a
- * year view behind it. It holds ALL the date, view and keyboard logic of the design
- * system; VDateInput does no more than dress it in a text field and a popover.
- *
- * The platform offers no accessible date grid to build on — `<input type="date">`
- * can be neither styled nor composed — so the JavaScript here implements the ARIA
- * "grid" pattern by hand: a single cell in the tab order at a time, arrow and
- * page keys to move between dates, and selection of one date, a range or a list.
- * None of that can be expressed in HTML and CSS alone.
- *
- * Every date is handled in local time as an ISO `YYYY-MM-DD` string (see
- * `utils/date`), which is what keeps the server and the browser in agreement.
+ * Implement roving grid focus and date selection because the platform has no composable,
+ * stylable date grid. VDateInput reuses this calendar logic.
  */
 
 import { computed, inject, nextTick, onMounted, ref, useId, watch, watchEffect } from 'vue'
@@ -157,15 +147,13 @@ interface DatePickerProps {
    */
   disabled?: boolean
   /**
-   * Shows what is selected without letting it be changed. The calendar can still be
-   * read and walked through (another month, another year), which is what separates it
-   * from `disabled`.
+   * Shows what is selected without letting it be changed. The calendar can still be read and
+   * walked through (another month, another year), which separates it from `disabled`.
    */
   readonly?: boolean
   /**
-   * The accessible name of the whole picker, its header and its grid together. A range
-   * shown as two calendars side by side needs one each, or a screen reader announces the
-   * same group twice. It falls back to the dictionary, and a consumer `aria-label` wins.
+   * The accessible name of the whole picker, its header and its grid together. It falls back to
+   * the dictionary, and a consumer `aria-label` wins.
    */
   label?: string
 }
@@ -186,12 +174,8 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
 })
 
 /**
- * What is selected, and its SHAPE follows `selection`: an ISO `YYYY-MM-DD` string for
- * `single`, a `{ start, end }` pair for `range`, an array of strings for `multiple`. Nothing
- * is selected to begin with.
- *
- * Every date is a plain local-time string, never a `Date`, so the value a consumer receives
- * cannot shift a day across time zones.
+ * What is selected, and its shape follows `selection`: an ISO `YYYY-MM-DD` string for `single`,
+ * a `{ start, end }` pair for `range`, an array of strings for `multiple`.
  */
 const model = defineModel<DatePickerValue>({ default: null })
 
@@ -216,8 +200,8 @@ defineSlots<{
 
 const gridLabelId = useId()
 
-// The navigation labels have no prop of their own: the dictionary is the single
-// place to change them, globally or per language — see `src/i18n/`.
+// The navigation labels have no prop of their own: the dictionary is the single place to change
+// them, globally or per language; see `src/i18n/`.
 const m = useMessages()
 // @a11y
 // A roleless box cannot carry an accessible name (axe: aria-prohibited-attr),
@@ -226,7 +210,6 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.datePicker.label)
 const resolvedLocale = useResolvedLocale(() => props.locale)
 
 // @devwarn
-// Silent inside a host that forwards these props and reports on them itself (utils/hostWarns).
 if (isDev && !inject(hostWarnsKey, false)) {
   watchEffect(() => {
     if (props.min && props.max && compareISO(props.min, props.max) > 0)
@@ -267,21 +250,16 @@ const multipleValues = computed<string[]>(() =>
   props.selection === 'multiple' && Array.isArray(model.value) ? model.value : [],
 )
 
-// `focusedISO` is the single source of truth for the view: the month on display is
-// derived from it, never stored separately, so the two cannot drift apart.
-//
-// TRAP — a range start or a list entry is validated HERE, the way the single value is
-// validated upstream. Those two reach this component exactly as the consumer wrote them,
-// and a malformed one (`{ start: 'foo' }`) made the focused date unparseable: the month
-// arrows assert that parse, so the first render threw.
+// A range start or a list entry is validated here, the way the single value is validated
+// upstream. Those two reach this component exactly as the consumer wrote them, and a malformed
+// one (`{ start: 'foo' }`) made the focused date unparseable: the month arrows assert that
+// parse, so the first render threw.
 function initialFocus(): string {
   if (singleValue.value) return singleValue.value
   const start = rangeValue.value.start
   if (start && isValidISO(start)) return start
   const listed = multipleValues.value.find(isValidISO)
   if (listed) return listed
-  // With nothing selected, the calendar opens on today, brought back inside the
-  // allowed bounds.
   readTheClock = true
   return clampISO(formatISO(new Date()), props.min, props.max)
 }
@@ -307,18 +285,12 @@ const today = ref<string | null>(null)
 
 // @ssr
 /*
- * TRAP — with nothing selected, the month on display is read from the clock at setup, on
- * the server and again in the browser, and the two can disagree: a page prerendered in
- * September and opened in October, or a server a timezone behind its visitor on the last
- * evening of a month. Hydration then patches the TEXT and keeps the server's ATTRIBUTES, so
- * the month button said "Oct." on screen and "September" to a screen reader, and the day ids
- * `focusDay` looks up named days that were not there.
- *
- * The header and the grid are therefore keyed on `renderEpoch`, which is bumped once, on
- * mount, whenever the month came from the clock: both are then built again from the
- * browser's own state. Nothing on the page can say whether the server agreed (the grid's
- * own title IS patched, the month button's is not), and rebuilding an empty picker once
- * costs less than asking. A picker opened on a value is never rebuilt.
+ * With nothing selected, the month on display is read from the clock at setup, on the server
+ * and again in the browser, and the two can disagree: a page prerendered in September and
+ * opened in October, or a server a timezone behind its visitor on the last evening of a month.
+ * Hydration then patches the TEXT and keeps the server's ATTRIBUTES, so the month button said
+ * "Oct." on screen and "September" to a screen reader, and the day ids `focusDay` looks up
+ * named days that were not there.
  */
 const renderEpoch = ref(0)
 onMounted(() => {
@@ -354,9 +326,9 @@ const effectiveRange = computed<DatePickerRange>(() => {
 })
 
 /**
- * Whether a day is part of the COMMITTED value, which is what `aria-selected` says: the
- * end a range preview is drawing is not selected yet, and announcing every day the focus
- * walks over as "selected" would say so.
+ * Whether a day is part of the COMMITTED value, which `aria-selected` says: the end a range
+ * preview is drawing is not selected yet, and announcing every day the focus walks over as
+ * "selected" would say so.
  */
 function isCommitted(iso: string): boolean {
   if (props.selection !== 'range') return isSelected(iso)
@@ -366,18 +338,11 @@ function isCommitted(iso: string): boolean {
 function isSelected(iso: string): boolean {
   if (props.selection === 'single') return isSameISO(iso, singleValue.value)
   if (props.selection === 'multiple') return multipleValues.value.includes(iso)
-  // In range selection, the two ends of the period count as selected — including the
-  // provisional end shown during the preview.
+  // In range selection, the two ends of the period count as selected; including the provisional
+  // end shown during the preview.
   return isSameISO(iso, effectiveRange.value.start) || isSameISO(iso, effectiveRange.value.end)
 }
-/**
- * Whether a day falls inside the selected period, BOTH ends included.
- *
- * The inclusiveness is a contract with the stylesheet, not a detail: `[data-in-range]` is
- * what draws the band's pseudo-element, and the two end rules only round a corner of one
- * that already exists. Narrowing this to the days strictly between would leave each end
- * with nothing to cap and silently square off every range.
- */
+/** Whether a day falls inside the selected period, both ends included. */
 function isInRange(iso: string): boolean {
   const { start, end } = effectiveRange.value
   return !!start && !!end && compareISO(iso, start) >= 0 && compareISO(iso, end) <= 0
@@ -403,13 +368,7 @@ type DayCell = {
   eventText: string
 }
 
-/**
- * The 42 squares of the month on display, rebuilt only when the MONTH changes. The two
- * computeds are split on purpose: a range being previewed changes `hoverISO` on every
- * `pointerenter`, and that has to repaint the decoration below without building 42 dates
- * again. `viewYear` and `viewMonth0` are numbers, so moving the focus inside the month
- * leaves them — and this — untouched.
- */
+/** The 42 squares of the month on display, rebuilt only when the MONTH changes. */
 const grid = computed(() =>
   buildMonthGrid(viewYear.value, viewMonth0.value, resolvedFirstDay.value),
 )
@@ -543,10 +502,8 @@ function toggleView(target: 'months' | 'years') {
 }
 
 function selectDay(cell: DayCell) {
-  // The single choke point of the selection, so the two states are refused here rather
-  // than in each of the routes that lead to it — a click, Enter and Space all pass
-  // through. Navigation is deliberately NOT guarded by `readonly`: a calendar one may
-  // read is a calendar one may leaf through.
+  // Navigation is deliberately not guarded by `readonly`: a calendar one may read is a calendar
+  // one may leaf through.
   if (props.disabled || props.readonly) return
   if (cell.kind !== 'button' || cell.disabled) return
   focusedISO.value = cell.iso
@@ -564,9 +521,9 @@ function selectDay(cell: DayCell) {
   }
   lastWritten = JSON.stringify(next)
   model.value = next
-  // TRAP: emit what was just computed, never `model.value` read back. Under a parent
-  // `v-model`, `defineModel` does not update its local copy on write — it waits for the
-  // parent to re-render — so the read would hand `select` the PREVIOUS value.
+  // Emit what was just computed, never `model.value` read back. Under a parent `v-model`,
+  // `defineModel` does not update its local copy on write; it waits for the parent to
+  // re-render; so the read would hand `select` the PREVIOUS value.
   emit('select', next)
 }
 
@@ -575,7 +532,6 @@ function selectDay(cell: DayCell) {
 // lives in `./keyboard`; what stays here is the date that step is applied to, and
 // the focus move that follows.
 function onDaysKeydown(event: KeyboardEvent) {
-  // A key held with a modifier is the browser's or the system's: Alt+Left is Back.
   if (event.altKey || event.ctrlKey || event.metaKey) return
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault()
@@ -599,8 +555,8 @@ function onDaysKeydown(event: KeyboardEvent) {
 }
 
 /**
- * Leaving the months or the years view for the days of the month chosen, keeping the day of
- * the month where the new month has one — the 31st becoming the 30th, say.
+ * Leaving the months or the years view for the days of the month chosen, keeping the day of the
+ * month where the new month has one; the 31st becoming the 30th, say.
  */
 function chooseYearMonth(year: number, month0: number) {
   const day = Math.min(parseISO(focusedISO.value)!.getDate(), daysInMonth(year, month0))
@@ -632,9 +588,9 @@ function onViewKeydown(
   const delta = gridDelta(event.key)
   if (delta === undefined) return
   event.preventDefault()
-  // A cell the bounds rule out is a DISABLED button, which cannot take the focus: landing
-  // on it would move the tab stop where the focus cannot follow. The walk goes on the same
-  // way round to the next cell that can be chosen, and holds still when there is none.
+  // A cell the bounds rule out is a disabled button, which cannot take the focus: landing on it
+  // would move the tab stop where the focus cannot follow. The walk goes on the same way round
+  // to the next cell that can be chosen, and holds still when there is none.
   let next = clamp(cells.indexOf(focused.value) + delta, 0, cells.length - 1)
   while (!selectable(cells[next]!) && next + delta >= 0 && next + delta < cells.length)
     next += delta
@@ -643,7 +599,6 @@ function onViewKeydown(
   cellEl(focused.value)?.focus()
 }
 
-// The months view, opened from the month button in the header.
 const MONTHS = Array.from({ length: 12 }, (_, i) => i)
 const focusedMonth = ref(viewMonth0.value)
 const monthCellEl = (i: number) =>
@@ -659,14 +614,10 @@ const onMonthsKeydown = (event: KeyboardEvent) =>
 
 // @a11y
 /*
- * Both pickers are a `role="grid"`, and a grid owns ROWS, not cells: a gridcell
- * placed straight under the grid fails aria-required-children and
- * aria-required-parent at the same time. The cells are therefore cut into rows of
- * PICKER_COLUMNS, matching the `grid-template-columns` of the stylesheet — the row
- * element itself is `display: contents`, so the CSS grid never sees it.
- *
- * Keyboard navigation is unaffected by this extra level: it moves by index and
- * refocuses cells through their ids, never by walking the DOM.
+ * Both pickers are a `role="grid"`, and a grid owns ROWS, not cells: a gridcell placed straight
+ * under the grid fails aria-required-children and aria-required-parent at the same time. The
+ * cells are therefore cut into rows of PICKER_COLUMNS, matching the `grid-template-columns` of
+ * the stylesheet; the row element itself is `display: contents`, so the CSS grid never sees it.
  */
 const chunk = <T,>(list: T[]) =>
   Array.from({ length: Math.ceil(list.length / PICKER_COLUMNS) }, (_, r) =>
@@ -675,15 +626,13 @@ const chunk = <T,>(list: T[]) =>
 
 const monthRows = computed(() => chunk(monthLabels.value.map((name, i) => ({ name, i }))))
 
-// The years view, opened from the year button in the header.
 const yearRange = computed(() => {
   /*
-   * `min` and `max` come straight from the consumer, and this is the ONLY place
-   * where they are turned into a Date instead of being compared as ISO text —
-   * `compareISO`, `isWithin` and `clampISO` all tolerate a malformed bound. A value
-   * that is not a valid ISO date therefore has to fall back to the open range here:
-   * asserting the parse would throw and take the whole render down the moment the
-   * years view is opened.
+   * `min` and `max` come straight from the consumer, and this is the only place where they are
+   * turned into a Date instead of being compared as ISO text; `compareISO`, `isWithin` and
+   * `clampISO` all tolerate a malformed bound. A value that is not a valid ISO date therefore
+   * has to fall back to the open range here: asserting the parse would throw and take the whole
+   * render down the moment the years view is opened.
    */
   const minY = parseISO(props.min)?.getFullYear() ?? viewYear.value - 100
   const maxY = parseISO(props.max)?.getFullYear() ?? viewYear.value + 100
@@ -699,16 +648,9 @@ const chooseYear = (y: number) => chooseYearMonth(y, viewMonth0.value)
 const onYearsKeydown = (event: KeyboardEvent) =>
   onViewKeydown(event, yearRange.value, focusedYear, yearCellEl, chooseYear)
 
-// Follows a selection changed from the outside: when the leading value lands in
-// another month, the calendar moves to it rather than leaving the reader in front of
-// a grid where nothing is selected.
-//
-// TRAP — only from the OUTSIDE. The picker's own writes change the leading value too:
-// unticking the earliest date of a list makes the next one lead, and following it would
-// throw the reader into another month and drop the focus on `<body>`, the day they were
-// on having left the document. `lastWritten` is the value `selectDay` just wrote, and a
-// model that still reads the same was not changed by anyone else. It is compared as TEXT:
-// a parent v-model hands back a reactive proxy of the array, never the array written.
+// Only from the OUTSIDE. The picker's own writes change the leading value too: unticking the
+// earliest date of a list makes the next one lead, and following it would throw the reader into
+// another month and drop the focus on `<body>`, the day they were on having left the document.
 let lastWritten: string | undefined
 watch(
   () => [singleValue.value, rangeValue.value.start, multipleValues.value[0]],
@@ -736,13 +678,9 @@ function focus(options?: FocusOptions) {
 
 // @core
 /*
- * Puts the calendar back the way it opens: the days view, on the selected date (today
- * failing that), with no range preview pending. It moves no focus and announces nothing,
- * a panel reopening not being something the reader did.
- *
- * TRAP — a panel's content stays MOUNTED while the panel is closed, so without this the
- * months or years view a reader left open is what the next opening shows — and a field
- * that opens its panel on focus never calls `focus()`, the one place that reset the view.
+ * A panel's content stays MOUNTED while the panel is closed, so without this the months or
+ * years view a reader left open is what the next opening shows; and a field that opens its
+ * panel on focus never calls `focus()`, the one place that reset the view.
  */
 function reset() {
   view.value = 'days'
@@ -845,7 +783,6 @@ defineExpose({
       </div>
     </div>
 
-    <!-- Days view -->
     <div
       v-show="view === 'days'"
       :key="`days-${renderEpoch}`"
@@ -908,12 +845,12 @@ defineExpose({
               />
             </span>
           </button>
-          <!-- A day of a neighbouring month that cannot be selected. It renders the
-               very same slot as the clickable days: were it left with the bare
-               number, custom content taking several lines would apply to this month's
-               days only, and the numbers would stop lining up from one cell to the
-               next. The slot receives `inMonth`, which is how it can still tell the
-               two apart. -->
+          <!--
+            A day of a neighbouring month that cannot be selected. It renders the very same slot
+            as the clickable days: were it left with the bare number, custom content taking
+            several lines would apply to this month's days only, and the numbers would stop
+            lining up from one cell to the next.
+          -->
           <span
             v-else-if="cell.kind === 'static'"
             class="v-date-picker-day v-date-picker-day--static"
@@ -927,7 +864,6 @@ defineExpose({
       </div>
     </div>
 
-    <!-- Months view -->
     <div
       v-if="view === 'months'"
       class="v-date-picker-view"
@@ -955,7 +891,6 @@ defineExpose({
       </div>
     </div>
 
-    <!-- Years view -->
     <div
       v-if="view === 'years'"
       class="v-date-picker-view v-date-picker-view--years"
@@ -991,9 +926,11 @@ defineExpose({
 <style>
 @layer vectis.components {
   .v-date-picker {
-    /* The consumer sets the size of the day disc through its token; the cell around it —
-       the hover area and the width of the column — grows to follow, and never falls below
-       the size the cell token sets. */
+    /*
+     * The consumer sets the size of the day disc through its token; the cell around it; the
+     * hover area and the width of the column; grows to follow, and never falls below the size
+     * the cell token sets.
+     */
     --date-picker-cell: max(
       var(--vectis-control-size-date-picker-cell),
       calc(var(--vectis-control-size-date-picker-day) + var(--vectis-space-1))
@@ -1006,9 +943,10 @@ defineExpose({
     color: var(--vectis-color-text);
   }
 
-  /* The calendar is a flex column, so every block stretches to its full width by
-     default. The days grid then fills that width through its 1fr columns, and never
-     goes below the seven cells its own floor guarantees. */
+  /*
+   * The days grid then fills that width through its 1fr columns, and never goes below the seven
+   * cells its own floor guarantees.
+   */
   .v-date-picker-header {
     display: flex;
     align-items: center;
@@ -1028,14 +966,14 @@ defineExpose({
      whichever the consumer's bundler put last. */
   .v-date-picker-view-toggle[data-size] {
     min-inline-size: var(--vectis-control-size-date-picker-nav-min);
-    /* The semibold is state emphasis on the grid's main landmark, not a type role. */
     font-weight: var(--vectis-font-weight-semibold);
     text-transform: capitalize;
   }
 
-  /* The days grid can never be narrower than seven cells. Above that floor it takes
-     whatever width the calendar has — set by the header — and the 1fr columns share
-     it out equally. */
+  /*
+   * The days grid can never be narrower than seven cells. Above that floor it takes whatever
+   * width the calendar has; set by the header; and the 1fr columns share it out equally.
+   */
   .v-date-picker-grid {
     min-inline-size: calc(7 * var(--date-picker-cell));
   }
@@ -1069,22 +1007,12 @@ defineExpose({
     height: var(--date-picker-cell);
   }
 
-  /* The band joining the days of a selected range: a tinted background laid behind
-     the day, at the HEIGHT of the disc rather than of the whole cell. Its vertical
-     inset is half the gap between cell and disc, expressed in `%` so it follows the
-     real width of a 1fr column whatever the calendar measures.
-
-     At either end the band stops exactly at the edge of the disc — hence the inset on
-     the outer side — and that corner is rounded with the pill radius, which a box
-     this height caps at half its height, i.e. precisely the disc's own radius, so it
-     cannot overshoot.
-
-     TRAP — the two cap rules below only shape a pseudo-element that `[data-in-range]`
-     has already created, so they depend on `isInRange` counting BOTH ends of the period
-     as inside it. Make it exclusive and there is no `::before` to cap: both rounded ends
-     of every range vanish, leaving a band that stops square one cell short at each side,
-     with nothing in the console. The last rule is the single-day case, where the two caps
-     would meet and draw a disc behind the disc. */
+  /*
+   * The two cap rules below only shape a pseudo-element that `[data-in-range]` has already
+   * created, so they depend on `isInRange` counting both ends of the period as inside it. Make
+   * it exclusive and there is no `::before` to cap: both rounded ends of every range vanish,
+   * leaving a band that stops square one cell short at each side, with nothing in the console.
+   */
   .v-date-picker-cell[data-in-range]::before {
     content: '';
     position: absolute;
@@ -1141,8 +1069,10 @@ defineExpose({
     color: var(--vectis-color-text-subtle);
   }
 
-  /* The semibold in the two rules below marks a state — today, and the selection —
-     and is not a typographic role, which is why it reads a font token directly. */
+  /*
+   * The semibold in the two rules below marks a state; today, and the selection; and is not a
+   * typographic role, which is why it reads a font token directly.
+   */
   .v-date-picker-day[data-today]:not([data-selected]) {
     box-shadow: inset 0 0 0 1px var(--vectis-color-accent-border);
     color: var(--vectis-color-accent-text);
@@ -1155,11 +1085,12 @@ defineExpose({
     font-weight: var(--vectis-font-weight-semibold);
   }
 
-  /* The strike-through says the DATE is unavailable — outside the bounds, or listed in
-     `disabledDates`. It hangs on its own attribute rather than on `aria-disabled`, which
-     a read-only calendar also carries on every day: nothing can be chosen there, but the
-     dates themselves are perfectly available and striking them all out would say the
-     opposite. The hover rule below still reads `aria-disabled`, so neither highlights. */
+  /*
+   * It hangs on its own attribute rather than on `aria-disabled`, which a read-only calendar
+   * also carries on every day: nothing can be chosen there, but the dates themselves are
+   * perfectly available and striking them all out would say the opposite. The hover rule below
+   * still reads `aria-disabled`, so neither highlights.
+   */
   .v-date-picker-day[data-unavailable] {
     color: var(--vectis-color-text-subtle);
     text-decoration: line-through;
@@ -1261,7 +1192,6 @@ defineExpose({
   .v-date-picker-view-cell[data-selected] {
     background: var(--vectis-color-accent);
     color: var(--vectis-color-text-on-accent);
-    /* Again state emphasis, not a type role. */
     font-weight: var(--vectis-font-weight-semibold);
   }
   .v-date-picker-view-cell:disabled {

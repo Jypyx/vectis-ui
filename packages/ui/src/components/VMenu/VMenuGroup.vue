@@ -1,21 +1,10 @@
 <script setup lang="ts">
-/**
- * A named section inside a menu: "Sort by", "Recent files". The name is announced as
- * the group's label rather than being read as one more item, and it is plain text: it
- * cannot be chosen, and the arrow keys walk straight past it.
- */
-
 import { useId, useSlots, watchEffect } from 'vue'
 
 import { isDev } from '../../utils/env'
 
 interface MenuGroupProps {
-  /**
-   * The name of the section, replaced by the `#label` slot. One of the two is REQUIRED:
-   * it is what names the group, and a section named by neither points its
-   * `aria-labelledby` at an empty element. It is a heading, not a command: nothing
-   * happens on click.
-   */
+  /** The name of the section, replaced by the `#label` slot. */
   label?: string
 }
 

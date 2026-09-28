@@ -1,20 +1,8 @@
 <script setup lang="ts">
 // @core
 /**
- * A complete text field: label above, hint below, icons inside (clickable ones included), a
- * counter, a clear cross and a loading state, all arranged around a real `<input>`.
- *
- * Wrapper-root, so the attrs split: `class`/`style` stay on the root, where a consumer
- * expects to style the field, and everything else is forwarded to the input, where `name`,
- * `required` and the `aria-*` actually do something.
- *
- * Validation stays the browser's. The field turns red through `:user-invalid`, which only
- * reacts once the reader has left it, and even the soft limit is reported by
- * `setCustomValidity` rather than an event of our own — so a consumer's `<form>` sees
- * exactly what a bare input would give it.
- *
- * The behavioural JS is the v-model and the clear cross, which has to move focus back to the
- * field: it disappears the moment it is clicked, and focus would otherwise fall to the page.
+ * Native input owns typing and validity. JavaScript bridges the model and restores focus after
+ * the clear button disappears.
  */
 import { computed, inject, ref } from 'vue'
 
@@ -51,11 +39,7 @@ interface InputProps {
    * offer: a numeric pad for `number`, an @ key for `email`.
    */
   type?: InputType
-  /**
-   * Marks the field as invalid whatever the browser thinks. This is the route for a
-   * rule only the server can check; anything the browser can validate on its own
-   * already colours the field without this prop.
-   */
+  /** Marks the field as invalid whatever the browser thinks. */
   invalid?: boolean
   /** Makes the field unusable, greyed out through the colour tokens. */
   disabled?: boolean
@@ -66,10 +50,8 @@ interface InputProps {
    */
   readonly?: boolean
   /**
-   * Refuses the keyboard without drawing the field as read-only: the native attribute is
-   * set, but the field keeps its ordinary look and its clear cross. For a field whose value
-   * comes from somewhere else, a picker or a file dialog, and which is no less editable for
-   * it.
+   * Refuses the keyboard without drawing the field as read-only: the native attribute is set,
+   * but the field keeps its ordinary look and its clear cross.
    */
   noTyping?: boolean
   /** The label above the field, tied to it so that clicking it focuses the field. */
@@ -80,10 +62,9 @@ interface InputProps {
    */
   hint?: string
   /**
-   * An icon inside the field, at the start. It is decorative by default and becomes
-   * a real button as soon as a `@click:icon-start` listener is attached, in which
-   * case it needs `iconStartLabel`. The `#start` slot is rendered after it, so a
-   * field composed on top of this one can show both.
+   * An icon inside the field, at the start. It is decorative by default and becomes a real
+   * button as soon as a `@click:icon-start` listener is attached, in which case it needs
+   * `iconStartLabel`.
    */
   iconStart?: IconSource
   /**
@@ -125,9 +106,8 @@ interface InputProps {
    */
   maxlength?: number
   /**
-   * Turns that limit into a soft one: the reader may type past it, and the field
-   * goes into error instead of silently refusing the keystrokes. It is reported
-   * through the native validity, so a form cannot be submitted over the limit.
+   * Turns that limit into a soft one: the reader may type past it, and the field goes into
+   * error instead of silently refusing the keystrokes.
    */
   softLimit?: boolean
   /**
@@ -174,16 +154,14 @@ const emit = defineEmits<{
 
 defineSlots<{
   /**
-   * Content at the start of the field, rendered after `iconStart` rather than in its
-   * place, which is what lets a field composed on top of this one put the chips
-   * standing for its values here beside an icon it still wants drawn.
+   * Content at the start of the field, rendered after `iconStart` rather than in its place,
+   * which lets a field composed on top of this one put the chips standing for its values here
+   * beside an icon it still wants drawn.
    */
   start?(): unknown
   /**
-   * Controls of your own inside the field, placed before the field's own: the clear
-   * cross and the end icon. It is the slot for something that acts on the VALUE, such
-   * as the AM/PM button of a 12-hour time field, which belongs beside the text rather
-   * than past the controls that clear and open.
+   * Controls of your own inside the field, placed before the field's own: the clear cross and
+   * the end icon.
    */
   'value-end'?(): unknown
   /**
@@ -193,27 +171,19 @@ defineSlots<{
   end?(): unknown
 }>()
 
-/**
- * The value, typed as text OR a number rather than text alone. On an
- * `<input type="number">` Vue converts the value to a number by itself, so a
- * string-only model would hand a number back to a consumer who passed a string in,
- * and Vue would report an invalid prop.
- */
+/** The value, typed as text or a number rather than text alone. */
 const model = defineModel<string | number>({ default: '' })
 
 /**
- * The value seen as text. Every measurement of its length — the counter, the soft
- * limit, whether the clear cross has anything to clear — goes through this, since a
- * number has no length of its own.
+ * The value seen as text. Every measurement of its length; the counter, the soft limit, whether
+ * the clear cross has anything to clear; goes through this, since a number has no length of its
+ * own.
  */
 const modelText = computed(() => String(model.value ?? ''))
 
 const { attrs, rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs()
 
-// A VInputGroup joins several controls into one object, so the shape of this field is the
-// row's decision rather than its own: a segment of another height stops lining up with its
-// neighbours and the merged border no longer reads as a single box. `disabled` is the one
-// read as an OR, the two answers being cumulative (VInput/context.ts).
+// `disabled` is the one read as an or, the two answers being cumulative (VInput/context.ts).
 const group = inject(inputGroupKey, null)
 const {
   size: resolvedSize,
@@ -262,9 +232,9 @@ const { counterText, over } = useTextLimit({
   softLimit: () => props.softLimit,
 })
 
-// The real input sits inside the wrapper, out of reach of whoever renders this component.
-// These three are how the components built on it get there — VCombobox refocuses the field
-// and selects its text this way.
+// The real input sits inside the wrapper, out of reach of whoever renders this component. These
+// three are how the components built on it get there; VCombobox refocuses the field and selects
+// its text this way.
 defineExpose({
   /** Moves the focus to the real input. */
   focus: (options?: FocusOptions) => controlEl.value?.focus(options),
@@ -290,13 +260,12 @@ defineExpose({
     </VTypography>
 
     <div class="v-input-field">
-      <!-- TRAP — the start icon is rendered BEFORE the slot, where the end icon is the
-           slot's own fallback. That asymmetry is what the composed fields need: VCombobox
-           and VFileInput fill `#start` with the chips standing for their values, which is
-           OTHER content in the same zone rather than another way of drawing the icon. As a
-           fallback the icon would vanish the moment a value was chosen — silently, and the
-           clickable variant with it. The end zone has no such consumer: what is put there
-           really does replace the icon. -->
+      <!--
+        The start icon is rendered before the slot, where the end icon is the slot's own
+        fallback. That asymmetry is what the composed fields need: VCombobox and VFileInput fill
+        `#start` with the chips standing for their values, which is OTHER content in the same
+        zone rather than another way of drawing the icon.
+      -->
       <button
         v-if="iconStart && hasIconStartHandler"
         type="button"
@@ -380,16 +349,16 @@ defineExpose({
     font-family: var(--vectis-text-family);
   }
 
-  /* The label and the hint are rendered by VTypography, which carries their type. The
-     .v-input-label and .v-input-hint classes remain as hooks: a consumer overrides
-     through them, and the disabled state below reaches them that way. */
+  /*
+   * The .v-input-label and .v-input-hint classes remain as hooks: a consumer overrides through
+   * them, and the disabled state below reaches them that way.
+   */
 
-  /* This is the box that carries the border, the background and the focus ring.
-     `--field-border-color` is the single source of truth for its colour, and the
-     hover, error and disabled states do nothing but redefine it.
-
-     Nothing here restates the size scale: the `--control-*` variables are inherited
-     from the v-control root (styles/control-size.css), the icon context included. */
+  /*
+   * This is the box that carries the border, the background and the focus ring.
+   * `--field-border-color` is the single source of truth for its colour, and the hover, error
+   * and disabled states do nothing but redefine it.
+   */
   .v-input-field {
     --field-border-color: var(--vectis-color-border-strong);
 
@@ -418,7 +387,7 @@ defineExpose({
     background: none;
     color: inherit;
     font: inherit;
-    outline: none; /* the focus ring is drawn by the field around it, not here */
+    outline: none; /* The focus ring is drawn by the field around it, not here */
   }
 
   .v-input-control::placeholder {
@@ -446,26 +415,20 @@ defineExpose({
     display: none;
   }
 
-  /* The yellow autofill background is painted by the browser on the input itself,
-     inside our field. Its colour cannot be changed, but matching the field's radius
-     at least stops it from showing square corners inside a rounded box. */
+  /*
+   * Its colour cannot be changed, but matching the field's radius at least stops it from
+   * showing square corners inside a rounded box.
+   */
   .v-input-control:-webkit-autofill {
     border-radius: var(--vectis-radius-interactive);
   }
 
-  /* A read-only field sinks slightly into the page but keeps its text at full
-     strength — the value is there to be read — and still shows the accent focus ring.
-     The state is read from [data-readonly] and never from `:read-only`, which the
-     browser also matches on a disabled field.
-
-     TRAP — this block must stay FIRST in the sequence of states: read-only, then
-     hover, focus, invalid and disabled. The read-only, focus, invalid and disabled
-     selectors all weigh (0,3,0), `:has()` taking the specificity of what it contains, so
-     nothing but the source order arbitrates between them. Hover alone weighs more, (0,6,0):
-     its `:not()` keeps it off a focused, invalid or disabled field, and on a read-only
-     one it darkens the border as on any other. Moved further down, this rule would repaint the
-     error border and the accent focus ring grey, with no error anywhere. What
-     belongs to a read-only field is its BASE colour alone. */
+  /*
+   * This block must stay first in the sequence of states: read-only, then hover, focus, invalid
+   * and disabled. The read-only, focus, invalid and disabled selectors all weigh (0,3,0),
+   * `:has()` taking the specificity of what it contains, so nothing but the source order
+   * arbitrates between them.
+   */
   .v-input[data-readonly] .v-input-field {
     --field-border-color: var(--vectis-color-border);
 
@@ -486,18 +449,13 @@ defineExpose({
     );
   }
 
-  /* The focused field appears to have a two-pixel border: it is really its own 1px
-     border plus a 1px shadow of the same colour just outside it, which costs no
-     layout and therefore makes nothing jump.
-
-     The selector watches the CONTROL's focus and not `:focus-within`, so that when
-     one of the field's own buttons — the cross, a clickable icon — takes keyboard
-     focus, only that button's outline lights up: two indicators at once would be
-     unreadable. And it is `:focus` rather than `:focus-visible`, because a text field
-     shows its focus even when it was reached with the mouse.
-
-     The transparent outline is the safety net for Windows forced colours, which drop
-     box-shadows entirely; an outline survives and keeps the field marked. */
+  /*
+   * The selector watches the control's focus and not `:focus-within`, so that when one of the
+   * field's own buttons; the cross, a clickable icon; takes keyboard focus, only that button's
+   * outline lights up: two indicators at once would be unreadable. And it is `:focus` rather
+   * than `:focus-visible`, because a text field shows its focus even when it was reached with
+   * the mouse.
+   */
   .v-input-field:has(.v-input-control:focus) {
     --field-border-color: var(--vectis-color-accent);
 
@@ -505,17 +463,16 @@ defineExpose({
     outline: var(--vectis-focus-ring-width) solid transparent;
   }
 
-  /* The invalid state, from the browser's own verdict first and from the `invalid`
-     prop second. Only the colour variable is changed, which is why the border AND
-     the focus ring both turn red without either being restated. */
+  /*
+   * Only the colour variable is changed, which is why the border and the focus ring both turn
+   * red without either being restated.
+   */
   .v-input-field:has(.v-input-control:user-invalid),
   .v-input-field:has(.v-input-control[aria-invalid='true']) {
     --field-border-color: var(--vectis-color-danger);
   }
 
-  /* The counter's type and its overflow colour are `.v-field-counter`'s (styles/field.css),
-     shared with the counters VTextarea and VFileInput draw under their field. Inside the
-     box it must not shrink, or a long value would squeeze its figures. */
+  /* Inside the box it must not shrink, or a long value would squeeze its figures. */
   .v-input-counter {
     flex: none;
   }
@@ -530,16 +487,12 @@ defineExpose({
     font-size: var(--vectis-icon-size);
   }
 
-  /* A disabled field greys out through the colour tokens, the same ones VCheckbox and
-     VRadio use, and never through opacity. It comes LAST in the sequence of states,
-     which at equal specificity is what makes it win over all of them, the error
-     included: a disabled field is not submitted, so it has nothing to report.
-
-     The text here is `text-muted` and not the `text-subtle` used by the label and the
-     hint below, because those sit on the page surface where this sits on
-     `surface-muted` — against which subtle falls to a 4.4:1 contrast. The control
-     itself is exempt from that rule, being natively disabled, but the icons the field
-     CONTAINS are not, and they inherit this colour. */
+  /*
+   * A disabled field greys out through the colour tokens, the same ones VCheckbox and VRadio
+   * use, and never through opacity. It comes last in the sequence of states, which at equal
+   * specificity is what makes it win over all of them, the error included: a disabled field is
+   * not submitted, so it has nothing to report.
+   */
   .v-input[data-disabled] .v-input-field {
     --field-border-color: var(--vectis-color-border);
 
@@ -564,27 +517,13 @@ defineExpose({
     cursor: not-allowed;
   }
 
-  /* Two arrangements a field composed on top of this one opts into with a class on this
-     root: VCombobox and VFileInput, the two that put chips inside the field. They live in
-     THIS sheet because it is the one both are guaranteed to load, being built on VInput —
-     the core sheet would charge every consumer for them.
-
-     `.v-input-end-pinned` lifts the clear cross and whatever carries `.v-input-icon-end` —
-     the end icon, or a composed field's own chevron and spinner — out of the flow, so they
-     stay pinned to the end of the field and vertically centred whatever the chips do. The
-     room they occupy is then reserved with padding, or the text and the chips would run
-     underneath. That reservation is written as exactly what the flow would have produced
-     with them left in place — one glyph's width each from the field's padding, one gap
-     between two of them — and reads the same two variables as the insets below, so the room
-     reserved and the glyphs it protects cannot drift apart.
-
-     Which of the two take their room is read off the markup (`:has`): the cross is rendered
-     exactly when there is something to clear, and the end icon only when there is one (a
-     VCombobox with `hideExpandIcon` has none), so the padding cannot disagree with either.
-     VInput's own loading spinner counts as the end icon it replaces.
-
-     The centring is a translation kept SEPARATE from `rotate`, which VCombobox's chevron
-     turns when its panel opens. */
+  /*
+   * They live in this sheet because it is the one both are guaranteed to load, being built on
+   * VInput; the core sheet would charge every consumer for them. `.v-input-end-pinned` lifts
+   * the clear cross and whatever carries `.v-input-icon-end`; the end icon, or a composed
+   * field's own chevron and spinner; out of the flow, so they stay pinned to the end of the
+   * field and vertically centred whatever the chips do.
+   */
   .v-input-end-pinned .v-input-field {
     position: relative;
   }
@@ -609,29 +548,22 @@ defineExpose({
     translate: 0 -50%;
   }
 
-  /* TRAP — this inset reads in GLYPHS and not in buttons. The cross is one of the field's
-     buttons, whose negative margin — half the difference between icon and button — already
-     cancels its own overhang, so an inset lands on the glyph's edge. Measured in button
-     widths instead, it pushes the cross a whole gap too far, with nothing to signal it.
-     It applies only when an end icon follows the cross: alone, the cross takes the end
-     slot itself, at the inset above. */
+  /*
+   * This inset reads in glyphs and not in buttons. The cross is one of the field's buttons,
+   * whose negative margin; half the difference between icon and button; already cancels its own
+   * overhang, so an inset lands on the glyph's edge.
+   */
   .v-input-end-pinned .v-input-clear:has(~ :is(.v-input-icon-end, .v-spinner)) {
     inset-inline-end: calc(
       var(--control-padding-inline-field) + var(--vectis-icon-size) + var(--control-gap)
     );
   }
 
-  /* `.v-input-chips` lets the chips WRAP onto several rows, the field growing instead of
-     scrolling but never shrinking below an ordinary control.
-
-     The input is forced to the chips' height rather than the full height it inherits: its
-     natural height is greater than a chip's, and the field would grow the moment it was
-     focused. That height is `--chip-height`, written inline on the composed field's root
-     by the helper that also picks the chips' size (utils/chip.ts), so the two cannot drift.
-
-     TRAP — the control rule must stay at (0,2,0). VCombobox folds its search input away
-     with a (0,3,0) rule that zeroes this height, and at equal weight the winner would be
-     whichever of the two sheets a bundler put last. */
+  /*
+   * The control rule must stay at (0,2,0). VCombobox folds its search input away with a (0,3,0)
+   * rule that zeroes this height, and at equal weight the winner would be whichever of the two
+   * sheets a bundler put last.
+   */
   .v-input-chips .v-input-field {
     flex-wrap: wrap;
     height: auto;

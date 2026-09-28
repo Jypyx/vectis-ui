@@ -97,27 +97,23 @@ describe('registerMessages', () => {
     registerMessages('en', { common: { loading: 'Please wait…' } })
 
     expect(messages().common.loading).toBe('Please wait…')
-    // same namespace, another key
     expect(messages().common.close).toBe('Close')
-    // another namespace
     expect(messages().dataTable.empty).toBe('No data')
   })
 
   it('treats FUNCTIONS as leaves, never as objects to merge', () => {
     registerMessages('en', { dataTable: { empty: 'Nothing to show' } })
 
-    // The neighbouring function was not walked into: it stays callable.
     expect(messages().dataTable.selection(3)).toBe('3 items selected')
     expect(messages().dataTable.empty).toBe('Nothing to show')
 
-    // And an overridden function is indeed REPLACED.
     registerMessages('en', { dataTable: { selection: (count) => `${count} row(s)` } })
     expect(messages().dataTable.selection(3)).toBe('3 row(s)')
   })
 
   it('ignores a prototype-reaching key instead of merging it', () => {
-    // A dictionary coming from `JSON.parse` can carry `__proto__` as an OWN key,
-    // which the merge would otherwise apply to the object's prototype.
+    // A dictionary coming from `JSON.parse` can carry `__proto__` as an own key, which the
+    // merge would otherwise apply to the object's prototype.
     const hostile = JSON.parse('{"__proto__":{"polluted":true},"common":{"close":"Fermer"}}')
     registerMessages('en', hostile)
 
@@ -192,8 +188,6 @@ describe('plurals and typographic conventions', () => {
   })
 })
 
-// CANONICAL tests of the mechanism — they hold for the ~20 consumer components
-// and are therefore not duplicated across their respective files.
 describe('mechanism, component side', () => {
   it('refreshes an ALREADY MOUNTED component when the locale changes', async () => {
     registerMessages('fr', fr)
@@ -266,7 +260,6 @@ describe('locale of the date components', () => {
   })
 
   it('translates the formats even without a dictionary for that language', () => {
-    // 'de' has no dictionary: the LABELS stay English…
     setLocale('de-DE')
     const de = render(VDatePicker, { props: { modelValue: '2026-03-15' } })
     expect(de.getByRole('button', { name: 'Previous month' })).toBeTruthy()
@@ -275,11 +268,6 @@ describe('locale of the date components', () => {
   })
 })
 
-/*
- * A dictionary loaded from JSON can carry a `null`, and one built with `x ?? undefined` an
- * `undefined`: laid over English as they stood, every clear cross lost its name. An override
- * only replaces a word with another word.
- */
 describe('an override with a hole in it', () => {
   it('keeps the English word where the override gives none', () => {
     const holes = { common: { clear: undefined, loading: '', dismiss: null } }
@@ -305,10 +293,6 @@ describe('the spoken value of the clock', () => {
   })
 })
 
-/*
- * French typography, as the dictionary itself claims it: a no-break space before a colon as
- * before a percent sign, and one apostrophe throughout, the typographic one.
- */
 describe('the French dictionary', () => {
   const strings = Object.values(fr).flatMap((section) =>
     Object.values(section as Record<string, unknown>).map((value) =>

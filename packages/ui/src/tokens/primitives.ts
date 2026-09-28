@@ -1,21 +1,6 @@
 /**
- * The raw material: the colour palettes and the numeric scales everything else is built from.
- *
- * No component reads these. A component asks for a ROLE — the accent, the page background —
- * and `semantic.ts` is what points that role at a step. Keeping the two apart is what makes
- * theming possible at all: a theme moves the roles, never the palette.
- *
- * OKLCH, so a step of one palette is as light as the same step of any other and a
- * `color-mix()` between two passes through the shades one expects rather than through grey.
- * The palettes are Tailwind CSS 4's, family for family and step for step.
- *
- * Exactly FIVE families, and they are exactly the five a role points at: gray for surfaces,
- * text and borders, indigo for the accent, red/green/amber for danger/success/warning. The
- * library ships no palette it does not paint with — a deliberate limit, since a family costs
- * eleven custom properties in every page that loads the sheet whether or not anything reads
- * them, and `tokens.test.ts` locks it. An application wanting a sixth declares its own eleven
- * steps in its own unlayered sheet and repoints the role; the docs site does exactly that
- * for its violet.
+ * OKLCH primitive palettes and scales; components consume semantic roles so themes can repoint
+ * them independently.
  */
 import {
   color,
@@ -120,18 +105,13 @@ export const primitives = {
       sans: fontFamily(
         "system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
       ),
-      // The heading typeface. It points at the running one, so out of the box the two are
-      // the same and nothing looks different; giving headings a face of their own is a
-      // matter of overriding this single token. The indirection is what makes the two
-      // decisions independent: replacing `sans` still carries the headings along, whereas
-      // replacing `display` moves the headings alone.
+      // Display aliases sans so consumers can change headings through a single family token.
       display: fontFamily('{font.family.sans}'),
       mono: fontFamily(
         "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace",
       ),
-      // The icon font, which the library never bundles: an application that wants icons
-      // drawn from a font loads it itself, as the README explains. Overriding this one
-      // token is what switches the whole system to another cut of Material Symbols.
+      // The consumer loads any icon font; the library supplies only its configurable family
+      // token.
       icon: fontFamily("'Material Symbols Rounded'"),
     },
     weight: {
@@ -164,9 +144,7 @@ export const primitives = {
     },
   },
   radius: {
-    // Carries a unit although it is zero: these tokens are subtracted from one another to
-    // derive a nested corner (`calc(var(--vectis-radius-surface) - 1px)`), and `calc(0 - 1px)`
-    // is invalid where `calc(0px - 1px)` is not.
+    // Zero radii need units because calc(0 - 1px) is invalid while calc(0px - 1px) is valid.
     none: dimension('0px'),
     xs: dimension('0.125rem'),
     sm: dimension('0.25rem'),
@@ -183,18 +161,7 @@ export const primitives = {
     lg: shadow('0 10px 15px -3px oklch(0% 0 0 / 0.1), 0 4px 6px -4px oklch(0% 0 0 / 0.1)'),
     xl: shadow('0 20px 25px -5px oklch(0% 0 0 / 0.1), 0 8px 10px -6px oklch(0% 0 0 / 0.1)'),
   },
-  /*
-   * The durations are named after the milliseconds they hold, and that is what lets a
-   * component state the time it actually wants. The roles a transition reaches for (fast,
-   * base, slow) are defined alongside the other roles; the values here are what those roles
-   * point at, and what the long looping animations — a spinner, a skeleton's wave — name
-   * directly, since "one second" is the whole point of such a loop and no role could say it
-   * better.
-   *
-   * The steps above a second exist for those loops and for their slowed-down counterparts
-   * under `prefers-reduced-motion`. Without them the same durations come back as arbitrary
-   * multipliers on a shorter token, which is what this scale replaces.
-   */
+  /* Use explicit duration steps for long loops instead of multiplying shorter transition roles. */
   duration: {
     '0': duration('0ms'),
     '50': duration('50ms'),

@@ -1,38 +1,6 @@
 /**
- * Weighs the built artefact and holds it to a committed baseline.
- *
- * WHY THIS EXISTS. The documentation site quotes size figures, and a figure nothing measures
- * drifts away from the artefact with nothing in the build to notice. This script owns those
- * numbers.
- *
- * WHAT IT MEASURES. Three aggregates plus one row per component sheet:
- *
- *   core.css     `styles.css` alone — the reset, the tokens and the shared chrome.
- *   all.css      every sheet concatenated: what a flat stylesheet would have cost.
- *   library.js   the whole import closure of the barrel: importing everything.
- *   <X>.css      one component's own sheet.
- *   <X>.js       one component's JS closure — see `importClosure`, which is what keeps this
- *                honest under `preserveModules` (a component's `VX.js` is a 275-byte stub).
- *
- * WHY IT GATES. Bytes are deterministic, so unlike a timing this is safe to fail a build on
- * a noisy CI runner. The discipline is the coverage thresholds': the baseline is committed,
- * a regression past `tolerance` is red, and raising it is a visible line in the diff rather
- * than a silent drift. `--update` re-baselines, and is meant to be a deliberate act.
- *
- * WHAT THE CORE COSTS, and why it is what it is. `core.css` carries every shared recipe —
- * the tone table and the four ways of painting it, the control size scale, the panel, the
- * banner, the field action, the choice chassis, the disclosure and the
- * hidden input — so a consumer who imports one component downloads all of them. That is a
- * deliberate trade against the alternative, which is the same recipe written out in two or
- * three component sheets and free to drift between them on the next token change. Adding a
- * shared sheet therefore RAISES this figure and lowers the component sheets by less, and the
- * raise has to be worth the recipe: weigh it before writing the sheet, not after.
- *
- * Runtime timings live in `*.bench.ts` (`pnpm bench`) and deliberately do NOT gate.
- *
- *   pnpm --filter vectis-ui exec tsx scripts/bench-size.ts            # measure + gate
- *   pnpm --filter vectis-ui exec tsx scripts/bench-size.ts --update   # re-baseline
- *   pnpm --filter vectis-ui exec tsx scripts/bench-size.ts --json     # machine-readable
+ * Gate built gzip sizes against the committed baseline. Shared CSS increases the core
+ * downloaded by every consumer, so compare core and total-size deltas.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -45,24 +13,9 @@ const dist = resolve(pkgRoot, 'dist')
 const baselinePath = resolve(pkgRoot, 'bench/size-baseline.json')
 
 interface Baseline {
-  /**
-   * How much a figure may grow before the run is red, as a fraction. Small on purpose: gzip
-   * output is stable to the byte for a given input, so the only thing this absorbs is a
-   * genuine change nobody has looked at yet.
-   */
+  /** How much a figure may grow before the run is red, as a fraction. */
   tolerance: number
-  /**
-   * A growth this small is never reported, whatever the percentage says.
-   *
-   * A relative ceiling ALONE punishes the smallest entries: the library's tiniest component
-   * closures are under 2 kB, where a shared helper entering the graph costs ~50 bytes and
-   * trips a 2 % gate, while the same 50 bytes on `library.js` is invisible. Without this
-   * floor the gate cries loudest exactly where the least is at stake, and the habit that
-   * builds — re-baselining to clear noise — is what stops it being read at all.
-   *
-   * 128 bytes gzipped is roughly one shared import's worth: below that, the percentage is
-   * measuring the denominator rather than the change.
-   */
+  /** A growth this small is never reported, whatever the percentage says. */
   minBytes: number
   entries: Record<string, number>
 }
@@ -77,8 +30,7 @@ if (!existsSync(dist)) throw new Error('dist/ is missing — run `pnpm build` fi
 
 const measured: Record<string, number> = {}
 
-// The two CSS aggregates. `styles.css` is the core every consumer imports explicitly; the
-// concatenation is the flat stylesheet the per-component split replaced.
+// Measure both core styles.css and the concatenation of all component sheets.
 const coreCss = join(dist, 'styles.css')
 const sheets = walk(dist, '.css')
 measured['core.css'] = gzipBytes(readFileSync(coreCss))
@@ -88,8 +40,8 @@ measured['all.css'] = gzipTogether(sheets)
 // pays who tree-shakes nothing.
 measured['library.js'] = gzipTogether(importClosure(join(dist, 'index.js')).js)
 
-// One row per component sheet. A sheet's sibling module is the component's entry point,
-// which is what a consumer actually imports.
+// One row per component sheet. A sheet's sibling module is the component's entry point, which a
+// consumer actually imports.
 for (const sheet of sheets) {
   const name = posix(dist, sheet)
   if (name === 'styles.css') continue
@@ -147,7 +99,7 @@ for (const [key, bytes] of Object.entries(measured)) {
 }
 
 // A headline line on every run, so the figures are in the build log whether or not anything
-// moved — that is what makes them quotable without running the script by hand.
+// moved; that is what makes them quotable without running the script by hand.
 console.log(
   `size OK — core ${formatKb(measured['core.css']!)}, ` +
     `all sheets ${formatKb(measured['all.css']!)}, ` +

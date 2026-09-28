@@ -1,13 +1,7 @@
 // @core
 /**
- * A progress value normalized for VProgressLinear and VProgressCircular: the bound brought
- * back to zero or above, the value clamped into range, and its position in that range as a
- * 0-to-1 fraction and as a percentage. Everything either component draws comes from those —
- * the fill, the arc, the percentage written inside, the ARIA values.
- *
- * The bound is returned rather than left for each component to read off its prop: the value
- * is clamped against the NORMALIZED bound, so announcing the raw one would give assistive
- * technology a `aria-valuenow` above an `aria-valuemax` of -5.
+ * Normalize finite bounds and values once so CSS, slot text and progressbar ARIA all describe
+ * the same range.
  */
 
 import { computed, type ComputedRef } from 'vue'
@@ -38,7 +32,6 @@ export function useProgressValue(
     return Number.isNaN(current) ? 0 : clamp(current, 0, normalizedMax.value)
   })
 
-  // The `|| 1` denominator is what keeps a max of 0 from dividing by nothing.
   const fraction = computed(() => clamped.value / (normalizedMax.value || 1))
   const percent = computed(() => fraction.value * 100)
   /* Rounded to the nearest whole number, except at the two ends: "100%" is written only

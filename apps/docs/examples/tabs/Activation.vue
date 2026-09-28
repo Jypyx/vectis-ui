@@ -25,9 +25,7 @@ const automatic = ref('overview')
       </VTabs>
     </div>
 
-    <!-- Selecting on arrival is what the ARIA authoring practices recommend when the
-         panel appears instantly: the reader hears the panel as they walk the row,
-         instead of having to confirm each one. Focus a tab and press an arrow key. -->
+    <!-- Focus a tab and press an arrow key. -->
     <div class="row">
       <p class="caption">automatic</p>
       <VTabs v-model="automatic" activation="automatic" label="Project, automatic">

@@ -1,8 +1,6 @@
 /**
- * Makes `import './styles/index.css'` resolvable to TypeScript under
- * `allowArbitraryExtensions`, WITHOUT a `declare module '*.css'` wildcard: a
- * wildcard matches any path, which would defeat `noUncheckedSideEffectImports`
- * — the flag whose only job here is to catch a typo in that one import.
+ * Resolve this CSS import without a wildcard declaration so noUncheckedSideEffectImports can
+ * still catch misspelled paths.
  */
 declare const css: string
 export default css

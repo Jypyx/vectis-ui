@@ -2,8 +2,10 @@
 import { ref } from 'vue'
 import { VCalendar, type CalendarEvent } from 'vectis-ui'
 
-/* The span below runs from Wednesday to Sunday, which is what shows what the custom view
-   is for: a week would have stopped at the Sunday boundary and started again on Monday. */
+/*
+ * The span below runs from Wednesday to Sunday, which shows what the custom view is for: a week
+ * would have stopped at the Sunday boundary and started again on Monday.
+ */
 const events = ref<CalendarEvent[]>([
   {
     id: 'standup',

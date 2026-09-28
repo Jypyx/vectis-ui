@@ -5,7 +5,6 @@ const tones: ToastTone[] = ['neutral', 'accent', 'success', 'warning', 'danger']
 </script>
 
 <template>
-  <!-- Raised into the <VToaster /> mounted once at the root of the application. -->
   <div class="demo">
     <!-- The tone says what the notification means, and it also decides which icon it
          takes when none is given. Five of them, because a notification reports a state
@@ -25,8 +24,6 @@ const tones: ToastTone[] = ['neutral', 'accent', 'success', 'warning', 'danger']
       </div>
     </div>
 
-    <!-- The variant is how strongly it is painted: a tinted background with a border,
-         or the full colour. -->
     <div class="row">
       <p class="caption">solid</p>
       <div class="buttons">

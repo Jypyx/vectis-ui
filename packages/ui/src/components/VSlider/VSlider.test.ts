@@ -25,10 +25,8 @@ describe('VSlider', () => {
     expect(getByRole('slider', { name: 'Budget (end)' })).toBeTruthy()
   })
 
-  // The pair stays ordered, but the thumb the reader is holding is the one that decides:
-  // taken past its sibling it PUSHES it rather than stopping against it. Stopping was the
-  // dead end — two thumbs resting on the same value leave only the top one (the end) under
-  // the pointer, and it could then never come back down.
+  // Allow coincident thumbs to move apart: the top end thumb must still be able to move below
+  // their shared value.
   it('a thumb taken past its sibling pushes it rather than stopping against it', async () => {
     const { getByRole, emitted } = render(VSlider, {
       props: { modelValue: [20, 60], range: true, label: 'Budget' },
@@ -114,8 +112,6 @@ describe('VSlider', () => {
       props: { modelValue: 40, label: 'x' },
     })
     const root = () => container.querySelector('.v-slider')!
-    // The default branch is written out too, so a consumer styling the horizontal case
-    // from their own sheet has something to select.
     expect(root().getAttribute('data-orientation')).toBe('horizontal')
     await rerender({ orientation: 'vertical' })
     expect(root().getAttribute('data-orientation')).toBe('vertical')
@@ -128,7 +124,6 @@ describe('VSlider', () => {
     const ticks = container.querySelectorAll('.v-slider-tick')
     expect(ticks).toHaveLength(5)
     const filled = container.querySelectorAll('.v-slider-tick[data-filled]')
-    // 0, 25, 50 are filled (≤ the value)
     expect(filled).toHaveLength(3)
   })
 
@@ -160,7 +155,6 @@ describe('VSlider', () => {
     })
     const rendered = [...container.querySelectorAll('.v-slider-label')].map((el) => el.textContent)
     expect(rendered).toEqual(['XS', 'S', 'M', 'L', 'XL'])
-    // labels implies ticks
     expect(container.querySelectorAll('.v-slider-tick')).toHaveLength(5)
     const slider = getByRole('slider', { name: 'Size' })
     expect(slider.getAttribute('aria-valuetext')).toBe('M')
@@ -193,11 +187,9 @@ describe('VSlider', () => {
     const fields = getAllByRole('spinbutton')
     expect(fields).toHaveLength(1)
     const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
-    // out of bounds → clamped to max
     await fireEvent.update(field, '150')
     await fireEvent.change(field)
     expect(emitted('update:modelValue').at(-1)).toEqual([100])
-    // a value off the step → snapped (42 → 40)
     await fireEvent.update(field, '42')
     await fireEvent.change(field)
     expect(emitted('update:modelValue').at(-1)).toEqual([40])
@@ -217,8 +209,6 @@ describe('VSlider', () => {
     expect(emitted('update:modelValue').at(-1)).toEqual([90])
   })
 
-  // `Math.round((v - min) / 0)` is Infinity and `Infinity * 0` is NaN, which went straight
-  // into the v-model and took every fraction down with it.
   it('inputs: a step of 0 commits the clamped value rather than NaN', async () => {
     const { getByRole, emitted } = render(VSlider, {
       props: { modelValue: 40, inputs: 'ends', step: 0, label: 'Volume' },
@@ -351,8 +341,6 @@ describe('VSlider', () => {
     expect((getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement).disabled).toBe(true)
   })
 
-  /* The four labels are computeds shared between the numeric field and the range
-     input: the complete matrix is what locks that sharing down. */
   describe('accessible names of the thumbs', () => {
     it('without a label: "Start"/"End" in range, "Value" on the single field', () => {
       const range = render(VSlider, {
@@ -385,11 +373,10 @@ describe('VSlider', () => {
       expect(single.getByRole('spinbutton', { name: 'Volume' })).toBeTruthy()
     })
 
-    // The component binds its own `aria-label` after the forwarded attributes, so it
-    // wins — which is what gives the two thumbs of a range distinct names. It must
-    // therefore RESOLVE the consumer's attribute rather than overwrite it: bound from a
-    // value that is `undefined`, `mergeProps` copies the key anyway and the slider ends
-    // up with no accessible name at all.
+    // The component binds its own `aria-label` after the forwarded attributes, so it wins;
+    // which gives the two thumbs of a range distinct names. It must therefore RESOLVE the
+    // consumer's attribute rather than overwrite it: bound from a value that is `undefined`,
+    // `mergeProps` copies the key anyway and the slider ends up with no accessible name at all.
     it('a consumer aria-label names the thumb, and both thumbs of a range', () => {
       const single = render(VSlider, {
         props: { modelValue: 40, inputs: 'ends' },
@@ -505,8 +492,6 @@ describe('VSlider — the wrapper-root split', () => {
     warn.mockRestore()
   })
 
-  // Read once in the setup body, the guards were blind to everything a parent changed
-  // afterwards: a slider re-rendered into 1901 steps drew no tick and said nothing.
   it('warns after a re-render that makes the ticks undrawable, and only once', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const { rerender } = render(VSlider, {
@@ -630,8 +615,8 @@ describe('VSlider — the wrapper-root split', () => {
     expect(root.style.getPropertyValue('--slider-end-fraction')).toBe('0.4')
   })
 
-  // The places depend on the bounds and the step alone: moving the value must hand the
-  // ticks back the SAME style objects, which is what spares Vue re-patching every one.
+  // The places depend on the bounds and the step alone: moving the value must hand the ticks
+  // back the same style objects, which spares Vue re-patching every one.
   it('ticks: moving the value changes which are filled, not where they sit', async () => {
     const { container, rerender } = render(VSlider, {
       props: { modelValue: 20, step: 10, ticks: true, label: 'x' },
@@ -645,9 +630,8 @@ describe('VSlider — the wrapper-root split', () => {
   })
 })
 
-// A validation library marks the field invalid through the attribute. The component's own
-// `invalid` binding comes after the forwarded attributes, so it must hand the consumer's value
-// through rather than overwrite it with nothing.
+// The component's own `invalid` binding comes after the forwarded attributes, so it must hand
+// the consumer's value through rather than overwrite it with nothing.
 describe('VSlider — a consumer aria-invalid', () => {
   it('reaches the control when `invalid` is not set', () => {
     const { getByRole } = render(VSlider, {

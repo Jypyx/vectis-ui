@@ -8,8 +8,10 @@ export default {
     'Vectis UI est une suite de composants Vue 3 ultra-légère pilotée par des tokens CSS natifs. Zéro surcouche, zéro dépendance, zéro compromis.',
   heroCta: 'Installer la bibliothèque',
 
-  /* Le français est ici la langue SOURCE, contrairement au reste du site : ces textes ont été
-     dictés en français, et l'anglais en est la réécriture. */
+  /*
+   * Le français est ici la langue source, contrairement au reste du site : ces textes ont été
+   * dictés en français, et l'anglais en est la réécriture.
+   */
   standardsHeading: 'Une architecture alignée sur les standards du Web',
   standardsSubtitle:
     "Profitez d'une intégration parfaite avec Nuxt et d'une gestion des styles simplifiée par les CSS Layers. Tout est pensé pour vous offrir une personnalisation prévisible, basée sur un code HTML sémantique et accessible.",

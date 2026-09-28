@@ -1,22 +1,8 @@
 <script setup lang="ts" generic="E extends CalendarEvent">
 // @a11y @ssr @core
 /**
- * An agenda: the days side by side, the hours running down them, the events drawn where they
- * fall.
- *
- * A place to READ and REARRANGE a schedule, never to write one. Opening an event for editing
- * stays with the consumer — this reports what was asked for and leaves the form to them.
- *
- * Everything is local ISO `YYYY-MM-DD` and 24-hour `HH:mm`, which is what keeps the server
- * and the browser in agreement. An event may name a `timezone`, and that name is SHOWN
- * beside its times but never applied: converting would move the card depending on where the
- * page was rendered, the one thing a calendar must not do.
- *
- * The JS is what the platform leaves no way round — there is no accessible time grid to
- * build on and no way to say "these three meetings overlap, share the width" in CSS, so the
- * ARIA grid pattern and the overlap layout are written by hand. Every geometric and
- * calendrical decision lives in `layout.ts`, pure, because jsdom lays nothing out and that is
- * the only place any of it can be tested.
+ * Calendar layout is pure; JavaScript supplies grid navigation, editing gestures and
+ * announcements because HTML has no native agenda widget. Editing forms remain consumer-owned.
  */
 import { computed, onMounted, ref, useId, watch } from 'vue'
 
@@ -76,10 +62,8 @@ export interface CalendarProps {
   /** How many days the custom view shows, and how far Previous and Next step in it. */
   customDays?: number
   /**
-   * Which weekdays are on show, as numbers from 0 for Sunday. `[1,2,3,4,5]` hides the
-   * weekend everywhere. The ORDER matters as well: the first entry is the day a week
-   * starts on, and it wins over `firstDayOfWeek`. Left out, the seven days starting on
-   * `firstDayOfWeek`.
+   * Which weekdays are on show, as numbers from 0 for Sunday. The ORDER matters as well: the
+   * first entry is the day a week starts on, and it wins over `firstDayOfWeek`.
    */
   weekdays?: number[]
   /**
@@ -118,25 +102,19 @@ export interface CalendarProps {
    */
   readonly?: boolean
   /**
-   * Freezes the whole calendar: nothing can be moved, created or opened, no other period
-   * can be reached, and everything greys out through the colour tokens. The cards leave the
-   * tab order, the grid keeps its own so the agenda can still be read. That is what
-   * separates this from `readonly`, where only the editing stops.
+   * Freezes the whole calendar: nothing can be moved, created or opened, no other period can be
+   * reached, and everything greys out through the colour tokens. That is what separates this
+   * from `readonly`, where only the editing stops.
    */
   disabled?: boolean
   /**
    * Lets an empty stretch of a time grid be drawn out with the pointer, up or down from the
-   * slot pressed. On release its times are reported through `event-create`, and nothing is
-   * added to `events`: putting the event on the calendar is yours to do. A click, or Enter on a
-   * focused cell, reports `cell-activate` with or without this.
+   * slot pressed.
    */
   creatable?: boolean
   /**
-   * How long a dragged event has to rest against the side of the calendar before the view
-   * turns to the previous or next period, in milliseconds. `0` turns that off.
-   *
-   * The wait is the point of it: paging the instant the pointer touched the edge would make
-   * the last day of a week impossible to aim at.
+   * How long a dragged event has to rest against the side of the calendar before the view turns
+   * to the previous or next period, in milliseconds.
    */
   edgeStepDelay?: number
   /** Stops dragging near the top or bottom of a time grid from scrolling it. */
@@ -168,8 +146,8 @@ const props = withDefaults(defineProps<CalendarProps>(), {
 
 /*
  * The wrapper-root pattern: the consumer's class and style stay on the outer box, and
- * everything else — their `id`, their `aria-*` — goes on the region, which is the part
- * that carries the role and is therefore the part they mean.
+ * everything else; their `id`, their `aria-*`; goes on the region, which is the part that
+ * carries the role and is therefore the part they mean.
  */
 defineOptions({ inheritAttrs: false })
 
@@ -178,10 +156,6 @@ const view = defineModel<CalendarView>('view', { default: 'week' })
 
 // @ssr
 /*
- * The anchor is read from the clock at setup, so the server and the client can in
- * principle disagree across a midnight boundary. That is the trade VDatePicker already
- * makes for the month it opens on, and it is a safer one here: what the anchor decides is
- * a whole WEEK or month, which is the same on both sides for all but a few seconds a day.
  * Today's date, which marks a single column, is a different matter and is read below in
  * `onMounted` where the server cannot see it at all.
  */
@@ -190,14 +164,7 @@ const view = defineModel<CalendarView>('view', { default: 'week' })
  * year holding it. It opens on today.
  */
 const date = defineModel<string>('date', { default: () => todayISO() })
-/**
- * What is on the calendar, empty to begin with. It is a MODEL rather than a plain prop
- * because dragging and resizing write back to it: the calendar rearranges what it is given
- * and hands the new list back, never mutating the one it received.
- *
- * Opening an event for editing stays with the consumer: this component reads and
- * rearranges, and never creates or deletes: a slot drawn out is reported, not added.
- */
+/** What is on the calendar, empty to begin with. */
 const events = defineModel<E[]>('events', { default: () => [] })
 
 const emit = defineEmits<{
@@ -208,11 +175,7 @@ const emit = defineEmits<{
    * view has no hour of its own, and reports the one the time grids start at.
    */
   'cell-activate': [cell: CalendarCell]
-  /**
-   * An event was dragged or nudged somewhere else. It carries the event as it now stands and
-   * where it came from, so undoing it needs no copy of your own. A gesture that ends where it
-   * began reports nothing.
-   */
+  /** An event was dragged or nudged somewhere else. */
   'event-move': [event: E, previous: CalendarEventTimes]
   /** An event's end was dragged or nudged, in the same two parts. */
   'event-resize': [event: E, previous: CalendarEventTimes]
@@ -261,8 +224,8 @@ const weeks = computed(() =>
 
 const months = computed(() => (view.value === 'year' ? monthsOfYear(date.value) : []))
 
-// @ssr — today and the time it is now can only be known on the client: the server has no
-// way to tell either where the reader is, and rendering a guess would make the two markups
+// @ssr
+// Way to tell either where the reader is, and rendering a guess would make the two markups
 // differ. Both stay null until then, and every rule that draws them is written to expect it.
 const today = ref<string | null>(null)
 const now = ref<number | null>(null)
@@ -270,13 +233,9 @@ const now = ref<number | null>(null)
 const clock = useTimer()
 
 /**
- * Re-reads the clock, then arms itself for the top of the next minute — so the line moves
- * when the minute does rather than drifting by however long the interval was.
- *
- * TRAP — the floor on the delay is not a nicety. `useTimer` runs a delay of zero or less
- * SYNCHRONOUSLY, by design, so a tick that ever computed one would call itself straight back
- * and go on doing so until the stack gave out. A second is well below the resolution
- * anything here needs and comfortably above the point where that could happen.
+ * The floor on the delay is not a nicety. `useTimer` runs a delay of zero or less
+ * synchronously, by design, so a tick that ever computed one would call itself straight back
+ * and go on doing so until the stack gave out.
  */
 function tick() {
   const at = new Date()
@@ -297,8 +256,8 @@ onMounted(() => {
 })
 
 // @core
-// The prop is a switch a consumer may flip after mount: the clock read at mount alone never
-// started when it was turned on later, and went on ticking when it was turned off.
+// Watch the visibility prop so toggling the current-time line starts or stops its timer after
+// mount.
 watch(
   () => props.hideCurrentTime,
   (hidden) => {
@@ -309,14 +268,10 @@ watch(
 )
 
 /**
- * The grid, named by what it exposes rather than by `InstanceType<typeof …>`.
- *
- * TRAP — the usual form does not work here and the error it gives says nothing useful about
- * why. A generic `<script setup>` compiles to a FUNCTION, not to a class, so it has no
- * construct signature for `InstanceType` to read: the message complains that the component
- * "provides no match for the signature `new (...args: any)`", pointing at the template.
- * Writing the contract out is also the more honest of the two, since these two methods are
- * the whole of what this component asks of that one.
+ * The usual form does not work here and the error it gives says nothing useful about why. A
+ * generic `<script setup>` compiles to a FUNCTION, not to a class, so it has no construct
+ * signature for `InstanceType` to read: the message complains that the component "provides no
+ * match for the signature `new (...args: any)`", pointing at the template.
  */
 const gridRef = ref<{
   focus(options?: FocusOptions): void
@@ -332,10 +287,10 @@ watch(gridRef, scrollToStart, { flush: 'post' })
 const regionEl = ref<HTMLElement | null>(null)
 
 /*
- * Which cell holds the tab stop, kept as two refs because the two kinds of view mean
- * different things by it: a time grid needs a day AND an hour, a month only a day. One ref
- * carrying an hour the month ignores would leave that hour to go stale, and the grid would
- * then reopen on whatever the month happened to leave behind.
+ * Which cell holds the tab stop, kept as two refs because the two kinds of view mean different
+ * things by it: a time grid needs a day and an hour, a month only a day. One ref carrying an
+ * hour the month ignores would leave that hour to go stale, and the grid would then reopen on
+ * whatever the month happened to leave behind.
  */
 const focused = ref<FocusedCell>({ iso: date.value, minutes: timeWindow.value.start })
 const focusedDay = ref(date.value)
@@ -381,11 +336,7 @@ const viewLabel = (value: CalendarView) => {
   return words.viewCustom(props.customDays)
 }
 
-/**
- * What the two navigation buttons are called. They name the step rather than saying
- * "previous" alone, because the step is what changes from one view to the next and a bare
- * "previous" leaves a reader to guess whether it is a day or a year they are about to lose.
- */
+/** What the two navigation buttons are called. */
 const stepLabels = computed(() => {
   const words = m.value.calendar
   if (view.value === 'day') return { previous: words.previousDay, next: words.nextDay }
@@ -398,11 +349,10 @@ const stepLabels = computed(() => {
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.calendar.label)
 
 /*
- * The four ways of reaching another period all pass through here, and `disabled` is refused
- * in every one of them rather than on the controls alone: the edge step pages the view from a
+ * The four ways of reaching another period all pass through here, and `disabled` is refused in
+ * every one of them rather than on the controls alone: the edge step pages the view from a
  * drag, and the year grid opens a month from a cell, neither of which is a button this
  * component disabled. It is the VDatePicker arrangement, where the guard sits on `goTo`.
- * `onCellActivate` below takes the same guard, for the same reason.
  */
 function step(delta: -1 | 1) {
   if (props.disabled) return
@@ -420,13 +370,10 @@ function setView(value: CalendarView) {
 }
 
 /**
- * An empty cell taken up, from either grid. The one place the time a month day stands for is
- * decided: the hour the time grids start at.
- *
- * TRAP — `disabled` is refused HERE, and not by the stylesheet's `pointer-events: none`
- * alone. That rule stops a click, but the grid keeps its tab stop so the agenda stays
- * readable, and Enter on a focused cell reaches this with nothing in its way — a frozen
- * calendar would go on reporting cells to a consumer's form.
+ * `disabled` is refused here, and not by the stylesheet's `pointer-events: none` alone. That
+ * rule stops a click, but the grid keeps its tab stop so the agenda stays readable, and Enter
+ * on a focused cell reaches this with nothing in its way; a frozen calendar would go on
+ * reporting cells to a consumer's form.
  */
 function onCellActivate(cell: ActivatedCell) {
   if (props.disabled) return
@@ -437,13 +384,8 @@ function onCellActivate(cell: ActivatedCell) {
 }
 
 /**
- * Going from a summary to the thing it summarises: opening a day from the month view, or a
- * month from the year view.
- *
- * The view only changes if the calendar was offering that one in the first place. A consumer
- * who narrowed `views` to a week and a year has said what their calendar is for, and jumping
- * it into a day view they deliberately left out would be the component overruling them —
- * so the date moves and the view stays, which is still a step towards what was asked for.
+ * Drill into an allowed detail view; if views excludes it, update the date while preserving the
+ * current view.
  */
 function openIn(iso: string, target: CalendarView) {
   if (props.disabled) return
@@ -454,10 +396,6 @@ function openIn(iso: string, target: CalendarView) {
 /**
  * What a reader who cannot see the grid is told: the range after every step of a move, and
  * whether the move was taken or given up.
- *
- * The node is rendered from the FIRST paint and left empty, never inserted along with its
- * first message — a live region that appears at the same moment as its text is not announced
- * at all, which is the trap VDataTable's selection count already documents.
  */
 const { polite: announcement, announce: say } = useLiveAnnouncer()
 const uid = useId()
@@ -471,15 +409,7 @@ function announce(message: string) {
   say(message, false)
 }
 
-/**
- * Writes one event's new times into the model and says what happened.
- *
- * The array is replaced rather than edited in place: a new reference is what wakes a
- * consumer's own watchers, and it is the design system's rule for every v-model holding a
- * list. This runs ONCE, when a gesture ends — never per frame of a drag, which would fill an
- * undo stack with sixty entries a second and send each one back as a render fighting the
- * finger.
- */
+/** Writes one event's new times into the model and says what happened. */
 function onEventDrop(id: CalendarEventId, times: CalendarEventTimes, kind: 'move' | 'resize') {
   const current = events.value.find((item) => item.id === id)
   if (!current) return
@@ -499,8 +429,7 @@ function onEventDrop(id: CalendarEventId, times: CalendarEventTimes, kind: 'move
 /*
  * A drawn slot is REPORTED and never added. What an event is called, what else it carries and
  * whether it exists at all are the consumer's decisions, so the calendar hands over the times
- * and draws nothing once the pointer is let go. The grid only asks when it was told it could
- * create, so `creatable` is not checked a second time here.
+ * and draws nothing once the pointer is let go.
  */
 function onSlotCreate(times: CalendarEventTimes) {
   emit('event-create', times)
@@ -594,12 +523,8 @@ defineExpose({
       </div>
 
       <!--
-        The public props say what is REFUSED — `readonly`, `hideCurrentTime`,
-        `noEdgeScroll` — so that none of them has to be turned off with a binding. The two
-        internal grids keep the positive sense they read a dozen times each, and the whole
-        of the inversion lives here, at the boundary: flip a sign on one of these lines and
-        the grid quietly does the opposite of what was asked, since nothing downstream
-        knows which way round the prop was written.
+        Invert opt-out public props once at the internal-grid boundary; internal view contracts
+        use positive booleans.
       -->
       <VCalendarTimeGrid
         v-if="isTimeGrid"
@@ -682,12 +607,9 @@ defineExpose({
       />
 
       <!--
-        Both of these are rendered from the first paint and never conditionally.
-
-        The live region has to EXIST before it has anything to say: one inserted along with
-        its first message is not announced at all. And the hint is what every card points at
-        with `aria-describedby`, so one node serves the whole calendar rather than repeating
-        the same sentence on each of a hundred events.
+        Both of these are rendered from the first paint and never conditionally. The live region
+        has to EXIST before it has anything to say: one inserted along with its first message is
+        not announced at all.
       -->
       <div class="v-visually-hidden" role="status" aria-live="polite">{{ announcement }}</div>
       <span :id="hintId" class="v-visually-hidden">{{ m.calendar.eventHint }}</span>
@@ -718,15 +640,11 @@ defineExpose({
   }
 
   /*
-   * The height is settled in CSS rather than measured, the VDataTable idiom: the region is
-   * a flex column at full height, the toolbar refuses to grow and the grid takes what is
-   * left. `min-block-size: 0` on the grid is what lets it shrink below its content and
-   * therefore scroll — without it the automatic minimum of a flex item would hold it at its
-   * full 24-hour height and the whole page would scroll instead.
-   *
-   * All of it is a no-op when the parent's height is auto, where the percentage falls back
-   * to auto and the calendar is simply as tall as its content. That is what makes an opt-in
-   * prop unnecessary.
+   * `min-block-size: 0` on the grid is what lets it shrink below its content and therefore
+   * scroll; without it the automatic minimum of a flex item would hold it at its full 24-hour
+   * height and the whole page would scroll instead. All of it is a no-op when the parent's
+   * height is auto, where the percentage falls back to auto and the calendar is simply as tall
+   * as its content.
    */
   .v-calendar-region {
     display: flex;
@@ -752,8 +670,10 @@ defineExpose({
   }
 
   .v-calendar-title {
-    /* It may be long — a full weekday and month in the day view — so it is the part that
-       gives way first, and the controls keep their size. */
+    /*
+     * It may be long; a full weekday and month in the day view; so it is the part that gives
+     * way first, and the controls keep their size.
+     */
     min-inline-size: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -783,20 +703,15 @@ defineExpose({
   }
 
   /*
-   * What the three views share lives HERE rather than in each of their sheets. They are only
-   * ever rendered by this component, so this sheet ships wherever they do — the
-   * VCarousel/VCarouselItem arrangement. Every rule a view writes against one of these classes
-   * is either disjoint from it or more specific, never tied: a tie between two sheets would be
-   * settled by the consumer's bundler.
+   * Every rule a view writes against one of these classes is either disjoint from it or more
+   * specific, never tied: a tie between two sheets would be settled by the consumer's bundler.
    */
 
   /*
-   * A drag currently held off the calendar. `not-allowed` is the word the library already uses
-   * for "you cannot do this", on every disabled control.
-   *
-   * BEST-EFFORT, and never the signal: while a pointer is captured the cursor is resolved
-   * against the capture target rather than against whatever sits under the pointer, and engines
-   * differ on it. What carries the message is the card's own paint.
+   * `not-allowed` is the word the library already uses for "you cannot do this", on every
+   * disabled control. BEST-EFFORT, and never the signal: while a pointer is captured the cursor
+   * is resolved against the capture target rather than against whatever sits under the pointer,
+   * and engines differ on it.
    */
   .v-calendar-view[data-outside] {
     cursor: not-allowed;
@@ -812,8 +727,7 @@ defineExpose({
 
   /*
    * Today's date, marked on the number the way a calendar marks a date rather than a column.
-   * Semibold here marks a state, not a type role. Written at (0,2,0) so it wins over each view's
-   * own (0,1,0) rule for the element it lands on.
+   * Semibold here marks a state, not a type role.
    */
   .v-calendar-view .v-calendar-today {
     background: var(--vectis-color-accent);
@@ -842,7 +756,6 @@ defineExpose({
     outline-offset: calc(-1 * var(--vectis-focus-ring-width));
   }
 
-  /* The plain buttons the month and year views draw: a day number, the "+2 more", a month. */
   .v-calendar-button {
     /* A button carries a border and a background from the browser, which around a round day
        number read as a stray ring. Neither is optional. */
@@ -859,17 +772,9 @@ defineExpose({
   }
 
   /*
-   * The strip that lights up while a drag rests against an edge, counting down to turn the
-   * page. It is what stops the paging being a surprise.
-   *
    * Drawn INSIDE the box the cells occupy rather than on the scroller, because a scroller's
    * absolutely positioned child is placed against its content and scrolls away with it. That
-   * box has to be positioned, which each view's own sheet sees to. An absolutely positioned
-   * pseudo-element is not a grid item, so it disturbs no column.
-   *
-   * Its width is `--vectis-control-size-calendar-edge`, whose twin is `EDGE_BAND` in
-   * `edgeStep.ts` — the JavaScript that decides where the countdown actually starts. Neither
-   * may move without the other. The layer, 2, is the time grid's stacking table.
+   * box has to be positioned, which each view's own sheet sees to.
    */
   .v-calendar-edge-cue[data-edge]::after {
     content: '';

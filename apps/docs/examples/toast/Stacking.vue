@@ -16,7 +16,6 @@ function raiseThree() {
 </script>
 
 <template>
-  <!-- Raised into the <VToaster /> mounted once at the root of the application. -->
   <div class="demo">
     <!-- Notifications stack rather than replace one another, because two states can be
          true at the same time: a finished backup and a failed send are both worth

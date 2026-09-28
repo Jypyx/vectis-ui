@@ -1,13 +1,7 @@
 <script setup lang="ts">
 /**
- * A dialog demanding an answer: confirming something irreversible, acknowledging a
- * failure. It looks exactly like VDialog and is nothing more than VDialog with its
- * options fixed, but those fixed options change what it is.
- *
- * It is announced to assistive technology as an alert rather than an ordinary dialog,
- * and every casual way out is closed off: there is no cross, a click outside does
- * nothing, and Escape does nothing either. The buttons in the footer are the only way
- * to dismiss it — which is why supplying them is not optional.
+ * Fix VDialog to alertdialog semantics and require an explicit answer instead of light
+ * dismissal.
  */
 
 import { computed, ref } from 'vue'
@@ -24,9 +18,8 @@ interface DialogAlertProps {
   /** A line under the title, spelling out the consequences of the answer. */
   subtitle?: string
   /**
-   * How wide the alert is: a number is read as pixels, a string as any CSS length. Left
-   * out, it takes the `--vectis-control-size-dialog-width` token, 400px by default. It is
-   * never allowed to exceed the width of the viewport.
+   * How wide the alert is: a number is read as pixels, a string as any CSS length. Left out, it
+   * takes the `--vectis-control-size-dialog-width` token, 400px by default.
    */
   width?: number | string
 }
@@ -62,9 +55,8 @@ defineSlots<{
 }>()
 
 /*
- * The same three members VDialog exposes, handed straight through. This component is
- * VDialog with its options fixed, so a ref on it has to answer the same way — without
- * this, the one dialog that CANNOT be dismissed by Escape or by a click outside would
+ * This component is VDialog with its options fixed, so a ref on it has to answer the same way;
+ * without this, the one dialog that CANNOT be dismissed by Escape or by a click outside would
  * also be the one a consumer could not close from code.
  */
 const dialogRef = ref<InstanceType<typeof VDialog> | null>(null)

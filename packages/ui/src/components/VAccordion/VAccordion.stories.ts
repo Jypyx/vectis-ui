@@ -125,7 +125,8 @@ export const Default: Story = {
     const details = [...canvasElement.querySelectorAll('details')]
     await expect(details[0]?.open).toBe(true)
 
-    // The NATIVE one-at-a-time mode (the name attribute): opening the 2nd closes the 1st, with no JS
+    // The native one-at-a-time mode (the name attribute): opening the 2nd closes the 1st, with
+    // no JS
     await userEvent.click(canvas.getByText('How do I customize the theme?'))
     await waitFor(() => expect(details[1]?.open).toBe(true))
     await waitFor(() => expect(details[0]?.open).toBe(false))
@@ -148,7 +149,6 @@ export const MultipleOpen: Story = {
     const details = [...canvasElement.querySelectorAll('details')]
     await userEvent.click(canvas.getByText('First'))
     await userEvent.click(canvas.getByText('Second'))
-    // with no shared name, both stay open
     await waitFor(() => expect(details[0]?.open).toBe(true))
     await waitFor(() => expect(details[1]?.open).toBe(true))
   },
@@ -240,9 +240,9 @@ export const Variants: Story = {
       </div>
     `,
   }),
-  // jsdom computes no style, so this is the only guard: a flat accordion must not become a
-  // scroll container (it would capture a `position: sticky` in its content), and the
-  // outlined one clips its rows to its corners without becoming one either.
+  // Jsdom computes no style, so this is the only guard: a flat accordion must not become a
+  // scroll container (it would capture a `position: sticky` in its content), and the outlined
+  // one clips its rows to its corners without becoming one either.
   play: async ({ canvasElement }) => {
     const [flat, outlined] = [...canvasElement.querySelectorAll<HTMLElement>('.v-accordion')]
     await expect(getComputedStyle(flat!).overflow).toBe('visible')

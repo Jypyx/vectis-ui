@@ -5,10 +5,9 @@ import { KeepAlive, defineComponent, h, nextTick, ref } from 'vue'
 import { useTimer } from './useTimer'
 
 /**
- * Three invariants, and the last two are the ones a plain `setTimeout` gets wrong:
- * `start()` re-arms rather than stacking, and a delay ≤ 0 runs SYNCHRONOUSLY — the
- * DS convention that 0 disarms the deferral (a synchronous debounce, a persistent
- * toast). `setTimeout(…, 0)` would defer, which is exactly what callers must not get.
+ * Three invariants, and the last two are the ones a plain `setTimeout` gets wrong: `start()`
+ * re-arms rather than stacking, and a delay ≤ 0 runs synchronously; the DS convention that 0
+ * disarms the deferral (a synchronous debounce, a persistent toast).
  */
 function mountTimer() {
   let api!: ReturnType<typeof useTimer>
@@ -42,7 +41,6 @@ describe('useTimer', () => {
     const fn = vi.fn()
 
     api.start(fn, 0)
-    // No advanceTimersByTime: a deferred call would fail here.
     expect(fn).toHaveBeenCalledTimes(1)
   })
 
@@ -80,11 +78,6 @@ describe('useTimer', () => {
   })
 })
 
-/*
- * A component kept alive is deactivated rather than unmounted, so a timer cancelled on
- * unmount alone went on firing off screen: a carousel kept rotating on a page the reader had
- * left. It is held while the component is away, and armed again when it comes back.
- */
 describe('useTimer inside KeepAlive', () => {
   beforeEach(() => vi.useFakeTimers())
   afterEach(() => vi.useRealTimers())

@@ -112,9 +112,6 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    // opening through the trigger (the #trigger slot): the modal moves to the top layer.
-    // Lazy mounting: the <dialog> only exists in the DOM once open, so it can only be
-    // queried after the click.
     await userEvent.click(canvas.getByRole('button', { name: 'Open the modal' }))
     const dialog = await waitFor(() => {
       const el = canvasElement.querySelector('.v-dialog') as HTMLDialogElement | null
@@ -122,7 +119,6 @@ export const Default: Story = {
       return el!
     })
 
-    // closing through the cross: the <dialog> is entirely unmounted
     await userEvent.click(within(dialog).getByRole('button', { name: 'Close' }))
     await waitFor(() => expect(canvasElement.querySelector('.v-dialog')).toBeNull())
   },
@@ -164,11 +160,7 @@ export const Width: Story = {
   }),
 }
 
-/**
- * Overflowing content: the body becomes scrollable while the header and the footer stay
- * put. The separators only appear when content passes under the header or under the
- * footer (scroll-state container queries, Chrome 133+).
- */
+/** Overflowing content: the body becomes scrollable while the header and the footer stay put. */
 export const LongContent: Story = {
   render: (args) => ({
     components: { VDialog, VButton, VTypography },
@@ -280,7 +272,6 @@ export const EscapeDismiss: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    // lazy mounting: the <dialog> is only queryable once open
     await userEvent.click(canvas.getByRole('button', { name: 'Open the modal' }))
     const dialog = await waitFor(() => {
       const el = canvasElement.querySelector('.v-dialog') as HTMLDialogElement | null
@@ -289,9 +280,9 @@ export const EscapeDismiss: Story = {
     })
 
     // Escape goes through the native CloseWatcher (closedby), which requires a *trusted*
-    // keystroke — impossible to synthesize in a play function. The same native route is
-    // taken (close() → the 'close' event) to check OUR bridge: the v-model resync then
-    // the complete unmount.
+    // keystroke; impossible to synthesize in a play function. The same native route is taken
+    // (close() → the 'close' event) to check OUR bridge: the v-model resync then the complete
+    // unmount.
     dialog.close()
     await waitFor(() => expect(canvasElement.querySelector('.v-dialog')).toBeNull())
   },

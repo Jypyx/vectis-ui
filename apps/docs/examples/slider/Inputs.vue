@@ -8,11 +8,11 @@ const budget = ref<[number, number]>([20, 60])
 
 <template>
   <div class="demo">
-    <!-- Sliding is quick and imprecise, and this is the way out: a number field, one
-         per end in range mode, here on either side of the track. What is typed is
-         committed when the field is left or on Enter, never as it is typed, or the 1
-         of 15 would be clamped before the 5 was pressed. An out of bounds entry is
-         brought back inside, an unreadable one puts the previous value back. -->
+    <!--
+      What is typed is committed when the field is left or on Enter, never as it is typed, or
+      the 1 of 15 would be clamped before the 5 was pressed. An out of bounds entry is brought
+      back inside, an unreadable one puts the previous value back.
+    -->
     <VSlider v-model="volume" inputs="ends" label="Volume" />
     <VSlider v-model="budget" inputs="ends" range label="Budget" />
   </div>

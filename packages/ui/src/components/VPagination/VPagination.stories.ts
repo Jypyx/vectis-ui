@@ -55,20 +55,18 @@ export const Default: Story = {
     await expect(current).toHaveAttribute('aria-current', 'page')
 
     /*
-     * A pill is a VButton, so `.v-pagination-page[data-size]` and `.v-button` both
-     * declare `padding-inline` on this very element. The qualified selector must win
-     * whatever the order in which a consumer's bundler concatenates the two sheets —
-     * which nothing else can check, since jsdom evaluates no style and the split
-     * makes that order unknowable. `--vectis-space-2` (8px) against VButton's
-     * `--control-padding-inline`, i.e. `--vectis-space-3` (12px) at the default size.
+     * The qualified selector must win whatever the order in which a consumer's bundler
+     * concatenates the two sheets; which nothing else can check, since jsdom evaluates no style
+     * and the split makes that order unknowable. `--vectis-space-2` (8px) against VButton's
+     * `--control-padding-inline`, i.e.
      */
     await expect(getComputedStyle(current).paddingInline).toBe('8px')
 
     /*
-     * Same rule, same argument, for the transition VButton declares and the pill drops:
-     * without it the highlight cross-fades between two neighbouring pills every time the
-     * truncation window slides, and the row flickers. Nothing else can check it — jsdom
-     * evaluates no style, and the only symptom is visual.
+     * Same rule, same argument, for the transition VButton declares and the pill drops: without
+     * it the highlight cross-fades between two neighbouring pills every time the truncation
+     * window slides, and the row flickers. Nothing else can check it; jsdom evaluates no style,
+     * and the only symptom is visual.
      */
     await expect(getComputedStyle(current).transitionProperty).toBe('none')
 
@@ -99,9 +97,6 @@ export const Variants: Story = {
   render: () => ({
     components: { VPagination },
     setup: () => ({ ghost: ref(6), outline: ref(6) }),
-    // Only the inactive pages follow the variant; the current one takes `selectedVariant`.
-    // `label` on every instance: several `<nav>`s under one name are indistinguishable
-    // in a landmark list — the same reason VDataTable names its own pagination.
     template: `
       <div style="display: grid; gap: 16px">
         <VPagination :length="12" item-variant="ghost" label="ghost" v-model="ghost" />
@@ -125,9 +120,8 @@ export const SelectedVariants: Story = {
   }),
   play: async ({ canvasElement }) => {
     /*
-     * `soft` and `ghost` leave VButton's border transparent, which in an outline row opens a
-     * gap in the frame for the width of the current page. The page has to carry the frame's
-     * colour on its edges, like its neighbours. jsdom evaluates no style, hence the browser.
+     * The page has to carry the frame's colour on its edges, like its neighbours. jsdom
+     * evaluates no style, hence the browser.
      */
     for (const name of ['soft', 'ghost']) {
       const nav = within(within(canvasElement).getByRole('navigation', { name }))
@@ -216,7 +210,6 @@ export const Controls: Story = {
   render: () => ({
     components: { VPagination },
     setup: () => ({ a: ref(4), b: ref(4), c: ref(4), d: ref(4), e: ref(4), t }),
-    // Custom icons: a Material Symbols name OR an image URL.
     template: `
       <div style="display: grid; gap: 16px">
         <VPagination :length="10" controls="icon" label="icon" v-model="a" />
@@ -299,11 +292,10 @@ export const Responsive: Story = {
   render: () => ({
     components: { VPagination },
     setup: () => ({ page: ref(10) }),
-    // The nav is its own query container: the truncation follows the width of the
-    // frame, not the viewport's. The panel is resizable by its handle (bottom
-    // right corner, CSS resize — hence the overflow: hidden): the neighbours fall
-    // away in steps as it narrows, while the first, the last and the current page
-    // always remain.
+    // The nav is its own query container: the truncation follows the width of the frame, not
+    // the viewport's. The panel is resizable by its handle (bottom right corner, CSS resize;
+    // hence the overflow: hidden): the neighbours fall away in steps as it narrows, while the
+    // first, the last and the current page always remain.
     template: `
       <div
         style="
@@ -320,8 +312,6 @@ export const Responsive: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    // At the initial width (~39rem) the full window fits: the next steps
-    // (1 … 9 10 11 … 40, then 1 … 10 … 40) are observed with the handle.
     const nav = canvasElement.querySelector('.v-pagination')
     const visiblePages = [...nav!.querySelectorAll<HTMLElement>('.v-pagination-page')]
       .filter((el) => getComputedStyle(el).display !== 'none')
@@ -335,8 +325,6 @@ export const Alignment: Story = {
   render: () => ({
     components: { VPagination },
     setup: () => ({ aligns: ['start', 'center', 'end'], page: ref(3) }),
-    // The nav is block-level and takes the full available width, so the alignment
-    // goes through the `align` prop.
     template: `
       <div style="display: grid; gap: 16px; border: 1px dashed var(--vectis-color-border); padding: 8px">
         <VPagination v-for="a in aligns" :key="a" :length="8" :align="a" :label="a" v-model="page" />

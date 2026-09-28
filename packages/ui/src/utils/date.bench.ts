@@ -1,20 +1,6 @@
 /**
- * The cost of the date helpers, and specifically of the `Intl` objects behind them.
- *
- * WHAT THIS IS FOR. `date.ts` memoizes everything that touches `Intl`, because construction
- * costs one to two orders of magnitude more than use. Three helpers escaped that for a
- * while — `dateMaskFor`, `maskPlaceholder` and `firstDayOfWeekFor` each built a fresh `Intl`
- * object on every call. Every consumer wraps them in a `computed`, so they never ran per
- * render, but they ran once per component instance per locale: a form of twenty date fields
- * paid twenty constructions at mount, measured here at 4.73 ms before the caches went in
- * and 0.005 ms after.
- *
- * The benches stay after the fix, because what they now guard is the cache itself: the
- * figures collapse if one is removed, and `× 20` is the line that would say so loudest.
- *
- * `formatterFor`'s cache key is built with `JSON.stringify(options)` on every call, so the
- * `formatDateDisplay` figure includes that stringify. It is measured here rather than assumed:
- * the year view calls it 504 times per render.
+ * Benchmark repeated date-formatting calls to exercise memoized Intl construction under field
+ * workloads.
  */
 import { bench, describe } from 'vitest'
 
@@ -32,12 +18,10 @@ describe('memoized — the floor', () => {
     formatDateDisplay(ISO, LOCALE, { day: 'numeric' })
   })
 
-  // The VCalendarYear render: one formatted day number per square, twelve months of them.
   bench('formatDateDisplay × 504 (a year of day numbers)', () => {
     for (let i = 0; i < 504; i++) formatDateDisplay(ISO, LOCALE, { day: 'numeric' })
   })
 
-  // These two already hoist their formatter out of the loop.
   bench('weekdayNames', () => {
     weekdayNames(LOCALE, 1, 'short')
   })
@@ -61,9 +45,9 @@ describe('memoized per locale — the caches these guard', () => {
   })
 
   /*
-   * What a form of twenty date fields pays at mount, since each instance resolves these in
-   * its own `computed`. 4.73 ms before the caches, 0.005 ms after — so this is the line that
-   * goes red if one of them is ever removed.
+   * What a form of twenty date fields pays at mount, since each instance resolves these in its
+   * own `computed`. 4.73 ms before the caches, 0.005 ms after; so this is the line that goes
+   * red if one of them is ever removed.
    */
   bench('× 20 (a form of twenty date fields mounting)', () => {
     for (let i = 0; i < 20; i++) {

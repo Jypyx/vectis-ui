@@ -65,9 +65,9 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const slider = canvas.getByRole('slider', { name: 'Volume' }) as HTMLInputElement
-    // The keyboard is 100% native, but a synthetic (untrusted) keydown does NOT trigger
-    // the default behaviour of an <input type=range>: the effect of a right arrow is
-    // simulated (a value + an input event) and the v-model bridge is checked.
+    // The keyboard is 100% native, but a synthetic (untrusted) keydown does not trigger the
+    // default behaviour of an <input type=range>: the effect of a right arrow is simulated (a
+    // value + an input event) and the v-model bridge is checked.
     slider.focus()
     slider.value = '41'
     await fireEvent.input(slider)
@@ -93,9 +93,8 @@ export const Range: Story = {
   },
 }
 
-// Clicking the track moves the value (single mode only — natively, through
-// pointer-events; check it by hand: coordinate hit-testing is too fragile for a play
-// function).
+// Clicking the track moves the value (single mode only; natively, through pointer-events; check
+// it by hand: coordinate hit-testing is too fragile for a play function).
 export const Steps: Story = {
   render: (args) => ({
     components: { VSlider },
@@ -177,9 +176,8 @@ export const WithInputs: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // an out-of-bounds entry → committed on change → clamped to max. A synthetic
-    // {Enter} does not trigger the native change: the field is left (blur) as a real
-    // user would.
+    // An out-of-bounds entry → committed on change → clamped to max. A synthetic {Enter} does
+    // not trigger the native change: the field is left (blur) as a real user would.
     const field = canvas.getByRole('spinbutton', { name: 'Volume' })
     await userEvent.clear(field)
     await userEvent.type(field, '150')
@@ -191,8 +189,7 @@ export const WithInputs: Story = {
 
 /**
  * `inputs` takes a placement: `ends` on either side of the track, `top` and `bottom` in a row
- * above or below it, each field at the edge of the value it holds. Upright, `top` and
- * `bottom` become the two sides of the track.
+ * above or below it, each field at the edge of the value it holds.
  */
 export const InputPlacements: Story = {
   render: (args) => ({
@@ -226,7 +223,7 @@ export const InputPlacements: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    // jsdom lays nothing out, so the grid templates are only ever checked here.
+    // Jsdom lays nothing out, so the grid templates are only ever checked here.
     const parts = (cls: string) => {
       const root = canvasElement.querySelector(`.${cls}`)!
       const box = (sel: string) => root.querySelector(sel)?.getBoundingClientRect()
@@ -280,10 +277,9 @@ export const TextLabels: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // non-numeric values are announced through aria-valuetext
+    // Non-numeric values are announced through aria-valuetext
     const slider = canvas.getByRole('slider', { name: 'Size' }) as HTMLInputElement
     await expect(slider).toHaveAttribute('aria-valuetext', 'M')
-    // the same limit as Default: the effect of ArrowRight is simulated (a value + input)
     slider.focus()
     slider.value = '3'
     await fireEvent.input(slider)
@@ -334,7 +330,7 @@ export const WithTooltip: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // keyboard focus (focus-visible) shows the bubble of the thumb being manipulated
+    // Keyboard focus (focus-visible) shows the bubble of the thumb being manipulated
     await userEvent.tab()
     await waitFor(() => expect(canvas.getByText('40')).toBeVisible())
   },
@@ -364,9 +360,9 @@ export const FullVertical: Story = {
 }
 
 /**
- * `readonly` keeps the thumbs focusable and announced, and refuses every change: the keys
- * that move a thumb are cancelled, and a thumb the pointer has already moved is put back
- * before the browser paints. The number fields turn read-only with them.
+ * `readonly` keeps the thumbs focusable and announced, and refuses every change: the keys that
+ * move a thumb are cancelled, and a thumb the pointer has already moved is put back before the
+ * browser paints.
  */
 export const ReadOnly: Story = {
   render: (args) => ({
@@ -385,7 +381,6 @@ export const ReadOnly: Story = {
     const slider = canvas.getByRole('slider', { name: 'Volume' }) as HTMLInputElement
     await expect(slider).toHaveAttribute('aria-readonly', 'true')
     await expect(slider).not.toBeDisabled()
-    // A key: cancelled before the browser can apply it.
     slider.focus()
     const key = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true })
     slider.dispatchEvent(key)

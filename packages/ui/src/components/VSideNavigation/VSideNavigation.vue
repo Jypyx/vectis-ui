@@ -1,18 +1,8 @@
 <script setup lang="ts">
 // @keyboard @core
 /**
- * A sidebar's navigation: a tree of links shown in place rather than in a panel, its
- * branches foldable. Written out level by level with its subcomponents, never from an
- * `items` prop.
- *
- * Real `<ul>`/`<li>` markup, where VMenu uses plain containers, and the difference is
- * meaningful: the ARIA menu pattern forbids lists, admitting only `menuitem` and `group`,
- * whereas in a navigation the counting and the nesting ARE the information. "List of 4
- * items, item 2, itself a list of 3" is a screen reader describing the site's structure.
- *
- * The folding is native `<details>`: state, keyboard, exclusivity between neighbouring
- * sections and animation all come from the browser. The only behavioural JS is arrow-key
- * focus movement.
+ * Native details folds branches; JavaScript bridges open models and adds arrow navigation
+ * without replacing native links or buttons.
  */
 
 import { provide, ref, useId } from 'vue'
@@ -38,7 +28,7 @@ interface SideNavigationProps {
   /** The height of the rows, 32 or 40 pixels, inherited by every level. */
   size?: SideNavigationSize
   /**
-   * Takes 4px off the height of every row. It is a density setting and NOT a collapsed
+   * Takes 4px off the height of every row. It is a density setting and not a collapsed
    * icon-only rail, which this component does not offer.
    */
   compact?: boolean
@@ -73,8 +63,8 @@ defineSlots<{
 const m = useMessages()
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.sideNavigation.label)
 
-// The name shared by the first level's sections. Each item mints another for its own
-// children, which is what keeps the exclusivity local to a level (see context.ts).
+// The name shared by the first level's sections. Each item mints another for its own children,
+// which keeps the exclusivity local to a level (see context.ts).
 const rootName = useId()
 
 provide(sideNavigationKey, {
@@ -96,24 +86,18 @@ const rootEl = ref<HTMLElement | null>(null)
 
 // @keyboard @a11y
 /**
- * What the arrow keys may move to: the header of a branch, and the link of a leaf.
- *
- * Both forms of disabling have to be excluded, since `:disabled` only ever matches a
- * button — an inert link and a disabled branch header are marked with `aria-disabled`
- * instead, exactly as in VMenu's panel.
+ * What the arrow keys may move to: the header of a branch, and the link of a leaf. Both forms
+ * of disabling have to be excluded, since `:disabled` only ever matches a button; an inert link
+ * and a disabled branch header are marked with `aria-disabled` instead, exactly as in VMenu's
+ * panel.
  */
 const ROW_SELECTOR = ':is(summary, .v-side-nav-action):not(:disabled):not([aria-disabled="true"])'
 
 // @keyboard @a11y
 /**
- * Whether a row can actually be reached: everything inside a CLOSED branch is skipped,
- * except that branch's own header, which stays focusable.
- *
- * TRAP — this cannot be left to the shared helper, which skips whatever is not
- * displayed. The content of a closed disclosure element is not hidden that way: the
- * browser passes over it by a rule of its own, and it still reports itself as
- * displayed. Walking the ancestors is the only reliable answer, and it also spares one
- * style computation per row.
+ * This cannot be left to the shared helper, which skips whatever is not displayed. The content
+ * of a closed disclosure element is not hidden that way: the browser passes over it by a rule
+ * of its own, and it still reports itself as displayed.
  */
 function reachable(el: HTMLElement, root: HTMLElement): boolean {
   for (
@@ -130,18 +114,15 @@ function reachable(el: HTMLElement, root: HTMLElement): boolean {
 
 // @keyboard @a11y
 /*
- * The component's only behavioural JavaScript, and it exists because nothing native
- * moves the focus from one link to the next.
- *
- * It follows the design system's contract: the arrows MOVE the focus and never
- * activate anything. Every visible row also stays a stop in the tab order — the
- * VToggle model — which is what the disclosure navigation pattern calls for.
+ * The component's only behavioural JavaScript, and it exists because nothing native moves the
+ * focus from one link to the next. It follows the design system's contract: the arrows MOVE the
+ * focus and never activate anything.
  */
 function onKeydown(event: KeyboardEvent) {
   const root = rootEl.value
   if (!root || event.defaultPrevented) return
-  // Only a key pressed ON a row: a field or a menu in a row's `#end` slot is a descendant
-  // too, and its caret or its own list must keep the arrows and Home/End.
+  // Only a key pressed on a row: a field or a menu in a row's `#end` slot is a descendant too,
+  // and its caret or its own list must keep the arrows and Home/End.
   if (!(event.target as Element | null)?.matches(ROW_SELECTOR)) return
   arrowNavigate(
     event,
@@ -170,30 +151,16 @@ function onKeydown(event: KeyboardEvent) {
 <style>
 @layer vectis.components {
   .v-side-nav {
-    /*
-     * How much one level of the tree is indented by: exactly the room a leading icon
-     * occupies, the icon plus the gap after it. That is what makes a subitem's label
-     * start on the SAME VERTICAL as its parent's, whether or not the parent has an
-     * icon.
-     *
-     * Both measurements come from the shared size class set on this very element, so
-     * the indent follows the size scale with no table of its own, and a consumer who
-     * changes the icon size sees it follow. Every level inherits it.
-     */
+    /* Every level inherits it. */
     --side-nav-indent: calc(var(--vectis-icon-size) + var(--control-gap));
 
     font-family: var(--vectis-text-family);
   }
 
   /*
-   * The three lists of the tree are stripped of their bullets and their padding here,
-   * once, rather than in each of the three components that render one. Nothing can be
-   * arbitrated wrongly by doing so: these classes exist nowhere else in the design
-   * system.
-   *
    * They are laid out as flex columns and not as ordinary blocks, which removes margin
-   * collapsing entirely — otherwise a group's margin could escape a branch that is
-   * closed, and therefore of zero height, and push the rows apart under it.
+   * collapsing entirely; otherwise a group's margin could escape a branch that is closed, and
+   * therefore of zero height, and push the rows apart under it.
    */
   .v-side-nav-list,
   .v-side-nav-children,

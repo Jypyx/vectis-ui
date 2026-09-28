@@ -4,14 +4,10 @@ import { ref } from 'vue'
 import { usePopover } from './usePopover'
 
 /**
- * The invariants tested here are the ones every popover in the design system rests
- * on, and none of them is visible from a component test: `shown` is fed BY THE DOM,
- * and the idempotence guards are what stop `hidePopover()` throwing
- * `InvalidStateError` on an already-closed popover.
- *
- * The element is a hand-made double rather than the global jsdom stub: the point is
- * to observe exactly which calls the composable makes, and in which state it
- * refuses to make them.
+ * The invariants tested here are the ones every popover in the design system rests on, and none
+ * of them is visible from a component test: `shown` is fed BY THE DOM, and the idempotence
+ * guards are what stop `hidePopover()` throwing `InvalidStateError` on an already-closed
+ * popover.
  */
 function popoverEl() {
   const el = document.createElement('div')
@@ -33,7 +29,7 @@ describe('usePopover', () => {
     expect(shown.value).toBe(false)
     show()
     expect(showPopover).toHaveBeenCalledTimes(1)
-    // The call alone does NOT move the state: it is the event that does.
+    // The call alone does not move the state: it is the event that does.
     expect(shown.value).toBe(false)
 
     syncShown(toggleEvent('open'))
@@ -65,11 +61,9 @@ describe('usePopover', () => {
     syncShown(toggleEvent('open'))
     expect(shown.value).toBe(true)
 
-    // The platform closed it on its own (click outside, Escape).
     syncShown(toggleEvent('closed'))
     expect(shown.value).toBe(false)
 
-    // …so a later hide() is a no-op rather than a throw.
     hide()
     expect(hidePopover).not.toHaveBeenCalled()
   })

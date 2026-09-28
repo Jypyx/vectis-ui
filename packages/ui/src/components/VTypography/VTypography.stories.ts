@@ -32,7 +32,6 @@ const TONES = [
   'on-inverse',
 ] as const
 
-/* Pangrams: the point is to exercise the typeface, so each language keeps its own. */
 const t = storyText({
   en: {
     pangram: 'The quick brown fox jumps over the lazy dog',
@@ -95,9 +94,8 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {}
 
 /**
- * The complete scale. The headings are rendered with `as="p"` here so as not to
- * distort the docs page's heading hierarchy — in a real page, leave the default
- * tag (h1…h4).
+ * The complete scale. The headings are rendered with `as="p"` here so as not to distort the
+ * docs page's heading hierarchy; in a real page, leave the default tag (h1…h4).
  */
 export const Variants: Story = {
   render: () => ({
@@ -146,9 +144,8 @@ export const Tones: Story = {
 }
 
 /**
- * The rendered tag is derived from the variant (h1…h4, p, span, code) and
- * overridable through `as` — the same visual recipe can dress any element (e.g. a
- * document h2 styled as heading-4).
+ * The rendered tag is derived from the variant (h1…h4, p, span, code) and overridable through
+ * `as`; the same visual recipe can dress any element (e.g. a document h2 styled as heading-4).
  */
 export const Tags: Story = {
   render: () => ({
@@ -164,7 +161,7 @@ export const Tags: Story = {
   }),
 }
 
-/** `truncate` cuts on a single line with an ellipsis — the width comes from the parent. */
+/** `truncate` cuts on a single line with an ellipsis; the width comes from the parent. */
 export const Truncate: Story = {
   render: () => ({
     components: { VTypography },

@@ -1,11 +1,7 @@
 <script setup lang="ts">
 /**
- * A code sample, with its language and a button that copies it.
- *
- * The code arrives as a PROP rather than through a slot, and that is what makes the samples
- * safe to write: Vue's interpolation escapes the text, so a `<template>` or a `<VButton>` in
- * an example is written literally instead of as `&lt;`. It also means the copy button has the
- * exact string to hand and never has to read `innerText` back out of the DOM.
+ * Render and copy the supplied source string directly so clipboard content does not depend on
+ * DOM text extraction.
  */
 import { VIconButton, VTypography } from 'vectis-ui'
 
@@ -17,14 +13,7 @@ const props = defineProps<{
 }>()
 
 defineSlots<{
-  /**
-   * A control placed in the header, between the language tag and the copy button — the home
-   * page's package-manager toggle is the only one today. It stays a slot rather than a prop
-   * because the header is chrome this component owns while the CONTENT of such a control is
-   * always the caller's: `code` arrives from outside, so whatever changes it belongs outside
-   * too. Left unused, as it is by every other sample on the site, it renders nothing at all
-   * and the header keeps its two-item layout.
-   */
+  /** Optional control between the language tag and the copy button. */
   head?(): unknown
 }>()
 
@@ -37,11 +26,6 @@ const text = computed(() => trim(props.code))
 <template>
   <div class="vd-code">
     <div class="vd-code-head">
-      <!--
-        `overline` supplies the capitals, the tracking and the size; the class adds only the
-        monospaced family, which is the one thing that role does not own and should not — what
-        it names here is a language, not a word.
-      -->
       <VTypography variant="overline" tone="muted" class="vd-code-lang">{{ lang }}</VTypography>
       <slot name="head" />
       <VIconButton

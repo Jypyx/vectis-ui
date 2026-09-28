@@ -42,10 +42,8 @@ const meta = {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     mode: { control: 'inline-radio', options: ['picker', 'input', 'list'] },
   },
-  // No `mode`: pinning it would make the Controls panel lie, as it would show a current
-  // value different from the component's default. No `locale` either — the picker then
-  // follows the design system's global locale, so the Locale toolbar drives the hour
-  // cycle along with the words.
+  // No `locale` either; the picker then follows the design system's global locale, so the
+  // Locale toolbar drives the hour cycle along with the words.
   args: {
     size: 'md',
   },
@@ -72,40 +70,35 @@ export const Default: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // `textbox` and not `combobox`: with no panel the field takes no role at all.
     const field = canvas.getByRole('textbox', { name: 'Time' }) as HTMLInputElement
 
-    // with no picker, the field announces no popup and opens none
     await expect(field).not.toHaveAttribute('aria-haspopup')
     await userEvent.click(field)
     await expect(canvas.queryByRole('dialog')).toBeNull()
 
     await userEvent.keyboard('09')
     await expect(field).toHaveValue('09:')
-    // the caret has crossed the colon, and typing carries on into the minutes
     await expect(field.selectionStart).toBe(3)
     await userEvent.keyboard('30')
     await expect(field).toHaveValue('09:30')
     await waitFor(() => expect(canvas.getByTestId('value')).toHaveTextContent('09:30'))
 
-    // both minute digits go, and the caret lands BEFORE the colon (deleting does not
-    // cross it)…
+    // Both minute digits go, and the caret lands before the colon (deleting does not cross it)…
     await userEvent.keyboard('{Backspace}{Backspace}')
     await expect(field).toHaveValue('09:')
     await expect(field.selectionStart).toBe(2)
-    // …and the next Backspace erases the digit, not the separator
     await userEvent.keyboard('{Backspace}')
     await expect(field).toHaveValue('0')
 
-    // leaving the field: the incomplete entry silently reverts to the value
+    // Leaving the field: the incomplete entry silently reverts to the value
     await userEvent.tab()
     await waitFor(() => expect(field).toHaveValue('09:30'))
   },
 }
 
 /**
- * `mode="picker"`: the time can only be chosen on the clock, which then becomes the only
- * route — `showPicker` is beside the point there.
+ * `mode="picker"`: the time can only be chosen on the clock, which then becomes the only route;
+ * `showPicker` is beside the point there.
  */
 export const PickerOnly: Story = {
   args: { mode: 'picker' },
@@ -122,7 +115,7 @@ export const PickerOnly: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const field = canvas.getByRole('combobox', { name: 'Time' })
-    // keyboard opening (the down arrow), with focus moved into the panel
+    // Keyboard opening (the down arrow), with focus moved into the panel
     field.focus()
     await userEvent.keyboard('{ArrowDown}')
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
@@ -150,10 +143,10 @@ export const DialSelection: Story = {
     const canvas = within(canvasElement)
 
     /*
-     * The panel BEFORE anything opens it. A closed popover has to be `display: none`, or its
-     * box stays laid out over the page: invisible at `opacity: 0`, `position: fixed`, and
-     * swallowing every click that lands on it. jsdom cannot see this at all, computing no
-     * styles, so the browser suite is the only place it can be held.
+     * A closed popover has to be `display: none`, or its box stays laid out over the page:
+     * invisible at `opacity: 0`, `position: fixed`, and swallowing every click that lands on
+     * it. jsdom cannot see this at all, computing no styles, so the browser suite is the only
+     * place it can be held.
      */
     const closed = canvasElement.querySelector('.v-time-input-panel') as HTMLElement
     await expect(getComputedStyle(closed).display).toBe('none')
@@ -162,11 +155,10 @@ export const DialSelection: Story = {
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible())
 
     /*
-     * `.v-popover-panel.v-time-input-panel` against `.v-panel`, which declares a
-     * `padding` at equal specificity on this very element (the popover is a `surface`).
-     * Only the compound cancels it under an order nothing controls once each sheet ships
-     * separately: `0px` against `.v-panel`'s `--vectis-space-1` (4px). The room around the
-     * clock is the CLOCK's own, as VDatePicker's is, and so is the gap between its parts.
+     * `.v-popover-panel.v-time-input-panel` against `.v-panel`, which declares a `padding` at
+     * equal specificity on this very element (the popover is a `surface`). Only the compound
+     * cancels it under an order nothing controls once each sheet ships separately: `0px`
+     * against `.v-panel`'s `--vectis-space-1` (4px).
      */
     const panel = canvas.getByRole('dialog')
     await expect(getComputedStyle(panel).padding).toBe('0px')
@@ -176,21 +168,18 @@ export const DialSelection: Story = {
 
     const face = canvasElement.querySelector('.v-time-picker-face') as HTMLElement
 
-    // hour 3 = a quarter turn; releasing moves on to the minutes step
     tapDial(face, 3 / 12)
     await waitFor(() =>
       expect(canvas.getByRole('button', { name: /Select hour$/ })).toHaveTextContent('03'),
     )
     await waitFor(() => expect(canvas.getByRole('slider')).toHaveAccessibleName('Minutes'))
 
-    // minute 30 = half a turn, then OK commits
     tapDial(face, 30 / 60)
     await userEvent.click(canvas.getByRole('button', { name: 'OK' }))
     await waitFor(() => expect(canvas.getByTestId('value')).toHaveTextContent('03:30'))
   },
 }
 
-// A 24 h clock: the inner ring carries 00 and 13–23.
 export const InnerRing: Story = {
   args: { mode: 'picker', format: '24h' },
   render: (args) => ({
@@ -209,12 +198,9 @@ export const InnerRing: Story = {
     const face = canvasElement.querySelector('.v-time-picker-face') as HTMLElement
     const hourCell = () => canvas.getByRole('button', { name: /Select hour$/ })
 
-    // midnight: the twelve o'clock position, inner ring (half the radius)
     tapDial(face, 0, 0.44)
     await waitFor(() => expect(hourCell()).toHaveTextContent('00'))
-    // back to the hour step (releasing moved on to the minutes)
     await userEvent.click(hourCell())
-    // 13:00: the one o'clock position, inner ring
     tapDial(face, 1 / 12, 0.44)
     await waitFor(() => expect(hourCell()).toHaveTextContent('13'))
   },
@@ -222,8 +208,8 @@ export const InnerRing: Story = {
 
 /**
  * `showPicker` makes the picker reachable from an input field: a clickable icon at the end of
- * the field, and the panel opening on focus — without stealing the caret, so typing
- * carries on in the field.
+ * the field, and the panel opening on focus; without stealing the caret, so typing carries on
+ * in the field.
  */
 export const InputWithDial: Story = {
   args: { showPicker: true, format: '24h' },
@@ -241,7 +227,7 @@ export const InputWithDial: Story = {
     const canvas = within(canvasElement)
     const field = canvas.getByRole('combobox', { name: 'Time' })
 
-    // the click opens the panel WITHOUT stealing the caret: typing carries on
+    // The click opens the panel WITHOUT stealing the caret: typing carries on
     await userEvent.click(field)
     const panel = await waitFor(() => canvas.getByRole('dialog'))
     await expect(field).toHaveFocus()
@@ -260,7 +246,6 @@ export const InputWithDial: Story = {
     await expect(field).toHaveValue('09:30')
     await expect(field).toHaveFocus()
 
-    // the down arrow is the explicit route to the picker, and Escape comes back
     await userEvent.keyboard('{ArrowDown}')
     await waitFor(() => expect(panel.contains(document.activeElement)).toBe(true))
     await userEvent.keyboard('{Escape}')
@@ -291,8 +276,8 @@ export const TimeList: Story = {
     await userEvent.click(field)
     const panel = await waitFor(() => canvas.getByRole('listbox'))
 
-    // The panel opens ON the current value rather than at midnight, which is what makes a
-    // 48-row list usable with a pointer. jsdom lays nothing out and scrolls nothing.
+    // The panel opens on the current value rather than at midnight, which makes a 48-row list
+    // usable with a pointer. jsdom lays nothing out and scrolls nothing.
     await waitFor(() => expect(panel.scrollTop).toBeGreaterThan(0))
     const selected = panel.querySelector('[aria-selected="true"]') as HTMLElement
     await expect(selected).toHaveTextContent('14:30')
@@ -308,8 +293,8 @@ export const TimeList: Story = {
 }
 
 /**
- * The whole point of the combobox: a time is FOUND rather than scrolled to, and the bare
- * digit run finds it — "930" reaches half past nine without the colon being typed.
+ * The whole point of the combobox: a time is FOUND rather than scrolled to, and the bare digit
+ * run finds it; "930" reaches half past nine without the colon being typed.
  */
 export const ListSearch: Story = {
   args: { mode: 'list', minuteStep: 30, format: '24h' },
@@ -332,7 +317,6 @@ export const ListSearch: Story = {
     await userEvent.keyboard('930')
     const panel = canvas.getByRole('listbox')
     await waitFor(() => expect(panel.querySelectorAll('[role="option"]')).toHaveLength(1))
-    // Red if the rule reads a 24 hour label as a 12 hour one: 21:30 would answer too.
     await expect(panel.querySelector('[role="option"]')).toHaveTextContent('30')
 
     // Enter takes the highlighted row: focus never left the field, this being a combobox.
@@ -341,8 +325,6 @@ export const ListSearch: Story = {
     await waitFor(() => expect(canvas.getByTestId('value')).toHaveTextContent('09:30'))
     await expect(panel.matches(':popover-open')).toBe(false)
 
-    // A search matching nothing leaves the value alone: the list is the contract.
-    // Scoped to the panel — the wording is also in the live region, outside it.
     await userEvent.click(field)
     await userEvent.keyboard('0937')
     await waitFor(() => expect(panel.querySelectorAll('[role="option"]')).toHaveLength(0))
@@ -351,8 +333,6 @@ export const ListSearch: Story = {
   },
 }
 
-// The v-model stays canonical 24 h: 7 o'clock + PM → '19:00'. The button sits inside the
-// field, beside the value it qualifies: no opening and no confirmation needed.
 export const TwelveHour: Story = {
   args: { format: '12h', clearable: true, showPicker: true },
   render: (args) => ({
@@ -367,7 +347,6 @@ export const TwelveHour: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // The name is the label and the current half of the day, so it changes with the state.
     await userEvent.click(canvas.getByRole('button', { name: 'AM or PM: AM' }))
     await waitFor(() => expect(canvas.getByTestId('value')).toHaveTextContent('19:00'))
     await expect(canvas.getByRole('button', { name: 'AM or PM: PM' })).toBeVisible()
@@ -435,13 +414,8 @@ export const FiveMinuteStep: Story = {
 }
 
 /**
- * The same four restrictions — `min`, `max`, `allowedHours`, `allowedMinutes` — reach the
- * three modes as two answers, which follow from what each mode asks the reader for.
- *
- * The list and the picker OFFER the times, so both LEAVE OUT what cannot be chosen: each
- * is read before it is chosen from. The typed field asks the reader to write, so it
- * COMMITS what was typed and turns invalid — swallowing the entry would leave them
- * nothing to correct.
+ * The same four restrictions; `min`, `max`, `allowedHours`, `allowedMinutes`; reach the three
+ * modes as two answers, which follow from what each mode asks the reader for.
  */
 export const Restrictions: Story = {
   args: { format: '24h', minuteStep: 30, min: '09:00', max: '17:00' },
@@ -464,16 +438,12 @@ export const Restrictions: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // Typed: the value stands, and the browser is what refuses it — which is also what
-    // stops a form leaving with it.
-    // A typed field with no picker carries no combobox role: it points at no panel.
     const typed = canvas.getByRole('textbox', { name: 'Typed' }) as HTMLInputElement
     await userEvent.clear(typed)
     await userEvent.type(typed, '0800')
     await userEvent.tab()
     await waitFor(() => expect(typed.validity.customError).toBe(true))
 
-    // Listed: the rows outside the bounds are not there to be chosen at all.
     await userEvent.click(canvas.getByRole('combobox', { name: 'Listed' }))
     await waitFor(() => expect(canvas.getAllByRole('option')).toHaveLength(17))
   },
@@ -506,13 +476,9 @@ export const Disabled: Story = {
 }
 
 /**
- * `readonly` freezes the time whichever way it could have been changed: nothing can be
- * typed, no clock is rendered, the AM/PM button goes since it writes the value, and the
- * clear cross goes with them. The attributes announcing a panel go too. Unlike
- * `disabled` the field keeps its contrast, takes the focus and can be copied from.
- *
- * It is a different question from `mode`, which says how a field that CAN be changed is
- * filled in, and it reaches the list form just as well, that one being a VCombobox.
+ * `readonly` freezes the time whichever way it could have been changed: nothing can be typed,
+ * no clock is rendered, the AM/PM button goes since it writes the value, and the clear cross
+ * goes with them.
  */
 export const ReadOnly: Story = {
   args: { readonly: true, clearable: true, format: '12h' },
@@ -537,16 +503,7 @@ export const ReadOnly: Story = {
   },
 }
 
-/**
- * The two ends of the field. `iconStart` puts an icon at the start, decorative until a
- * `@click:icon-start` listener turns it into a button, which then needs
- * `iconStartLabel`. At the other end `loading` shows a spinner in place of the clock
- * icon while something is being fetched, and changes nothing else: the field is still
- * typed into and the panel still opens.
- *
- * `pickerIconLabel` and `clearLabel` rename the clock button and the clear cross when the
- * dictionary's wording is not the right one.
- */
+/** The two ends of the field. */
 export const FieldIcon: Story = {
   args: { format: '24h' },
   render: (args) => ({
@@ -576,12 +533,8 @@ export const FieldIcon: Story = {
 
 /**
  * Clicking an empty area of the panel (its padding, the gutter between the picker and the
- * footer) must close NOTHING — and above all abandon nothing: closing by focus leaving
- * amounts to cancelling the draft here.
- *
- * Without `useFieldPanel`'s neutralized `mousedown`, the browser would hand focus back to
- * `<body>` and the root's `focusout` would close the panel. Invisible in jsdom, which does
- * not simulate focus on click.
+ * footer) must close NOTHING; and above all abandon nothing: closing by focus leaving amounts
+ * to cancelling the draft here.
  */
 export const ClickInTheVoid: Story = {
   args: { mode: 'picker', format: '24h' },
@@ -599,25 +552,19 @@ export const ClickInTheVoid: Story = {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('combobox', { name: 'Time' }))
     const panel = await waitFor(() => canvas.getByRole('dialog'))
-    // focus is moved into the panel under a rAF
+    // Focus is moved into the panel under a rAF
     await waitFor(() => expect(panel.contains(document.activeElement)).toBe(true))
 
-    // a draft under way: 10 o'clock chosen on the clock, not committed yet
     const face = canvasElement.querySelector('.v-time-picker-face') as HTMLElement
     tapDial(face, 10 / 12)
     await waitFor(() =>
       expect(canvas.getByRole('button', { name: /Select hour$/ })).toHaveTextContent('10'),
     )
 
-    // a click on the panel ITSELF and not on one of its controls: userEvent dispatches on
-    // the element it is given, with no hit-testing — which faithfully reproduces the click
-    // landing in its padding, where nothing is focusable
     await userEvent.click(panel)
     await expect(panel.matches(':popover-open')).toBe(true)
-    // the draft survived: closing here would have abandoned it
     await expect(canvas.getByRole('button', { name: /Select hour$/ })).toHaveTextContent('10')
 
-    // OK commits as usual
     await userEvent.click(canvas.getByRole('button', { name: 'OK' }))
     await waitFor(() => expect(canvas.getByTestId('value')).toHaveTextContent('10:15'))
   },

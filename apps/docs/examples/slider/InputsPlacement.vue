@@ -14,8 +14,6 @@ const gain = ref<[number, number]>([30, 70])
     <VSlider v-model="budget" inputs="top" range label="Budget" />
     <VSlider v-model="volume" inputs="bottom" label="Volume" />
 
-    <!-- Upright, top and bottom become the two sides of the track: top the start
-         side, bottom the end side. -->
     <VSlider v-model="gain" orientation="vertical" inputs="top" range label="Gain" />
   </div>
 </template>

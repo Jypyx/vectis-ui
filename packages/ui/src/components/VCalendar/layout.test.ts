@@ -36,11 +36,6 @@ import {
 } from './layout'
 import type { CalendarEvent } from './types'
 
-/*
- * Reference week: June 2026. The 8th is a Monday, so the 10th is a Wednesday and the 13th
- * and 14th are the weekend — the same grid VDatePicker's tests use, for the same reason:
- * a fixed week is what lets an expectation name a day rather than compute one.
- */
 const WEDNESDAY = '2026-06-10'
 const MONDAY = '2026-06-08'
 const FRIDAY = '2026-06-12'
@@ -49,7 +44,7 @@ const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6]
 const WEEK_FROM_MONDAY = [1, 2, 3, 4, 5, 6, 0]
 const WORKING_DAYS = [1, 2, 3, 4, 5]
 
-/** A whole day, which is what every geometric test below is read against. */
+/** A whole day, which every geometric test below is read against. */
 const DAY = windowOf(0, 24)
 
 /** Minutes since midnight, so a case can be written in the hours it means. */
@@ -94,9 +89,9 @@ describe('timeOf', () => {
   })
 
   /*
-   * The whole reason the helper clamps rather than rolling over. `24:00` is not a time the
-   * design system's own guard accepts, and writing `00:00` on the next day would turn an
-   * evening appointment into a two-day event, which the all-day band would then swallow.
+   * `24:00` is not a time the design system's own guard accepts, and writing `00:00` on the
+   * next day would turn an evening appointment into a two-day event, which the all-day band
+   * would then swallow.
    */
   it('holds midnight one minute short instead of rolling over to the next day', () => {
     expect(timeOf(1440)).toBe('23:59')
@@ -214,11 +209,6 @@ describe('visibleDays', () => {
 })
 
 describe('stepAnchor', () => {
-  /*
-   * The sharpest bug this module can carry. Stepping by one CALENDAR day from a Friday in
-   * a Monday-to-Friday calendar lands on a Saturday nothing draws, so the grid shows the
-   * week it was already showing and the button looks broken with nothing to point at.
-   */
   it('steps over the hidden days in the day view', () => {
     expect(stepAnchor(FRIDAY, 'day', 1, WORKING_DAYS, 4)).toBe('2026-06-15')
     expect(stepAnchor(MONDAY, 'day', -1, WORKING_DAYS, 4)).toBe('2026-06-05')
@@ -294,7 +284,6 @@ describe('isAllDayEvent', () => {
     expect(isAllDayEvent(event({ id: 'c' }))).toBe(false)
   })
 
-  // A column holds up to a day, so an evening running into the next morning stays in the grid.
   it('leaves an event running past midnight for less than a day in the grid', () => {
     const late = event({ id: 'd', end: '2026-06-11', startTime: '22:00', endTime: '02:00' })
     expect(isAllDayEvent(late)).toBe(false)
@@ -460,10 +449,6 @@ describe('packDayColumn', () => {
     expect(placed.b).toMatchObject({ column: 1, columns: 2 })
   })
 
-  /*
-   * Overlap is strict, so one event ending exactly as the next begins is not a collision.
-   * A loose comparison here would halve the width of every back-to-back day in a diary.
-   */
   it('lets two events that merely touch share one column', () => {
     const placed = packDayColumn([seg('a', at(9), at(10)), seg('b', at(10), at(11))])
     expect(placed.every((p) => p.columns === 1 && p.column === 0)).toBe(true)
@@ -474,7 +459,6 @@ describe('packDayColumn', () => {
       packDayColumn([seg('a', at(9), at(10)), seg('b', at(9), at(10)), seg('c', at(14), at(15))]),
     )
     expect(placed.a!.columns).toBe(2)
-    // The lone afternoon meeting keeps the whole width: it is nobody's neighbour.
     expect(placed.c).toMatchObject({ column: 0, span: 1, columns: 1 })
   })
 
@@ -488,7 +472,6 @@ describe('packDayColumn', () => {
     )
     expect(placed.a).toMatchObject({ column: 0, columns: 2 })
     expect(placed.b).toMatchObject({ column: 1, columns: 2 })
-    // `c` reuses the column `a` has just freed rather than opening a third.
     expect(placed.c).toMatchObject({ column: 0, columns: 2 })
   })
 
@@ -502,7 +485,6 @@ describe('packDayColumn', () => {
       ]),
     )
     expect(placed.a!.columns).toBe(3)
-    // Nothing sits beside `d` for its whole length, so it takes two columns of the three.
     expect(placed.d).toMatchObject({ column: 1, span: 2, columns: 3 })
   })
 
@@ -593,15 +575,10 @@ describe('the order of a day', () => {
   })
 
   /*
-   * The last tie-break must be a stable total order over the ids and NOTHING else. It used
-   * to be `localeCompare` with no locale, which resolves against the runtime's default and
-   * therefore orders differently in Node and in the browser — and since this order is what
-   * the month view lists chips in, the two renders disagreed across hydration.
-   *
-   * The ids here are chosen so the two rules genuinely disagree: by code point 'Z' (90)
-   * precedes 'a' (97) and 'z' (122) precedes 'é' (233), where an ICU collation puts 'a'
-   * before 'Z' and 'é' next to 'e'. Asserting the code-point order is what makes a
-   * reintroduced `localeCompare` fail here rather than in production.
+   * The last tie-break must be a stable total order over the ids and NOTHING else. The ids here
+   * are chosen so the two rules genuinely disagree: by code point 'Z' (90) precedes 'a' (97)
+   * and 'z' (122) precedes 'é' (233), where an ICU collation puts 'a' before 'Z' and 'é' next
+   * to 'e'.
    */
   it('breaks the last tie by code point, not by locale collation', () => {
     const sameSlot = [
@@ -652,9 +629,8 @@ describe('eventsByDay', () => {
   })
 
   /*
-   * A day the weekday filter hides simply has no bucket. An event spanning it must still
-   * appear on the visible days either side rather than being dropped — the Monday-to-Friday
-   * calendar showing a Friday-to-Monday trip on both of its ends.
+   * An event spanning it must still appear on the visible days either side rather than being
+   * dropped; the Monday-to-Friday calendar showing a Friday-to-Monday trip on both of its ends.
    */
   it('skips days that are not on show without losing the event', () => {
     const visible = [MONDAY, FRIDAY]
@@ -702,10 +678,6 @@ describe('eventsByDay', () => {
     expect(byDay.get('2026-06-11')).toEqual([])
   })
 
-  /*
-   * On its second day an overnight event has been running since that day's midnight, so it
-   * is ranked from there, ahead of the morning's appointments.
-   */
   it('ranks the morning part of an overnight event from midnight', () => {
     const nine = event({
       id: 'nine',
@@ -732,7 +704,6 @@ describe('eventsByDay', () => {
 describe('packAllDay', () => {
   const days = [MONDAY, '2026-06-09', WEDNESDAY, '2026-06-11', FRIDAY]
 
-  // Twenty-four hours from one midnight to the next is ONE day: nothing happens on the second.
   it('gives a bar ending at midnight exactly no column on the day it ends', () => {
     const whole = event({
       id: 'day',
@@ -774,10 +745,6 @@ describe('packAllDay', () => {
     expect(packAllDay([elsewhere], days)).toEqual([])
   })
 
-  /*
-   * A hidden weekday inside a range is simply not there, rather than a gap to account for:
-   * the bar covers the run between the first and last day it actually shows on.
-   */
   it('covers only the visible days of a range that crosses a hidden one', () => {
     const week = [MONDAY, '2026-06-09', WEDNESDAY, '2026-06-11', FRIDAY]
     const overWeekend = event({ id: 'a', start: FRIDAY, end: '2026-06-15' })
@@ -912,10 +879,6 @@ describe('daySpan', () => {
 })
 
 describe('moveEventToDay', () => {
-  /*
-   * The whole reason this exists beside `moveEvent`: that one collapses `end` onto `start`,
-   * so a three-day trip put through it would come out as one Tuesday.
-   */
   it('keeps the length in days', () => {
     const trip = { start: MONDAY, end: '2026-06-10', startTime: '09:00', endTime: '17:00' }
     expect(moveEventToDay(trip, FRIDAY)).toEqual({
@@ -992,15 +955,14 @@ describe('inlineEdgeAt', () => {
   })
 
   /*
-   * A pointer dragged clean off the calendar is asking to keep going, not to stop — so past
-   * the far side still counts as being against that edge.
+   * A pointer dragged clean off the calendar is asking to keep going, not to stop; so past the
+   * far side still counts as being against that edge.
    */
   it('keeps naming the edge past the end of the box', () => {
     expect(inlineEdgeAt(-500, geometry, 48, false)).toBe(-1)
     expect(inlineEdgeAt(5000, geometry, 48, false)).toBe(1)
   })
 
-  // "Back" is the reading direction's start, so it swaps sides with the script.
   it('swaps the two edges in a right-to-left page', () => {
     const rtl = { inlineStart: 900, inlineSize: 700 }
     expect(inlineEdgeAt(890, rtl, 48, true)).toBe(-1)
@@ -1020,10 +982,6 @@ describe('blockEdgeAt', () => {
     expect(blockEdgeAt(400, geometry, 48)).toBe(0)
   })
 
-  /*
-   * A fraction rather than a direction, so the scroll can speed up towards the edge: at a
-   * constant speed nothing works — useful at the boundary is uncontrollable a few pixels in.
-   */
   it('rises towards the edge rather than switching on flat', () => {
     const gentle = blockEdgeAt(136, geometry, 48)
     const hard = blockEdgeAt(104, geometry, 48)
@@ -1055,7 +1013,6 @@ describe('pointWithin', () => {
     expect(pointWithin({ x: 550, y: 400 }, box)).toBe(true)
   })
 
-  // All four, deliberately: a test of one side passes an implementation that checks only that one.
   it('is false past any of the four sides', () => {
     expect(pointWithin({ x: 150, y: 400 }, box)).toBe(false)
     expect(pointWithin({ x: 950, y: 400 }, box)).toBe(false)
@@ -1068,12 +1025,6 @@ describe('pointWithin', () => {
     expect(pointWithin({ x: 900, y: 700 }, box)).toBe(true)
   })
 
-  /*
-   * The degenerate case, and the one that decides the whole feature: with nothing measured there
-   * is no outside to be on. jsdom lays nothing out, so taking a zero-size box literally would make
-   * every drag in the component's tests read as released off the calendar — and in a browser it
-   * would make a calendar in a hidden tab, or one on its first frame, refuse every drop.
-   */
   it('contains everything when the box has not been laid out', () => {
     expect(pointWithin({ x: 5000, y: -5000 }, { left: 0, top: 0, width: 0, height: 0 })).toBe(true)
   })
@@ -1086,8 +1037,6 @@ describe('sameTimes', () => {
     expect(sameTimes(origin, { ...origin })).toBe(true)
   })
 
-  /* Each field on its own: a drag that changes only the day, or only the end, is still a move
-     the grid has to draw. */
   it.each([
     ['start', { start: '2026-06-11' }],
     ['end', { end: '2026-06-11' }],

@@ -1,15 +1,6 @@
 /**
- * What a VTabs passes down to the tabs and panels inside it.
- *
- * A tab and its panel have to know each other's identifier, since each names the
- * other for assistive technology. Rather than a registry they fill in as they mount,
- * both DERIVE that identifier from one generated base and their own `value` — so they
- * agree without ever exchanging anything, and the server and the browser produce the
- * same markup.
- *
- * The size travels through here rather than through CSS inheritance, as it does in
- * VAccordion, for a concrete reason: each tab renders a button that declares its own
- * size on itself, so an inherited value would never reach it.
+ * Derive tab/panel IDs from a shared base and value for SSR consistency. Pass size through
+ * context because child buttons declare their own size.
  */
 
 import type { InjectionKey } from 'vue'
@@ -48,16 +39,8 @@ export interface TabsContext {
 export const tabsKey: InjectionKey<TabsContext> = Symbol('v-tabs')
 
 /**
- * Makes a tab's value safe to use inside an identifier. The attribute tying a tab to
- * its panel holds a LIST of identifiers separated by spaces, so a value containing a
- * space would be read there as two references, both to elements that do not exist.
- *
- * TRAP — the encoding has to be INJECTIVE, or two tabs get one identifier and a tab
- * points its panel reference at its neighbour's panel, with no error anywhere. So every
- * character outside `[A-Za-z0-9-]` is spelled out as its code point between two
- * underscores (the underscore itself included, which is what keeps `a b` and `a_b`
- * apart), and the TYPE leads the result, the number 1 and the string "1" being two
- * different tabs.
+ * Encode type and every non-safe character, including underscore, so different values cannot
+ * collide in tab/panel IDs.
  */
 const slug = (value: ItemValue) =>
   (typeof value === 'number' ? 'n-' : 's-') +

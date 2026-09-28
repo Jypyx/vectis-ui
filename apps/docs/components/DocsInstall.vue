@@ -1,12 +1,4 @@
 <script setup lang="ts">
-/**
- * The command that adds the package, in whichever package manager the reader uses.
- *
- * It is a DocsCode carrying the manager toggle in its header slot, which is the one control
- * that header was designed for. The choice itself lives in `usePackageManager`, module-wide, so
- * every install block on the site shows the same manager: which one a reader uses is a fact
- * about their machine, not about the paragraph they happen to be reading.
- */
 import { VToggle, VToggleItem } from 'vectis-ui'
 
 const props = defineProps<{

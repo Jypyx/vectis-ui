@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import { VTimePicker, VTypography } from 'vectis-ui'
 
-/* Two faces, one value: half past seven in the evening is 19:30 on either of them. */
 const twelve = ref<string | null>('19:30')
 const twentyFour = ref<string | null>('19:30')
 </script>

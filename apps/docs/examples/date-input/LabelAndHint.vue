@@ -25,7 +25,6 @@ const deadline = ref<string | null>(null)
       :picker-icon="schedule"
     />
 
-    <!-- The start icon is rendered before whatever else fills that end of the field. -->
     <VDateInput
       v-model="start"
       label="Filter by date"

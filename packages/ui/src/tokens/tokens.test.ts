@@ -1,11 +1,6 @@
 /*
- * The token layer's only automated guard.
- *
- * CI already runs `tokens:check`, but that compares the generated artefacts against the
- * source byte for byte: it catches a stale `tokens.css`, never a wrong token. These tests
- * cover the other half — the shape of the palettes, which are transcribed by hand from
- * Tailwind's stylesheet, and the two invariants the generator relies on (an alias points at
- * something that exists; a theme reassigns a role and never invents one).
+ * Validate token meaning as well as generation freshness; tokens:check alone only compares
+ * artefact bytes.
  */
 import { describe, expect, it } from 'vitest'
 
@@ -16,12 +11,10 @@ import { isToken, type TokenGroup } from './types'
 const { primitives, semantic } = tokens
 const dark = tokens.themes.dark
 
-/** The five Tailwind families the library ships, in the order the source declares them. */
 const FAMILIES = ['red', 'amber', 'green', 'indigo', 'gray']
 
 const STEPS = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950']
 
-/** A `{color.<family>.<step>}` reference, as the semantic layer and the themes write them. */
 const COLOUR_ALIAS_RE = /\{color\.([a-z]+)\.\d+\}/g
 
 describe('the colour palettes', () => {
@@ -42,19 +35,8 @@ describe('the colour palettes', () => {
   })
 
   it('ships no palette a role does not point at', () => {
-    /*
-     * The rule this locks: the library carries only the colours it actually paints with.
-     * A palette nothing reads still costs eleven custom properties in every page that
-     * loads the stylesheet, and nothing else in the build would ever notice — which is
-     * exactly how twenty-one dead families accumulated here before.
-     *
-     * Only the FAMILIES are judged. `white` and `black` are single tokens rather than
-     * groups, so they fall outside the loop on their own; `black` is deliberately kept
-     * unaliased, as the peer of a `white` five roles do point at.
-     */
     const cited = new Set<string>()
     for (const { token } of [...flattenTokens(semantic), ...flattenTokens(dark)]) {
-      // Group 1 is not optional in the pattern, so a match always carries the family.
       for (const match of token.$value.matchAll(COLOUR_ALIAS_RE)) cited.add(match[1]!)
     }
 
@@ -74,8 +56,6 @@ describe('the duration scale', () => {
   })
 
   it('gives the three motion roles a step of that scale', () => {
-    // These are what a `transition` reaches for; a role pointing at a value of its own
-    // would put a fourth duration on the page that no other component could name.
     const steps = new Set(Object.keys(primitives.duration).map((n) => `{duration.${n}}`))
 
     for (const token of Object.values(semantic.duration)) {
@@ -90,8 +70,6 @@ describe('flattenTokens', () => {
 
     expect(names).toContain('--vectis-color-gray-500')
     expect(names).toContain('--vectis-font-size-2xl')
-    // A key that already holds a dash simply concatenates, which is what makes `in-out`
-    // and `heading-1` come out right.
     expect(names).toContain('--vectis-ease-in-out')
     expect(new Set(flattenTokens(semantic).map((f) => f.cssName))).toContain(
       '--vectis-text-heading-1-size',
@@ -116,7 +94,7 @@ describe('resolveTokenValue', () => {
 
   it('throws on an alias that points at nothing', () => {
     // Left to CSS, a dangling reference resolves to nothing at all and the declaration is
-    // silently dropped — hence a build error instead.
+    // silently dropped; hence a build error instead.
     expect(() => resolveTokenValue('{color.gray.42}', known)).toThrow(/Unknown token alias/)
   })
 
@@ -129,11 +107,8 @@ describe('resolveTokenValue', () => {
 
 describe('the semantic descriptions', () => {
   /*
-   * The documentation site's Design tokens page prints these sentences as the reference an
-   * application reads to know which token to override, so a role without one is a blank cell
-   * there. The text recipes are the one exception: the page describes a ROLE once, on a row
-   * holding its size, weight, leading and tracking, and four identical sentences here would
-   * say nothing more.
+   * Semantic descriptions populate the public token catalogue; text recipes are described once
+   * per role.
    */
   const recipes = Object.entries(semantic.text).filter(([, node]) => !isToken(node))
   const recipeNames = new Set(
@@ -158,7 +133,6 @@ describe('the semantic descriptions', () => {
 
 describe('the dark theme', () => {
   it('only reassigns roles that already exist', () => {
-    // A token existing in one theme alone would leave a component unstyled in the other.
     const roles = new Set(flattenTokens(semantic).map((f) => f.cssName))
 
     for (const { cssName } of flattenTokens(dark)) {
@@ -168,10 +142,8 @@ describe('the dark theme', () => {
 })
 
 /*
- * A `var()` inside a custom property is resolved where the property is DECLARED, which for
- * a token is `:root`. A hue read there is the fallback's, and every card that set its own
- * would still be painted in it. The event colours are therefore plain colours, and the card
- * turns their hue with relative colour syntax on itself.
+ * Per-event hues must be applied on cards; root-resolved aliases would reuse only the fallback
+ * hue.
  */
 describe('the calendar event colours', () => {
   it('carry no custom property, in either theme', () => {

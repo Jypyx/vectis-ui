@@ -13,7 +13,6 @@ import firefoxLogo from '~/assets/img/firefox-browser-svg.svg'
   <VIconButton :icon="{ path: code.paths[0] }" variant="outline" label="View the source" />
   <VIconButton :icon="{ src: firefoxLogo }" variant="outline" label="Open in Firefox" />
 
-  <!-- Filled marks a state, here a notification that has arrived. -->
   <VIconButton :icon="notifications" icon-filled variant="outline" label="3 new notifications" />
 
   <!-- The slot is the way to an icon the prop cannot express: a VIcon you configure

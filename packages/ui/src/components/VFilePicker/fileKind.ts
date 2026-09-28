@@ -1,20 +1,6 @@
 /**
- * What KIND of thing a file is, for the sole purpose of choosing an icon. It is
- * deliberately coarse: the question is which of eight pictures to show, not how to
- * classify every type in existence.
- *
- * The answer comes from the type the browser reports FIRST, and from the extension
- * afterwards. That order is the contract: the reported type is authoritative when there
- * IS one, but it is empty far more often than one expects — an extension the operating
- * system does not know, certain Linux setups — which is why the extension has to be
- * there as a fallback rather than as a first resort.
- *
- * The module is pure and knows nothing of Vue. It lives in the component's folder for
- * the usual reason: a single consumer, so it does not qualify as shared code — promote
- * it the day a second one appears.
- *
- * What is NOT here is which icon each kind takes. That belongs to VFilePicker, which
- * exposes it as a prop a consumer can override.
+ * Prefer reported MIME types and fall back to filename extensions when the browser provides no
+ * type.
  */
 
 import type { FileCandidate } from '../../utils/file'
@@ -120,17 +106,17 @@ export function fileKind(file: FileCandidate): FilePickerKind {
   const byMime = lookup(MIME_KINDS, type)
   if (byMime) return byMime
 
-  // TRAP — the dot must be found PAST the first character and not at it: a file named
-  // `.gitignore` has no extension at all, it has a name beginning with a dot.
+  // The dot must be found PAST the first character and not at it: a file named `.gitignore` has
+  // no extension at all, it has a name beginning with a dot.
   const dot = file.name.lastIndexOf('.')
   const extension = dot > 0 ? file.name.slice(dot + 1).toLowerCase() : ''
   return lookup(EXTENSION_KINDS, extension) ?? 'file'
 }
 
 /**
- * TRAP — the tables are object literals, so a bare index also answers for what they
- * INHERIT: a file named `x.constructor` would get a function back, and the component would
- * look its icon up with it. Only a table's own keys are kinds.
+ * The tables are object literals, so a bare index also answers for what they INHERIT: a file
+ * named `x.constructor` would get a function back, and the component would look its icon up
+ * with it. Only a table's own keys are kinds.
  */
 const lookup = (table: Record<string, FilePickerKind>, key: string): FilePickerKind | undefined =>
   Object.hasOwn(table, key) ? table[key] : undefined

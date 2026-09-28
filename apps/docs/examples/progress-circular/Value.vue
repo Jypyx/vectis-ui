@@ -11,7 +11,6 @@ const step = (delta: number) => (value.value += delta)
     <div class="row">
       <VProgressCircular :value="value" :size="96" show-value label="Upload" />
 
-      <!-- `max` says what counts as finished. The other end is always zero. -->
       <VProgressCircular :value="7" :max="12" :size="96" show-value label="Files" />
     </div>
 

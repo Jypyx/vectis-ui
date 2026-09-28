@@ -1,12 +1,6 @@
 /**
- * Connects the theme state to the document, once, on the client.
- *
- * Everything here waits for `app:mounted` on purpose. The pre-paint script in
- * `nuxt.config.ts` has already put the right value on `<html data-theme>`, so the PAGE is
- * correct from the first frame; what cannot be done earlier is moving the Vue state, because
- * the header renders a different icon for each theme and the prerendered HTML says 'light'.
- * Seeding before hydration would therefore be a mismatch, and seeding after it costs one
- * frame of a light-mode icon on a dark-mode machine.
+ * The pre-paint script sets page colours. Update Vue theme state after hydration to avoid
+ * mismatching the prerendered icon.
  */
 import { THEME_STORAGE_KEY, type DocsTheme } from '~/composables/useDocsTheme'
 
@@ -22,7 +16,6 @@ export default defineNuxtPlugin((nuxtApp) => {
       pinned.value = false
     }
 
-    // The one place the attribute is written after boot, so no caller has to remember to.
     watch(theme, (next: DocsTheme) => {
       root.dataset.theme = next
     })

@@ -1,20 +1,7 @@
 <script setup lang="ts">
 /**
- * A keyboard shortcut, DISPLAYED. Written as a plain string — `mod+k` — and rendered with
- * the symbols of the system the reader is on: ⌘K on a Mac, Ctrl+K elsewhere.
- *
- * Two things here are unique in the library. It carries the ONLY `navigator` read, in
- * `onMounted` and nowhere else: the server cannot know the OS and the first client render
- * has to match what it sent, so a Mac visitor pays one frame of `Ctrl`. The `platform` prop
- * is the escape hatch, and what makes stories and tests deterministic.
- *
- * And `listen` attaches the library's ONLY document-level listener, which is why it must be
- * asked for: a component whose job is to display a shortcut must not silently capture the
- * page's keyboard.
- *
- * It is not interactive and not focusable, so it carries no hover, active or focus rule, and
- * therefore no transition and no reduced-motion block. That absence is deliberate — do not
- * copy VButton's state rules into it.
+ * Render platform-specific shortcut glyphs. Detect the platform after mount for SSR; attach
+ * keyboard listeners only when listen is enabled.
  */
 
 import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue'
@@ -37,22 +24,14 @@ export type HotkeysVariant = 'soft' | 'outline' | 'elevated'
 export type HotkeysSize = 'xs' | 'sm'
 
 interface HotkeysProps {
-  /**
-   * The combination, `+`-separated: `mod+k`, `ctrl+shift+p`, `alt+enter`, `esc`.
-   * Case- and space-insensitive. `mod` is the CROSS-PLATFORM modifier: ⌘ on
-   * macOS, Ctrl everywhere else; `meta` is the literal Command/Windows/Super key.
-   * Aliases: cmd/command/win/super → meta, control → ctrl, option/opt → alt,
-   * return → enter, escape → esc, del → delete, arrowup… → up…. An unknown token
-   * is displayed as declared (`k` → K, `f5` → F5). The `+` key is `plus`.
-   */
+  /** The combination, `+`-separated: `mod+k`, `ctrl+shift+p`, `alt+enter`, `esc`. */
   keys: string
   /** How a key cap is drawn: tinted (`soft`), outlined (`outline`), or raised off the page (`elevated`). */
   variant?: HotkeysVariant
   /**
-   * Draws the whole combination as a SINGLE key rather than as several: the decoration
-   * moves from each cap to the shortcut as a whole, so the separator ends up inside
-   * the key instead of between two of them. It is purely visual: the markup and the
-   * announced name are identical either way.
+   * Draws the whole combination as a SINGLE key rather than as several: the decoration moves
+   * from each cap to the shortcut as a whole, so the separator ends up inside the key instead
+   * of between two of them.
    */
   attached?: boolean
   /** The size of the caps, `xs` by default: a shortcut is chrome beside other text. */
@@ -77,9 +56,8 @@ interface HotkeysProps {
    */
   listen?: boolean
   /**
-   * While listening, lets the browser go on doing whatever the combination normally
-   * does. Left out, the browser is stopped, which is the entire point of taking over
-   * something like ⌘K. Escape is never stopped: it has to stay the close request of dialogs.
+   * While listening, lets the browser go on doing whatever the combination normally does. Left
+   * out, the browser is stopped, which is the entire point of taking over something like ⌘K.
    */
   allowDefault?: boolean
   /**
@@ -114,16 +92,12 @@ const emit = defineEmits<{
 
 const m = useMessages()
 
-// @ssr — the library's ONLY reading of the visitor's platform, and the reason it
-// happens after mounting.
-/* The operating system is read once the component is in the page and never during
-   setup: a server has nothing to read it from, so rendering the detected value
-   directly would make the two markups differ.
-
-   TRAP — the value is held PER INSTANCE and not at module level. A shared one, having
-   already resolved to macOS, would make a component hydrated later — a Nuxt island, a
-   route loaded on demand — render ⌘ on its very first client pass where the server had
-   written Ctrl. */
+// @ssr
+/*
+ * The value is held per instance and not at module level. A shared one, having already resolved
+ * to macOS, would make a component hydrated later; a Nuxt island, a route loaded on demand;
+ * render ⌘ on its very first client pass where the server had written Ctrl.
+ */
 const detected = ref<HotkeysPlatform>(DEFAULT_PLATFORM)
 onMounted(() => {
   detected.value = detectPlatform()
@@ -135,11 +109,12 @@ const tokens = computed(() => parseHotkeys(props.keys))
 const resolved = computed(() => resolveKeys(tokens.value, platform.value))
 
 // @a11y
-/* The same table is read twice, in opposite directions. On SCREEN the symbol wins, ⌘
-   being what is engraved on the key; in the ANNOUNCED NAME the word does, because that
-   symbol is either passed over in silence or read out as "place of interest sign",
-   depending on the screen reader. Inverting the preference is what lets one table
-   serve both. */
+/*
+ * On SCREEN the symbol wins, ⌘ being what is engraved on the key; in the ANNOUNCED NAME the
+ * word does, because that symbol is either passed over in silence or read out as "place of
+ * interest sign", depending on the screen reader. Inverting the preference is what lets one
+ * table serve both.
+ */
 const caps = computed(() =>
   resolved.value.map(
     (key) => key.glyph ?? (key.word ? m.value.hotkeys[key.word] : capLabel(key.token)),
@@ -153,14 +128,12 @@ const spoken = computed(() =>
 const resolvedLabel = computed(() => props.label ?? m.value.hotkeys.label(spoken.value))
 
 // @core
-/* A plain variable and not a reactive one: nothing renders it, and making it reactive
-   would cause renders for no reason — the same reasoning as in `useTimer`.
-
-   TRAP — it is called `listening` and NOT `attached`. Every top-level binding of a
-   `<script setup>` is exposed to the template, where it SHADOWS the prop of the same
-   name: called `attached`, this flag would silently be what the template read instead
-   of the prop, and the joined rendering would follow whether a listener happened to be
-   installed. */
+/*
+ * It is called `listening` and not `attached`. Every top-level binding of a `<script setup>` is
+ * exposed to the template, where it SHADOWS the prop of the same name: called `attached`, this
+ * flag would silently be what the template read instead of the prop, and the joined rendering
+ * would follow whether a listener happened to be installed.
+ */
 let listening = false
 
 function attach() {
@@ -175,8 +148,7 @@ function detach() {
   listening = false
 }
 
-// @keyboard @core — the listening half. Deciding whether a key event IS the
-// combination is pure and lives in `platform.ts`.
+// @keyboard @core
 function onKeydown(event: KeyboardEvent) {
   /* A held-down combination repeats at the system's auto-repeat rate, which would
      reopen the consumer's palette a dozen times a second; only the first press
@@ -190,8 +162,10 @@ function onKeydown(event: KeyboardEvent) {
      plain element: the field itself is the first entry of the composed path. */
   if (!props.allowInInput && isEditableTarget(event.composedPath()[0] ?? event.target)) return
   if (!matchesEvent(event, tokens.value, platform.value)) return
-  /* TRAP — Escape is never cancelled. A cancelled Escape is not turned into a close request,
-     so every open dialog and light-dismiss popover on the page would stop closing on it. */
+  /*
+   * Escape is never cancelled. A cancelled Escape is not turned into a close request, so every
+   * open dialog and light-dismiss popover on the page would stop closing on it.
+   */
   if (!props.allowDefault && !tokens.value.includes('esc')) event.preventDefault()
   emit('trigger', event)
 }
@@ -233,15 +207,12 @@ onActivated(() => {
 
 <style>
 @layer vectis.components {
-  /* TRAP — the browser gives a `<kbd>` a monospaced family AND a smaller size, and
-     that reduction COMPOUNDS when one `<kbd>` sits inside another, as it does here:
-     the caps would come out at roughly 69% of the surrounding text. Both are reset
-     here and again on the caps themselves, and deleting either line silently
-     miniaturizes the whole component.
-
-     The vertical alignment is the second correction: a box laid out this way sits on
-     the baseline of its FIRST item, which drops the caps below the line of prose
-     around them. */
+  /*
+   * The browser gives a `<kbd>` a monospaced family and a smaller size, and that reduction
+   * COMPOUNDS when one `<kbd>` sits inside another, as it does here: the caps would come out at
+   * roughly 69% of the surrounding text. Both are reset here and again on the caps themselves,
+   * and deleting either line silently miniaturizes the whole component.
+   */
   .v-hotkeys {
     display: inline-flex;
     align-items: center;
@@ -274,25 +245,12 @@ onActivated(() => {
     line-height: var(--vectis-text-control-leading);
   }
 
-  /* The three variants are tinted (`soft`, the word VButton and VChip use for a tinted
-     surface, where `flat` names the absence of decoration on VTabs, VAccordion and
-     VDataTable), outlined and raised, and EVERY paint here derives
-     from `currentcolor` rather than from a surface token — the argument the separator
-     at the bottom of this sheet already makes, carried through to the caps themselves.
-
-     A shortcut is chrome, so it sits in whatever surrounds it: a paragraph, a field, a
-     menu row, a tooltip painted on an inverse surface. Greys chosen against the page
-     are wrong in half of those, and the failure is silent in the worst way — the caps
-     kept the page's text colour while the ground under them was the opposite one, so
-     on a light theme a shortcut inside a tooltip wrote dark keys on a dark panel.
-     Deriving the whole cap from the inherited colour is what makes the component
-     ground-independent, and it is the same reason there is no tone table at all.
-
-     They set VARIABLES rather than declaring the look straight away, because that look
-     has two possible carriers (see below). The names are qualified on purpose: these
-     variables inherit, so a bare `--bg` would be captured by any ancestor in the host
-     application that happened to define one. `currentcolor` inside them is resolved on
-     whichever element ends up USING them, which is exactly what is wanted here. */
+  /*
+   * Deriving the whole cap from the inherited colour is what makes the component
+   * ground-independent, and it is the same reason there is no tone table at all. They set
+   * VARIABLES rather than declaring the look straight away, because that look has two possible
+   * carriers (see below).
+   */
   .v-hotkeys[data-variant='soft'] {
     --hotkeys-bg: color-mix(in oklab, currentcolor, transparent 90%);
     --hotkeys-border: transparent;
@@ -315,18 +273,22 @@ onActivated(() => {
     --hotkeys-shadow: var(--vectis-shadow-sm);
   }
 
-  /* When one key holds the WHOLE combination, its ends take the same breathing room as
-     the gaps inside it, which gives the key a single rhythm. The usual control padding
-     is sized to wrap ONE short label; around three runs of text already spaced from
-     one another, it reads as slack at the edges. */
+  /*
+   * When one key holds the whole combination, its ends take the same breathing room as the gaps
+   * inside it, which gives the key a single rhythm. The usual control padding is sized to wrap
+   * ONE short label; around three runs of text already spaced from one another, it reads as
+   * slack at the edges.
+   */
   .v-hotkeys[data-attached] {
     --hotkeys-pad: var(--control-gap);
   }
 
-  /* THE key recipe, written once for its two possible carriers: every cap by default,
-     and the whole shortcut alone when it is drawn as a single key — which is exactly
-     what puts the separator inside the key rather than between two of them. Written
-     out twice, the two renderings would drift apart at the first token change. */
+  /*
+   * THE key recipe, written once for its two possible carriers: every cap by default, and the
+   * whole shortcut alone when it is drawn as a single key; which is exactly what puts the
+   * separator inside the key rather than between two of them. Written out twice, the two
+   * renderings would drift apart at the first token change.
+   */
   .v-hotkeys[data-attached],
   .v-hotkeys:not([data-attached]) .v-hotkeys-key {
     height: var(--control-height);
@@ -346,9 +308,10 @@ onActivated(() => {
     color: color-mix(in oklab, currentcolor, transparent 40%);
   }
 
-  /* Forced colours flatten the tint and drop the shadow, which is all a soft or an
-     elevated cap is made of. Every variant takes the edge of the outlined one, in the
-     system text colour. At (0,2,0) and later in the sheet, this beats the variant rules. */
+  /*
+   * Forced colours flatten the tint and drop the shadow, which is all a soft or an elevated cap
+   * is made of. Every variant takes the edge of the outlined one, in the system text colour.
+   */
   @media (forced-colors: active) {
     .v-hotkeys[data-variant] {
       --hotkeys-border: CanvasText;

@@ -25,7 +25,6 @@ const COMMANDS = [
       what you are after. <VHotkeys keys="esc" /> puts it away again.
     </VTypography>
 
-    <!-- At the end of a command row, which is where a shortcut is usually read. -->
     <VMenu>
       <template #trigger="{ triggerProps }">
         <VButton v-bind="triggerProps" variant="outline" tone="neutral">File</VButton>
@@ -39,8 +38,7 @@ const COMMANDS = [
       </VMenuItem>
     </VMenu>
 
-    <!-- Inside a tooltip, which is what its `#content` slot is for: rich but never
-         interactive. -->
+    <!-- Inside a tooltip, which its `#content` slot is for: rich but never interactive. -->
     <VTooltip>
       <template #default="{ triggerProps }">
         <VButton v-bind="triggerProps" variant="outline" tone="neutral">Save</VButton>
@@ -48,7 +46,6 @@ const COMMANDS = [
       <template #content>Save this file <VHotkeys keys="mod+s" size="xs" /></template>
     </VTooltip>
 
-    <!-- And inside the control the shortcut is a second route to. -->
     <VButton variant="outline" tone="neutral" class="search">
       Search the docs
       <VHotkeys keys="mod+k" variant="outline" />

@@ -54,10 +54,10 @@ const meta = {
   argTypes: {
     preview: { control: 'inline-radio', options: [false, 'bottom', 'end'] },
   },
-  // `title` is required, so it has to be pinned (the VIconButton `label`
-  // precedent) — in English, matching what the templates render under the default
-  // locale. Neither `preview` nor `multiple` is: pinning them would make the
-  // Controls panel lie, showing a current value different from the default.
+  // `title` is required, so it has to be pinned (the VIconButton `label` precedent); in
+  // English, matching what the templates render under the default locale. Neither `preview` nor
+  // `multiple` is: pinning them would make the Controls panel lie, showing a current value
+  // different from the default.
   args: {
     title: 'Drag your files here',
   },
@@ -66,20 +66,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/**
- * Builds a real `DataTransfer` and drops it on the component.
- *
- * A play function must NEVER click the browse button, nor the zone once it is the
- * control: both open a genuine OS dialog, which no automation can close — the run
- * would hang. A drop exercises the same screening pipeline, and is precisely what
- * jsdom cannot do (it ships neither `DataTransfer` nor `DragEvent`).
- *
- * Dispatched by hand rather than through `fireEvent.drop`: in a real browser the
- * helper REBUILDS a fresh `DataTransfer` and copies only the OWN property names
- * of the one it is given — a genuine `DataTransfer` has none of them (everything
- * sits on the prototype), so the files would silently vanish and every assertion
- * below would fail on an empty selection.
- */
+/** Builds a real `DataTransfer` and drops it on the component. */
 function drop(canvasElement: HTMLElement, files: File[]) {
   const dataTransfer = new DataTransfer()
   for (const file of files) dataTransfer.items.add(file)
@@ -92,9 +79,9 @@ const fileOf = (name: string, size: number, type: string) =>
   new File([new Uint8Array(size)], name, { type })
 
 /**
- * A real 1×1 PNG. The bytes have to be decodable: a `Uint8Array` of zeroes would
- * make the `<img>` fire `error`, and the component would rightly fall back to the
- * type icon — the thumbnail assertion would then never see a `blob:` source.
+ * A real 1×1 PNG. The bytes have to be decodable: a `Uint8Array` of zeroes would make the
+ * `<img>` fire `error`, and the component would rightly fall back to the type icon; the
+ * thumbnail assertion would then never see a `blob:` source.
  */
 const PNG_1PX =
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
@@ -106,10 +93,8 @@ const body = (canvasElement: HTMLElement) =>
   canvasElement.querySelector<HTMLElement>('.v-file-picker-body')!
 
 /**
- * The complete zone: a large icon, a required title, an optional subtitle, then
- * the "or" separator and the button that opens the system dialog. `preview`
- * lists what has been loaded, each row carrying a thumbnail or a type icon, the
- * name, the size and a remove button.
+ * The complete zone: a large icon, a required title, an optional subtitle, then the "or"
+ * separator and the button that opens the system dialog.
  */
 export const Default: Story = {
   args: { preview: 'bottom', multiple: true },
@@ -144,17 +129,10 @@ export const Default: Story = {
     await waitFor(() =>
       expect(canvas.getByRole('button', { name: 'Remove track.mp3' })).toHaveFocus(),
     )
-    // Ends with the list on screen, so axe audits it.
   },
 }
 
-/**
- * `hideBrowse` keeps the top half alone. Drag & drop is not reachable from
- * a keyboard, so the zone then becomes the control ITSELF — a real `<button>`,
- * which brings Enter, Space, focus and the disabled state along for free. It is
- * exactly because a button may not contain a button that the preview list is
- * always rendered outside the zone.
- */
+/** `hideBrowse` keeps the top half alone. */
 export const WithoutBrowse: Story = {
   args: { hideBrowse: true, preview: 'bottom', multiple: true },
   render: (args) => ({
@@ -176,16 +154,11 @@ export const WithoutBrowse: Story = {
     drop(canvasElement, [fileOf('report.pdf', 1200, 'application/pdf')])
 
     await waitFor(() => expect(within(canvasElement).getAllByRole('listitem')).toHaveLength(1))
-    // The invariant axe checks right after this: no nested interactive element.
     await expect(zone.querySelectorAll('button, a, [tabindex]')).toHaveLength(0)
   },
 }
 
-/**
- * `preview="end"` puts the list beside the zone. The fold-back is a **container
- * query**, not a media query: the component follows the width it is given, so it
- * behaves the same in a page, in a dialog or in a narrow sidebar.
- */
+/** `preview="end"` puts the list beside the zone. */
 export const PreviewEnd: Story = {
   args: { preview: 'end', multiple: true },
   render: (args) => ({
@@ -203,9 +176,8 @@ export const PreviewEnd: Story = {
 }
 
 /**
- * The same story in a 380px container: below the threshold the list moves back
- * under the zone. This is the only place the container query can be exercised —
- * jsdom evaluates no style at all.
+ * The same story in a 380px container: below the threshold the list moves back under the zone.
+ * This is the only place the container query can be exercised; jsdom evaluates no style at all.
  */
 export const PreviewEndNarrow: Story = {
   args: { preview: 'end', multiple: true },
@@ -224,10 +196,9 @@ export const PreviewEndNarrow: Story = {
 }
 
 /**
- * An image gets a real thumbnail: an object URL created on the client only, and
- * revoked as soon as the file leaves the model or the component unmounts.
- * Everything else falls back to the icon of its kind — PDF, audio, video,
- * archive, spreadsheet, code, or the generic document.
+ * An image gets a real thumbnail: an object URL created on the client only, and revoked as soon
+ * as the file leaves the model or the component unmounts. Everything else falls back to the
+ * icon of its kind; PDF, audio, video, archive, spreadsheet, code, or the generic document.
  */
 export const Thumbnails: Story = {
   args: { preview: 'bottom', multiple: true, accept: 'image/*,.pdf,.zip' },
@@ -258,11 +229,7 @@ export const Thumbnails: Story = {
   },
 }
 
-/**
- * The zone reacts to a drag as a whole. The state is held by a depth COUNTER and
- * not a boolean: `dragleave` fires every time the pointer crosses into a child,
- * so a boolean would flicker off under the cursor.
- */
+/** The zone reacts to a drag as a whole. */
 export const DragAndDrop: Story = {
   args: { preview: 'bottom' },
   render: (args) => ({
@@ -293,10 +260,9 @@ export const DragAndDrop: Story = {
 }
 
 /**
- * `accept`, `maxSize`, `maxTotalSize` and `maxFiles` screen every file, from the
- * dialog AND from a drop — the `accept` attribute has no say over a drop, which
- * is why the rule exists a second time in JS. A refused file never enters the
- * model; it is reported through `reject`, one event per file.
+ * `accept`, `maxSize`, `maxTotalSize` and `maxFiles` screen every file, from the dialog and
+ * from a drop; the `accept` attribute has no say over a drop, which is why the rule exists a
+ * second time in JS.
  */
 export const Limits: Story = {
   args: { preview: 'bottom', multiple: true, accept: '.pdf', maxSize: 2000, maxFiles: 2 },
@@ -333,12 +299,7 @@ export const Limits: Story = {
   },
 }
 
-/**
- * Every visible part is a slot. `#browse` receives `open`, without which a custom
- * button could no longer open the dialog; `#remove` receives `remove` and a
- * ready-made `removeLabel` carrying the file name — dropping it would leave an unnamed
- * button, which axe fails.
- */
+/** Every visible part is a slot. */
 export const CustomSlots: Story = {
   args: { preview: 'bottom', multiple: true },
   render: (args) => ({
@@ -376,9 +337,9 @@ export const CustomSlots: Story = {
 }
 
 /**
- * `disabled` greys the zone through tokens and makes dialog and drop inert;
- * `readonly` keeps the selection on screen but takes every way of changing it
- * away — no dialog, no drop, no removal.
+ * `disabled` greys the zone through tokens and makes dialog and drop inert; `readonly` keeps
+ * the selection on screen but takes every way of changing it away; no dialog, no drop, no
+ * removal.
  */
 export const States: Story = {
   render: (args) => ({
@@ -412,10 +373,8 @@ export const States: Story = {
 }
 
 /**
- * `loading` is the opposite of `disabled` and `readonly`: purely visual, a spinner in
- * place of the zone icon while an upload is under way, with the dialog and the drop left
- * working. `invalid` colours the zone's outline, for a rule of your own — nothing here
- * is checked by the browser, the real input being hidden.
+ * `loading` is the opposite of `disabled` and `readonly`: purely visual, a spinner in place of
+ * the zone icon while an upload is under way, with the dialog and the drop left working.
  */
 export const LoadingAndInvalid: Story = {
   render: (args) => ({
@@ -431,9 +390,9 @@ export const LoadingAndInvalid: Story = {
   play: async ({ canvasElement }) => {
     const [loading, invalid] = [...canvasElement.querySelectorAll('.v-file-picker')]
     await expect(loading!.querySelector('.v-spinner')).not.toBeNull()
-    // The spinner stands in for the icon, so it takes the icon's box — the picker beside it
-    // is that same picture with its icon, and the two boxes and the two zones must agree.
-    // jsdom lays nothing out, so this can only be asserted here.
+    // The spinner stands in for the icon, so it takes the icon's box; the picker beside it is
+    // that same picture with its icon, and the two boxes and the two zones must agree. jsdom
+    // lays nothing out, so this can only be asserted here.
     const spinner = loading!.querySelector('.v-file-picker-icon .v-spinner')!
     const icon = invalid!.querySelector('.v-file-picker-icon .v-icon')!
     await expect(
@@ -442,7 +401,6 @@ export const LoadingAndInvalid: Story = {
     await expect(
       Math.abs(loading!.getBoundingClientRect().height - invalid!.getBoundingClientRect().height),
     ).toBeLessThan(1)
-    // Loading changes nothing else: the browse button is still there to be pressed.
     await expect(
       loading!.querySelector('.v-file-picker-zone button, button.v-file-picker-zone'),
     ).toBeEnabled()

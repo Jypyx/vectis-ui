@@ -1,30 +1,11 @@
 /**
- * Entry point of `vectis-ui`. Named exports only (tree-shaking).
- *
- * The CSS import below feeds the extraction into `dist/styles.css`, which carries
- * the CORE alone (reset, tokens, and the shared chrome of `styles/`); Vite strips
- * the import from the emitted JS, so the consumer imports `vectis-ui/styles.css`
- * explicitly. Each component's own CSS ships as `dist/<path>/VX.css`, imported by
- * its own `VX.js` — see `shipComponentCss` in `vite.config.ts`.
- *
- * The export order therefore no longer fixes anything: it is editorial (dependency
- * → dependent, for reading). NOTHING may depend on it, because the order in which
- * the consumer's bundler concatenates the sheets is unknowable. A rule that would
- * collide with another component's at equal specificity is qualified instead —
- * `[data-size]` (`.v-tab`, `.v-pagination-page`), a compound class
- * (`.v-popover-panel.v-tooltip-panel`), a descendant (`.v-data-table-toolbar .v-input`)
- * — or routed through the custom property the target reads (`--typography-color`).
- * `scripts/check-css-split.ts` guards the mechanism at `postbuild`.
- *
- * Internal components (VComboboxOption, VMenuPanel…) and the composables are not
- * exported.
+ * Public export order aids reading; component CSS must remain independent of the consumer's
+ * module ordering.
  */
 import './styles/index.css'
 
-// Internationalization — pure TS modules, so no effect on the bundled CSS order
-// (same status as the `setIconResolver` block below). First because this is
-// configuration for the whole DS, not for a component. `fr` is opt-in: not
-// importing it is enough to prune it from the bundle.
+// First because this is configuration for the whole DS, not for a component. `fr` is opt-in:
+// not importing it is enough to prune it from the bundle.
 export { setLocale, registerMessages } from './i18n/state'
 export { en } from './i18n/en'
 export { fr } from './i18n/fr'
@@ -32,8 +13,6 @@ export type { ItemValue } from './types'
 export type { Messages, MessagesInput } from './i18n/types'
 
 export { default as VIcon } from './components/VIcon/VIcon.vue'
-// Hook for a third-party icon library — pure TS modules, so no effect on the
-// bundled CSS order.
 export {
   setIconResolver,
   ligatureIconResolver,
@@ -257,9 +236,11 @@ export type {
   FileInputChipSlotProps,
   FileInputCounterSlotProps,
 } from './components/VFileInput/VFileInput.vue'
-/* What `@reject` carries, on VFileInput as on VFilePicker. The two screen a batch through
-   the same rule, so the type is declared beside that rule rather than copied into each of
-   them — the `TimePickerAllowed` arrangement, and what lets one handler serve both. */
+/*
+ * What `@reject` carries, on VFileInput as on VFilePicker. The two screen a batch through the
+ * same rule, so the type is declared beside that rule rather than copied into each of them; the
+ * `TimePickerAllowed` arrangement, and what lets one handler serve both.
+ */
 export type { FileRejectReason, FileRejection } from './utils/file'
 export { default as VFilePicker } from './components/VFilePicker/VFilePicker.vue'
 export type {

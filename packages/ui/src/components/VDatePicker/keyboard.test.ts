@@ -11,13 +11,11 @@ describe('dayStep', () => {
   })
 
   it('lands Home and End on the ends of the CURRENT week, whatever the offset', () => {
-    // Wednesday of a Monday-first week: 2 days back to the start, 4 forward to the end.
     expect(dayStep('Home', false, 2)).toEqual({ days: -2 })
     expect(dayStep('End', false, 2)).toEqual({ days: 4 })
     // Already on the first day: Home does not move, End spans the whole week.
     expect(dayStep('Home', false, 0)).toEqual({ days: 0 })
     expect(dayStep('End', false, 0)).toEqual({ days: 6 })
-    // Last day of the week: the mirror image.
     expect(dayStep('Home', false, 6)).toEqual({ days: -6 })
     expect(dayStep('End', false, 6)).toEqual({ days: 0 })
   })
@@ -49,12 +47,7 @@ describe('gridDelta', () => {
     expect(gridDelta('ArrowUp')).toBe(-PICKER_COLUMNS)
   })
 
-  /*
-   * Why this module exists. `PICKER_COLUMNS` chunks the months/years grid AND sets the
-   * vertical arrow step, and writing the step as a literal instead would leave the arrows
-   * moving three cells the day the picker widens, with no error anywhere. Assert the TIE,
-   * never the value.
-   */
+  /* Assert the TIE, never the value. */
   it('derives the vertical step from PICKER_COLUMNS, never from a literal', () => {
     expect(gridDelta('ArrowDown')).toBe(PICKER_COLUMNS)
     expect(gridDelta('ArrowUp')).toBe(-gridDelta('ArrowDown')!)

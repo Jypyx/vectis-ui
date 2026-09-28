@@ -1,17 +1,8 @@
 <script setup lang="ts">
 // @core
 /**
- * A modal dialog: it takes over the page until the reader answers it.
- *
- * Almost everything that makes a modal correct comes free with the native `<dialog>`
- * element opened as a modal — it is drawn above the whole page, the background is
- * dimmed and made unusable, the focus is trapped inside it and handed back to the
- * trigger on closing, and whether a click outside or Escape dismisses it is declared
- * with an attribute rather than coded.
- *
- * The ONLY behavioural JavaScript is the bridge between `v-model:open` and the two
- * methods the platform offers no declarative equivalent for: opening as a modal, and
- * closing.
+ * Native showModal supplies top-layer placement and modal focus. JavaScript bridges v-model to
+ * imperative open/close and provides guarded dismissal where closedBy is absent.
  */
 
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, useId, watch } from 'vue'
@@ -35,9 +26,8 @@ interface DialogProps {
   /** A line under the title, explaining what the dialog is asking. */
   subtitle?: string
   /**
-   * How wide the dialog is: a number is read as pixels, a string as any CSS length. Left
-   * out, it takes the `--vectis-control-size-dialog-width` token, 400px by default. It is
-   * never allowed to exceed the width of the viewport.
+   * How wide the dialog is: a number is read as pixels, a string as any CSS length. Left out,
+   * it takes the `--vectis-control-size-dialog-width` token, 400px by default.
    */
   width?: number | string
   /**
@@ -77,11 +67,7 @@ const props = withDefaults(defineProps<DialogProps>(), {
 const m = useMessages()
 const resolvedCloseLabel = computed(() => props.closeLabel ?? m.value.common.close)
 
-/**
- * Whether the dialog is showing. It starts closed, and it is BIDIRECTIONAL: the browser
- * writes back to it whenever the dialog closes on its own, through Escape or the backdrop,
- * so a consumer never has to reset it by hand.
- */
+/** Whether the dialog is showing. */
 const open = defineModel<boolean>('open', { default: false })
 
 /** What the trigger has to carry: the click that opens the dialog, and the fact that it does. */
@@ -100,8 +86,8 @@ defineSlots<{
   /** The buttons at the foot of the dialog. */
   footer?(): unknown
   /**
-   * The button that opens the dialog. Bind the `triggerProps` it receives onto it. It
-   * stays rendered at all times, unlike the dialog itself.
+   * The button that opens the dialog. Bind the `triggerProps` it receives onto it. It stays
+   * rendered always, unlike the dialog itself.
    */
   trigger?(props: { triggerProps: DialogTriggerProps }): unknown
 }>()
@@ -114,31 +100,25 @@ const titleId = useId()
 const subtitleId = useId()
 
 /**
- * Which dismissals the browser itself accepts, declared as an attribute rather than
- * handled in code: everything, Escape alone, or nothing.
- *
- * One combination cannot be expressed that way — a click outside allowed while Escape
- * is not — and it falls back to allowing both. Nothing in the design system asks for
- * it, and it would be a strange thing to want.
+ * Which dismissals the browser itself accepts, declared as an attribute rather than handled in
+ * code: everything, Escape alone, or nothing. One combination cannot be expressed that way; a
+ * click outside allowed while Escape is not; and it falls back to allowing both.
  */
 const closedby = computed(() =>
   props.persistentBackdrop ? (props.persistentEscape ? 'none' : 'closerequest') : 'any',
 )
 
 // @fallback
-// The `closedby` attribute is newer than the type definitions shipped with
-// TypeScript, so writing it directly in the template would be reported as an unknown
-// attribute. Passing it inside a bound object goes through the same path as any
-// forwarded attribute, which is not checked element by element. Vue still merges the
-// `class` and `style` it may contain with the static ones below.
+// The `closedby` attribute is newer than the type definitions shipped with TypeScript, so
+// writing it directly in the template would be reported as an unknown attribute. Passing it
+// inside a bound object goes through the same path as any forwarded attribute, which is not
+// checked element by element.
 const rootAttrs = computed(() => ({ ...attrs, closedby: closedby.value }))
 
-// The dialog and its content only exist while it is open, which also spares the page
-// whatever heavy thing it contains. Every opening therefore builds a BRAND NEW
-// element, so it is always opened as a modal from a clean slate, and closing removes
-// it entirely — nothing is left behind to swallow clicks, and reopening cannot race
-// with a closing that is still finishing. The trigger, by contrast, stays rendered at
-// all times.
+// Every opening therefore builds a BRAND NEW element, so it is always opened as a modal from a
+// clean slate, and closing removes it entirely; nothing is left behind to swallow clicks, and
+// reopening cannot race with a closing that is still finishing. The trigger, by contrast, stays
+// rendered always.
 const rendered = ref(open.value)
 
 /**
@@ -155,8 +135,8 @@ function show(): Promise<void> {
 }
 
 function requestClose() {
-  // Closing the element is enough: the browser then fires its own close event, which
-  // is what puts the model back in step below.
+  // Closing the element is enough: the browser then fires its own close event, which puts the
+  // model back in step below.
   dialogEl.value?.close()
 }
 
@@ -165,19 +145,11 @@ const triggerProps = computed<DialogTriggerProps>(() => ({
   'aria-haspopup': 'dialog',
 }))
 
-// The `<dialog>` element is asymmetric in a way that shapes this whole bridge: it
-// announces every closing with an event, but announces nothing at all when it opens —
-// where a popover reports both. So the two directions are not written the same way:
-//
-//  - opening: render the element, then, once Vue has actually put it in the document,
-//    open it as a modal;
-//  - closing: whatever closed it — the cross, our own call, Escape, a click outside —
-//    the browser's close event is what puts the model back in step, and only then is
-//    the element removed.
+// Opening requires a mounted element and showModal. Closing updates the model from the native
+// close event before removing the element; dialog has no matching open event.
 watch(open, (value) => {
   if (value) {
     rendered.value = true
-    // the brand new <dialog> has to exist before it can be opened
     opening = nextTick(() => dialogEl.value?.showModal())
   } else {
     dialogEl.value?.close()
@@ -187,18 +159,14 @@ watch(open, (value) => {
 
 // @ssr
 onMounted(() => {
-  // A watcher does not run during the server render, so a dialog asked to be open from
-  // the start would never be opened. The element is already there — the flag above was
-  // initialized from the model — it just has to be told to show itself.
+  // A watcher does not run during the server render, so a dialog asked to be open from the
+  // start would never be opened. The element is already there; the flag above was initialized
+  // from the model; it just has to be told to show itself.
   if (open.value) dialogEl.value?.showModal()
 })
 
-// The browser's own close event, whatever caused it, is what brings the model back in
-// step with reality.
-//
-// TRAP — only the element on screen may do it. A close event is queued as a TASK, so the
-// one fired by the element a quick close-and-reopen has just replaced arrives after the new
-// element exists, and without the check it closed the dialog that had just opened.
+// Ignore close events from replaced elements: the queued event from a quick close-and-reopen
+// must not close the new dialog.
 function onClose(event: Event) {
   if (event.target !== dialogEl.value) return
   open.value = false
@@ -214,10 +182,10 @@ onBeforeUnmount(() => {
 
 // @fallback
 /*
- * `closedby` is what applies `persistentBackdrop` and `persistentEscape`, and Safari does
- * not implement it: there Escape always closes and the backdrop never does. The two halves
- * are rebuilt below, and ONLY where the attribute is unknown, so a browser that has it is
- * never second-guessed. The support is asked at event time: there is no DOM during setup.
+ * `closedby` is what applies `persistentBackdrop` and `persistentEscape`, and Safari does not
+ * implement it: there Escape always closes and the backdrop never does. The two halves are
+ * rebuilt below, and only where the attribute is unknown, so a browser that has it is never
+ * second-guessed.
  */
 const closedbyUnsupported = () => !('closedBy' in HTMLDialogElement.prototype)
 
@@ -348,21 +316,20 @@ defineExpose({
 <style>
 @layer vectis.components {
   .v-dialog {
-    /* The width comes from the prop, set inline, or from the token when there is none.
-       Whatever it asks for, the dialog is never allowed past the viewport, margins included.
-
-       TRAP — the token is declared ON the element rather than written as a `var()` fallback.
-       A custom property inherits, and a dialog opened from inside another one is its DOM
-       descendant: with a fallback, an alert confirming something in an 800px dialog would
-       read that dialog's inline width and open 800px wide itself, with no error anywhere. */
+    /*
+     * The token is declared on the element rather than written as a `var()` fallback. A custom
+     * property inherits, and a dialog opened from inside another one is its DOM descendant:
+     * with a fallback, an alert confirming something in an 800px dialog would read that
+     * dialog's inline width and open 800px wide itself, with no error anywhere.
+     */
     --dialog-width: var(--vectis-control-size-dialog-width);
     inline-size: var(--dialog-width);
     max-inline-size: calc(100dvi - 2 * var(--vectis-space-4));
     max-block-size: calc(100dvb - 2 * var(--vectis-space-4));
-    /* This puts the dialog back in the middle of the screen. The browser centres a
-       modal with an automatic margin, which the design system's own reset — where
-       every element loses its margins — had removed; restoring it here works because
-       the component layer is stronger than the reset one. */
+    /*
+     * Restore the modal's automatic margins in the component layer because the reset removes
+     * native dialog centring.
+     */
     margin: auto;
     /* The header and footer stay put while only the body scrolls, and hiding the
        overflow is what keeps the content inside the rounded corners. */
@@ -379,13 +346,9 @@ defineExpose({
   }
 
   /*
-   * An indispensable guard. The browser hides a closed dialog with a rule of its own,
-   * but any display we declare above beats it — so without this, a closed dialog would
-   * sit in the page at the top left, swallowing clicks.
-   *
-   * It also covers the two moments where the element exists without being open yet: the
-   * frame between rendering it and opening it, and the server-rendered markup. The
-   * popovers have the very same guard.
+   * An indispensable guard. The browser hides a closed dialog with a rule of its own, but any
+   * display we declare above beats it; so without this, a closed dialog would sit in the page
+   * at the top left, swallowing clicks.
    */
   .v-dialog:not([open]) {
     display: none;
@@ -399,10 +362,10 @@ defineExpose({
   }
 
   .v-dialog-scroll {
-    /* The ONLY part that scrolls. It takes whatever room is left between the header
-       and the footer, which is what keeps the scrollbar confined to it. The zero
-       minimum is load-bearing: without it a flex item refuses to shrink below its
-       content, and nothing would ever scroll. */
+    /*
+     * The zero minimum is load-bearing: without it a flex item refuses to shrink below its
+     * content, and nothing would ever scroll.
+     */
     flex: 1 1 auto;
     min-block-size: 0;
     overflow-y: auto;
@@ -411,16 +374,17 @@ defineExpose({
     overscroll-behavior: contain;
     display: flex;
     flex-direction: column;
-    /* This makes the box something its descendants can ask questions about — namely
-       whether there is content hidden above or below. It adds no containment of size. */
+    /*
+     * This makes the box something its descendants can ask questions about; namely whether
+     * there is content hidden above or below. It adds no containment of size.
+     */
     container-type: scroll-state;
   }
 
   /*
-   * The two sentinels: hairlines stuck to the top and the bottom of the scrolling
-   * area, and descendants of it, which is what allows them to ask about its scroll
-   * state. Their negative margins mean they occupy no space at all. They are
-   * transparent until the rules further down reveal them.
+   * The two sentinels: hairlines stuck to the top and the bottom of the scrolling area, and
+   * descendants of it, which allows them to ask about its scroll state. Their negative margins
+   * mean they occupy no space at all.
    */
   .v-dialog-edge {
     flex: none;
@@ -440,7 +404,7 @@ defineExpose({
   }
 
   .v-dialog-header {
-    flex: none; /* stays at the top, outside whatever scrolls */
+    flex: none;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -479,7 +443,7 @@ defineExpose({
   }
 
   .v-dialog-footer {
-    flex: none; /* stays at the bottom, outside whatever scrolls */
+    flex: none;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -488,16 +452,7 @@ defineExpose({
     padding: var(--vectis-space-3) var(--vectis-space-6) var(--vectis-space-6);
   }
 
-  /*
-   * The lines only appear when they mean something. Asking the scrolling area whether
-   * it can still be scrolled upwards tells us content is hidden ABOVE, so the line
-   * under the header is shown; the same question downwards reveals the one above the
-   * footer. In other words each line is drawn exactly when content is passing behind
-   * the edge it marks.
-   *
-   * This kind of query is Chrome 133 and later for now. Where it is missing the
-   * sentinels simply stay transparent, which is the intended fallback.
-   */
+  /* Where it is missing the sentinels simply stay transparent, which is the intended fallback. */
   @container scroll-state(scrollable: top) {
     .v-dialog-edge--top {
       background: var(--vectis-color-border);
@@ -511,13 +466,10 @@ defineExpose({
   }
 
   /*
-   * The dialog animates on the way IN and not on the way out. Since it is removed from
-   * the page the moment it closes, there is nothing left to animate out — that is the
-   * price of the clean slate the lazy rendering buys, and it also spares the extra
-   * declarations an exit animation would need.
-   *
-   * The starting values below are where a freshly rendered dialog begins, before
-   * settling into its open state.
+   * The dialog animates on the way in and not on the way out. Since it is removed from the page
+   * the moment it closes, there is nothing left to animate out; that is the price of the clean
+   * slate the lazy rendering buys, and it also spares the extra declarations an exit animation
+   * would need.
    */
   .v-dialog {
     transition:
@@ -550,9 +502,7 @@ defineExpose({
     }
   }
 
-  /* Windows forced colors flattens the dialog's background to Canvas and drops its shadow,
-     which were its only edge: it would float over the page with no boundary at all. An
-     outline draws one without moving the layout by a pixel. */
+  /* An outline draws one without moving the layout by a pixel. */
   @media (forced-colors: active) {
     .v-dialog {
       outline: 1px solid CanvasText;

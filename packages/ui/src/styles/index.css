@@ -1,19 +1,6 @@
 /*
- * CSS entry point of the design system (`vectis-ui/styles.css`).
- *
- * The layer order is declared here, once and for all:
- *   vectis.reset < vectis.tokens < vectis.components < vectis.utilities
- * Any NON-layered consumer style automatically wins over these layers — that is
- * the intended override mechanism. To override finely while keeping the DS
- * cascade, a consumer can also write into `vectis.utilities`.
- *
- * The statement must come FIRST: a `@layer vectis.components {}` block parsed before it
- * would pin that layer at the bottom of the order, under the reset, for good.
- *
- * The import order below is not: each sheet declares its own layer, and that statement
- * decides everything between sheets. Order still matters INSIDE a sheet — floating.css
- * has rules that beat each other by source order alone — which is why these stay separate
- * files rather than being merged into one.
+ * Declare layer order before any layer block or import; otherwise the first encountered layer
+ * is permanently ordered below the reset.
  */
 @layer vectis.reset, vectis.tokens, vectis.components, vectis.utilities;
 

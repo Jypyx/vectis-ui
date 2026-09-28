@@ -88,9 +88,9 @@ describe('VToggle', () => {
     it('joined (the default): the items are DIRECT children of the VButtonGroup (the seam)', () => {
       const { container } = mount()
       expect(container.querySelector('.v-toggle.v-button-group')).not.toBeNull()
-      // Structural guard on VToggleItem's own root: it renders the button and nothing
-      // around it. The wrappers a companion adds are the exception, and both sheets are
-      // written to reach through them — see "an item carrying a companion" below.
+      // Structural guard on VToggleItem's own root: it renders the button and nothing around
+      // it. The wrappers a companion adds are the exception, and both sheets are written to
+      // reach through them; see "an item carrying a companion" below.
       expect(container.querySelector('.v-button-group > .v-toggle-item')).not.toBeNull()
     })
 
@@ -134,7 +134,6 @@ describe('VToggle', () => {
       const { container, model } = mount({ initial: 'a', toggleAttrs: 'mandatory' })
       await fireEvent.click(itemsOf(container)[0] as HTMLElement)
       expect(model.value).toBe('a')
-      // but switching to another item stays possible
       await fireEvent.click(itemsOf(container)[1] as HTMLElement)
       expect(model.value).toBe('b')
     })
@@ -216,9 +215,9 @@ describe('VToggle', () => {
 
   describe('the row variant on the root', () => {
     /*
-     * The frame rules need to tell an outline row from a ghost one, and no item can say
-     * it: a selected one carries its OWN variant. Both branches carry the attribute,
-     * since a detached row has a frame to keep closed too.
+     * The frame rules need to tell an outline row from a ghost one, and no item can say it: a
+     * selected one carries its own variant. Both branches carry the attribute, since a detached
+     * row has a frame to keep closed too.
      */
     it('joined and detached alike carry data-item-variant', () => {
       const joined = mount({ toggleAttrs: 'item-variant="outline"' })
@@ -236,10 +235,10 @@ describe('VToggle', () => {
 
   describe('context propagation', () => {
     /*
-     * The four props asserted below — elevated, size, compact, disabled — travel through
-     * the VButtonGroup the row renders, and not through the toggle's own context: they
-     * say how the row is DRAWN, which is that component's decision. What is asserted is
-     * unchanged by that, which is the point.
+     * The four props asserted below; elevated, size, compact, disabled; travel through the
+     * VButtonGroup the row renders, and not through the toggle's own context: they say how the
+     * row is DRAWN, which is that component's decision. What is asserted is unchanged by that,
+     * which is the point.
      */
     it('elevated raises every button, so the group can take the shadow', () => {
       const { container } = mount({ toggleAttrs: 'elevated' })
@@ -391,12 +390,11 @@ describe('VToggle', () => {
   })
 
   /*
-   * An item may carry a companion — a VTooltip, a VPopover, a VBadge — and each of them
-   * puts a wrapper between the row and the item. jsdom can see the two halves that are
-   * not drawing: the selection still crossing that wrapper, and the arrows still finding
-   * the item, which they do because the list is read from a descendant query rather than
-   * from the row's own children. The frame and the merged borders are measured by the
-   * `Companions` play function.
+   * An item may carry a companion; a VTooltip, a VPopover, a VBadge; and each of them puts a
+   * wrapper between the row and the item. jsdom can see the two halves that are not drawing:
+   * the selection still crossing that wrapper, and the arrows still finding the item, which
+   * they do because the list is read from a descendant query rather than from the row's own
+   * children.
    */
   describe('an item carrying a companion', () => {
     const mountWrapped = () =>

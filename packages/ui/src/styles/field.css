@@ -1,32 +1,11 @@
 /*
- * What the text fields share and none of them renders for another: the buttons a field
- * holds INSIDE its own box — the clear cross, a clickable icon, VTimeInput's AM/PM word —
- * and the counter, with the row under the field that carries it beside the hint.
- *
- * It is a shared sheet for the reason `.v-panel` and `.v-banner` are: VInput, VTextarea
- * and VFileInput each draw some of it and none renders the others, so a recipe left in one
- * sheet would have to be copied into the next, where the copies would drift apart on the
- * next token change. Each class goes on the element beside the component's own, which keeps
- * every per-component rule — the disabled state, VTimeInput's compound — winning on
- * specificity.
- *
- * What is NOT here is anything a field redeclares: VTextarea centres its buttons on the
- * first LINE rather than on the box, and every field greys them out from its own root.
- * Those sit at (0,2,0) and above against this (0,1,0), so no sheet order decides them.
- *
- * Nor is the field box's own state machine — hover, focus, invalid, read-only, disabled —
- * although VInput and VTextarea write it identically. Every consumer pays for this sheet,
- * and those rules weigh more than the whole of it: they stay as two aligned copies.
+ * Shared field actions and metadata. Component overrides must win by specificity rather than
+ * stylesheet order.
  */
 @layer vectis.components {
   /*
-   * From muted grey to full strength on hover, and VButton's radius so the focus ring has
-   * the same rounded corners as everything else.
-   *
-   * The inline margin is DERIVED and never written as a number: it is exactly half the
-   * difference between the icon and the wider box holding it. Subtracting it cancels that
-   * inset, so the glyph lands precisely where a decorative icon would have — against the
-   * field's padding, one --control-gap from its neighbour.
+   * Derive the action margin from icon and hit-target dimensions so both remain centred across
+   * sizes.
    */
   .v-field-action {
     display: inline-flex;
@@ -49,23 +28,22 @@
     color: var(--vectis-color-text);
   }
 
-  /* The ring is drawn INSIDE the box: the field clips its overflow, and a positive offset
-     would be cropped against its border. */
+  /* Draw the ring inward because the field clips overflow. */
   .v-field-action:focus-visible {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: calc(-1 * var(--vectis-focus-ring-width));
   }
 
-  /* The row under a field: the hint at the start, the counter pushed to the end. */
   .v-field-meta {
     display: flex;
     align-items: baseline;
     gap: var(--vectis-space-2);
   }
 
-  /* The counter keeps its own styling rather than going through VTypography: figures of
-     equal width, so the number does not shift as it counts, and a colour that marks the
-     overflow — neither of which is a typographic role. */
+  /*
+   * Use tabular numerals to keep counter width stable and component-owned colour for overflow
+   * state.
+   */
   .v-field-counter {
     font-size: var(--vectis-text-caption-size);
     color: var(--vectis-color-text-muted);

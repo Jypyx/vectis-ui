@@ -16,20 +16,10 @@ describe('hueOf', () => {
     expect(hueOf('standup')).toBe(hueOf('standup'))
   })
 
-  /*
-   * An id makes the round trip through a consumer's JSON and may well come back as the
-   * other type. If the two disagreed, an event would change colour on a page reload.
-   */
   it('reads a number and the digits of that number as the same event', () => {
     expect(hueOf(42)).toBe(hueOf('42'))
   })
 
-  /*
-   * The whole reason the hash is multiplied before being taken modulo 360. A plain string
-   * hash of "1", "2", "3" produces three CONSECUTIVE numbers, so a calendar whose events
-   * are numbered in order would come out entirely one colour — with nothing in the console
-   * to say so. This test fails if the golden constant is ever removed.
-   */
   it('scatters consecutive ids across the wheel instead of bunching them', () => {
     const hues = Array.from({ length: 12 }, (_, i) => hueOf(String(i + 1)))
     for (let i = 1; i < hues.length; i++) {
@@ -43,8 +33,6 @@ describe('hueOf', () => {
   it('spreads a realistic set of ids over most of the wheel', () => {
     const ids = Array.from({ length: 40 }, (_, i) => `event-${i}`)
     const sixths = new Set(ids.map((id) => Math.floor(hueOf(id) / 60)))
-    // Forty events should reach every sixth of the wheel; anything less is a hash that
-    // clusters, which is what makes a calendar look monochrome.
     expect(sixths.size).toBe(6)
   })
 

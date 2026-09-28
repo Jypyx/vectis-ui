@@ -23,8 +23,6 @@ const shapes: SkeletonLoaderShape[] = ['text', 'control', 'pill', 'circle', 'sur
       <VSkeletonLoader shape="control" width="60%" />
     </div>
 
-    <!-- `height` wins over the shape and the size, for a silhouette no shape
-         describes. -->
     <div class="row">
       <p class="caption">height</p>
       <VSkeletonLoader shape="surface" :height="48" />

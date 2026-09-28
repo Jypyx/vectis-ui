@@ -34,7 +34,6 @@ import { VProgressLinear, VTypography } from 'vectis-ui'
   display: grid;
   justify-items: center;
   gap: var(--vectis-space-2);
-  /* The bar takes the height it is given, exactly as the horizontal one takes a width. */
   block-size: 9rem;
   grid-template-rows: 1fr auto;
 }

@@ -14,7 +14,6 @@ const filling = ref('week')
       <VToggleItem value="month" label="Month" />
     </VToggle>
 
-    <!-- Every item takes an equal share of the width, whatever its label measures. -->
     <VToggle v-model="filling" full-width item-variant="outline" label="Period, filling the column">
       <VToggleItem value="day" label="Day" />
       <VToggleItem value="week" label="Week" />
@@ -24,7 +23,6 @@ const filling = ref('week')
 </template>
 
 <style scoped>
-/* A column narrower than the page, so that filling it is something to see. */
 .column {
   display: flex;
   flex-direction: column;

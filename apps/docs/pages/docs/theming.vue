@@ -11,12 +11,8 @@ import {
   VTypography,
 } from 'vectis-ui'
 /*
- * The icon is IMPORTED and not named, and the distinction is the library's: a bare string is
- * only ever a NAME, handed to a consumer resolver and then to an icon FONT's ligature — it
- * reaches none of the thirty-four drawings the library ships, which is exactly what makes them
- * tree-shakable. This site loads no icon font, and its own resolver answers only for the
- * handful of icons it ships itself — `search` not among them — so `icon="search"` would render
- * the word "search" as text. Importing the value hands VIcon the drawing.
+ * Import the built-in icon value: a bare string reaches the resolver or ligature fallback, not
+ * tree-shaken icon modules.
  */
 import { search as searchIcon } from 'vectis-ui/icons'
 
@@ -27,29 +23,10 @@ const localePath = useLocalePath()
 useDocsHead('theming')
 
 /*
- * The samples are NOT translated, here or anywhere on the site: a demo has to match the code
- * printed beside it, and the code is the same in every language. The heading `id`s are not
- * translated either — they are the site's permalinks.
- *
- * `coralCode` is the sharpest case of that rule on the site: it is not an illustration but the
- * ACTUAL declaration block painting the panel printed under it, the twin of the `.coral` rule
- * at the end of `assets/css/docs-layout.css`. Change one and change the other, or the page
- * shows a sample that produces something else. The two differ in wrapping alone, Prettier
- * breaking the `color-mix()` calls in the stylesheet where a code block reads better without.
+ * The two differ in wrapping alone, Prettier breaking the `color-mix()` calls in the stylesheet
+ * where a code block reads better without.
  */
-/**
- * The two theme panels: the same eight controls, twice, each side naming its own theme.
- *
- * Each panel carries its OWN state, and its own radio `group`. Sharing either would tie the
- * two together — a shared model literally, and a shared `name` through the platform: several
- * <input type="radio"> with one name form ONE native group whatever their place in the tree,
- * so choosing Yearly on the left would clear Monthly on the right.
- *
- * The controls are chosen for what they paint rather than for what they do: a field carries the
- * surface, the border and the placeholder; the three toggles carry the accent when they are on
- * and the border when they are not; the buttons carry the filled and outlined pairs; the chip
- * carries a status tone. Between them they touch nearly every colour role a theme moves.
- */
+/** The two theme panels: the same eight controls, twice, each side naming its own theme. */
 const panels = [
   {
     theme: 'light',

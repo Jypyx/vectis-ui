@@ -10,9 +10,9 @@ const JUNE = '2026-06-10'
  * Simulated typing: jsdom places no caret, so it is set explicitly at the end of the
  * text, as sequential typing would.
  */
-// Several tests pass `locale: 'fr-FR'`: the dd/mm/yyyy mask and the French month names
-// are what they assert. The DS dictionary is a separate axis — the button labels stay in
-// the base locale (English).
+// Several tests pass `locale: 'fr-FR'`: the dd/mm/yyyy mask and the French month names are what
+// they assert. The DS dictionary is a separate axis; the button labels stay in the base locale
+// (English).
 async function type(input: HTMLInputElement, value: string) {
   input.value = value
   input.setSelectionRange(value.length, value.length)
@@ -48,12 +48,11 @@ describe('VDateInput — default', () => {
       container.querySelector<HTMLElement>('.v-input-icon-end .v-icon')?.dataset.icon
     expect(endIcon()).toBe('event')
 
-    // With something to clear, the two coexist — the VInput/VTextarea/VCombobox
-    // convention, which would break silently.
+    // With something to clear, the two coexist; the VInput/VTextarea/VCombobox convention,
+    // which would break silently.
     await rerender({ modelValue: JUNE })
     expect(endIcon()).toBe('event')
 
-    // The cross FIRST: to the left of the opening icon.
     const actions = [...container.querySelectorAll('.v-input-field .v-input-action')]
     expect(actions.map((el) => el.getAttribute('aria-label'))).toEqual([
       'Clear date',
@@ -124,13 +123,11 @@ describe('VDateInput — picker mode', () => {
   })
 
   it('the panel is drawn on the shared surface', async () => {
-    // TRAP — VDatePicker paints no background, border or shadow of its own: the panel
-    // takes all of it from `.v-panel`, which VPopover sets on any panel it is not told
-    // is `bare`. Nothing else guards it — jsdom evaluates no styles, and the play
-    // function asserts the padding, which comes from the `.v-popover-panel
-    // .v-date-input-panel` compound and survives the loss of the class. Without this
-    // assertion, a `bare` slipping in leaves the calendar floating transparent over the
-    // page, and every check in the repo stays green.
+    // VDatePicker paints no background, border or shadow of its own: the panel takes all of it
+    // from `.v-panel`, which VPopover sets on any panel it is not told is `bare`. Nothing else
+    // guards it; jsdom evaluates no styles, and the play function asserts the padding, which
+    // comes from the `.v-popover-panel .v-date-input-panel` compound and survives the loss of
+    // the class.
     const { container } = mount({ modelValue: JUNE })
     await fireEvent.click(container.querySelector('.v-date-input-control') as HTMLElement)
     await nextTick()
@@ -148,7 +145,6 @@ describe('VDateInput — picker mode', () => {
     await fireEvent.click(day15)
     await nextTick()
     expect(emitted('update:modelValue')?.at(-1)).toEqual(['2026-06-15'])
-    // closed: the panel is no longer marked open
     expect(container.querySelector('.v-date-input-panel')?.hasAttribute('data-popover-open')).toBe(
       false,
     )
@@ -298,15 +294,15 @@ describe('VDateInput — input mode', () => {
     })
     const input = container.querySelector('input') as HTMLInputElement
 
-    await type(input, '10/06/20') // incomplet
+    await type(input, '10/06/20')
     await fireEvent.change(input)
     expect(input.value).toBe('10/06/2026')
 
-    await type(input, '10/07/2026') // beyond max
+    await type(input, '10/07/2026')
     await fireEvent.change(input)
     expect(input.value).toBe('10/06/2026')
 
-    await type(input, '15/06/2026') // a disabled date
+    await type(input, '15/06/2026') // A disabled date
     await fireEvent.change(input)
     expect(input.value).toBe('10/06/2026')
 
@@ -336,7 +332,6 @@ describe('VDateInput — input mode', () => {
     const input = container.querySelector('input') as HTMLInputElement
     await type(input, '10')
     expect(input.value).toBe('10/')
-    // the caret after the separator placed by the mask
     input.setSelectionRange(3, 3)
     await fireEvent.keyDown(input, { key: 'Backspace' })
     expect(input.value).toBe('1')
@@ -355,7 +350,6 @@ describe('VDateInput — input mode', () => {
     const input = container.querySelector('input') as HTMLInputElement
     await fireEvent.focus(input)
     await nextTick()
-    // the panel opens but the caret stays in the field
     expect(container.querySelector('.v-date-input-panel')?.hasAttribute('data-popover-open')).toBe(
       true,
     )
@@ -399,8 +393,8 @@ describe('VDateInput — input mode', () => {
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('[VDateInput]'))
   })
 
-  // "no calendar without showPicker" is the component's DEFAULT behaviour: that test
-  // lives in the "default" describe.
+  // "no calendar without showPicker" is the component's default behaviour: that test lives in
+  // the "default" describe.
 
   it('showPicker restores the icon and the opening on focus', async () => {
     const { container } = mount({ modelValue: JUNE, showPicker: true })
@@ -422,9 +416,9 @@ describe('VDateInput — input mode', () => {
   })
 
   it('raises no warning when mounting an empty input field', () => {
-    // `useIconClickHandlers` warns AT SETUP when a `@click:icon-end` is
-    // attached without an `pickerIconLabel` — even with no icon rendered. That is what
-    // forces `endIconLabel` to stay defined at all times.
+    // `useIconClickHandlers` warns AT setup when a `@click:icon-end` is attached without an
+    // `pickerIconLabel`; even with no icon rendered. That is what forces `endIconLabel` to stay
+    // defined always.
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     mount()
     expect(warn).not.toHaveBeenCalled()
@@ -562,8 +556,6 @@ describe('VDateInput — development warnings and the mask keys', () => {
   })
 
   it('leaves a Backspace after a DIGIT to the browser', async () => {
-    // Only a separator needs the mask's help; cancelling every Backspace would take the
-    // browser's own editing away from the digits too.
     const { container } = render(VDateInput, { props: { locale: 'fr-FR' } })
     const input = container.querySelector('input') as HTMLInputElement
     await type(input, '1')

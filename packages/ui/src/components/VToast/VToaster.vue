@@ -1,19 +1,8 @@
 <script setup lang="ts">
 // @a11y @core
 /**
- * Where notifications appear: mounted ONCE at the root, after which every `toast()` call
- * shows up here.
- *
- * One container per placement rather than one popover per notification, each stacking its
- * own with CSS. These boxes are drawn above the page at physical coordinates, anchored to
- * nothing, so individually they would all land on the same spot and keeping them apart would
- * mean measuring and offsetting each in code. The six exist at all times; empty, they cost
- * nothing and are not displayed.
- *
- * The JS covers three things the platform does not: keeping the queue and the containers in
- * step, the popover being imperative; the per-notification dismissal timers; and holding
- * them while the pointer rests on a stack OR the keyboard is inside it, so something that
- * disappears on a clock can be read and closed (WCAG 2.2.1).
+ * Manual popovers host notification stacks. JavaScript maintains queues, announcements and
+ * per-item timers paused during hover or keyboard focus.
  */
 
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
@@ -78,22 +67,18 @@ const groups = computed(() => {
   return map
 })
 
-/* The six containers, collected by the `v-for` itself. A plain template ref rather than a
-   function one: a function written inline in the template is a new function on every
-   render, which Vue answers by calling the old one with null and the new one with the
-   element — twelve calls each time a notification comes or goes. */
+/*
+ * The six containers, collected by the `v-for` itself. A plain template ref rather than a
+ * function one: a function written inline in the template is a new function on every render,
+ * which Vue answers by calling the old one with null and the new one with the element; twelve
+ * calls each time a notification comes or goes.
+ */
 const stackEls = ref<HTMLElement[]>([])
 
 /*
- * One instance of the popover plumbing PER corner. Each carries its own element, its
- * own open state — fed by that element's events — and the guards that make opening and
- * closing safe to call twice: asking the browser to show an already-shown popover
- * throws.
- *
- * The element is looked up by its placement rather than by its index: Vue does not
- * promise that a `v-for` ref array follows the order of the list.
- *
- * The containers being permanent, this runs once and never again.
+ * The element is looked up by its placement rather than by its index: Vue does not promise that
+ * a `v-for` ref array follows the order of the list. The containers being permanent, this runs
+ * once and never again.
  */
 const stacks = new Map(
   PLACEMENTS.map((placement) => {
@@ -108,12 +93,12 @@ function syncStack(placement: ToastPlacement, event: Event) {
   stacks.get(placement)?.syncShown(event)
 }
 
-/* The running countdowns, one per notification. */
 const timers = new Map<number, ReturnType<typeof setTimeout>>()
-/* The corners holding their countdowns, one set per reason. Two sets rather than one
-   because the reasons overlap and end independently: a reader tabs to a close cross, then
-   moves the pointer over the stack and away, and the corner must stay held while the cross
-   still has the focus — VSnackbar's two flags, per corner. */
+/*
+ * Two sets rather than one because the reasons overlap and end independently: a reader tabs to
+ * a close cross, then moves the pointer over the stack and away, and the corner must stay held
+ * while the cross still has the focus; VSnackbar's two flags, per corner.
+ */
 const hovered = new Set<ToastPlacement>()
 const focused = new Set<ToastPlacement>()
 
@@ -144,18 +129,8 @@ function startTimer(item: ToastItem) {
 
 // @core
 /**
- * Brings the page into line with the queue: it throws away the countdowns of the
- * notifications that have gone, gives every other one a countdown exactly when its corner
- * is not held, and then shows the corners holding something while hiding the empty ones.
- *
- * TRAP — the countdown follows the corner a notification is in NOW, re-derived on every
- * pass rather than remembered per notification. The default corner is a prop, so a
- * notification can change corner while the pointer rests on the old one: a memory of
- * "already armed" then outlived the countdown the hold had cancelled, the release looked
- * in the old corner, and the notification never got a countdown again.
- *
- * It runs once on mount — which is what makes a notification raised before this
- * component existed appear all the same — and after that on every change to the queue.
+ * Recompute each toast's corner before arming timers: moving a held toast must not leave it
+ * without a countdown after release.
  */
 function sync() {
   const alive = new Set(toasts.map((item) => item.id))
@@ -164,7 +139,6 @@ function sync() {
   for (const item of toasts) {
     if (announced.has(item.id)) continue
     announced.add(item.id)
-    // A failure or a warning interrupts what is being read; anything else waits.
     announce(
       [item.title, item.message].filter(Boolean).join('. '),
       item.tone === 'danger' || item.tone === 'warning',
@@ -173,10 +147,9 @@ function sync() {
 
   for (const placement of PLACEMENTS) {
     const stackEl = stacks.get(placement)?.el.value
-    // TRAP — a hold is dropped here as soon as it can no longer be true, rather than
-    // trusted to its closing event. A close cross leaves the page while it has the focus,
-    // and an engine that sends no `focusout` for a removed element would keep the corner
-    // held for good; an emptied stack is hidden under the pointer, with no `pointerleave`.
+    // A close cross leaves the page while it has the focus, and an engine that sends no
+    // `focusout` for a removed element would keep the corner held for good; an emptied stack is
+    // hidden under the pointer, with no `pointerleave`.
     if (!stackEl?.contains(document.activeElement)) focused.delete(placement)
     if ((groups.value.get(placement)?.length ?? 0) === 0) hovered.delete(placement)
   }
@@ -186,9 +159,8 @@ function sync() {
     else startTimer(item)
   }
 
-  // Showing and hiding are safe to call on a container already in that state, the
-  // guards living in the popover plumbing — so there is no need to remember which
-  // corners are currently open.
+  // Showing and hiding are safe to call on a container already in that state, the guards living
+  // in the popover plumbing; so there is no need to remember which corners are currently open.
   for (const placement of PLACEMENTS) {
     const stack = stacks.get(placement)
     if (!stack?.el.value) continue
@@ -198,9 +170,8 @@ function sync() {
 }
 
 /*
- * Watching the grouped queue covers a change to the notifications AND a change to the
- * default corner. The `post` timing is load-bearing: the notification must already be
- * in the page before its container is told to show itself.
+ * The `post` timing is load-bearing: the notification must already be in the page before its
+ * container is told to show itself.
  */
 watch(groups, sync, { flush: 'post' })
 // @ssr
@@ -213,13 +184,10 @@ onMounted(sync)
 // WCAG 2.2.1: something that disappears on a clock has to be holdable, or a
 // slow reader simply never finishes it.
 /*
- * Resting the pointer on a corner suspends its countdowns, and so does moving the keyboard
- * into it: each notification carries a close cross, a real button a reader tabs to, which
- * would otherwise vanish from under the focus ring. The same verbs and the same two
- * reasons as VSnackbar.
- *
- * Leaving restarts them from the FULL duration rather than from what was left: simpler,
- * and more generous to the reader who has just interrupted themselves.
+ * Resting the pointer on a corner suspends its countdowns, and so does moving the keyboard into
+ * it: each notification carries a close cross, a real button a reader tabs to, which would
+ * otherwise vanish from under the focus ring. The same verbs and the same two reasons as
+ * VSnackbar.
  */
 function hold(placement: ToastPlacement, which: 'pointer' | 'focus') {
   const reason = which === 'pointer' ? hovered : focused
@@ -326,15 +294,8 @@ onBeforeUnmount(() => {
 <style>
 @layer vectis.components {
   /*
-   * The container. Its rules are an ALIGNED COPY of VSnackbar's host: the two containers are the
-   * same object, a popover at a physical corner that fades when it empties, and the copy is
-   * kept line for line, the one difference being the top edge, which a confirmation never takes.
-   * They are not factored into styles/banner.css because that sheet is paid for by every
-   * consumer, and these rules cost more than the size gate allows; change one, change the other.
-   *
-   * The fixed positioning and the guard hiding a closed container come from the shared
-   * `.v-overlay` class, set on this same element. What is undone here is the browser's own
-   * popover decoration: its border, its padding, its opaque background.
+   * Keep host rules aligned with VSnackbar; toaster also supports top placements. Sharing this
+   * layout in core CSS would increase every consumer's size cost.
    */
   .v-toast-stack {
     margin: 0;
@@ -346,14 +307,8 @@ onBeforeUnmount(() => {
   }
 
   /*
-   * PHYSICAL coordinates rather than logical ones: a message appears at a place on the
-   * screen, and that place does not flip with the reading direction — the operating
-   * system's own notifications behave the same way.
-   *
-   * `--banner-enter-y` is the direction each card slides in from, read by `.v-banner` in
-   * styles/banner.css: the container is the only thing that knows which edge of the screen
-   * it sits on. That sheet reads it with a `, 0` fallback, so dropping the declaration costs
-   * the slide and nothing else, and nothing reports it.
+   * Keep screen placement physical in RTL. The host supplies each card's entry direction from
+   * its screen edge.
    */
   .v-toast-stack[data-placement^='top-'] {
     top: var(--vectis-space-4);

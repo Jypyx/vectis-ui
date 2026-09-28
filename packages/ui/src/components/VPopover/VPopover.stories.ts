@@ -113,13 +113,8 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {}
 
 /**
- * The trigger opens and closes the panel through the native `popovertarget`
- * attribute alone, with no click handler, and `aria-expanded` follows the panel's
- * real state in both directions.
- *
- * The light dismiss of `auto` mode (click outside, Escape) is not assertable
- * here: it relies on **trusted** browser events, which `userEvent`'s synthetic
- * events do not produce.
+ * The trigger opens and closes the panel through the native `popovertarget` attribute alone,
+ * with no click handler, and `aria-expanded` follows the panel's real state in both directions.
  */
 export const OpenedByTheTrigger: Story = {
   play: async ({ canvasElement }) => {
@@ -132,20 +127,15 @@ export const OpenedByTheTrigger: Story = {
     await waitFor(() => expect(panel.matches(':popover-open')).toBe(true))
     await expect(trigger).toHaveAttribute('aria-expanded', 'true')
 
-    // clicking again: `popovertarget` toggles (the default action) and the state
-    // republished by the panel flows back down to the trigger
+    // Clicking again: `popovertarget` toggles (the default action) and the state republished by
+    // the panel flows back down to the trigger
     await userEvent.click(trigger)
     await waitFor(() => expect(panel.matches(':popover-open')).toBe(false))
     await expect(trigger).toHaveAttribute('aria-expanded', 'false')
   },
 }
 
-/**
- * Two VPopover side by side: each panel anchors to ITS trigger. The anchor name is
- * static and shared by every instance — it is `anchor-scope`, set on the wrapper,
- * that confines it to each subtree. Without it, both panels would attach to the
- * last wrapper on the page.
- */
+/** Two VPopover side by side: each panel anchors to ITS trigger. */
 export const TwoInstances: Story = {
   render: (args) => ({
     components: { VPopover, VButton, VTypography },
@@ -177,10 +167,9 @@ export const TwoInstances: Story = {
     await waitFor(() => expect(first.matches(':popover-open')).toBe(true))
     const left = first.getBoundingClientRect().left
 
-    // in `auto` mode, opening the second closes the first (the native stack)
+    // In `auto` mode, opening the second closes the first (the native stack)
     await userEvent.click(canvas.getByRole('button', { name: 'Right' }))
     await waitFor(() => expect(second.matches(':popover-open')).toBe(true))
-    // each panel resolved ITS anchor, not the last one on the page
     await expect(second.getBoundingClientRect().left).toBeGreaterThan(left)
   },
 }
@@ -234,10 +223,8 @@ export const Placements: Story = {
 }
 
 /**
- * Unlike VTooltip, the content can be interactive: the panel is persistent and
- * focus can enter it. For dialog-like content, set `role="dialog"` and an
- * accessible name on the VPopover (and `aria-haspopup="dialog"` on the trigger) —
- * the component imposes no role.
+ * Unlike VTooltip, the content can be interactive: the panel is persistent and focus can enter
+ * it.
  */
 export const InteractiveContent: Story = {
   render: (args) => ({
@@ -278,9 +265,8 @@ export const InteractiveContent: Story = {
 }
 
 /**
- * `bare` removes the decoration (`.v-panel`): the consumer provides its own. This is
- * the mode taken by the DS panel that has its own chrome — VTooltip, whose contrast
- * is inverted.
+ * `bare` removes the decoration (`.v-panel`): the consumer provides its own. This is the mode
+ * taken by the DS panel that has its own chrome; VTooltip, whose contrast is inverted.
  */
 export const WithoutSurface: Story = {
   args: { bare: true },
@@ -309,7 +295,6 @@ export const WithoutSurface: Story = {
     await userEvent.click(canvas.getByRole('button'))
     const panel = canvasElement.querySelector<HTMLElement>('.v-popover-panel')!
     await waitFor(() => expect(panel.matches(':popover-open')).toBe(true))
-    // None of the browser's own [popover] decoration survives on a bare panel.
     const style = getComputedStyle(panel)
     await expect(style.borderTopStyle).toBe('none')
     await expect(style.paddingTop).toBe('0px')
@@ -318,10 +303,9 @@ export const WithoutSurface: Story = {
 }
 
 /**
- * Programmatic opening through `v-model:open`, with no trigger: the consumer then
- * sets the anchor itself (`anchor-scope` on a common ancestor, `anchor-name` on
- * the element to follow) and passes it through the `anchor` prop. This is the mode
- * VCombobox, VTooltip, VDateInput and VTimeInput use.
+ * Programmatic opening through `v-model:open`, with no trigger: the consumer then sets the
+ * anchor itself (`anchor-scope` on a common ancestor, `anchor-name` on the element to follow)
+ * and passes it through the `anchor` prop.
  */
 export const SuppliedAnchor: Story = {
   render: (args) => ({
@@ -359,10 +343,9 @@ export const SuppliedAnchor: Story = {
 }
 
 /**
- * Automatic flipping at the screen edge (`position-try-fallbacks: flip-block,
- * flip-inline` — see floating.css): each trigger is stuck to a viewport edge with
- * a placement pointing at that edge. With no room, the browser flips the panel to
- * the opposite side, with no JS at all.
+ * Automatic flipping at the screen edge (`position-try-fallbacks: flip-block, flip-inline`; see
+ * floating.css): each trigger is stuck to a viewport edge with a placement pointing at that
+ * edge.
  */
 export const EdgeFlipping: Story = {
   parameters: { layout: 'fullscreen' },

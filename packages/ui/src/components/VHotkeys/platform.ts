@@ -1,23 +1,9 @@
-// @core — module-wide: pure, no Vue and no lifecycle. `detectPlatform` is the
-// exception below.
+// @core
+// Shortcut parsing and platform glyphs are pure; read navigator only after mount to preserve
+// deterministic SSR output.
 /**
- * Everything VHotkeys needs to know about keyboards: which system this one belongs to,
- * and how a written token relates to the symbol engraved on the key, to the word for
- * it, and to what the browser reports when it is pressed.
- *
- * An operating system is not a language, and the distinction matters here. Whether a
- * key shows ⌘ or Ctrl is a fact about the hardware, so it does NOT depend on the
- * reader's language. Only the WORDS do — Shift becomes Maj in French — and those live
- * in the dictionary: this module hands back the dictionary KEY and never the text
- * itself.
- *
- * What earns the module its existence is the alias table. The SAME table normalizes
- * the tokens a consumer writes in `keys` and the key names the browser reports, so a
- * shortcut cannot be declared in a spelling the matcher would fail to recognize.
- *
- * TRAP — detecting the platform must only ever be done once a component is mounted.
- * There is nothing to read it from on a server, and sniffing a request header is not
- * this library's business.
+ * Detecting the platform must only ever be done once a component is mounted. There is nothing
+ * to read it from on a server, and sniffing a request header is not this library's business.
  */
 
 import { isDev } from '../../utils/env'
@@ -26,12 +12,8 @@ import { isDev } from '../../utils/env'
 export type HotkeysPlatform = 'mac' | 'windows' | 'linux' | 'other'
 
 /**
- * The dictionary entries naming a key, and only those: the sentence framing the
- * shortcut is not one of them.
- *
- * The list is written out here rather than derived from the dictionary's own type,
- * which would tie this module to the dictionary's shape. Nothing is lost: reading an
- * entry by one of these names is checked just as strictly at the point of use.
+ * The dictionary entries naming a key, and only those: the sentence framing the shortcut is not
+ * one of them.
  */
 export type HotkeysWord =
   | 'command'
@@ -53,7 +35,7 @@ export type HotkeysWord =
 
 /** One key of a shortcut, once resolved for a given platform. */
 export interface ResolvedKey {
-  /** Its canonical name, which is what the matcher compares a key press against. */
+  /** Its canonical name, which the matcher compares a key press against. */
   token: string
   /** The symbol engraved on that key, where the system engraves one. */
   glyph?: string
@@ -65,30 +47,19 @@ export interface ResolvedKey {
 }
 
 // @ssr
-/**
- * What a SERVER renders, and therefore what the browser's FIRST render must be as
- * well. It shares Ctrl, Alt and Shift with Windows and Linux, so a Mac visitor pays a
- * single frame of "Ctrl" before it is corrected to ⌘. The literal `meta` key is the one
- * word it shares with Linux alone: a Windows visitor sees "Super" for a frame before "Win".
- */
+/** What a SERVER renders, and therefore what the browser's first render must be as well. */
 export const DEFAULT_PLATFORM: HotkeysPlatform = 'other'
 
-// @ssr @fallback — the DS's ONLY `navigator` read, with a two-source ladder.
-/**
- * Works out which system the keyboard belongs to, from two sources in order. The
- * modern one is the more reliable; the older one is deprecated and frozen, but it is
- * still the only one Firefox and Safari provide.
- *
- * The modern one is missing from TypeScript's own definitions, so it is described by a
- * type declared LOCALLY rather than added to the global ones: the latter would leak
- * out into every consumer's compilation.
- */
+// @ssr @fallback
+/** Works out which system the keyboard belongs to, from two sources in order. */
 export function detectPlatform(): HotkeysPlatform {
   if (typeof navigator === 'undefined') return DEFAULT_PLATFORM
   const nav = navigator as Navigator & { userAgentData?: { platform?: string } }
   const source = (nav.userAgentData?.platform || nav.platform || '').toLowerCase()
-  /* iPadOS reports itself as a Mac, which is fine here: an attached keyboard carries
-     the same modifier symbols either way. */
+  /*
+   * IPadOS reports itself as a Mac, which is fine here: an attached keyboard carries the same
+   * modifier symbols either way.
+   */
   if (/mac|iphone|ipad|ipod/.test(source)) return 'mac'
   if (source.includes('win')) return 'windows'
   /* ChromeOS spells itself two different ways depending on which of the two sources
@@ -98,13 +69,11 @@ export function detectPlatform(): HotkeysPlatform {
   return DEFAULT_PLATFORM
 }
 
-/* Every spelling accepted in the `keys` prop, and at the same time the table that
-   normalizes what the browser reports. Serving both is what guarantees the two can
-   never disagree.
-
-   The `+` key is canonically named `plus`, since `+` is the separator and cannot name
-   itself in the prop — but the browser does report it as `'+'`, hence its presence
-   here. */
+/*
+ * Serving both is what guarantees the two can never disagree. The `+` key is canonically named
+ * `plus`, since `+` is the separator and cannot name itself in the prop; but the browser does
+ * report it as `'+'`, hence its presence here.
+ */
 const ALIASES: Record<string, string> = {
   cmd: 'meta',
   command: 'meta',
@@ -189,9 +158,8 @@ const NON_TEXT_INPUT_TYPES = new Set([
 ])
 
 /**
- * Reads a combination as it was written and returns its keys in canonical form:
- * `'mod+k'` and `' Mod + K '` both give the same two. Empty segments are dropped, so a
- * trailing separator is harmless, and the `+` KEY itself is written `plus`.
+ * Reads a combination as it was written and returns its keys in canonical form: `'mod+k'` and
+ * `' Mod + K '` both give the same two.
  */
 export function parseHotkeys(keys: string): string[] {
   const tokens = keys
@@ -234,10 +202,11 @@ export function capLabel(token: string): string {
 }
 
 function wordOf(token: string, platform: HotkeysPlatform): HotkeysWord | undefined {
-  /* The two keys whose name depends on the system. `mod` is the modifier a consumer
-     writes when they mean "the usual one here" — Command on a Mac, Ctrl elsewhere —
-     while `meta` names that physical key literally, and it is called something
-     different on each system. */
+  /*
+   * The two keys whose name depends on the system. `mod` is the modifier a consumer writes when
+   * they mean "the usual one here"; Command on a Mac, Ctrl elsewhere; while `meta` names that
+   * physical key literally, and it is called something different on each system.
+   */
   if (token === 'mod') return platform === 'mac' ? 'command' : 'ctrl'
   if (token === 'meta') {
     if (platform === 'mac') return 'command'
@@ -273,13 +242,7 @@ function normalizeEventKey(event: KeyboardEvent): string {
   return ALIASES[key] ?? key
 }
 
-/**
- * Whether a key press IS this combination.
- *
- * The modifiers are compared EXACTLY, and never as "at least these ones". Without
- * that, `mod+k` and `mod+shift+k` could not coexist in one application: the first
- * would swallow every press meant for the second.
- */
+/** Whether a key press IS this combination. */
 export function matchesEvent(
   event: KeyboardEvent,
   tokens: string[],
@@ -294,13 +257,14 @@ export function matchesEvent(
   const main = tokens.find((token) => !isModifier(token))
   /* A combination made of modifiers alone never fires: there is no key to press. */
   if (main === undefined) return false
-  /* Both sides go through the same normalization, which is also what makes a press
-     reported as "K" — because Shift was held — match a shortcut written `k`. */
+  /*
+   * Both sides go through the same normalization, which is also what makes a press reported as
+   * "K"; because Shift was held; match a shortcut written `k`.
+   */
   return normalizeEventKey(event) === main
 }
 
-// @keyboard — what `allowInInput` is asked about: a shortcut must not fire in the
-// middle of someone typing a sentence.
+// @keyboard
 export function isEditableTarget(target: EventTarget | null | undefined): boolean {
   if (!(target instanceof HTMLElement)) return false
   if (target.isContentEditable) return true

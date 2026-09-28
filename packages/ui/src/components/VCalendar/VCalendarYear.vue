@@ -1,17 +1,8 @@
 <script setup lang="ts" generic="E extends CalendarEvent">
 // @a11y @core
 /**
- * The year view: twelve small months, each marking the days that have something on them.
- * Internal to VCalendar, whose documentation covers it.
- *
- * WHY THE DAYS ARE NOT BUTTONS, unlike every other view. A year is 365 days, and making each
- * focusable would put that many stops in the tab order for a view meant to be glanced at.
- * Twelve roving grids would fix the count but leave the arrows unable to cross from one
- * month to the next, which is exactly the movement a year view invites.
- *
- * So it is a SUMMARY and says so: the days are text with the busy ones ringed, and what can
- * be reached and acted on is the MONTH, whose name carries how many of its days are busy.
- * Choosing a day is what the month and day views are for, and the heading is the way through.
+ * Use one roving date across the year so arrows cross month boundaries without adding hundreds
+ * of Tab stops.
  */
 import { computed, ref } from 'vue'
 
@@ -40,15 +31,7 @@ const emit = defineEmits<{
   'month-activate': [iso: string]
 }>()
 
-/**
- * The days of the year on show that have something on them, worked out once for all twelve.
- *
- * Walked day by day rather than tested against every square: a year holds far more squares
- * than a schedule holds days, so filling a set from the events and asking it one question per
- * square is the cheaper way round. Each walk is CLAMPED to the year on show, the only days a
- * mini-month marks — so an event from another year costs one comparison, and a range running
- * across several years walks only the part of it this year holds.
- */
+/** The days of the year on show that have something on them, worked out once for all twelve. */
 const busyDays = computed(() => {
   const days = new Set<string>()
   const first = props.months[0]
@@ -67,7 +50,7 @@ const busyDays = computed(() => {
 })
 
 /*
- * The twelve grids, built ONCE per change of anchor or weekdays, and their day numbers once per
+ * The twelve grids, built once per change of anchor or weekdays, and their day numbers once per
  * locale: the adjacent days repeat across neighbouring months, and none of it depends on the
  * events. The busy marks are laid over both in `yearMonths` below.
  */
@@ -95,13 +78,7 @@ interface YearDay {
   busy: boolean
 }
 
-/**
- * What the template draws, each month with its name, its squares and how many of them are busy.
- *
- * The template reaches a month's count twice, in the `v-if` and in the text beside it, and each
- * square asks whether it is busy: reading them here means the busy set is walked once per
- * render rather than once per square, and the count is never computed twice.
- */
+/** What the template draws, each month with its name, its squares and how many of them are busy. */
 const yearMonths = computed(() => {
   const busy = busyDays.value
   const numbers = dayNumbers.value
@@ -149,9 +126,11 @@ defineExpose({
         @click="emit('month-activate', entry.month)"
       >
         {{ entry.name }}
-        <!-- The count is part of the button's own text, so a month that has something on it
-             says so in its accessible name — which is what makes the days below safe to hide
-             from the accessibility tree. -->
+        <!--
+          The count is part of the button's own text, so a month that has something on it says
+          so in its accessible name; which makes the days below safe to hide from the
+          accessibility tree.
+        -->
         <span v-if="entry.busyCount > 0" class="v-calendar-year-count">
           {{ entry.busyCount }}
         </span>
@@ -249,21 +228,23 @@ defineExpose({
   }
 
   /*
-   * TRAP — both states are written DISJOINT from today rather than below it. Today is very
-   * often also busy, and its paint is `.v-calendar-today`, in VCalendar's sheet: at equal
-   * specificity the winner between two sheets is whichever the consumer's bundler emitted last,
-   * and losing that draw paints today as an ordinary busy day — the one square a reader looks
-   * for first, quietly indistinguishable.
+   * Both states are written DISJOINT from today rather than below it. Today is very often also
+   * busy, and its paint is `.v-calendar-today`, in VCalendar's sheet: at equal specificity the
+   * winner between two sheets is whichever the consumer's bundler emitted last, and losing that
+   * draw paints today as an ordinary busy day; the one square a reader looks for first, quietly
+   * indistinguishable.
    */
   .v-calendar-year-day[data-adjacent]:not(.v-calendar-today) {
     color: var(--vectis-color-text-subtle);
   }
 
-  /* A busy day is RINGED rather than dotted: at this size a dot would be about one pixel,
-     and it would be drawn as a background, which Windows forced-colors flattens away —
-     where a border keeps a colour of its own. The tint is a second, redundant signal for
-     anyone the ring alone is too fine for — and the ring alone is what today keeps, being
-     painted over the tint. */
+  /*
+   * A busy day is RINGED rather than dotted: at this size a dot would be about one pixel, and
+   * it would be drawn as a background, which Windows forced-colors flattens away; where a
+   * border keeps a colour of its own. The tint is a second, redundant signal for anyone the
+   * ring alone is too fine for; and the ring alone is what today keeps, being painted over the
+   * tint.
+   */
   .v-calendar-year-day[data-busy] {
     border: 1px solid var(--vectis-color-accent-border);
   }

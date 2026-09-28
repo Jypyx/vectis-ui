@@ -35,7 +35,6 @@ describe('VBreadcrumb', () => {
         props: { items, currentPath: '/projects/' },
       })
       expect(getByRole('link', { name: 'Projects' }).getAttribute('aria-current')).toBe('page')
-      // the root '/' is not emptied by the normalization
       expect(getByRole('link', { name: 'Home' }).hasAttribute('aria-current')).toBe(false)
     })
 
@@ -54,7 +53,6 @@ describe('VBreadcrumb', () => {
       expect(separators).toHaveLength(3)
       for (const sep of separators) {
         expect(sep.getAttribute('aria-hidden')).toBe('true')
-        // the class is set ON the VIcon: the separator is itself the .v-icon root
         expect((sep as HTMLElement).dataset.icon).toBe('chevron_right')
       }
     })
@@ -124,14 +122,13 @@ describe('VBreadcrumb', () => {
       ;(container.querySelector('[role="menu"]') as HTMLElement).showPopover()
       await nextTick()
 
-      // order and accessible names (the aria-hidden icon does not enter the name)
+      // Order and accessible names (the aria-hidden icon does not enter the name)
       const menuitems = getAllByRole('menuitem')
       expect(menuitems).toHaveLength(3)
       for (const [index, name] of ['Alpha', 'Bravo', 'Charlie'].entries()) {
         expect(getByRole('menuitem', { name })).toBe(menuitems[index])
       }
       expect(getByRole('menuitem', { name: 'Bravo' }).getAttribute('href')).toBe('/a/b')
-      // the hidden item's icon is carried over into the menu
       expect(
         getByRole('menuitem', { name: 'Alpha' }).querySelector('.v-icon-symbol')?.textContent,
       ).toBe('folder')

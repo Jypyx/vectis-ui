@@ -4,7 +4,6 @@ import { arrow_right_alt as arrowRightAlt, code } from 'vectis-ui/icons'
 </script>
 
 <template>
-  <!-- `href` renders an <a> instead of a <button>. -->
   <VIconButton href="#usage" :icon="arrowRightAlt" variant="outline" label="Back to usage" />
 
   <VIconButton

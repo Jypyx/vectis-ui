@@ -22,7 +22,6 @@ type Project = (typeof rows)[number]
 /* What comes back are the identities `rowKey` names, never the row objects. */
 const selected = ref<DataTableRowId[]>(['Atlas'])
 
-/* "Select row" says nothing about which one, so the row itself names its checkbox. */
 const selectRowLabel = (row: Project) => `Select ${row.name}`
 </script>
 

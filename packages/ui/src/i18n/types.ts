@@ -1,21 +1,6 @@
 /**
- * Every user-facing word the library can say, in one place: what a translator works from and
- * what a consumer overrides.
- *
- * Depth EXACTLY 2: namespace, then leaf. A leaf is finished text, or a TS function when
- * something has to be slotted in. There is deliberately no template language and no plural
- * engine: a parameterized message IS a hand-written function whose signature is the
- * contract, so a translation that forgets an argument does not compile, and a plural is a
- * ternary inside it.
- *
- * The two levels are structural, not aesthetic: they are what lets a partial override be
- * merged NON-RECURSIVELY, and therefore what makes it impossible to descend into one of
- * those functions and turn it into `{}`.
- *
- * Three kinds of text are deliberately absent. Whatever `Intl` derives from the tag (month
- * and day names, field order, hour cycle); whatever is made only of digits and universal
- * punctuation (`99+`, `+N`, an `N/M` counter, a time's colon); and the `[Component] …`
- * warnings, which address the integrator and are never translated.
+ * Two-level message namespaces permit nonrecursive partial merging. Parameterized messages are
+ * typed functions so translations preserve their argument contracts.
  */
 export interface Messages {
   /** Words several components share, so that they are translated once rather than five times. */
@@ -46,11 +31,7 @@ export interface Messages {
   tabs: { label: string; previous: string; next: string }
   breadcrumb: { label: string; ellipsis: string }
   sideNavigation: {
-    /**
-     * What the navigation area is called. It is the component's only piece of text: the
-     * labels are written by the consumer, and whether a branch is open or closed is
-     * something the browser announces on its own.
-     */
+    /** What the navigation area is called. */
     label: string
   }
   combobox: {
@@ -70,26 +51,17 @@ export interface Messages {
     selectRow: (index: number) => string
     selection: (count: number) => string
     range: (range: { start: number; end: number; total: number }) => string
-    /**
-     * What the pagination under a table is called. It is deliberately not the same as the
-     * name a standalone pagination takes: a page holding both would otherwise offer a
-     * screen reader two navigation areas under one name, with no way to tell them apart.
-     */
+    /** What the pagination under a table is called. */
     pagination: string
   }
   toaster: { label: string }
   snackbar: {
     /**
-     * What screen readers announce for the confirmation area itself, which is a landmark
-     * of the page. It is deliberately not the notifications' name: a page holding both
-     * would otherwise offer two areas under one word, with no way to tell them apart.
+     * What screen readers announce for the confirmation area itself, which is a landmark of the
+     * page.
      */
     label: string
-    /**
-     * The single action a snackbar offers, when the caller does not name it. It means
-     * taking back what was just done: not cancelling a form, which is `common.cancel`
-     * and is a different word in several languages.
-     */
+    /** The single action a snackbar offers, when the caller does not name it. */
     action: string
   }
   inputOTP: {
@@ -121,12 +93,8 @@ export interface Messages {
     label: string
   }
   /**
-   * The keys of a keyboard shortcut, in WORDS. The symbols (⌘ ⌃ ⌥ ⇧ ↵ ⌫ ⌦ ⇥
-   * ↑ ↓ ← →) are not here: they are engraved on the hardware and the same in every
-   * language, so they live with the component.
-   *
-   * Every entry below is the SPOKEN form. Where a symbol exists it wins on screen, and
-   * the word wins in what a screen reader says.
+   * The keys of a keyboard shortcut, in words. Where a symbol exists it wins on screen, and the
+   * word wins in what a screen reader says.
    */
   hotkeys: {
     /** How ⌘, the Command key on a Mac, is spoken. */
@@ -195,23 +163,13 @@ export interface Messages {
     /** What the panel holding the clock is called. */
     pickerLabel: string
     /**
-     * What the AM/PM button inside the field is called, the half of the day it currently
-     * shows included. The value is what the button reads on screen, so the name repeats
-     * it rather than replacing it: a reader arriving on the button is told which half is
-     * chosen, and hears the new one as soon as it changes.
+     * What the AM/PM button inside the field is called, the half of the day it currently shows
+     * included.
      */
     meridiemValue: (value: string) => string
-    /**
-     * The grey template shown in an empty field, "hh:mm". It is translatable because those
-     * letters are the initials of WORDS, unlike the colon between them, which is the same
-     * everywhere and lives with the time helpers.
-     */
+    /** The grey template shown in an empty field, "hh:mm". */
     maskPlaceholder: string
-    /**
-     * What the field says of a time the restrictions do not allow. It is carried by the
-     * control's own validity rather than displayed, so a browser is what shows it, and in
-     * the language the browser is being told to speak here.
-     */
+    /** What the field says of a time the restrictions do not allow. */
     unavailable: string
   }
   fileInput: {
@@ -239,11 +197,8 @@ export interface Messages {
     list: string
   }
   /**
-   * The carousel. Two of these entries are what a screen reader SAYS instead of the bare
-   * words "region" and "group", so they are text a reader hears and therefore text that
-   * belongs here. It is worth being deliberate about them: a role description left in
-   * English is the one accessibility string that goes wrong with no visible symptom
-   * whatsoever.
+   * The carousel. Two of these entries are what a screen reader SAYS instead of the bare words
+   * "region" and "group", so they are text a reader hears and therefore text that belongs here.
    */
   carousel: {
     /** What the carousel is called when the consumer gives it no name of its own. */
@@ -254,11 +209,7 @@ export interface Messages {
     slideRoleDescription: string
     /** What the scrolling area itself is called: it can be reached with the Tab key. */
     slides: string
-    /**
-     * What a slide is called, and its dot with it. The number is the one a reader counts,
-     * starting at one: the caller adds it. It carries the WORD "of", which is why it is
-     * here where the table's bare "3/8" counter is not.
-     */
+    /** What a slide is called, and its dot with it. */
     slide: (index: number, total: number) => string
     previous: string
     next: string
@@ -266,16 +217,7 @@ export interface Messages {
     indicators: string
   }
 
-  /**
-   * The calendar. Two groups of words that read very differently: the toolbar, which a
-   * reader SEES, and everything from `eventRoleDescription` down, which only a screen
-   * reader ever says: the same caution as the carousel's role description applies, since
-   * an untranslated one goes wrong with no visible symptom at all.
-   *
-   * The navigation labels are per view rather than one word plus a unit: "Previous" needs
-   * to say what it steps over, and building "Previous " + "week" out of two fragments is
-   * the kind of sentence assembly that survives English and nothing else.
-   */
+  /** The calendar. */
   calendar: {
     /** What the calendar is called when the consumer gives it no name of its own. */
     label: string
@@ -329,11 +271,7 @@ export interface Messages {
 }
 
 /**
- * A dictionary given in PART: every section and every entry is optional. Anything left
- * out falls back to the dictionary already in place, and never to an empty string.
- *
- * The optionality stops at the entries and does not descend into them, so a message that
- * takes a value stays a whole function. Making it recursive would allow one of those
- * functions to be described as a partial object, which is to say as nothing at all.
+ * A dictionary given in PART: every section and every entry is optional. Anything left out
+ * falls back to the dictionary already in place, and never to an empty string.
  */
 export type MessagesInput = { [K in keyof Messages]?: Partial<Messages[K]> }

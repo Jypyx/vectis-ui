@@ -96,7 +96,6 @@ describe('resolveKeys / capLabel', () => {
       'ctrl',
       'k',
     ])
-    // On a Mac mod is Command, so it and Ctrl are two different keys.
     expect(resolveKeys(parseHotkeys('mod+ctrl+k'), 'mac')).toHaveLength(3)
   })
 

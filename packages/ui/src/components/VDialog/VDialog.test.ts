@@ -5,16 +5,8 @@ import { defineComponent, h, nextTick, ref } from 'vue'
 import VDialog from './VDialog.vue'
 import VDialogAlert from './VDialogAlert.vue'
 
-/**
- * Logic only (jsdom + the showModal/close stub, see vitest.setup.ts). The real browser
- * behaviour (the top layer, ::backdrop, the focus trap, the Escape/backdrop light
- * dismiss, the scroll-state separators) is covered by the Storybook play functions.
- *
- * Lazy mounting: the <dialog> only exists in the DOM while it is open — so the tests
- * open the modal before querying the element.
- */
+/** Logic only (jsdom + the showModal/close stub, see vitest.setup.ts). */
 async function flush() {
-  // opening chains rendered=true → nextTick (mounting) → showModal()
   await nextTick()
   await new Promise((r) => setTimeout(r))
   await nextTick()
@@ -100,8 +92,6 @@ describe('VDialog', () => {
   })
 
   it('hideClose keeps the header actions container for the slot that still fills it', async () => {
-    // The `v-if` is `!hideClose || $slots["header-actions"]`, not `!(hideClose || …)`: written
-    // the second way the container disappears exactly when a consumer fills the slot.
     const { container } = await openHarness(
       { hideClose: true },
       '<template #header-actions><button data-testid="pin">Pin</button></template>',
@@ -142,12 +132,10 @@ describe('VDialog', () => {
   })
 
   it('width is set as the inline --dialog-width style', async () => {
-    // No width, no inline value: the stylesheet falls back on the dialog-width token.
     expect((await openHarness()).dialog.style.getPropertyValue('--dialog-width')).toBe('')
     expect(
       (await openHarness({ width: '640px' })).dialog.style.getPropertyValue('--dialog-width'),
     ).toBe('640px')
-    // A number is read as pixels, as on every free dimension of the design system.
     expect(
       (await openHarness({ width: 560 })).dialog.style.getPropertyValue('--dialog-width'),
     ).toBe('560px')
@@ -200,7 +188,6 @@ describe('VDialogAlert — the imperative API', () => {
 
     holder.value?.close()
     await flush()
-    // The element is unmounted along with the dialog, which is what `el` follows.
     expect(holder.value?.el).toBeNull()
   })
 })
@@ -234,7 +221,6 @@ describe('VDialog — closing, the model and a browser without closedby', () => 
     await flush()
     open.value = true
     await flush()
-    // What the browser does: the old element's close event arrives in a later task.
     old.dispatchEvent(new Event('close'))
     await nextTick()
     expect(open.value).toBe(true)
@@ -247,7 +233,7 @@ describe('VDialog — closing, the model and a browser without closedby', () => 
   })
 
   describe('where closedby is not implemented', () => {
-    // jsdom has no `closedBy`, which is exactly the browser this fallback is for.
+    // Jsdom has no `closedBy`, which is exactly the browser this fallback is for.
     const escape = () => new Event('cancel', { cancelable: true })
 
     it('a refused Escape is cancelled', async () => {
@@ -269,7 +255,7 @@ describe('VDialog — closing, the model and a browser without closedby', () => 
 
     it('a click on the backdrop closes a dialog that allows it', async () => {
       const { dialog, open } = await openHarness()
-      // jsdom lays nothing out: the dialog's box is empty, so any point is outside it.
+      // Jsdom lays nothing out: the dialog's box is empty, so any point is outside it.
       dialog.dispatchEvent(pointer('pointerdown', 5))
       dialog.dispatchEvent(pointer('click', 5))
       await flush()

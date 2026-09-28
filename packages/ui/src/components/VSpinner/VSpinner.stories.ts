@@ -32,7 +32,6 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   play: async ({ canvasElement }) => {
-    // role="status" + a hidden label: announced by screen readers
     await expect(within(canvasElement).getByRole('status')).toHaveTextContent('Loading…')
   },
 }

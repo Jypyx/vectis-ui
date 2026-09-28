@@ -105,9 +105,8 @@ export const AutoGrow: Story = {
 }
 
 /**
- * `rows` is the number of lines the field shows, and it is what gives the field its
- * height — there is no CSS floor underneath. At `rows="1"` it is exactly a VInput of
- * the same size, and every further row adds one line box.
+ * `rows` is the number of lines the field shows, and it is what gives the field its height;
+ * there is no CSS floor underneath.
  */
 export const Rows: Story = {
   render: () => ({
@@ -123,15 +122,10 @@ export const Rows: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    /* Two claims a browser alone can settle, jsdom laying nothing out.
-
-       One: `rows="1"` is a VInput to the pixel. That is the whole reason the padding is
-       derived from the control height, and it only holds because the icon and button
-       offsets are SYMMETRIC — an asymmetric one leaves the clear cross taller than the
-       line box and the field 1.5px over.
-
-       Two: a row costs exactly one line box, so the height is affine in `rows`. A
-       `min-height` on the field breaks it, pinning every count to the same height. */
+    /*
+     * Two claims a browser alone can settle, jsdom laying nothing out. One: `rows="1"` is a
+     * VInput to the pixel.
+     */
     const boxOf = (id: string, field: string) =>
       canvasElement
         .querySelector(`[data-testid="${id}"]`)!
@@ -164,10 +158,7 @@ export const Sizes: Story = {
   }),
 }
 
-/**
- * 4px off the field, taken from the padding — the only lever left now that the height
- * comes from `rows`. The number of lines, the type and the icons are unchanged.
- */
+/** Compact reduces padding by 4px while preserving rows, type and icon sizes. */
 export const Compact: Story = {
   render: () => ({
     components: { VTextarea },
@@ -182,8 +173,7 @@ export const Compact: Story = {
 
 /**
  * Pointing `--vectis-radius-interactive` at the pill token is how a consumer asks for pill
- * controls. The field follows that override on the corner a control of its own size takes,
- * so a five-row textarea keeps the corners of the `VInput` above it.
+ * controls.
  */
 export const PillRadius: Story = {
   render: () => ({
@@ -199,14 +189,12 @@ export const PillRadius: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    /* The override sits on the wrapper alone, so the rest of the page keeps the shipped
-       value and the story cannot leak into the next one in the tab.
-
-       `getComputedStyle` reports the COMPUTED radius and never the painted one: scaling a
-       radius down to fit its box is a used-value step and leaves nothing behind here. That
-       is what makes this assertion sharp — uncapped, it reads back 9999px while the corner
-       on screen is half the field. jsdom sees none of it, applying no stylesheet and
-       laying nothing out. */
+    /*
+     * The override sits on the wrapper alone, so the rest of the page keeps the shipped value
+     * and the story cannot leak into the next one in the tab. `getComputedStyle` reports the
+     * COMPUTED radius and never the painted one: scaling a radius down to fit its box is a
+     * used-value step and leaves nothing behind here.
+     */
     const fieldOf = (id: string, field: string) =>
       canvasElement
         .querySelector(`[data-testid="${id}"]`)!
@@ -216,14 +204,10 @@ export const PillRadius: Story = {
     const input = fieldOf('pill-input', '.v-input')
     const textarea = fieldOf('pill-textarea', '.v-textarea')
 
-    /* The single-line field is what defines the corner: it is one control tall, so whatever
-       the override says, the browser paints half its height. The textarea has to COMPUTE
-       that same number. */
     const half = input.getBoundingClientRect().height / 2
     const radius = Number.parseFloat(getComputedStyle(textarea).borderTopLeftRadius)
     await expect(Math.abs(radius - half)).toBeLessThan(0.5)
 
-    // …on a field that really is several controls tall, or the claim above is vacuous.
     await expect(textarea.getBoundingClientRect().height).toBeGreaterThan(half * 3)
   },
 }
@@ -267,8 +251,8 @@ export const SoftCounter: Story = {
     await userEvent.type(textarea, 'far too long a value')
     await waitFor(() => expect(textarea.value).toBe('far too long a value'))
     await expect(canvas.getByText('20/10')).toHaveAttribute('data-over')
-    // native validity: setCustomValidity invalidated the field (:user-invalid
-    // cannot be asserted, as it requires a *trusted* interaction)
+    // Native validity: setCustomValidity invalidated the field (:user-invalid cannot be
+    // asserted, as it requires a *trusted* interaction)
     await waitFor(() => expect(textarea.validity.customError).toBe(true))
     await expect(textarea.matches(':invalid')).toBe(true)
   },
@@ -287,13 +271,11 @@ export const Clearable: Story = {
     await userEvent.type(textarea, 'draft')
     const clear = await canvas.findByRole('button', { name: 'Clear' })
 
-    /* The decorative icon and the clear cross are offset onto the SAME first line box,
-       so they read as one row alongside the text — VInput's alignment, on a field whose
-       height varies. Nothing but a browser can see this: jsdom lays nothing out.
-
-       The offsets must NOT be written as `1lh`: the browser resolves that against each
-       element's OWN font, and an icon carries a 20px one against the field's 14px, which
-       sits it 4.5px below the cross. */
+    /*
+     * Nothing but a browser can see this: jsdom lays nothing out. The offsets must not be
+     * written as `1lh`: the browser resolves that against each element's own font, and an icon
+     * carries a 20px one against the field's 14px, which sits it 4.5px below the cross.
+     */
     const middleOf = (el: Element) => {
       const rect = el.getBoundingClientRect()
       return rect.top + rect.height / 2
@@ -301,8 +283,6 @@ export const Clearable: Story = {
     const icon = canvasElement.querySelector('.v-textarea-field > .v-icon')!
     await expect(Math.abs(middleOf(icon) - middleOf(clear))).toBeLessThan(1)
 
-    // …and that row is the FIRST line, not the middle of a field two lines tall: this
-    // is what would go red if the alignment were "fixed" with `align-items: center`.
     const field = canvasElement.querySelector('.v-textarea-field')!.getBoundingClientRect()
     await expect(middleOf(icon) - field.top).toBeLessThan(field.height / 2)
 
@@ -320,7 +300,6 @@ export const Loading: Story = {
     template: '<VTextarea v-bind="args" v-model="value" style="width: 320px" />',
   }),
   play: async ({ canvasElement }) => {
-    // the spinner replaces the end icon
     await expect(within(canvasElement).getByRole('status')).toBeInTheDocument()
   },
 }
@@ -357,10 +336,10 @@ export const Readonly: Story = {
 }
 
 /**
- * `readonly` and `invalid` compose: the sunken background and the red border are
- * two independent decisions. On a read-only field the error can only come from
- * the `invalid` prop (`aria-invalid`) — a `<textarea readonly>` is barred from
- * constraint validation, so `:user-invalid` never applies to it.
+ * `readonly` and `invalid` compose: the sunken background and the red border are two
+ * independent decisions. On a read-only field the error can only come from the `invalid` prop
+ * (`aria-invalid`); a `<textarea readonly>` is barred from constraint validation, so
+ * `:user-invalid` never applies to it.
  */
 export const ReadonlyInvalid: Story = {
   render: () => ({
@@ -392,15 +371,16 @@ export const ReadonlyInvalid: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    // data-testid lands on the <textarea> (inheritAttrs: false), hence the closest().
+    // Data-testid lands on the <textarea> (inheritAttrs: false), hence the closest().
     const border = (id: string) =>
       getComputedStyle(
         canvasElement.querySelector(`[data-testid="${id}"]`)!.closest('.v-textarea-field')!,
       ).borderColor
 
-    /* Every state block weighs (0,3,0) — :has() takes the specificity of its
-       argument — so source order alone decides. Verified red by moving the
-       [data-readonly] block back after the invalid one. */
+    /*
+     * Every state block weighs (0,3,0); :has() takes the specificity of its argument; so source
+     * order alone decides.
+     */
     await expect(border('both')).toBe(border('invalid'))
     await expect(border('both')).not.toBe(border('readonly'))
   },

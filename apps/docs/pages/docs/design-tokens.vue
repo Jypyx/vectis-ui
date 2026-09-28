@@ -46,7 +46,6 @@ const roleColumns = computed(() => [
 
 const ROLE_PARTS = ['size', 'weight', 'leading', 'tracking'] as const
 
-/* The same plain-string-or-compiled-message split `DocsTokenRow` explains. */
 function roleDescription(role: TextRole): string {
   const entry = (tm('designTokens.roles') as Record<string, unknown>)[role]
   return typeof entry === 'string' ? entry : rt(entry as never)

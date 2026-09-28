@@ -87,7 +87,6 @@ export const Group: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(canvas.getByRole('radio', { name: 'Standard' })).toBeChecked()
-    // the hidden input is pointer-events: none, so the wrapping <label> is clicked
     await userEvent.click(canvas.getByRole('radio', { name: 'Pro' }).closest('label')!)
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('pro'))
     await expect(canvas.getByRole('radio', { name: 'Standard' })).not.toBeChecked()
@@ -188,9 +187,8 @@ export const WithHint: Story = {
 }
 
 /**
- * `readonly`, set on every button of the group, keeps the buttons focusable and refuses
- * the selection. The arrow keys select through a click the browser dispatches on the next
- * button, and that click is cancelled like any other.
+ * `readonly`, set on every button of the group, keeps the buttons focusable and refuses the
+ * selection.
  */
 export const ReadOnly: Story = {
   args: { value: 'x' },

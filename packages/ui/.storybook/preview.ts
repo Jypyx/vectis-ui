@@ -7,16 +7,11 @@ import '../src/styles/index.css'
 import './preview.css'
 
 /*
- * Theme, direction and locale are applied as side effects rather than through
- * the state of a templated wrapper: Storybook's vue3 renderer does not re-mount
- * the tree when a toolbar global changes (it only patches reactive args), so
- * state captured in setup() would stay frozen. The decorator body, however, is
- * re-run on every change — and the DS locale is a shallowRef, so already-mounted
- * components re-render on setLocale.
+ * Apply toolbar globals in the decorator body: Storybook reruns it without remounting Vue
+ * setup. Reactive library locale state updates mounted components.
  */
 const darkMedia = window.matchMedia('(prefers-color-scheme: dark)')
 
-// `en` is the base dictionary; French is opt-in, so the toolbar needs it registered.
 registerMessages('fr', fr)
 
 const applySystemTheme = () => {
@@ -27,7 +22,6 @@ const applyTheme = (theme: string) => {
   darkMedia.removeEventListener('change', applySystemTheme)
   if (theme === 'system') {
     applySystemTheme()
-    // Follows OS preference changes for as long as the System preset is active.
     darkMedia.addEventListener('change', applySystemTheme)
   } else {
     document.documentElement.dataset.theme = theme
@@ -48,40 +42,22 @@ const preview: Preview = {
   parameters: {
     a11y: {
       /*
-       * `error` and not the addon's default `todo`, which downgrades every axe violation
-       * to a warning — `pnpm test:stories` would stay green through any regression. One
-       * run covers ONE theme: the dark pass goes through the emulated colour scheme wired
-       * in vitest.config.ts, since the stories' `theme` global resolves to
-       * `prefers-color-scheme`.
+       * `error` and not the addon's default `todo`, which downgrades every axe violation to a
+       * warning; `pnpm test:stories` would stay green through any regression. One run covers
+       * ONE theme: the dark pass goes through the emulated colour scheme wired in
+       * vitest.config.ts, since the stories' `theme` global resolves to `prefers-color-scheme`.
        */
       test: 'error',
       /*
-       * Two decorative overlays axe cannot judge: it derives an element's background
-       * from the boxes that CONTAIN its rect, and both of these are painted by a
-       * SIBLING they only partly cover — VProgressLinear's clipped copy sits over the
-       * fill, the dial's selected numeral over the hand's tip dot. axe reads the track
-       * (resp. the panel) underneath and reports ~1.1:1 where the rendering is 6.5:1.
-       * Both are aria-hidden duplicates whose colour is derived FROM the overlay they
-       * sit on (contrast-color() / --progress-text-fallback), so the contrast is guaranteed
-       * by construction, not by this rule.
+       * axe cannot resolve these aria-hidden overlays' sibling backgrounds. Their foregrounds
+       * derive from the fill or hand they overlap, rather than the track or panel axe measures.
        */
       context: {
         exclude: ['.v-progress-linear-text[data-on-fill]', '.v-time-picker-number[data-selected]'],
       },
       /*
-       * axe is asked for VIOLATIONS ALONE, and that is a MEMORY decision rather than a
-       * reporting one — deleting these three lines makes `pnpm storybook` die, not the
-       * suite go quiet. The Vitest addon attaches the whole axe result to every story's
-       * test report and keeps the accumulated reports in the DEV SERVER's state (that is
-       * what feeds the Accessibility panel), pushing them to the manager as the run goes:
-       * measured at ~20 MB of heap per test, which crosses Node's ~4 GB limit around test
-       * 155 of 458 and kills `storybook dev` with "FATAL ERROR: Reached heap limit".
-       * Trimmed, the same run holds at ~400 MB. The weight is in `passes`, which nobody
-       * reads: VDatePicker/Default alone returns 839 passing nodes, 423 kB of JSON against
-       * 42 kB here. `violations` are returned IN FULL whatever this is set to (verified
-       * rule by rule), so nothing that fails today can pass; what the panel loses is the
-       * node list of the rules that PASSED, of which axe keeps one per rule. The CLI
-       * (`pnpm test:stories`) never had the problem — it has no store to accumulate into.
+       * Dispose timers and queue state between Storybook navigations; the preview process
+       * retains module-level state.
        */
       options: {
         resultTypes: ['violations'],

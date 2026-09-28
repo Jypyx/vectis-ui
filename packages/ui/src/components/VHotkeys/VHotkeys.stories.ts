@@ -114,8 +114,7 @@ export const Variants: Story = {
 
 /**
  * The whole point of the component: `mod` is ⌘ on macOS and Ctrl everywhere else, and `meta`
- * names the physical key (Command, Windows, Super). The last column is the OS actually
- * detected on this machine — it is what a consumer gets without the `platform` prop.
+ * names the physical key (Command, Windows, Super).
  */
 export const Platforms: Story = {
   render: () => ({
@@ -165,38 +164,32 @@ export const Attached: Story = {
       </div>
     `,
   }),
-  /* The whole feature is one CSS rule with two carriers, and nothing else covers
-     it: jsdom evaluates no styles, and a typo in the `:not([data-attached])` half
-     would decorate BOTH the root and the caps with no error anywhere. Verified
-     red by dropping that `:not()`. */
+  /*
+   * The whole feature is one CSS rule with two carriers, and nothing else covers it: jsdom
+   * evaluates no styles, and a typo in the `:not([data-attached])` half would decorate both the
+   * root and the caps with no error anywhere.
+   */
   play: async ({ canvasElement }) => {
     const roots = [...canvasElement.querySelectorAll<HTMLElement>('.v-hotkeys')]
     const [detached, , attached] = roots
 
     const bg = (el: Element) => getComputedStyle(el).backgroundColor
     const TRANSPARENT = 'rgba(0, 0, 0, 0)'
-    /* Detached: the caps are the keys, the root is bare. */
     await expect(bg(detached!)).toBe(TRANSPARENT)
     await expect(bg(detached!.querySelector('.v-hotkeys-key')!)).not.toBe(TRANSPARENT)
-    /* Attached: the decoration has moved to the root, so the separator is inside it. */
     await expect(bg(attached!)).not.toBe(TRANSPARENT)
     await expect(bg(attached!.querySelector('.v-hotkeys-key')!)).toBe(TRANSPARENT)
 
-    /* A single key holds the whole combination, so its ends take exactly the gap
-       that spaces its insides — while a detached cap keeps a cap's wider padding.
-       Verified red by dropping the [data-attached] --hotkeys-pad override. */
     const gapOf = (root: Element) =>
       getComputedStyle(root.querySelector('.v-hotkeys-keys')!).columnGap
     const padOf = (el: Element) => getComputedStyle(el).paddingLeft
     await expect(padOf(attached!)).toBe(gapOf(attached!))
     await expect(padOf(detached!.querySelector('.v-hotkeys-key')!)).not.toBe(gapOf(detached!))
 
-    /* NOTHING but the padding on the sides. The key is `inline-flex`, so it is
-       content-sized on its own — but a grid cell or a flex column stretches it
-       like any other DS root (VChip, VButton), and only `attached` makes that
-       visible, since the root is the decorated box. This locks the story's own
-       `justify-items: start`, without which the pill was 138.5px wide for 92.5px
-       of content: 23px of dead space at each end, read as "too much padding". */
+    /*
+     * This locks the story's own `justify-items: start`, without which the pill was 138.5px
+     * wide for 92.5px of content: 23px of dead space at each end, read as "too much padding".
+     */
     const cs = getComputedStyle(attached!)
     const outer = attached!.getBoundingClientRect().width
     const inner = attached!.querySelector('.v-hotkeys-keys')!.getBoundingClientRect().width
@@ -205,7 +198,7 @@ export const Attached: Story = {
   },
 }
 
-/** `xs` (the default) and `sm`, the VChip scale — `compact` takes 4px off the height. */
+/** `xs` (the default) and `sm`, the VChip scale; `compact` takes 4px off the height. */
 export const Sizes: Story = {
   render: () => ({
     components: { VHotkeys, VButton, VChip },

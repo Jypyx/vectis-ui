@@ -7,7 +7,6 @@ const CATALOGUE: ComboboxOption[] = Array.from({ length: 120 }, (_, i) => ({
   label: `Reference ${String(i + 1).padStart(3, '0')}`,
 }))
 
-/* Stands in for a server: latency, and the filtering done on its side. */
 function fetchReferences(query: string): Promise<ComboboxOption[]> {
   const found = CATALOGUE.filter((option) =>
     option.label.toLowerCase().includes(query.toLowerCase()),

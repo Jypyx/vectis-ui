@@ -4,7 +4,6 @@ import { VButton, VPopover, VTypography } from 'vectis-ui'
 
 <template>
   <div class="column">
-    <!-- Left alone, the panel is only as wide as its content. -->
     <VPopover placement="bottom-start">
       <template #trigger="{ triggerProps }">
         <VButton v-bind="triggerProps" variant="outline" tone="neutral" class="wide">
@@ -14,7 +13,6 @@ import { VButton, VPopover, VTypography } from 'vectis-ui'
       <VTypography variant="body-sm">Short.</VTypography>
     </VPopover>
 
-    <!-- The panel can no longer be narrower than what it is anchored to. -->
     <VPopover match-trigger placement="bottom-start">
       <template #trigger="{ triggerProps }">
         <VButton v-bind="triggerProps" variant="outline" tone="neutral" class="wide">
@@ -24,8 +22,10 @@ import { VButton, VPopover, VTypography } from 'vectis-ui'
       <VTypography variant="body-sm">Short.</VTypography>
     </VPopover>
 
-    <!-- It is a FLOOR and not a clamp: content that needs more room still gets it,
-         which is what a list of long labels under a short field wants. -->
+    <!--
+      It is a FLOOR and not a clamp: content that needs more room still gets it, which a list of
+      long labels under a short field wants.
+    -->
     <VPopover match-trigger placement="bottom-start">
       <template #trigger="{ triggerProps }">
         <VButton v-bind="triggerProps" variant="outline" tone="neutral">Narrow</VButton>

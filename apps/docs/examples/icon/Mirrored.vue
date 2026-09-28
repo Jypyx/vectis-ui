@@ -9,7 +9,6 @@ import { arrow_right_alt as arrowRight, chevron_left as chevronLeft, search } fr
       <VTypography variant="caption" tone="muted">{{ dir }}</VTypography>
       <VIcon :name="chevronLeft" :size="28" mirrored />
       <VIcon :name="arrowRight" :size="28" mirrored />
-      <!-- A magnifier means the same thing in both directions, so it takes no flip. -->
       <VIcon :name="search" :size="28" />
     </div>
   </div>

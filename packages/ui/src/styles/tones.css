@@ -1,27 +1,6 @@
 /*
- * Tone table — the single CSS incarnation of the design system's tone contract.
- *
- * A component sets `v-tone` on the element carrying `data-tone` and consumes the
- * `--tone-*` variables in its own CSS. The blocks define ONLY custom properties,
- * never a visual property: it is each component that decides what `--tone-bg-solid`
- * paints. The four chromatic tones follow the semantic colour families; VButton takes two of
- * them, `accent` and `danger`, success and warning being STATES a button never reports.
- * `neutral`, which no token family covers, is the canonical inversion described below.
- *
- *   --tone-bg-solid / -hover / -active   filled background and its two states
- *   --tone-text-solid                    text ON that filled background
- *   --tone-text-tinted                   the tone as TEXT, on the page background
- *   --tone-bg-soft                       the tinted surface (the `soft` variant,
- *                                        which is named after this very token, and
- *                                        the hover of a ghost)
- *   --tone-border-soft                   the border matching that surface
- *
- * WHY `vectis.tokens` AND NOT `vectis.components`. The table is a FALLBACK a component must
- * be able to override (VToast redefines `neutral`, VChip's `[data-custom]` replaces the whole
- * set). Those rules sit at EQUAL specificity with these — `.v-toast[data-tone='neutral']` and
- * `.v-tone[data-tone='neutral']` are both (0,2,0) — and
- * each component ships its own sheet, so in the same layer the winner would depend on the
- * bundler's order. One layer lower, every component rule wins by construction.
+ * Keep tone custom properties in vectis.tokens so component overrides win independently of
+ * stylesheet order.
  */
 @layer vectis.tokens {
   .v-tone[data-tone='accent'] {
@@ -65,13 +44,10 @@
     --tone-border-soft: var(--vectis-color-warning-border);
   }
 
-  /* Neutral has no token family: its solid is a full text/surface INVERSION, and both
-     obvious alternatives are dead ends. `surface-muted` would make --tone-bg-solid equal
-     to --tone-bg-soft, so a solid neutral would be indistinguishable from a soft one —
-     the state a selection has to signal. `surface-inverse` equals `surface-muted` in dark,
-     where a selected neutral control would then vanish. The inversion stays distinct in
-     BOTH themes, which is why hover/active mix towards `surface`, the opposite direction
-     from the chromatic tones. VSnackbar consumes it for its own sake, with no override. */
+  /*
+   * Neutral solid inverts text and surface; surface-muted would collapse solid and soft into
+   * the same appearance.
+   */
   .v-tone[data-tone='neutral'] {
     --tone-bg-solid: var(--vectis-color-text);
     --tone-bg-solid-hover: color-mix(
@@ -90,14 +66,10 @@
     --tone-border-soft: var(--vectis-color-border-strong);
   }
 
-  /* A colour of the consumer's own (`color`, sent inline as `--custom-color` with
-     `data-custom`) replaces whichever tone is set. Every value is derived from that one
-     colour mixed with the theme's own surface and text, so the same value reads in the
-     light theme and in the dark one. The text on the full colour is a fixed white: its
-     contrast is the consumer's to check, where `contrast-color()` does not pick it.
-     Same specificity as the tone rows and written after them in this same sheet, so it
-     wins over them without any bundle order involved. A component that needs more rows
-     (VChip's hover and border steps) adds them in its own sheet. */
+  /*
+   * Keep custom-colour rows after tone rows at equal specificity. Consumers must check
+   * white-text contrast when contrast-color is unavailable.
+   */
   .v-tone[data-custom] {
     --tone-bg-solid: var(--custom-color);
     --tone-text-solid: var(--vectis-color-text-on-accent);

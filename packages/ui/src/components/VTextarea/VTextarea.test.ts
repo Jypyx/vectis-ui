@@ -39,8 +39,6 @@ describe('VTextarea', () => {
   })
 
   it('rows is floored at 1 and rounded, so the parser never falls back to its own default', () => {
-    // A zero, a negative or a fractional `rows` is invalid HTML: the browser would drop
-    // it and use two rows. Each of these therefore has to reach the DOM as an integer.
     for (const [rows, expected] of [
       [0, '1'],
       [-3, '1'],
@@ -54,9 +52,7 @@ describe('VTextarea', () => {
   })
 
   it('exposes the resolved rows to the field CSS, which auto-grow reads as its floor', () => {
-    // The variable is what puts `rows` back in charge of the starting height under
-    // `field-sizing: content`, which ignores the attribute outright. Invisible in jsdom
-    // (no layout) — the height itself is asserted by the Rows play function.
+    // Invisible in jsdom (no layout); the height itself is asserted by the Rows play function.
     const { container } = render(VTextarea, { props: { modelValue: '', rows: 3 } })
     const field = container.querySelector('.v-textarea-field') as HTMLElement
     expect(field.style.getPropertyValue('--textarea-rows')).toBe('3')
@@ -88,7 +84,6 @@ describe('VTextarea', () => {
       props: { modelValue: '', iconStart: 'search' },
       slots: { start: '<span data-testid="extra">Alpha</span>' },
     })
-    // The same asymmetry as VInput: the slot sits beside the icon, not over it.
     const icon = container.querySelector('.v-icon')
     const extra = getByTestId('extra')
     expect(icon).not.toBeNull()
@@ -146,7 +141,7 @@ describe('VTextarea', () => {
     })
     const counter = container.querySelector('.v-textarea-meta .v-textarea-counter') as HTMLElement
     expect(counter.textContent?.trim()).toBe('3/10')
-    // never a counter inside the field (unlike VInput)
+    // Never a counter inside the field (unlike VInput)
     expect(container.querySelector('.v-textarea-field .v-textarea-counter')).toBeNull()
     await rerender({ modelValue: 'abcdefghijk' })
     expect(counter.hasAttribute('data-over')).toBe(true)
@@ -193,9 +188,8 @@ describe('VTextarea — expose', () => {
   })
 })
 
-// A validation library marks the field invalid through the attribute. The component's own
-// `invalid` binding comes after the forwarded attributes, so it must hand the consumer's value
-// through rather than overwrite it with nothing.
+// The component's own `invalid` binding comes after the forwarded attributes, so it must hand
+// the consumer's value through rather than overwrite it with nothing.
 describe('VTextarea — a consumer aria-invalid', () => {
   it('reaches the control when `invalid` is not set', () => {
     const { getByRole } = render(VTextarea, {
@@ -207,7 +201,6 @@ describe('VTextarea — a consumer aria-invalid', () => {
 })
 
 describe('VTextarea — robustness and hooks', () => {
-  // A value straight from an API or a database is often null rather than ''.
   it('mounts with a null model while counting and clearable', () => {
     const { getByRole } = render(VTextarea, {
       props: {

@@ -1,14 +1,7 @@
 <script setup lang="ts">
 /**
- * A radio button whose dot is drawn by the design system, on the same principle as
- * VCheckbox: the real `<input type="radio">` stays in place and only its own drawing
- * is hidden.
- *
- * The group is native as well. Several VRadio sharing the same `name` and the same
- * v-model form one choice, and it is the browser that then makes the arrow keys move
- * between them, that lets only one be selected, and that gives the group a single
- * stop in the tab order. There is no JavaScript here for any of it; the only piece this
- * component writes is the refusal `readonly` asks for, which a radio has no native form of.
+ * Retain the native radio for keyboard selection and forms. Its hint stays outside the label so
+ * it does not become part of the accessible name.
  */
 
 import { ref } from 'vue'
@@ -47,11 +40,7 @@ interface RadioProps {
   invalid?: boolean
   /** Makes this choice unusable, greyed out through the colour tokens. */
   disabled?: boolean
-  /**
-   * Shows the selection without allowing it to be changed. The button can still be
-   * focused and is still submitted with its form; a click or an arrow key simply selects
-   * nothing. Set it on every button of the group.
-   */
+  /** Shows the selection without allowing it to be changed. */
   readonly?: boolean
 }
 
@@ -65,10 +54,10 @@ const props = withDefaults(defineProps<RadioProps>(), {
   readonly: false,
 })
 
-// @a11y — the redirection buys the whole keyboard. Moving between the buttons of a group is
-// the browser's job, but it only groups inputs that share a `name` — so redirecting the
-// attributes is what makes the arrow keys work at all. The root being a layout box, `name`
-// left on it would reach nothing.
+// @a11y
+// The browser's job, but it only groups inputs that share a `name`; so redirecting the
+// attributes is what makes the arrow keys work at all. The root being a layout box, `name` left
+// on it would reach nothing.
 defineOptions({ inheritAttrs: false })
 const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 const { hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
@@ -87,14 +76,9 @@ defineSlots<{
 const inputEl = ref<HTMLInputElement | null>(null)
 
 // @core
-// The native `readonly` attribute does nothing on a radio button. Cancelling the click is
-// what refuses the selection: the browser puts the group's previous selection back and fires
-// no `change`. It covers the arrow keys too, which select the next button of the group
-// through a click the browser dispatches on it — so the focus still moves, the selection
-// does not.
-//
-// No `aria-readonly` goes with it, unlike VCheckbox and VSwitch: ARIA allows it on a
-// `radiogroup` and not on a `radio`, and axe fails the page for it.
+// The native `readonly` attribute does nothing on a radio button. Cancelling the click is what
+// refuses the selection: the browser puts the group's previous selection back and fires no
+// `change`.
 function refuseWhenReadonly(event: MouseEvent) {
   if (props.readonly) event.preventDefault()
 }
@@ -173,14 +157,12 @@ defineExpose({
     opacity: 1;
   }
 
-  /* The state painting, rule for rule the same as VCheckbox's with its own classes: keep the
-     two ALIGNED. The states below weigh (0,3,0), bar the read-only base at (0,2,0), so their
-     ORDER arbitrates them: checked, read-only, invalid, then disabled last.
-
-     The two hovers sit at (0,7,0) and therefore beat every one of them on specificity, order
-     or no order — which is why they have to EXCLUDE by hand each state they must not repaint.
-     Forgetting the invalid pair is what once rubbed the danger border out under the pointer,
-     on a control whose whole point at that moment is to look wrong. */
+  /*
+   * The states below weigh (0,3,0), bar the read-only base at (0,2,0), so their ORDER
+   * arbitrates them: checked, read-only, invalid, then disabled last. The two hovers sit at
+   * (0,7,0) and therefore beat every one of them on specificity, order or no order; which is
+   * why they have to EXCLUDE by hand each state they must not repaint.
+   */
   .v-radio:not([data-readonly])
     .v-choice-row:hover
     .v-radio-input:not(:disabled, :checked, :user-invalid, [aria-invalid='true'])
@@ -205,11 +187,11 @@ defineExpose({
     border-color: var(--vectis-color-accent-hover);
   }
 
-  /* Read-only sinks like a read-only field, and a selected control trades the accent for the
-     muted text colour: still plainly on, no longer inviting a click. The inner disc takes the
-     surface colour, which contrasts with that fill in both themes, where white would vanish
-     against the light grey of the dark theme. `:where()` keeps both rules at the weight of
-     the states they sit between. */
+  /*
+   * The inner disc takes the surface colour, which contrasts with that fill in both themes,
+   * where white would vanish against the light grey of the dark theme. `:where()` keeps both
+   * rules at the weight of the states they sit between.
+   */
   :where(.v-radio[data-readonly]) .v-radio-input + .v-radio-dot {
     background: var(--vectis-color-surface-sunken);
     border-color: var(--vectis-color-border);
@@ -233,15 +215,11 @@ defineExpose({
   }
 
   @media (forced-colors: active) {
-    /* Windows forced colors erase every author colour: a `background` becomes `Canvas` and a
-     `border-color` becomes `CanvasText`, so a selected radio loses its inner disc outright, that disc being
-     a `background` on a `background` where a checkbox has a `stroke` that survives. The system
-     Highlight pair is what says "selected" here, as it does on a pressed VToggleItem, a
-     selected VChip and the current VPagination page.
-
-     The class is repeated to (0,8,0) so the row's own hover rules, which reach (0,7,0),
-     cannot repaint it: `forced-color-adjust: none` takes the forcing off this element, and
-     a hover left winning would then paint its REAL grey over the system colour. */
+    /*
+     * The class is repeated to (0,8,0) so the row's own hover rules, which reach (0,7,0),
+     * cannot repaint it: `forced-color-adjust: none` takes the forcing off this element, and a
+     * hover left winning would then paint its real grey over the system colour.
+     */
     .v-radio-input.v-radio-input.v-radio-input.v-radio-input.v-radio-input:checked:not(:disabled)
       + .v-radio-dot {
       forced-color-adjust: none;

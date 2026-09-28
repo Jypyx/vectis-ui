@@ -70,14 +70,13 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 /**
- * An alert requires an explicit action: no cross, and both the backdrop click AND the
- * Escape key are neutralized. Only the footer buttons close it.
+ * An alert requires an explicit action: no cross, and both the backdrop click and the Escape
+ * key are neutralized. Only the footer buttons close it.
  */
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    // lazy mounting: the <dialog> is only queryable once open
     await userEvent.click(canvas.getByRole('button', { name: 'Delete' }))
     const dialog = await waitFor(() => {
       const el = canvasElement.querySelector('.v-dialog') as HTMLDialogElement | null
@@ -91,7 +90,6 @@ export const Default: Story = {
     await new Promise((r) => setTimeout(r, 100))
     expect(dialog.open).toBe(true)
 
-    // only an explicit action closes it (the <dialog> is then unmounted)
     await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }))
     await waitFor(() => expect(canvasElement.querySelector('.v-dialog')).toBeNull())
   },

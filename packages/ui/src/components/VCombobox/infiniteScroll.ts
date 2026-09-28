@@ -1,18 +1,7 @@
 // @core
 /**
- * What asks VCombobox for the next page as the reader reaches the end of the list.
- *
- * Nothing in CSS can report that an element has come into view, so this is code by
- * necessity: a marker is rendered at the foot of the panel and watched, with the panel
- * itself — the box that scrolls — as the frame it is watched within.
- *
- * The module lives in the component's folder rather than among the shared ones, for the
- * usual reason: a single consumer, so it does not qualify as shared code, and VCombobox
- * owns the contract. Promote it the day a second panel paginates.
- *
- * It should not be confused with the shared observer between VTabs and VCombobox that
- * was deliberately refused: VTabs watches two markers at the ends of a row to enable or
- * disable buttons, which has nothing in common with paging a list.
+ * Observe the list's sentinel to request another page; retain ownership of data fetching with
+ * the consumer.
  */
 import { watch, type Ref } from 'vue'
 
@@ -31,18 +20,12 @@ export interface InfiniteScrollOptions {
 }
 
 export interface InfiniteScroll {
-  /**
-   * Releases the lock that stops two requests overlapping.
-   *
-   * It must be called wherever a page that was asked for can no longer arrive: when the
-   * panel closes, above all. Without that, a request which failed would leave the paging
-   * frozen for the rest of the session.
-   */
+  /** Releases the lock that stops two requests overlapping. */
   reset: () => void
   /**
-   * Releases the lock AND takes the next list handed over as an arrival, whatever its
-   * length. For a new search: the page asked for under the old term never lands, and the
-   * new first page may be exactly as long as the list it replaces.
+   * Releases the lock and takes the next list handed over as an arrival, whatever its length.
+   * For a new search: the page asked for under the old term never lands, and the new first page
+   * may be exactly as long as the list it replaces.
    */
   restart: () => void
 }
@@ -50,12 +33,11 @@ export interface InfiniteScroll {
 export function useInfiniteScroll(options: InfiniteScrollOptions): InfiniteScroll {
   let observer: IntersectionObserver | null = null
   /*
-   * A lock of our own, set the instant a page is asked for. The consumer's loading flag
-   * cannot serve: they raise it when their request starts, which is at best a tick
-   * later, and the gap between the two is wide enough for several requests to go out.
+   * The consumer's loading flag cannot serve: they raise it when their request starts, which is
+   * at best a tick later, and the gap between the two is wide enough for several requests to go
+   * out.
    */
   let pending = false
-  // Set by `restart`: the next list counts as an arrival even at the same length.
   let rearm = false
 
   function onIntersect(entries: IntersectionObserverEntry[]) {
@@ -73,11 +55,11 @@ export function useInfiniteScroll(options: InfiniteScrollOptions): InfiniteScrol
       // be tolerated rather than assumed away; the behaviour is checked in a real
       // browser.
       if (!el || typeof IntersectionObserver === 'undefined') return
-      // TRAP — the panel must be named as the frame the marker is watched within, and it
-      // is found by its ARIA role, which is public API, rather than by an internal class.
-      // Left unspecified, the frame would be the VIEWPORT — and since the panel floats
-      // above the page, the marker would count as visible from the very first moment,
-      // firing a burst of requests for every page at once.
+      // The panel must be named as the frame the marker is watched within, and it is found by
+      // its ARIA role, which is public API, rather than by an internal class. Left unspecified,
+      // the frame would be the VIEWPORT; and since the panel floats above the page, the marker
+      // would count as visible from the very first moment, firing a burst of requests for every
+      // page at once.
       const root = el.closest('[role="listbox"]')
       if (!root) return
       observer = new IntersectionObserver(onIntersect, {
@@ -93,22 +75,12 @@ export function useInfiniteScroll(options: InfiniteScrollOptions): InfiniteScrol
         observer = null
       })
     },
-    // `post` so the sentinel and the panel it is measured against are both in the DOM: in
-    // the default timing the refs are still null on the pass that mounts them, and the
-    // observer is never built at all.
     { flush: 'post' },
   )
 
-  // TRAP — an observer only reports a CROSSING. If the page that arrives is too short to
-  // push the marker out of view, the marker stays visible without ever crossing anything
-  // again, and the loading would stop dead at the second page. Watching it afresh after
-  // each page forces a new answer.
-  //
-  // It also gives the stopping condition away for nothing: a source that returns no new
-  // option leaves the count unchanged, nothing happens, and the loop simply ends. That is
-  // why a new array of the same length is NOT an arrival on its own — a source appending
-  // an empty page into a fresh array would otherwise ask again for ever — except after
-  // `restart`, when the list is known to have been replaced.
+  // An observer only reports a CROSSING. If the page that arrives is too short to push the
+  // marker out of view, the marker stays visible without ever crossing anything again, and the
+  // loading would stop dead at the second page.
   watch(options.loaded, (list, previous) => {
     if (list.length === previous.length && !rearm) return
     rearm = false

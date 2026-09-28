@@ -21,10 +21,6 @@ describe('useLiveAnnouncer', () => {
     expect(polite.value).toBe('')
   })
 
-  /*
-   * Two notifications raised in one handler write the same region in the same tick. Only the
-   * last value ever reached the page, so the first was never announced at all.
-   */
   it('keeps every message said in the same tick', async () => {
     const { polite, announce } = useLiveAnnouncer()
     announce('Saved', false)

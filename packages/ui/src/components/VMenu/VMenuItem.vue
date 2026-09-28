@@ -1,21 +1,7 @@
 <script setup lang="ts">
 /**
- * One command in a menu. The panel moves the focus between items, and choosing one closes
- * the whole menu, submenus included.
- *
- * With an `href` it becomes a link, made inert through `useInertLink` when disabled: a
- * link has no `disabled` attribute, so the address is removed, `aria-disabled` says why
- * and the consumer's click listeners are dropped (an `<a>` without `href` still clicks).
- *
- * With the `#submenu` slot it becomes the trigger of a nested panel rendered INSIDE the
- * parent one. That nesting is what buys the submenu behaviour from the browser: the panels
- * form a native stack, a click outside closes all of them, and opening one branch closes its
- * sibling.
- *
- * The JS covers only the two openings the browser does not: the keyboard, and a hover held
- * long enough to show it was meant. A click already opens it natively, and ONLY opens it
- * (`popovertargetaction="show"`): the hover has usually opened it a moment before the
- * click lands, and the default toggle would shut what the reader was reaching for.
+ * Menu commands use native buttons or links. JavaScript handles inert anchors and submenu hover
+ * intent; the panel owns roving focus and dismissal.
  */
 
 import { inject, ref, useAttrs, useId } from 'vue'
@@ -57,13 +43,8 @@ interface MenuItemProps {
   /**
    * What the command means, in colour. `danger` marks it destructive (deleting something
    * belongs there), and `neutral`, the default, is every other command.
-   *
-   * A row is an action, so it takes the vocabulary of one: the same word on the same
-   * prop as a VButton, rather than a boolean of its own. There is no `accent` here,
-   * a menu having no primary command among its rows.
    */
   tone?: MenuItemTone
-  /** Makes the item unusable: it no longer responds and the arrows skip over it. */
   disabled?: boolean
   /**
    * Turns the item into a link pointing at this address, for a menu that navigates
@@ -72,9 +53,9 @@ interface MenuItemProps {
   href?: string
 }
 
-// With a submenu this component renders two elements — the item and the nested panel
-// — so there is no single root for Vue to put the consumer's attributes on. They are
-// placed on the item explicitly.
+// With a submenu this component renders two elements; the item and the nested panel; so there
+// is no single root for Vue to put the consumer's attributes on. They are placed on the item
+// explicitly.
 defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<MenuItemProps>(), {
@@ -112,8 +93,8 @@ const slots = defineSlots<{
   submenu?(): unknown
 }>()
 
-// TRAP — a function read by the template, never a `computed`: `slots` is not reactive, so a
-// computed would keep its first answer while a slot behind a `v-if` comes and goes.
+// A function read by the template, never a `computed`: `slots` is not reactive, so a computed
+// would keep its first answer while a slot behind a `v-if` comes and goes.
 function hasSubmenu() {
   return !!slots.submenu
 }
@@ -139,17 +120,16 @@ function onClick() {
 const subId = useId()
 const subOpen = ref(false)
 const subPanel = ref<InstanceType<typeof VMenuPanel> | null>(null)
-// TRAP — when a submenu is opened from code rather than by a click, the item must be
-// handed to the browser as the source of that opening. The implicit anchor is only
-// established natively, on click; without it the panel has nothing to position itself
-// against and lands at the corner of the viewport, with no error anywhere.
+// When a submenu is opened from code rather than by a click, the item must be handed to the
+// browser as the source of that opening. The implicit anchor is only established natively, on
+// click; without it the panel has nothing to position itself against and lands at the corner of
+// the viewport, with no error anywhere.
 const itemEl = ref<HTMLElement | null>(null)
 
 // @keyboard
-// Opening a submenu from the keyboard, which the browser's own toggle does not cover
-// — it only reacts to a click.
+// Opening a submenu from the keyboard, which the browser's own toggle does not cover; it only
+// reacts to a click.
 function onKeydown(event: KeyboardEvent) {
-  // A key held with a modifier is the browser's: Alt+Right is Forward.
   if (event.altKey || event.ctrlKey || event.metaKey) return
   // @keyboard @a11y
   // A menu item is activated by Space as well as Enter, and a LINK answers Enter alone:
@@ -174,21 +154,21 @@ function onKeydown(event: KeyboardEvent) {
   subPanel.value?.focusFirst()
 }
 
-// A submenu opens on hover, but only once the pointer has stayed long enough to show
-// it was meant — otherwise every panel crossed on the way to another one would flash
-// open. ONE timer serves both directions, since opening and closing are mutually
-// exclusive: arming either always cancels the other.
+// A submenu opens on hover, but only once the pointer has stayed long enough to show it was
+// meant; otherwise every panel crossed on the way to another one would flash open. ONE timer
+// serves both directions, since opening and closing are mutually exclusive: arming either
+// always cancels the other.
 const hoverTimer = useTimer()
 
 // @a11y @core
-// TRAP — a TOUCH tap sends `pointerenter` and `pointerleave` before its `click`, so the
-// leave below armed the close and the submenu the tap opened shut 150 ms later. Hover
-// intent means nothing to a finger: only a pointer that can hover takes this route, the
-// tap opening the submenu natively through the click.
+// A TOUCH tap sends `pointerenter` and `pointerleave` before its `click`, so the leave below
+// armed the close and the submenu the tap opened shut 150 ms later. Hover intent means nothing
+// to a finger: only a pointer that can hover takes this route, the tap opening the submenu
+// natively through the click.
 function onPointerEnter(event: PointerEvent) {
   if (props.disabled || event.pointerType === 'touch') return
-  // Hovering also moves the focus, so that the mouse and the keyboard never highlight
-  // two different items at once — in a menu there is only ever one current item.
+  // Hovering also moves the focus, so that the mouse and the keyboard never highlight two
+  // different items at once; in a menu there is only ever one current item.
   itemEl.value?.focus({ preventScroll: true })
   if (!hasSubmenu()) return
   hoverTimer.start(() => subPanel.value?.show(itemEl.value ?? undefined), SUBMENU_HOVER_DELAY)
@@ -268,23 +248,9 @@ function onPointerLeave(event: PointerEvent) {
 @layer vectis.components {
   .v-menu-item {
     /*
-     * Every dimension comes from the `--control-*` variables the root panel sets and
-     * this row inherits — one size table for the whole design system. The icons follow
-     * with nothing written for them, their own variables belonging to that same block.
-     *
-     * The type is the one composite part: the SIZE comes from the scale, but the line
-     * height stays that of body text — a unitless ratio, so it still follows the size
-     * — and the weight stays regular. The full `control` type role would mean a medium
-     * weight and lines set tight against each other, and a row may carry a second line
-     * under its label.
-     *
-     * The label and that second line TRUNCATE rather than wrap, the VSideNavigationItem
-     * recipe: the panel has a ceiling, and a command that grew a line would break the
-     * rhythm of the list. `width` on VMenu is the way to give long labels more room.
-     *
-     * The corner is VSideNavigationItem's: the control radius capped at half a control
-     * height, so a pill override paints every row of a menu alike, a row carrying a
-     * sublabel included, instead of rounding each one to half of its own height.
+     * Every dimension comes from the `--control-*` variables the root panel sets and this row
+     * inherits; one size table for the whole design system. The icons follow with nothing
+     * written for them, their own variables belonging to that same block.
      */
     display: flex;
     align-items: center;
@@ -334,11 +300,12 @@ function onPointerLeave(event: PointerEvent) {
     color: var(--vectis-color-text-muted);
   }
 
-  /* In a menu the focus IS the highlight, so it is drawn on `:focus` and not on
-     `:focus-visible`: the focus is moved from code — by the arrows, and by hovering —
-     and the browser would not call that a keyboard focus worth showing. While a submenu is
-     open its parent item keeps the highlight too, so the path followed through the levels
-     stays visible. */
+  /*
+   * In a menu the focus IS the highlight, so it is drawn on `:focus` and not on
+   * `:focus-visible`: the focus is moved from code; by the arrows, and by hovering; and the
+   * browser would not call that a keyboard focus worth showing. While a submenu is open its
+   * parent item keeps the highlight too, so the path followed through the levels stays visible.
+   */
   .v-menu-item:hover:not(:disabled, [aria-disabled='true']),
   .v-menu-item:focus,
   .v-menu-item[aria-expanded='true'] {
@@ -392,12 +359,11 @@ function onPointerLeave(event: PointerEvent) {
     color: inherit;
   }
 
-  /* Windows forced colors. The highlight is a background, which the mode forces to Canvas:
-     the row under the focus would look exactly like the others, and a keyboard user would
-     lose their place (WCAG 2.4.7). An outline inside the row takes its place. The selected
-     row, also drawn by its tint alone, takes the system selection pair, the rule the
-     selected controls of the actions family follow; the class is doubled to stay above
-     its (0,3,0) hover and focus rules. */
+  /*
+   * The highlight is a background, which the mode forces to Canvas: the row under the focus
+   * would look exactly like the others, and a keyboard user would lose their place (WCAG
+   * 2.4.7). An outline inside the row takes its place.
+   */
   @media (forced-colors: active) {
     .v-menu-item:focus,
     .v-menu-item[aria-expanded='true'] {

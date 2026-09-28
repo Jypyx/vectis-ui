@@ -3,9 +3,7 @@ import { VButton, toast } from 'vectis-ui'
 </script>
 
 <template>
-  <!-- Raised into the <VToaster /> mounted once at the root of the application. -->
   <div class="demo">
-    <!-- The message is the whole of it, and one sentence is usually enough. -->
     <VButton
       variant="outline"
       tone="neutral"

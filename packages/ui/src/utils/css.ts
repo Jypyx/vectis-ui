@@ -1,14 +1,7 @@
 // @core
 /**
- * A dimension always in pixels: `12` and `'12'` both give `12px`.
- *
- * Anything non-numeric, or negative, yields `undefined` rather than a custom property CSS cannot read:
- * an invalid value breaks the geometry outright, where nothing at all lets the component's
- * own default apply.
- *
- * TRAP: `Number`, never `parseFloat`: the latter reads a numeric PREFIX, so `'12rem'`
- * would come out as `12px`, a wrong size with nothing to say so. `Number('')` being 0, a
- * blank string is refused before it gets there.
+ * Accept complete numeric strings; parseFloat would silently reinterpret 12rem as 12px. Reject
+ * blanks before Number converts them to zero.
  */
 export function px(v: number | string | undefined): string | undefined {
   if (v === undefined) return undefined
@@ -18,13 +11,9 @@ export function px(v: number | string | undefined): string | undefined {
 
 // @core
 /**
- * A dimension in any unit: a bare number is read as pixels, a string passes through
- * untouched: `50%`, `20vw`, `max-content`.
- *
- * Unlike `px` above, the string is deliberately not examined: CSS judges it, and one it
- * cannot parse falls back to whatever the component declares for itself. A NUMBER is judged
- * here, as `px` judges one: a width computed as `NaN` or below zero, and an empty string,
- * give nothing rather than a declaration CSS drops, so the component's own default applies.
+ * A dimension in any unit: a bare number is read as pixels, a string passes through untouched:
+ * `50%`, `20vw`, `max-content`. Unlike `px` above, the string is deliberately not examined: CSS
+ * judges it, and one it cannot parse falls back to whatever the component declares for itself.
  */
 export function cssSize(v: number | string | undefined): string | undefined {
   if (v === undefined || v === '') return undefined

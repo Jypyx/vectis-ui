@@ -3,13 +3,10 @@ import { describe, expect, it } from 'vitest'
 import { windowOf } from './layout'
 import { drawnSlot, moveEvent, moveTimedEvent, resizeEvent, resizeTimedEvent } from './timeGrid'
 
-/*
- * The reference week `layout.test.ts` reads against: June 2026, whose 10th is a Wednesday.
- */
 const WEDNESDAY = '2026-06-10'
 const FRIDAY = '2026-06-12'
 
-/** A whole day, which is what every case below is read against unless it says otherwise. */
+/** A whole day, which every case below is read against unless it says otherwise. */
 const DAY = windowOf(0, 24)
 
 /** Minutes since midnight, so a case can be written in the hours it means. */
@@ -28,8 +25,8 @@ describe('moveEvent', () => {
   })
 
   /*
-   * Moving something must never change how long it is — that is the other gesture's job.
-   * So an event pushed past the end of the window is held against it instead of being cut.
+   * Moving something must never change how long it is; that is the other gesture's job. So an
+   * event pushed past the end of the window is held against it instead of being cut.
    */
   it('holds an event at the edge rather than shortening it', () => {
     const late = moveEvent(origin, 10_000, DAY)
@@ -97,7 +94,6 @@ describe('moveTimedEvent', () => {
     })
   })
 
-  // Taken by its morning card, the start is counted back from the pointer's own day.
   it('carries a start pushed before midnight onto the day before', () => {
     expect(moveTimedEvent(overnight, '2026-06-11', -at(1), DAY, true)).toMatchObject({
       start: WEDNESDAY,
@@ -132,7 +128,6 @@ describe('resizeTimedEvent', () => {
     })
   })
 
-  // Past a whole day the event would turn into a bar under the pointer.
   it('stops short of a whole day after the start', () => {
     expect(resizeTimedEvent(overnight, '2026-06-11', at(23), 15, DAY, true)).toMatchObject({
       end: '2026-06-11',
@@ -173,11 +168,6 @@ describe('drawnSlot', () => {
   })
 })
 
-/*
- * An overnight event may START after the window's end: a calendar showing 08:00 to 20:00 still
- * draws the morning card of a 22:00 to 10:00 shift. Neither gesture may then pull its start
- * into the window, or write an end before its start.
- */
 describe('an overnight event starting after the window', () => {
   const EVENING = windowOf(8, 20)
 

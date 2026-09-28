@@ -124,30 +124,22 @@ export const Default: Story = {
     const menu = canvasElement.querySelector('[role="menu"]') as HTMLElement
     const trigger = canvas.getByRole('button', { name: 'Actions' })
 
-    // when closed, the panel is out of the layout (display none): it must never
-    // intercept clicks on the content it would cover (the floating.css guard)
+    // When closed, the panel is out of the layout (display none): it must never intercept
+    // clicks on the content it would cover (the floating.css guard)
     await expect(getComputedStyle(menu).display).toBe('none')
 
-    // declarative opening (popovertarget). The focus enters the panel; WHERE exactly
-    // depends on the opening modality, and this runner cannot drive that — Chromium's
-    // `:focus-visible` heuristic follows real input, not synthetic events, so a
-    // `userEvent.click` is not reliably "a pointer". The branch itself is locked in
-    // jsdom; what matters here is that the focus went in at all, and Home then gives a
-    // deterministic starting point for the arrows.
-    //
-    // These three lines are also the ONLY place the reason for focusing the panel is
-    // actually proved. Nothing touches the focus between the click and the keystroke, so
-    // a Home that reaches an item shows the event found the panel's listener from
-    // wherever the opening left it. Left on the trigger — a DOM sibling — it would not:
-    // the menu would open with its whole keyboard dead. jsdom cannot see this, its tests
-    // dispatching each key on the panel itself.
+    // The focus enters the panel; WHERE exactly depends on the opening modality, and this
+    // runner cannot drive that; Chromium's `:focus-visible` heuristic follows real input, not
+    // synthetic events, so a `userEvent.click` is not reliably "a pointer". The branch itself
+    // is locked in jsdom; what matters here is that the focus went in at all, and Home then
+    // gives a deterministic starting point for the arrows.
     await userEvent.click(trigger)
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
     await waitFor(() => expect(menu.contains(document.activeElement)).toBe(true))
     await userEvent.keyboard('{Home}')
     await expect(canvas.getByRole('menuitem', { name: 'Rename' })).toHaveFocus()
 
-    // roving focus: arrows with wrap-around, disabled items are skipped
+    // Roving focus: arrows with wrap-around, disabled items are skipped
     await userEvent.keyboard('{ArrowDown}')
     await expect(canvas.getByRole('menuitem', { name: 'Duplicate' })).toHaveFocus()
     await userEvent.keyboard('{ArrowDown}')
@@ -155,7 +147,7 @@ export const Default: Story = {
     await userEvent.keyboard('{ArrowDown}')
     await expect(canvas.getByRole('menuitem', { name: 'Rename' })).toHaveFocus()
 
-    // selecting closes the menu and hands focus back to the trigger
+    // Selecting closes the menu and hands focus back to the trigger
     await userEvent.keyboard('{Enter}')
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(false))
     await waitFor(() => expect(trigger).toHaveFocus())
@@ -201,7 +193,6 @@ export const Selection: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Sort by' }))
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
 
-    // the selected item is signalled to assistive technologies
     const selected = canvas.getByRole('menuitem', { name: 'Name' })
     await expect(selected).toHaveAttribute('aria-current', 'true')
   },
@@ -237,24 +228,19 @@ export const Groups: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Document' }))
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
 
-    // named groups + a roving focus that crosses them (the labels are skipped).
-    // waitFor: the panel has just opened, its entry transition starts from
-    // opacity 0 (@starting-style) and toBeVisible evaluates it.
+    // Named groups + a roving focus that crosses them (the labels are skipped). waitFor: the
+    // panel has just opened, its entry transition starts from opacity 0 (@starting-style) and
+    // toBeVisible evaluates it.
     await waitFor(() => expect(canvas.getByRole('group', { name: 'File' })).toBeVisible())
 
-    // the section header holds the height of a row: the list's vertical rhythm
-    // does not break (heights are not measurable in jsdom). Tolerance: the panel
-    // carries a `transform` transition, and the rects measured at the end of the
-    // animation differ by a hundred-thousandth of a pixel.
+    // The section header holds the height of a row: the list's vertical rhythm does not break
+    // (heights are not measurable in jsdom).
     const groupLabel = menu.querySelector('.v-menu-group-label') as HTMLElement
     await expect(groupLabel.getBoundingClientRect().height).toBeCloseTo(
       canvas.getByRole('menuitem', { name: 'Rename' }).getBoundingClientRect().height,
       1,
     )
 
-    // the rule bleeds out to the panel edges (--vectis-space-1 = 0.25rem), which is
-    // the ONE declaration VMenuSeparator adds to VSeparator — and it overrides the
-    // latter's `margin: 0` from another sheet, hence the compound selector.
     const separator = menu.querySelector('.v-menu-separator') as HTMLElement
     await expect(getComputedStyle(separator).marginInlineStart).toBe('-4px')
 
@@ -268,8 +254,8 @@ export const Groups: Story = {
 }
 
 /**
- * sm 32px (the default) / md 40px / lg 48px — minimum item height and inline
- * padding; `compact` removes 4px, combinable with all three.
+ * Sm 32px (the default) / md 40px / lg 48px; minimum item height and inline padding; `compact`
+ * removes 4px, combinable with all three.
  */
 export const Sizes: Story = {
   render: () => ({
@@ -337,7 +323,6 @@ export const Width: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const trigger = canvas.getByRole('button', { name: 'Sort alphabetically' })
-    // the panel is the one the trigger invokes (popovertarget)
     const panel = document.getElementById(
       trigger.getAttribute('popovertarget') ?? '',
     ) as HTMLElement
@@ -379,7 +364,6 @@ export const EscapeDismiss: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Menu' }))
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
 
-    // Escape closes the current level — here the root panel, hence the menu
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(false))
     await waitFor(() => expect(canvas.getByRole('button', { name: 'Menu' })).toHaveFocus())
@@ -408,7 +392,7 @@ export const NavigationItems: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Go to' }))
     await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
 
-    // href items are real links; the disabled link is inert
+    // Href items are real links; the disabled link is inert
     const profile = canvas.getByRole('menuitem', { name: 'Profile' })
     await expect(profile).toHaveAttribute('href', '#profile')
     await expect(profile.tagName).toBe('A')
@@ -416,7 +400,7 @@ export const NavigationItems: Story = {
     await expect(archives).not.toHaveAttribute('href')
     await expect(archives).toHaveAttribute('aria-disabled', 'true')
 
-    // the roving focus skips the inert link (Home first: see the note in `Default`)
+    // The roving focus skips the inert link (Home first: see the note in `Default`)
     await waitFor(() => expect(menu.contains(document.activeElement)).toBe(true))
     await userEvent.keyboard('{Home}')
     await expect(profile).toHaveFocus()
@@ -487,7 +471,6 @@ export const Submenus: Story = {
     await userEvent.keyboard('{ArrowRight}')
     await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'PNG' })).toHaveFocus())
 
-    // ArrowLeft: goes up one level only
     await userEvent.keyboard('{ArrowLeft}')
     await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'Image' })).toHaveFocus())
     await expect(exportItem).toHaveAttribute('aria-expanded', 'true')
@@ -535,34 +518,33 @@ export const SubmenusOnHover: Story = {
     const root = canvasElement.querySelector('[role="menu"]') as HTMLElement
     await waitFor(() => expect(root.matches(':popover-open')).toBe(true))
 
-    // hover: the hovered item takes the focus (a single highlight), then the
-    // submenu opens after the intent delay
+    // Hover: the hovered item takes the focus (a single highlight), then the submenu opens
+    // after the intent delay
     const exportItem = canvas.getByRole('menuitem', { name: 'Export' })
     await userEvent.hover(exportItem)
     await expect(exportItem).toHaveFocus()
     await waitFor(() => expect(exportItem).toHaveAttribute('aria-expanded', 'true'))
-    // waitFor: the subpanel's entry transition (opacity 0 at the first instant)
     await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'PDF' })).toBeVisible())
 
-    // switching branch: hovering another item with a submenu closes the first.
-    // explicit unhover: userEvent's direct API does not track the pointer between
-    // two hover() calls, so the previous item's pointerleave would never be
-    // emitted (a real pointer emits it when leaving the item).
+    // Switching branch: hovering another item with a submenu closes the first. explicit
+    // unhover: userEvent's direct API does not track the pointer between two hover() calls, so
+    // the previous item's pointerleave would never be emitted (a real pointer emits it when
+    // leaving the item).
     const shareItem = canvas.getByRole('menuitem', { name: 'Share' })
     await userEvent.unhover(exportItem)
     await userEvent.hover(shareItem)
     await waitFor(() => expect(shareItem).toHaveAttribute('aria-expanded', 'true'))
     await waitFor(() => expect(exportItem).toHaveAttribute('aria-expanded', 'false'))
 
-    // hovering a plain item closes the neighbouring branch (closing on
-    // pointerleave after the intent delay)
+    // Hovering a plain item closes the neighbouring branch (closing on pointerleave after the
+    // intent delay)
     await userEvent.unhover(shareItem)
     await userEvent.hover(canvas.getByRole('menuitem', { name: 'New' }))
     await waitFor(() => expect(shareItem).toHaveAttribute('aria-expanded', 'false'))
 
-    // Left OPEN on purpose. The a11y check runs after the play function, so this is the
-    // only story where axe ever sees a nested panel — and a nested panel is precisely
-    // what an ARIA `menu` may not own directly.
+    // Left OPEN on purpose. The a11y check runs after the play function, so this is the only
+    // story where axe ever sees a nested panel; and a nested panel is precisely what an ARIA
+    // `menu` may not own directly.
     await userEvent.hover(exportItem)
     await waitFor(() => expect(exportItem).toHaveAttribute('aria-expanded', 'true'))
   },

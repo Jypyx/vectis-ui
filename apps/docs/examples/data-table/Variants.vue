@@ -16,7 +16,6 @@ const rows = [
 
 <template>
   <div class="stack">
-    <!-- Flat carries no decoration at all and sits on whatever surface it is placed on. -->
     <VDataTable
       :columns="columns"
       :rows="rows"
@@ -26,7 +25,6 @@ const rows = [
       caption="Organisation projects, flat"
     />
 
-    <!-- Outlined makes it a card, and the frame gives the toolbar and the footer a gutter. -->
     <VDataTable
       variant="outlined"
       :columns="columns"

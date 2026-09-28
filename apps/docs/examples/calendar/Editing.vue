@@ -41,7 +41,6 @@ const events = ref<CalendarEvent[]>([
 
 let nextId = 1
 
-/** What the form edits: a copy, so Cancel leaves the calendar as it was. */
 interface Draft {
   title: string
   allDay: boolean
@@ -54,7 +53,6 @@ interface Draft {
 
 const open = ref(false)
 const formId = useId()
-/** The event being edited, or null while a new one is being written. */
 const editingId = ref<CalendarEventId | null>(null)
 const draft = reactive<Draft>(emptyDraft())
 
@@ -70,7 +68,6 @@ function emptyDraft(): Draft {
   }
 }
 
-/** A local date and time moved by some minutes, crossing midnight when it has to. */
 function addMinutes(date: string, time: string, minutes: number): { date: string; time: string } {
   const moved = new Date(`${date}T${time}:00`)
   moved.setMinutes(moved.getMinutes() + minutes)
@@ -87,7 +84,6 @@ function openNew(times: CalendarEventTimes) {
   open.value = true
 }
 
-/* A drawn-out slot already has both ends. */
 function onEventCreate(times: CalendarEventTimes) {
   openNew(times)
 }
@@ -100,7 +96,6 @@ function onCellActivate(cell: CalendarCell) {
   openNew({ start: cell.date, startTime, end: end.date, endTime: end.time })
 }
 
-/* The toolbar button has neither, and starts on the day the calendar is showing. */
 function onNewClick() {
   openNew({ start: anchor.value, startTime: '09:00', end: anchor.value, endTime: '10:00' })
 }
@@ -119,7 +114,6 @@ function onEventActivate(event: CalendarEvent) {
   open.value = true
 }
 
-/* ISO dates and 24-hour times compare correctly as strings, so no Date is needed here. */
 const endsBeforeStart = computed(() => {
   if (!draft.start || !draft.end) return false
   if (draft.allDay) return draft.end < draft.start
@@ -254,7 +248,6 @@ function remove() {
   gap: var(--vectis-space-4);
 }
 
-/* A grid item stretches by default, which would push the label away from its switch. */
 .all-day {
   justify-self: start;
 }
@@ -266,7 +259,6 @@ function remove() {
   align-items: start;
 }
 
-/* Pushed to the other end of the footer, away from the button that saves. */
 .delete {
   margin-inline-end: auto;
 }

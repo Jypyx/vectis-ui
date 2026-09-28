@@ -1,14 +1,6 @@
 <script setup lang="ts">
 import type { TokenRow } from '~/content/designTokens'
 
-/**
- * One row of a Design tokens table: the property name, its description, and either its default
- * value or, in a `themed` table, its value in each theme.
- *
- * The description is looked up by the token's name in the catalogue. A backtick in it marks a
- * prop or an attribute name, rendered as code by splitting the text rather than by injecting
- * markup, so the sentence needs no HTML of its own.
- */
 const props = defineProps<{
   row: TokenRow
   /** Shows a Light and a Dark column instead of a single default value. */

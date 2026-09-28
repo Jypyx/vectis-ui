@@ -1,20 +1,9 @@
 /**
- * Generates `content/api/<slug>.ts`: the props, events, slots, named types and CSS variables every
- * component page's API section lists.
- *
- * A name, a type and a default are facts about the library, not prose, and forty-four pages
- * transcribing them by hand is forty-four pages that rot the day a default changes. They are
- * read straight out of the source instead, with `vue-component-meta` — the same engine that
- * fills Storybook's `<Controls>` table, so the two surfaces cannot disagree about what the
- * library offers.
- *
- * What is NOT generated is the DESCRIPTIONS: they are prose, they are translated, and they live
- * in `i18n/locales/{en,fr}/<page>.ts` beside the rest of the page's words. `check-api.ts` runs
- * at postbuild and fails when the two halves drift apart.
- *
- * Run with `pnpm --filter vectis-docs api` — on demand, NOT in a build hook. It type-checks the
- * whole library to answer, which is far too slow for every build, and the answer only moves when
- * the library's API does. The generated files are committed.
+ * They are read straight out of the source instead, with `vue-component-meta`; the same engine
+ * that fills Storybook's `<Controls>` table, so the two surfaces cannot disagree about what the
+ * library offers. What is not generated is the DESCRIPTIONS: they are prose, they are
+ * translated, and they live in `i18n/locales/{en,fr}/<page>.ts` beside the rest of the page's
+ * words.
  */
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -27,18 +16,7 @@ const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const uiRoot = resolve(appRoot, '../../packages/ui')
 const componentsDir = join(uiRoot, 'src/components')
 
-/**
- * One entry per component page, in the order `content/nav.ts` lists them.
- *
- * `components` are the ones the page documents, the family's head first: they are the tables it
- * shows, and their order is the order it shows them in. It is written out rather than derived
- * from the folder because a folder is not a page — VAvatar and VAvatarGroup share one folder and
- * have a page each, VTabs owns three components and has one.
- *
- * `internals` are the SFCs a family renders but never exports. They document nothing, and they
- * are named here for one reason: the CSS variables scan below reads them too, since a family's
- * measurements are just as often consumed by an internal panel as by its head.
- */
+/** One entry per component page, in the order `content/nav.ts` lists them. */
 const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
   { slug: 'accordion', components: ['VAccordion', 'VAccordionItem'] },
   { slug: 'avatar', components: ['VAvatar'] },
@@ -108,24 +86,8 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
 ]
 
 /**
- * Defaults the extractor cannot print as the value a reader would act on.
- *
- * Three cases land here. A default computed from a constant is reported as the expression that
- * produced it, and `EDGE_STEP_DELAY` tells nobody anything; and a prop whose default is left
- * `undefined` so that "not given" stays distinguishable is reported as having none at all,
- * where the component does have a last resort and applies it (VButton's `tone`, which falls
- * back to `accent` once its group has had its say); and a Boolean prop absent from its
- * withDefaults, which Vue casts to `false` while the extractor sees nothing at all.
- *
- * What stays OUT is a fallback that is not a value: a label taken from the message dictionary,
- * a format or a first day of week derived from the locale, an id generated at mount, a width the
- * CSS decides. Those cells stay empty and their DESCRIPTION says where the value comes from, a
- * cell being read as something one could type.
- *
- * Keyed `Component.prop`, and deliberately a table rather than a rule: each of these is a
- * decision about what the value MEANS, and the day one of them changes the build should not
- * quietly agree with a stale answer here. An entry pointing at a prop that no longer exists is
- * reported.
+ * Override defaults the extractor cannot display meaningfully, including runtime fallbacks
+ * whose props deliberately remain undefined.
  */
 const DEFAULT_OVERRIDES: Record<string, string> = {
   'VAvatar.size': "'md'",
@@ -153,10 +115,8 @@ function indexComponents(): Map<string, string> {
 }
 
 /**
- * The type as the documentation prints it, from the extractor's rendering of it.
- *
- * Two changes, both of them about matching the source a reader would write. The extractor adds
- * `| undefined` to every optional prop, which says nothing the empty Default cell does not
+ * The type as the documentation prints it, from the extractor's rendering of it. The extractor
+ * adds `| undefined` to every optional prop, which says nothing the empty Default cell does not
  * already say; and it prints string literals in double quotes, where the library and every code
  * sample on the site use single ones.
  */
@@ -172,29 +132,16 @@ function printType(type: string, required: boolean): string {
 }
 
 /**
- * The type as the SOURCE writes it, which is the one to print whenever it can be had.
- *
- * TRAP — the extractor's `type` string is TypeScript's own rendering of the type, and a union
- * comes back in TypeScript's internal order rather than the author's: VButton's
- * `'xs' | 'sm' | 'md' | 'lg' | 'xl'` is handed over as `'md' | 'xs' | 'sm' | 'lg' | 'xl'`,
- * `withDefaults` having created the `'md'` literal first. A size scale printed out of order is
- * a documentation bug a reader cannot tell from a real one, and the order is not even stable
- * across TypeScript versions, so the committed file would churn on an upgrade.
- *
- * Slicing the declaration out of the source sidesteps all of it. A `defineModel` prop has no
- * declaration to slice, which is why the extractor's rendering stays as the fallback: those
- * types are a single term and have no order to lose.
+ * Use source declaration order for union members; TypeScript's rendered union order is unstable
+ * and can scramble size scales.
  */
 function sourceType(declarations: { file: string; range: [number, number] }[], name: string) {
   const declaration = declarations[0]
   if (!declaration) return undefined
   const text = readFileSync(declaration.file, 'utf8')
 
-  // TRAP — the range is a HINT, never a boundary. On a generic SFC the mapping back from the
-  // virtual code Volar type-checks lands one character to the LEFT, so slicing it clips the last
-  // character of the type: VDataTable's IconSource comes out as IconSourc, which is not a type
-  // anyone would notice was wrong. Anchoring on the property's own name inside a generous window
-  // and reading to the end of its line is what makes the read independent of where the range falls.
+  // Treat extractor ranges as hints and parse the surrounding declaration; generic SFC source
+  // mappings can be offset by one character.
   const window = text.slice(Math.max(0, declaration.range[0] - 8), declaration.range[1] + 200)
   const signature = new RegExp(`(?:^|[\\s;{])${name}\\??\\s*:\\s*([^\\n]*?)\\s*;?\\s*$`, 'm')
   const type = signature.exec(window)?.[1]?.trim()
@@ -218,12 +165,9 @@ function balanced(type: string): boolean {
 }
 
 /**
- * The default as the documentation prints it, or nothing when the prop has none.
- *
- * An icon default arrives as the IMPORT ALIAS the component gave it — `closeIcon`, `swapVertIcon`
- * — which names nothing a reader can look up. The alias is resolved back through the SFC's own
- * import so the cell says `close` and `swap_vert`, the names the icon registry answers to. Doing
- * it from the import rather than from a table here is what keeps it right when an icon changes.
+ * The default as the documentation prints it, or nothing when the prop has none. An icon
+ * default arrives as the IMPORT ALIAS the component gave it; `closeIcon`, `swapVertIcon`; which
+ * names nothing a reader can look up.
  */
 function printDefault(
   value: string | undefined,
@@ -249,27 +193,7 @@ function keyFor(name: string): string {
     .join('')
 }
 
-/**
- * Every type alias and interface the library declares, printed as the source writes it.
- *
- * The tables name a hundred-odd types and used to say nothing about them, which left a reader
- * holding `ButtonVariant` with no way to learn that it is four words. A declaration is a fact
- * about the library, like a name or a default, so it is read out of the source too.
- *
- * PARSED, never sliced: a declaration spans as many lines as it likes, and `sourceType`'s own
- * TRAP above is what slicing looks like when it goes wrong. `createSourceFile` is a parse and not
- * a type-check, so the whole library costs a few milliseconds.
- *
- * Local types are indexed alongside the exported ones. A type a slot hands out is the shape a
- * reader binding that object needs to see, whether or not it can be imported; the library exports
- * every one of them today, and the printed keyword is what tells a reader which is which.
- *
- * Ambiguity is recorded rather than resolved, and refused only if a page ever asks for it: two
- * declarations of one name would have the page print whichever file happened to be read last.
- * VCalendarMonth and VCalendarTimeGrid each keep a local `Gesture` of their own shape, and
- * neither reaches a table, so the collision is a fact about the library and not a problem to
- * report — what would be one is a TABLE naming a type that could be either.
- */
+/** Parse complete type declarations with createSourceFile rather than slicing source ranges. */
 const ambiguous = new Set<string>()
 
 function indexTypes(): Map<string, string> {
@@ -316,17 +240,7 @@ function typesIn(file: string): [string, string][] {
   return declared
 }
 
-/**
- * A declaration with its comments taken out.
- *
- * The library's JSDoc is addressed to an integrator reading an IDE hover: it is English only, and
- * it carries the em dashes the site's prose rules forbid. What a field MEANS is the page's own
- * prose to write; what the declaration is asked for here is its shape.
- *
- * It strips a comment wherever the two markers appear, a string literal included. No type in the
- * library carries either inside a string, and a type that did would be printed with a hole in it
- * rather than silently wrong.
- */
+/** A declaration with its comments taken out. */
 function withoutComments(text: string): string {
   return text
     .replace(/\/\*[\s\S]*?\*\//g, '')
@@ -338,14 +252,10 @@ function withoutComments(text: string): string {
 }
 
 /**
- * The values a prop accepts, when its type is a closed set of them.
- *
- * That set is the whole of what a reader wants from `ButtonVariant`, and it is short enough to
- * print in the cell beside the name, which is where the question gets asked. An alias pointing at
- * an alias is followed (`TimePickerFormat` is `HourFormat` is two words); anything that is not a
- * union of literals is a SHAPE rather than a set, and it is printed under the Types heading
- * instead. No threshold on the length: the five placement unions are twelve words and the reader
- * wants all twelve, so the cell wraps them.
+ * The values a prop accepts, when its type is a closed set of them. An alias pointing at an
+ * alias is followed (`TimePickerFormat` is `HourFormat` is two words); anything that is not a
+ * union of literals is a shape rather than a set, and it is printed under the Types heading
+ * instead.
  */
 function literalValuesOf(name: string, seen = new Set<string>()): string | undefined {
   if (seen.has(name)) return undefined
@@ -405,13 +315,7 @@ const row = (name: string, type: string, fallback?: string): Row => {
   }
 }
 
-/**
- * The types a page's tables name and do not answer in the cell.
- *
- * A name standing as the WHOLE of a cell whose values were expanded there is answered already;
- * every other mention is a shape the reader has to be shown, `CalendarView[]` included — which is
- * why the test is on the mention and not on the name.
- */
+/** The types a page's tables name and do not answer in the cell. */
 function typesOf(components: { props?: Row[]; events?: Row[]; slots?: Row[] }[]): TypeEntry[] {
   const needed = new Set<string>()
   for (const component of components) {
@@ -452,14 +356,7 @@ const index = indexComponents()
 const types = indexTypes()
 const usedOverrides = new Set<string>()
 
-/**
- * `--jsdoc <slug>` prints the library's own JSDoc for a page's entries, and writes nothing.
- *
- * It is a WRITING AID and never an output: that prose is addressed to an integrator reading an
- * IDE hover, it follows the library's comment style, and it is full of the em dashes the site's
- * prose rules forbid. What it saves is opening five SFCs to find what a prop is for; every line
- * of it is then rewritten, in English and in French, into the catalogue.
- */
+/** `--jsdoc <slug>` prints the library's own JSDoc for a page's entries, and writes nothing. */
 const jsdocFor = process.argv.includes('--jsdoc')
   ? process.argv[process.argv.indexOf('--jsdoc') + 1]
   : undefined
@@ -472,7 +369,7 @@ function apiOf(component: string) {
   const source = readFileSync(file, 'utf8')
 
   // Every `update:x` an emit carries is one half of a `defineModel`; the prop `x` is the other.
-  // The pair is documented ONCE, as the binding a template actually writes, so the event is
+  // The pair is documented once, as the binding a template actually writes, so the event is
   // dropped and the prop is renamed.
   const modelled = new Set(
     meta.events
@@ -501,8 +398,8 @@ function apiOf(component: string) {
     .filter((event) => !modelled.has(event.name.replace(/^update:/, '')))
     .map((event) => row(event.name, printType(event.type, true)))
 
-  // A slot's type is the scope it hands out, which is what a consumer destructures. The
-  // extractor says `any` for a slot that hands out nothing, where `{}` is what a reader reads.
+  // A slot's type is the scope it hands out, which a consumer destructures. The extractor says
+  // `any` for a slot that hands out nothing, where `{}` is what a reader reads.
   const slots = meta.slots.map((slot) =>
     row(slot.name, slot.type === 'any' ? '{}' : printType(slot.type, true)),
   )
@@ -521,12 +418,8 @@ const tokens = JSON.parse(readFileSync(join(uiRoot, 'src/tokens/tokens.json'), '
 const control = tokens.semantic.control
 
 /**
- * The `--vectis-*` tokens a family is measured in.
- *
  * Taken from the `control` group of the semantic tokens, minus the shared size scale
  * (`height-*`) and the border width: what is left is exactly the set named after a component.
- * Membership is then read off the family's own stylesheets rather than declared in a table
- * here, so a token that stops being used stops being documented on the same commit.
  */
 function tokensOf(files: string[]): { name: string; value: string }[] {
   const text = files.map((file) => readFileSync(file, 'utf8')).join('\n')
@@ -538,8 +431,8 @@ function tokensOf(files: string[]): { name: string; value: string }[] {
 
 /**
  * A token value as the stylesheet carries it: an alias in braces (`{control.height.md}`)
- * becomes the `var()` it is generated as, which is what a reader overriding it will see in
- * devtools, rather than the source notation nothing in CSS understands.
+ * becomes the `var()` it is generated as, which a reader overriding it will see in devtools,
+ * rather than the source notation nothing in CSS understands.
  */
 function cssValueOf(value: string): string {
   return value.replace(
@@ -570,14 +463,7 @@ function printRow(entry: object, indent: string): string {
   return `${indent}{ ${fields.join(', ')} },`
 }
 
-/**
- * The type blocks, each definition printed as a TEMPLATE LITERAL.
- *
- * An interface is several lines and a single-quoted string cannot hold a newline, so the
- * alternative is a file full of `\n` escapes: the generated source would no longer be the thing
- * the page renders, which is exactly what makes these files readable. Prettier leaves the content
- * of a template literal alone, so the indentation printed here is the indentation shown.
- */
+/** The type blocks, each definition printed as a TEMPLATE LITERAL. */
 function printTypes(entries: TypeEntry[], indent: string): string {
   const quote = (definition: string) =>
     definition.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${')

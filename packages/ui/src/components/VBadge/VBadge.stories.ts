@@ -49,7 +49,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-/** The 5 tones in both variants, solid then soft — check `neutral` in both themes. */
+/** The 5 tones in both variants, solid then soft; check `neutral` in both themes. */
 export const Tones: Story = {
   render: () => ({
     components: { VBadge },
@@ -96,9 +96,9 @@ export const Soft: Story = {
 }
 
 /**
- * A free colour (hex, CSS name, oklch()): the text adapts black/white through
- * contrast-color() (Safari 26+); elsewhere, a white fallback — the contrast of a
- * light colour is the consumer's responsibility.
+ * A free colour (hex, CSS name, oklch()): the text adapts black/white through contrast-color()
+ * (Safari 26+); elsewhere, a white fallback; the contrast of a light colour is the consumer's
+ * responsibility.
  */
 export const CustomColor: Story = {
   render: () => ({
@@ -152,7 +152,7 @@ export const Icon: Story = {
   }),
 }
 
-/** `dot` reduces the badge to a 10px circle with no content — presence, status. */
+/** `dot` reduces the badge to a 10px circle with no content; presence, status. */
 export const Dot: Story = {
   render: () => ({
     components: { VBadge },
@@ -180,7 +180,7 @@ export const Inline: Story = {
   }),
 }
 
-/** `overlay` places the badge on a corner of the target — top-right by default — shifted inwards. */
+/** `overlay` places the badge on a corner of the target; top-right by default; shifted inwards. */
 export const Overlay: Story = {
   render: () => ({
     components: { VAvatar, VBadge, VButton },
@@ -205,9 +205,8 @@ export const Overlay: Story = {
 }
 
 /**
- * `overlayPosition` chooses the corner: `top` (the default) or `bottom` — a presence
- * dot belongs at the foot of an avatar. The horizontal side stays the reading
- * direction's end.
+ * `overlayPosition` chooses the corner: `top` (the default) or `bottom`; a presence dot belongs
+ * at the foot of an avatar. The horizontal side stays the reading direction's end.
  */
 export const OverlayPosition: Story = {
   render: () => ({
@@ -233,11 +232,9 @@ export const OverlayPosition: Story = {
 }
 
 /**
- * `bordered` draws a ring (`--vectis-control-size-badge-ring`) in the colour of the
- * background behind the badge, which detaches it from what it overlaps. That colour is
- * the page background by default (top row). On any other surface the consumer is the
- * one who knows what is underneath, and passes it to `ringColor` (bottom row, on an
- * accent card).
+ * `bordered` draws a ring (`--vectis-control-size-badge-ring`) in the colour of the background
+ * behind the badge, which detaches it from what it overlaps. That colour is the page background
+ * by default (top row).
  */
 export const Bordered: Story = {
   render: () => ({

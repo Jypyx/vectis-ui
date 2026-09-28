@@ -60,8 +60,6 @@ const meta = {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     display: { control: 'inline-radio', options: ['text', 'chip'] },
   },
-  // Neither `display` nor `multiple`: pinning them would make the Controls panel
-  // lie, showing a current value different from the component's default.
   args: {
     counter: true,
   },
@@ -70,20 +68,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/**
- * Builds a real `DataTransfer` and drops it on the component.
- *
- * A play function must NEVER click the field or press Enter on it: that opens a
- * genuine OS dialog, which no automation can close — the run would hang. A drop
- * exercises the same acceptance pipeline, and is precisely what jsdom cannot do
- * (it ships neither `DataTransfer` nor `DragEvent`).
- *
- * Dispatched by hand rather than through `fireEvent.drop`: in a real browser the
- * helper REBUILDS a fresh `DataTransfer` and copies only the OWN property names
- * of the one it is given — a genuine `DataTransfer` has none of them (everything
- * sits on the prototype), so the files would silently vanish and every assertion
- * below would fail on an empty selection.
- */
+/** Builds a real `DataTransfer` and drops it on the component. */
 function drop(canvasElement: HTMLElement, files: File[]) {
   const dataTransfer = new DataTransfer()
   for (const file of files) dataTransfer.items.add(file)
@@ -96,11 +81,8 @@ const fileOf = (name: string, size: number, type: string) =>
   new File([new Uint8Array(size)], name, { type })
 
 /**
- * A single file. The field is read-only — its value comes from the dialog or
- * from a drop, never from typing — and the paperclip on the right opens the
- * system picker. `clearable` adds the cross to its left, which appears as soon
- * as there is something to erase; worth asking for here, since nothing can be
- * erased by typing.
+ * A single file. The field is read-only; its value comes from the dialog or from a drop, never
+ * from typing; and the paperclip on the right opens the system picker.
  */
 export const Default: Story = {
   args: { clearable: true },
@@ -133,9 +115,9 @@ export const Default: Story = {
 }
 
 /**
- * `multiple` accepts a whole batch. In the default `text` rendering the names are
- * joined with commas and the line is truncated when it overflows — the counter
- * under the field is what keeps the total readable.
+ * `multiple` accepts a whole batch. In the default `text` rendering the names are joined with
+ * commas and the line is truncated when it overflows; the counter under the field is what keeps
+ * the total readable.
  */
 export const Multiple: Story = {
   args: { multiple: true },
@@ -150,15 +132,7 @@ export const Multiple: Story = {
   }),
 }
 
-/**
- * `display="chip"` gives each file its own removable chip. The field then grows
- * with the rows, while the paperclip and the cross stay pinned to its end.
- *
- * A name longer than 20 characters is cut **in the middle**, so both its start
- * and its extension stay readable — chips wrap, so a long name would not
- * overflow a line, it would push the field to another row. The full name stays
- * on the chip's `title` and in the removal button's accessible name.
- */
+/** `display="chip"` gives each file its own removable chip. */
 export const Chips: Story = {
   args: { multiple: true, display: 'chip' },
   render: (args) => ({
@@ -195,9 +169,8 @@ export const Chips: Story = {
 }
 
 /**
- * `maxSize`, `maxTotalSize` and `maxFiles` are limits, not warnings: an
- * out-of-bounds file never enters the model. Each refusal is reported through
- * `reject`, one event per file — the message is yours to write.
+ * `maxSize`, `maxTotalSize` and `maxFiles` are limits, not warnings: an out-of-bounds file
+ * never enters the model.
  */
 export const Limits: Story = {
   args: { multiple: true, maxFiles: 3, maxSize: 2_000_000, maxTotalSize: 5_000_000 },
@@ -233,10 +206,8 @@ export const Limits: Story = {
 }
 
 /**
- * `accept` filters the system dialog through the native attribute — and a drop
- * through the component's own matching, since the attribute has no say there.
- * Spell extensions alongside the MIME families: a file whose type the OS did not
- * guess arrives with an empty `type`.
+ * `accept` filters the system dialog through the native attribute; and a drop through the
+ * component's own matching, since the attribute has no say there.
  */
 export const Accept: Story = {
   args: { multiple: true, accept: 'image/*,.pdf' },
@@ -292,8 +263,6 @@ export const DragAndDrop: Story = {
     await fireEvent.dragEnter(root)
     await waitFor(() => expect(root).toHaveAttribute('data-dragging'))
 
-    // Crossing into a child fires `dragleave` on the root: the depth counter is
-    // what keeps the highlight from flickering off under the cursor.
     await fireEvent.dragEnter(field)
     await fireEvent.dragLeave(root)
     await expect(root).toHaveAttribute('data-dragging')
@@ -338,9 +307,9 @@ export const InAForm: Story = {
 }
 
 /**
- * The whole point of the `File[]` model: the component displays, the parent
- * previews. Nothing is uploaded, nothing is read for you — `File` objects come
- * out exactly as the browser handed them over.
+ * The whole point of the `File[]` model: the component displays, the parent previews. Nothing
+ * is uploaded, nothing is read for you; `File` objects come out exactly as the browser handed
+ * them over.
  */
 export const Preview: Story = {
   args: { multiple: true, display: 'chip' },
@@ -379,10 +348,6 @@ export const Sizes: Story = {
   }),
 }
 
-/**
- * `readonly` displays a selection that can no longer change: no dialog, no drop,
- * no cross — and the paperclip disappears with the affordance it stood for.
- */
 export const States: Story = {
   render: (args) => ({
     components: { VFileInput },
@@ -397,16 +362,7 @@ export const States: Story = {
   }),
 }
 
-/**
- * The two ends of the field. `iconStart` puts an icon at the start, rendered BEFORE the
- * chips rather than in their place, so it survives a chip display; it is decorative until
- * a `@click:icon-start` listener turns it into a button, which then needs
- * `iconStartLabel`. At the other end `loading` shows a spinner where the attach icon
- * was, and changes nothing else: files can still be dropped and the dialog still opens.
- *
- * `pickerIconLabel`, `clearLabel` and `loadingText` rename the attach button, the clear
- * cross and the spinner when the dictionary's wording is not the right one.
- */
+/** The two ends of the field. */
 export const FieldIcon: Story = {
   args: { multiple: true, display: 'chip' },
   render: (args) => ({
@@ -433,18 +389,13 @@ export const FieldIcon: Story = {
     `,
   }),
   play: async ({ canvasElement }) => {
-    // The icon comes first, the chips after it, and the spinner takes the attach place.
     const field = canvasElement.querySelector('.v-input-field')!
     await expect(field.firstElementChild).toHaveClass('v-icon')
     await expect(canvasElement.querySelectorAll('.v-spinner')).toHaveLength(1)
   },
 }
 
-/**
- * `#chip` replaces a file's chip, `#counter` its summary line. The chip slot
- * hands you `remove` — without it the file could no longer be taken out — plus
- * the `size`/`compact` computed to fit inside the field.
- */
+/** `#chip` replaces a file's chip, `#counter` its summary line. */
 export const CustomSlots: Story = {
   args: { multiple: true, display: 'chip', counter: true },
   render: (args) => ({

@@ -20,14 +20,6 @@ vi.mock('./layout', async (importOriginal) => {
   }
 })
 
-/*
- * Reference week: June 2026. The 8th is a Monday, so the 10th is a Wednesday and the 13th
- * and 14th are the weekend — the grid VDatePicker's tests use too.
- *
- * VCalendar is a GENERIC single-file component, so `typeof VCalendar` is a function rather
- * than a class and the usual component typings do not apply: everything below casts, the
- * way VDataTable's tests do for the same reason.
- */
 const WEDNESDAY = '2026-06-10'
 const MONDAY = '2026-06-08'
 
@@ -140,10 +132,6 @@ describe('navigating', () => {
     expect(getByRole('button', { name: 'Next day' })).toBeTruthy()
   })
 
-  /*
-   * The sharpest bug the layout can carry: a step of one CALENDAR day from a Friday in a
-   * Monday-to-Friday calendar lands on an invisible Saturday, and the grid appears frozen.
-   */
   it('steps over a hidden weekday rather than landing on it', async () => {
     const { emitted, getByRole } = mount({
       view: 'day',
@@ -163,9 +151,9 @@ describe('navigating', () => {
 })
 
 /*
- * The menu panel is a closed `popover`, so its rows are hidden from the accessibility tree
- * and a plain role query cannot see them. `hidden: true` is what looks inside it — the
- * alternative, opening the panel, needs the top layer, which jsdom does not have.
+ * The menu panel is a closed `popover`, so its rows are hidden from the accessibility tree and
+ * a plain role query cannot see them. `hidden: true` is what looks inside it; the alternative,
+ * opening the panel, needs the top layer, which jsdom does not have.
  */
 describe('the view menu', () => {
   it('offers the views it was given, marking the one in effect', () => {
@@ -199,10 +187,10 @@ describe('the view menu', () => {
 
 describe('the events', () => {
   /*
-   * The default locale is `en-US`, whose clock is a twelve-hour one — so the times a card
-   * announces are "9:00 AM", not the canonical "09:00" the model holds. That difference is
-   * the point of the assertion: what a reader hears is written for them, and what the
-   * v-model carries is not.
+   * The default locale is `en-US`, whose clock is a twelve-hour one; so the times a card
+   * announces are "9:00 AM", not the canonical "09:00" the model holds. That difference is the
+   * point of the assertion: what a reader hears is written for them, and what the v-model
+   * carries is not.
    */
   it('draws a card for a timed event, named by its title and its times', () => {
     const { getByRole } = mount({ events: [event({ id: 'a', title: 'Standup' })] })
@@ -217,11 +205,6 @@ describe('the events', () => {
     expect(getByRole('button', { name: 'Standup, 09:00 – 10:00' })).toBeTruthy()
   })
 
-  /*
-   * The card texts are memoized. A cache that outlived the clock format it was filled under
-   * would keep announcing "9:00 AM" after the calendar had switched to a 24-hour clock, since
-   * a cache hit reads no prop and so tracks none.
-   */
   it.each(['week', 'month'])(
     'rewrites the times of a %s view when the clock format changes',
     async (view) => {
@@ -248,7 +231,6 @@ describe('the events', () => {
       events: [event({ id: 'a', title: 'Sync', timezone: 'Europe/Paris' })],
     })
     expect(getByRole('button', { name: 'Sync, 09:00 – 10:00 (Europe/Paris)' })).toBeTruthy()
-    // The card still sits in the column of the day it names: the zone moved nothing.
     const card = container.querySelector('.v-calendar-event')!
     expect(card.closest('.v-calendar-cell')).toHaveProperty('dataset.iso', WEDNESDAY)
   })
@@ -283,10 +265,9 @@ describe('the events', () => {
   })
 
   /*
-   * A card is placed absolutely, but it is a CHILD of the cell its start falls in. In an
-   * overlay layer it would sit outside the `role="grid"` altogether, which breaks the
-   * reading order and fails axe's `aria-required-children` as soon as anything moves it
-   * back. Nothing about that is observable in a stylesheet, so it is pinned here.
+   * In an overlay layer it would sit outside the `role="grid"` altogether, which breaks the
+   * reading order and fails axe's `aria-required-children` as soon as anything moves it back.
+   * Nothing about that is observable in a stylesheet, so it is pinned here.
    */
   it('puts a card inside the cell of the hour it starts in', () => {
     const { container } = mount({
@@ -298,7 +279,7 @@ describe('the events', () => {
 
   /*
    * The card is a container query's container, and an element cannot be styled by its own
-   * query — so the layout that has to change when a card gets short lives on this wrapper.
+   * query; so the layout that has to change when a card gets short lives on this wrapper.
    * Flattening it would leave a quarter-hour event showing nothing at all, with no error
    * anywhere: the query would still match and have nothing to act on.
    */
@@ -311,8 +292,6 @@ describe('the events', () => {
 
   it('keeps the resize strip a sibling of that box, not a child of it', () => {
     const { container } = mount({ view: 'day', events: [event({ id: 'a' })] })
-    // The strip is placed against the CARD, so moving it inside the body would put it
-    // against a box whose padding it is meant to ignore.
     expect(container.querySelector('.v-calendar-event > [data-calendar-handle]')).not.toBeNull()
   })
 
@@ -343,9 +322,9 @@ describe('the keyboard', () => {
   })
 
   /*
-   * A scrolling region has to hold something reachable by Tab — `tabindex="-1"` does not
-   * count for axe's `scrollable-region-focusable`. So exactly one cell must always be
-   * tabbable, including on an empty calendar and straight after a view change.
+   * A scrolling region has to hold something reachable by Tab; `tabindex="-1"` does not count
+   * for axe's `scrollable-region-focusable`. So exactly one cell must always be tabbable,
+   * including on an empty calendar and straight after a view change.
    */
   it('always keeps exactly one cell in the tab order', () => {
     const { container } = mount()
@@ -429,8 +408,8 @@ describe('the all-day band', () => {
     expect(container.querySelector('.v-calendar-allday')).toBeNull()
   })
 
-  // The default week here starts on a SUNDAY — `en-US` is the default locale — so the
-  // Tuesday the bar begins on is the third column, not the second.
+  // The default week here starts on a SUNDAY; `en-US` is the default locale; so the Tuesday the
+  // bar begins on is the third column, not the second.
   it('stretches a bar over the days an event covers', () => {
     const { container } = mount({
       events: [event({ id: 'a', start: '2026-06-09', end: '2026-06-11' })],
@@ -460,9 +439,8 @@ describe('the all-day band', () => {
 })
 
 /*
- * Today and the clock are read in `onMounted` only, so on the server both are null and every
- * rule that draws them has to expect it. That is why the line is absent here: jsdom mounts,
- * but the reference date is 2026 and the clock says otherwise.
+ * That is why the line is absent here: jsdom mounts, but the reference date is 2026 and the
+ * clock says otherwise.
  */
 describe('the current-time line', () => {
   it('stays away from a week that does not contain today', () => {
@@ -501,10 +479,6 @@ describe('the current-time line', () => {
     expect(container.querySelector('.v-calendar-now')).not.toBeNull()
   })
 
-  /*
-   * `scrollTime` was applied once, in `onMounted`: a calendar opened on its month and switched
-   * to a week then opened at midnight, the working day off screen.
-   */
   it('scrolls a time grid that appears later to the scroll time', async () => {
     const height = vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(2400)
     try {
@@ -558,17 +532,12 @@ describe('the month view', () => {
     expect(getByText('+2 more')).toBeTruthy()
   })
 
-  // A limit below zero shows no chip rather than inventing hidden ones on every empty square.
   it('reads a negative event limit as zero', () => {
     const { container } = month({ events: [event({ id: 'one' })], monthEventLimit: -1 })
     expect(container.querySelectorAll('.v-calendar-month-more')).toHaveLength(1)
     expect(container.querySelector('.v-calendar-month-more')?.textContent?.trim()).toBe('+1 more')
   })
 
-  /*
-   * A day OTHER than the anchor, deliberately: writing the value a model already holds
-   * emits nothing, so choosing the 10th here would prove only that Vue deduplicates.
-   */
   it('opens a day when its number is chosen, and switches to the day view', async () => {
     const { container, emitted } = month()
     const cell = container.querySelector('.v-calendar-month-cell[data-iso="2026-06-15"]')!
@@ -591,10 +560,6 @@ describe('the month view', () => {
     expect(emitted('cell-activate')).toBeUndefined()
   })
 
-  /*
-   * A consumer who narrowed `views` has said what their calendar is for. Jumping it into a
-   * view they deliberately left out would be the component overruling them.
-   */
   it('moves the date but keeps the view when the day view was not offered', async () => {
     const { container, emitted } = mount({ view: 'month', views: ['month', 'week'] })
     const cell = container.querySelector('.v-calendar-month-cell[data-iso="2026-06-15"]')!
@@ -615,7 +580,6 @@ describe('the month view', () => {
     const before = first.dataset.iso!
     await fireEvent.keyDown(first, { key: 'ArrowDown' })
     const after = container.querySelector('.v-calendar-month-cell[tabindex="0"]') as HTMLElement
-    // Seven calendar days later, whatever the columns: a row IS a week.
     expect(Date.parse(after.dataset.iso!) - Date.parse(before)).toBe(7 * 24 * 3600 * 1000)
   })
 
@@ -624,8 +588,6 @@ describe('the month view', () => {
     expect(container.querySelectorAll('.v-calendar-month-cell[tabindex="0"]')).toHaveLength(1)
   })
 
-  // A click on the empty part of a square reports it as Enter does, and a click on what the
-  // square holds stays that element's own.
   it('reports a click on the empty part of a day, as Enter does', async () => {
     const { container, emitted } = month({ events: [event({ id: 'a' })] })
     const cell = container.querySelector<HTMLElement>(
@@ -644,7 +606,7 @@ describe('the month view', () => {
 
   /*
    * A frozen calendar keeps its tab stop so the agenda stays readable, and a click is stopped
-   * only by the stylesheet, which jsdom does not apply — so both routes reach the handler here
+   * only by the stylesheet, which jsdom does not apply; so both routes reach the handler here
    * exactly as Enter does in a browser, and the calendar has to refuse them itself.
    */
   it('reports nothing about a day when the calendar is disabled', async () => {
@@ -659,7 +621,7 @@ describe('the month view', () => {
 })
 
 /*
- * jsdom measures every square as zero, so the geometry that turns a point into a day is
+ * Jsdom measures every square as zero, so the geometry that turns a point into a day is
  * `layout.test.ts`'s business. What these pin is the WIRING, and the two rules that would
  * otherwise be silently wrong: a move must not squash a multi-day event, and letting go must
  * not also open what was just dragged.
@@ -744,10 +706,6 @@ describe('dragging in the month view', () => {
   })
 })
 
-/*
- * Every gesture the pointer offers has to be reachable without one (WCAG 2.1.1). The month
- * had no drag at all before, so this is the half that would most easily have been forgotten.
- */
 describe('moving an event with the keyboard, in the month view', () => {
   const held = async (props: Record<string, unknown> = {}) => {
     const utils = mount({
@@ -772,8 +730,6 @@ describe('moving an event with the keyboard, in the month view', () => {
   it('moves a day sideways and a whole week vertically', async () => {
     const { container } = await held()
     await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'ArrowDown' })
-    // A row IS a week here, which is the month's own reading of the same key table: one press
-    // of Down moves the 10th to the 17th, not to the 11th.
     await nextTick()
     expect(container.querySelector('[role="status"]')!.textContent).toContain('June 17')
   })
@@ -828,11 +784,6 @@ describe('the year view', () => {
     expect(getByText('2026')).toBeTruthy()
   })
 
-  /*
-   * The days here are text, not controls: three hundred and sixty-five tab stops for a view
-   * meant to be glanced at would be worse than useless. The month is what you can reach, and
-   * its name carries the count so the marks below stay safe to hide.
-   */
   it('carries how many days of a month have something on them, in its name', () => {
     const { getByRole } = year({
       events: [event({ id: 'a' }), event({ id: 'b', start: MONDAY, end: MONDAY })],
@@ -840,9 +791,6 @@ describe('the year view', () => {
     expect(getByRole('button', { name: /June\s*2/ })).toBeTruthy()
   })
 
-  // The sheet reads the column count from this variable: a literal 7 wrapped every five-day
-  // row onto the next line. The `Year` play function checks the sheet consumes it.
-  // Only the year on show is walked: a trip from last December marks its January days alone.
   it('marks only the days of the year on show', () => {
     const { getByRole } = year({
       events: [
@@ -875,13 +823,8 @@ describe('the year view', () => {
 })
 
 /*
- * The pointer gestures, driven by synthetic PointerEvents.
- *
- * jsdom lays NOTHING out, so `getBoundingClientRect` answers zero for everything and the
- * geometry cannot be exercised here at all — that is what `layout.test.ts` is for, over
- * plain numbers. What these tests pin is the WIRING: which press starts which gesture,
- * whether the model is written once and only on release, and that a cancel writes nothing.
- * The gestures as a reader experiences them are covered by the play functions.
+ * Synthetic gestures exercise wiring, not geometry: jsdom has zero-sized layouts, so pure
+ * layout tests validate coordinates.
  */
 function pointer(el: Element, type: string, init: PointerEventInit = {}) {
   el.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerId: 1, button: 0, ...init }))
@@ -921,7 +864,6 @@ describe('dragging an event', () => {
     pointer(card, 'pointerdown', { clientX: 100, clientY: 100 })
     pointer(card, 'pointermove', { clientX: 100, clientY: 200 })
     await nextTick()
-    // The event itself, not the echo it leaves at its old place.
     const moved = container.querySelector('.v-calendar-event:not([data-ghost])')!
     expect(moved.getAttribute('data-dragging')).toBe('')
   })
@@ -985,10 +927,6 @@ describe('dragging an event', () => {
     })
   })
 
-  /*
-   * The gesture was taken away — a system gesture, a context menu, the page starting to
-   * scroll. Nothing may be written: the card goes back to where the model still says it is.
-   */
   it('writes nothing when the gesture is taken away', async () => {
     const { container, emitted } = drag()
     const card = container.querySelector('.v-calendar-event')!
@@ -1015,8 +953,8 @@ describe('dragging an event', () => {
   })
 
   /*
-   * pointerup fires before click. Without the guard, letting go at the end of a drag would
-   * ALSO open the event — the consumer's editor over every card the reader had just moved.
+   * Pointerup fires before click. Without the guard, letting go at the end of a drag would ALSO
+   * open the event; the consumer's editor over every card the reader had just moved.
    */
   it('does not open the event that has just been dropped', async () => {
     const { container, emitted } = drag()
@@ -1132,9 +1070,9 @@ describe('dragging an event', () => {
   })
 
   /*
-   * The dragged card takes no pointer events, so the strip's own `ns-resize` is lost the instant
-   * the press begins. The scroller names the gesture from the press to the release, which is what
-   * the stylesheet holds the cursor on.
+   * The dragged card takes no pointer events, so the strip's own `ns-resize` is lost the
+   * instant the press begins. The scroller names the gesture from the press to the release,
+   * which the stylesheet holds the cursor on.
    */
   it('names a stretch on the scroller for as long as it lasts', async () => {
     const { container } = drag()
@@ -1163,7 +1101,7 @@ describe('dragging an event', () => {
   })
 
   /*
-   * A bar has no hours, so dragging it up and down means nothing — but it does move by whole
+   * A bar has no hours, so dragging it up and down means nothing; but it does move by whole
    * days along the band. jsdom measures every column as zero width, so what this pins is the
    * WIRING: that the band's press starts a gesture and that the release reports a move.
    */
@@ -1182,10 +1120,6 @@ describe('dragging an event', () => {
     expect(emitted('event-move')).toHaveLength(1)
   })
 
-  /*
-   * The whole reason `moveEventToDay` exists beside `moveEvent`: the latter collapses `end`
-   * onto `start`, so a three-day trip put through it would come back as one day.
-   */
   it('keeps a multi-day bar as long as it was', async () => {
     const { container, emitted } = mount({
       view: 'week',
@@ -1219,10 +1153,6 @@ describe('dragging an event', () => {
   })
 })
 
-/*
- * The faded copy left where a dragged event started, so the reader can see what they are
- * moving it from.
- */
 describe('the echo left behind while dragging', () => {
   const start = (props: Record<string, unknown> = {}) => {
     const utils = mount({ view: 'day', dayStart: 8, dayEnd: 18, ...props })
@@ -1246,8 +1176,8 @@ describe('the echo left behind while dragging', () => {
   })
 
   /*
-   * A colour is derived from an id, and the echo has to carry a DIFFERENT one so the layout
-   * can tell the two apart — so without passing the original back the copy would come out a
+   * A colour is derived from an id, and the echo has to carry a DIFFERENT one so the layout can
+   * tell the two apart; so without passing the original back the copy would come out a
    * different colour from the card it belongs to.
    */
   it('is the same colour as the card it belongs to', async () => {
@@ -1261,11 +1191,7 @@ describe('the echo left behind while dragging', () => {
     expect(hues[0]).not.toBe('')
   })
 
-  /*
-   * It is a duplicate of an event already announced, and a focusable copy inside a hidden
-   * subtree is an accessibility failure of its own. `inert` settles the tree, the focus and
-   * the pointer in one attribute.
-   */
+  /* `inert` settles the tree, the focus and the pointer in one attribute. */
   it('is out of reach of the pointer, the keyboard and a screen reader', async () => {
     const { container, card } = start({ events: [event({ id: 'a' })] })
     pointer(card, 'pointermove', { clientX: 100, clientY: 300 })
@@ -1315,7 +1241,6 @@ describe('the echo left behind while dragging', () => {
     const { container } = mount({ view: 'day', events: [event({ id: 'a' })] })
     const card = container.querySelector('.v-calendar-event') as HTMLElement
     await fireEvent.keyDown(card, { key: ' ' })
-    // Taking hold is not yet moving: nothing has been given up, so nothing to echo.
     expect(container.querySelector('[data-ghost]')).toBeNull()
 
     await fireEvent.keyDown(container.querySelector('[data-grabbed]')!, { key: 'ArrowDown' })
@@ -1324,21 +1249,12 @@ describe('the echo left behind while dragging', () => {
 })
 
 describe('creating an event by taking up an empty slot', () => {
-  // `creatable` is opt-in, so the whole block asks for it; the one test about its absence
-  // spreads over it.
   const empty = (props: Record<string, unknown> = {}) =>
     mount({ view: 'day', dayStart: 9, dayEnd: 17, creatable: true, ...props })
 
   /*
-   * The flag that stops a drag from also OPENING what it just moved is lowered by the click that
-   * reads it — and that click only reaches a card's handler when it lands on one. Drawing a new
-   * event starts on a CELL, so it does not: the flag stays raised.
-   *
-   * Usually the next press heals it, since its own `pointerup` overwrites the flag with its own
-   * `moved`. That is what makes this narrow rather than constant — and it is exactly what stops
-   * working when the press starts NO gesture, which is the case here: a calendar that lets events
-   * be drawn but not moved. The reader then clicks an event to open it, nothing happens, they
-   * click again and it works, with nothing on screen to connect it to the event they drew before.
+   * Drawing a new event starts on a CELL, so it does not: the flag stays raised. Usually the
+   * next press heals it, since its own `pointerup` overwrites the flag with its own `moved`.
    */
   it('does not swallow a later, deliberate click on a card', async () => {
     const { container, emitted } = mount({
@@ -1364,10 +1280,6 @@ describe('creating an event by taking up an empty slot', () => {
     expect(emitted('event-activate')).toHaveLength(1)
   })
 
-  /*
-   * The window is 9 to 17 over the 600 pixels `layOut` gives the columns, so an hour is 75
-   * pixels: y = 75 is 10:00 and y = 160 is 11:08.
-   */
   const drawn = (props: Record<string, unknown> = {}) => {
     const utils = empty(props)
     layOut(utils.container, '.v-calendar-columns')
@@ -1385,7 +1297,6 @@ describe('creating an event by taking up an empty slot', () => {
       [{ start: WEDNESDAY, end: WEDNESDAY, startTime: '10:00', endTime: '11:15' }],
     ])
     expect(emitted('update:events')).toBeUndefined()
-    // The click the browser sends after the release ends the drag, and names no cell.
     expect(emitted('cell-activate')).toBeUndefined()
     expect(container.querySelector('[data-event-id="__vectis-calendar-draft__"]')).toBeNull()
   })
@@ -1401,7 +1312,6 @@ describe('creating an event by taking up an empty slot', () => {
     ])
   })
 
-  // A default length is the consumer's decision, so a click makes nothing and reports its cell.
   it('makes nothing from a click, and reports the cell instead', async () => {
     const { cell, container, emitted } = drawn()
     pointer(cell, 'pointerdown', { clientX: 100, clientY: 10 })
@@ -1462,7 +1372,6 @@ describe('creating an event by taking up an empty slot', () => {
 })
 
 describe('an event running past midnight', () => {
-  // Tuesday 22:00 to Wednesday 02:00: four hours, so a card in each column rather than a bar.
   const overnight = event({
     id: 'late',
     start: '2026-06-09',
@@ -1487,7 +1396,6 @@ describe('an event running past midnight', () => {
     expect(container.querySelector('.v-calendar-allday')).toBeNull()
   })
 
-  // The strip drags the event's real end, which is on its second day.
   it('offers the resize strip on its morning card alone', () => {
     const { container } = mount({ events: [overnight] })
     expect(cardOn(container, '2026-06-09')!.querySelector('[data-calendar-handle]')).toBeNull()
@@ -1500,12 +1408,6 @@ describe('an event running past midnight', () => {
     expect(container.querySelector('.v-calendar-allday .v-calendar-event')).not.toBeNull()
   })
 
-  /*
-   * Taken by its morning card, the event is held from its start the evening before, so an hour
-   * down moves it an hour whole: 22:00–02:00 to 23:00–03:00, the start staying on Tuesday.
-   * Laid out at 700 by 600, a column is 100 pixels (Wednesday is the fourth of an en-US week)
-   * and an hour 25.
-   */
   it('moves as one when it is dragged by its morning card', async () => {
     const { container, emitted } = mount({ events: [overnight] })
     layOut(container, '.v-calendar-columns')
@@ -1540,21 +1442,14 @@ describe('an event running past midnight', () => {
 })
 
 /*
- * Holding a drag against the side of the calendar to turn the page.
- *
- * The dwell is driven by real timers, so these use fake ones. What they pin is that the wait
- * exists at all — paging the instant the pointer touched the edge would make the last day of
- * a week unaimable — and that a gesture SURVIVES the view changing under it, which is the one
- * thing that would otherwise leave the card stranded on a day nobody can see.
+ * What they pin is that the wait exists at all; paging the instant the pointer touched the edge
+ * would make the last day of a week unaimable; and that a gesture SURVIVES the view changing
+ * under it, which is the one thing that would otherwise leave the card stranded on a day nobody
+ * can see.
  */
 /*
- * jsdom lays nothing out, so every rect is zero — and a box with no width has no edges and no
- * inside, which is what `inlineEdgeAt` and `pointWithin` both correctly answer. Giving a box a
- * size is therefore not a convenience but the only way either behaviour can be exercised at all,
- * and it makes the tests stronger: they pin WHICH edge, and which side of the box.
- *
- * 700 by 600 at the origin, so a point at x = 900 is off the calendar and x = 690 is inside its
- * 48-wide end band.
+ * Supply a nonzero rectangle so edge and outside-pointer tests exercise geometry rather than
+ * the empty-box guard.
  */
 const layOut = (container: Element, selector: string) => {
   const el = container.querySelector(selector) as HTMLElement | null
@@ -1583,7 +1478,6 @@ describe('paging by holding at an edge', () => {
     layOut(utils.container, '.v-calendar-time-grid')
     const card = utils.container.querySelector('.v-calendar-event') as HTMLElement
     pointer(card, 'pointerdown', { clientX: 350, clientY: 300 })
-    // 690 of 700 is inside the end band, which is 48 wide.
     pointer(card, 'pointermove', { clientX: 690, clientY: 300 })
     return utils
   }
@@ -1599,11 +1493,9 @@ describe('paging by holding at an edge', () => {
     const { emitted } = dragging()
     vi.advanceTimersByTime(EDGE_STEP_DELAY)
     await nextTick()
-    // The end edge, so the week after the one it started on.
     expect(emitted('update:date')?.at(-1)).toEqual(['2026-06-17'])
   })
 
-  // Zero turns paging off, and a consumer may bind it to zero while the drag is held there.
   it('stops paging once the delay is turned off during the hold', async () => {
     const { emitted, rerender } = dragging()
     vi.advanceTimersByTime(EDGE_STEP_DELAY)
@@ -1646,10 +1538,8 @@ describe('paging by holding at an edge', () => {
   })
 
   /*
-   * Pushing PAST the side is how one asks the calendar to keep going, and a drag held out there
-   * is also a drag that would be abandoned if it were let go. The two must not be confused: a
-   * later tidy-up that stopped paging once the pointer had left would take away the very gesture
-   * that crosses from one week into the next.
+   * The two must not be confused: a later tidy-up that stopped paging once the pointer had left
+   * would take away the very gesture that crosses from one week into the next.
    */
   it('keeps paging while the drag is held right off the calendar', async () => {
     const { container, emitted } = mount({ view: 'week', events: [event({ id: 'a' })] })
@@ -1696,33 +1586,18 @@ describe('paging by holding at an edge', () => {
     expect(container.querySelector('.v-calendar-columns')!.getAttribute('data-edge')).toBe('end')
   })
 
-  /*
-   * The whole reason the gesture keeps the last pointer position. Paging swaps the days out
-   * from under a hand that is holding still, so without re-applying that position the card
-   * would stay on a day that is no longer on screen — and simply vanish.
-   */
+  /* The whole reason the gesture keeps the last pointer position. */
   it('keeps the card on screen after the view has turned under it', async () => {
     const { container, rerender } = dragging()
     vi.advanceTimersByTime(EDGE_STEP_DELAY)
     await nextTick()
-    // The parent is controlled here, so the new week is applied by hand — which is exactly
-    // what a real consumer's v-model does a tick later.
     await rerender({ date: '2026-06-03' })
     expect(container.querySelector('.v-calendar-event')).not.toBeNull()
   })
 
-  /*
-   * The other half, and the fragile one. The echo belongs to a DATE, but the boxes it is
-   * drawn from are described by INDEX into the days on show, so once the view has turned that
-   * index names a different day. Frozen, the echo reappears on the same COLUMN of the new
-   * week — a card dragged out of Wednesday the 10th leaving its echo on Wednesday the 17th,
-   * as though it had come from there. Recomputing it against the current days is what makes
-   * it leave with its own week.
-   */
   it('takes the echo away with the day it belonged to', async () => {
     const { container } = dragging()
     await nextTick()
-    // Its day is still on show, so it is drawn.
     expect(container.querySelector('[data-ghost]')).not.toBeNull()
 
     vi.advanceTimersByTime(EDGE_STEP_DELAY)
@@ -1743,9 +1618,9 @@ describe('paging by holding at an edge', () => {
 
   /*
    * What pins the echo as DERIVED rather than merely thrown away on the first page: overshoot
-   * the week, come back, and it is drawn again — because it is worked out afresh from the day
-   * it belongs to every time. Dropping it on the way out would pass the test above and fail
-   * this one.
+   * the week, come back, and it is drawn again; because it is worked out afresh from the day it
+   * belongs to every time. Dropping it on the way out would pass the test above and fail this
+   * one.
    */
   it('brings the echo back when the view turns back to its day', async () => {
     const { container } = dragging()
@@ -1753,7 +1628,6 @@ describe('paging by holding at an edge', () => {
     await nextTick()
     expect(container.querySelector('[data-ghost]')).toBeNull()
 
-    // Back against the other edge, which pages the other way and puts the week back.
     pointer(container.querySelector('.v-calendar-event')!, 'pointermove', {
       clientX: 10,
       clientY: 300,
@@ -1763,12 +1637,6 @@ describe('paging by holding at an edge', () => {
     expect(container.querySelector('[data-ghost]')).not.toBeNull()
   })
 
-  /*
-   * A bar is not all-or-nothing: one running past the end of the week still covers the start
-   * of the next, so its echo stays — but it now begins BEFORE the range, which is column zero
-   * and not the column it was grabbed on. Frozen it would keep the captured index; derived,
-   * `packAllDay` answers that question the same way it does for every other bar.
-   */
   it('re-places the echo of a bar that still reaches into the new range', async () => {
     const { container } = mount({
       view: 'week',
@@ -1804,13 +1672,9 @@ describe('paging by holding at an edge', () => {
 })
 
 /*
- * What a drag costs between two slots. None of it is visible — the picture is the same either
- * way — so these count the work instead: how often the cards are rendered, read through the
+ * What a drag costs between two slots. None of it is visible; the picture is the same either
+ * way; so these count the work instead: how often the cards are rendered, read through the
  * `#event` slot every card calls, and how often each half of the layout is packed.
- *
- * A pointer fires many times per slot, and the gesture state is a deep ref: an equal preview
- * written as a NEW object re-packs every column and re-renders every cell. On a busy week that
- * is the difference between a drag that follows the hand and one that stutters behind it.
  */
 describe('what a drag recomputes', () => {
   /*
@@ -1854,11 +1718,9 @@ describe('what a drag recomputes', () => {
     await moveTo(350, 120)
     const before = renders()
 
-    // A pointer three minutes further down snaps back to the slot already on show.
     await moveTo(350, 123)
     expect(renders()).toBe(before)
 
-    // And the counter is live: the next slot does render.
     await moveTo(350, 160)
     expect(renders()).toBeGreaterThan(before)
   })
@@ -1868,7 +1730,6 @@ describe('what a drag recomputes', () => {
       { view: 'month', views: ['month'], events: [event({ id: 'a' })] },
       '.v-calendar-month-grid',
     )
-    // Six weeks over 600 pixels and seven days over 700: Wednesday the 10th is row 1, column 3.
     pointer(container.querySelector('.v-calendar-event')!, 'pointerdown', {
       clientX: 350,
       clientY: 150,
@@ -1929,12 +1790,8 @@ describe('what a drag recomputes', () => {
 
 /*
  * Letting go somewhere the drag cannot mean anything: the hand's version of the Escape the
- * keyboard grab already has.
- *
- * These are on REAL timers, and the point is out of the box on the INLINE axis only. A point
- * below the grid would send `blockEdgeAt` to full speed and leave the auto-scroll's animation
- * frames running for the rest of the file; x = 900 against the 700-wide stub only arms the edge
- * timer, which is torn down on unmount.
+ * keyboard grab already has. These are on real timers, and the point is out of the box on the
+ * inline axis only.
  */
 describe('letting go outside the calendar', () => {
   const outside = (props: Record<string, unknown> = {}) => {
@@ -1980,10 +1837,6 @@ describe('letting go outside the calendar', () => {
     expect(emitted('event-move')).toBeUndefined()
   })
 
-  /*
-   * The create gesture goes the same way, and deliberately: one rule covers all four kinds, so
-   * there is nothing to remember beyond "released outside, nothing happens".
-   */
   it('creates nothing when a drawn slot is let go outside', async () => {
     const { container, emitted } = outside({ events: [], creatable: true })
     dragOut(container.querySelector('.v-calendar-cell')!)
@@ -2019,8 +1872,6 @@ describe('letting go outside the calendar', () => {
     )
   })
 
-  /* The echo is what says where the event is about to go back to, so it is needed MORE out
-     here than in, not less. */
   it('keeps the echo showing where the event will return to', async () => {
     const { container } = outside()
     const card = container.querySelector('.v-calendar-event')!
@@ -2030,10 +1881,7 @@ describe('letting go outside the calendar', () => {
     expect(container.querySelector('[data-ghost]')).not.toBeNull()
   })
 
-  /*
-   * `pointerup` fires before `click`. Without the drag flag being set on this path too, an
-   * abandoned drag would end by opening the very event it has just refused to move.
-   */
+  /* `pointerup` fires before `click`. */
   it('does not open the event it has just refused to move', async () => {
     const { container, emitted } = outside()
     const card = container.querySelector('.v-calendar-event')!
@@ -2053,7 +1901,7 @@ describe('letting go outside the calendar', () => {
 
   /*
    * The component's own guard on the degenerate rule: a box that measures nothing contains
-   * everything. Note there is no `layOut` here — which is the state every other drag test in
+   * everything. Note there is no `layOut` here; which is the state every other drag test in
    * this file runs in, and this is what fails loudly if that branch is ever flipped.
    */
   it('still writes on release when nothing has been laid out', async () => {
@@ -2063,8 +1911,6 @@ describe('letting go outside the calendar', () => {
     expect(emitted('event-move')).toHaveLength(1)
   })
 
-  /* The month is measured against its ROOT, which includes the row of weekday names its grid
-     leaves out. */
   it('writes nothing when a chip is let go outside the month', async () => {
     const { container, emitted } = mount({
       view: 'month',
@@ -2141,10 +1987,6 @@ describe('moving an event with the keyboard', () => {
     expect(container.querySelector('[role="status"]')!.textContent).toContain('9:15 AM')
   })
 
-  /*
-   * Each press is applied to the PREVIEW, so three presses move three slots. Applying them
-   * to the origin instead would make every arrow undo the last one.
-   */
   it('accumulates its steps rather than restarting from where it began', async () => {
     const { container } = await held({ slotDuration: 15 })
     for (let i = 0; i < 3; i++) {
@@ -2175,9 +2017,9 @@ describe('moving an event with the keyboard', () => {
 
   /*
    * The card is redrawn somewhere else on every step, and a re-rendered element does not keep
-   * the focus. Putting it back is what keeps the following arrow reaching the card at all —
-   * without it, the first press drops the reader onto the body and the grab becomes
-   * unusable while still being held. This went untested for as long as the lookup threw.
+   * the focus. Putting it back is what keeps the following arrow reaching the card at all;
+   * without it, the first press drops the reader onto the body and the grab becomes unusable
+   * while still being held.
    */
   it('carries the focus with the card it moves', async () => {
     const { container } = await held()
@@ -2218,11 +2060,6 @@ describe('moving an event with the keyboard', () => {
     expect(emitted('update:events')).toBeUndefined()
   })
 
-  /*
-   * Held against the end of the day, a step is written 23:59 rather than 24:00. Taking the
-   * next step from THAT would cost a minute a press, and the event would come back shorter and
-   * off the slot grid. Every step is worked out from where the event was taken instead.
-   */
   it('comes back from the end of the day whole and on the slot grid', async () => {
     const { container, emitted } = await held({
       dayStart: 0,
@@ -2309,9 +2146,9 @@ describe('moving an event with the keyboard', () => {
   })
 
   /*
-   * Every gesture the pointer offers has a keyboard equivalent (WCAG 2.1.1), and a reader
-   * has to be told how to reach it — from ONE shared node, not the same sentence repeated on
-   * each of a hundred cards.
+   * Every gesture the pointer offers has a keyboard equivalent (WCAG 2.1.1), and a reader has
+   * to be told how to reach it; from ONE shared node, not the same sentence repeated on each of
+   * a hundred cards.
    */
   it('tells a reader how to move a card, from a node they all share', () => {
     const { container } = mount({ events: [event({ id: 'a' }), event({ id: 'b' })] })
@@ -2322,10 +2159,6 @@ describe('moving an event with the keyboard', () => {
     expect(hint.textContent).toContain('arrow keys')
   })
 
-  /*
-   * A live region inserted at the same moment as its first message is not announced at all —
-   * the trap VDataTable's selection count already documents.
-   */
   it('has its live region on screen and empty from the very first paint', () => {
     const { container } = mount()
     const region = container.querySelector('[role="status"]')!
@@ -2353,9 +2186,9 @@ describe('the region', () => {
   })
 
   /*
-   * The wrapper-root pattern: class and style belong to the outer box, everything else to
-   * the element carrying the role — otherwise a consumer's `id` lands on a wrapper their
-   * own `aria-labelledby` can never point at.
+   * The wrapper-root pattern: class and style belong to the outer box, everything else to the
+   * element carrying the role; otherwise a consumer's `id` lands on a wrapper their own
+   * `aria-labelledby` can never point at.
    */
   it('keeps class on the root and sends the rest to the region', () => {
     const { container } = mount({ class: 'mine', id: 'schedule' })
@@ -2387,14 +2220,12 @@ describe('what it exposes', () => {
       '<VCalendar ref="calendar" label="Schedule" date="2026-06-10" :view="view" :views="views" />',
   })
 
-  // The region is where the id and the ARIA attributes a consumer writes land.
   it('hands over the region as el', async () => {
     const { container } = render(Host)
     await nextTick()
     expect(calendar.value?.el).toBe(container.querySelector('.v-calendar-region'))
   })
 
-  // The year view has no grid, and focus() used to do nothing there.
   it('focuses the first month in the year view', async () => {
     const { container } = render(Host, { props: { view: 'year' } })
     await nextTick()

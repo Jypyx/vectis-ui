@@ -83,15 +83,12 @@ export const Default: Story = {
     const bar = within(canvasElement).getByRole('progressbar', { name: 'Progress' })
     await expect(bar).toHaveAttribute('aria-valuenow', '65')
     /*
-     * Support canary: the whole geometry of the donut rests on the SVG2 geometry CSS
-     * properties (cx/cy/r) on an <svg> with no viewBox. Were they not to apply, nothing
-     * would be drawn — it is checked here rather than by eye (impossible in jsdom,
-     * which has no SVG layout). Default diameter 48px, thickness 4px → r = 22px.
+     * Were they not to apply, nothing would be drawn; it is checked here rather than by eye
+     * (impossible in jsdom, which has no SVG layout). Default diameter 48px, thickness 4px → r
+     * = 22px.
      */
     const barCircle = bar.querySelector('.v-progress-circular-bar')!
     await waitFor(() => expect(getComputedStyle(barCircle).r).toBe('22px'))
-    // Chromium serializes the resolved calc() as "calc(35px)" in getComputedStyle
-    // (parseFloat → NaN): the value is read through the typed OM.
     await waitFor(() => {
       const offset = barCircle.computedStyleMap().get('stroke-dashoffset') as CSSUnitValue
       expect(offset.value).toBeCloseTo(35, 0)
@@ -116,9 +113,8 @@ export const Tones: Story = {
 }
 
 /**
- * `color` replaces the tone: the stroke takes the raw colour, and the track is derived
- * from it by `color-mix` towards the surface — hence adapted to the light theme as
- * well as the dark one.
+ * `color` replaces the tone: the stroke takes the raw colour, and the track is derived from it
+ * by `color-mix` towards the surface; hence adapted to the light theme as well as the dark one.
  */
 export const CustomColor: Story = {
   render: () => ({
@@ -150,7 +146,7 @@ export const Size: Story = {
   }),
 }
 
-/** The thickness is independent of the diameter — the donut can become a disc. */
+/** The thickness is independent of the diameter; the donut can become a disc. */
 export const Thickness: Story = {
   render: () => ({
     components: { VProgressCircular },

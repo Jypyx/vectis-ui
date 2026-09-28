@@ -8,8 +8,6 @@ const off = ref(false)
 
 <template>
   <div class="stack">
-    <!-- Still focusable and still submitted with the form, but a click or the Space key
-         changes nothing. -->
     <VCheckbox v-model="on" readonly label="Set by your organisation" />
     <VCheckbox v-model="off" readonly label="Not available on your plan" />
   </div>

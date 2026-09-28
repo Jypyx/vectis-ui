@@ -11,10 +11,12 @@ const pending = ref(true)
       {{ pending ? 'Load' : 'Reload' }}
     </VButton>
 
-    <!-- There is no wrapper mode: the component never measures what it replaces, so
-         the shape is declared rather than guessed. The idiom is a plain v-if, with
-         `aria-busy` on the container, which is what announces the wait for the whole
-         zone instead of each silhouette announcing its own. -->
+    <!--
+      There is no wrapper mode: the component never measures what it replaces, so the shape is
+      declared rather than guessed. The idiom is a plain v-if, with `aria-busy` on the
+      container, which announces the wait for the whole zone instead of each silhouette
+      announcing its own.
+    -->
     <div class="zone" :aria-busy="pending || undefined">
       <template v-if="pending">
         <VSkeletonLoader shape="control" size="sm" width="55%" />

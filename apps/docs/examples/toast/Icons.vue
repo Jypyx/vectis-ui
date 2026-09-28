@@ -4,7 +4,6 @@ import { cloud_upload as cloudUpload } from 'vectis-ui/icons'
 </script>
 
 <template>
-  <!-- Raised into the <VToaster /> mounted once at the root of the application. -->
   <div class="demo">
     <!-- Left out, the icon comes from the tone: a notification arrives unannounced, so
          it is scanned before it is read and the glyph is what carries the meaning at a

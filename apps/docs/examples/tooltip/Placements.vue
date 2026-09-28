@@ -36,7 +36,6 @@ const placements: TooltipPlacement[] = [
   display: flex;
   flex-wrap: wrap;
   gap: var(--vectis-space-6) var(--vectis-space-4);
-  /* Room above and below for the panels, which are drawn outside this box. */
   padding-block: var(--vectis-space-8);
 }
 </style>

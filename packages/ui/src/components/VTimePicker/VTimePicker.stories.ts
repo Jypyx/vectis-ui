@@ -63,17 +63,15 @@ export const Default: Story = {
   }),
   play: async ({ canvasElement }) => {
     const face = faceOf(canvasElement)
-    // Nine o'clock is a quarter of the way round.
     await waitFor(() => expect(face.getAttribute('aria-valuenow')).toBe('9'))
     tapDial(face, 3 / 12)
-    // Choosing an hour moves the clock on to the minutes by itself.
     await waitFor(() => expect(face.getAttribute('aria-label')).toBe('Minutes'))
   },
 }
 
 /**
- * A 24-hour clock carries a SECOND ring inside the first, for the hours from 13 to 00, and
- * has no half-day control at all — the numerals then centre on their own.
+ * A 24-hour clock carries a SECOND ring inside the first, for the hours from 13 to 00, and has
+ * no half-day control at all; the numerals then centre on their own.
  */
 export const TwentyFourHour: Story = {
   args: { format: '24h' },
@@ -84,15 +82,11 @@ export const TwentyFourHour: Story = {
   }),
   play: async ({ canvasElement }) => {
     expect(canvasElement.querySelector('.v-time-picker-meridiem')).toBeNull()
-    // Both rings are drawn: twelve outer numerals and twelve inner ones.
     expect(canvasElement.querySelectorAll('.v-time-picker-number[data-ring="inner"]')).toHaveLength(
       12,
     )
     const canvas = within(canvasElement)
     const face = faceOf(canvasElement)
-    // Pointing near the centre lands on the inner ring — 21:00 rather than 9. It is the
-    // numeral at the top that is read and not the slider's own value: releasing settles
-    // the step, so by now the face is already showing the minutes.
     tapDial(face, 9 / 12, 0.44)
     await waitFor(() =>
       expect(canvas.getByRole('button', { name: /Select hour$/ })).toHaveTextContent('21'),
@@ -102,8 +96,8 @@ export const TwentyFourHour: Story = {
 
 /**
  * The half-day control writes straight into the value, and sits at the end of the row of
- * numerals — which in a right-to-left page puts it on the other side, the numerals
- * themselves never being reordered.
+ * numerals; which in a right-to-left page puts it on the other side, the numerals themselves
+ * never being reordered.
  */
 export const Meridiem: Story = {
   args: { format: '12h' },
@@ -164,19 +158,14 @@ export const MinuteStep: Story = {
     await userEvent.click(canvas.getByRole('button', { name: /Select minutes$/ }))
     expect(canvasElement.querySelectorAll('.v-time-picker-number')).toHaveLength(4)
     const face = faceOf(canvasElement)
-    // A point between two markers is pulled back to the nearest quarter.
     tapDial(face, 0.13)
     await waitFor(() => expect(Number(face.getAttribute('aria-valuenow')) % 15).toBe(0))
   },
 }
 
 /**
- * What may be chosen, restricted four ways: the two bounds, and a rule for the hours and
- * one for the minutes. What they rule out is LEFT OFF the face, the minute step's own
- * rule: the clock prints what can be chosen and nothing else.
- *
- * The two compose: nine o'clock stays open under a bound of half past nine, and it is its
- * first thirty minutes that go.
+ * What may be chosen, restricted four ways: the two bounds, and a rule for the hours and one
+ * for the minutes.
  */
 export const Restrictions: Story = {
   args: {
@@ -205,20 +194,16 @@ export const Restrictions: Story = {
     await userEvent.keyboard('{ArrowUp}{ArrowUp}')
     await waitFor(() => expect(canvasElement.textContent).toContain('14:15'))
 
-    // Nine o'clock is only half open, and the minutes follow the hour into what is left.
     await userEvent.keyboard('{Home}')
     await waitFor(() => expect(canvasElement.textContent).toContain('09:30'))
 
-    // Midday carries no numeral, so aiming at it does nothing whatever: no hour, and no
-    // step moved on either. Only a real face answers this — jsdom lays none out, and
-    // measures the one it does not lay out as a point at the origin.
+    // Only a real face answers this; jsdom lays none out, and measures the one it does not lay
+    // out as a point at the origin.
     tapDial(face, 0)
     await waitFor(() => expect(canvasElement.textContent).toContain('09:30'))
     expect(face.getAttribute('aria-label')).toBe('Hour')
 
     await userEvent.click(canvas.getByRole('button', { name: /Select minutes$/ }))
-    // Half past and a quarter to are all that is left of nine o'clock, and they are all
-    // the face prints.
     await waitFor(() =>
       expect(canvasElement.querySelectorAll('.v-time-picker-number')).toHaveLength(2),
     )
@@ -270,9 +255,8 @@ export const Localization: Story = {
 }
 
 /**
- * `readonly` shows the time without letting it be changed, the face keeping its focus and
- * the two numerals still switching between hours and minutes. `disabled` takes the clock
- * out of use altogether and out of the tab order.
+ * `readonly` shows the time without letting it be changed, the face keeping its focus and the
+ * two numerals still switching between hours and minutes.
  */
 export const States: Story = {
   render: (args) => ({

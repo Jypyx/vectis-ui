@@ -14,7 +14,6 @@ const CodeIcon = () =>
 
 <template>
   <div class="grid">
-    <!-- `render` wins over everything, and short-circuits the resolver with it. -->
     <figure>
       <VIcon :render="{ path: cloudUpload.paths[0] }" :size="28" />
       <figcaption>render, as SVG path data</figcaption>
@@ -38,15 +37,15 @@ const CodeIcon = () =>
       <figcaption>name, from the library</figcaption>
     </figure>
 
-    <!-- A plain string is only ever a name. Nothing in the registry answers to this
-         one, so it is left to a ligature font, which this site does not load: what
-         you see is the fallback, the name drawn as its own text. -->
+    <!--
+      Nothing in the registry answers to this one, so it is left to a ligature font, which this
+      site does not load: what you see is the fallback, the name drawn as its own text.
+    -->
     <figure>
       <VIcon name="translate" :size="28" />
       <figcaption>name, unresolved</figcaption>
     </figure>
 
-    <!-- Last resort: the slot, reached when neither `name` nor `src` was given. -->
     <figure>
       <VIcon :size="28">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

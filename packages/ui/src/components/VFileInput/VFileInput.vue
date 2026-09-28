@@ -1,18 +1,8 @@
 <script setup lang="ts">
 // @core
 /**
- * File selection presented as an ordinary form field: a read-only VInput showing what was
- * picked, with the real file input hidden behind it — VDateInput's `readonly` shape, minus
- * the panel. The v-model is always a `File[]`, `multiple` or not, so a consumer never has to
- * narrow a union TypeScript cannot discriminate.
- *
- * The JS is imposed by the platform, not chosen. A dialog opens ONLY from a real click on a
- * file input, and a `FileList` cannot be written from a template — so the visible field can
- * never BE the native control, and that control is only ever a SOURCE of files.
- *
- * The rest follows: the relayed click, the reset after every change (without which the same
- * file cannot be picked twice running), and screening in code, `accept` having no say over
- * a drop.
+ * Compose a read-only VInput with a native file input. useFileField bridges File[] selection to
+ * the browser dialog and form submission.
  */
 import { computed, inject, ref, useId } from 'vue'
 
@@ -72,13 +62,7 @@ export type FileInputSize = 'sm' | 'md' | 'lg'
 interface FileInputProps {
   /** Allows several files to be chosen. With one only, every extra file is turned away. */
   multiple?: boolean
-  /**
-   * Which kinds of file are accepted, in the browser's own syntax (`image/*,.pdf`).
-   *
-   * It is applied TWICE, and it has to be: as an attribute, which is what filters the
-   * system's file dialog, and again in code, which is the only thing that can filter a
-   * file DROPPED on the component, the attribute having no say over a drop.
-   */
+  /** Which kinds of file are accepted, in the browser's own syntax (`image/*,.pdf`). */
   accept?: string
   /**
    * How the chosen files are shown: their names joined by commas, or one dismissible
@@ -126,10 +110,9 @@ interface FileInputProps {
    */
   placeholder?: string
   /**
-   * An icon inside the field, at the start. It is rendered before the chips rather than
-   * in their place, so it survives a chip display. Decorative by default, it becomes a
-   * real button as soon as a `@click:icon-start` listener is attached, in which case it
-   * needs `iconStartLabel`.
+   * An icon inside the field, at the start. Decorative by default, it becomes a real button as
+   * soon as a `@click:icon-start` listener is attached, in which case it needs
+   * `iconStartLabel`.
    */
   iconStart?: IconSource
   /** What the start icon does, in words, once it is clickable. */
@@ -140,9 +123,8 @@ interface FileInputProps {
    */
   pickerIconLabel?: string
   /**
-   * Shows a spinner at the end of the field, in place of the attach icon, while an
-   * upload is under way, typically. It says that something is happening and changes
-   * nothing else: files can still be dropped and the dialog still opens.
+   * Shows a spinner at the end of the field, in place of the attach icon, while an upload is
+   * under way, typically.
    */
   loading?: boolean
   /**
@@ -150,11 +132,7 @@ interface FileInputProps {
    * system dictionary.
    */
   loadingText?: string
-  /**
-   * Offers a cross that empties the selection. Worth turning on here more than on an
-   * ordinary field: what a picker holds cannot be erased by typing, so the cross is the
-   * only way back out of a wrong choice.
-   */
+  /** Offers a cross that empties the selection. */
   clearable?: boolean
   /** What that cross does, in words. It falls back to the design system dictionary. */
   clearLabel?: string
@@ -215,20 +193,11 @@ defineSlots<{
    */
   start?(): unknown
   /**
-   * Controls of your own inside the field, placed before the ones the field owns: the
-   * clear cross and the icon that opens the file dialog. Those two are this component's
-   * own affordance, which is why there is no `#end` here: it would replace them.
+   * Controls of your own inside the field, placed before the ones the field owns: the clear
+   * cross and the icon that opens the file dialog.
    */
   'value-end'?(): unknown
-  /**
-   * Replaces the chip standing for one file.
-   *
-   * Three of the values it receives are what make it usable without regressions:
-   * `label` is the name already shortened in the MIDDLE so that its extension survives,
-   * `remove` is what takes the file out (without it the file could no longer be removed
-   * at all), and the size and density are the ones worked out to sit inside the field,
-   * which cannot be guessed from outside.
-   */
+  /** Replaces the chip standing for one file. */
   chip?(props: FileInputChipSlotProps): unknown
   /**
    * Replaces the counter under the field. `text` is the sentence already built and
@@ -239,18 +208,13 @@ defineSlots<{
 
 // `get` reads an explicit `null` as the empty list: the default applies only to a model
 // that was never given, and `files = ref(null)` is a common start in untyped code.
-/**
- * Always a LIST of files, whether or not several are allowed, and never a file on its own.
- * The shape of the value does not depend on a prop, so a consumer never has to narrow a
- * union TypeScript has no way of discriminating. With a single file it is simply a list
- * of at most one.
- */
+/** Always a LIST of files, whether or not several are allowed, and never a file on its own. */
 const model = defineModel<File[]>({ default: () => [], get: (files) => files ?? [] })
 
 const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 // Declared as this component's own event, `click:icon-start` is out of `$attrs`, so the
-// listener is relayed to the field by hand — and only when the consumer wrote one.
+// listener is relayed to the field by hand; and only when the consumer wrote one.
 const iconStartClick = iconStartListener((event) => emit('click:icon-start', event))
 
 const m = useMessages()
@@ -267,14 +231,10 @@ const {
 } = useControlShape(props, group)
 
 /*
- * The hidden input, the sorting of the consumer's attributes, the single entry point into
- * the value, the removal of a file and the emptying of all of them live in `useFileField`,
- * shared with VFilePicker.
- *
- * Here, the bucket meant for "the control the user deals with" goes to the visible
- * field: that is what they see, focus and click, so a consumer's own `<label for>` has
- * to point at it. The description attribute is pulled out of that bucket, because this
- * component re-assembles it further down.
+ * Here, the bucket meant for "the control the user deals with" goes to the visible field: that
+ * is what they see, focus and click, so a consumer's own `<label for>` has to point at it. The
+ * description attribute is pulled out of that bucket, because this component re-assembles it
+ * further down.
  */
 const {
   fileEl,
@@ -293,7 +253,6 @@ const {
   disabled: resolvedDisabled,
   excludeFromControl: ['aria-describedby'],
   onClear: () => emit('clear'),
-  // Behind `isDev`, which a production build folds to false, so the message is dropped.
   warnings: isDev
     ? () => [
         props.display === 'chip' &&
@@ -309,7 +268,6 @@ const fieldAttrs = computed(() => ({ ...controlAttrs.value, ...iconStartClick })
 const inputRef = ref<InstanceType<typeof VInput> | null>(null)
 const rootEl = ref<HTMLElement | null>(null)
 
-// Chips only mean something for a list: a single file always shows as plain text.
 const resolvedDisplay = computed<FileInputDisplay>(() => (props.multiple ? props.display : 'text'))
 
 const displayText = computed(() =>
@@ -321,22 +279,17 @@ const placeholderText = computed(() =>
 )
 
 /*
- * Whether the clear cross is shown has to be answered EXPLICITLY here. The visible field
- * is read-only, and a read-only field hides its cross by default — rightly so, since its
- * text cannot be edited. Here the value comes from the file dialog rather than from
+ * The visible field is read-only, and a read-only field hides its cross by default; rightly so,
+ * since its text cannot be edited. Here the value comes from the file dialog rather than from
  * typing, so there is something to clear all the same.
  */
 const clearVisible = computed(() => canClear(props, resolvedDisabled.value, model.value.length > 0))
 
 // @a11y @devwarn
 /*
- * The icon disappears along with what it offers: a read-only field opens no dialog, so
- * an icon inviting one would be a lie — the same rule VDateInput follows for its
- * calendar.
- *
- * TRAP — its LABEL stays defined at all times, even when no icon is rendered. The helper
- * that detects a click handler on an icon warns AT SETUP if one is attached without a
- * label, and it has no way of knowing whether an icon exists.
+ * Its label stays defined always, even when no icon is rendered. The helper that detects a
+ * click handler on an icon warns AT setup if one is attached without a label, and it has no way
+ * of knowing whether an icon exists.
  */
 const endIcon = computed<IconSource | undefined>(() =>
   props.readonly ? undefined : props.pickerIcon,
@@ -347,12 +300,11 @@ const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.fileInput.
 const totalSize = computed(() => model.value.reduce((sum, file) => sum + file.size, 0))
 
 /*
- * The counter is assembled from three sources: the WORD comes from the dictionary, since
- * it is language; the SIZE is formatted by the platform, which knows the local
- * conventions; and the parentheses come from neither, being punctuation every language
- * shares — the same boundary VBadge's "99+" falls on.
- *
- * With nothing chosen it states the count alone: "0 files ()" would be noise.
+ * The counter is assembled from three sources: the WORD comes from the dictionary, since it is
+ * language; the SIZE is formatted by the platform, which knows the local conventions; and the
+ * parentheses come from neither, being punctuation every language shares; the same boundary
+ * VBadge's "99+" falls on. With nothing chosen it states the count alone: "0 files ()" would be
+ * noise.
  */
 const counterText = computed(() => {
   const word = m.value.fileInput.files(model.value.length)
@@ -364,13 +316,10 @@ const counterId = useId()
 
 // @a11y
 /*
- * What describes the field for a screen reader is a LIST of references, assembled here
- * rather than by VInput: the hint belongs to OUR row under the field, VInput having no
- * such row — its own counter sits inside the field.
- *
- * The counter is deliberately part of that list, unlike in VTextarea. When the files are
- * shown as chips the field's own text is EMPTY, and the counter is then the only spoken
- * summary of what has been chosen.
+ * What describes the field for a screen reader is a LIST of references, assembled here rather
+ * than by VInput: the hint belongs to OUR row under the field, VInput having no such row; its
+ * own counter sits inside the field. The counter is deliberately part of that list, unlike in
+ * VTextarea.
  */
 const describedBy = computed(() =>
   joinIds(
@@ -388,25 +337,15 @@ const describedBy = computed(() =>
 const chipScale = computed(() => chipScaleFor(resolvedSize.value, resolvedCompact.value))
 
 /**
- * What each chip shows for its file, worked out once per change of the selection rather
- * than on every render, which reads it three times per chip. The name is shortened in the
- * MIDDLE rather than cut off at the end, for two reasons.
- *
- * The chips WRAP, so there is no line for a long name to overflow: left whole it would
- * simply push the field onto two or three rows. And cutting the middle preserves the
- * extension, which is what tells the reader what kind of file it is — an ellipsis at the
- * end drops it first.
- *
- * The full name is never lost: the removal button is named with it, and the chip carries
- * it as a tooltip whenever the label was actually shortened.
+ * What each chip shows for its file, worked out once per change of the selection rather than on
+ * every render, which reads it three times per chip.
  */
 // Computed lazily, so a text display, which never reads it, never pays for it.
 const chipLabels = computed(() => model.value.map((file) => truncateMiddle(file.name)))
 
 function onControlClick(event: MouseEvent) {
-  // The field's own buttons already handle their clicks, and the click also reaches the
-  // field itself. Without this guard the attach icon would open the dialog TWICE, and
-  // the clear cross would reopen it immediately after emptying the selection.
+  // Without this guard the attach icon would open the dialog TWICE, and the clear cross would
+  // reopen it immediately after emptying the selection.
   if ((event.target as HTMLElement).closest('button')) return
   openPicker()
 }
@@ -426,8 +365,10 @@ function removeFile(index: number) {
   if (removeAt(index)) inputRef.value?.focus()
 }
 
-/* Files may be dropped on the component itself; there is no separate drop area here —
-   that is what VFilePicker is for. */
+/*
+ * Files may be dropped on the component itself; there is no separate drop area here; that is
+ * what VFilePicker is for.
+ */
 const { dragging, onDragEnter, onDragOver, onDragLeave, onDrop } = useFileDrop(
   () => !props.noDrop && enabled.value,
   acceptFiles,
@@ -553,8 +494,6 @@ defineExpose({
 
 <style>
 @layer vectis.components {
-  /* Positioned so the hidden file input, which has no size at all, has something to be
-     placed against. */
   .v-file-input {
     position: relative;
     display: flex;
@@ -564,10 +503,12 @@ defineExpose({
     font-family: var(--vectis-text-family);
   }
 
-  /* The real file input is a SOURCE of files and not a control anyone deals with: it
-     wears `.v-hidden-input`, and taking it out of the tab order and hiding it from screen
-     readers, in `useFileField`, is what leaves the visible field as the single stop and the
-     single announcement. */
+  /*
+   * The real file input is a source of files and not a control anyone deals with: it wears
+   * `.v-hidden-input`, and taking it out of the tab order and hiding it from screen readers, in
+   * `useFileField`, is what leaves the visible field as the single stop and the single
+   * announcement.
+   */
   .v-file-input:not([data-disabled]):not([data-readonly]) .v-file-input-control,
   .v-file-input:not([data-disabled]):not([data-readonly])[data-display='text'] .v-input-control {
     cursor: pointer;
@@ -581,12 +522,11 @@ defineExpose({
     text-overflow: ellipsis;
   }
 
-  /* While a file is being dragged over it, the field is highlighted by redefining the
-     very variable VInput uses for its own border colour — so the two can never disagree.
-
-     TRAP — the selector weighs (0,4,0), one step above VInput's states, and it has to. The
-     field inside is ALWAYS read-only, and VInput's read-only background weighs (0,3,0): at
-     that weight the winner would be whichever of the two sheets a bundler put last. */
+  /*
+   * The selector weighs (0,4,0), one step above VInput's states, and it has to. The field
+   * inside is always read-only, and VInput's read-only background weighs (0,3,0): at that
+   * weight the winner would be whichever of the two sheets a bundler put last.
+   */
   .v-file-input[data-dragging] .v-input .v-input-field {
     --field-border-color: var(--vectis-color-accent);
 

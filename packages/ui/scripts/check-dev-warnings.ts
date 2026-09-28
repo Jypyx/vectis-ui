@@ -1,18 +1,6 @@
 /**
- * Verifies that the integrator-facing warnings SURVIVE the library build. Run as `postbuild`.
- *
- * What it protects: `utils/env.isDev` gates every `@devwarn`, and it is decided by the
- * CONSUMER's bundler, never by ours. A flag that Vite can read at library build time is
- * folded to a constant there, and the minifier then deletes every guarded block, so the
- * package ships with no warning at all. Nothing fails when that happens: Storybook and the
- * unit tests run off the source, where the flag is still live, and a consumer simply never
- * hears about the misuse the warning was written for.
- *
- * Two checks, both on the ARTEFACT:
- * 1. `dist/utils/env.js` exists and reads `process.env.NODE_ENV` at run time;
- * 2. every source module that writes a warning still has one in `dist`: at least as many
- *    emitted modules carry `console.warn` as source modules do (an SFC may emit more than
- *    one module, never fewer).
+ * Keep isDev dependent on the consumer's NODE_ENV so library minification cannot erase all
+ * development warnings.
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'

@@ -24,9 +24,10 @@ import { VSeparator, VTypography } from 'vectis-ui'
       <VTypography as="span" variant="body-sm">3 comments</VTypography>
     </div>
 
-    <!-- TRAP: an <hr> has no height of its own. Outside a flex or grid line the rule
-         collapses to nothing, silently and with no error, so in ordinary flow it needs
-         a height of yours. -->
+    <!--
+      An <hr> has no height of its own. Outside a flex or grid line the rule collapses to
+      nothing, silently and with no error, so in ordinary flow it needs a height of yours.
+    -->
     <div class="flow">
       <VSeparator orientation="vertical" class="standing" />
       <VTypography variant="body-sm" tone="muted">

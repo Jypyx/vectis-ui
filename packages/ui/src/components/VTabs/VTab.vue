@@ -1,14 +1,7 @@
 <script setup lang="ts">
 /**
- * One tab. It IS a VButton — the colour, the size, the focus ring and the disabled
- * state all come from there — and what this component adds is the handful of
- * attributes that make a button part of a tab row for assistive technology.
- *
- * Used outside a VTabs it renders as a quiet neutral button at VButton's own size, and as
- * nothing more: the row's decisions all come from the context, and a tab with no row takes
- * VButton's defaults rather than a copy of the row's. It carries no `tab` role either,
- * which would be an orphan without a tablist, nor the roving `tabindex` that would take
- * it out of the tab order.
+ * Reuse VButton for activation; tab context supplies selection, IDs and roving tabindex without
+ * a mounted-child registry.
  */
 
 import { computed, inject } from 'vue'
@@ -34,11 +27,7 @@ interface TabProps {
   iconEnd?: IconSource
   /** Renders `iconStart` and `iconEnd` in their filled form (the font's `FILL` axis). */
   iconFilled?: boolean
-  /**
-   * Makes the tab unusable: it no longer responds, the arrow keys skip over it, and it
-   * greys out through the colour tokens. A VTabs set `disabled` disables every tab, this
-   * one included, whatever this says.
-   */
+  /** A VTabs set `disabled` disables every tab, this one included, whatever this says. */
   disabled?: boolean
 }
 
@@ -64,11 +53,10 @@ const tabs = inject(tabsKey, null)
 const selected = computed(() => tabs != null && tabs.value === props.value)
 const tabId = computed(() => tabs?.tabId(props.value))
 const panelId = computed(() => (tabs?.hasPanels ? tabs.panelId(props.value) : undefined))
-// Cumulative, the VButtonGroup rule: a row switched off has no tab that can opt back in.
 const resolvedDisabled = computed(() => props.disabled || Boolean(tabs?.disabled))
 
-// TRAP — a function read by the template, never a `computed`: `slots` is not reactive, so a
-// computed would keep its first answer while a slot behind a `v-if` comes and goes.
+// A function read by the template, never a `computed`: `slots` is not reactive, so a computed
+// would keep its first answer while a slot behind a `v-if` comes and goes.
 /**
  * An icon, on either side, and no label at all: the tab becomes a square, like a VIconButton.
  * The same definition as VChip's, and the square itself is VButton's `[data-icon-only]` rule.
@@ -83,11 +71,10 @@ function iconOnly() {
 
 // @keyboard @a11y
 /*
- * Selecting a tab the moment it takes focus, which is what `automatic` activation
- * means. It lives here rather than in the row's keyboard handler, because this
- * component knows its own value: the handler would have to read it back from a DOM
- * attribute, and would lose the distinction between the number 1 and the string "1"
- * doing so.
+ * Selecting a tab the moment it takes focus, which `automatic` activation means. It lives here
+ * rather than in the row's keyboard handler, because this component knows its own value: the
+ * handler would have to read it back from a DOM attribute, and would lose the distinction
+ * between the number 1 and the string "1" doing so.
  */
 function onFocus() {
   if (tabs?.activation === 'automatic' && !resolvedDisabled.value) tabs.select(props.value)
@@ -130,18 +117,16 @@ function onFocus() {
 <style>
 @layer vectis.components {
   /*
-   * These rules override a VButton, so they are qualified by an attribute that button
-   * always renders. That is what makes them win whatever order the two sheets end up
-   * in — the same device VIconButton uses.
+   * These rules override a VButton, so they are qualified by an attribute that button always
+   * renders. That is what makes them win whatever order the two sheets end up in; the same
+   * device VIconButton uses.
    */
   .v-tab[data-size] {
-    /* The indicator below is positioned against this box, and a button declares no
-       position of its own. */
     position: relative;
     /*
-     * The tabs are never compressed, and that is precisely WHAT makes the row
-     * overflow. Allowed to shrink, they would squeeze down to their smallest possible
-     * width and scrolling would never come into play at all.
+     * The tabs are never compressed, and that is precisely what makes the row overflow. Allowed
+     * to shrink, they would squeeze down to their smallest possible width and scrolling would
+     * never come into play at all.
      */
     flex: none;
     white-space: nowrap;
@@ -173,14 +158,10 @@ function onFocus() {
   }
 
   /*
-   * On a track the tabs are contiguous SEGMENTS with square corners: what carves the
-   * bar up is the rule and the indicator, not the silhouette of each button. Rounded
-   * corners would leave pale notches above the rule, and a gap would break the row of
-   * hover highlights into islands.
-   *
-   * The gap is removed on the row rather than here, the row being what declares it;
-   * the bar's own gap stays, since that one separates the scroll buttons and not the
-   * tabs.
+   * On a track the tabs are contiguous SEGMENTS with square corners: what carves the bar up is
+   * the rule and the indicator, not the silhouette of each button. Rounded corners would leave
+   * pale notches above the rule, and a gap would break the row of hover highlights into
+   * islands.
    */
   .v-tabs:is([data-variant='flat'], [data-variant='outlined'])
     > .v-tabs-bar
@@ -190,19 +171,9 @@ function onFocus() {
   }
 
   /*
-   * Inside a card the row takes its rounded corners back at the ENDS only, the seams
-   * between tabs staying square — the VButtonGroup idiom, applied to the one edge the
-   * track does not occupy.
-   *
-   * The radius is the CARD's inner one — its own, less the border it sits behind — and
-   * not the button's. The bar spends no gutter, so an end tab lands exactly on a corner
-   * of the frame and has to follow that curve: a button radius, smaller, would leave a
-   * sliver of card showing outside the tab as soon as it painted a background.
-   *
-   * TRAP — the selectors ask for the first and last of their TYPE rather than the
-   * first and last child, because the scroll markers are the row's real first and last
-   * children. They are spans, the tabs being the only buttons, which is what makes the
-   * distinction work.
+   * The selectors ask for the first and last of their TYPE rather than the first and last
+   * child, because the scroll markers are the row's real first and last children. They are
+   * spans, the tabs being the only buttons, which makes the distinction work.
    */
   .v-tabs[data-variant='outlined'] > .v-tabs-bar > .v-tabs-list .v-tab[data-size]:first-of-type {
     border-start-start-radius: calc(var(--vectis-radius-surface) - 1px);
@@ -225,9 +196,8 @@ function onFocus() {
   }
 
   /*
-   * The bar marking the selected tab, in the two framed variants. It is painted in the
-   * tab's own text colour rather than by reading one of VButton's private variables:
-   * that way it follows the selected tone AND the grey of a disabled tab on its own,
+   * It is painted in the tab's own text colour rather than by reading one of VButton's private
+   * variables: that way it follows the selected tone and the grey of a disabled tab on its own,
    * without this file having to know anything about either.
    */
   .v-tabs:is([data-variant='flat'], [data-variant='outlined'])
@@ -272,14 +242,9 @@ function onFocus() {
   }
 
   /*
-   * Windows forced colors replace every background with the page's, so the selected tab would look
-   * exactly like the others there: the fill is its only cue, the state being in an ARIA
-   * attribute a sighted reader never sees. It takes the system's own selection pair
-   * instead, and opts out of the forcing for that element alone so the pair is painted.
-   *
-   * TRAP — the class is repeated to reach (0,6,0). The variant, hover and active rules
-   * reach (0,5,0), and with the forcing turned off any of them that still won would paint
-   * its tone over the selection, with HighlightText on top of it.
+   * The class is repeated to reach (0,6,0). The variant, hover and active rules reach (0,5,0),
+   * and with the forcing turned off any of them that still won would paint its tone over the
+   * selection, with HighlightText on top of it.
    */
   @media (forced-colors: active) {
     .v-tab.v-tab.v-tab.v-tab[aria-selected='true']:not(:disabled) {

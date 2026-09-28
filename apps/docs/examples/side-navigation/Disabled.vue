@@ -13,8 +13,6 @@ import { description, image, table_chart as tableChart } from 'vectis-ui/icons'
            keeps its contrast against the sidebar. -->
       <VSideNavigationItem href="#usage" :icon="image" disabled>Media</VSideNavigationItem>
 
-      <!-- On a branch it goes further: the section can no longer be unfolded, so what
-           it holds is out of reach for good. -->
       <VSideNavigationItem :icon="tableChart" disabled>
         Reports
         <template #children>

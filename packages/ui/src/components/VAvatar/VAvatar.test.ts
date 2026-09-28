@@ -46,7 +46,6 @@ describe('VAvatar', () => {
 
   it('renders a Material icon when `icon` is a name (not a URL)', () => {
     const { container, queryByText } = render(VAvatar, { props: { icon: 'star' } })
-    // no initials, the Material ligature is present
     expect(container.querySelector('.v-avatar-icon')).toBeTruthy()
     expect(queryByText('star')).toBeTruthy()
   })
@@ -94,7 +93,6 @@ describe('VAvatar', () => {
     const a = container.querySelector('a.v-avatar') as HTMLElement
     expect(a.getAttribute('href')).toBeNull()
     expect(a.getAttribute('aria-disabled')).toBe('true')
-    // The consumer's style is merged, not dropped with the attributes the link filters.
     expect(a.style.margin).toBe('1px')
     await fireEvent.click(a)
     expect(onClick).not.toHaveBeenCalled()
@@ -191,7 +189,7 @@ describe('VAvatarGroup', () => {
       },
     })
     const avatars = container.querySelectorAll('.v-avatar')
-    // the first inherits lg, the second keeps its xs prop
+    // The first inherits lg, the second keeps its xs prop
     expect(avatars[0]?.getAttribute('data-size')).toBe('lg')
     expect(avatars[1]?.getAttribute('data-size')).toBe('xs')
   })

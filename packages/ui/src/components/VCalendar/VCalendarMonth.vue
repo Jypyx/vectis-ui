@@ -1,20 +1,8 @@
 <script setup lang="ts" generic="E extends CalendarEvent">
 // @a11y @keyboard @core
 /**
- * The month view: the weeks stacked one under another, each day a square holding as many of
- * its events as will fit.
- *
- * It is internal to VCalendar and has no story of its own — its documentation lives with
- * the component that renders it. Like the time grid it computes nothing about dates: it is
- * handed the weeks already cut and filtered, and turns them into boxes.
- *
- * A day here is not a column of hours but a SUMMARY, so the events are drawn as chips in
- * the order the day would be read out — the all-day ones first, then the rest by when they
- * start — and a day with more than it can show says how many are left rather than silently
- * dropping them.
- *
- * The drag and the keyboard grab are `gesture.ts`'s. What stays here is what a square means:
- * the point under the pointer turned into a day, and a vertical step read as a whole week.
+ * Month cells summarize events and overflow counts. Shared gesture logic supplies dragging and
+ * keyboard grabs; grid focus remains in this view.
  */
 import { computed, ref, useId } from 'vue'
 
@@ -104,12 +92,10 @@ const weekdayNames = computed(() =>
 )
 
 /*
- * The two labels every square carries, worked out once per cell rather than once per USE.
- *
- * `longDay` is asked for twice in the template — the square's own `aria-label`, then the
- * name of the button that opens the day — so the 42 cells cost 126 `Intl` formats a render,
- * and a drag re-renders the whole grid each time it carries a chip onto another day. The map
- * depends on the weeks and the locale alone, so it survives every frame of a drag.
+ * `longDay` is asked for twice in the template; the square's own `aria-label`, then the name of
+ * the button that opens the day; so the 42 cells cost 126 `Intl` formats a render, and a drag
+ * re-renders the whole grid each time it carries a chip onto another day. The map depends on
+ * the weeks and the locale alone, so it survives every frame of a drag.
  */
 const dayLabels = computed(() => {
   const map = new Map<string, { number: string; long: string }>()
@@ -129,27 +115,21 @@ const dayLabels = computed(() => {
 const dayNumber = (iso: string) => dayLabels.value.get(iso)?.number ?? ''
 
 /*
- * A day outside the grid can reach this — the announcement after a move names the day the
- * event landed on, which may be the next month — so it falls back to formatting rather than
- * assuming the map holds it.
+ * A day outside the grid can reach this; the announcement after a move names the day the event
+ * landed on, which may be the next month; so it falls back to formatting rather than assuming
+ * the map holds it.
  */
 const longDay = (iso: string) =>
   dayLabels.value.get(iso)?.long ??
   formatDateDisplay(iso, props.locale, { weekday: 'long', day: 'numeric', month: 'long' })
 
-/**
- * A chip being carried from one day to another, by pointer or by keyboard.
- *
- * A month has no hours, so there is one kind and no resize: only which day an event starts
- * on moves, and its length in days and its times come along untouched.
- */
+/** A chip being carried from one day to another, by pointer or by keyboard. */
 interface Gesture extends GestureBase {
   /** Which square the pointer took hold in, so a long bar does not jump under it. */
   grabIndex: number
 }
 
 const gridEl = ref<HTMLElement | null>(null)
-/** The view's own box, which a drag is measured against to know whether it has left it. */
 const rootEl = ref<HTMLElement | null>(null)
 
 const {
@@ -171,13 +151,10 @@ const {
   cardState,
 } = useCalendarGesture<E, Gesture>({
   events: () => props.events,
-  // The finished gesture and the weeks it was measured against are not kept past it.
   onRelease: () => {
     lastApplied = null
   },
   eventOf: (id): E | undefined => eventsById.value.get(id),
-  // Measured against the ROOT and not against `gridEl`, whose rect leaves out the row of
-  // weekday names above it.
   rootEl,
   // Captured on the GRID rather than on the chip, because a chip is redrawn on another day the
   // moment the drag starts and a captured element that moves takes the pointer with it.
@@ -201,7 +178,6 @@ const {
           pointerId: null,
           originX: 0,
           originY: 0,
-          // There is no pointer to remember; the arrows work off the preview, not a position.
           grabIndex: 0,
         }
       : null,
@@ -211,13 +187,8 @@ const {
 })
 
 /**
- * The events as the month should currently DRAW them — the model, with the one being carried
- * put wherever it now is. Running the preview through the same grouping as everything else is
- * what makes the day it leaves and the day it arrives at both redraw with no special case.
- *
- * Nothing has to be held out of a layout for the echo, unlike the time grid: a month cell
- * simply stacks its chips, so the echo takes its own line in the day it came from and disturbs
- * nothing.
+ * The events as the month should currently DRAW them; the model, with the one being carried put
+ * wherever it now is.
  */
 const drawnEvents = computed<E[]>(() => (gesture.value ? withPreview(props.events) : props.events))
 
@@ -229,12 +200,8 @@ const eventsById = computed(
 )
 
 /**
- * A chip says when it happens only when that is not obvious: an all-day event has no time
- * to give, and the day it sits in already says which day it is.
- *
- * Memoized by start time inside the computed, so a change of locale or hour format throws the
- * cache away whole — the twin in VCalendarTimeGrid.vue carries the trap that makes reading
- * the computed, and not a cache beside it, the only correct shape.
+ * A chip says when it happens only when that is not obvious: an all-day event has no time to
+ * give, and the day it sits in already says which day it is.
  */
 const timeTextOf = computed(() => {
   const { locale, format } = props
@@ -256,19 +223,10 @@ interface Chip {
   timeText: string
 }
 
-/**
- * What each square draws, and how many it had to leave out — one Map, built in a single pass.
- *
- * It is the `dayLabels` treatment. Written as template functions these returned a NEW array
- * per square per render, and since one of them is the source of a `v-for`, Vue rediffed all
- * 42 lists each time; each chip also formatted its own time. The map is rebuilt with `byDay`,
- * which a drag changes only when it carries its chip onto another day (`applyPoint` writes
- * nothing otherwise), and survives every other render.
- */
+/** What each square draws, and how many it had to leave out; one Map, built in a single pass. */
 const dayEvents = computed(() => {
   const map = new Map<string, { shown: Chip[]; hidden: number }>()
   const textOf = timeTextOf.value
-  // Below zero, a limit would count hidden events on every empty square.
   const limit = Math.max(0, props.monthEventLimit)
   for (const [iso, all] of byDay.value) {
     const shown = all.length > limit ? all.slice(0, limit) : all
@@ -286,8 +244,7 @@ const dayEventsOf = (iso: string) => dayEvents.value.get(iso) ?? NO_EVENTS
 
 function moveFocusTo(iso: string) {
   focused.value = iso
-  // @a11y — the model decides which cell is tabbable, so the focus can only follow once the
-  // render that applied it has run.
+  // @a11y
   focusCell(cellId(iso), true)
 }
 
@@ -297,8 +254,7 @@ const tabbable = computed(() =>
 
 /**
  * The same table serves both views, so its two axes are read differently here: a sideways step
- * is one day, and a vertical one is a whole week rather than an hour. That is the only place the
- * month reinterprets it, and it is why the table returns a direction rather than a date.
+ * is one day, and a vertical one is a whole week rather than an hour.
  */
 const dayStep = (days: number, minutes: number) =>
   days !== 0 ? days : Math.sign(minutes) * columnCount.value
@@ -394,12 +350,7 @@ function onGridPointerdown(event: PointerEvent) {
   )
 }
 
-/**
- * Works out which day the chip now belongs to, from wherever the pointer last was.
- *
- * Separate from the handler because the month turning calls it too: the squares change under
- * a hand that has not moved, and the chip has to be placed against the new ones.
- */
+/** Works out which day the chip now belongs to, from wherever the pointer last was. */
 function applyPoint(state: Gesture, rect: DOMRect) {
   const index = indexAt(state.lastX, state.lastY, rect, state.rtl)
   const last = lastApplied
@@ -408,9 +359,9 @@ function applyPoint(state: Gesture, rect: DOMRect) {
 
   /*
    * The target is the event's START shifted by however many squares the pointer has crossed,
-   * not the square it is over — so a bar grabbed by its third day keeps its third day under
-   * the finger. The days come out of the flattened grid, which is already filtered to the
-   * weekdays on show, so a hidden weekend is not counted.
+   * not the square it is over; so a bar grabbed by its third day keeps its third day under the
+   * finger. The days come out of the flattened grid, which is already filtered to the weekdays
+   * on show, so a hidden weekend is not counted.
    */
   const days = flat.value
   const from = days.indexOf(state.origin.start)
@@ -420,8 +371,8 @@ function applyPoint(state: Gesture, rect: DOMRect) {
     ]
   if (!target) return
   /*
-   * TRAP — written only when the day changes. The gesture is a deep ref, so an equal but new
-   * preview would still re-bucket and re-sort every event and re-render all 42 squares.
+   * Written only when the day changes. The gesture is a deep ref, so an equal but new preview
+   * would still re-bucket and re-sort every event and re-render all 42 squares.
    */
   const next = moveEventToDay(state.origin, target)
   if (!sameTimes(state.preview, next)) state.preview = next
@@ -429,20 +380,16 @@ function applyPoint(state: Gesture, rect: DOMRect) {
 
 /**
  * The square `applyPoint` last placed the chip from, so the many `pointermove`s that fire
- * inside one square return before any date arithmetic. The weeks belong to what the index
- * MEANS: the month turning under a still pointer reads as a new square at the same index.
- * A plain variable, since nothing renders it; the gesture's identity says a new press began.
+ * inside one square return before any date arithmetic.
  */
 let lastApplied: { state: Gesture; weeks: MonthCell[][]; index: number } | null = null
 
 /** One arrow press on a chip held by the keyboard: a day sideways, a week vertically. */
 function onGrabStep(state: Gesture, step: GrabStep, item: E): boolean {
-  // A month has no hours to stretch, so Shift with an arrow is simply not a gesture here.
   if (step.kind !== 'grabMove') return false
   const days = flat.value
   const from = days.indexOf(state.preview.start)
   const target = days[clamp(from + dayStep(step.days, step.minutes), 0, days.length - 1)]
-  // Held against the grid's edge, the press goes nowhere: nothing to announce or to drop.
   if (!target || target === state.preview.start) return false
   state.preview = moveEventToDay(state.preview, target)
   emit('announce', m.value.calendar.movedTo(item.title, longDay(state.preview.start)))
@@ -451,18 +398,14 @@ function onGrabStep(state: Gesture, step: GrabStep, item: E): boolean {
 
 function onCardClick(item: E) {
   // `pointerup` fires before `click`, so letting go at the end of a drag would ALSO open the
-  // event — the consumer's editor over every chip the reader had just moved.
+  // event; the consumer's editor over every chip the reader had just moved.
   if (consumeDrag()) return
   emit('event-activate', item)
 }
 
 /**
- * A click on the empty part of a day: the pointer's side of the Enter that activates a cell,
- * so a square drawn with a pointer cursor answers a click as it answers the key.
- *
- * The chips and the two buttons a square holds answer their own clicks, so a click that came
- * from one of them is theirs alone. And a click ending a drag is swallowed like the one a chip
- * would have received: the drop has already said what the gesture meant.
+ * A click on the empty part of a day: the pointer's side of the Enter that activates a cell, so
+ * a square drawn with a pointer cursor answers a click as it answers the key.
  */
 function onGridClick(event: MouseEvent) {
   const target = event.target as HTMLElement | null
@@ -605,7 +548,6 @@ defineExpose({
   }
 
   .v-calendar-month-grid {
-    /* The edge strip is placed against this box. */
     position: relative;
     display: flex;
     /* The rows share what height there is, so a month fills the box it was given instead of
@@ -629,8 +571,10 @@ defineExpose({
     padding: var(--vectis-space-1);
   }
 
-  /* The days of the neighbouring months are kept — the grid is a fixed six rows, so the
-     page never jumps — but pushed back, since they are context rather than content. */
+  /*
+   * The days of the neighbouring months are kept; the grid is a fixed six rows, so the page
+   * never jumps; but pushed back, since they are context rather than content.
+   */
   .v-calendar-month-cell[data-adjacent] {
     background: var(--vectis-color-surface-sunken);
     color: var(--vectis-color-text-subtle);
@@ -656,13 +600,8 @@ defineExpose({
   }
 
   /*
-   * A day in the month view is a summary, so a chip is capped at one lane however long the
-   * event really is — an all-day bar and a two-hour meeting look the same here, and several
-   * have to fit under the date.
-   *
-   * The height is SET AS A PROPERTY rather than as `block-size`. The chip rule in
-   * VCalendarEvent's own sheet is (0,2,0) against this (0,1,0), so declaring the size
-   * directly would lose — and matching its specificity would only hand the decision to
+   * The chip rule in VCalendarEvent's own sheet is (0,2,0) against this (0,1,0), so declaring
+   * the size directly would lose; and matching its specificity would only hand the decision to
    * whichever sheet the consumer's bundler emitted last, which is the failure the library's
    * one-sheet-per-component rule exists to prevent.
    */

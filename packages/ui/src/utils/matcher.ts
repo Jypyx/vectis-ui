@@ -1,12 +1,5 @@
 // @core
-/**
- * Turns the design system's "which entries are unavailable" props: `disabledDates`,
- * `disabledPages` and their kind, each accepting a list OR a predicate, into one
- * function to ask, so components need not care which they were handed.
- *
- * Resolve it ONCE inside a `computed`, never per value: the list becomes a `Set` here, so
- * each lookup is immediate where an `includes` would rescan it for every cell on screen.
- */
+/** Resolve matchers once in a computed value so repeated cell lookups reuse the compiled Set. */
 export function resolveMatcher<T>(
   matcher: readonly T[] | ((value: T) => boolean) | undefined,
 ): (value: T) => boolean {

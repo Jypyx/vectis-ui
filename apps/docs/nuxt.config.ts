@@ -1,112 +1,54 @@
 import { docRoutes } from './content/nav'
 import { LOCALE_PREFIXES, SITE_URL } from './content/site'
 
-/**
- * The site is served from the ROOT of its own domain, vectis-ui.com. This is the ONLY place
- * that path is written: asset URLs are relative and Vite rewrites them, and the two absolute
- * URLs the build needs are composed from it below.
- *
- * It read `/vectis-ui/` for as long as this was a GitHub Pages PROJECT site, which is served
- * from a subdirectory — hence the trailing slash every composition below relies on. Moving back
- * under a subdirectory is this one line; GitHub redirects the old jypyx.github.io/vectis-ui/*
- * URLs to the custom domain on its own, so nothing published before this breaks.
- */
+/** Central base URL for asset and redirect paths. */
 const BASE_URL = '/'
 
-/**
- * The Vectis UI documentation site.
- *
- * It is a STATIC site: `nuxt generate` prerenders every route, and the artefact is published
- * to GitHub Pages by the `pages` job in .github/workflows/ci.yml. Nothing here runs on a
- * server at request time, which is also what makes the site a real end-to-end test of the
- * library's SSR safety — a component reaching for `window` at setup would fail the build.
- */
 export default defineNuxtConfig({
   compatibilityDate: '2026-08-16',
   devtools: { enabled: false },
 
   /*
-   * Nuxt 4 resolves the application from an `app/` directory by default — `pages`,
-   * `components`, `composables`, `plugins`, `assets`, `app.vue` and `error.vue` all live one
-   * level down. This site keeps the flat layout, through the opt-out the upgrade guide
-   * publishes for exactly that: `srcDir` back to the project root, and `dir.app` named so the
-   * router-options slot keeps the meaning it had. Without BOTH lines Nuxt finds no `app/` and
-   * builds a site with no pages at all — a successful build of nothing, not an error.
-   *
-   * Moving to the new layout is a separate change: it rewrites every `~/` specifier's meaning
-   * and every path this repo's documentation names, and it buys nothing the flat layout does
-   * not already do.
+   * Keep the flat app layout explicit; otherwise Nuxt can generate an empty site while
+   * reporting success.
    */
   srcDir: '.',
   dir: { app: 'app' },
 
   modules: ['@nuxtjs/i18n'],
 
-  /**
-   * English and French, both PRERENDERED.
-   *
-   * The site is an artefact on GitHub Pages, so a language has to exist as a file: a
-   * client-side swap after hydration would ship English HTML to a French reader, flash, and
-   * be invisible to a crawler. Every `/fr/…` page below is therefore rendered at build time,
-   * French words included.
-   *
-   * Version note: this is `@nuxtjs/i18n` 10, which is what Nuxt 4 requires — the module
-   * depends on `@nuxt/kit` 4 and `vue-router` 5, so the two versions move together and
-   * neither can be bumped alone.
-   */
+  /** Prerender both locales because a static host cannot negotiate language. */
   i18n: {
     locales: [
       { code: 'en', language: 'en-GB', file: 'en.ts', name: 'English' },
       { code: 'fr', language: 'fr-FR', file: 'fr.ts', name: 'Français' },
     ],
     defaultLocale: 'en',
-    // The default locale keeps the bare paths, so no URL this site has published ever breaks.
     strategy: 'prefix_except_default',
-    /*
-     * Every URL the site declares carries a trailing slash, because that is the one it serves.
-     *
-     * `nuxt generate` publishes a route as `<route>/index.html`, and GitHub Pages answers the
-     * slashless form with a 301 to the slashed one. A canonical, an `hreflang` alternate or an
-     * `og:url` written without it therefore names an address that redirects, and a crawler is
-     * left to work out that the page it was pointed at and the page it fetched are the same.
-     *
-     * The option reaches further than the SEO head: it is also what puts the slash on every
-     * `localePath()` href and on the route records themselves, so the links, the canonical and
-     * the sitemap agree by construction instead of being kept in step by hand. The redirects
-     * below carry it for the same reason, a target without it costing a second hop.
-     */
+    /* Match the served trailing-slash URLs to avoid GitHub Pages redirects. */
     trailingSlash: true,
     langDir: 'locales',
-    // Stated rather than left to the default filename: it carries the decision that messages are
-    // plain text, without which `@import` in a sentence fails the build. See the file itself.
+    // Use the pass-through compiler so technical punctuation such as @import remains literal
+    // text.
     vueI18n: './i18n.config.ts',
     /*
-     * A prerendered artefact cannot negotiate a language. The cookie-driven redirect would run
-     * on the client, after the English HTML has already painted, and it would hijack a deep
-     * link one reader shared with another. The switcher in the header is the whole of the
-     * choice, and it changes the URL — which is what makes the choice shareable.
+     * Use URL-based locale selection; client language detection would replace shared deep links
+     * after first paint.
      */
     detectBrowserLanguage: false,
-    // Only used to make the `hreflang` alternates absolute; the path comes from `app.baseURL`.
     baseUrl: SITE_URL,
   },
 
   app: {
     baseURL: BASE_URL,
     head: {
-      // `lang` is deliberately NOT set here: this block is serialized into the build, so a
-      // literal would say `en` on every French page too. `app.vue` sets it from the active
-      // locale instead, along with the `hreflang` alternates.
-      //
-      // `titleTemplate` lives in app.vue for the same reason — a string template would print
-      // " · Vectis UI" on any page that sets no title of its own.
+      // Set lang in app.vue from the active locale; this static head is shared by both
+      // languages.
       link: [{ rel: 'icon', type: 'image/svg+xml', href: `${BASE_URL}favicon.svg` }],
       script: [
         {
-          // Runs BEFORE first paint, which is the whole point: the design system's tokens
-          // carry no `prefers-color-scheme` query at all (only [data-theme='light'] and
-          // [data-theme='dark']), so the scheme has to be resolved in JS. Deferring it to
-          // Vue would paint a light page first and flash.
+          // Resolve data-theme before first paint because library tokens do not follow
+          // prefers-color-scheme automatically.
           innerHTML: `(function(){try{var t=localStorage.getItem('vectis-docs-theme');if(t!=='light'&&t!=='dark'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme='light'}})()`,
           tagPosition: 'head',
         },
@@ -115,61 +57,27 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    // Emits .nojekyll alongside the site — without it GitHub Pages drops every path that
-    // starts with an underscore, which is where Nuxt puts its build assets.
+    // Emit .nojekyll so GitHub Pages serves Nuxt's underscore-prefixed assets.
     preset: 'github-pages',
     prerender: {
-      /**
-       * One route at a time, and this is CORRECTNESS rather than caution.
-       *
-       * The design system keeps its locale in module-level state, one per process, and
-       * `plugins/vectis.ts` sets it from the route about to be rendered. Rendered concurrently,
-       * a French route sets the locale while an English one is still building its tree, and the
-       * English page ships French words: every one of the fifty-three carried
-       * "Raccourci clavier : Ctrl + K" from the header's VHotkeys, with nothing failing.
-       *
-       * It costs about three seconds over the whole build. The way to earn them back is to make
-       * the library resolve its messages per app rather than per process, which is a change to
-       * the library and not to this file.
-       */
+      /** Prerender sequentially because the library locale is shared process-wide. */
       concurrency: 1,
       crawlLinks: true,
-      // Belt as well as braces: the crawler follows the sidebar, but a slug that lost its
-      // link would then vanish silently. The list comes from content/nav.ts, so a page
-      // cannot be in the navigation and absent from the build — in either language.
+      // List navigation routes explicitly so missing crawler links cannot silently drop pages.
       routes: [
         '/',
         '/404.html',
-        /*
-         * The two SEO files, which are server routes so that they can be derived from
-         * content/nav.ts rather than typed out. Nothing links to either, so the crawler
-         * never reaches them: named here, nitro renders them into the artefact as the
-         * plain `robots.txt` and `sitemap.xml` a crawler asks the origin for.
-         */
+        /* Explicitly prerender these server routes because no page links to them. */
         '/robots.txt',
         '/sitemap.xml',
         ...LOCALE_PREFIXES.flatMap((prefix) => [`${prefix}/`, ...docRoutes(prefix)]),
       ],
-      /**
-       * Drop the doubled-locale paths the crawler invents, e.g. `/fr/fr/docs`.
-       *
-       * They come from nitro's own link following, not from the site: every internal `href`
-       * here is absolute and carries the base URL (`/fr/docs/installation`), and the
-       * crawler resolves a handful of them against the current page's directory after stripping
-       * that base — which turns an absolute link into a relative one and prepends `/fr/` a
-       * second time. Verified: nothing in the generated HTML links to such a path, and removing
-       * the `/fr/docs` redirect rule does not stop them, so the source is the crawler.
-       *
-       * What they cost is 16 kB of orphan page published for each, reachable only by typing it.
-       * The list is DERIVED from the prefixes above so a third language needs no edit here.
-       */
+      /** Ignore doubled-locale paths produced by prerender crawling. */
       ignore: [
         ...LOCALE_PREFIXES.filter(Boolean).map((prefix) => `${prefix}${prefix}`),
         /*
-         * `/app` is where the links inside a live example point. A breadcrumb has to show a real
-         * trail for its code to be worth copying, and those addresses belong to an imaginary
-         * application rather than to this site. The crawler follows every `href` a page renders,
-         * so without this it chases them and fails the build on a 404 it was never meant to find.
+         * Exclude demo-only destinations from crawling; their illustrative href values are not
+         * site routes.
          */
         '/app',
       ],
@@ -177,21 +85,15 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    // The header points at the first page rather than at a section index. Under `generate`
-    // this emits a real redirecting HTML file, so /docs is not a 404 for anyone who types it.
-    //
-    // The target carries the base URL, and must: nitro writes it into a `<meta http-equiv>`
-    // verbatim, without prepending anything — so a bare `/docs/installation` would send a
-    // GitHub Pages visitor to the root of the domain, which is not this site. The locale
-    // segment is part of the target for the same reason: `/fr/docs` must land in French.
+    // Compose redirect targets with the base URL and locale because Nitro serializes them
+    // verbatim.
     '/docs': { redirect: `${BASE_URL}docs/installation/` },
     '/fr/docs': { redirect: `${BASE_URL}fr/docs/installation/` },
   },
 
   css: [
-    // Order matters. styles.css carries the `@layer vectis.reset, vectis.tokens,
-    // vectis.components, vectis.utilities;` statement, and a component sheet parsed before
-    // it would pin its layer FIRST — under the reset — irreversibly.
+    // Load the core layer statement before component sheets so their first encounter cannot pin
+    // components below reset.
     'vectis-ui/styles.css',
     '~/assets/css/fonts.css',
     '~/assets/css/docs-layout.css',
@@ -199,13 +101,8 @@ export default defineNuxtConfig({
 
   features: {
     /**
-     * Ship the CSS as files, not as a `<style>` block in every page.
-     *
-     * Nuxt inlines critical CSS into the SSR'd HTML by default, which is the right trade for
-     * an app with a handful of routes and the wrong one for fifty-three prerendered pages: the
-     * same ~50 kB would be re-sent with each of them and never cached. Extracted, it is one
-     * request that every later page hits in the cache — which is also exactly what the
-     * Installation page tells a reader to do, so the site had better do it too.
+     * Serve shared CSS files for caching instead of repeating critical styles in every
+     * prerendered page.
      */
     inlineStyles: false,
   },
@@ -213,22 +110,12 @@ export default defineNuxtConfig({
   imports: {
     transform: {
       /**
-       * Keep Nuxt's auto-import rewriting off the library's own modules.
-       *
-       * `ssr.noExternal` below pulls `vectis-ui` into the build, and a pnpm workspace link
-       * resolves it to `packages/ui/dist/…` — a path with no `node_modules` in it, so the
-       * default exclusion does not catch it. Nuxt then scans those files for bare
-       * identifiers it can auto-import and injects `import { h } from 'vue'` on top of the
-       * bundle's OWN minified `var h`, which fails the build with "Identifier h has already
-       * been declared". Single-letter minified names make this a certainty, not a risk.
+       * Exclude workspace library dist from auto-import rewriting; its resolved path contains
+       * no node_modules segment.
        */
       /*
-       * `examples/` is excluded for the opposite reason, and it is a correctness guard rather
-       * than a workaround. Those SFCs are PRINTED beside themselves: the page renders the file
-       * and shows its source, so a reader copies exactly what is on screen. Auto-imports would
-       * make `ref` and `useI18n` work in the example while being absent from the text of it,
-       * and the sample would fail the moment it was pasted into a real project. Excluded, a
-       * missing import is a build error instead.
+       * Examples use explicit imports because their raw source is shown as copyable consumer
+       * code.
        */
       exclude: [
         /[\\/]node_modules[\\/]/,
@@ -241,24 +128,18 @@ export default defineNuxtConfig({
   vite: {
     build: {
       /*
-       * The floor the library documents, and here it is correctness rather than weight.
-       * Vite 8 minifies CSS with Lightning CSS, which reads `cssTarget` (derived from
-       * `build.target`, whose default stands for Chrome 87) and rewrites `:dir(rtl)` into a
-       * list of `:lang()` selectors. That list matches on the page LANGUAGE where the
-       * library flips on its DIRECTION, so the eleven components that mirror something stop
-       * mirroring, silently and in the built artefact alone. This site documents that trap
-       * on its Theming page; naming the floor here is what keeps it from shipping it.
+       * Match the library CSS floor to preserve direction-based selectors; lowering dir to
+       * language selectors breaks RTL with an English locale.
        */
       cssTarget: ['chrome134', 'edge134', 'safari26', 'firefox147'],
     },
     ssr: {
-      // Every component module of the library carries `import './VX.css'`. Externalised, Node
-      // cannot resolve that specifier and the prerender dies on the first component.
+      // Bundle library modules for SSR because Node cannot load their CSS imports as external
+      // modules.
       noExternal: ['vectis-ui'],
     },
     resolve: {
-      // Two copies of Vue break provide/inject ACROSS the library boundary, with no error:
-      // VAccordion, VToggle, VSideNavigation and VMenu all pass their context that way.
+      // Deduplicate Vue so provide/inject uses one runtime across the library boundary.
       dedupe: ['vue'],
     },
   },

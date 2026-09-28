@@ -1,10 +1,6 @@
 /**
- * English, the dictionary always bundled. Any language without one of its own falls back
- * here entry by entry, so nothing is ever left unsaid.
- *
- * TRAP — these strings are asserted letter for letter by the unit tests, and the play
- * functions query controls BY them (they run with the default globals, so the locale there
- * is deterministically `en-US`). Changing a word means changing what expects it.
+ * English is the bundled fallback. Labels are also used by tests and play-function queries;
+ * update those contracts when changing wording.
  */
 
 import type { Messages } from './types'

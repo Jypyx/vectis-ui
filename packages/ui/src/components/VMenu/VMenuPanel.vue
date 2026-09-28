@@ -1,25 +1,8 @@
 <script setup lang="ts">
 // @a11y @keyboard @core
 /**
- * The panel a menu is drawn in. Internal to VMenu, and the same component serves both
- * levels — the root menu and every submenu.
- *
- * It rests on `popover="auto"`, which gives it light dismiss, positioning against its
- * invoker, and — a submenu being rendered inside its parent panel — a native stack the
- * browser closes from the outside in. Its look comes from the shared `.v-panel`.
- *
- * It carries `tabindex="-1"` so it can hold the focus itself, which it does whenever the
- * menu was opened by POINTER: no command is singled out, but the keyboard still has
- * somewhere to arrive, everything below being listened for on this element.
- *
- * The JS is the ARIA menu keyboard, which the platform does not provide:
- *
- * - arrows and Home/End move focus item to item, CONFINED to the panel the focus is in — a
- *   keystroke inside a submenu also bubbles through every panel containing it, hence the
- *   guard on where the event came from;
- * - Escape closes the CURRENT LEVEL only, as does ArrowLeft in a submenu, handing focus
- *   back to the item that opened it;
- * - Tab closes the whole menu, a menu not being something one tabs through.
+ * Native auto popovers form the submenu stack. JavaScript maintains open models, roving focus
+ * and explicit source invokers when opening imperatively.
  */
 
 import { computed, inject, ref } from 'vue'
@@ -98,10 +81,10 @@ function onToggle(event: Event) {
 
 // @a11y @keyboard
 /**
- * The items the keyboard may move to. Two exclusions matter: `:disabled` only ever
- * matches a `<button>`, so an inert link is recognized by its `aria-disabled`
- * instead; and the final filter keeps only the items of THIS panel, since an open
- * submenu's items are DOM descendants of it and would otherwise join the list.
+ * The items the keyboard may move to. Two exclusions matter: `:disabled` only ever matches a
+ * `<button>`, so an inert link is recognized by its `aria-disabled` instead; and the final
+ * filter keeps only the items of this panel, since an open submenu's items are DOM descendants
+ * of it and would otherwise join the list.
  */
 function items(): HTMLElement[] {
   const panel = panelEl.value
@@ -120,12 +103,7 @@ function focusFirst() {
 }
 
 // @a11y
-/**
- * Puts the focus on the panel itself, singling out no command. This is where a menu
- * opened with a pointer lands: the reader has not asked for a first choice, but the
- * keyboard still has to work from the very next keystroke — and every key below is
- * listened for on this element, so leaving the focus outside would silence all of them.
- */
+/** Puts the focus on the panel itself, singling out no command. */
 function focusPanel() {
   panelEl.value?.focus()
 }
@@ -136,7 +114,6 @@ function onKeydown(event: KeyboardEvent) {
   // A keystroke inside a submenu passes through every panel containing it on its way
   // up, so only the panel the focused item DIRECTLY belongs to acts on it.
   if (!panel || (event.target as Element).closest('[role="menu"]') !== panel) return
-  // A key held with a modifier is the browser's: Alt+Left is Back.
   if (event.altKey || event.ctrlKey || event.metaKey) return
 
   if (event.key === 'Tab') {
@@ -147,24 +124,20 @@ function onKeydown(event: KeyboardEvent) {
   // right-to-left page, where the submenu opened on the left.
   const back = isRtl(panel) ? 'ArrowRight' : 'ArrowLeft'
   if (event.key === 'Escape' || (props.submenu && event.key === back)) {
-    // Escape closes THIS level and no more. The `preventDefault` matters: left to
-    // itself the browser would close the popover on its own, without handing the
-    // focus back to the item that opened it — and our own hide() would already have
-    // closed it anyway. At the top level, VMenu is what returns the focus to the
+    // The `preventDefault` matters: left to itself the browser would close the popover on its
+    // own, without handing the focus back to the item that opened it; and our own hide() would
+    // already have closed it anyway. At the top level, VMenu is what returns the focus to the
     // trigger.
     event.preventDefault()
     hide()
     if (props.submenu) menuInvoker(props.id)?.focus()
     return
   }
-  // Coming from the panel itself — a menu opened with a pointer, where no command is
-  // singled out — the up arrow goes to the LAST item, entering the list from its far
-  // end the way a menu is expected to. `utils/arrowNav` starts any arrow at the
-  // beginning when nothing in the list has the focus, which is the right answer for the
-  // tabs, the pages and the toggle group it also serves: it is this menu that has a
-  // convention of its own, so it is handled here rather than in the shared helper.
-  // The case only exists BECAUSE of the pointer opening: reached from an item, the
-  // arrow never lands here.
+  // `utils/arrowNav` starts any arrow at the beginning when nothing in the list has the focus,
+  // which is the right answer for the tabs, the pages and the toggle group it also serves: it
+  // is this menu that has a convention of its own, so it is handled here rather than in the
+  // shared helper. The case only exists BECAUSE of the pointer opening: reached from an item,
+  // the arrow never lands here.
   if (event.key === 'ArrowUp' && document.activeElement === panel) {
     const list = items()
     if (list.length > 0) {
@@ -179,7 +152,6 @@ function onKeydown(event: KeyboardEvent) {
   arrowNavigate(event, panel, items, { vertical: true })
 }
 
-// The only thing set inline is an explicit width, when the prop asks for one.
 const resolvedWidth = computed(() => cssSize(props.width) || undefined)
 const panelStyle = computed(() =>
   resolvedWidth.value ? { '--menu-width': resolvedWidth.value } : undefined,
@@ -213,14 +185,11 @@ defineExpose({
     class="v-overlay v-panel v-menu v-floating"
     :class="{
       /*
-       * The size class goes on the ROOT panel only. It sets the whole `--control-*`
-       * family — height, paddings, gap, type, icon context — and the submenus, being
-       * DOM descendants, inherit every one of them.
-       *
-       * Adding it to the submenus as well would BREAK them: the class recomputes the
-       * height from the base one without knowing about the compact attribute, which
-       * submenus do not carry, so a compact menu's submenus would silently snap back
-       * to full height.
+       * It sets the whole `--control-*` family; height, paddings, gap, type, icon context; and
+       * the submenus, being DOM descendants, inherit every one of them. Adding it to the
+       * submenus as well would BREAK them: the class recomputes the height from the base one
+       * without knowing about the compact attribute, which submenus do not carry, so a compact
+       * menu's submenus would silently snap back to full height.
        */
       'v-control': !submenu,
     }"
@@ -240,20 +209,23 @@ defineExpose({
 
 <style>
 @layer vectis.components {
-  /* The panel's surface, border, shadow and inner rhythm come from the shared
-     `.v-panel` class, and its dimensions from the `v-control` class the template sets
-     on the root panel — there is no size table here, the rows reading the inherited
-     variables directly. Only what is specific to a dropdown menu stays below. */
+  /*
+   * The panel's surface, border, shadow and inner rhythm come from the shared `.v-panel` class,
+   * and its dimensions from the `v-control` class the template sets on the root panel; there is
+   * no size table here, the rows reading the inherited variables directly. Only what is
+   * specific to a dropdown menu stays below.
+   */
   .v-menu {
     min-inline-size: var(--vectis-control-size-menu-min);
     max-inline-size: min(var(--vectis-control-size-menu-max), calc(100dvi - var(--vectis-space-8)));
   }
 
-  /* The panel is focusable, but only ever from code — its `tabindex` is -1, so the Tab
-     key never brings anyone here. It holds the focus when the menu was opened with a
-     pointer, and a ring drawn around the whole panel would then read as the reader
-     having landed on something, which is the opposite of what that state means: no
-     command is singled out. The rows keep their own highlight, `.v-menu-item:focus`. */
+  /*
+   * The panel is focusable, but only ever from code; its `tabindex` is -1, so the Tab key never
+   * brings anyone here. It holds the focus when the menu was opened with a pointer, and a ring
+   * drawn around the whole panel would then read as the reader having landed on something,
+   * which is the opposite of what that state means: no command is singled out.
+   */
   .v-menu:focus {
     outline: none;
   }
@@ -272,14 +244,11 @@ defineExpose({
     inline-size: var(--menu-width);
   }
 
-  /* The panel may not be narrower than its trigger. This works with no anchor name of
-     any kind, because the button that opened the panel is already its implicit anchor
-     — VCombobox and VTimeInput, anchored to a text input, have to name theirs. Like
-     the width above, only the ROOT panel renders it.
-
-     It is placed AFTER the width rule, at equal specificity, so that when both are
-     given the floor wins. A trigger wider than the ceiling therefore widens the panel
-     past it, a minimum width beating a maximum one — which is intended. */
+  /*
+   * This works with no anchor name of any kind, because the button that opened the panel is
+   * already its implicit anchor; VCombobox and VTimeInput, anchored to a text input, have to
+   * name theirs. Like the width above, only the ROOT panel renders it.
+   */
   .v-menu[data-match-trigger] {
     min-inline-size: anchor-size(width);
   }

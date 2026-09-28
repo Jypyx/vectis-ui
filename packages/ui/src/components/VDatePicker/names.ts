@@ -1,14 +1,7 @@
 // @core
 /**
- * The names of the months, as VDatePicker writes them in its header, its months view and
- * the title of its grid.
- *
- * It sits in the component's folder rather than in `utils/date.ts`: there is one consumer,
- * and `utils/date.ts` is in the import closure of every VCalendar component, which would
- * pay for rules only the picker needs, the `VTimeInput/search.ts` argument.
- *
- * Every name is read on a REFERENCE date pinned to `timeZone: 'UTC'`, so a label never
- * depends on the rendering machine's zone and the server agrees with the browser.
+ * Format reference dates in UTC so month and weekday names do not vary with the rendering
+ * machine's time zone.
  */
 
 import { memo } from '../../utils/memo'
@@ -28,16 +21,9 @@ export function monthNames(locale: string): string[] {
 const MONTH_LONG = { month: 'long', calendar: 'gregory', timeZone: 'UTC' } as const
 
 /**
- * Month names shortened for the picker's narrow cells: a name of four characters or
- * fewer is kept whole ("May", "June", "July"), a longer one is cut to three
- * characters followed by a dot ("January" becomes "Jan."). The name is spread with
- * `[...n]` rather than indexed, so that an accented or non-Latin character counts as
- * one character and is never cut in half.
- *
- * TRAP: the cut is not safe everywhere. Vietnamese writes every month "Tháng N", so all
- * twelve come out "Thá.", and Estonian, Czech, Lithuanian or Greek lose a pair; the months
- * view then shows identical cells. When the cut repeats itself, the language's own short
- * names are used instead, which CLDR keeps distinct.
+ * The cut is not safe everywhere. Vietnamese writes every month "Tháng N", so all twelve come
+ * out "Thá.", and Estonian, Czech, Lithuanian or Greek lose a pair; the months view then shows
+ * identical cells.
  */
 export function monthNamesCompact(locale: string): string[] {
   const cut = monthNames(locale).map((n) => {
@@ -70,9 +56,9 @@ export function monthName(locale: string, month0: number): string {
 }
 
 /**
- * A month and its year written the way the language writes them together: "June 2026",
- * "juin 2026", but "2026年6月" in Japanese and "2026. június" in Hungarian, where gluing the
- * two with a space gets the order wrong. The digits are Latin, as on the year button.
+ * A month and its year written the way the language writes them together: "June 2026", "juin
+ * 2026", but "2026年6月" in Japanese and "2026. június" in Hungarian, where gluing the two with a
+ * space gets the order wrong.
  */
 export function monthYearName(locale: string, year: number, month0: number): string {
   const at = new Date(Date.UTC(2021, month0, 1))

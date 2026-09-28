@@ -1,17 +1,7 @@
 // @ssr @core
 /**
- * The queue of notifications waiting to be shown. Nothing in HTML covers this, so it
- * is code by necessity.
- *
- * The queue is held at module level rather than inside a component, and that is the
- * whole point: `toast()` can then be called from ANYWHERE — a component, a store, an
- * error handler in an API layer — without anything having to be passed down to it.
- * The price is a contract to respect: since module state is shared by every request a
- * server handles, `toast()` must only ever be called in the browser, from a handler or
- * when a request comes back, and never while a page is being rendered on the server.
- *
- * The only thing that touches the DOM, and the only thing that arms the timers, is the
- * mounted VToaster.
+ * Module state lets toast be called outside components. Call it only in browser handlers, never
+ * during SSR, because the queue is shared across server requests.
  */
 
 import { reactive } from 'vue'
@@ -80,13 +70,8 @@ export const toasts = reactive<ToastItem[]>([])
 let nextId = 0
 
 /**
- * Raises a notification, and hands back an id that `dismissToast` can use to take it
- * away again before its time.
- *
- * The two defaults that belong to the VToaster, where notifications appear and how
- * long they stay, are deliberately NOT resolved here: they are read when the
- * notification is rendered, so the toaster remains the single source of truth for its
- * own settings.
+ * Raises a notification, and hands back an id that `dismissToast` can use to take it away again
+ * before its time.
  */
 export function toast(options: ToastOptions): number {
   // @devwarn

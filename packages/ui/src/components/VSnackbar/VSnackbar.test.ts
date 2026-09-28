@@ -196,9 +196,8 @@ describe('VSnackbar', () => {
   })
 
   /*
-   * The half the notifications do not need: the action is a real button, so a reader
-   * tabbing towards it must not watch the bar vanish from under the focus ring. Verified
-   * red by removing `@focusin` from the template.
+   * The half the notifications do not need: the action is a real button, so a reader tabbing
+   * towards it must not watch the bar vanish from under the focus ring.
    */
   it('moving the keyboard into the bar suspends the countdown, leaving re-arms it', async () => {
     const { container } = render(VSnackbar)
@@ -232,8 +231,6 @@ describe('VSnackbar', () => {
     expect(current.value).not.toBeNull()
   })
 
-  // The focused action button leaves the page with the bar. A synthetic focusin with no
-  // matching focusout is exactly an engine that sends none for a removed element.
   it('a bar taken away while holding the focus does not hold the next one', async () => {
     const { container, getByRole } = render(VSnackbar)
     snackbar({ message: 'First', action: () => {} })
@@ -298,8 +295,6 @@ describe('VSnackbar — announcing, focus and robustness', () => {
     const { container } = render(VSnackbar)
     const polite = region(container, 'status')
     const urgent = region(container, 'alert')
-    // Present, and empty, before anything is raised: a region inserted along with its
-    // text is not announced.
     expect(polite.textContent).toBe('')
     snackbar({ message: 'Saved' })
     await settle()
@@ -307,7 +302,6 @@ describe('VSnackbar — announcing, focus and robustness', () => {
     snackbar({ message: 'Failed', tone: 'danger' })
     await settle()
     expect(urgent.textContent).toBe('Failed')
-    // The card itself is no live region any more: it would announce twice, or not at all.
     expect(container.querySelector('.v-snackbar')?.hasAttribute('role')).toBe(false)
   })
 
@@ -337,7 +331,6 @@ describe('VSnackbar — announcing, focus and robustness', () => {
     await nextTick()
     const button = document.querySelector('.v-snackbar-action') as HTMLElement
     button.click()
-    // The error still reaches the application, and the bar is gone all the same.
     expect(errors).toHaveLength(1)
     expect(current.value).toBeNull()
   })

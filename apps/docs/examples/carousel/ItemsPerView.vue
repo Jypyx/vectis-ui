@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { VCarousel, VCarouselItem } from 'vectis-ui'
 
-/* Flat colours rather than pictures, so one slide is told from the next at a glance. */
 const hues = [220, 280, 340, 20, 90, 160]
 </script>
 
@@ -14,7 +13,6 @@ const hues = [220, 280, 340, 20, 90, 160]
 </template>
 
 <style scoped>
-/* A slide has no height of its own: it takes the one its content brings. */
 .slide {
   display: grid;
   place-items: center;

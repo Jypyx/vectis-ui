@@ -1,19 +1,8 @@
 <script setup lang="ts">
 // @a11y @core
 /**
- * A field for choosing a date: a VInput, and a VDatePicker in a panel below it.
- *
- * The panel is `mode="manual"` and driven imperatively, which is not a detail — `popovertarget`
- * is invalid on a text `<input>`, and opening it ourselves is also what lets focus be moved
- * INTO the grid so the keyboard lands on the dates. Closing is ours too: `focusout`, or Escape.
- *
- * Two FIELD modes, `mode`: `input` (the default) types digits only, the separators appearing
- * as they go in the order and punctuation of the reader's locale; `picker` makes the calendar
- * the only way in. What the field is FOR is a different question from the `readonly` prop,
- * which freezes whatever it holds by every route at once.
- *
- * That is a different question from WHAT is chosen — one date, a range, or several — which is
- * `selection`, passed straight through to the picker.
+ * Compose VInput with VDatePicker. A text input cannot use popovertarget, so the manual panel
+ * bridge handles opening, dismissal and focus transfer into the grid.
  */
 
 import { computed, inject, provide, ref, watchEffect } from 'vue'
@@ -78,12 +67,8 @@ export interface DateInputFooterSlotProps {
 const MODES: DateInputMode[] = ['picker', 'input']
 
 /**
- * The century a two-digit year is expanded into — "10/06/26" becomes 2026 — applied only
- * when the reader leaves the field.
- *
- * It is FIXED and never derived from the current year. A sliding rule would make the
- * component's behaviour depend on when it runs, which is the same objection that keeps
- * today's date out of VDatePicker's setup, and it would give the tests a shelf life.
+ * The century a two-digit year is expanded into; "10/06/26" becomes 2026; applied only when the
+ * reader leaves the field.
  */
 const YEAR_PIVOT = 2000
 
@@ -97,7 +82,6 @@ const DEFAULT_DISPLAY_FORMAT: Intl.DateTimeFormatOptions = {
 export type DateInputSize = 'sm' | 'md' | 'lg'
 
 interface DateInputProps {
-  // Everything from here to `events` is handed straight to the calendar.
   /** What is being chosen: one date, a period between two, or several separate dates. */
   selection?: DatePickerSelection
   /**
@@ -121,7 +105,6 @@ interface DateInputProps {
   selectAdjacentDays?: boolean
   /** Events to mark under the days they fall on. */
   events?: DatePickerEvent[]
-  // From here on: the field.
   /**
    * Whether the field can be TYPED into (the default, using the numeric form of the
    * reader's language) or is filled from the calendar alone, which is `picker`.
@@ -131,9 +114,8 @@ interface DateInputProps {
    */
   mode?: DateInputMode
   /**
-   * Offers the date picker alongside a field that can be typed into: an icon at the end of
-   * the field, and a panel that opens on focus. It means nothing in `picker` mode, where
-   * the calendar is already the only way to choose.
+   * Offers the date picker alongside a field that can be typed into: an icon at the end of the
+   * field, and a panel that opens on focus.
    */
   showPicker?: boolean
   /** The label above the field. */
@@ -149,10 +131,8 @@ interface DateInputProps {
   /** Makes the field unusable, greyed out through the colour tokens. */
   disabled?: boolean
   /**
-   * Shows the date without letting it be changed: nothing can be typed, there is no
-   * calendar and no clear cross. The field stays focusable and can be copied from,
-   * which is what separates it from `disabled`, and it is a different question from
-   * `mode`, which says how a field that CAN be changed is filled in.
+   * Shows the date without letting it be changed: nothing can be typed, there is no calendar
+   * and no clear cross.
    */
   readonly?: boolean
   /** Marks the field as invalid, for a rule of your own. */
@@ -192,9 +172,9 @@ interface DateInputProps {
    */
   pickerIcon?: IconSource
   /**
-   * How the date is WRITTEN OUT in the field. It has no effect on a field being typed
-   * into, which necessarily shows the numeric form one types, so it concerns the
-   * `picker` mode, and the period and list selections, which fall back to it.
+   * How the date is written OUT in the field. It has no effect on a field being typed into,
+   * which necessarily shows the numeric form one types, so it concerns the `picker` mode, and
+   * the period and list selections, which fall back to it.
    */
   displayFormat?: Intl.DateTimeFormatOptions
   /** Where the panel opens relative to the field. */
@@ -212,9 +192,8 @@ const props = withDefaults(defineProps<DateInputProps>(), {
   selectAdjacentDays: false,
   events: undefined,
   // Deliberately left undefined rather than defaulted to the typed mode: that is what
-  // distinguishes "the prop was not given" from "the prop was given this value", and
-  // therefore what allows warning ONLY the consumer who explicitly asked for something
-  // that cannot work.
+  // distinguishes "the prop was not given" from "the prop was given this value", and therefore
+  // what allows warning only the consumer who explicitly asked for something that cannot work.
   mode: undefined,
   showPicker: false,
   label: undefined,
@@ -241,13 +220,8 @@ const props = withDefaults(defineProps<DateInputProps>(), {
 })
 
 /**
- * The date or dates chosen, in the shape `selection` calls for: an ISO `YYYY-MM-DD` string
- * for `single`, a `{ start, end }` pair for `range`, an array for `multiple`. Nothing is
- * selected to begin with.
- *
- * While the reader types, it is only written once what they have entered is a complete and
- * acceptable date; an unfinished or refused entry leaves it untouched and is reverted when
- * they leave the field.
+ * The date or dates chosen, in the shape `selection` calls for: an ISO `YYYY-MM-DD` string for
+ * `single`, a `{ start, end }` pair for `range`, an array for `multiple`.
  */
 const model = defineModel<DatePickerValue>({ default: null })
 
@@ -266,26 +240,25 @@ defineSlots<{
   start?(): unknown
   /**
    * Controls of your own inside the field, placed before the ones the field owns: the clear
-   * cross and the icon that opens the panel. Those two are this component's own affordance,
-   * which is why there is no `#end` here: it would replace them.
+   * cross and the icon that opens the panel.
    */
   'value-end'?(): unknown
   /** What a day cell shows, handed straight to the calendar. */
   day?(props: DatePickerDaySlotProps): unknown
   /**
-   * The strip at the foot of the panel: actions, or preset dates such as "today". It
-   * receives `close`, which is what lets one of those buttons dismiss the panel.
+   * The strip at the foot of the panel: actions, or preset dates such as "today". It receives
+   * `close`, which lets one of those buttons dismiss the panel.
    */
   footer?(props: DateInputFooterSlotProps): unknown
 }>()
 
-// `class` and `style` stay on the wrapper; everything else goes down to the text field,
-// which is what a consumer's label points at and what assistive technology deals with.
+// `class` and `style` stay on the wrapper; everything else goes down to the text field, which a
+// consumer's label points at and what assistive technology deals with.
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 // Declared as this component's own event, `click:icon-start` is out of `$attrs`, so the
-// listener is relayed to the field by hand — and only when the consumer wrote one.
+// listener is relayed to the field by hand; and only when the consumer wrote one.
 const iconStartClick = iconStartListener((event) => emit('click:icon-start', event))
 
 /** What reaches the field: the consumer's own attributes, plus that listener. */
@@ -345,8 +318,6 @@ if (isDev) {
       console.warn(
         `[VDateInput] unknown mode "${props.mode}": use "input" (the default) or "picker".`,
       )
-    // Tested on the PROP and not on what was resolved from it: typing being the default,
-    // a period or a list falls back on its own with nobody having asked for anything.
     // Only a consumer who explicitly asked to type deserves to be told it cannot work.
     if (props.mode === 'input' && props.selection !== 'single')
       console.warn(
@@ -389,10 +360,9 @@ const {
   rootEl,
   panelRef,
   field: inputRef,
-  // With no panel there is nothing to open. This is the composable's SINGLE cut-off
-  // point, and every way in passes through it — clicking the field, focusing it, the
-  // down arrow, Enter, the icon — so the condition never has to be repeated in a
-  // handler.
+  // This is the composable's SINGLE cut-off point, and every way in passes through it; clicking
+  // the field, focusing it, the down arrow, Enter, the icon; so the condition never has to be
+  // repeated in a handler.
   disabled: () => resolvedDisabled.value || !hasPanel.value,
   focusInPanel: () => pickerRef.value?.focus(),
   // The calendar stays mounted while the panel is closed, so it is put back on the days
@@ -405,11 +375,11 @@ const {
 })
 
 // @a11y
-// TRAP — the popup wiring is spread OVER the forwarded attributes, never bound as four
-// attributes after them. A binding written after `v-bind` wins even when it is
-// `undefined`, so a field with no panel would erase the consumer's own `role` or
-// `aria-controls`; spread, the wiring carries no key at all when there is no panel, and
-// wins over the consumer's when there is one, which is what a combobox needs.
+// The popup wiring is spread OVER the forwarded attributes, never bound as four attributes
+// after them. A binding written after `v-bind` wins even when it is `undefined`, so a field
+// with no panel would erase the consumer's own `role` or `aria-controls`; spread, the wiring
+// carries no key at all when there is no panel, and wins over the consumer's when there is one,
+// which a combobox needs.
 const inputAttrs = computed(() =>
   hasPanel.value
     ? {
@@ -431,10 +401,12 @@ const hasValue = computed(() => {
   return typeof model.value === 'string' && !!model.value
 })
 
-/* TRAP — this component is the SINGLE place the locale is resolved: what flows down to the
-   calendar is the RESULT, never the prop, which would usually be undefined and would have
-   the calendar resolve the language a second time — with every chance of the two
-   disagreeing after a later change. */
+/*
+ * This component is the SINGLE place the locale is resolved: what flows down to the calendar is
+ * the RESULT, never the prop, which would usually be undefined and would have the calendar
+ * resolve the language a second time; with every chance of the two disagreeing after a later
+ * change.
+ */
 const resolvedLocale = useResolvedLocale(() => props.locale)
 
 const displayText = computed(() => {
@@ -455,8 +427,6 @@ const displayText = computed(() => {
   return list.map((iso) => formatDateDisplay(iso, locale, displayFormat)).join(', ')
 })
 
-/* From here on: everything the typed field needs. */
-
 const mask = computed(() => dateMaskFor(resolvedLocale.value))
 const maskHint = computed(() => maskPlaceholder(resolvedLocale.value, mask.value))
 const isDisabledDate = computed(() => resolveMatcher(props.disabledDates))
@@ -468,12 +438,11 @@ const isDisabledDate = computed(() => resolveMatcher(props.disabledDates))
 const acceptable = (iso: string) => isDateAllowed(iso, props.min, props.max, isDisabledDate.value)
 
 /*
- * The mask machinery — the text being typed, the bridge to the value, the reformatting
- * that preserves the caret, the commit as soon as the date is complete and the silent
- * revert when it is not — is shared with VTimeInput and lives in `useMaskedField`.
- *
- * What is injected here is the date VOCABULARY alone: the order of the fields, the
- * separator between them and their widths, all derived from the reader's language.
+ * The mask machinery; the text being typed, the bridge to the value, the reformatting that
+ * preserves the caret, the commit as soon as the date is complete and the silent revert when it
+ * is not; is shared with VTimeInput and lives in `useMaskedField`. What is injected here is the
+ * date VOCABULARY alone: the order of the fields, the separator between them and their widths,
+ * all derived from the reader's language.
  */
 const {
   draft,
@@ -496,9 +465,8 @@ const {
   format: (digits) => formatDateMask(digits, mask.value),
   caret: (text, digitsBefore, inserting) =>
     caretAfterDigits(text, digitsBefore, inserting ? mask.value.separator : undefined),
-  // A two-digit year is only expanded on the FINAL commit, when the reader leaves the
-  // field — never while they are still typing, where "26" may well be on its way to
-  // becoming "2026".
+  // A two-digit year is only expanded on the FINAL commit, when the reader leaves the field;
+  // never while they are still typing, where "26" may well be on its way to becoming "2026".
   parse: (text, final) =>
     parseDateMask(text, mask.value, final ? { yearPivot: YEAR_PIVOT } : undefined),
   toMask: (iso) => (iso ? isoToMask(iso, mask.value) : ''),
@@ -506,12 +474,8 @@ const {
 })
 
 /**
- * Typing anything that is not a digit — a slash, a dot, a space — completes the field
- * being typed with a leading zero and moves on to the next. It is what lets someone type
- * "5/6/2026" and get the same result as typing all eight digits.
- *
- * It applies to the day and the month only: a year cut short has no such convention, "26"
- * being neither 0026 nor 2026 until the reader has finished.
+ * Typing anything that is not a digit; a slash, a dot, a space; completes the field being typed
+ * with a leading zero and moves on to the next.
  */
 function padCurrentField(el: HTMLInputElement) {
   const start = el.selectionStart ?? el.value.length
@@ -548,9 +512,8 @@ function onFieldKeydown(event: KeyboardEvent) {
 }
 
 /**
- * Pasting. A date recognizable as a whole — in the ISO form, or already written the way
- * this field writes them — is adopted as it stands; anything else contributes its digits
- * alone.
+ * Pasting. A date recognizable as a whole; in the ISO form, or already written the way this
+ * field writes them; is adopted as it stands; anything else contributes its digits alone.
  */
 function onFieldPaste(event: ClipboardEvent) {
   onPaste(event, (pasted) =>
@@ -559,15 +522,11 @@ function onFieldPaste(event: ClipboardEvent) {
 }
 
 /*
- * The clear cross is the field's own, which renders it BEFORE the end icon rather than in
- * its place — the convention every field in the design system follows, so the two live
- * side by side.
- *
- * Whether it is shown has to be answered explicitly here: outside the typed mode the field
- * is read-only, and a read-only field hides its cross by default, rightly so — but here
- * the value comes from the panel, so there is something to clear all the same. The
- * `readonly` PROP is the one case where the default answer was right: frozen, the field
- * offers no route to a new value, so it offers no route to none either.
+ * Whether it is shown has to be answered explicitly here: outside the typed mode the field is
+ * read-only, and a read-only field hides its cross by default, rightly so; but here the value
+ * comes from the panel, so there is something to clear all the same. The `readonly` PROP is the
+ * one case where the default answer was right: frozen, the field offers no route to a new
+ * value, so it offers no route to none either.
  */
 const clearVisible = computed(() =>
   canClear(props, resolvedDisabled.value, hasValue.value || (typing.value && !!draft.value)),
@@ -577,15 +536,9 @@ const endIcon = computed<IconSource | undefined>(() =>
 )
 // @a11y @devwarn
 /*
- * TRAP — the LABEL is defined at all times, even when no icon is rendered at all.
- *
- * The helper detecting a click handler on an icon warns AT SETUP if one is attached
- * without a label, and it has no way of knowing whether an icon exists. Since the
- * listener here is attached permanently and that detection is static, making the label
- * conditional would produce a false warning every time a field without a calendar is
- * mounted.
- *
- * The wording itself has no prop: the dictionary is where it is changed — see `src/i18n/`.
+ * The label is defined always, even when no icon is rendered at all. The helper detecting a
+ * click handler on an icon warns AT setup if one is attached without a label, and it has no way
+ * of knowing whether an icon exists.
  */
 const m = useMessages()
 
@@ -643,14 +596,14 @@ defineExpose({
     @keydown="onKeydown"
   >
     <div class="v-date-input-control" @click="onControlClick">
-      <!-- The field is declared a combobox rather than left as the plain text box it
-           implicitly is, because a text box may not carry the attribute saying whether
-           something is expanded — and a text field with a panel attached IS the combobox
-           pattern, the same role VCombobox gives its own field.
-
-           The role and the three attributes are all conditioned on the SAME thing, so the
-           role never appears without the expanded state it requires, and nothing ever
-           points at a panel that was not rendered. -->
+      <!--
+        The field is declared a combobox rather than left as the plain text box it implicitly
+        is, because a text box may not carry the attribute saying whether something is expanded;
+        and a text field with a panel attached IS the combobox pattern, the same role VCombobox
+        gives its own field. The role and the three attributes are all conditioned on the same
+        thing, so the role never appears without the expanded state it requires, and nothing
+        ever points at a panel that was not rendered.
+      -->
       <VInput
         ref="inputRef"
         v-model="fieldModel"
@@ -689,9 +642,7 @@ defineExpose({
       </VInput>
     </div>
 
-    <!-- With no panel rendered there is nothing to hold a reference to, and the open state
-         — which is fed by the panel's own events — can no longer become true. The absence
-         of a panel is therefore self-enforcing. -->
+    <!-- The absence of a panel is therefore self-enforcing. -->
     <VPopover
       v-if="hasPanel"
       :id="panelId"
@@ -733,32 +684,31 @@ defineExpose({
 <style>
 @layer vectis.components {
   .v-date-input {
-    /* Confines the anchor to this instance (the root = the common ancestor of the
-       control and the panel) */
     anchor-scope: --date-input-anchor;
     display: block;
     width: 100%;
     font-family: var(--vectis-text-family);
   }
 
-  /* The pointer says "this opens a panel", which a read-only or disabled field no longer
-     does: the VFileInput gating. */
   .v-date-input:not([data-disabled]):not([data-readonly]) .v-date-input-control {
     cursor: pointer;
   }
 
-  /* The anchor is the FIELD's box and not this wrapper's, which also holds the label and
-     the hint: anchored to the wrapper, the calendar opens a hint's height below the field,
-     and a label's height above it once there is no room below and `flip-block` turns it
-     over. Against the field it covers whichever of the two it lands on, which is what a
-     panel belonging to a control is supposed to do. */
+  /*
+   * The anchor is the FIELD's box and not this wrapper's, which also holds the label and the
+   * hint: anchored to the wrapper, the calendar opens a hint's height below the field, and a
+   * label's height above it once there is no room below and `flip-block` turns it over. Against
+   * the field it covers whichever of the two it lands on, which a panel belonging to a control
+   * is supposed to do.
+   */
   .v-date-input-control .v-input-field {
     anchor-name: --date-input-anchor;
   }
 
-  /* Input mode: the field is editable, and the <input>'s text caret takes over from the
-     control's `pointer` (which signals "this opens a panel"). The mask has a fixed width:
-     tabular figures, otherwise the caret jitters from one digit to the next. */
+  /*
+   * The mask has a fixed width: tabular figures, otherwise the caret jitters from one digit to
+   * the next.
+   */
   .v-date-input[data-mode='input']:not([data-disabled]):not([data-readonly]) .v-date-input-control {
     cursor: text;
   }
@@ -767,14 +717,13 @@ defineExpose({
     font-variant-numeric: tabular-nums;
   }
 
-  /* `position-anchor` and the chrome come from VPopover (the `anchor` prop, and the
-     `.v-panel` it sets on any panel that is not `bare`): only the dimensions are left here,
-     which `panel.css` deliberately does not carry. The panel's OWN padding is cancelled,
-     VDatePicker padding itself as VTimePicker does, so both pickers keep the same room
-     on a page and in a panel. Compounded with `.v-popover-panel` (VPopover puts both
-     classes on the same element) because `.v-panel` declares `padding` too, and at
-     equal specificity the winner would depend on the order in which the consumer's
-     bundler concatenates the CSS. */
+  /*
+   * `position-anchor` and the chrome come from VPopover (the `anchor` prop, and the `.v-panel`
+   * it sets on any panel that is not `bare`): only the dimensions are left here, which
+   * `panel.css` deliberately does not carry. The panel's own padding is cancelled, VDatePicker
+   * padding itself as VTimePicker does, so both pickers keep the same room on a page and in a
+   * panel.
+   */
   .v-popover-panel.v-date-input-panel {
     width: max-content;
     padding: 0;

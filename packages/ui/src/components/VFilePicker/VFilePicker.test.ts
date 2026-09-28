@@ -15,8 +15,10 @@ function fileOf(name: string, size = 10, type = ''): File {
   return file
 }
 
-/** jsdom has no `FileList` constructor: an iterable array with `item()` is enough
-    for the only thing the component does with it (a spread). */
+/**
+ * Jsdom has no `FileList` constructor: an iterable array with `item()` is enough for the only
+ * thing the component does with it (a spread).
+ */
 const fileListOf = (files: File[]) =>
   Object.assign(files.slice(), { item: (i: number) => files[i] ?? null }) as unknown as FileList
 
@@ -26,11 +28,7 @@ async function pick(input: HTMLInputElement, files: File[]) {
   await fireEvent.change(input)
 }
 
-/**
- * Records the writes to `input.value`. A spy is the only way to check the reset:
- * jsdom derives the `value` GETTER from its internal file list, which our `files`
- * override does not touch — so reading it back proves nothing.
- */
+/** Records the writes to `input.value`. */
 function trackReset(input: HTMLInputElement) {
   const writes: string[] = []
   Object.defineProperty(input, 'value', {
@@ -64,9 +62,9 @@ describe('VFilePicker', () => {
   })
 
   /*
-   * The whole shape of the component hangs on this switch: a button inside a
-   * button is invalid markup AND an axe `nested-interactive` violation, so the
-   * zone may only become a control once there is no button left inside it.
+   * The whole shape of the component hangs on this switch: a button inside a button is invalid
+   * markup and an axe `nested-interactive` violation, so the zone may only become a control
+   * once there is no button left inside it.
    */
   it('is a plain container while the browse button is shown', () => {
     const { zone, getAllByRole } = renderUpload()
@@ -81,7 +79,6 @@ describe('VFilePicker', () => {
 
     expect(zone.tagName).toBe('BUTTON')
     expect(zone.getAttribute('type')).toBe('button')
-    // The invariant that keeps axe green: no nested interactive element.
     expect(zone.querySelectorAll('button, a, input:not([type="file"])')).toHaveLength(0)
   })
 
@@ -106,7 +103,6 @@ describe('VFilePicker', () => {
     expect(zone.getAttribute('data-test')).toBe('x')
     expect(zone.getAttribute('name')).toBeNull()
 
-    // class/style stay on the root — the wrapper-root pattern.
     expect(container.querySelector('.v-file-picker')!.classList.contains('mine')).toBe(true)
     expect(zone.classList.contains('mine')).toBe(false)
   })
@@ -204,8 +200,6 @@ describe('VFilePicker preview list', () => {
     expect(getByRole('button', { name: 'Remove report.pdf' })).toBeTruthy()
   })
 
-  /* The list is rendered OUTSIDE the zone in every mode: inside a zone that has
-     become a <button>, its remove buttons would be nested interactive elements. */
   it('never renders inside the zone, not even when the zone is a button', () => {
     const { zone } = renderUpload({
       preview: 'bottom',
@@ -270,8 +264,6 @@ describe('VFilePicker preview list', () => {
     expect(getByRole('button', { name: 'Remove report.pdf' })).toBeTruthy()
   })
 
-  // Keyed by index, removing the first row re-keys every row after it: Vue patches the
-  // first row's element into the second's place, which remounts a thumbnail's <img>.
   it('keys the rows by file identity, so a removal keeps the elements of the rest', async () => {
     const { getByRole, container } = renderUpload({
       preview: 'bottom',
@@ -301,9 +293,9 @@ describe('VFilePicker preview list', () => {
 
 describe('VFilePicker thumbnails', () => {
   /*
-   * jsdom implements neither `createObjectURL` nor `revokeObjectURL`. Stubbed
-   * HERE and not in `vitest.setup.ts`: the global file carries the gaps SEVERAL
-   * components depend on (the Popover API, <dialog>); this one has one consumer.
+   * Jsdom implements neither `createObjectURL` nor `revokeObjectURL`. Stubbed here and not in
+   * `vitest.setup.ts`: the global file carries the gaps SEVERAL components depend on (the
+   * Popover API, <dialog>); this one has one consumer.
    */
   beforeEach(() => {
     URL.createObjectURL = vi.fn((blob: Blob) => `blob:${(blob as File).name}`)
@@ -350,8 +342,6 @@ describe('VFilePicker thumbnails', () => {
     expect(URL.revokeObjectURL).toHaveBeenCalledExactlyOnceWith('blob:other.png')
   })
 
-  // Replacing the model wholesale is a first-class case, not an edge one: the
-  // reconciliation revokes the leavers and creates the arrivals in ONE pass.
   it('reconciles a wholesale replacement of the model in one pass', async () => {
     const { rerender } = renderUpload({ preview: 'bottom', modelValue: [png()] })
     await nextTick()
@@ -400,7 +390,6 @@ describe('VFilePicker drag & drop', () => {
     await fireEvent.dragEnter(el)
     expect(el.hasAttribute('data-dragging')).toBe(true)
 
-    // The first leave is the pointer crossing into a child: still dragging.
     await fireEvent.dragLeave(el)
     expect(el.hasAttribute('data-dragging')).toBe(true)
 
@@ -443,7 +432,7 @@ describe('VFilePicker drag & drop', () => {
   })
 })
 
-// Dev guards — they address the integrator, so they are never translated.
+// Dev guards; they address the integrator, so they are never translated.
 describe('VFilePicker dev warnings', () => {
   afterEach(() => {
     vi.restoreAllMocks()
@@ -461,9 +450,10 @@ describe('VFilePicker dev warnings', () => {
     expect(warn).toHaveBeenCalledWith(expect.stringMatching(/`required` lands on the hidden/))
   })
 
-  /* axe reports `aria-prohibited-attr` on a generic <div>, and the attribute is
-     inert there anyway — the guard is what keeps the suite from failing on a
-     consumer's well-meant label. */
+  /*
+   * Axe reports `aria-prohibited-attr` on a generic <div>, and the attribute is inert there
+   * anyway; the guard is what keeps the suite from failing on a consumer's well-meant label.
+   */
   it('warns on an aria-label that lands on the zone while it is a plain container', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     renderUpload({}, { 'aria-label': 'Attachments' })
@@ -499,8 +489,8 @@ describe('fileKind', () => {
     expect(fileKind({ name, type })).toBe(expected)
   })
 
-  // `file.type` is the browser's GUESS and is empty far more often than one
-  // expects — the extension is the fallback, never the other way round.
+  // `file.type` is the browser's GUESS and is empty far more often than one expects; the
+  // extension is the fallback, never the other way round.
   it.each([
     ['photo.HEIC', 'image'],
     ['track.mp3', 'audio'],
@@ -509,7 +499,6 @@ describe('fileKind', () => {
     ['sheet.xlsx', 'spreadsheet'],
     ['main.rs', 'code'],
     ['notes.txt', 'file'],
-    // No extension: a dotfile has a NAME that starts with a dot.
     ['.gitignore', 'file'],
     ['README', 'file'],
   ])('falls back to the extension of %s → "%s"', (name, expected) => {

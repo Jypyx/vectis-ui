@@ -18,7 +18,6 @@ const step = (delta: number) => (value.value += delta)
       <VTypography variant="body-sm" tone="muted">value = {{ value }}, max = 100</VTypography>
     </div>
 
-    <!-- `max` says what counts as finished. The other end is always zero. -->
     <div class="labelled">
       <VTypography variant="caption" tone="muted">7 of 12 files, max = 12</VTypography>
       <VProgressLinear :value="7" :max="12" thickness="10" label="Files" show-value />
