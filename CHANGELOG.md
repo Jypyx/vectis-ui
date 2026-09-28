@@ -2,6 +2,19 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.10.3] - 2026-09-29
+
+No public API or runtime changes. No migration is required from 0.10.2.
+
+### Changed
+
+- Rewrote the English and French documentation for shorter, clearer component descriptions and consistent coverage of props, slots and events.
+- Corrected documentation for selection models, native form validation and keyboard interaction. Simplified example comments without changing their code or styles.
+- Storybook uses `vue-component-meta` to extract component API metadata.
+- Upgraded the repository package manager to pnpm 12.6.0.
+
+**Full diff:** [v0.10.2...v0.10.3](https://github.com/Jypyx/vectis-ui/compare/v0.10.2...v0.10.3)
+
 ## [0.10.2] - 2026-09-28
 
 No public API changes. No migration is required from 0.10.1, and the minimum supported browser versions are unchanged.
