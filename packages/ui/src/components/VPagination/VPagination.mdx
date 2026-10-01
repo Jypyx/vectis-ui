@@ -96,10 +96,12 @@ they carry `rel="first"` and `rel="last"`.
 ## Logical truncation
 
 Without `totalVisible`, there is no truncation: the bar renders as many pills as `length`. When
-set, `totalVisible` fixes the total number of rendered slots, **ellipses included** (useful
-minimum: 5, i.e. first + ellipsis + current + ellipsis + last). The first and last pages are
-always kept, and the window centred on the current page **shifts** near the ends instead of
-shrinking: the bar keeps exactly the same width whatever the current page.
+set, `totalVisible` fixes the total number of rendered slots, **ellipses included**. From 5
+slots (first + ellipsis + current + ellipsis + last), the first and last pages are always kept,
+and the window centred on the current page **shifts** near the ends instead of shrinking: the bar
+keeps exactly the same width whatever the current page. Below 5, there is no room for the bounds
+or the ellipses: the bar shows that many consecutive pages around the current one, down to the
+current page alone at 1, which pairs with `edgeControls` for the long jumps.
 
 <Canvas of={VPaginationStories.ManyPages} />
 

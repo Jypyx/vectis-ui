@@ -58,7 +58,8 @@ interface PaginationProps {
   length?: number
   /**
    * How many slots to render, ellipses counted among them, so the row keeps exactly the same
-   * width whichever page is current. Left out, every page is rendered.
+   * width whichever page is current. Below 5, the row drops the bounds and the ellipses and
+   * shows that many consecutive pages around the current one. Left out, every page is rendered.
    */
   totalVisible?: number
 
@@ -260,12 +261,18 @@ const items = computed<PaginationItem[]>(() => {
   // window slid, for a node that never changes.
   const gap = (side: 'start' | 'end'): PaginationItem => ({ kind: 'gap', key: `gap-${side}` })
 
-  // With no limit given, nothing is left out. Below five slots there would be no room
-  // for the first page, an ellipsis, the current page, another ellipsis and the last,
-  // so that is the floor.
+  // With no limit given, nothing is left out. At least the current page is always shown.
   const limit = Math.trunc(props.totalVisible ?? count)
-  const visible = Number.isNaN(limit) ? count : Math.max(limit, 5)
+  const visible = Number.isNaN(limit) ? count : Math.max(limit, 1)
   if (visible >= count) return pages(1, count)
+
+  // Below five slots there is no room for the first page, an ellipsis, the current page,
+  // another ellipsis and the last: the row is a plain window of consecutive pages, held
+  // against the bounds so it keeps the same number of slots.
+  if (visible < 5) {
+    const from = clamp(current - Math.floor((visible - 1) / 2), 1, count - visible + 1)
+    return pages(from, from + visible - 1)
+  }
 
   const start = current - Math.floor((visible - 5) / 2)
   const end = start + (visible - 5)

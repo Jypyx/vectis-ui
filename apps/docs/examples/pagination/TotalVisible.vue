@@ -7,7 +7,7 @@ const page = ref(1)
 
 <template>
   <div class="column">
-    <div v-for="slots in [5, 7, 9]" :key="slots" class="row">
+    <div v-for="slots in [1, 3, 5, 7]" :key="slots" class="row">
       <VPagination
         v-model="page"
         :length="20"

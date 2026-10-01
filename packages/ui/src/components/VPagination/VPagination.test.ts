@@ -61,13 +61,31 @@ describe('VPagination', () => {
       expect(container.querySelectorAll('.v-pagination-ellipsis')).toHaveLength(0)
     })
 
-    it('clamps totalVisible to the useful minimum of 5', () => {
+    it('below 5, renders a window of consecutive pages held against the bounds', () => {
+      const cases: Array<[number, number, string[]]> = [
+        [1, 10, ['10']],
+        [3, 10, ['9', '10', '11']],
+        [3, 1, ['1', '2', '3']],
+        [3, 20, ['18', '19', '20']],
+        [4, 10, ['9', '10', '11', '12']],
+      ]
+      for (const [totalVisible, current, expected] of cases) {
+        const { container, unmount } = render(VPagination, {
+          props: { length: 20, modelValue: current, totalVisible },
+        })
+
+        expect(pageLabels(container)).toEqual(expected)
+        expect(slotCount(container)).toBe(totalVisible)
+        unmount()
+      }
+    })
+
+    it('clamps totalVisible to a minimum of 1', () => {
       const { container } = render(VPagination, {
-        props: { length: 20, modelValue: 10, totalVisible: 3 },
+        props: { length: 20, modelValue: 10, totalVisible: 0 },
       })
 
-      expect(pageLabels(container)).toEqual(['1', '10', '20'])
-      expect(slotCount(container)).toBe(5)
+      expect(pageLabels(container)).toEqual(['10'])
     })
 
     it('marks the bounds with data-edge and the neighbours with their distance to the current page', () => {

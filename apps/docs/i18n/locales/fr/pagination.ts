@@ -28,7 +28,7 @@ export default {
     },
     totalVisible: {
       title: "Nombre d'emplacements",
-      text: '<code>totalVisible</code> limite les emplacements de pages et de points de suspension, avec un minimum de cinq. Les première et dernière pages restent visibles.',
+      text: '<code>totalVisible</code> limite les emplacements de pages et de points de suspension. À partir de cinq emplacements, les première et dernière pages restent visibles. En dessous, des pages consécutives entourent la page courante, jusqu’à la page courante seule.',
     },
     controls: {
       title: 'Précédent et suivant',
@@ -64,7 +64,7 @@ export default {
       props: {
         length: 'Nombre total de pages.',
         totalVisible:
-          'Nombre maximal d’emplacements de pages et de points de suspension ; minimum 5. Absent, affiche toutes les pages.',
+          'Nombre maximal d’emplacements de pages et de points de suspension ; minimum 1. Absent, affiche toutes les pages.',
         detached: 'Sépare les boutons de page.',
         bordered:
           'Ajoute des séparateurs entre les boutons joints. Ignoré si les boutons sont séparés.',

@@ -28,7 +28,7 @@ export default {
     },
     totalVisible: {
       title: 'Total visible',
-      text: '<code>totalVisible</code> caps page and ellipsis slots, with a minimum of five. The first and last pages remain visible.',
+      text: '<code>totalVisible</code> caps page and ellipsis slots. From five slots, the first and last pages remain visible. Below five, consecutive pages surround the current one, down to the current page alone.',
     },
     controls: {
       title: 'Previous and next',
@@ -63,7 +63,7 @@ export default {
     VPagination: {
       props: {
         length: 'Total page count.',
-        totalVisible: 'Maximum page and ellipsis slots; minimum 5. Omitted shows every page.',
+        totalVisible: 'Maximum page and ellipsis slots; minimum 1. Omitted shows every page.',
         detached: 'Separates page buttons.',
         bordered: 'Adds dividers between joined buttons. Ignored when detached.',
         itemVariant: 'Style of other pages and previous/next controls.',
