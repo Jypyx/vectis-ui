@@ -28,9 +28,11 @@ import { description } from './description'
 import { error } from './error'
 import { expand_less } from './expand_less'
 import { expand_more } from './expand_more'
+import { first_page } from './first_page'
 import { folder_zip } from './folder_zip'
 import { image } from './image'
 import { info } from './info'
+import { last_page } from './last_page'
 import { more_horiz } from './more_horiz'
 import { notifications } from './notifications'
 import { picture_as_pdf } from './picture_as_pdf'
@@ -66,9 +68,11 @@ export {
   error,
   expand_less,
   expand_more,
+  first_page,
   folder_zip,
   image,
   info,
+  last_page,
   more_horiz,
   notifications,
   picture_as_pdf,
@@ -86,7 +90,7 @@ export {
  *
  * NOTHING the library ships imports this barrel: a component imports the two or
  * three icon modules it draws, by name. Importing it from a component would pull all
- * 34 drawings back into every consumer's bundle and undo the split.
+ * 36 drawings back into every consumer's bundle and undo the split.
  */
 export const builtinIcons = {
   arrow_downward,
@@ -111,9 +115,11 @@ export const builtinIcons = {
   error,
   expand_less,
   expand_more,
+  first_page,
   folder_zip,
   image,
   info,
+  last_page,
   more_horiz,
   notifications,
   picture_as_pdf,

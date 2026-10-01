@@ -34,9 +34,13 @@ export default {
       title: 'Previous and next',
       text: '<code>controls</code> selects icons, text, both or neither. Controls disable when no reachable page remains in their direction.',
     },
+    edgeControls: {
+      title: 'First and last',
+      text: '<code>edgeControls</code> adds controls leading to the first and last reachable pages, displayed as <code>controls</code> specifies. Narrow responsive rows hide them.',
+    },
     unreachablePages: {
       title: 'Unreachable pages',
-      text: '<code>disabledPages</code> accepts a page array or predicate. Previous and next controls skip those pages.',
+      text: '<code>disabledPages</code> accepts a page array or predicate. Controls skip those pages.',
     },
     links: {
       title: 'Links',
@@ -74,6 +78,12 @@ export default {
         nextIcon: 'Next control icon.',
         prevText: 'Previous control text and accessible name. Defaults to the dictionary.',
         nextText: 'Next control text and accessible name. Defaults to the dictionary.',
+        edgeControls:
+          'Adds first and last page controls, displayed as <code>controls</code> specifies.',
+        firstIcon: 'First page control icon.',
+        lastIcon: 'Last page control icon.',
+        firstText: 'First page control text and accessible name. Defaults to the dictionary.',
+        lastText: 'Last page control text and accessible name. Defaults to the dictionary.',
         disabled: 'Disables interaction.',
         disabledPages: 'Unavailable pages as an array or predicate. Controls skip them.',
         responsive: 'Hides neighbouring pages to fit the container. Takes the available width.',

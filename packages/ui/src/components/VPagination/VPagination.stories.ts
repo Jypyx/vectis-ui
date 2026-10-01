@@ -34,6 +34,7 @@ const meta = {
     compact: false,
     align: 'start',
     controls: 'icon',
+    edgeControls: false,
     disabled: false,
     responsive: true,
   },
@@ -230,6 +231,72 @@ export const Controls: Story = {
       </div>
     `,
   }),
+}
+
+export const EdgeControls: Story = {
+  render: () => ({
+    components: { VPagination },
+    setup: () => ({ a: ref(10), b: ref(10), c: ref(10) }),
+    // The last row is narrower than the final responsive step: the edge controls give way to
+    // the first and last pills, and the previous and next controls take the row's ends.
+    template: `
+      <div style="display: grid; gap: 16px">
+        <VPagination :length="20" :total-visible="7" edge-controls label="icon" v-model="a" />
+        <VPagination
+          :length="20"
+          :total-visible="7"
+          edge-controls
+          controls="both"
+          label="both"
+          v-model="b"
+        />
+        <div style="width: 360px">
+          <VPagination
+            :length="20"
+            :total-visible="7"
+            edge-controls
+            item-variant="outline"
+            responsive
+            label="narrow"
+            v-model="c"
+          />
+        </div>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const icon = within(canvas.getByRole('navigation', { name: 'icon' }))
+
+    const last = icon.getByRole('button', { name: 'Last page' })
+    await userEvent.click(last)
+    await waitFor(() =>
+      expect(icon.getByRole('button', { name: 'Page 20' })).toHaveAttribute('aria-current', 'page'),
+    )
+    await expect(last).toBeDisabled()
+    await expect(icon.getByRole('button', { name: 'Next page' })).toBeDisabled()
+    await expect(icon.getByRole('button', { name: 'Page 20' })).toHaveFocus()
+
+    /*
+     * VButtonGroup joins its segments by DOM position, which the hidden edge controls still
+     * hold; the previous and next controls must get the outer corners, margin and border back.
+     * Only a real layout shows it.
+     */
+    const narrow = canvas.getByRole('navigation', { name: 'narrow' })
+    const control = (side: string) => narrow.querySelector<HTMLElement>(`[data-side='${side}']`)!
+    await expect(getComputedStyle(control('first')).display).toBe('none')
+    await expect(getComputedStyle(control('last')).display).toBe('none')
+
+    const prev = getComputedStyle(control('prev'))
+    const next = getComputedStyle(control('next'))
+    await expect(prev.marginInlineStart).toBe('0px')
+    await expect(prev.borderStartStartRadius).not.toBe('0px')
+    await expect(prev.borderStartStartRadius).toBe(next.borderEndEndRadius)
+    // The top border is untouched by the join, so it carries the variant's own colour.
+    await expect(prev.borderInlineStartColor).not.toBe('rgba(0, 0, 0, 0)')
+    await expect(prev.borderInlineStartColor).toBe(prev.borderBlockStartColor)
+    await expect(next.borderInlineEndColor).toBe(next.borderBlockStartColor)
+  },
 }
 
 export const DisabledPages: Story = {

@@ -17,8 +17,10 @@ export const fr: Messages = {
   },
   pagination: {
     label: 'Pagination',
+    first: 'Première page',
     previous: 'Page précédente',
     next: 'Page suivante',
+    last: 'Dernière page',
     page: (page) => `Page ${page}`,
   },
   tabs: {

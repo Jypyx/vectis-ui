@@ -34,9 +34,13 @@ export default {
       title: 'Précédent et suivant',
       text: '<code>controls</code> choisit des icônes, du texte, les deux ou aucun contrôle. Ils se désactivent si aucune page n’est accessible dans leur direction.',
     },
+    edgeControls: {
+      title: 'Première et dernière',
+      text: '<code>edgeControls</code> ajoute des contrôles menant aux première et dernière pages accessibles, affichés comme l’indique <code>controls</code>. Les lignes responsive étroites les masquent.',
+    },
     unreachablePages: {
       title: 'Pages inaccessibles',
-      text: '<code>disabledPages</code> accepte un tableau de pages ou un prédicat. Les contrôles précédent et suivant ignorent ces pages.',
+      text: '<code>disabledPages</code> accepte un tableau de pages ou un prédicat. Les contrôles ignorent ces pages.',
     },
     links: {
       title: 'Liens',
@@ -78,6 +82,14 @@ export default {
           'Texte et nom accessible du contrôle précédent. Utilise le dictionnaire par défaut.',
         nextText:
           'Texte et nom accessible du contrôle suivant. Utilise le dictionnaire par défaut.',
+        edgeControls:
+          'Ajoute des contrôles première et dernière page, affichés comme l’indique <code>controls</code>.',
+        firstIcon: 'Icône du contrôle première page.',
+        lastIcon: 'Icône du contrôle dernière page.',
+        firstText:
+          'Texte et nom accessible du contrôle première page. Utilise le dictionnaire par défaut.',
+        lastText:
+          'Texte et nom accessible du contrôle dernière page. Utilise le dictionnaire par défaut.',
         disabled: 'Désactive les interactions.',
         disabledPages:
           'Pages indisponibles sous forme de tableau ou de prédicat. Les contrôles les ignorent.',

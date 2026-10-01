@@ -24,8 +24,10 @@ export interface Messages {
   }
   pagination: {
     label: string
+    first: string
     previous: string
     next: string
+    last: string
     page: (page: number) => string
   }
   tabs: { label: string; previous: string; next: string }

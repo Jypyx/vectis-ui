@@ -307,6 +307,113 @@ describe('VPagination', () => {
     })
   })
 
+  describe('edge controls', () => {
+    const sides = (container: Element) =>
+      [...container.querySelectorAll<HTMLElement>('.v-pagination-control')].map(
+        (el) => el.dataset.side,
+      )
+
+    it('leaves them out by default', () => {
+      const { container } = render(VPagination, { props: { length: 5, modelValue: 3 } })
+
+      expect(sides(container)).toEqual(['prev', 'next'])
+    })
+
+    it('frames the previous and next controls with first and last, in their default icons', () => {
+      const { container, getByRole } = render(VPagination, {
+        props: { length: 5, modelValue: 3, edgeControls: true },
+      })
+
+      expect(sides(container)).toEqual(['first', 'prev', 'next', 'last'])
+      const first = getByRole('button', { name: 'First page' })
+      const last = getByRole('button', { name: 'Last page' })
+      expect(first.querySelector<HTMLElement>('.v-icon')?.dataset.icon).toBe('first_page')
+      expect(last.querySelector<HTMLElement>('.v-icon')?.dataset.icon).toBe('last_page')
+    })
+
+    it('follows controls: false', () => {
+      const { container } = render(VPagination, {
+        props: { length: 5, modelValue: 3, controls: false as const, edgeControls: true },
+      })
+
+      expect(container.querySelectorAll('.v-pagination-control')).toHaveLength(0)
+    })
+
+    it('jumps to the first and last pages', async () => {
+      const first = render(VPagination, {
+        props: { length: 20, modelValue: 10, edgeControls: true },
+      })
+      await fireEvent.click(first.getByRole('button', { name: 'First page' }))
+      expect(first.emitted('update:modelValue')).toEqual([[1]])
+      first.unmount()
+
+      const last = render(VPagination, {
+        props: { length: 20, modelValue: 10, edgeControls: true },
+      })
+      await fireEvent.click(last.getByRole('button', { name: 'Last page' }))
+      expect(last.emitted('update:modelValue')).toEqual([[20]])
+    })
+
+    it('lands on the farthest reachable page, over disabled ones', async () => {
+      const { getByRole, emitted } = render(VPagination, {
+        props: { length: 9, modelValue: 5, disabledPages: [1, 2, 9], edgeControls: true },
+      })
+
+      await fireEvent.click(getByRole('button', { name: 'First page' }))
+      await fireEvent.click(getByRole('button', { name: 'Last page' }))
+
+      expect(emitted('update:modelValue')).toEqual([[3], [8]])
+    })
+
+    it('disables each one with its neighbour once no page is left in its direction', () => {
+      const { getByRole } = render(VPagination, {
+        props: { length: 5, modelValue: 2, disabledPages: [1], edgeControls: true },
+      })
+
+      expect((getByRole('button', { name: 'First page' }) as HTMLButtonElement).disabled).toBe(true)
+      expect((getByRole('button', { name: 'Previous page' }) as HTMLButtonElement).disabled).toBe(
+        true,
+      )
+      expect((getByRole('button', { name: 'Last page' }) as HTMLButtonElement).disabled).toBe(false)
+    })
+
+    it('shows the text the way controls asks, the icon on the outer side', () => {
+      const { getByRole } = render(VPagination, {
+        props: { length: 5, modelValue: 3, controls: 'both', edgeControls: true },
+      })
+      const first = getByRole('button', { name: 'First page' })
+      const last = getByRole('button', { name: 'Last page' })
+
+      const parts = (el: HTMLElement) =>
+        [...el.querySelectorAll('.v-icon, .v-pagination-control-label')].map((part) =>
+          part.matches('.v-icon') ? 'icon' : part.textContent,
+        )
+
+      expect(parts(first)).toEqual(['icon', 'First page'])
+      expect(parts(last)).toEqual(['Last page', 'icon'])
+    })
+
+    it('picks up custom labels and icons', () => {
+      const { getByRole } = render(VPagination, {
+        props: {
+          length: 5,
+          modelValue: 3,
+          edgeControls: true,
+          firstText: 'Newest',
+          lastText: 'Oldest',
+          firstIcon: 'arrow_upward',
+          lastIcon: { src: 'https://cdn.test/last.svg' },
+        },
+      })
+
+      const first = getByRole('button', { name: 'Newest' })
+      expect(first.querySelector<HTMLElement>('.v-icon')?.dataset.icon).toBe('arrow_upward')
+      expect(
+        getByRole('button', { name: 'Oldest' }).querySelector('.v-icon-img')?.getAttribute('src'),
+      ).toBe('https://cdn.test/last.svg')
+    })
+  })
+
   describe('size', () => {
     it('propagates size and compact to every button', () => {
       const { container } = render(VPagination, {
@@ -482,6 +589,19 @@ describe('VPagination — links', () => {
     expect(prev.getAttribute('rel')).toBe('prev')
     expect(next.getAttribute('href')).toBe('/products?page=7')
     expect(next.getAttribute('rel')).toBe('next')
+  })
+
+  it('links the edge controls to the first and last reachable pages, with rel', () => {
+    const { getByRole } = render(VPagination, {
+      props: { length: 9, modelValue: 5, disabledPages: [1], edgeControls: true, href },
+    })
+
+    const first = getByRole('link', { name: 'First page' })
+    const last = getByRole('link', { name: 'Last page' })
+    expect(first.getAttribute('href')).toBe('/products?page=2')
+    expect(first.getAttribute('rel')).toBe('first')
+    expect(last.getAttribute('href')).toBe('/products?page=9')
+    expect(last.getAttribute('rel')).toBe('last')
   })
 
   it('turns a control with no page left into an inert link, with no address and no rel', () => {

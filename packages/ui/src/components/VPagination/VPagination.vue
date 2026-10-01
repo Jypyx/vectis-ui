@@ -13,6 +13,8 @@ import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import { chevron_left as chevronLeftIcon } from '../VIcon/icons/chevron_left'
 import { chevron_right as chevronRightIcon } from '../VIcon/icons/chevron_right'
+import { first_page as firstPageIcon } from '../VIcon/icons/first_page'
+import { last_page as lastPageIcon } from '../VIcon/icons/last_page'
 import { more_horiz as moreHorizIcon } from '../VIcon/icons/more_horiz'
 import type { IconSource } from '../VIcon/types'
 import VIconButton from '../VIconButton/VIconButton.vue'
@@ -114,6 +116,25 @@ interface PaginationProps {
    * readers announce. It falls back to the design system dictionary.
    */
   nextText?: string
+  /**
+   * Adds first and last page controls outside the previous and next ones, drawn the way
+   * `controls` draws those. It has no effect when `controls` is `false`.
+   */
+  edgeControls?: boolean
+  /** The icon of the first page control: an icon name, or an explicit render. */
+  firstIcon?: IconSource
+  /** The icon of the last page control: an icon name, or an explicit render. */
+  lastIcon?: IconSource
+  /**
+   * The wording of the first page control, used both as its visible text and as what
+   * screen readers announce. It falls back to the design system dictionary.
+   */
+  firstText?: string
+  /**
+   * The wording of the last page control, used both as its visible text and as what
+   * screen readers announce. It falls back to the design system dictionary.
+   */
+  lastText?: string
 
   /** Makes the whole component unusable. */
   disabled?: boolean
@@ -161,6 +182,11 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   nextIcon: () => chevronRightIcon,
   prevText: undefined,
   nextText: undefined,
+  edgeControls: false,
+  firstIcon: () => firstPageIcon,
+  lastIcon: () => lastPageIcon,
+  firstText: undefined,
+  lastText: undefined,
   disabled: false,
   disabledPages: undefined,
   responsive: false,
@@ -185,6 +211,8 @@ const m = useMessages()
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.pagination.label)
 const resolvedPrevText = computed(() => props.prevText ?? m.value.pagination.previous)
 const resolvedNextText = computed(() => props.nextText ?? m.value.pagination.next)
+const resolvedFirstText = computed(() => props.firstText ?? m.value.pagination.first)
+const resolvedLastText = computed(() => props.lastText ?? m.value.pagination.last)
 
 /** The page being shown, counted from 1. It starts on the first. */
 const page = defineModel<number>({ default: 1 })
@@ -262,10 +290,22 @@ function step(direction: -1 | 1): number | undefined {
   return undefined
 }
 
+/**
+ * Where a first or last control leads: the reachable page farthest in that direction. It is
+ * `undefined` exactly when `step` is, so each edge control disables itself with its neighbour.
+ */
+function leap(direction: -1 | 1): number | undefined {
+  const end = direction < 0 ? 1 : total.value
+  for (let n = end; n !== currentPage.value; n -= direction) {
+    if (!isPageDisabled.value(n)) return n
+  }
+  return undefined
+}
+
+const firstTarget = computed(() => leap(-1))
 const prevTarget = computed(() => step(-1))
 const nextTarget = computed(() => step(1))
-const prevDisabled = computed(() => props.disabled || prevTarget.value === undefined)
-const nextDisabled = computed(() => props.disabled || nextTarget.value === undefined)
+const lastTarget = computed(() => leap(1))
 
 function goTo(n: number | undefined) {
   if (n === undefined) return
@@ -319,20 +359,25 @@ async function goFromControl(event: MouseEvent, n: number | undefined) {
   }
 }
 
+type ControlSide = 'first' | 'prev' | 'next' | 'last'
+
 /*
- * The previous and next controls, written once: the two differ only by their direction, and a
- * pair of template blocks drifting apart on the next change is exactly what this avoids. A
- * functional component because the two sit at either end of the row, with the pages in between,
- * where a `v-for` over two descriptors could not put them.
+ * The four controls, written once: they differ only by their direction and reach, and template
+ * blocks drifting apart on the next change is exactly what this avoids. A functional component
+ * because they sit at either end of the row, with the pages in between, where a `v-for` over
+ * descriptors could not put them.
  */
-const PageControl: FunctionalComponent<{ side: 'prev' | 'next' }> = ({ side }) => {
-  const prev = side === 'prev'
-  const label = prev ? resolvedPrevText.value : resolvedNextText.value
-  const icon = prev ? props.prevIcon : props.nextIcon
-  const target = prev ? prevTarget.value : nextTarget.value
-  const disabled = prev ? prevDisabled.value : nextDisabled.value
+const PageControl: FunctionalComponent<{ side: ControlSide }> = ({ side }) => {
+  const { label, icon, target } = {
+    first: { label: resolvedFirstText.value, icon: props.firstIcon, target: firstTarget.value },
+    prev: { label: resolvedPrevText.value, icon: props.prevIcon, target: prevTarget.value },
+    next: { label: resolvedNextText.value, icon: props.nextIcon, target: nextTarget.value },
+    last: { label: resolvedLastText.value, icon: props.lastIcon, target: lastTarget.value },
+  }[side]
+  const disabled = props.disabled || target === undefined
   const common = {
     class: 'v-pagination-control',
+    'data-side': side,
     variant: props.itemVariant,
     disabled,
     href: hrefFor(target ?? currentPage.value),
@@ -341,11 +386,12 @@ const PageControl: FunctionalComponent<{ side: 'prev' | 'next' }> = ({ side }) =
   }
   const glyph = () => h(VIcon, { ...iconProps(icon), mirrored: true })
   if (props.controls === 'icon') return h(VIconButton, { ...common, label }, glyph)
+  const backward = side === 'first' || side === 'prev'
   return h(
     VButton,
     { ...common, tone: 'neutral', 'aria-label': label },
     {
-      ...(props.controls === 'both' ? { [prev ? 'start' : 'end']: glyph } : {}),
+      ...(props.controls === 'both' ? { [backward ? 'start' : 'end']: glyph } : {}),
       default: () => h('span', { class: 'v-pagination-control-label' }, label),
     },
   )
@@ -414,6 +460,7 @@ defineExpose({
       :compact="compact || undefined"
       :elevated="elevated || undefined"
     >
+      <PageControl v-if="controls && edgeControls" side="first" />
       <PageControl v-if="controls" side="prev" />
 
       <template v-for="item in items" :key="item.key">
@@ -456,6 +503,7 @@ defineExpose({
       </template>
 
       <PageControl v-if="controls" side="next" />
+      <PageControl v-if="controls && edgeControls" side="last" />
     </VButtonGroup>
   </nav>
 </template>
@@ -541,19 +589,55 @@ defineExpose({
     .v-pagination[data-responsive] .v-pagination-page[data-distance='1'] {
       display: none;
     }
+
+    /* The first and last pills stay on screen and lead to the same pages. */
+    .v-pagination[data-responsive]
+      .v-pagination-control:is([data-side='first'], [data-side='last']) {
+      display: none;
+    }
+
+    /*
+     * VButtonGroup joins its segments by DOM position, which a hidden edge control still holds:
+     * the previous and next controls would keep the square corners, the pulled margin and the
+     * cleared or seamed border of an inner segment. These restore an outer edge, at (0,7,0)
+     * against the (0,6,0) of VButtonGroup's heaviest join rule. Controls are neutral and either
+     * ghost or outline, so their border is the outline frame or nothing.
+     */
+    .v-pagination[data-responsive]
+      > .v-pagination-items:not([data-detached])
+      > [data-side='first']
+      + .v-pagination-control[data-side='prev'] {
+      margin-inline-start: 0;
+      border-start-start-radius: var(--vectis-radius-interactive);
+      border-end-start-radius: var(--vectis-radius-interactive);
+      border-inline-start-color: var(--pagination-frame, transparent);
+    }
+
+    .v-pagination[data-responsive]
+      > .v-pagination-items:not([data-detached])
+      > [data-side='first']
+      + .v-pagination-control[data-side='prev']::before {
+      content: none;
+    }
+
+    .v-pagination[data-responsive]
+      > .v-pagination-items:not([data-detached])
+      > .v-pagination-control[data-side='next']:has(+ [data-side='last']) {
+      border-start-end-radius: var(--vectis-radius-interactive);
+      border-end-end-radius: var(--vectis-radius-interactive);
+      border-inline-end-color: var(--pagination-frame, transparent);
+    }
   }
 
   /*
-   * A disabled page greys its outline to a different token, hence a variable the second rule
-   * changes. VToggle's `--toggle-frame` is the same device.
+   * A disabled page or control greys its outline to a different token, hence a variable the
+   * second rule changes. VToggle's `--toggle-frame` is the same device.
    */
   .v-pagination[data-item-variant='outline'] {
     --pagination-frame: var(--vectis-color-border-strong);
   }
 
-  .v-pagination[data-item-variant='outline']
-    > *
-    > .v-pagination-page:is(:disabled, [aria-disabled='true']) {
+  .v-pagination[data-item-variant='outline'] > * > :is(:disabled, [aria-disabled='true']) {
     --pagination-frame: var(--vectis-color-border);
   }
 

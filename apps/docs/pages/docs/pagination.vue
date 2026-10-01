@@ -8,6 +8,8 @@ import PaginationControls from '~/examples/pagination/Controls.vue'
 import paginationControlsSource from '~/examples/pagination/Controls.vue?raw'
 import PaginationDetached from '~/examples/pagination/Detached.vue'
 import paginationDetachedSource from '~/examples/pagination/Detached.vue?raw'
+import PaginationEdgeControls from '~/examples/pagination/EdgeControls.vue'
+import paginationEdgeControlsSource from '~/examples/pagination/EdgeControls.vue?raw'
 import PaginationElevated from '~/examples/pagination/Elevated.vue'
 import paginationElevatedSource from '~/examples/pagination/Elevated.vue?raw'
 import PaginationLength from '~/examples/pagination/Length.vue'
@@ -92,6 +94,12 @@ useDocsHead('pagination')
   <DocsProse keypath="pagination.examples.controls.text" />
   <DocsExample :source="paginationControlsSource" stack>
     <PaginationControls />
+  </DocsExample>
+
+  <h3 id="edge-controls">{{ t('pagination.examples.edgeControls.title') }}</h3>
+  <DocsProse keypath="pagination.examples.edgeControls.text" />
+  <DocsExample :source="paginationEdgeControlsSource" stack>
+    <PaginationEdgeControls />
   </DocsExample>
 
   <h3 id="unreachable-pages">{{ t('pagination.examples.unreachablePages.title') }}</h3>

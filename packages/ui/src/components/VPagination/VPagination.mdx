@@ -80,6 +80,19 @@ extremities, with no separate test.
 
 <Canvas of={VPaginationStories.Controls} />
 
+## First / last controls
+
+`edgeControls` adds two controls outside the previous and next ones, leading to the first and
+last pages. They show what `controls` asks for and disappear with `controls: false`. `firstIcon`
+and `lastIcon` replace the default icons, and `firstText`/`lastText` supply both the visible
+text and the accessible name.
+
+Like the previous and next controls, they skip disabled pages: each one leads to the farthest
+reachable page in its direction, and disables itself together with its neighbour. Under `href`
+they carry `rel="first"` and `rel="last"`.
+
+<Canvas of={VPaginationStories.EdgeControls} />
+
 ## Logical truncation
 
 Without `totalVisible`, there is no truncation: the bar renders as many pills as `length`. When
@@ -94,8 +107,9 @@ shrinking: the bar keeps exactly the same width whatever the current page.
 
 The bar declares its own query container: the steps depend on the space actually allocated to
 the component, never on the viewport width. The most distant neighbours disappear first; the
-first page, the last and the current one are never hidden. At the narrowest step, a control in
-`both` mode folds down to icon-only.
+first page, the last and the current one are never hidden. A control in `both` mode folds down
+to icon-only as space runs out. At the narrowest step, the first and last controls are hidden:
+the first and last pills, still on screen, lead to the same pages.
 
 Two consequences worth knowing. First, the bar is block-level and takes its parent's width —
 which is what makes the truncation container-dependent — so alignment goes through the `align`
@@ -120,7 +134,7 @@ the whole component.
 
 ## Links
 
-Given `href`, a function from a page number to its address, every pill and both controls render
+Given `href`, a function from a page number to its address, every pill and every control render
 as links. The row can then page a list of products by URL: a page opens in a new tab, is
 bookmarked, and is followed by a crawler. The previous and next controls point at the page they
 lead to, carry `rel="prev"` and `rel="next"`, and become inert links (no address,
