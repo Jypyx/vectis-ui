@@ -50,11 +50,11 @@ interface ToggleProps {
    */
   detached?: boolean
   /**
-   * Takes the lines out from between the joined items, so the row reads as one frame
-   * rather than as segments. It has no effect under `detached`, where the items are
-   * separate buttons already.
+   * Draws a line between the joined items, so the row reads as segments rather than as
+   * one frame. It has no effect under `detached`, where the items are separate buttons
+   * already.
    */
-  seamless?: boolean
+  bordered?: boolean
   /** Whether the items run across the page or down it. */
   orientation?: ToggleOrientation
   /**
@@ -98,7 +98,7 @@ const props = withDefaults(defineProps<ToggleProps>(), {
   multiple: false,
   mandatory: false,
   detached: false,
-  seamless: false,
+  bordered: false,
   orientation: 'horizontal',
   fullWidth: false,
   itemVariant: 'ghost',
@@ -215,7 +215,7 @@ defineExpose({
     class="v-toggle"
     :orientation="orientation"
     :detached="detached"
-    :seamless="seamless"
+    :bordered="bordered"
     :full-width="fullWidth"
     :size="size"
     :compact="compact || undefined"
@@ -233,7 +233,7 @@ defineExpose({
 @layer vectis.components {
   /*
    * The `:not(:where(.v-overlay))` guard weighs nothing and keeps a panel from passing for an
-   * item; the pair is one specificity, so the arbitration with the group's seamless rules holds
+   * item; the pair is one specificity, so the arbitration with the group's cleared edges holds
    * on both shapes. The frame of an `outline` row, which only that row has: the colour its
    * unselected items already paint.
    */

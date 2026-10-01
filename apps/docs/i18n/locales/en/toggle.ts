@@ -26,9 +26,9 @@ export default {
       title: 'Detached',
       text: '<code>detached</code> separates the items with a gap.',
     },
-    seamless: {
-      title: 'No dividers',
-      text: '<code>seamless</code> removes inner dividers. Has no effect with <code>detached</code>.',
+    bordered: {
+      title: 'Dividers',
+      text: 'Joined items have no inner dividers by default. <code>bordered</code> adds them. Has no effect with <code>detached</code>.',
     },
     fullWidth: {
       title: 'Full width',
@@ -62,8 +62,7 @@ export default {
         mandatory:
           'Prevents deselecting the last selected item. Does not select an initial value or prevent external changes to <code>v-model</code>.',
         detached: 'Separates the items with a gap.',
-        seamless:
-          'Removes inner dividers while preserving the outer border. Has no effect with <code>detached</code>.',
+        bordered: 'Adds dividers between joined items. Has no effect with <code>detached</code>.',
         orientation: 'Horizontal row or vertical column. Sets the arrow navigation direction.',
         fullWidth:
           'Fills the parent’s width. Horizontal items share equal widths but may overflow if their content is too wide.',

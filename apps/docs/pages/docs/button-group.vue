@@ -2,6 +2,8 @@
 import api from '~/content/api/button-group'
 import ButtonGroupBasic from '~/examples/button-group/Basic.vue'
 import buttonGroupBasicSource from '~/examples/button-group/Basic.vue?raw'
+import ButtonGroupBordered from '~/examples/button-group/Bordered.vue'
+import buttonGroupBorderedSource from '~/examples/button-group/Bordered.vue?raw'
 import ButtonGroupCompact from '~/examples/button-group/Compact.vue'
 import buttonGroupCompactSource from '~/examples/button-group/Compact.vue?raw'
 import ButtonGroupDetached from '~/examples/button-group/Detached.vue'
@@ -16,8 +18,6 @@ import ButtonGroupLink from '~/examples/button-group/Link.vue'
 import buttonGroupLinkSource from '~/examples/button-group/Link.vue?raw'
 import ButtonGroupOrientation from '~/examples/button-group/Orientation.vue'
 import buttonGroupOrientationSource from '~/examples/button-group/Orientation.vue?raw'
-import ButtonGroupSeamless from '~/examples/button-group/Seamless.vue'
-import buttonGroupSeamlessSource from '~/examples/button-group/Seamless.vue?raw'
 import ButtonGroupSizes from '~/examples/button-group/Sizes.vue'
 import buttonGroupSizesSource from '~/examples/button-group/Sizes.vue?raw'
 import ButtonGroupStates from '~/examples/button-group/States.vue'
@@ -68,10 +68,10 @@ useDocsHead('buttonGroup')
     <ButtonGroupDetached />
   </DocsExample>
 
-  <h3 id="seamless">{{ t('buttonGroup.examples.seamless.title') }}</h3>
-  <DocsProse keypath="buttonGroup.examples.seamless.text" />
-  <DocsExample :source="buttonGroupSeamlessSource">
-    <ButtonGroupSeamless />
+  <h3 id="bordered">{{ t('buttonGroup.examples.bordered.title') }}</h3>
+  <DocsProse keypath="buttonGroup.examples.bordered.text" />
+  <DocsExample :source="buttonGroupBorderedSource">
+    <ButtonGroupBordered />
   </DocsExample>
 
   <h3 id="elevated">{{ t('buttonGroup.examples.elevated.title') }}</h3>

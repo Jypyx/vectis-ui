@@ -11,7 +11,7 @@ export default {
       props: [
         { name: 'orientation', type: 'ButtonGroupOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },
         { name: 'detached', type: 'boolean', default: 'false' },
-        { name: 'seamless', type: 'boolean', default: 'false' },
+        { name: 'bordered', type: 'boolean', default: 'false' },
         { name: 'fullWidth', type: 'boolean', default: 'false' },
         { name: 'variant', type: 'ButtonVariant', values: "'solid' | 'outline' | 'ghost' | 'soft'" },
         { name: 'tone', type: 'ButtonTone', values: "'accent' | 'neutral' | 'danger'" },

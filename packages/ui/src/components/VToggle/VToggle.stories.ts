@@ -76,7 +76,7 @@ const meta = {
     multiple: false,
     mandatory: false,
     detached: false,
-    seamless: false,
+    bordered: false,
     fullWidth: false,
     orientation: 'horizontal',
     itemVariant: 'ghost',
@@ -216,7 +216,6 @@ export const SelectedVariants: Story = {
         getComputedStyle(neighbour).borderBlockStartColor,
       )
       await expect(frame.borderBlockEndColor).not.toBe(TRANSPARENT)
-      await expect(frame.borderInlineStartColor).not.toBe(TRANSPARENT)
     }
 
     await expect(getComputedStyle(selectedIn('ghost', 'soft')).borderBlockStartColor).toBe(
@@ -225,23 +224,23 @@ export const SelectedVariants: Story = {
   },
 }
 
-export const Seamless: Story = {
+export const Bordered: Story = {
   render: () => ({
     components: { VToggle, VToggleItem },
-    setup: () => ({ lined: ref('centre'), plain: ref('centre'), t }),
+    setup: () => ({ plain: ref('centre'), lined: ref('centre'), t }),
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
-        <VToggle item-variant="outline" :label="t.withLine" v-model="lined">
+        <VToggle item-variant="outline" selected-variant="soft" :label="t.withoutLine" v-model="plain">
           <VToggleItem value="left" :label="t.left" />
           <VToggleItem value="centre" :label="t.centre" />
           <VToggleItem value="right" :label="t.right" />
         </VToggle>
         <VToggle
-          seamless
+          bordered
           item-variant="outline"
           selected-variant="soft"
-          :label="t.withoutLine"
-          v-model="plain"
+          :label="t.withLine"
+          v-model="lined"
         >
           <VToggleItem value="left" :label="t.left" />
           <VToggleItem value="centre" :label="t.centre" />
@@ -251,20 +250,25 @@ export const Seamless: Story = {
     `,
   }),
   /*
-   * Those rules are doubled to (0,6,0) for exactly this, and at equal specificity the winner
-   * would be whichever sheet the bundler put last. The middle item is the selected one, which
-   * is why it is the one read.
+   * The group's cleared edges are (0,6,0) for exactly this, and at equal specificity with the
+   * frame the winner would be whichever sheet the bundler put last. The middle item is the
+   * selected one, which is why it is the one read.
    */
   play: async ({ canvasElement }) => {
     const TRANSPARENT = 'rgba(0, 0, 0, 0)'
     const itemsOf = (row: HTMLElement) => [...row.querySelectorAll<HTMLElement>('.v-toggle-item')]
-    const [, plain] = [...canvasElement.querySelectorAll<HTMLElement>('.v-toggle')]
+    const [plain, lined] = [...canvasElement.querySelectorAll<HTMLElement>('.v-toggle')]
 
     const centre = getComputedStyle(itemsOf(plain as HTMLElement)[1] as HTMLElement)
     await expect(centre.borderInlineStartColor).toBe(TRANSPARENT)
     await expect(centre.borderInlineEndColor).toBe(TRANSPARENT)
     await expect(centre.borderBlockStartColor).not.toBe(TRANSPARENT)
     await expect(centre.borderBlockEndColor).not.toBe(TRANSPARENT)
+
+    // Bordered, the frame over a `soft` selection is restored on all four sides.
+    const framed = getComputedStyle(itemsOf(lined as HTMLElement)[1] as HTMLElement)
+    await expect(framed.borderInlineStartColor).not.toBe(TRANSPARENT)
+    await expect(framed.borderInlineEndColor).not.toBe(TRANSPARENT)
   },
 }
 
@@ -447,7 +451,13 @@ export const Companions: Story = {
     components: { VToggle, VToggleItem, VTooltip, VBadge },
     setup: () => ({ selection: ref('week'), t }),
     template: `
-      <VToggle v-model="selection" item-variant="outline" selected-variant="soft" :label="t.periods">
+      <VToggle
+        v-model="selection"
+        bordered
+        item-variant="outline"
+        selected-variant="soft"
+        :label="t.periods"
+      >
         <VToggleItem value="day" :label="t.day" />
         <VTooltip :text="t.weekHint">
           <template #default="{ triggerProps }">

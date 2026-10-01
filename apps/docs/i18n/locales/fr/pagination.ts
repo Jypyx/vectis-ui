@@ -12,7 +12,7 @@ export default {
     },
     detached: {
       title: 'Détaché',
-      text: '<code>detached</code> sépare les boutons. <code>seamless</code> retire les bordures entre les boutons joints.',
+      text: '<code>detached</code> sépare les boutons. <code>bordered</code> ajoute des séparateurs entre les boutons joints.',
     },
     elevated: {
       title: 'Surélevé',
@@ -62,8 +62,8 @@ export default {
         totalVisible:
           'Nombre maximal d’emplacements de pages et de points de suspension ; minimum 5. Absent, affiche toutes les pages.',
         detached: 'Sépare les boutons de page.',
-        seamless:
-          'Retire les séparateurs entre boutons joints. Ignoré si les boutons sont séparés.',
+        bordered:
+          'Ajoute des séparateurs entre les boutons joints. Ignoré si les boutons sont séparés.',
         itemVariant: 'Style des autres pages et des contrôles précédent/suivant.',
         selectedVariant: 'Style de la page actuelle.',
         tone: 'Couleur de la page actuelle.',

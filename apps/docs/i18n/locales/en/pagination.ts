@@ -12,7 +12,7 @@ export default {
     },
     detached: {
       title: 'Detached',
-      text: '<code>detached</code> separates the buttons. <code>seamless</code> removes borders between joined buttons.',
+      text: '<code>detached</code> separates the buttons. <code>bordered</code> adds dividers between joined buttons.',
     },
     elevated: {
       title: 'Elevated',
@@ -61,7 +61,7 @@ export default {
         length: 'Total page count.',
         totalVisible: 'Maximum page and ellipsis slots; minimum 5. Omitted shows every page.',
         detached: 'Separates page buttons.',
-        seamless: 'Removes separators between joined buttons. Ignored when detached.',
+        bordered: 'Adds dividers between joined buttons. Ignored when detached.',
         itemVariant: 'Style of other pages and previous/next controls.',
         selectedVariant: 'Style of the current page.',
         tone: 'Colour of the current page.',

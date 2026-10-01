@@ -26,9 +26,9 @@ export default {
       title: 'Éléments séparés',
       text: '<code>detached</code> sépare les éléments par un espace.',
     },
-    seamless: {
-      title: 'Sans séparateurs',
-      text: '<code>seamless</code> retire les séparateurs internes. Sans effet avec <code>detached</code>.',
+    bordered: {
+      title: 'Séparateurs',
+      text: 'Par défaut, les éléments joints n’ont pas de séparateurs internes. <code>bordered</code> les ajoute. Sans effet avec <code>detached</code>.',
     },
     fullWidth: {
       title: 'Pleine largeur',
@@ -62,8 +62,8 @@ export default {
         mandatory:
           'Empêche de désélectionner le dernier élément sélectionné. Ne choisit aucune valeur initiale et n’empêche pas les modifications externes de <code>v-model</code>.',
         detached: 'Sépare les éléments par un espace.',
-        seamless:
-          'Retire les séparateurs internes et conserve la bordure extérieure. Sans effet avec <code>detached</code>.',
+        bordered:
+          'Ajoute des séparateurs entre les éléments joints. Sans effet avec <code>detached</code>.',
         orientation:
           'Disposition en ligne horizontale ou en colonne verticale. Définit le sens de navigation avec les flèches.',
         fullWidth:

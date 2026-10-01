@@ -31,8 +31,8 @@ const t = storyText({
     detached: 'Detached',
     naturalWidth: 'As wide as its labels',
     fullWidth: 'Filling the column',
-    lined: 'Lined',
     seamless: 'Seamless',
+    bordered: 'Bordered',
     alone: 'Alone',
     singleButton: 'Single button',
     longLabels: 'Long labels',
@@ -68,8 +68,8 @@ const t = storyText({
     detached: 'Séparés',
     naturalWidth: 'À la largeur de ses libellés',
     fullWidth: 'Remplissant la colonne',
-    lined: 'Avec traits',
     seamless: 'Sans traits',
+    bordered: 'Avec traits',
     alone: 'Seul',
     singleButton: 'Bouton unique',
     longLabels: 'Libellés longs',
@@ -99,7 +99,7 @@ const meta = {
   args: {
     orientation: 'horizontal',
     detached: false,
-    seamless: false,
+    bordered: false,
     fullWidth: false,
     variant: 'outline',
     tone: 'neutral',
@@ -169,18 +169,18 @@ export const Detached: Story = {
   }),
 }
 
-export const Seamless: Story = {
+export const Bordered: Story = {
   render: () => ({
     components: { VButtonGroup, VButton },
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
-        <VButtonGroup variant="outline" tone="neutral" :label="t.lined">
+        <VButtonGroup variant="outline" tone="neutral" :label="t.seamless">
           <VButton>{{ t.day }}</VButton>
           <VButton>{{ t.week }}</VButton>
           <VButton>{{ t.month }}</VButton>
         </VButtonGroup>
-        <VButtonGroup seamless variant="outline" tone="neutral" :label="t.seamless">
+        <VButtonGroup bordered variant="outline" tone="neutral" :label="t.bordered">
           <VButton>{{ t.day }}</VButton>
           <VButton>{{ t.week }}</VButton>
           <VButton>{{ t.month }}</VButton>
@@ -199,9 +199,9 @@ export const Seamless: Story = {
     const segmentsOf = (name: string) =>
       within(canvas.getByRole('group', { name })).getAllByRole('button')
 
-    const [lined, linedWeek] = segmentsOf('Lined')
-    await expect(getComputedStyle(linedWeek!, '::before').content).toBe(GENERATED)
-    await expect(getComputedStyle(lined!).borderInlineEndColor).not.toBe(TRANSPARENT)
+    const [bordered, borderedWeek] = segmentsOf('Bordered')
+    await expect(getComputedStyle(borderedWeek!, '::before').content).toBe(GENERATED)
+    await expect(getComputedStyle(bordered!).borderInlineEndColor).not.toBe(TRANSPARENT)
 
     const [day, week, month] = segmentsOf('Seamless')
     await expect(getComputedStyle(week!, '::before').content).not.toBe(GENERATED)
@@ -334,7 +334,7 @@ export const Companions: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 24px; inline-size: 360px">
-        <VButtonGroup variant="outline" tone="neutral" :label="t.rowActions">
+        <VButtonGroup bordered variant="outline" tone="neutral" :label="t.rowActions">
           <VButton>{{ t.rename }}</VButton>
           <VTooltip :text="t.duplicateHint">
             <template #default="{ triggerProps }">
@@ -483,6 +483,7 @@ export const EdgeCases: Story = {
 }
 
 export const Playground: Story = {
+  args: { bordered: true },
   play: async ({ canvasElement }) => {
     const group = within(canvasElement).getByRole('group', { name: 'Alignment' })
     await expect(group).toHaveAttribute('data-orientation', 'horizontal')

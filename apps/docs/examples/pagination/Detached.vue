@@ -4,7 +4,7 @@ import { VPagination, VTypography } from 'vectis-ui'
 
 const joined = ref(3)
 const detached = ref(3)
-const seamless = ref(3)
+const bordered = ref(3)
 </script>
 
 <template>
@@ -27,13 +27,13 @@ const seamless = ref(3)
 
     <div class="row">
       <VPagination
-        v-model="seamless"
+        v-model="bordered"
         :length="6"
-        seamless
+        bordered
         item-variant="outline"
-        label="Seamless pages"
+        label="Bordered pages"
       />
-      <VTypography variant="caption" tone="muted">seamless</VTypography>
+      <VTypography variant="caption" tone="muted">bordered</VTypography>
     </div>
   </div>
 </template>

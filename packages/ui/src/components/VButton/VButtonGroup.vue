@@ -25,10 +25,10 @@ interface ButtonGroupProps {
    */
   detached?: boolean
   /**
-   * Takes the lines out from between the joined buttons, so the row reads as one frame rather
-   * than as segments.
+   * Draws a line between the joined buttons, so the row reads as segments rather than as one
+   * frame. It has no effect under `detached`.
    */
-  seamless?: boolean
+  bordered?: boolean
   /**
    * Stretches the row across the whole inline size of its parent, every segment taking an equal
    * share of that width.
@@ -70,13 +70,13 @@ interface ButtonGroupProps {
 }
 
 const props = withDefaults(defineProps<ButtonGroupProps>(), {
-  // `detached`, `seamless` and `fullWidth` are the group's own layout, and take a real
+  // `detached`, `bordered` and `fullWidth` are the group's own layout, and take a real
   // default like the orientation does. The six that follow travel down to the buttons,
   // and are `undefined` by default, the booleans included: it is `undefined`, and not
   // `false`, that means the group has no opinion and lets the button keep its own.
   orientation: 'horizontal',
   detached: false,
-  seamless: false,
+  bordered: false,
   fullWidth: false,
   variant: undefined,
   tone: undefined,
@@ -129,7 +129,7 @@ defineExpose({
 
 <template>
   <!--
-    `data-seamless` is withheld under `detached`, so the DOM never carries a claim the markup
+    `data-bordered` is withheld under `detached`, so the DOM never carries a claim the markup
     cannot honour: apart, the buttons share no edge for a line to sit on.
   -->
   <div
@@ -139,7 +139,7 @@ defineExpose({
     :aria-label="ariaLabel"
     :data-orientation="orientation"
     :data-detached="detached ? '' : undefined"
-    :data-seamless="seamless && !detached ? '' : undefined"
+    :data-bordered="bordered && !detached ? '' : undefined"
     :data-full-width="fullWidth ? '' : undefined"
   >
     <slot />
@@ -287,9 +287,9 @@ defineExpose({
   }
 
   /* Only the generating rule is guarded. The two orientation rules below place the insets
-     of a pseudo-element that, apart or seamless, is never generated at all. */
-  .v-button-group:not([data-detached]):not([data-seamless]) > .v-button:not(:first-child)::before,
-  .v-button-group:not([data-detached]):not([data-seamless])
+     of a pseudo-element that, unless the row is bordered, is never generated at all. */
+  .v-button-group[data-bordered] > .v-button:not(:first-child)::before,
+  .v-button-group[data-bordered]
     > :not(:where(.v-overlay, .v-button-group)):not(:first-child)
     .v-button:not(:where(.v-overlay *))::before {
     content: '';
@@ -315,39 +315,41 @@ defineExpose({
   }
 
   /*
-   * The class is doubled to reach (0,6,0), and that is not decoration. Written once these are
-   * (0,5,0), which TIES with the compound a component overrides a segment's border through
+   * Unless the row is bordered, the borders on both sides of every shared edge are cleared. The
+   * `:not([data-detached])` guard is also what brings these to (0,6,0), and that weight is not
+   * decoration. Without it they are (0,5,0), which TIES with the compound a component overrides
+   * a segment's border through
    * (VToggle's outline frame,
    * `.v-toggle[data-item-variant='outline'] > .v-toggle-item[aria-pressed='true']:is(…)`), and
    * a tie between two sheets is settled by whichever the consumer's bundler put last.
    */
-  .v-button-group.v-button-group[data-seamless][data-orientation='horizontal']
+  .v-button-group:not([data-detached]):not([data-bordered])[data-orientation='horizontal']
     > .v-button:not(:first-child),
-  .v-button-group.v-button-group[data-seamless][data-orientation='horizontal']
+  .v-button-group:not([data-detached]):not([data-bordered])[data-orientation='horizontal']
     > :not(:where(.v-overlay, .v-button-group)):not(:first-child)
     .v-button:not(:where(.v-overlay *)) {
     border-inline-start-color: transparent;
   }
 
-  .v-button-group.v-button-group[data-seamless][data-orientation='horizontal']
+  .v-button-group:not([data-detached]):not([data-bordered])[data-orientation='horizontal']
     > .v-button:has(~ :not(.v-overlay)),
-  .v-button-group.v-button-group[data-seamless][data-orientation='horizontal']
+  .v-button-group:not([data-detached]):not([data-bordered])[data-orientation='horizontal']
     > :not(:where(.v-overlay, .v-button-group)):has(~ :not(.v-overlay))
     .v-button:not(:where(.v-overlay *)) {
     border-inline-end-color: transparent;
   }
 
-  .v-button-group.v-button-group[data-seamless][data-orientation='vertical']
+  .v-button-group:not([data-detached]):not([data-bordered])[data-orientation='vertical']
     > .v-button:not(:first-child),
-  .v-button-group.v-button-group[data-seamless][data-orientation='vertical']
+  .v-button-group:not([data-detached]):not([data-bordered])[data-orientation='vertical']
     > :not(:where(.v-overlay, .v-button-group)):not(:first-child)
     .v-button:not(:where(.v-overlay *)) {
     border-block-start-color: transparent;
   }
 
-  .v-button-group.v-button-group[data-seamless][data-orientation='vertical']
+  .v-button-group:not([data-detached]):not([data-bordered])[data-orientation='vertical']
     > .v-button:has(~ :not(.v-overlay)),
-  .v-button-group.v-button-group[data-seamless][data-orientation='vertical']
+  .v-button-group:not([data-detached]):not([data-bordered])[data-orientation='vertical']
     > :not(:where(.v-overlay, .v-button-group)):has(~ :not(.v-overlay))
     .v-button:not(:where(.v-overlay *)) {
     border-block-end-color: transparent;

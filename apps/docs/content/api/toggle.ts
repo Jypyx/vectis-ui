@@ -12,7 +12,7 @@ export default {
         { name: 'multiple', type: 'boolean', default: 'false' },
         { name: 'mandatory', type: 'boolean', default: 'false' },
         { name: 'detached', type: 'boolean', default: 'false' },
-        { name: 'seamless', type: 'boolean', default: 'false' },
+        { name: 'bordered', type: 'boolean', default: 'false' },
         { name: 'orientation', type: 'ToggleOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },
         { name: 'fullWidth', type: 'boolean', default: 'false' },
         { name: 'itemVariant', type: 'ToggleItemVariant', values: "'ghost' | 'outline'", default: "'ghost'" },

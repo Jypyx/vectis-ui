@@ -196,20 +196,20 @@ describe('VToggle', () => {
     })
   })
 
-  describe('seamless', () => {
-    it('the joined row keeps its lines unless they are refused', () => {
+  describe('bordered', () => {
+    it('the joined row draws no lines unless they are asked for', () => {
       const { container } = mount({ initial: 'a' })
-      expect(container.querySelector('.v-button-group')?.hasAttribute('data-seamless')).toBe(false)
+      expect(container.querySelector('.v-button-group')?.hasAttribute('data-bordered')).toBe(false)
     })
 
-    it('the prop marks the joined root, which is what the frame rules read', () => {
-      const { container } = mount({ initial: 'a', toggleAttrs: 'seamless' })
-      expect(container.querySelector('.v-button-group')?.hasAttribute('data-seamless')).toBe(true)
+    it('the prop marks the joined root, which is what the seam rules read', () => {
+      const { container } = mount({ initial: 'a', toggleAttrs: 'bordered' })
+      expect(container.querySelector('.v-button-group')?.hasAttribute('data-bordered')).toBe(true)
     })
 
-    it('detached, it is inert: there is no shared edge to take a line off', () => {
-      const { container } = mount({ initial: 'a', toggleAttrs: 'detached seamless' })
-      expect(container.querySelector('.v-toggle')?.hasAttribute('data-seamless')).toBe(false)
+    it('detached, it is inert: there is no shared edge to draw a line on', () => {
+      const { container } = mount({ initial: 'a', toggleAttrs: 'detached bordered' })
+      expect(container.querySelector('.v-toggle')?.hasAttribute('data-bordered')).toBe(false)
     })
   })
 

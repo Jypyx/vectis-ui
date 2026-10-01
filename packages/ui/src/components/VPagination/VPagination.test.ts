@@ -160,18 +160,18 @@ describe('VPagination', () => {
       expect(ellipsis?.hasAttribute('data-icon-only')).toBe(true)
     })
 
-    it('seamless reaches the row, and the size is carried by the row to every button', () => {
+    it('bordered reaches the row, and the size is carried by the row to every button', () => {
       const { container } = render(VPagination, {
         props: {
           length: 20,
           modelValue: 10,
           totalVisible: 7,
-          seamless: true,
+          bordered: true,
           size: 'sm',
           compact: true,
         },
       })
-      expect(container.querySelector('.v-button-group')?.hasAttribute('data-seamless')).toBe(true)
+      expect(container.querySelector('.v-button-group')?.hasAttribute('data-bordered')).toBe(true)
       const buttons = [...container.querySelectorAll<HTMLElement>('.v-button')]
       expect(buttons.every((el) => el.dataset.size === 'sm')).toBe(true)
       expect(buttons.every((el) => el.hasAttribute('data-compact'))).toBe(true)

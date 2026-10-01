@@ -50,13 +50,13 @@ describe('VButtonGroup', () => {
   })
 
   describe('how the row is drawn', () => {
-    it('joined and lined by default: neither marker is on the root', () => {
+    it('joined and unlined by default: neither marker is on the root', () => {
       const { getByRole } = render(VButtonGroup, {
         slots: { default: '<button>A</button>' },
       })
       const group = getByRole('group')
       expect(group.hasAttribute('data-detached')).toBe(false)
-      expect(group.hasAttribute('data-seamless')).toBe(false)
+      expect(group.hasAttribute('data-bordered')).toBe(false)
     })
 
     it('detached: the marker the whole joining half of the sheet steps aside for', () => {
@@ -67,22 +67,22 @@ describe('VButtonGroup', () => {
       expect(getByRole('group').hasAttribute('data-detached')).toBe(true)
     })
 
-    it('seamless: the marker the transparent shared edges read', () => {
+    it('bordered: the marker the seams between segments read', () => {
       const { getByRole } = render(VButtonGroup, {
-        props: { seamless: true },
+        props: { bordered: true },
         slots: { default: '<button>A</button>' },
       })
-      expect(getByRole('group').hasAttribute('data-seamless')).toBe(true)
+      expect(getByRole('group').hasAttribute('data-bordered')).toBe(true)
     })
 
     // The DOM never carries a claim the markup cannot honour: apart, the buttons share
-    // no edge for a line to sit on, so there is nothing for `seamless` to take away.
-    it('detached, seamless is withheld', () => {
+    // no edge for a line to sit on, so there is nothing for `bordered` to draw.
+    it('detached, bordered is withheld', () => {
       const { getByRole } = render(VButtonGroup, {
-        props: { detached: true, seamless: true },
+        props: { detached: true, bordered: true },
         slots: { default: '<button>A</button>' },
       })
-      expect(getByRole('group').hasAttribute('data-seamless')).toBe(false)
+      expect(getByRole('group').hasAttribute('data-bordered')).toBe(false)
     })
   })
 

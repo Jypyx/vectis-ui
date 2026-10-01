@@ -24,12 +24,12 @@ JavaScript.
 
 ## Joined and detached
 
-The buttons are joined by default: merged borders, rounded corners only at the ends. `detached`
-spaces them out instead and gives each its own corners, and `seamless` keeps them joined while
-taking the lines out from between them, both on the terms of `VButtonGroup`'s own props. Being a `VButtonGroup` is what dictates
+The buttons are joined by default: merged borders, no line between them, rounded corners only at
+the ends. `detached` spaces them out instead and gives each its own corners, and `bordered` keeps
+them joined while drawing a line between them, both on the terms of `VButtonGroup`'s own props. Being a `VButtonGroup` is what dictates
 the internal structure — `VButtonGroup` styles only
 its **direct** children, hence no `<ul>`/`<li>` and an ellipsis rendered as an inert button
-rather than a `<span>`: the seam stays continuous, including when a neighbour is hidden by the
+rather than a `<span>`: the joints stay continuous, including when a neighbour is hidden by the
 responsive truncation.
 
 <Canvas of={VPaginationStories.Attached} />

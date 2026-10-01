@@ -66,11 +66,10 @@ interface PaginationProps {
    */
   detached?: boolean
   /**
-   * Takes the lines out from between the joined buttons, so the row reads as one frame rather
-   * than as segments, on the terms of VButtonGroup's own `seamless`. It has no effect under
-   * `detached`.
+   * Draws a line between the joined buttons, so the row reads as segments rather than as one
+   * frame, on the terms of VButtonGroup's own `bordered`. It has no effect under `detached`.
    */
-  seamless?: boolean
+  bordered?: boolean
   /**
    * How the pages OTHER than the current one, and the controls, are drawn. It is named for the
    * ITEMS because that is what it paints: on VTabs and VDataTable `variant` names the
@@ -149,7 +148,7 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   length: 1,
   totalVisible: undefined,
   detached: false,
-  seamless: false,
+  bordered: false,
   itemVariant: 'ghost',
   selectedVariant: 'solid',
   tone: 'accent',
@@ -410,7 +409,7 @@ defineExpose({
     <VButtonGroup
       class="v-pagination-items"
       :detached="detached"
-      :seamless="seamless"
+      :bordered="bordered"
       :size="size"
       :compact="compact || undefined"
       :elevated="elevated || undefined"

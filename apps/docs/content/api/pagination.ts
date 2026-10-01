@@ -12,7 +12,7 @@ export default {
         { name: 'length', type: 'number', default: '1' },
         { name: 'totalVisible', type: 'number' },
         { name: 'detached', type: 'boolean', default: 'false' },
-        { name: 'seamless', type: 'boolean', default: 'false' },
+        { name: 'bordered', type: 'boolean', default: 'false' },
         { name: 'itemVariant', type: 'PaginationItemVariant', values: "'ghost' | 'outline'", default: "'ghost'" },
         { name: 'selectedVariant', type: 'PaginationSelectedVariant', values: "'solid' | 'soft' | 'ghost'", default: "'solid'" },
         { name: 'tone', type: 'PaginationTone', values: "'accent' | 'neutral' | 'danger'", default: "'accent'" },

@@ -2,6 +2,8 @@
 import api from '~/content/api/toggle'
 import ToggleBasic from '~/examples/toggle/Basic.vue'
 import toggleBasicSource from '~/examples/toggle/Basic.vue?raw'
+import ToggleBordered from '~/examples/toggle/Bordered.vue'
+import toggleBorderedSource from '~/examples/toggle/Bordered.vue?raw'
 import ToggleDetached from '~/examples/toggle/Detached.vue'
 import toggleDetachedSource from '~/examples/toggle/Detached.vue?raw'
 import ToggleDisabled from '~/examples/toggle/Disabled.vue'
@@ -20,8 +22,6 @@ import ToggleMultiple from '~/examples/toggle/Multiple.vue'
 import toggleMultipleSource from '~/examples/toggle/Multiple.vue?raw'
 import ToggleOrientation from '~/examples/toggle/Orientation.vue'
 import toggleOrientationSource from '~/examples/toggle/Orientation.vue?raw'
-import ToggleSeamless from '~/examples/toggle/Seamless.vue'
-import toggleSeamlessSource from '~/examples/toggle/Seamless.vue?raw'
 import ToggleSelectedVariants from '~/examples/toggle/SelectedVariants.vue'
 import toggleSelectedVariantsSource from '~/examples/toggle/SelectedVariants.vue?raw'
 import ToggleSizes from '~/examples/toggle/Sizes.vue'
@@ -82,10 +82,10 @@ useDocsHead('toggle')
     <ToggleDetached />
   </DocsExample>
 
-  <h3 id="seamless">{{ t('toggle.examples.seamless.title') }}</h3>
-  <DocsProse keypath="toggle.examples.seamless.text" />
-  <DocsExample :source="toggleSeamlessSource" stack>
-    <ToggleSeamless />
+  <h3 id="bordered">{{ t('toggle.examples.bordered.title') }}</h3>
+  <DocsProse keypath="toggle.examples.bordered.text" />
+  <DocsExample :source="toggleBorderedSource" stack>
+    <ToggleBordered />
   </DocsExample>
 
   <h3 id="full-width">{{ t('toggle.examples.fullWidth.title') }}</h3>

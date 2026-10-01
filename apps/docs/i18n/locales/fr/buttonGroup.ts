@@ -18,9 +18,9 @@ export default {
       title: 'Boutons séparés',
       text: '<code>detached</code> sépare les boutons en conservant les réglages d’apparence du groupe.',
     },
-    seamless: {
-      title: 'Sans séparateurs',
-      text: '<code>seamless</code> retire les séparateurs internes et conserve la bordure extérieure. Sans effet avec <code>detached</code>.',
+    bordered: {
+      title: 'Séparateurs',
+      text: 'Par défaut, les boutons joints n’ont pas de séparateurs internes. <code>bordered</code> les ajoute. Sans effet avec <code>detached</code>.',
     },
     elevated: {
       title: 'Avec une ombre',
@@ -57,8 +57,8 @@ export default {
         orientation: 'Disposition en ligne horizontale ou en colonne verticale.',
         detached:
           'Sépare les boutons par un espace. Chacun garde ses coins et bordures ; les réglages d’apparence du groupe restent appliqués.',
-        seamless:
-          'Retire les séparateurs internes et conserve la bordure extérieure. Sans effet avec <code>detached</code>.',
+        bordered:
+          'Ajoute des séparateurs entre les boutons joints. Sans effet avec <code>detached</code>.',
         fullWidth:
           'Occupe toute la largeur du parent. Les boutons horizontaux ont la même largeur, mais peuvent déborder si leur contenu est trop large.',
         variant:

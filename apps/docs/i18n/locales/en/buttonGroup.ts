@@ -18,9 +18,9 @@ export default {
       title: 'Detached',
       text: '<code>detached</code> separates the buttons while preserving the group’s appearance settings.',
     },
-    seamless: {
-      title: 'No dividers',
-      text: '<code>seamless</code> removes inner dividers and preserves the outer border. Has no effect with <code>detached</code>.',
+    bordered: {
+      title: 'Dividers',
+      text: 'Joined buttons have no inner dividers by default. <code>bordered</code> adds them. Has no effect with <code>detached</code>.',
     },
     elevated: {
       title: 'Elevated',
@@ -57,8 +57,7 @@ export default {
         orientation: 'Horizontal row or vertical column.',
         detached:
           'Separates the buttons with a gap. Each keeps its own corners and borders; group appearance settings still apply.',
-        seamless:
-          'Removes inner dividers while preserving the outer border. Has no effect with <code>detached</code>.',
+        bordered: 'Adds dividers between joined buttons. Has no effect with <code>detached</code>.',
         fullWidth:
           'Fills the parent’s width. Horizontal buttons share equal widths but may overflow if their content is too wide.',
         variant:

@@ -17,11 +17,11 @@ rendered in the group's `tone` (`selectedVariant`, `solid` by default), the othe
 
 ## Joined or detached
 
-The row **is** a `VButtonGroup`, and that is where the drawing lives: `detached`, `seamless`,
+The row **is** a `VButtonGroup`, and that is where the drawing lives: `detached`, `bordered`,
 `orientation`, `size`, `compact` and `elevated` are handed straight over to it. What VToggle
 adds on top is the selection.
 
-Joined by default, the items form one segmented control with a line at each joint. `detached`
+Joined by default, the items form one segmented control with no line between them. `detached`
 separates them with a gutter, each button regaining its rounded corners.
 
 <Canvas of={VToggleStories.Variants} />
@@ -37,17 +37,18 @@ draws the one that is, in the group's `tone`:
 
 <Canvas of={VToggleStories.SelectedVariants} />
 
-## Seamless
+## Bordered
 
-A joined row carries a line at every joint. `seamless` takes them out: the borders on both sides
-of each shared edge are cleared as well, so an `outline` row reads as one frame rather than as
-three boxes. It is inert under `detached`, where the items are separate buttons already.
+A joined row draws no line between its items: the borders on both sides of each shared edge are
+cleared, so an `outline` row reads as one frame rather than as three boxes. `bordered` lays a line
+at every joint instead. It is inert under `detached`, where the items are separate buttons
+already.
 
 In an `outline` row a `soft` or `ghost` selection keeps that frame closed either way. The border
-VButton leaves transparent is restored, in the colour the rest of the row paints, on every edge
-except the ones the segment shares with a neighbour.
+VButton leaves transparent is restored, in the colour the rest of the row paints: on every edge in
+a `bordered` row, and on every edge except the ones the segment shares with a neighbour otherwise.
 
-<Canvas of={VToggleStories.Seamless} />
+<Canvas of={VToggleStories.Bordered} />
 
 ## Selection
 

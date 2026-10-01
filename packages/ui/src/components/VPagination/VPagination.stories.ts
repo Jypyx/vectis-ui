@@ -27,7 +27,7 @@ const meta = {
     length: 20,
     totalVisible: 7,
     detached: false,
-    seamless: false,
+    bordered: false,
     itemVariant: 'ghost',
     tone: 'accent',
     size: 'md',
@@ -188,21 +188,22 @@ export const Elevated: Story = {
   }),
 }
 
-/** `seamless` keeps the row joined and takes the lines out from between the buttons. */
-export const Seamless: Story = {
+/** `bordered` keeps the row joined and draws a line between the buttons. */
+export const Bordered: Story = {
   render: () => ({
     components: { VPagination },
-    setup: () => ({ lined: ref(3), plain: ref(3) }),
+    setup: () => ({ plain: ref(3), lined: ref(3) }),
     template: `
       <div style="display: grid; gap: 24px">
-        <VPagination :length="8" item-variant="outline" label="lined" v-model="lined" />
-        <VPagination :length="8" seamless item-variant="outline" label="seamless" v-model="plain" />
+        <VPagination :length="8" item-variant="outline" label="seamless" v-model="plain" />
+        <VPagination :length="8" bordered item-variant="outline" label="bordered" v-model="lined" />
       </div>
     `,
   }),
   play: async ({ canvasElement }) => {
-    const [, plain] = [...canvasElement.querySelectorAll<HTMLElement>('.v-button-group')]
-    await expect(plain).toHaveAttribute('data-seamless')
+    const [plain, lined] = [...canvasElement.querySelectorAll<HTMLElement>('.v-button-group')]
+    await expect(plain).not.toHaveAttribute('data-bordered')
+    await expect(lined).toHaveAttribute('data-bordered')
   },
 }
 

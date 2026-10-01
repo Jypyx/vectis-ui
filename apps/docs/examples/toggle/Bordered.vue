@@ -2,15 +2,15 @@
 import { ref } from 'vue'
 import { VToggle, VToggleItem } from 'vectis-ui'
 
-const segmented = ref('week')
 const seamless = ref('week')
+const bordered = ref('week')
 </script>
 
 <template>
   <div class="demo">
     <div class="row">
-      <p class="caption">with the seams</p>
-      <VToggle v-model="segmented" item-variant="outline" label="Period, segmented">
+      <p class="caption">without the seams, the default</p>
+      <VToggle v-model="seamless" item-variant="outline" label="Period, seamless">
         <VToggleItem value="day" label="Day" />
         <VToggleItem value="week" label="Week" />
         <VToggleItem value="month" label="Month" />
@@ -18,8 +18,8 @@ const seamless = ref('week')
     </div>
 
     <div class="row">
-      <p class="caption">seamless</p>
-      <VToggle v-model="seamless" seamless item-variant="outline" label="Period, seamless">
+      <p class="caption">bordered</p>
+      <VToggle v-model="bordered" bordered item-variant="outline" label="Period, bordered">
         <VToggleItem value="day" label="Day" />
         <VToggleItem value="week" label="Week" />
         <VToggleItem value="month" label="Month" />
