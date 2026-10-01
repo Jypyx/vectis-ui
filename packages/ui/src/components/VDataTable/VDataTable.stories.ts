@@ -411,7 +411,7 @@ export const FullHeight: Story = {
     expect(Math.round(wrapper.getBoundingClientRect().height)).toBe(460)
     expect(scroller.scrollHeight).toBeGreaterThan(scroller.clientHeight)
 
-    await userEvent.click(canvas.getByRole('button', { name: 'Page 3' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Last page' }))
     await waitFor(() => {
       expect(canvasElement.querySelectorAll('tbody tr').length).toBe(2)
       expect(Math.round(wrapper.getBoundingClientRect().height)).toBe(460)
