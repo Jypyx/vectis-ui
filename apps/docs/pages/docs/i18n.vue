@@ -115,6 +115,7 @@ const PARAMETERISED: Record<DictionaryLanguage, Record<ParameterisedKey, string>
     'calendar.moreEvents': '(count) => `+${count} more`',
     'calendar.openDay': '(day) => `Open ${day}`',
     'calendar.movedTo': '(title, when) => `${title} moved to ${when}.`',
+    'treeView.loadError': '(label) => `Could not load the contents of ${label}`',
   },
   fr: {
     'common.remove': '(name) => `Retirer ${name}`',
@@ -142,6 +143,7 @@ const PARAMETERISED: Record<DictionaryLanguage, Record<ParameterisedKey, string>
     'calendar.moreEvents': "(count) => `+${count} autre${count > 1 ? 's' : ''}`",
     'calendar.openDay': '(day) => `Ouvrir le ${day}`',
     'calendar.movedTo': '(title, when) => `${title} déplacé au ${when}.`',
+    'treeView.loadError': '(label) => `Impossible de charger le contenu de ${label}`',
   },
 }
 

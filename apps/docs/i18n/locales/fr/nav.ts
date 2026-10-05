@@ -67,6 +67,7 @@ const nav: NavMessages = {
   toast: 'Notification',
   toggle: 'Groupe à bascule',
   tooltip: 'Infobulle',
+  'tree-view': 'Arborescence',
   typography: 'Typographie',
 
   'js-helpers': 'Fonctions JavaScript',

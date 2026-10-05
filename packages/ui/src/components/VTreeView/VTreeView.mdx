@@ -1,0 +1,86 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VTreeViewStories from './VTreeView.stories'
+
+<Meta of={VTreeViewStories} />
+
+# TreeView
+
+A hierarchy the reader folds and unfolds: files, categories, a site map. VTreeView follows the
+ARIA tree pattern, with a single tab stop and arrow-key navigation.
+
+<Canvas of={VTreeViewStories.Default} />
+
+<Controls of={VTreeViewStories.Default} />
+
+## Items and expansion
+
+`items` lists the first level. Each node has a `value`, unique across the tree, and a `label`;
+optionally an `icon`, `children`, `href`, `current`, `disabled` and `lazy`. `v-model:expanded`
+holds the values of the expanded nodes; left unbound, the tree keeps that state itself.
+
+Clicking the chevron folds a branch. In the default `none` mode, clicking the row does too, and
+the `activate` event follows every click or Enter on a node.
+
+## Selection
+
+`selectionMode="single"` selects one node at a time, by click, Enter or Space; `v-model` holds its
+value, or `null`. The chevron folds a branch without selecting it.
+
+<Canvas of={VTreeViewStories.SingleSelection} />
+
+`selectionMode="multiple"` gives each row a checkbox and `v-model` an array. Checking a branch
+checks its whole subtree, and a branch partly checked shows a dash. The model lists the checked
+nodes in tree order, a branch included once everything under it is checked; a value given for a
+branch checks its subtree. Disabled nodes keep their state, and values the tree does not know,
+such as the children of a node not loaded yet, are kept.
+
+<Canvas of={VTreeViewStories.MultipleSelection} />
+
+## Links
+
+A node with `href` is a link, which keeps opening in a new tab and the middle click. `current`
+marks the page being viewed and receives the initial tab stop. To hand navigation to a router,
+call `preventDefault()` on the event that `activate` receives. Space selects a link without
+following it.
+
+<Canvas of={VTreeViewStories.Navigation} />
+
+## Lazy loading
+
+`loadChildren` fetches the children of a node marked `lazy` on its first expansion, and the tree
+keeps them. The chevron gives way to a spinner meanwhile. An empty answer turns the node into a
+leaf. A failure closes the node, marks it with an icon, announces it, and the next expansion
+retries. Loading waits for the client: during server rendering, an expanded lazy node renders
+without children.
+
+<Canvas of={VTreeViewStories.LazyLoading} />
+
+## Custom content
+
+The `#icon`, `#label` and `#end` slots receive the node, its `level` and whether it is
+`expanded`. The `#end` slot must not hold anything focusable: a row is a single control.
+
+<Canvas of={VTreeViewStories.CustomContent} />
+
+## Sizes
+
+<Canvas of={VTreeViewStories.Sizes} />
+
+## Accessibility
+
+- The tree is named "Tree" from the dictionary (`label`); `aria-labelledby` takes over from it.
+- The rows are rendered flat, their depth given by `aria-level`, `aria-setsize` and
+  `aria-posinset`, so a node's name is its own label and not its subtree's.
+- One row is in the tab order: the last focused, else the selected or current node, else the
+  first. Up and Down move between visible rows, Home and End reach the ends. Right opens a branch,
+  then enters it; Left goes up to the parent, then closes it. The two are swapped in a
+  right-to-left page. `*` opens every branch beside the focused node, and typing moves to the next
+  label starting with the letters typed.
+- `single` mode sets `aria-selected` on every row; `multiple` mode sets `aria-checked`, `mixed`
+  for a partly checked branch, and `aria-multiselectable` on the tree. Selection never follows
+  focus.
+- A disabled node stays reachable by the keyboard, so it is still found, but cannot be selected,
+  activated or folded.
+- A loading node is `aria-busy`. A failed load is announced, and "Could not load" is said after
+  the node's label until the next attempt.
+- In forced colours, the selected row takes the system selection colours.

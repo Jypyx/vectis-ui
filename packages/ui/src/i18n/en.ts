@@ -112,6 +112,11 @@ export const en: Messages = {
     completed: 'Completed',
     error: 'Error',
   },
+  treeView: {
+    label: 'Tree',
+    loadFailed: 'Could not load',
+    loadError: (label) => `Could not load the contents of ${label}`,
+  },
   timePicker: {
     label: 'Time picker',
     meridiem: 'AM or PM',

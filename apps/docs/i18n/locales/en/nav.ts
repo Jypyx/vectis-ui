@@ -69,6 +69,7 @@ const nav: NavMessages = {
   toast: 'Toast',
   toggle: 'Toggle',
   tooltip: 'Tooltip',
+  'tree-view': 'Tree view',
   typography: 'Typography',
 
   'js-helpers': 'JavaScript helpers',

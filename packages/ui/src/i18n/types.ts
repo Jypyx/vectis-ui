@@ -155,6 +155,14 @@ export interface Messages {
     /** Said after the title of a step that has an error. */
     error: string
   }
+  treeView: {
+    /** What the tree is called. */
+    label: string
+    /** Said after the label of a node whose children could not be loaded. */
+    loadFailed: string
+    /** Announced when the children of a node could not be loaded. */
+    loadError: (label: string) => string
+  }
   /** The clock itself. VTimeInput reads the half-day words from here too: there is one
       vocabulary for choosing a time, wherever the control that does it is rendered. */
   timePicker: {

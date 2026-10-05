@@ -64,6 +64,7 @@ import timePicker from './en/timePicker'
 import toast from './en/toast'
 import toggle from './en/toggle'
 import tooltip from './en/tooltip'
+import treeView from './en/treeView'
 import typography from './en/typography'
 
 export interface DocsMessages {
@@ -136,6 +137,7 @@ export interface DocsMessages {
   toast: typeof toast
   toggle: typeof toggle
   tooltip: typeof tooltip
+  treeView: typeof treeView
   typography: typeof typography
 
   jsHelpers: typeof jsHelpers
@@ -208,6 +210,7 @@ export default defineI18nLocale((): DocsMessages => ({
   toast,
   toggle,
   tooltip,
+  treeView,
   typography,
 
   jsHelpers,

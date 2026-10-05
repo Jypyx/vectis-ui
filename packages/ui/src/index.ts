@@ -62,6 +62,14 @@ export type {
 export { default as VTab } from './components/VTabs/VTab.vue'
 export { default as VTabPanel } from './components/VTabs/VTabPanel.vue'
 export { default as VStepper } from './components/VStepper/VStepper.vue'
+export { default as VTreeView } from './components/VTreeView/VTreeView.vue'
+export type {
+  TreeItem,
+  TreeItemSlotProps,
+  TreeSelectionMode,
+  TreeViewModelValue,
+  TreeViewSize,
+} from './components/VTreeView/VTreeView.vue'
 export type {
   StepperIndicatorSlotProps,
   StepperOrientation,

@@ -91,6 +91,7 @@ export const components = [
   entry('toast'),
   entry('toggle'),
   entry('tooltip'),
+  entry('tree-view'),
   entry('typography'),
 ] as const
 

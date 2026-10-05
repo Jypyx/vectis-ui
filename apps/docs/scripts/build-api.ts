@@ -90,6 +90,7 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
   { slug: 'toast', components: ['VToaster'], internals: ['VToast'] },
   { slug: 'toggle', components: ['VToggle', 'VToggleItem'] },
   { slug: 'tooltip', components: ['VTooltip'] },
+  { slug: 'tree-view', components: ['VTreeView'] },
   { slug: 'typography', components: ['VTypography'] },
 ]
 

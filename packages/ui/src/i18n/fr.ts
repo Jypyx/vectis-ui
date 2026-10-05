@@ -115,6 +115,11 @@ export const fr: Messages = {
     completed: 'Terminée',
     error: 'Erreur',
   },
+  treeView: {
+    label: 'Arborescence',
+    loadFailed: 'Chargement impossible',
+    loadError: (label) => `Impossible de charger le contenu de ${label}`,
+  },
   timePicker: {
     label: 'Sélecteur d’heure',
     meridiem: 'AM ou PM',
