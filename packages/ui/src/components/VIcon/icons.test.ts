@@ -51,6 +51,7 @@ const EXPECTED = [
   'schedule',
   'search',
   'search_off',
+  'star',
   'swap_vert',
   'table_chart',
   'video_file',

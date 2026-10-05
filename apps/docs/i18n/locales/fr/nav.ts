@@ -53,6 +53,7 @@ const nav: NavMessages = {
   'progress-circular': 'Progression circulaire',
   'progress-linear': 'Progression linéaire',
   radio: 'Bouton radio',
+  rating: 'Notation',
   separator: 'Séparateur',
   'side-navigation': 'Navigation latérale',
   'skeleton-loader': 'Squelette de chargement',

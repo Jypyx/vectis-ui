@@ -55,6 +55,7 @@ const nav: NavMessages = {
   'progress-circular': 'Progress circular',
   'progress-linear': 'Progress linear',
   radio: 'Radio',
+  rating: 'Rating',
   separator: 'Separator',
   'side-navigation': 'Side navigation',
   'skeleton-loader': 'Skeleton loader',

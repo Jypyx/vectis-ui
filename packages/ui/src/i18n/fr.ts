@@ -111,6 +111,11 @@ export const fr: Messages = {
     increment: 'Augmenter',
     decrement: 'Diminuer',
   },
+  rating: {
+    label: 'Note',
+    empty: 'Aucune note',
+    value: (value, max) => `${value} sur ${max}`,
+  },
   stepper: {
     label: 'Progression',
     completed: 'Terminée',

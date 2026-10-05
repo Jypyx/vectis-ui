@@ -46,6 +46,7 @@ const NAMES = [
   'schedule',
   'search',
   'search_off',
+  'star',
   'swap_vert',
   'table_chart',
   'video_file',
@@ -59,6 +60,6 @@ export type IconName = (typeof NAMES)[number]
  * The names alone, carrying no drawing at all. `classIconResolver` in `strict` mode
  * asks nothing more than "does the design system ship this name?", and a module of
  * its own is what stops a consumer who wired in their OWN icon library from
- * downloading 42 Material paths to answer that one question.
+ * downloading 43 Material paths to answer that one question.
  */
 export const builtinIconNames: ReadonlySet<string> = /* @__PURE__ */ new Set(NAMES)

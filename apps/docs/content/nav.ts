@@ -77,6 +77,7 @@ export const components = [
   entry('progress-circular'),
   entry('progress-linear'),
   entry('radio'),
+  entry('rating'),
   entry('separator'),
   entry('side-navigation'),
   entry('skeleton-loader'),

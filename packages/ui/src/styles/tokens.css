@@ -287,6 +287,9 @@
     --vectis-control-size-dialog-width: 25rem;
     --vectis-control-size-stepper-indicator: 2rem;
     --vectis-control-size-stepper-connector-min: 1.5rem;
+    --vectis-control-size-rating-sm: 1.25rem;
+    --vectis-control-size-rating-md: 1.5rem;
+    --vectis-control-size-rating-lg: 2rem;
     --vectis-control-size-drawer-sm: 20rem;
     --vectis-control-size-drawer-md: 25rem;
     --vectis-control-size-drawer-lg: 35rem;

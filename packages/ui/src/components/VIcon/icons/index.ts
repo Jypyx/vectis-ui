@@ -44,6 +44,7 @@ import { remove } from './remove'
 import { schedule } from './schedule'
 import { search } from './search'
 import { search_off } from './search_off'
+import { star } from './star'
 import { swap_vert } from './swap_vert'
 import { table_chart } from './table_chart'
 import { video_file } from './video_file'
@@ -90,6 +91,7 @@ export {
   schedule,
   search,
   search_off,
+  star,
   swap_vert,
   table_chart,
   video_file,
@@ -102,7 +104,7 @@ export {
  *
  * NOTHING the library ships imports this barrel: a component imports the two or
  * three icon modules it draws, by name. Importing it from a component would pull all
- * 42 drawings back into every consumer's bundle and undo the split.
+ * 43 drawings back into every consumer's bundle and undo the split.
  */
 export const builtinIcons = {
   add,
@@ -143,6 +145,7 @@ export const builtinIcons = {
   schedule,
   search,
   search_off,
+  star,
   swap_vert,
   table_chart,
   video_file,

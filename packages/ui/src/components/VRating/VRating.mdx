@@ -1,0 +1,70 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VRatingStories from './VRating.stories'
+
+<Meta of={VRatingStories} />
+
+# Rating
+
+A rating out of a few icons. VRating is a group of native radios, one per icon, so the arrow keys,
+form submission and `required` are the browser's own.
+
+<Canvas of={VRatingStories.Default} />
+
+<Controls of={VRatingStories.Default} />
+
+## Value
+
+`v-model` holds a whole number from 1 to `max` (5 by default), or `null` when there is no rating.
+Hovering previews the rating the click would give.
+
+## Clearing
+
+By default, a rating can change but not go back to none, as in any group of radios. `clearable`
+lets it: clicking the current value again clears it, and a "No rating" choice comes first, so the
+keyboard can reach it with the arrows. While it has the focus, the ring surrounds the whole row.
+
+<Canvas of={VRatingStories.Clearable} />
+
+## Read-only
+
+`readonly` shows the value without letting it change. The icons become a single image named
+after the value, such as "3.7 out of 5", and a fractional value fills part of an icon, from the
+start of the line. With a `name`, the value is still sent in a form.
+
+<Canvas of={VRatingStories.Readonly} />
+
+## Sizes
+
+<Canvas of={VRatingStories.Sizes} />
+
+## Tones and icons
+
+`tone` colours the filled icons, `accent` by default. `color` replaces the tone with a colour of
+your own (hex, CSS name or `oklch()`), whose contrast with the background is yours to check.
+
+`icon` replaces the star; the empty icons are drawn in outline and the filled ones with the icon's
+filled form. The built-in `star` goes through the icon resolver, so `setIconResolver` can map it
+to your own set everywhere.
+
+<Canvas of={VRatingStories.TonesAndIcons} />
+
+## Field
+
+VRating follows the field model: `label` becomes the legend of its `<fieldset>`, `hint` describes
+the group, and `error` replaces the hint, is announced, marks every radio `aria-invalid` and draws
+the empty icons in red. `required` adds an asterisk and makes the browser require a choice.
+
+<Canvas of={VRatingStories.WithError} />
+
+<Canvas of={VRatingStories.Disabled} />
+
+## Accessibility
+
+- The group is a `<fieldset>` named by its legend, or "Rating" from the dictionary without a
+  `label`. Each radio is named "3 out of 5", whatever the icon.
+- The radios are native and hidden, never with `display: none`: they keep the focus, the arrow
+  keys and form submission. The focus ring is drawn on the icon.
+- Clearing by clicking again is limited to the pointer; the keyboard clears through "No rating",
+  so Space never undoes a choice.
+- Read-only, the icons are one `role="img"` whose name gives the value, formatted for the locale.
+- In forced colours, the filled icons take the system highlight colour.

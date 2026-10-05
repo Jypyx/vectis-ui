@@ -154,6 +154,14 @@ export interface Messages {
     /** The button that takes one step off the value. */
     decrement: string
   }
+  rating: {
+    /** What the group of icons is called when it has no label. */
+    label: string
+    /** The choice that clears the rating. */
+    empty: string
+    /** One value out of the highest, both already formatted for the locale. */
+    value: (value: string, max: string) => string
+  }
   stepper: {
     /** What the list of steps is called. */
     label: string

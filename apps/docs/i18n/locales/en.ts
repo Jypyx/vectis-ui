@@ -49,6 +49,7 @@ import popover from './en/popover'
 import progressCircular from './en/progressCircular'
 import progressLinear from './en/progressLinear'
 import radio from './en/radio'
+import rating from './en/rating'
 import separator from './en/separator'
 import sideNavigation from './en/sideNavigation'
 import skeletonLoader from './en/skeletonLoader'
@@ -120,6 +121,7 @@ export interface DocsMessages {
   progressCircular: typeof progressCircular
   progressLinear: typeof progressLinear
   radio: typeof radio
+  rating: typeof rating
   separator: typeof separator
   sideNavigation: typeof sideNavigation
   skeletonLoader: typeof skeletonLoader
@@ -198,6 +200,7 @@ export default defineI18nLocale((): DocsMessages => ({
   progressCircular,
   progressLinear,
   radio,
+  rating,
   separator,
   sideNavigation,
   skeletonLoader,

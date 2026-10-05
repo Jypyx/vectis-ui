@@ -108,6 +108,11 @@ export const en: Messages = {
     increment: 'Increase',
     decrement: 'Decrease',
   },
+  rating: {
+    label: 'Rating',
+    empty: 'No rating',
+    value: (value, max) => `${value} out of ${max}`,
+  },
   stepper: {
     label: 'Progress',
     completed: 'Completed',

@@ -215,6 +215,8 @@ export type {
   ProgressLinearOrientation,
   ProgressLinearSlotProps,
 } from './components/VProgressLinear/VProgressLinear.vue'
+export { default as VRating } from './components/VRating/VRating.vue'
+export type { RatingSize, RatingTone } from './components/VRating/VRating.vue'
 export { default as VSlider } from './components/VSlider/VSlider.vue'
 export type {
   SliderInputs,

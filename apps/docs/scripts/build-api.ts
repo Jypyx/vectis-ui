@@ -68,6 +68,7 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
   { slug: 'progress-circular', components: ['VProgressCircular'] },
   { slug: 'progress-linear', components: ['VProgressLinear'] },
   { slug: 'radio', components: ['VRadio'] },
+  { slug: 'rating', components: ['VRating'] },
   { slug: 'separator', components: ['VSeparator'] },
   {
     slug: 'side-navigation',

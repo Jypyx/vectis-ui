@@ -328,6 +328,9 @@ export const semantic = {
       '1.5rem',
       'The shortest a horizontal VStepper connector gets between two steps (24px)',
     ),
+    'size-rating-sm': dimension('1.25rem', 'The icon of a small VRating (20px)'),
+    'size-rating-md': dimension('1.5rem', 'The icon of a medium VRating (24px)'),
+    'size-rating-lg': dimension('2rem', 'The icon of a large VRating (32px)'),
     'size-drawer-sm': dimension(
       '20rem',
       'The width of a small VDrawer on a side, or the height of one at the top or bottom (320px)',
