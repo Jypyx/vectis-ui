@@ -47,6 +47,7 @@ const nav: NavMessages = {
   input: 'Input',
   'input-group': 'Input group',
   'input-otp': 'Input OTP',
+  link: 'Link',
   menu: 'Menu',
   'number-input': 'Number input',
   pagination: 'Pagination',

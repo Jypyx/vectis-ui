@@ -45,6 +45,7 @@ const nav: NavMessages = {
   input: 'Champ de saisie',
   'input-group': 'Groupe de champs',
   'input-otp': 'Code à usage unique',
+  link: 'Lien',
   menu: 'Menu',
   'number-input': 'Champ numérique',
   pagination: 'Pagination',

@@ -49,6 +49,7 @@ const ICONS = [
   'last_page',
   'more_horiz',
   'notifications',
+  'open_in_new',
   'picture_as_pdf',
   'priority_high',
   'remove',

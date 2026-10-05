@@ -33,6 +33,7 @@ export const fr: Messages = {
     ellipsis: 'Afficher les pages intermédiaires',
   },
   sideNavigation: { label: 'Navigation' },
+  link: { newTab: ', s’ouvre dans un nouvel onglet' },
   combobox: {
     empty: 'Aucun résultat',
     clear: 'Effacer la sélection',

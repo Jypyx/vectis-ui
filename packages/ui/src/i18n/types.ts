@@ -36,6 +36,13 @@ export interface Messages {
     /** What the navigation area is called. */
     label: string
   }
+  link: {
+    /**
+     * Said after the text of a link that opens in a new tab. It starts with punctuation: a
+     * leading space would be trimmed from the accessible name, gluing the words to the text.
+     */
+    newTab: string
+  }
   combobox: {
     empty: string
     clear: string

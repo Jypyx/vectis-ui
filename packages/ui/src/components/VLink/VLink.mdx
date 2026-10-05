@@ -1,0 +1,78 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VLinkStories from './VLink.stories'
+
+<Meta of={VLinkStories} />
+
+# Link
+
+A native link painted in a tone. VLink takes the size, weight and line height of the text around
+it, so it sits in a sentence, a heading or a caption alike.
+
+<Canvas of={VLinkStories.Default} />
+
+<Controls of={VLinkStories.Default} />
+
+## Tones
+
+`tone` paints the link: `accent` by default, `neutral` for the colour of the text, or `danger`,
+`success` and `warning`.
+
+<Canvas of={VLinkStories.Tones} />
+
+`tone="inherit"` takes the colour of the text around the link, such as a muted footer line, and
+turns to the accent on hover. Keep the underline on: it is then what tells the link apart.
+
+<Canvas of={VLinkStories.InheritedColour} />
+
+## Underline
+
+`underline` is `always` by default: inside running text, colour alone does not tell a link apart.
+`hover` shows the line on hover and keyboard focus, and `none` never does; both suit menus,
+footers and lists of links.
+
+<Canvas of={VLinkStories.Underline} />
+
+## External links
+
+`external` opens the link in a new tab with `rel="noopener noreferrer"`, adds an icon after the
+text and tells screen readers that a new tab opens. A `target="_blank"` passed as an attribute
+gets the same marker, and a `target` or `rel` attribute replaces the component's.
+
+The icon is the built-in `open_in_new`, so an icon resolver set with `setIconResolver` can map it
+to your own set everywhere. `externalIcon` replaces it for one link, and `hideExternalIcon`
+removes it; the words read by screen readers stay.
+
+<Canvas of={VLinkStories.External} />
+
+## Disabled
+
+A disabled link loses its address and its click listeners, and is marked `aria-disabled`.
+
+<Canvas of={VLinkStories.Disabled} />
+
+## Inherited text
+
+<Canvas of={VLinkStories.InheritedText} />
+
+## Router
+
+VLink always renders a real `<a>`. With Vue Router or Nuxt, render it inside the router link's
+`custom` mode and pass on its address and navigation:
+
+```vue
+<RouterLink v-slot="{ href, navigate }" to="/settings" custom>
+  <VLink :href="href" @click="navigate">Settings</VLink>
+</RouterLink>
+```
+
+`navigate` leaves a click with a modifier key to the browser, so opening in a new tab still works.
+
+## Accessibility
+
+- VLink is a native `<a href>`: Enter follows it, and the browser's context menu and middle click
+  work.
+- The underline is on by default, so a link in a sentence does not rely on colour alone.
+- An external link adds ", opens in a new tab" from the dictionary to its accessible name; the
+  icon is hidden from assistive technology.
+- A disabled link has no `href` and carries `aria-disabled="true"`; it keeps the link role.
+- In forced colours, the link takes the system link colour, and a disabled link `GrayText`.

@@ -40,6 +40,7 @@ import inputGroup from './fr/inputGroup'
 import inputOtp from './fr/inputOtp'
 import installation from './fr/installation'
 import jsHelpers from './fr/jsHelpers'
+import link from './fr/link'
 import menu from './fr/menu'
 import nav from './fr/nav'
 import numberInput from './fr/numberInput'
@@ -113,6 +114,7 @@ export default defineI18nLocale((): DocsMessages => ({
   input,
   inputGroup,
   inputOtp,
+  link,
   menu,
   numberInput,
   pagination,

@@ -40,6 +40,7 @@ import inputGroup from './en/inputGroup'
 import inputOtp from './en/inputOtp'
 import installation from './en/installation'
 import jsHelpers from './en/jsHelpers'
+import link from './en/link'
 import menu from './en/menu'
 import nav from './en/nav'
 import numberInput from './en/numberInput'
@@ -111,6 +112,7 @@ export interface DocsMessages {
   input: typeof input
   inputGroup: typeof inputGroup
   inputOtp: typeof inputOtp
+  link: typeof link
   menu: typeof menu
   numberInput: typeof numberInput
   pagination: typeof pagination
@@ -188,6 +190,7 @@ export default defineI18nLocale((): DocsMessages => ({
   input,
   inputGroup,
   inputOtp,
+  link,
   menu,
   numberInput,
   pagination,

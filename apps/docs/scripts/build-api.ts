@@ -56,6 +56,7 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
   { slug: 'input', components: ['VInput'] },
   { slug: 'input-group', components: ['VInputGroup'] },
   { slug: 'input-otp', components: ['VInputOTP'] },
+  { slug: 'link', components: ['VLink'] },
   {
     slug: 'menu',
     components: ['VMenu', 'VMenuItem', 'VMenuGroup', 'VMenuSeparator'],

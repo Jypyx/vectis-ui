@@ -170,6 +170,8 @@ export type {
   ComboboxOverflowSlotProps,
   ComboboxEmptySlotProps,
 } from './components/VCombobox/VCombobox.vue'
+export { default as VLink } from './components/VLink/VLink.vue'
+export type { LinkTone, LinkUnderline } from './components/VLink/VLink.vue'
 export { default as VBreadcrumb } from './components/VBreadcrumb/VBreadcrumb.vue'
 export type { BreadcrumbItem } from './components/VBreadcrumb/VBreadcrumb.vue'
 export { default as VSideNavigation } from './components/VSideNavigation/VSideNavigation.vue'

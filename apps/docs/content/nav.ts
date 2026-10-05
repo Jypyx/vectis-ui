@@ -69,6 +69,7 @@ export const components = [
   entry('input'),
   entry('input-group'),
   entry('input-otp'),
+  entry('link'),
   entry('menu'),
   entry('number-input'),
   entry('pagination'),
