@@ -30,6 +30,7 @@ export default {
     },
   ],
   cssVars: [
+    { name: '--vectis-control-size-skeleton-surface', value: '6rem' },
     { name: '--vectis-control-size-card-media', value: '12rem' },
     { name: '--vectis-control-size-card-body-min', value: '16rem' },
   ],
