@@ -2,6 +2,25 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.12.0] - 2026-10-05
+
+### Upgrading from 0.11.x
+
+- **VDataTable no longer accepts `responsive`**, and the `DataTableResponsive` type is no longer exported. A narrow table always scrolls horizontally, the previous default. Remove `responsive="scroll"`. Tables using `responsive="stack"` now scroll instead of turning each row into a card, and cells no longer carry `data-label`.
+- **VPagination no longer accepts `responsive`.** The row no longer hides pages as its container narrows: set `totalVisible` to the number of pages that fits. The `data-distance`, `data-edge` and `data-controls` attributes are removed, so styles targeting them no longer apply.
+
+### Added
+
+- VPagination `totalVisible` accepts `0`, which renders the controls without page numbers. When a control disables itself while focused, the focus moves to the nearest usable control.
+
+### Changed
+
+- VDataTable's footer pagination shows no page numbers, only the first, previous, next and last controls. Enable `showRange` to show the reader where they are.
+- VDataTable's toolbar search field keeps its own width in a narrow table and wraps below the title instead of stretching to the full width.
+- VPagination text controls are named by their visible text instead of a duplicate `aria-label`.
+
+**Full diff:** [v0.11.0...v0.12.0](https://github.com/Jypyx/vectis-ui/compare/v0.11.0...v0.12.0)
+
 ## [0.11.0] - 2026-10-05
 
 ### Upgrading from 0.10.x
