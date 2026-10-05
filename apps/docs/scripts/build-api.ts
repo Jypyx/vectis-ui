@@ -19,6 +19,7 @@ const componentsDir = join(uiRoot, 'src/components')
 /** One entry per component page, in the order `content/nav.ts` lists them. */
 const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
   { slug: 'accordion', components: ['VAccordion', 'VAccordionItem'] },
+  { slug: 'alert', components: ['VAlert'] },
   { slug: 'avatar', components: ['VAvatar'] },
   { slug: 'avatar-group', components: ['VAvatarGroup'] },
   { slug: 'badge', components: ['VBadge'] },

@@ -16,6 +16,7 @@ const nav: NavMessages = {
   accessibility: 'Accessibilité',
 
   accordion: 'Accordéon',
+  alert: 'Alerte',
   avatar: 'Avatar',
   'avatar-group': "Groupe d'avatars",
   badge: 'Badge',

@@ -1,6 +1,7 @@
 /** Default-export the locale macro so Nuxt can discover messages statically. */
 import accessibility from './en/accessibility'
 import accordion from './en/accordion'
+import alert from './en/alert'
 import avatar from './en/avatar'
 import avatarGroup from './en/avatarGroup'
 import badge from './en/badge'
@@ -73,6 +74,7 @@ export interface DocsMessages {
   accessibility: typeof accessibility
 
   accordion: typeof accordion
+  alert: typeof alert
   avatar: typeof avatar
   avatarGroup: typeof avatarGroup
   badge: typeof badge
@@ -141,6 +143,7 @@ export default defineI18nLocale((): DocsMessages => ({
   accessibility,
 
   accordion,
+  alert,
   avatar,
   avatarGroup,
   badge,

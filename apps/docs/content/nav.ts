@@ -40,6 +40,7 @@ export const intro = [
  */
 export const components = [
   entry('accordion'),
+  entry('alert'),
   entry('avatar'),
   entry('avatar-group'),
   entry('badge'),

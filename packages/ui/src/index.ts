@@ -107,6 +107,8 @@ export type {
 export { default as VSnackbar } from './components/VSnackbar/VSnackbar.vue'
 export { snackbar, dismissSnackbar } from './components/VSnackbar/state'
 export type { SnackbarOptions, SnackbarTone, SnackbarPlacement } from './components/VSnackbar/state'
+export { default as VAlert } from './components/VAlert/VAlert.vue'
+export type { AlertTone, AlertVariant } from './components/VAlert/VAlert.vue'
 export { default as VBadge } from './components/VBadge/VBadge.vue'
 export type { BadgeVariant, BadgeTone, BadgeOverlayPosition } from './components/VBadge/VBadge.vue'
 export { default as VAvatar } from './components/VAvatar/VAvatar.vue'

@@ -1,0 +1,75 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VAlertStories from './VAlert.stories'
+
+<Meta of={VAlertStories} />
+
+# Alert
+
+A message that stays in the flow of the page: a notice above a form, the result of a check, a
+warning about a quota. It does not float and does not leave on its own; for a passing
+notification, use `toast()`, and for the confirmation of an action, `snackbar()`.
+
+<Canvas of={VAlertStories.Default} />
+
+<Controls of={VAlertStories.Default} />
+
+## Tones and variants
+
+Five tones (`neutral`, `accent` by default, `success`, `warning`, `danger`) and two variants.
+`soft`, the default, tints the surface with the tone. `outline` keeps the page surface inside a
+border of the tone, for an alert that should weigh less. In both, the icon and the title take the
+tone's colour, and the message stays in the body text colour.
+
+<Canvas of={VAlertStories.Tones} />
+
+## Message only
+
+`title` is optional. Without it, the message sits alone beside the icon.
+
+<Canvas of={VAlertStories.MessageOnly} />
+
+## Icon
+
+Each tone brings its own icon: `info` for `neutral` and `accent`, `check_circle` for `success`,
+`warning` for `warning` and `error` for `danger`. `icon` replaces it with any icon the VIcon
+contract accepts, and `hideIcon` removes it.
+
+<Canvas of={VAlertStories.Icons} />
+
+## Actions
+
+The `#actions` slot places buttons or links under the message. Use small buttons, so that the
+actions do not outweigh the text.
+
+<Canvas of={VAlertStories.WithActions} />
+
+## Closing
+
+`closable` adds a cross at the end of the first line. Clicking it sets `open` to `false` and emits
+`close`. The alert then disappears from the DOM. Without a `v-model:open` binding, it stays closed
+until the component is mounted again; bind the model to bring it back.
+
+<Canvas of={VAlertStories.Closable} />
+
+## Live
+
+An alert rendered with the page is read in the normal flow, and announcing it would interrupt the
+reader with something they have not asked for. `live` turns it into a live region, for an alert
+that appears in answer to what the reader did: `role="status"`, read at the next pause, or
+`role="alert"` with the `danger` tone, read at once.
+
+<Canvas of={VAlertStories.Live} />
+
+## Accessibility
+
+- Without `live`, the alert is a plain `<div>`, read in order with the rest of the page.
+- With `live`, its role depends on the tone. A `role` attribute set by the consumer takes
+  precedence.
+- A live region is announced reliably when its content changes while it is mounted. Inserting the
+  whole alert, as in the example above, is announced by current screen readers, but changing the
+  text of an alert that is already there is the safest route.
+- The icon is decorative. The meaning must be carried by the text: write "Payment failed", not
+  only a red icon.
+- The close cross is named by `closeLabel`, or by the dictionary ("Close"). When it removes the
+  alert, focus returns to the document; move it in the `close` handler if the reader should land
+  somewhere precise.

@@ -1,6 +1,7 @@
 /** Annotate the return type to catch missing or renamed French messages. */
 import accessibility from './fr/accessibility'
 import accordion from './fr/accordion'
+import alert from './fr/alert'
 import avatar from './fr/avatar'
 import avatarGroup from './fr/avatarGroup'
 import badge from './fr/badge'
@@ -75,6 +76,7 @@ export default defineI18nLocale((): DocsMessages => ({
   accessibility,
 
   accordion,
+  alert,
   avatar,
   avatarGroup,
   badge,
