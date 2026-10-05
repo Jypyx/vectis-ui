@@ -21,6 +21,7 @@ import dateInput from './fr/dateInput'
 import datePicker from './fr/datePicker'
 import designTokens from './fr/designTokens'
 import dialog from './fr/dialog'
+import drawer from './fr/drawer'
 import error from './fr/error'
 import field from './fr/field'
 import fieldset from './fr/fieldset'
@@ -96,6 +97,7 @@ export default defineI18nLocale((): DocsMessages => ({
   dateInput,
   datePicker,
   dialog,
+  drawer,
   field,
   fieldset,
   fileInput,

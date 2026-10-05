@@ -202,6 +202,8 @@ export type {
 export { default as VDialog } from './components/VDialog/VDialog.vue'
 export type { DialogRole, DialogTriggerProps } from './components/VDialog/VDialog.vue'
 export { default as VDialogAlert } from './components/VDialog/VDialogAlert.vue'
+export { default as VDrawer } from './components/VDrawer/VDrawer.vue'
+export type { DrawerSide, DrawerSize } from './components/VDrawer/VDrawer.vue'
 export { default as VDatePicker } from './components/VDatePicker/VDatePicker.vue'
 export type {
   DatePickerSelection,

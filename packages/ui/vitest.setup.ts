@@ -29,6 +29,11 @@ if (!('showPopover' in HTMLElement.prototype)) {
   })
 }
 
+/** Jsdom runs no transitions and has no Web Animations API: an element animates nothing. */
+if (!('getAnimations' in Element.prototype)) {
+  Object.assign(Element.prototype, { getAnimations: () => [] })
+}
+
 /** Jsdom does not know `HTMLDialogElement.prototype.showModal` ("Not implemented"). */
 if (typeof HTMLDialogElement !== 'undefined') {
   const dispatchClose = (el: HTMLDialogElement) => el.dispatchEvent(new Event('close'))

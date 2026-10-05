@@ -21,6 +21,7 @@ import dateInput from './en/dateInput'
 import datePicker from './en/datePicker'
 import designTokens from './en/designTokens'
 import dialog from './en/dialog'
+import drawer from './en/drawer'
 import error from './en/error'
 import field from './en/field'
 import fieldset from './en/fieldset'
@@ -94,6 +95,7 @@ export interface DocsMessages {
   dateInput: typeof dateInput
   datePicker: typeof datePicker
   dialog: typeof dialog
+  drawer: typeof drawer
   field: typeof field
   fieldset: typeof fieldset
   fileInput: typeof fileInput
@@ -166,6 +168,7 @@ export default defineI18nLocale((): DocsMessages => ({
   dateInput,
   datePicker,
   dialog,
+  drawer,
   field,
   fieldset,
   fileInput,

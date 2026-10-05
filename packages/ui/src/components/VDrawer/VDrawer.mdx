@@ -1,0 +1,72 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VDrawerStories from './VDrawer.stories'
+
+<Meta of={VDrawerStories} />
+
+# Drawer
+
+A modal panel pinned to one edge of the viewport, for filters, navigation or a detail view that
+keeps the page in sight. Like VDialog it is a native `<dialog>` opened with `showModal()`: the top
+layer, `::backdrop`, the focus trap, the inert page, the locked page scroll and the focus returned
+to the trigger are all native. The two share their model bridge and their Safari fallback for
+`closedby` (`useModalDialog`), and the same three zones: a header with its title, subtitle,
+`#header-actions` and close cross, a scrolling body, and a `#footer`.
+
+<Canvas of={VDrawerStories.Default} />
+
+<Controls of={VDrawerStories.Default} />
+
+## Opening and closing
+
+`v-model:open` drives the drawer, and the `#trigger` slot hands out `triggerProps` to bind on the
+button that opens it. The cross, Escape and a click on the backdrop close it, and the `close`
+event puts the model back in step. `persistentBackdrop` and `persistentEscape` restrict those
+routes exactly as on VDialog. `show()`, `close()` and `el` are exposed through a `ref`.
+
+The `<dialog>` is rendered only while it is needed. Unlike VDialog, it stays in the page after
+closing until it has slid out: `display` and `overlay` are transitioned with
+`transition-behavior: allow-discrete`, which keeps the closed drawer painted and in the top layer
+for the duration of the exit, and VDrawer removes the element once
+`getAnimations()` reports the transitions finished. Reopened during its exit, the same element
+slides back in. The closed drawer lets clicks through to the page it uncovers.
+
+Engines without the `overlay` property (Safari, Firefox) take the drawer out of the top layer as
+soon as it closes: the backdrop disappears at once, and the drawer slides out above the page.
+
+## Sides
+
+`side` picks the edge: `start` and `end` follow the writing direction, `top` and `bottom` do not.
+The corners against the viewport stay square; the two facing the page are rounded.
+
+<Canvas of={VDrawerStories.Sides} />
+
+<Canvas of={VDrawerStories.RightToLeft} />
+
+## Size
+
+`size` sets the width of a drawer on a side, or the height of one at the top or bottom, from the
+`--vectis-control-size-drawer-*` tokens. `extent` replaces it with any CSS length. Either way the
+drawer leaves a strip of the page uncovered on a small screen, where the backdrop can still be
+clicked.
+
+<Canvas of={VDrawerStories.Sizes} />
+
+## Overflowing content
+
+The body scrolls while the header and the footer stay in place, and a hairline appears under the
+header or above the footer once content passes under it (scroll-state container queries, where
+supported).
+
+<Canvas of={VDrawerStories.LongContent} />
+
+## Accessibility
+
+- The native `<dialog>` element carries the `dialog` role; the trigger receives
+  `aria-haspopup="dialog"`.
+- `title` and `subtitle` feed `aria-labelledby` and `aria-describedby`. With the `#header` slot,
+  name the drawer yourself with `aria-label` or `aria-labelledby`.
+- `showModal()` provides the focus trap, the inert page and the focus return to the trigger.
+- The cross is named by `closeLabel`, "Close" by default, from the design system dictionary.
+- A body that scrolls is reached by the keyboard through the focusable content it holds.
+- Under `prefers-reduced-motion: reduce` the drawer and its backdrop appear and disappear without
+  any transition.

@@ -57,6 +57,7 @@ export const components = [
   entry('date-input'),
   entry('date-picker'),
   entry('dialog'),
+  entry('drawer'),
   entry('field'),
   entry('fieldset'),
   entry('file-input'),

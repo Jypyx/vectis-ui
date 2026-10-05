@@ -320,6 +320,18 @@ export const semantic = {
       '25rem',
       'The default width of VDialog and VDialogAlert (400px), when no `width` is given',
     ),
+    'size-drawer-sm': dimension(
+      '20rem',
+      'The width of a small VDrawer on a side, or the height of one at the top or bottom (320px)',
+    ),
+    'size-drawer-md': dimension(
+      '25rem',
+      'The width of a medium VDrawer on a side, or the height of one at the top or bottom (400px)',
+    ),
+    'size-drawer-lg': dimension(
+      '35rem',
+      'The width of a large VDrawer on a side, or the height of one at the top or bottom (560px)',
+    ),
     'size-snackbar-min': dimension('18rem', 'The minimum width of a snackbar (288px)'),
     'size-snackbar-max': dimension('36rem', 'The maximum width of a snackbar (576px)'),
     'size-card-media': dimension(

@@ -285,6 +285,9 @@
     --vectis-control-size-toast-width: 22rem;
     --vectis-control-size-tooltip-max: 18rem;
     --vectis-control-size-dialog-width: 25rem;
+    --vectis-control-size-drawer-sm: 20rem;
+    --vectis-control-size-drawer-md: 25rem;
+    --vectis-control-size-drawer-lg: 35rem;
     --vectis-control-size-snackbar-min: 18rem;
     --vectis-control-size-snackbar-max: 36rem;
     --vectis-control-size-card-media: 12rem;

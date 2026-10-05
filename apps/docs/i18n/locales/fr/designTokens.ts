@@ -126,6 +126,12 @@ const descriptions: Record<DescribedToken, string> = {
     "La largeur maximale d'une infobulle avant qu'elle ne passe à la ligne (288px)",
   '--vectis-control-size-dialog-width':
     "La largeur par défaut de VDialog et VDialogAlert (400px), en l'absence de `width`",
+  '--vectis-control-size-drawer-sm':
+    "La largeur d'un petit VDrawer latéral, ou la hauteur d'un VDrawer en haut ou en bas (320px)",
+  '--vectis-control-size-drawer-md':
+    "La largeur d'un VDrawer latéral moyen, ou la hauteur d'un VDrawer en haut ou en bas (400px)",
+  '--vectis-control-size-drawer-lg':
+    "La largeur d'un grand VDrawer latéral, ou la hauteur d'un VDrawer en haut ou en bas (560px)",
   '--vectis-control-size-snackbar-min': "La largeur minimale d'une snackbar (288px)",
   '--vectis-control-size-snackbar-max': "La largeur maximale d'une snackbar (576px)",
   '--vectis-control-size-card-media':

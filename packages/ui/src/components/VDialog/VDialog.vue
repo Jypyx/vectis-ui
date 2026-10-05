@@ -1,16 +1,14 @@
 <script setup lang="ts">
 // @core
-/**
- * Native showModal supplies top-layer placement and modal focus. JavaScript bridges v-model to
- * imperative open/close and provides guarded dismissal where closedBy is absent.
- */
+/** A native modal `<dialog>`, its model bridged by useModalDialog. */
 
-import { computed, nextTick, onBeforeUnmount, ref, useAttrs, useId, watch } from 'vue'
+import { computed, useId } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
 import { close as closeIcon } from '../VIcon/icons/close'
 import VIconButton from '../VIconButton/VIconButton.vue'
 import VTypography from '../VTypography/VTypography.vue'
+import { useModalDialog } from '../../composables/useModalDialog'
 import { useMessages } from '../../i18n/state'
 import { cssSize } from '../../utils/css'
 
@@ -94,106 +92,28 @@ defineSlots<{
 
 defineOptions({ inheritAttrs: false })
 
-const attrs = useAttrs()
-const dialogEl = ref<HTMLDialogElement | null>(null)
 const titleId = useId()
 const subtitleId = useId()
 
-/**
- * Which dismissals the browser itself accepts, declared as an attribute rather than handled in
- * code: everything, Escape alone, or nothing. One combination cannot be expressed that way; a
- * click outside allowed while Escape is not; and it falls back to allowing both.
- */
-const closedby = computed(() =>
-  props.persistentBackdrop ? (props.persistentEscape ? 'none' : 'closerequest') : 'any',
-)
-
-// @fallback
-// The `closedby` attribute is newer than the type definitions shipped with TypeScript, so
-// writing it directly in the template would be reported as an unknown attribute. Passing it
-// inside a bound object goes through the same path as any forwarded attribute, which is not
-// checked element by element.
-const rootAttrs = computed(() => ({ ...attrs, closedby: closedby.value }))
-
-function show(): Promise<void> {
-  open.value = true
-  return nextTick()
-}
-
-function requestClose() {
-  // Closing the element is enough: the browser then fires its own close event, which puts the
-  // model back in step below.
-  dialogEl.value?.close()
-}
+const {
+  dialogEl,
+  rendered,
+  rootAttrs,
+  show,
+  close: requestClose,
+  onClose,
+  onCancel,
+  onPointerdown,
+  onBackdropClick,
+} = useModalDialog(open, {
+  persistentBackdrop: () => props.persistentBackdrop,
+  persistentEscape: () => props.persistentEscape,
+})
 
 const triggerProps = computed<DialogTriggerProps>(() => ({
   onClick: show,
   'aria-haspopup': 'dialog',
 }))
-
-// Close before v-if removes the element so the browser restores the invoker's focus.
-watch(open, (value) => {
-  if (!value) dialogEl.value?.close()
-})
-
-// @ssr
-// Template refs become available after mounting, including when hydrating an open dialog.
-watch(dialogEl, (dialog) => dialog?.showModal(), { flush: 'post' })
-
-// Ignore close events from replaced elements: the queued event from a quick close-and-reopen
-// must not close the new dialog.
-function onClose(event: Event) {
-  if (event.target !== dialogEl.value) return
-  open.value = false
-}
-
-// @core
-// An open dialog removed with its parent (a `v-if`, a route change) runs no close steps,
-// so no close event would come: the model is handed back closed here, or it stayed `true`
-// and the dialog reopened by itself the next time its parent was shown.
-onBeforeUnmount(() => {
-  if (open.value) open.value = false
-})
-
-// @fallback
-/*
- * `closedby` is what applies `persistentBackdrop` and `persistentEscape`, and Safari does not
- * implement it: there Escape always closes and the backdrop never does. The two halves are
- * rebuilt below, and only where the attribute is unknown, so a browser that has it is never
- * second-guessed.
- */
-const closedbyUnsupported = () => !('closedBy' in HTMLDialogElement.prototype)
-
-function onCancel(event: Event) {
-  if (closedbyUnsupported() && closedby.value === 'none') event.preventDefault()
-}
-
-/**
- * Whether a point lies outside the dialog's box, which is where the backdrop is: a click on
- * the `::backdrop` is dispatched to the dialog element itself.
- */
-function outsideBox(event: MouseEvent) {
-  const box = dialogEl.value?.getBoundingClientRect()
-  if (!box) return false
-  return (
-    event.clientX < box.left ||
-    event.clientX > box.right ||
-    event.clientY < box.top ||
-    event.clientY > box.bottom
-  )
-}
-
-// A press that STARTED inside and ended on the backdrop (a text selection dragged past the
-// edge) is not a click on the backdrop, so the press is remembered, not only the release.
-let pressedOnBackdrop = false
-function onPointerdown(event: PointerEvent) {
-  pressedOnBackdrop = closedbyUnsupported() && event.target === dialogEl.value && outsideBox(event)
-}
-function onBackdropClick(event: MouseEvent) {
-  const onBackdrop = pressedOnBackdrop && event.target === dialogEl.value && outsideBox(event)
-  pressedOnBackdrop = false
-  if (onBackdrop && closedbyUnsupported() && closedby.value === 'any') requestClose()
-}
 
 defineExpose({
   /**
@@ -215,7 +135,7 @@ defineExpose({
 <template>
   <slot name="trigger" :trigger-props="triggerProps" />
   <dialog
-    v-if="open"
+    v-if="rendered"
     ref="dialogEl"
     :aria-labelledby="title ? titleId : undefined"
     :aria-describedby="subtitle ? subtitleId : undefined"
