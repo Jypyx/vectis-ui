@@ -54,6 +54,7 @@ import skeletonLoader from './en/skeletonLoader'
 import slider from './en/slider'
 import snackbar from './en/snackbar'
 import spinner from './en/spinner'
+import stepper from './en/stepper'
 import switchPage from './en/switch'
 import tabs from './en/tabs'
 import textarea from './en/textarea'
@@ -122,6 +123,7 @@ export interface DocsMessages {
   slider: typeof slider
   snackbar: typeof snackbar
   spinner: typeof spinner
+  stepper: typeof stepper
   /*
    * The import is `switchPage` because `switch` is a reserved word; the key is not, and the
    * keypath a page writes is `switch.title` like every other.
@@ -197,6 +199,7 @@ export default defineI18nLocale((): DocsMessages => ({
   slider,
   snackbar,
   spinner,
+  stepper,
   switch: switchPage,
   tabs,
   textarea,

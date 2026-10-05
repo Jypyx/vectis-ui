@@ -38,6 +38,7 @@ import { last_page } from './last_page'
 import { more_horiz } from './more_horiz'
 import { notifications } from './notifications'
 import { picture_as_pdf } from './picture_as_pdf'
+import { priority_high } from './priority_high'
 import { remove } from './remove'
 import { schedule } from './schedule'
 import { search } from './search'
@@ -82,6 +83,7 @@ export {
   more_horiz,
   notifications,
   picture_as_pdf,
+  priority_high,
   remove,
   schedule,
   search,
@@ -98,7 +100,7 @@ export {
  *
  * NOTHING the library ships imports this barrel: a component imports the two or
  * three icon modules it draws, by name. Importing it from a component would pull all
- * 40 drawings back into every consumer's bundle and undo the split.
+ * 41 drawings back into every consumer's bundle and undo the split.
  */
 export const builtinIcons = {
   add,
@@ -133,6 +135,7 @@ export const builtinIcons = {
   more_horiz,
   notifications,
   picture_as_pdf,
+  priority_high,
   remove,
   schedule,
   search,

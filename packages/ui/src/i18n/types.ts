@@ -147,6 +147,14 @@ export interface Messages {
     /** The button that takes one step off the value. */
     decrement: string
   }
+  stepper: {
+    /** What the list of steps is called. */
+    label: string
+    /** Said after the title of a step that is done. */
+    completed: string
+    /** Said after the title of a step that has an error. */
+    error: string
+  }
   /** The clock itself. VTimeInput reads the half-day words from here too: there is one
       vocabulary for choosing a time, wherever the control that does it is rendered. */
   timePicker: {

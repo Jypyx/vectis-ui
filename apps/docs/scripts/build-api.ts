@@ -81,6 +81,7 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
   { slug: 'slider', components: ['VSlider'] },
   { slug: 'snackbar', components: ['VSnackbar'] },
   { slug: 'spinner', components: ['VSpinner'] },
+  { slug: 'stepper', components: ['VStepper'] },
   { slug: 'switch', components: ['VSwitch'] },
   { slug: 'tabs', components: ['VTabs', 'VTab', 'VTabPanel'] },
   { slug: 'textarea', components: ['VTextarea'] },

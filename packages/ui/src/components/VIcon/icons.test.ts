@@ -45,6 +45,7 @@ const EXPECTED = [
   'more_horiz',
   'notifications',
   'picture_as_pdf',
+  'priority_high',
   'remove',
   'schedule',
   'search',

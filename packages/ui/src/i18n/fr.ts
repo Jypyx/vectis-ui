@@ -110,6 +110,11 @@ export const fr: Messages = {
     increment: 'Augmenter',
     decrement: 'Diminuer',
   },
+  stepper: {
+    label: 'Progression',
+    completed: 'Terminée',
+    error: 'Erreur',
+  },
   timePicker: {
     label: 'Sélecteur d’heure',
     meridiem: 'AM ou PM',

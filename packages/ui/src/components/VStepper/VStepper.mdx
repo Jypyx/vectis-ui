@@ -1,0 +1,57 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VStepperStories from './VStepper.stories'
+
+<Meta of={VStepperStories} />
+
+# Stepper
+
+The steps of a process and where the reader stands in it. VStepper is navigation only: the content
+of each step is yours, rendered from the same `v-model`, along with your own Back and Next buttons.
+
+<Canvas of={VStepperStories.Default} />
+
+<Controls of={VStepperStories.Default} />
+
+## Steps and model
+
+`steps` lists the steps in order: a `value`, a `title`, and optionally a `description`, `error`,
+`completed` and `disabled`. `v-model` holds the value of the current step; left out or unknown,
+the first step is current.
+
+Each step is drawn in one of four states. `error` wins over everything. Otherwise the current step
+is `active`, the steps before it are `completed` and those after it `upcoming`, unless `completed`
+says otherwise for a step.
+
+<Canvas of={VStepperStories.States} />
+
+## Going back and forth
+
+By default, the steps already reached are buttons and the steps ahead are plain text: the reader
+goes back freely, and forward only as far as they have been. Going back to the first step leaves
+the steps reached since within reach. `nonLinear` makes every step a button. A `disabled` step is
+never one.
+
+<Canvas of={VStepperStories.NonLinear} />
+
+## Orientation
+
+<Canvas of={VStepperStories.Vertical} />
+
+## Narrow space
+
+A horizontal stepper is a size container. Below 36rem, only the current step keeps its title on
+screen; the others keep their circles, and their titles stay readable by assistive technology.
+As a container, it takes its width from its parent rather than from its steps: inside a flex
+row, give it a basis of its own.
+
+<Canvas of={VStepperStories.Narrow} />
+
+## Accessibility
+
+- The steps are an `<ol>`, named "Progress" from the dictionary (`label`), so their number and
+  position are announced.
+- The current step carries `aria-current="step"`.
+- The tick and the exclamation mark are hidden from assistive technology; "Completed" and "Error"
+  are said after the title instead.
+- Steps within reach are native buttons in the tab order; the others are not focusable.
+- In forced colours, the current step keeps a ring of its own and the connectors stay drawn.

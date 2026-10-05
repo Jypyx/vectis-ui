@@ -58,6 +58,7 @@ const nav: NavMessages = {
   slider: 'Curseur',
   snackbar: 'Barre de confirmation',
   spinner: 'Indicateur de chargement',
+  stepper: 'Étapes',
   switch: 'Interrupteur',
   tabs: 'Onglets',
   textarea: 'Zone de texte',

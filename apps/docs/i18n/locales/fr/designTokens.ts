@@ -132,6 +132,10 @@ const descriptions: Record<DescribedToken, string> = {
     "La largeur d'un VDrawer latéral moyen, ou la hauteur d'un VDrawer en haut ou en bas (400px)",
   '--vectis-control-size-drawer-lg':
     "La largeur d'un grand VDrawer latéral, ou la hauteur d'un VDrawer en haut ou en bas (560px)",
+  '--vectis-control-size-stepper-indicator':
+    "Le diamètre du cercle qui porte le numéro d'une étape de VStepper (32px)",
+  '--vectis-control-size-stepper-connector-min':
+    "La longueur minimale d'un trait de liaison horizontal entre deux étapes de VStepper (24px)",
   '--vectis-control-size-snackbar-min': "La largeur minimale d'une snackbar (288px)",
   '--vectis-control-size-snackbar-max': "La largeur maximale d'une snackbar (576px)",
   '--vectis-control-size-card-media':

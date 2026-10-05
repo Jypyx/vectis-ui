@@ -82,6 +82,7 @@ export const components = [
   entry('slider'),
   entry('snackbar'),
   entry('spinner'),
+  entry('stepper'),
   entry('switch'),
   entry('tabs'),
   entry('textarea'),

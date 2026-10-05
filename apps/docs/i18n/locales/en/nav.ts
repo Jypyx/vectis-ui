@@ -60,6 +60,7 @@ const nav: NavMessages = {
   slider: 'Slider',
   snackbar: 'Snackbar',
   spinner: 'Spinner',
+  stepper: 'Stepper',
   switch: 'Switch',
   tabs: 'Tabs',
   textarea: 'Textarea',

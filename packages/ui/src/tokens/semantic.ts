@@ -320,6 +320,14 @@ export const semantic = {
       '25rem',
       'The default width of VDialog and VDialogAlert (400px), when no `width` is given',
     ),
+    'size-stepper-indicator': dimension(
+      '2rem',
+      'The diameter of the circle holding a VStepper step number (32px)',
+    ),
+    'size-stepper-connector-min': dimension(
+      '1.5rem',
+      'The shortest a horizontal VStepper connector gets between two steps (24px)',
+    ),
     'size-drawer-sm': dimension(
       '20rem',
       'The width of a small VDrawer on a side, or the height of one at the top or bottom (320px)',

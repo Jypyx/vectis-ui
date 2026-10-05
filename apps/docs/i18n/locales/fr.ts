@@ -54,6 +54,7 @@ import skeletonLoader from './fr/skeletonLoader'
 import slider from './fr/slider'
 import snackbar from './fr/snackbar'
 import spinner from './fr/spinner'
+import stepper from './fr/stepper'
 import switchPage from './fr/switch'
 import tabs from './fr/tabs'
 import textarea from './fr/textarea'
@@ -124,6 +125,7 @@ export default defineI18nLocale((): DocsMessages => ({
   slider,
   snackbar,
   spinner,
+  stepper,
   switch: switchPage,
   tabs,
   textarea,

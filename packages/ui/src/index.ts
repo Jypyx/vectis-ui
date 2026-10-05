@@ -61,6 +61,13 @@ export type {
 } from './components/VTabs/VTabs.vue'
 export { default as VTab } from './components/VTabs/VTab.vue'
 export { default as VTabPanel } from './components/VTabs/VTabPanel.vue'
+export { default as VStepper } from './components/VStepper/VStepper.vue'
+export type {
+  StepperIndicatorSlotProps,
+  StepperOrientation,
+  StepperStep,
+  StepperStepState,
+} from './components/VStepper/VStepper.vue'
 export { default as VToggle } from './components/VToggle/VToggle.vue'
 export type {
   ToggleModelValue,

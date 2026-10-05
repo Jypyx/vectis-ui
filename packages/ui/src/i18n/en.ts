@@ -107,6 +107,11 @@ export const en: Messages = {
     increment: 'Increase',
     decrement: 'Decrease',
   },
+  stepper: {
+    label: 'Progress',
+    completed: 'Completed',
+    error: 'Error',
+  },
   timePicker: {
     label: 'Time picker',
     meridiem: 'AM or PM',
