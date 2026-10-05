@@ -14,7 +14,6 @@ export default {
         { name: 'rowKey', type: 'string' },
         { name: 'caption', type: 'string' },
         { name: 'variant', type: 'DataTableVariant', values: "'flat' | 'outlined'", default: "'flat'" },
-        { name: 'responsive', type: 'DataTableResponsive', values: "'scroll' | 'stack'", default: "'scroll'" },
         { name: 'loading', type: 'boolean', default: 'false' },
         { name: 'loadingText', type: 'string' },
         { name: 'emptyText', type: 'string' },

@@ -118,9 +118,6 @@ export interface DataTableRange {
 /** How much decoration the table carries. */
 export type DataTableVariant = 'flat' | 'outlined'
 
-/** What a narrow container does to the rows. */
-export type DataTableResponsive = 'scroll' | 'stack'
-
 // This interface is exported rather than kept local, and it is generic rather than referring to
 // the component's own type parameter. A component typed over its rows inlines the whole
 // signature of its props into the declarations it emits, so a name that is not exported cannot
@@ -142,11 +139,6 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
    * and rounded corners.
    */
   variant?: DataTableVariant
-  /**
-   * What happens when the component is too narrow: the table scrolls sideways, or each
-   * row becomes a card with its column headings repeated inside it.
-   */
-  responsive?: DataTableResponsive
   /** Shows that the rows are being loaded. */
   loading?: boolean
   /**
@@ -240,7 +232,6 @@ const props = withDefaults(defineProps<DataTableProps<Row>>(), {
   rowKey: undefined,
   caption: undefined,
   variant: 'flat',
-  responsive: 'scroll',
   loading: false,
   loadingText: undefined,
   emptyText: undefined,
@@ -644,7 +635,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     :class="rootClass"
     :style="[heightStyle, rootStyle]"
     :data-variant="variant"
-    :data-responsive="responsive"
     :data-striped="striped ? '' : undefined"
     :data-compact="compact ? '' : undefined"
     :data-sticky-header="stickyHeader ? '' : undefined"
@@ -690,11 +680,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                 :aria-label="resolvedSelectAllLabel"
                 @update:model-value="toggleMaster"
               />
-              <!--
-                Its hidden box would leave the heading empty in the stacked layout (axe
-                empty-table-header), so it keeps its name as text there.
-              -->
-              <span class="v-data-table-stack-label">{{ resolvedSelectAllLabel }}</span>
             </th>
             <th
               v-for="column in columns"
@@ -716,11 +701,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                      the heading itself. -->
                 <VIcon class="v-data-table-sort-icon" v-bind="iconProps(sortIconFor(column))" />
               </button>
-              <!-- The heading as plain text, shown to screen readers in the STACKED layout
-                   only, where the button above is hidden: see the stack rules. -->
-              <span v-if="column.sortable" class="v-data-table-stack-label">{{
-                column.label
-              }}</span>
               <template v-else>
                 <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>
               </template>
@@ -767,12 +747,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                   @update:model-value="toggleRow(visibleIds[index]!)"
                 />
               </td>
-              <td
-                v-for="column in columns"
-                :key="column.key"
-                :data-label="column.label"
-                :data-align="column.align"
-              >
+              <td v-for="column in columns" :key="column.key" :data-align="column.align">
                 <slot
                   :name="`cell-${column.key}`"
                   :row="row"
@@ -866,7 +841,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
        the cells' own inline padding as soon as a frame appears. */
     --data-table-frame-pad: 0px;
 
-    container-type: inline-size;
     font-family: var(--vectis-text-family);
 
     /*
@@ -906,9 +880,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   /*
    * `min-block-size: 0` is load-bearing; a flex item refuses by default to shrink below its
    * content, so without it the area never compresses and the table overflows instead of
-   * scrolling. Deliberately not confined to `data-responsive='scroll'`: a table taller than its
-   * host must scroll in `stack` too, or `outlined`'s clip crops it and the rows below become
-   * unreachable.
+   * scrolling.
    */
   .v-data-table-scroller {
     flex: 1 1 auto;
@@ -1000,10 +972,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   /* The checkbox column is reduced to the width of its content. A table lays its columns
      out automatically, so asking for no width at all is what makes it take the least
      possible. */
-  .v-data-table-stack-label {
-    display: none;
-  }
-
   .v-data-table-table .v-data-table-select {
     inline-size: 0;
   }
@@ -1132,85 +1100,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     display: flex;
     align-items: center;
     gap: var(--vectis-space-2);
-  }
-
-  /*
-   * The stacked form: once the COMPONENT is narrow, each row becomes a card carrying its own
-   * headings. It is entirely CSS, and the threshold is written as a literal length; these
-   * queries accept no variables.
-   */
-  @container (max-width: 640px) {
-    .v-data-table[data-responsive='stack'] .v-data-table-head {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      margin: -1px;
-      overflow: hidden;
-      clip-path: inset(50%);
-    }
-
-    /*
-     * The heading row is out of sight, so its CONTROLS leave the tab order with it: a sort
-     * button or a "select all" box the keyboard lands on and nobody can see. `visibility`
-     * is what takes a control out of the tab order in CSS, and it takes it out of the
-     * accessibility tree too, so a sortable heading hands its name to a plain text copy.
-     */
-    .v-data-table[data-responsive='stack'] .v-data-table-head :is(.v-data-table-sort, .v-checkbox) {
-      visibility: hidden;
-    }
-
-    .v-data-table[data-responsive='stack'] .v-data-table-stack-label {
-      display: inline;
-    }
-
-    .v-data-table[data-responsive='stack'] tbody tr {
-      display: block;
-      padding-block: var(--vectis-space-2);
-      border-block-end: 1px solid var(--vectis-color-border);
-    }
-
-    .v-data-table[data-responsive='stack'] tbody tr:last-child {
-      border-block-end: none;
-    }
-
-    .v-data-table[data-responsive='stack'] td {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: var(--vectis-space-4);
-      padding: var(--vectis-space-1) var(--vectis-space-2);
-      border: none;
-      text-align: end;
-    }
-
-    /* Each cell writes its own column's name before itself, taken from the attribute the
-       template put there. It takes the overline type role, without forcing capitals. */
-    .v-data-table[data-responsive='stack'] td::before {
-      content: attr(data-label);
-      font-size: var(--vectis-text-overline-size);
-      font-weight: var(--vectis-text-overline-weight);
-      letter-spacing: var(--vectis-text-overline-tracking);
-      color: var(--vectis-color-text-muted);
-    }
-
-    /*
-     * The checkbox cell carries no column name; there is none; so it gets no heading and opens
-     * the card on its own line.
-     */
-    .v-data-table[data-responsive='stack'] td.v-data-table-select {
-      justify-content: flex-start;
-    }
-
-    .v-data-table[data-responsive='stack'] td.v-data-table-select::before {
-      content: none;
-    }
-
-    /* In a narrow component the search field drops under the title and takes the whole
-       width. This applies to both responsive forms, the toolbar never being part of what
-       scrolls. */
-    .v-data-table-search {
-      flex: 1 1 100%;
-    }
   }
 }
 </style>

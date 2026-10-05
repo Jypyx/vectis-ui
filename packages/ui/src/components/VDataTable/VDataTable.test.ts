@@ -49,13 +49,12 @@ describe('VDataTable', () => {
     vi.useRealTimers()
   })
 
-  it('renders a caption, th scope=col and cells with data-label (stack mode)', () => {
+  it('renders a caption and th scope=col', () => {
     const { container, getByText } = render(VDataTable, {
-      props: { columns: COLUMNS, rows: ROWS, caption: 'Projects', responsive: 'stack' },
+      props: { columns: COLUMNS, rows: ROWS, caption: 'Projects' },
     })
     expect(getByText('Projects').tagName).toBe('CAPTION')
     expect(container.querySelector('th')?.getAttribute('scope')).toBe('col')
-    expect(container.querySelector('td')?.getAttribute('data-label')).toBe('Name')
   })
 
   it('variant: data-variant set on the root, flat by default', () => {
@@ -675,14 +674,6 @@ describe('VDataTable', () => {
         },
       })
       expect(custom.getByRole('checkbox', { name: 'Row #2' })).toBeTruthy()
-    })
-
-    it('writes a sortable heading a second time, as text, for the stacked layout', () => {
-      const { container } = render(VDataTable, {
-        props: { columns: COLUMNS, rows: ROWS, responsive: 'stack' },
-      })
-      const copies = [...container.querySelectorAll('th .v-data-table-stack-label')]
-      expect(copies.map((el) => el.textContent?.trim())).toEqual(['Name', 'Total'])
     })
   })
 

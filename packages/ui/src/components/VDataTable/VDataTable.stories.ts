@@ -429,32 +429,6 @@ export const Striped: Story = {
   }),
 }
 
-/** Stack mode: under 640px of CONTAINER, the rows become cards; pure CSS. */
-export const ResponsiveStack: Story = {
-  args: { responsive: 'stack', selectable: true },
-  render: (args) => ({
-    components: { VDataTable },
-    setup: () => ({ args, columns, rows, selected: ref<DataTableRowId[]>([]) }),
-    template: `
-      <div style="width: 360px; border: 1px dashed var(--vectis-color-border); padding: 8px">
-        <VDataTable v-bind="args" :columns="columns" :rows="rows" v-model:selected="selected" />
-      </div>
-    `,
-  }),
-  // The heading row is out of sight here, so its sort buttons and "select all" box are out
-  // of the tab order too: the first Tab stop is the first row's checkbox.
-  play: async ({ canvasElement }) => {
-    const head = canvasElement.querySelector('.v-data-table-head') as HTMLElement
-    for (const control of head.querySelectorAll('button, input'))
-      await expect(getComputedStyle(control).visibility).toBe('hidden')
-
-    const firstRow = canvasElement.querySelector('tbody input') as HTMLInputElement
-    ;(canvasElement.ownerDocument.body as HTMLElement).focus()
-    await userEvent.tab()
-    await expect(firstRow).toHaveFocus()
-  },
-}
-
 /**
  * Server mode: the component applies NEITHER filter NOR sort NOR slicing; every state change
  * emits `update:params` and the consumer answers (here a pseudo-server: a simulated latency +

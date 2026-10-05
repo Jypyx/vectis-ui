@@ -123,17 +123,6 @@ wrapped onto two lines.
 
 <Canvas of={VDataTableStories.FullHeight} />
 
-## Responsive
-
-`responsive="scroll"` (the default) scrolls the table horizontally — the header and the footer stay
-put, only the table moves. `responsive="stack"` turns each row into a card under 640px of
-**container** (a container query, no measuring JS): the headers are re-injected in front of each
-cell through `data-label`, and the selection box opens the card. The heading row is then out of
-sight, so its sort buttons and its "select all" box leave the tab order with it; each heading stays
-in the table as text, where it still names its column for a screen reader.
-
-<Canvas of={VDataTableStories.ResponsiveStack} />
-
 ## Slots
 
 - `#title`: the left zone of the global header (wins over `title`).

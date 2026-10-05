@@ -161,7 +161,6 @@ export type {
   DataTableParams,
   DataTableProps,
   DataTableVariant,
-  DataTableResponsive,
 } from './components/VDataTable/VDataTable.vue'
 export { default as VInputOTP } from './components/VInputOTP/VInputOTP.vue'
 export type { InputOTPSize, InputOTPFormat } from './components/VInputOTP/VInputOTP.vue'

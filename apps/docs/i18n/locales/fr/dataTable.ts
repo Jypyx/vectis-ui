@@ -54,10 +54,6 @@ export default {
       title: 'Pleine hauteur',
       text: '<code>height</code> limite tout le composant, barre d’outils et pied compris. Les nombres utilisent des pixels ; les chaînes, des longueurs CSS.',
     },
-    responsive: {
-      title: 'Conteneurs étroits',
-      text: 'Dans un conteneur étroit, <code>responsive</code> choisit un défilement horizontal ou des cartes par ligne. Le mode cartes masque les boutons de tri des en-têtes et la case de sélection globale.',
-    },
     serverSide: {
       title: 'Côté serveur',
       text: '<code>serverSide</code> affiche les lignes fournies sans recherche, tri ni pagination locale. Écoutez <code>update:params</code>, chargez les lignes et fournissez <code>total</code>. <code>searchDebounce</code> retarde les requêtes de recherche.',
@@ -80,7 +76,6 @@ export default {
           'Champ d’identifiant stable des lignes. Requis pour la sélection ; sinon, la position est utilisée.',
         caption: 'Description du tableau annoncée par les technologies d’assistance.',
         variant: 'Tableau sans cadre ou avec bordure.',
-        responsive: 'Défilement horizontal ou cartes par ligne dans les conteneurs étroits.',
         loading: 'Affiche le contenu de chargement à la place des lignes.',
         loadingText: 'Texte de chargement visible. Utilise le dictionnaire par défaut.',
         emptyText: 'Texte des résultats vides. Utilise le dictionnaire par défaut.',

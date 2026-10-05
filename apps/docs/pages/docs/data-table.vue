@@ -14,8 +14,6 @@ import DataTableFullTable from '~/examples/data-table/FullTable.vue'
 import dataTableFullTableSource from '~/examples/data-table/FullTable.vue?raw'
 import DataTablePagination from '~/examples/data-table/Pagination.vue'
 import dataTablePaginationSource from '~/examples/data-table/Pagination.vue?raw'
-import DataTableResponsive from '~/examples/data-table/Responsive.vue'
-import dataTableResponsiveSource from '~/examples/data-table/Responsive.vue?raw'
 import DataTableRowsPerPage from '~/examples/data-table/RowsPerPage.vue'
 import dataTableRowsPerPageSource from '~/examples/data-table/RowsPerPage.vue?raw'
 import DataTableSearch from '~/examples/data-table/Search.vue'
@@ -130,12 +128,6 @@ useDocsHead('dataTable')
   <DocsProse keypath="dataTable.examples.fullHeight.text" />
   <DocsExample :source="dataTableFullHeightSource" stack>
     <DataTableFullHeight />
-  </DocsExample>
-
-  <h3 id="responsive">{{ t('dataTable.examples.responsive.title') }}</h3>
-  <DocsProse keypath="dataTable.examples.responsive.text" />
-  <DocsExample :source="dataTableResponsiveSource" stack>
-    <DataTableResponsive />
   </DocsExample>
 
   <h3 id="server-side">{{ t('dataTable.examples.serverSide.title') }}</h3>

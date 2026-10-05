@@ -54,10 +54,6 @@ export default {
       title: 'Full height',
       text: '<code>height</code> bounds the whole component, including toolbar and footer. Numbers use pixels; strings use CSS lengths.',
     },
-    responsive: {
-      title: 'Narrow containers',
-      text: 'In narrow containers, <code>responsive</code> selects horizontal scrolling or row cards. Card mode hides heading sort buttons and the select-all checkbox.',
-    },
     serverSide: {
       title: 'Server side',
       text: '<code>serverSide</code> displays supplied rows without local search, sort or pagination. Listen to <code>update:params</code>, fetch the rows and provide <code>total</code>. <code>searchDebounce</code> delays search requests.',
@@ -80,7 +76,6 @@ export default {
           'Stable row identifier field. Required for selection; otherwise row position is used.',
         caption: 'Table description announced by assistive technology.',
         variant: 'Unframed or outlined table.',
-        responsive: 'Horizontal scrolling or row cards in narrow containers.',
         loading: 'Displays loading content instead of rows.',
         loadingText: 'Visible loading text. Defaults to the dictionary.',
         emptyText: 'Empty-result text. Defaults to the dictionary.',
