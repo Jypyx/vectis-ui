@@ -186,9 +186,8 @@ export const LocalPagination: Story = {
         :per-page-options="[5, 10, 20]" style="width: 760px" />
     `,
   }),
-  // Layout that is not measurable in jsdom: the nav (responsive off, hence not
-  // confined) has an intrinsic width and the right-hand group is stuck to the footer's
-  // edge.
+  // Layout that is not measurable in jsdom: the nav has an intrinsic width and the
+  // right-hand group is stuck to the footer's edge.
   play: async ({ canvasElement }) => {
     const footer = canvasElement.querySelector('.v-data-table-footer') as HTMLElement
     const nav = footer.querySelector('.v-pagination') as HTMLElement

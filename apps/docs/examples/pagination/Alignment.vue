@@ -13,7 +13,6 @@ const page = ref(3)
       <VPagination
         v-model="page"
         :length="6"
-        responsive
         :align="align"
         item-variant="outline"
         :label="`Pages aligned ${align}`"

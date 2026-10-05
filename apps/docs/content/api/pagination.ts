@@ -32,7 +32,6 @@ export default {
         { name: 'lastText', type: 'string' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'disabledPages', type: 'PaginationMatcher' },
-        { name: 'responsive', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },
         { name: 'pageLabel', type: '(page: number) => string' },
         { name: 'href', type: '(page: number) => string' },

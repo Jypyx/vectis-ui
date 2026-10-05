@@ -1,6 +1,6 @@
 export default {
   title: 'Pagination',
-  lead: '<code>VPagination</code> sélectionne une page avec des boutons ou des liens. Il peut tronquer la plage et s’adapter aux conteneurs étroits.',
+  lead: '<code>VPagination</code> sélectionne une page avec des boutons ou des liens. Il peut tronquer la plage.',
   examples: {
     variantsAndTones: {
       title: 'Variantes et tonalités',
@@ -36,7 +36,7 @@ export default {
     },
     edgeControls: {
       title: 'Première et dernière',
-      text: '<code>edgeControls</code> ajoute des contrôles menant aux première et dernière pages accessibles, affichés comme l’indique <code>controls</code>. Les lignes responsive étroites les masquent.',
+      text: '<code>edgeControls</code> ajoute des contrôles menant aux première et dernière pages accessibles, affichés comme l’indique <code>controls</code>.',
     },
     unreachablePages: {
       title: 'Pages inaccessibles',
@@ -52,11 +52,7 @@ export default {
     },
     alignment: {
       title: 'Alignement',
-      text: '<code>align</code> positionne la ligne en mode responsive.',
-    },
-    responsive: {
-      title: 'Conteneurs étroits',
-      text: '<code>responsive</code> masque les pages voisines si le conteneur rétrécit, en conservant les première, dernière et actuelle.',
+      text: '<code>align</code> positionne la ligne dans la largeur disponible.',
     },
   },
   api: {
@@ -74,7 +70,7 @@ export default {
         size: 'Taille du composant.',
         compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
         elevated: 'Ajoute une ombre à la ligne ou aux boutons séparés.',
-        align: 'Alignement de la ligne en mode responsive.',
+        align: 'Alignement de la ligne dans la largeur disponible.',
         controls: 'Contenu précédent/suivant : icônes, texte, les deux ou <code>false</code>.',
         prevIcon: 'Icône du contrôle précédent.',
         nextIcon: 'Icône du contrôle suivant.',
@@ -93,8 +89,6 @@ export default {
         disabled: 'Désactive les interactions.',
         disabledPages:
           'Pages indisponibles sous forme de tableau ou de prédicat. Les contrôles les ignorent.',
-        responsive:
-          'Masque les pages voisines pour tenir dans le conteneur. Occupe la largeur disponible.',
         label: 'Nom accessible de la navigation. Utilise le dictionnaire par défaut.',
         pageLabel:
           'Fonction fournissant un nom accessible pour chaque numéro de page. Utilise le dictionnaire par défaut.',

@@ -1,6 +1,6 @@
 export default {
   title: 'Pagination',
-  lead: '<code>VPagination</code> selects a page with buttons or links. It supports truncated ranges and adapts to narrow containers.',
+  lead: '<code>VPagination</code> selects a page with buttons or links. It supports truncated ranges.',
   examples: {
     variantsAndTones: {
       title: 'Variants and tones',
@@ -36,7 +36,7 @@ export default {
     },
     edgeControls: {
       title: 'First and last',
-      text: '<code>edgeControls</code> adds controls leading to the first and last reachable pages, displayed as <code>controls</code> specifies. Narrow responsive rows hide them.',
+      text: '<code>edgeControls</code> adds controls leading to the first and last reachable pages, displayed as <code>controls</code> specifies.',
     },
     unreachablePages: {
       title: 'Unreachable pages',
@@ -52,11 +52,7 @@ export default {
     },
     alignment: {
       title: 'Alignment',
-      text: '<code>align</code> positions the row in responsive mode.',
-    },
-    responsive: {
-      title: 'Narrow containers',
-      text: '<code>responsive</code> hides neighbouring pages as the container narrows, preserving the first, last and current pages.',
+      text: '<code>align</code> positions the row within the available width.',
     },
   },
   api: {
@@ -73,7 +69,7 @@ export default {
         size: 'Component size.',
         compact: 'Reduces the control height without changing text or icons.',
         elevated: 'Adds a shadow to the row or detached buttons.',
-        align: 'Row alignment in responsive mode.',
+        align: 'Row alignment within the available width.',
         controls: 'Previous/next content: icons, text, both or <code>false</code>.',
         prevIcon: 'Previous control icon.',
         nextIcon: 'Next control icon.',
@@ -87,7 +83,6 @@ export default {
         lastText: 'Last page control text and accessible name. Defaults to the dictionary.',
         disabled: 'Disables interaction.',
         disabledPages: 'Unavailable pages as an array or predicate. Controls skip them.',
-        responsive: 'Hides neighbouring pages to fit the container. Takes the available width.',
         label: 'Accessible navigation name. Defaults to the dictionary.',
         pageLabel:
           'Function providing an accessible name for each page number. Defaults to the dictionary.',

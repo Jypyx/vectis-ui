@@ -91,22 +91,6 @@ describe('VPagination', () => {
         unmount()
       }
     })
-
-    it('marks the bounds with data-edge and the neighbours with their distance to the current page', () => {
-      const { container } = render(VPagination, {
-        props: { length: 20, modelValue: 10, totalVisible: 7 },
-      })
-      const [first, before, current, after, last] = [
-        ...container.querySelectorAll<HTMLElement>('.v-pagination-page'),
-      ]
-
-      expect(first?.hasAttribute('data-edge')).toBe(true)
-      expect(last?.hasAttribute('data-edge')).toBe(true)
-      expect(before?.dataset.distance).toBe('1')
-      expect(after?.dataset.distance).toBe('1')
-      // The current page can never be hidden
-      expect(current?.hasAttribute('data-distance')).toBe(false)
-    })
   })
 
   describe('v-model', () => {
@@ -295,7 +279,7 @@ describe('VPagination', () => {
       expect(control?.querySelector('.v-icon')).toBeTruthy()
     })
 
-    it('keeps the accessible name even when the label is visible', () => {
+    it('names a control by its visible label', () => {
       const { getByRole } = render(VPagination, {
         props: { length: 5, modelValue: 3, controls: 'both' },
       })

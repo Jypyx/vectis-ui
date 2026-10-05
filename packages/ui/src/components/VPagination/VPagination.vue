@@ -93,10 +93,7 @@ interface PaginationProps {
   compact?: boolean
   /** Raises the row off the page, on the terms of VButton's own `elevated`. */
   elevated?: boolean
-  /**
-   * Where the row sits in the space it is given. It only matters in responsive mode,
-   * where the row takes the whole width available.
-   */
+  /** Where the row sits in the width it is given. */
   align?: PaginationAlign
 
   /**
@@ -147,12 +144,6 @@ interface PaginationProps {
   disabledPages?: PaginationMatcher
 
   /**
-   * Lets the row shed pages as the space narrows, by asking about its own width. It is
-   * off by default, because it makes the row take the full width available.
-   */
-  responsive?: boolean
-
-  /**
    * What screen readers announce for the navigation itself. It falls back to the
    * design system dictionary.
    */
@@ -191,7 +182,6 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   lastText: undefined,
   disabled: false,
   disabledPages: undefined,
-  responsive: false,
   label: undefined,
   pageLabel: undefined,
   href: undefined,
@@ -220,9 +210,7 @@ const resolvedLastText = computed(() => props.lastText ?? m.value.pagination.las
 const page = defineModel<number>({ default: 1 })
 
 /** One slot in the row: either a page, or the ellipsis standing for those left out. */
-type PaginationItem =
-  | { kind: 'page'; key: string; page: number; edge: boolean; distance: number }
-  | { kind: 'gap'; key: string }
+type PaginationItem = { kind: 'page'; key: string; page: number } | { kind: 'gap'; key: string }
 
 // A length or a model that is not a whole number (`NaN` while a page size is still loading,
 // a computed `2.5`) is brought back to a page that exists, or no pill would ever match it.
@@ -243,13 +231,7 @@ const items = computed<PaginationItem[]>(() => {
   const count = total.value
   const current = currentPage.value
 
-  const pageItem = (n: number): PaginationItem => ({
-    kind: 'page',
-    key: `page-${n}`,
-    page: n,
-    edge: n === 1 || n === count,
-    distance: Math.min(Math.abs(n - current), 3),
-  })
+  const pageItem = (n: number): PaginationItem => ({ kind: 'page', key: `page-${n}`, page: n })
   const pages = (from: number, to: number): PaginationItem[] => {
     const out: PaginationItem[] = []
     for (let n = from; n <= to; n++) out.push(pageItem(n))
@@ -354,9 +336,9 @@ function isUnusable(el: HTMLElement): boolean {
  * The previous and next controls disable themselves once no page is left in their direction,
  * and a focused button that becomes disabled hands the focus to <body>: a keyboard reader
  * pressing "Next page" on the second to last page would be sent back to the top of the document
- * by the next Tab. The focus goes to the page just reached instead, which is always rendered,
- * the current page being the one pill the responsive steps never hide. A row without pages
- * hands it to the nearest control still usable, the one before it first.
+ * by the next Tab. The focus goes to the page just reached instead, the current page being
+ * always rendered. A row without pages hands it to the nearest control still usable, the one
+ * before it first.
  */
 async function goFromControl(event: MouseEvent, n: number | undefined) {
   const control = event.currentTarget as HTMLElement
@@ -405,7 +387,7 @@ const PageControl: FunctionalComponent<{ side: ControlSide }> = ({ side }) => {
   const backward = side === 'first' || side === 'prev'
   return h(
     VButton,
-    { ...common, tone: 'neutral', 'aria-label': label },
+    { ...common, tone: 'neutral' },
     {
       ...(props.controls === 'both' ? { [backward ? 'start' : 'end']: glyph } : {}),
       default: () => h('span', { class: 'v-pagination-control-label' }, label),
@@ -416,11 +398,7 @@ const PageControl: FunctionalComponent<{ side: ControlSide }> = ({ side }) => {
 const navEl = ref<HTMLElement | null>(null)
 
 // @keyboard @a11y
-/**
- * The arrow keys, through the shared implementation in `utils/arrowNav`. The pills the
- * responsive rules have hidden are left out by the helper, which skips anything not displayed;
- * so they cannot be focused into.
- */
+/** The arrow keys, through the shared implementation in `utils/arrowNav`. */
 function onKeydown(event: KeyboardEvent) {
   const nav = navEl.value
   if (!nav) return
@@ -430,7 +408,7 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 // The pills are rendered by a VButtonGroup inside the nav, so a template ref reaches none of
-// them. `focus` goes to the current page, which every responsive step keeps on screen.
+// them. `focus` goes to the current page.
 defineExpose({
   // Two queries, not one selector list: a list matches in DOM order, which would hand the
   // focus to the previous control ahead of the current page. `a[href]` because an inert link
@@ -454,8 +432,6 @@ defineExpose({
     :aria-label="ariaLabel"
     :data-align="align"
     :data-item-variant="itemVariant"
-    :data-controls="controls || undefined"
-    :data-responsive="responsive ? '' : undefined"
     @keydown="onKeydown"
   >
     <!-- The row is a VButtonGroup either way: joined it merges the borders of its DIRECT
@@ -489,8 +465,6 @@ defineExpose({
           :aria-label="pageLabelFor(item.page)"
           :aria-current="item.page === currentPage ? 'page' : undefined"
           :href="hrefFor(item.page)"
-          :data-edge="item.edge ? '' : undefined"
-          :data-distance="!item.edge && item.distance > 0 ? item.distance : undefined"
           @click="choose($event, item.page)"
         >
           {{ item.page }}
@@ -530,17 +504,6 @@ defineExpose({
     display: flex;
   }
 
-  /*
-   * A container of this kind computes its width WITHOUT looking at its content, so the row has
-   * to be block-level: as an inline box it would measure zero and hide everything at once. It
-   * therefore takes its parent's whole width, which is exactly what makes the hiding follow the
-   * space the component was actually given, and what obliges a flex parent to grant it one.
-   */
-  .v-pagination[data-responsive] {
-    container-type: inline-size;
-    container-name: v-pagination;
-  }
-
   .v-pagination[data-align='center'] {
     justify-content: center;
   }
@@ -577,76 +540,6 @@ defineExpose({
      class loses to it whatever the sheet order. */
   .v-pagination-ellipsis[data-size] {
     cursor: default;
-  }
-
-  /*
-   * Each threshold is the width NEEDED to show that level, never what remains after hiding:
-   * written the other way round the row overflows for the whole interval before the next step
-   * takes effect. The most distant neighbours go first.
-   */
-  @container v-pagination (max-inline-size: 36rem) {
-    .v-pagination[data-responsive] .v-pagination-page[data-distance='3'] {
-      display: none;
-    }
-  }
-
-  @container v-pagination (max-inline-size: 31rem) {
-    .v-pagination[data-responsive] .v-pagination-page[data-distance='2'] {
-      display: none;
-    }
-
-    /* It is never done when the control shows text alone: there would be nothing left to click. */
-    .v-pagination[data-responsive][data-controls='both'] .v-pagination-control-label {
-      display: none;
-    }
-  }
-
-  @container v-pagination (max-inline-size: 25rem) {
-    .v-pagination[data-responsive] .v-pagination-page[data-distance='1'] {
-      display: none;
-    }
-
-    /*
-     * The first and last pills stay on screen and lead to the same pages. A row without pages
-     * keeps these controls, which are then its only way to the bounds; the rules restoring the
-     * outer edges below are scoped the same way.
-     */
-    .v-pagination[data-responsive]:has(.v-pagination-page)
-      .v-pagination-control:is([data-side='first'], [data-side='last']) {
-      display: none;
-    }
-
-    /*
-     * VButtonGroup joins its segments by DOM position, which a hidden edge control still holds:
-     * the previous and next controls would keep the square corners, the pulled margin and the
-     * cleared or seamed border of an inner segment. These restore an outer edge, at (0,8,0)
-     * against the (0,6,0) of VButtonGroup's heaviest join rule. Controls are neutral and either
-     * ghost or outline, so their border is the outline frame or nothing.
-     */
-    .v-pagination[data-responsive]:has(.v-pagination-page)
-      > .v-pagination-items:not([data-detached])
-      > [data-side='first']
-      + .v-pagination-control[data-side='prev'] {
-      margin-inline-start: 0;
-      border-start-start-radius: var(--vectis-radius-interactive);
-      border-end-start-radius: var(--vectis-radius-interactive);
-      border-inline-start-color: var(--pagination-frame, transparent);
-    }
-
-    .v-pagination[data-responsive]:has(.v-pagination-page)
-      > .v-pagination-items:not([data-detached])
-      > [data-side='first']
-      + .v-pagination-control[data-side='prev']::before {
-      content: none;
-    }
-
-    .v-pagination[data-responsive]:has(.v-pagination-page)
-      > .v-pagination-items:not([data-detached])
-      > .v-pagination-control[data-side='next']:has(+ [data-side='last']) {
-      border-start-end-radius: var(--vectis-radius-interactive);
-      border-end-end-radius: var(--vectis-radius-interactive);
-      border-inline-end-color: var(--pagination-frame, transparent);
-    }
   }
 
   /*

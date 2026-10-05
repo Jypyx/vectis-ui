@@ -36,7 +36,6 @@ const meta = {
     controls: 'icon',
     edgeControls: false,
     disabled: false,
-    responsive: true,
   },
   // A live v-model: without a local ref, clicking a page would change nothing.
   render: (args) => ({
@@ -236,9 +235,7 @@ export const Controls: Story = {
 export const EdgeControls: Story = {
   render: () => ({
     components: { VPagination },
-    setup: () => ({ a: ref(10), b: ref(10), c: ref(10) }),
-    // The last row is narrower than the final responsive step: the edge controls give way to
-    // the first and last pills, and the previous and next controls take the row's ends.
+    setup: () => ({ a: ref(10), b: ref(10) }),
     template: `
       <div style="display: grid; gap: 16px">
         <VPagination :length="20" :total-visible="7" edge-controls label="icon" v-model="a" />
@@ -250,17 +247,6 @@ export const EdgeControls: Story = {
           label="both"
           v-model="b"
         />
-        <div style="width: 360px">
-          <VPagination
-            :length="20"
-            :total-visible="7"
-            edge-controls
-            item-variant="outline"
-            responsive
-            label="narrow"
-            v-model="c"
-          />
-        </div>
       </div>
     `,
   }),
@@ -276,26 +262,6 @@ export const EdgeControls: Story = {
     await expect(last).toBeDisabled()
     await expect(icon.getByRole('button', { name: 'Next page' })).toBeDisabled()
     await expect(icon.getByRole('button', { name: 'Page 20' })).toHaveFocus()
-
-    /*
-     * VButtonGroup joins its segments by DOM position, which the hidden edge controls still
-     * hold; the previous and next controls must get the outer corners, margin and border back.
-     * Only a real layout shows it.
-     */
-    const narrow = canvas.getByRole('navigation', { name: 'narrow' })
-    const control = (side: string) => narrow.querySelector<HTMLElement>(`[data-side='${side}']`)!
-    await expect(getComputedStyle(control('first')).display).toBe('none')
-    await expect(getComputedStyle(control('last')).display).toBe('none')
-
-    const prev = getComputedStyle(control('prev'))
-    const next = getComputedStyle(control('next'))
-    await expect(prev.marginInlineStart).toBe('0px')
-    await expect(prev.borderStartStartRadius).not.toBe('0px')
-    await expect(prev.borderStartStartRadius).toBe(next.borderEndEndRadius)
-    // The top border is untouched by the join, so it carries the variant's own colour.
-    await expect(prev.borderInlineStartColor).not.toBe('rgba(0, 0, 0, 0)')
-    await expect(prev.borderInlineStartColor).toBe(prev.borderBlockStartColor)
-    await expect(next.borderInlineEndColor).toBe(next.borderBlockStartColor)
   },
 }
 
@@ -356,39 +322,6 @@ export const Links: Story = {
   },
 }
 
-export const Responsive: Story = {
-  render: () => ({
-    components: { VPagination },
-    setup: () => ({ page: ref(10) }),
-    // The nav is its own query container: the truncation follows the width of the frame, not
-    // the viewport's. The panel is resizable by its handle (bottom right corner, CSS resize;
-    // hence the overflow: hidden): the neighbours fall away in steps as it narrows, while the
-    // first, the last and the current page always remain.
-    template: `
-      <div
-        style="
-          width: 640px;
-          max-width: 100%;
-          resize: horizontal;
-          overflow: hidden;
-          border: 1px dashed var(--vectis-color-border);
-          padding: 8px;
-        "
-      >
-        <VPagination :length="40" :total-visible="9" v-model="page" />
-      </div>
-    `,
-  }),
-  play: async ({ canvasElement }) => {
-    const nav = canvasElement.querySelector('.v-pagination')
-    const visiblePages = [...nav!.querySelectorAll<HTMLElement>('.v-pagination-page')]
-      .filter((el) => getComputedStyle(el).display !== 'none')
-      .map((el) => el.textContent?.trim())
-
-    await expect(visiblePages).toEqual(['1', '8', '9', '10', '11', '12', '40'])
-  },
-}
-
 export const Alignment: Story = {
   render: () => ({
     components: { VPagination },
@@ -421,14 +354,6 @@ export const EdgeCases: Story = {
         <!-- 4-digit numbers: the pills widen beyond the square. Without
              totalVisible, all 12,000 pages would be rendered. -->
         <VPagination :length="12000" :total-visible="7" label="length 12000" v-model="long" />
-        <!-- Responsive truncation off: the row overflows rather than shrinking. -->
-        <VPagination
-          :length="12000"
-          :total-visible="7"
-          :responsive="false"
-          label="length 12000 fixed"
-          v-model="long"
-        />
       </div>
     `,
   }),

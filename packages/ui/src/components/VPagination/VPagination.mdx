@@ -12,12 +12,10 @@ Navigation between the pages of a result set. The component invents no button: e
 `prefers-reduced-motion` therefore come straight from `VButton`, without a single state rule
 redefined here.
 
-Truncation happens at two deliberately distinct levels. The first is **logical**: by default
-every page is rendered, and `totalVisible` fixes the total number of slots shown (ellipses
-included) — a pure derivation of state, with no browser API involved. The second is
-**responsive** and entirely in CSS: the bar is its own query container, and `@container` steps
-remove the most distant neighbours when room runs out. No `ResizeObserver`, no measurement in
-JavaScript.
+Truncation is purely **logical**: by default every page is rendered, and `totalVisible` fixes the
+total number of slots shown (ellipses included) — a pure derivation of state, with no browser API
+involved. The bar never adapts to the width it is given: choose `totalVisible` for the space
+available.
 
 <Canvas of={VPaginationStories.Default} />
 <Controls of={VPaginationStories.Default} />
@@ -29,8 +27,7 @@ the ends. `detached` spaces them out instead and gives each its own corners, and
 them joined while drawing a line between them, both on the terms of `VButtonGroup`'s own props. Being a `VButtonGroup` is what dictates
 the internal structure — `VButtonGroup` styles only
 its **direct** children, hence no `<ul>`/`<li>` and an ellipsis rendered as an inert button
-rather than a `<span>`: the joints stay continuous, including when a neighbour is hidden by the
-responsive truncation.
+rather than a `<span>`: the joints stay continuous.
 
 <Canvas of={VPaginationStories.Attached} />
 
@@ -107,25 +104,11 @@ show it beside the bar when it matters, as `VDataTable`'s `showRange` does.
 
 <Canvas of={VPaginationStories.ManyPages} />
 
-## Responsive truncation
+## Alignment
 
-The bar declares its own query container: the steps depend on the space actually allocated to
-the component, never on the viewport width. The most distant neighbours disappear first; the
-first page, the last and the current one are never hidden. A control in `both` mode folds down
-to icon-only as space runs out. At the narrowest step, the first and last controls are hidden:
-the first and last pills, still on screen, lead to the same pages. A bar without pages keeps them.
+The bar is block-level and takes its parent's width, so `align` places the row within it:
+`start` (default), `center` or `end`.
 
-Two consequences worth knowing. First, the bar is block-level and takes its parent's width —
-which is what makes the truncation container-dependent — so alignment goes through the `align`
-prop rather than through the context. Second, the thresholds are literal values, since
-`@container` conditions accept no variables; they are calibrated on the `md` size. For a very
-large number of pages or an `xl` size, prefer adjusting `totalVisible`, or switch the responsive
-layer off with `responsive: false`.
-
-No extra ellipsis appears to compensate for a hidden neighbour: it would occupy exactly the
-width of a pill, so it would gain nothing.
-
-<Canvas of={VPaginationStories.Responsive} />
 <Canvas of={VPaginationStories.Alignment} />
 
 ## Disabled pages
@@ -168,8 +151,6 @@ alignment.
   used drops its address and announces `aria-disabled`, since a link has no `disabled`.
 - Every pill gets an explicit accessible name — "Page 7" by default, customizable through
   `pageLabel` — because an isolated number is meaningless out of context.
-- The controls keep their `aria-label` even when their label is visible: responsive truncation
-  can hide the text, and the accessible name must survive that.
 - A control that reaches the last page it can go to disables itself. When it held the keyboard
   focus, the focus moves to the page just reached, since a disabled button would otherwise hand
   it back to the document. Without pages, it moves to the nearest usable control.
@@ -179,9 +160,6 @@ alignment.
   arrows and Home/End only **move** focus, without changing page: a pagination that activated on
   focus would trigger unintended navigations. The arrows are physical, hence inverted in RTL,
   where the chevrons flip as well.
-- A page hidden by the responsive truncation is hidden with `display: none`: it leaves both the
-  accessibility tree and the tab order. A known corollary: if focus was on a neighbour when the
-  container narrows, it falls back to the document.
 - There is no `<ul>`/`<li>`: `VButtonGroup` styles only its direct children and an intervening
   list element would break the border merging. The named `<nav>` and the `role="group"` the
   `VButtonGroup` carries provide the grouping.

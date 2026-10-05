@@ -16,8 +16,6 @@ import PaginationLength from '~/examples/pagination/Length.vue'
 import paginationLengthSource from '~/examples/pagination/Length.vue?raw'
 import PaginationLinks from '~/examples/pagination/Links.vue'
 import paginationLinksSource from '~/examples/pagination/Links.vue?raw'
-import PaginationResponsive from '~/examples/pagination/Responsive.vue'
-import paginationResponsiveSource from '~/examples/pagination/Responsive.vue?raw'
 import PaginationSelectedVariants from '~/examples/pagination/SelectedVariants.vue'
 import paginationSelectedVariantsSource from '~/examples/pagination/SelectedVariants.vue?raw'
 import PaginationSizes from '~/examples/pagination/Sizes.vue'
@@ -124,12 +122,6 @@ useDocsHead('pagination')
   <DocsProse keypath="pagination.examples.alignment.text" />
   <DocsExample :source="paginationAlignmentSource" stack>
     <PaginationAlignment />
-  </DocsExample>
-
-  <h3 id="responsive">{{ t('pagination.examples.responsive.title') }}</h3>
-  <DocsProse keypath="pagination.examples.responsive.text" />
-  <DocsExample :source="paginationResponsiveSource" stack>
-    <PaginationResponsive />
   </DocsExample>
 
   <DocsApi page="pagination" :api="api" />
