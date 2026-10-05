@@ -164,6 +164,30 @@ describe('VMenu', () => {
    * neither anchors nor lays anything out, so what is locked here is the ONE observable thing:
    * that the trigger is named as the source.
    */
+  // Extensions wrapping `showPopover` drop its `source` option; the named anchor keeps the
+  // panel at the trigger regardless. jsdom ignores `anchor-name`, so the slot prop is read.
+  it('names the trigger as the panel anchor', () => {
+    const { getByTestId, container } = renderHarness(
+      `
+        <VMenu>
+          <template #trigger="{ triggerProps }">
+            <button
+              data-testid="trigger"
+              :data-anchor="triggerProps.style['anchor-name']"
+              v-bind="triggerProps"
+            >Actions</button>
+          </template>
+          <VMenuItem label="Rename" />
+        </VMenu>
+      `,
+      vi.fn(),
+    )
+    const name = getByTestId('trigger').dataset.anchor
+    const menu = container.querySelector('[role="menu"]') as HTMLElement
+    expect(name).toMatch(/^--menu-anchor-[\w-]+$/)
+    expect(menu.style.getPropertyValue('--menu-anchor')).toBe(name)
+  })
+
   describe('opened from code, the trigger is named as the popover source', () => {
     function renderModelMenu(initiallyOpen = false) {
       const open = ref(initiallyOpen)
@@ -551,6 +575,24 @@ describe('VMenu', () => {
         (el) => el.dataset.icon,
       )
       expect(icons).not.toContain('download')
+    })
+
+    // Hover and the keyboard open the submenu through `showPopover({ source })`, an option
+    // extensions wrapping that method drop; the named anchor keeps it in place regardless.
+    it('names the parent item as the subpanel anchor, whatever opens it', async () => {
+      const { getByRole, container } = renderSubmenu()
+      await openMenu(container)
+
+      const parent = getByRole('menuitem', { name: 'Export' })
+      const sub = panels(container)[1] as HTMLElement
+      const name = parent.style.getPropertyValue('--menu-anchor')
+      expect(name).toMatch(/^--menu-anchor-[\w-]+$/)
+      expect(sub.style.getPropertyValue('--menu-anchor')).toBe(name)
+      // The root panel names its own anchor, the trigger's, which the submenu never inherits
+      expect(panels(container)[0]?.style.getPropertyValue('--menu-anchor')).not.toBe(name)
+      expect(
+        getByRole('menuitem', { name: 'Rename' }).style.getPropertyValue('--menu-anchor'),
+      ).toBe('')
     })
 
     it('ArrowRight opens the submenu, focuses its first item and emits no select', async () => {

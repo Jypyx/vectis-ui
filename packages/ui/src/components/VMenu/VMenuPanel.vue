@@ -25,6 +25,13 @@ interface MenuPanelProps {
    */
   submenu?: boolean
   /**
+   * The anchor name carried by whatever opens the panel: the trigger, or the parent item.
+   * The implicit anchor is not enough: an opening from code relies on `showPopover({ source })`,
+   * and browser extensions that wrap `showPopover` (password managers do) drop that option,
+   * leaving the panel at the corner of the viewport.
+   */
+  anchor: string
+  /**
    * The row height, set by the ROOT panel only. Submenus receive no value and inherit
    * it through CSS instead.
    */
@@ -195,7 +202,7 @@ defineExpose({
     :data-compact="compact ? '' : undefined"
     :data-width="resolvedWidth ? '' : undefined"
     :data-match-trigger="matchTrigger ? '' : undefined"
-    :style="{ '--menu-width': resolvedWidth }"
+    :style="{ '--menu-width': resolvedWidth, '--menu-anchor': anchor }"
     @beforetoggle="syncShown"
     @toggle="onToggle"
     @keydown="onKeydown"
@@ -210,9 +217,11 @@ defineExpose({
    * The panel's surface, border, shadow and inner rhythm come from the shared `.v-panel` class,
    * and its dimensions from the `v-control` class the template sets on the root panel; there is
    * no size table here, the rows reading the inherited variables directly. Only what is
-   * specific to a dropdown menu stays below.
+   * specific to a dropdown menu stays below. Every panel sets its own `--menu-anchor`, so none
+   * inherits an enclosing one.
    */
   .v-menu {
+    position-anchor: var(--menu-anchor);
     min-inline-size: var(--vectis-control-size-menu-min);
     max-inline-size: min(var(--vectis-control-size-menu-max), calc(100dvi - var(--vectis-space-8)));
   }
@@ -241,11 +250,8 @@ defineExpose({
     inline-size: var(--menu-width);
   }
 
-  /*
-   * This works with no anchor name of any kind, because the button that opened the panel is
-   * already its implicit anchor; VCombobox and VTimeInput, anchored to a text input, have to
-   * name theirs. Like the width above, only the ROOT panel renders it.
-   */
+  /* `anchor-size()` measures the trigger through `position-anchor` above. Like the width,
+     only the ROOT panel renders it. */
   .v-menu[data-match-trigger] {
     min-inline-size: anchor-size(width);
   }

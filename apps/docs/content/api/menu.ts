@@ -86,6 +86,7 @@ export default {
   'aria-haspopup': 'menu'
   'aria-expanded': boolean
   'aria-controls': string
+  style: { 'anchor-name': string }
 }`,
     },
   ],

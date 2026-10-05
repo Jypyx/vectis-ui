@@ -13,7 +13,7 @@ import { iconProps } from '../VIcon/iconProps'
 import { chevron_right as chevronRightIcon } from '../VIcon/icons/chevron_right'
 import type { IconSource } from '../VIcon/types'
 import VMenuPanel from './VMenuPanel.vue'
-import { menuKey, SUBMENU_HOVER_DELAY } from './context'
+import { menuAnchor, menuKey, SUBMENU_HOVER_DELAY } from './context'
 
 import { useTimer } from '../../composables/useTimer'
 
@@ -118,12 +118,10 @@ function onClick() {
 }
 
 const subId = useId()
+// Hover and the keyboard open the submenu from code: see the `anchor` prop of VMenuPanel.
+const subAnchor = menuAnchor(subId)
 const subOpen = ref(false)
 const subPanel = ref<InstanceType<typeof VMenuPanel> | null>(null)
-// When a submenu is opened from code rather than by a click, the item must be handed to the
-// browser as the source of that opening. The implicit anchor is only established natively, on
-// click; without it the panel has nothing to position itself against and lands at the corner of
-// the viewport, with no error anywhere.
 const itemEl = ref<HTMLElement | null>(null)
 
 // @keyboard
@@ -207,6 +205,7 @@ function onPointerLeave(event: PointerEvent) {
     :data-selected="selected ? '' : undefined"
     :popovertarget="hasSubmenu() ? subId : undefined"
     :popovertargetaction="hasSubmenu() ? 'show' : undefined"
+    :style="hasSubmenu() ? { '--menu-anchor': subAnchor } : undefined"
     @click="onClick"
     @keydown="onKeydown"
     @pointerenter="onPointerEnter"
@@ -235,6 +234,7 @@ function onPointerLeave(event: PointerEvent) {
     :id="subId"
     ref="subPanel"
     placement="right-start"
+    :anchor="subAnchor"
     submenu
     @toggle="subOpen = $event"
     @pointerenter="hoverTimer.cancel()"
@@ -269,6 +269,11 @@ function onPointerLeave(event: PointerEvent) {
     text-align: start;
     text-decoration: none;
     cursor: pointer;
+  }
+
+  /* The name is unique per item and read by the submenu panel's `position-anchor`. */
+  .v-menu-item[aria-haspopup] {
+    anchor-name: var(--menu-anchor);
   }
 
   .v-menu-item-content {

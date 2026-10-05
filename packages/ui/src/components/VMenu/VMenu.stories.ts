@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
+import { ref } from 'vue'
 
 import { builtinIcons as icons } from '../VIcon/icons'
 import { storyText } from '../../stories/storyText'
@@ -12,6 +13,7 @@ import VMenuSeparator from './VMenuSeparator.vue'
 const t = storyText({
   en: {
     actions: 'Actions',
+    openFromCode: 'Open from code',
     rename: 'Rename',
     duplicate: 'Duplicate',
     archiveUnavailable: 'Archive (unavailable)',
@@ -48,6 +50,7 @@ const t = storyText({
   },
   fr: {
     actions: 'Actions',
+    openFromCode: 'Ouvrir par le code',
     rename: 'Renommer',
     duplicate: 'Dupliquer',
     archiveUnavailable: 'Archiver (indisponible)',
@@ -370,6 +373,42 @@ export const EscapeDismiss: Story = {
   },
 }
 
+export const OpenFromCode: Story = {
+  render: () => ({
+    components: { VMenu, VMenuItem, VButton },
+    setup: () => ({ t, open: ref(false) }),
+    template: `
+      <div style="display: flex; gap: 8px; align-items: center">
+        <VButton variant="soft" tone="neutral" @click="open = true">{{ t.openFromCode }}</VButton>
+        <VMenu v-model:open="open">
+          <template #trigger="{ triggerProps }">
+            <VButton variant="outline" tone="neutral" v-bind="triggerProps">{{ t.actions }}</VButton>
+          </template>
+          <VMenuItem :label="t.rename" />
+          <VMenuItem :label="t.duplicate" />
+        </VMenu>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const menu = canvasElement.querySelector('[role="menu"]') as HTMLElement
+    const trigger = canvas.getByRole('button', { name: 'Actions' })
+    // Stands in for a browser extension wrapping `showPopover` and dropping its `source`
+    // option: the menu must still open under its trigger, not at the viewport corner.
+    menu.showPopover = () => HTMLElement.prototype.showPopover.call(menu)
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Open from code' }))
+    await waitFor(() => expect(menu.matches(':popover-open')).toBe(true))
+    const triggerRect = trigger.getBoundingClientRect()
+    const menuRect = menu.getBoundingClientRect()
+    await expect(menuRect.top).toBeGreaterThanOrEqual(triggerRect.bottom)
+    // Loose: the entry transition scales the panel from 0.97
+    await expect(Math.abs(menuRect.left - triggerRect.left)).toBeLessThan(8)
+    delete (menu as Partial<HTMLElement>).showPopover
+  },
+}
+
 export const NavigationItems: Story = {
   render: () => ({
     components: { VMenu, VMenuItem, VButton },
@@ -521,10 +560,19 @@ export const SubmenusOnHover: Story = {
     // Hover: the hovered item takes the focus (a single highlight), then the submenu opens
     // after the intent delay
     const exportItem = canvas.getByRole('menuitem', { name: 'Export' })
+    const exportPanel = document.getElementById(exportItem.getAttribute('aria-controls')!)!
+    // Stands in for a browser extension wrapping `showPopover` and dropping its `source`
+    // option: the submenu must still open beside its item, not at the viewport corner.
+    exportPanel.showPopover = () => HTMLElement.prototype.showPopover.call(exportPanel)
     await userEvent.hover(exportItem)
     await expect(exportItem).toHaveFocus()
     await waitFor(() => expect(exportItem).toHaveAttribute('aria-expanded', 'true'))
     await waitFor(() => expect(canvas.getByRole('menuitem', { name: 'PDF' })).toBeVisible())
+    const itemRect = exportItem.getBoundingClientRect()
+    const panelRect = exportPanel.getBoundingClientRect()
+    await expect(panelRect.left).toBeGreaterThanOrEqual(itemRect.right)
+    await expect(Math.abs(panelRect.top - itemRect.top)).toBeLessThan(itemRect.height)
+    delete (exportPanel as Partial<HTMLElement>).showPopover
 
     // Switching branch: hovering another item with a submenu closes the first. explicit
     // unhover: userEvent's direct API does not track the pointer between two hover() calls, so

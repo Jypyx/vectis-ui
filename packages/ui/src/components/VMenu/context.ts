@@ -34,6 +34,15 @@ export function menuInvoker(id: string): HTMLElement | null {
   return document.querySelector(`[popovertarget="${id.replace(/["\\]/g, '\\$&')}"]`)
 }
 
+/**
+ * The anchor name tying a panel to the element that opens it, built from the panel id. Every
+ * character a dashed ident cannot hold unescaped is encoded, underscore included, so two ids
+ * cannot collide.
+ */
+export function menuAnchor(id: string): string {
+  return `--menu-anchor-${id.replace(/[^A-Za-z0-9-]/gu, (char) => `_${char.codePointAt(0)!.toString(16)}_`)}`
+}
+
 /** The height of the rows: 32, 40 or 48 pixels. This is public API. */
 export type MenuSize = 'sm' | 'md' | 'lg'
 

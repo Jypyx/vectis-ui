@@ -1,14 +1,14 @@
 <script setup lang="ts">
 // @a11y @core
 /**
- * Native auto popovers own light dismissal and anchoring. JavaScript supplies the model bridge
- * and ARIA menu focus management.
+ * Native auto popovers own light dismissal, and CSS anchoring places them. JavaScript supplies
+ * the model bridge and ARIA menu focus management.
  */
 
 import { computed, provide, ref, useId } from 'vue'
 
 import VMenuPanel from './VMenuPanel.vue'
-import { menuInvoker, menuKey } from './context'
+import { menuAnchor, menuInvoker, menuKey } from './context'
 import type { MenuPlacement, MenuSize } from './context'
 import { usePopoverModel } from '../../composables/usePopover'
 import { isKeyboardFocus } from '../../utils/focus'
@@ -54,15 +54,16 @@ withDefaults(defineProps<MenuProps>(), {
 const open = defineModel<boolean>('open', { default: false })
 
 /**
- * What the trigger has to carry: the link to the panel it opens, and the two
- * attributes telling assistive technology that a menu is attached to this button and
- * whether it is currently open.
+ * What the trigger has to carry: the link to the panel it opens, the attributes telling
+ * assistive technology that a menu is attached to this button and whether it is currently
+ * open, and the anchor name the panel is positioned against.
  */
 export type MenuTriggerProps = {
   popovertarget: string
   'aria-haspopup': 'menu'
   'aria-expanded': boolean
   'aria-controls': string
+  style: { 'anchor-name': string }
 }
 
 defineSlots<{
@@ -77,12 +78,14 @@ defineSlots<{
 
 const panelRef = ref<InstanceType<typeof VMenuPanel> | null>(null)
 const menuId = useId()
+const anchor = menuAnchor(menuId)
 
 const triggerProps = computed<MenuTriggerProps>(() => ({
   popovertarget: menuId,
   'aria-haspopup': 'menu',
   'aria-expanded': open.value,
   'aria-controls': menuId,
+  style: { 'anchor-name': anchor },
 }))
 
 // Closing this panel closes every submenu with it: they are rendered inside it, and
@@ -110,10 +113,8 @@ function onToggle(value: boolean) {
 }
 
 /*
- * Every opening that does not come from a click on the trigger has to NAME that trigger. A
- * popover opened through `popovertarget` takes its invoker as its implicit anchor; opened from
- * code with no `source`, it has no anchor at all and the browser paints it at the corner of the
- * viewport.
+ * The position comes from the trigger's anchor name. Naming the trigger as `source` still gives
+ * the opening the same invoker a click would.
  */
 function openAtTrigger() {
   panelRef.value?.show(menuInvoker(menuId) ?? undefined)
@@ -147,6 +148,7 @@ defineExpose({
   <VMenuPanel
     :id="menuId"
     ref="panelRef"
+    :anchor="anchor"
     :placement="placement"
     :size="size"
     :compact="compact"
