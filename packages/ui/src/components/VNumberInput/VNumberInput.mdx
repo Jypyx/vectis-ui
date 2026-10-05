@@ -1,0 +1,90 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VNumberInputStories from './VNumberInput.stories'
+
+<Meta of={VNumberInputStories} />
+
+# NumberInput
+
+A field for a number, with step buttons and the keyboard of a spinbutton. It is built on VInput,
+so it takes the same label, hint, error, sizes, clear cross and loading state, and it joins a
+VInputGroup like any other field.
+
+<Canvas of={VNumberInputStories.Default} />
+
+<Controls of={VNumberInputStories.Default} />
+
+## Why not `type="number"`
+
+A native number input cannot show a number formatted for its locale: no thousands separator, no
+currency, no unit, and a decimal separator that varies between browsers. VNumberInput is a text
+field with `inputmode="decimal"`, which brings up a numeric keyboard on a phone, and
+`role="spinbutton"`. The keyboard, the parsing and the stepping are written in the component.
+
+## Value and committing
+
+`v-model` holds a `number`, or `null` while the field is empty. What is typed is committed on blur
+and on Enter, not at each keystroke: a value below `min` or above `max` is then brought within
+bounds, and text that does not read as a number is undone. A minimum of 10 therefore never
+interrupts the typing of "15".
+
+Typing is read in the locale: group separators and spaces are ignored, the locale's decimal
+separator is understood, and so is a point where the locale does not group with one. Currency,
+unit and percent symbols are ignored too, so a formatted value pasted back reads as the number
+it shows.
+
+## Buttons and keyboard
+
+`controls` places the buttons: `split` (a minus at the start, a plus at the end), `stacked` (both
+at the end) or `none`. They stay out of the tab order and a press does not take the focus from
+the field. A button is disabled at the bound it moves towards.
+
+| Key                   | Effect                                       |
+| --------------------- | -------------------------------------------- |
+| Arrow Up / Arrow Down | One `step` up or down                        |
+| Page Up / Page Down   | Ten steps                                    |
+| Home / End            | `min` / `max`, when set; otherwise the caret |
+| Enter                 | Commits what was typed                       |
+
+Steps follow a grid starting at `min`, or at 0: a value off the grid lands on it first, and a
+fractional step does not drift (0.1 + 0.2 gives 0.3). An empty field starts from 0, or from the
+nearest bound. The mouse wheel does not change the value.
+
+<Canvas of={VNumberInputStories.Controls} />
+
+<Canvas of={VNumberInputStories.Step} />
+
+Stacked buttons reach the end edge of the field when they come last. With `clearable` or
+`loading`, they stay before the clear cross and the spinner, set apart from them by a divider. In
+`split`, a short rule follows the plus button in the same case, as VTimeInput draws after AM/PM.
+
+<Canvas of={VNumberInputStories.StackedWithActions} />
+
+## Formatting
+
+`formatOptions` takes the options of `Intl.NumberFormat`, in the design system's locale or in
+`locale`. The value is formatted while the field is not being edited and shown bare while it is.
+With `style: 'percent'`, the value 0.15 shows and is typed as 15.
+
+<Canvas of={VNumberInputStories.Formatting} />
+
+## Forms
+
+The visible field holds formatted text, so `name` and `form` move to a hidden input carrying the
+bare number. Enter commits before the form it submits reads that input.
+
+## Sizes and states
+
+<Canvas of={VNumberInputStories.Sizes} />
+
+<Canvas of={VNumberInputStories.States} />
+
+<Canvas of={VNumberInputStories.WithError} />
+
+## Accessibility
+
+- The field is a `spinbutton` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, and the
+  formatted value in `aria-valuetext` ("€1,249.90", "15%").
+- The buttons are named "Increase" and "Decrease" from the design system dictionary
+  (`incrementLabel`, `decrementLabel`). They stay reachable by a pointer and by assistive
+  technology, and keyboard users step from the field.
+- `error` replaces the hint, marks the field invalid and is announced, as on every field.

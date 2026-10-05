@@ -18,6 +18,7 @@ const REVISION = '528cb964c01fb2b09bc3b9208f82b6d8f8c1c1e2'
  * default.
  */
 const ICONS = [
+  'add',
   'arrow_downward',
   'arrow_downward_alt',
   'arrow_drop_down',
@@ -48,6 +49,7 @@ const ICONS = [
   'more_horiz',
   'notifications',
   'picture_as_pdf',
+  'remove',
   'schedule',
   'search',
   'swap_vert',

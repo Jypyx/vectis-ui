@@ -45,6 +45,7 @@ const nav: NavMessages = {
   'input-group': 'Groupe de champs',
   'input-otp': 'Code à usage unique',
   menu: 'Menu',
+  'number-input': 'Champ numérique',
   pagination: 'Pagination',
   popover: 'Popover',
   'progress-circular': 'Progression circulaire',

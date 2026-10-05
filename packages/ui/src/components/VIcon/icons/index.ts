@@ -6,6 +6,7 @@
  * google/material-design-icons @ 528cb964c01fb2b09bc3b9208f82b6d8f8c1c1e2
  * Apache-2.0 licence © Google.
  */
+import { add } from './add'
 import { arrow_downward } from './arrow_downward'
 import { arrow_downward_alt } from './arrow_downward_alt'
 import { arrow_drop_down } from './arrow_drop_down'
@@ -36,6 +37,7 @@ import { last_page } from './last_page'
 import { more_horiz } from './more_horiz'
 import { notifications } from './notifications'
 import { picture_as_pdf } from './picture_as_pdf'
+import { remove } from './remove'
 import { schedule } from './schedule'
 import { search } from './search'
 import { swap_vert } from './swap_vert'
@@ -46,6 +48,7 @@ import { warning } from './warning'
 export { ICON_VIEW_BOX } from './viewBox'
 export { builtinIconNames, type IconName } from './names'
 export {
+  add,
   arrow_downward,
   arrow_downward_alt,
   arrow_drop_down,
@@ -76,6 +79,7 @@ export {
   more_horiz,
   notifications,
   picture_as_pdf,
+  remove,
   schedule,
   search,
   swap_vert,
@@ -90,9 +94,10 @@ export {
  *
  * NOTHING the library ships imports this barrel: a component imports the two or
  * three icon modules it draws, by name. Importing it from a component would pull all
- * 36 drawings back into every consumer's bundle and undo the split.
+ * 38 drawings back into every consumer's bundle and undo the split.
  */
 export const builtinIcons = {
+  add,
   arrow_downward,
   arrow_downward_alt,
   arrow_drop_down,
@@ -123,6 +128,7 @@ export const builtinIcons = {
   more_horiz,
   notifications,
   picture_as_pdf,
+  remove,
   schedule,
   search,
   swap_vert,

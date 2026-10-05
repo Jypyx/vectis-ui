@@ -60,6 +60,7 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
     components: ['VMenu', 'VMenuItem', 'VMenuGroup', 'VMenuSeparator'],
     internals: ['VMenuPanel'],
   },
+  { slug: 'number-input', components: ['VNumberInput'] },
   { slug: 'pagination', components: ['VPagination'] },
   { slug: 'popover', components: ['VPopover'] },
   { slug: 'progress-circular', components: ['VProgressCircular'] },

@@ -13,6 +13,7 @@ import { builtinIconNames, builtinIcons, ICON_VIEW_BOX, type IconName } from './
  * `scripts/build-icons.ts`; and the other way round.
  */
 const EXPECTED = [
+  'add',
   'arrow_downward',
   'arrow_downward_alt',
   'arrow_drop_down',
@@ -43,6 +44,7 @@ const EXPECTED = [
   'more_horiz',
   'notifications',
   'picture_as_pdf',
+  'remove',
   'schedule',
   'search',
   'swap_vert',

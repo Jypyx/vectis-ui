@@ -138,6 +138,12 @@ export interface Messages {
     /** What the panel holding the calendar is called. */
     pickerLabel: string
   }
+  numberInput: {
+    /** The button that adds one step to the value. */
+    increment: string
+    /** The button that takes one step off the value. */
+    decrement: string
+  }
   /** The clock itself. VTimeInput reads the half-day words from here too: there is one
       vocabulary for choosing a time, wherever the control that does it is rendered. */
   timePicker: {

@@ -442,6 +442,7 @@ function fontShowcase(resolver: IconResolver): Story {
     until every DS icon is mapped. This is the exhaustiveness guard to recommend to
     consumers. */
 const PHOSPHOR: Record<IconName, string> = {
+  add: 'plus',
   arrow_downward: 'arrow-down',
   arrow_downward_alt: 'arrow-down',
   arrow_drop_down: 'caret-down',
@@ -472,6 +473,7 @@ const PHOSPHOR: Record<IconName, string> = {
   more_horiz: 'dots-three',
   notifications: 'bell',
   picture_as_pdf: 'file-pdf',
+  remove: 'minus',
   schedule: 'clock',
   search: 'magnifying-glass',
   swap_vert: 'arrows-down-up',
@@ -481,6 +483,7 @@ const PHOSPHOR: Record<IconName, string> = {
 }
 
 const FONT_AWESOME: Record<IconName, string> = {
+  add: 'plus',
   arrow_downward: 'arrow-down',
   arrow_downward_alt: 'arrow-down',
   arrow_drop_down: 'caret-down',
@@ -511,6 +514,7 @@ const FONT_AWESOME: Record<IconName, string> = {
   more_horiz: 'ellipsis',
   notifications: 'bell',
   picture_as_pdf: 'file-pdf',
+  remove: 'minus',
   schedule: 'clock',
   search: 'magnifying-glass',
   swap_vert: 'sort',
@@ -520,6 +524,7 @@ const FONT_AWESOME: Record<IconName, string> = {
 }
 
 const BOOTSTRAP: Record<IconName, string> = {
+  add: 'plus',
   arrow_downward: 'arrow-down',
   arrow_downward_alt: 'arrow-down',
   arrow_drop_down: 'caret-down-fill',
@@ -550,6 +555,7 @@ const BOOTSTRAP: Record<IconName, string> = {
   more_horiz: 'three-dots',
   notifications: 'bell-fill',
   picture_as_pdf: 'file-earmark-pdf',
+  remove: 'dash',
   schedule: 'clock-fill',
   search: 'search',
   swap_vert: 'arrow-down-up',

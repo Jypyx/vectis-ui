@@ -41,6 +41,7 @@ import installation from './en/installation'
 import jsHelpers from './en/jsHelpers'
 import menu from './en/menu'
 import nav from './en/nav'
+import numberInput from './en/numberInput'
 import pagination from './en/pagination'
 import popover from './en/popover'
 import progressCircular from './en/progressCircular'
@@ -107,6 +108,7 @@ export interface DocsMessages {
   inputGroup: typeof inputGroup
   inputOtp: typeof inputOtp
   menu: typeof menu
+  numberInput: typeof numberInput
   pagination: typeof pagination
   popover: typeof popover
   progressCircular: typeof progressCircular
@@ -180,6 +182,7 @@ export default defineI18nLocale((): DocsMessages => ({
   inputGroup,
   inputOtp,
   menu,
+  numberInput,
   pagination,
   popover,
   progressCircular,

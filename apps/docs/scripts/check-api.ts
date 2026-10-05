@@ -34,6 +34,7 @@ const EXTERNALS = new Set([
   'Intl',
   'KeyboardEvent',
   'MouseEvent',
+  'NumberFormatOptions',
   'Partial',
   'Record',
   'Row',

@@ -105,6 +105,10 @@ export const fr: Messages = {
     openPicker: 'Ouvrir le calendrier',
     pickerLabel: 'Choisir une date',
   },
+  numberInput: {
+    increment: 'Augmenter',
+    decrement: 'Diminuer',
+  },
   timePicker: {
     label: 'Sélecteur d’heure',
     meridiem: 'AM ou PM',
