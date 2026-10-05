@@ -310,20 +310,20 @@ describe('VDataTable', () => {
     ])
   })
 
-  it('footer pagination: the current page alone, between detached first/last controls', async () => {
-    const { container, getByRole } = render(VDataTable, {
+  it('footer pagination: detached first/previous/next/last controls, no page numbers', async () => {
+    const { container, getByRole, emitted } = render(VDataTable, {
       props: { columns: COLUMNS, rows: ROWS_MANY, perPage: 1, page: 3 },
     })
     const nav = container.querySelector('.v-pagination') as HTMLElement
-    const pages = nav.querySelectorAll('.v-pagination-page')
 
-    expect(pages).toHaveLength(1)
-    expect(pages[0]?.getAttribute('aria-current')).toBe('page')
-    expect(pages[0]?.textContent?.trim()).toBe('3')
+    expect(nav.querySelectorAll('.v-pagination-page, .v-pagination-ellipsis')).toHaveLength(0)
+    expect(
+      [...nav.querySelectorAll('.v-pagination-control')].map((el) => el.getAttribute('data-side')),
+    ).toEqual(['first', 'prev', 'next', 'last'])
     expect(nav.querySelector('.v-pagination-items')?.hasAttribute('data-detached')).toBe(true)
 
     await fireEvent.click(getByRole('button', { name: 'Last page' }))
-    expect(nav.querySelector('[aria-current="page"]')?.textContent?.trim()).toBe('5')
+    expect(emitted('update:page')?.at(-1)).toEqual([5])
   })
 
   it('warns in DEV when selectable is set without rowKey', () => {

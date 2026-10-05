@@ -46,9 +46,9 @@ Local pagination activates as soon as `perPage` is defined (`v-model:per-page`, 
 `:per-page`): the footer appears. Its right zone groups, in this order, the rows-per-page selector
 (`perPageOptions`, a `VMenu` of selected items), the "X–Y of Z" text (`showRange`, formattable
 through `rangeText`) and the design system's `VPagination` driven by `v-model:page`; the left zone
-stays empty outside selection. The pagination is detached and shows the current page alone,
-between the first, previous, next and last controls, so its width does not depend on the page
-count. If a filter reduces the number of pages, the display falls back to
+stays empty outside selection. The pagination is detached and shows no page numbers, only the
+first, previous, next and last controls, so its width does not depend on the page count;
+`showRange` tells where the reader is. If a filter reduces the number of pages, the display falls back to
 the last page by **derivation**, without mutating the model.
 
 <Canvas of={VDataTableStories.LocalPagination} />

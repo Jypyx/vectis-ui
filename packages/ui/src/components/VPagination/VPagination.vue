@@ -59,7 +59,8 @@ interface PaginationProps {
   /**
    * How many slots to render, ellipses counted among them, so the row keeps exactly the same
    * width whichever page is current. Below 5, the row drops the bounds and the ellipses and
-   * shows that many consecutive pages around the current one. Left out, every page is rendered.
+   * shows that many consecutive pages around the current one. At 0, no page is rendered and the
+   * controls alone remain. Left out, every page is rendered.
    */
   totalVisible?: number
 
@@ -261,9 +262,10 @@ const items = computed<PaginationItem[]>(() => {
   // window slid, for a node that never changes.
   const gap = (side: 'start' | 'end'): PaginationItem => ({ kind: 'gap', key: `gap-${side}` })
 
-  // With no limit given, nothing is left out. At least the current page is always shown.
+  // With no limit given, nothing is left out. At 0 the row holds the controls alone.
   const limit = Math.trunc(props.totalVisible ?? count)
-  const visible = Number.isNaN(limit) ? count : Math.max(limit, 1)
+  const visible = Number.isNaN(limit) ? count : Math.max(limit, 0)
+  if (visible === 0) return []
   if (visible >= count) return pages(1, count)
 
   // Below five slots there is no room for the first page, an ellipsis, the current page,
@@ -353,7 +355,8 @@ function isUnusable(el: HTMLElement): boolean {
  * and a focused button that becomes disabled hands the focus to <body>: a keyboard reader
  * pressing "Next page" on the second to last page would be sent back to the top of the document
  * by the next Tab. The focus goes to the page just reached instead, which is always rendered,
- * the current page being the one pill the responsive steps never hide.
+ * the current page being the one pill the responsive steps never hide. A row without pages
+ * hands it to the nearest control still usable, the one before it first.
  */
 async function goFromControl(event: MouseEvent, n: number | undefined) {
   const control = event.currentTarget as HTMLElement
@@ -361,9 +364,15 @@ async function goFromControl(event: MouseEvent, n: number | undefined) {
   choose(event, n)
   if (!hadFocus) return
   await nextTick()
-  if (isUnusable(control)) {
-    navEl.value?.querySelector<HTMLElement>('[aria-current="page"]')?.focus()
-  }
+  const nav = navEl.value
+  if (!nav || !isUnusable(control)) return
+  const current = nav.querySelector<HTMLElement>('[aria-current="page"]')
+  if (current) return current.focus()
+  const usable = [...nav.querySelectorAll<HTMLElement>(':is(button, a[href]):not(:disabled)')]
+  const before = usable.filter(
+    (el) => control.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_PRECEDING,
+  )
+  ;(before.at(-1) ?? usable[0])?.focus()
 }
 
 type ControlSide = 'first' | 'prev' | 'next' | 'last'
@@ -597,8 +606,12 @@ defineExpose({
       display: none;
     }
 
-    /* The first and last pills stay on screen and lead to the same pages. */
-    .v-pagination[data-responsive]
+    /*
+     * The first and last pills stay on screen and lead to the same pages. A row without pages
+     * keeps these controls, which are then its only way to the bounds; the rules restoring the
+     * outer edges below are scoped the same way.
+     */
+    .v-pagination[data-responsive]:has(.v-pagination-page)
       .v-pagination-control:is([data-side='first'], [data-side='last']) {
       display: none;
     }
@@ -606,11 +619,11 @@ defineExpose({
     /*
      * VButtonGroup joins its segments by DOM position, which a hidden edge control still holds:
      * the previous and next controls would keep the square corners, the pulled margin and the
-     * cleared or seamed border of an inner segment. These restore an outer edge, at (0,7,0)
+     * cleared or seamed border of an inner segment. These restore an outer edge, at (0,8,0)
      * against the (0,6,0) of VButtonGroup's heaviest join rule. Controls are neutral and either
      * ghost or outline, so their border is the outline frame or nothing.
      */
-    .v-pagination[data-responsive]
+    .v-pagination[data-responsive]:has(.v-pagination-page)
       > .v-pagination-items:not([data-detached])
       > [data-side='first']
       + .v-pagination-control[data-side='prev'] {
@@ -620,14 +633,14 @@ defineExpose({
       border-inline-start-color: var(--pagination-frame, transparent);
     }
 
-    .v-pagination[data-responsive]
+    .v-pagination[data-responsive]:has(.v-pagination-page)
       > .v-pagination-items:not([data-detached])
       > [data-side='first']
       + .v-pagination-control[data-side='prev']::before {
       content: none;
     }
 
-    .v-pagination[data-responsive]
+    .v-pagination[data-responsive]:has(.v-pagination-page)
       > .v-pagination-items:not([data-detached])
       > .v-pagination-control[data-side='next']:has(+ [data-side='last']) {
       border-start-end-radius: var(--vectis-radius-interactive);

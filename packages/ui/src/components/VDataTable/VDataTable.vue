@@ -816,7 +816,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
           size="sm"
           :compact="compact"
           align="end"
-          :total-visible="1"
+          :total-visible="0"
           edge-controls
           detached
         />

@@ -101,7 +101,9 @@ slots (first + ellipsis + current + ellipsis + last), the first and last pages a
 and the window centred on the current page **shifts** near the ends instead of shrinking: the bar
 keeps exactly the same width whatever the current page. Below 5, there is no room for the bounds
 or the ellipses: the bar shows that many consecutive pages around the current one, down to the
-current page alone at 1, which pairs with `edgeControls` for the long jumps.
+current page alone at 1, which pairs with `edgeControls` for the long jumps. At 0, no page is
+rendered and the controls alone remain; nothing in the bar then says which page is current, so
+show it beside the bar when it matters, as `VDataTable`'s `showRange` does.
 
 <Canvas of={VPaginationStories.ManyPages} />
 
@@ -111,7 +113,7 @@ The bar declares its own query container: the steps depend on the space actually
 the component, never on the viewport width. The most distant neighbours disappear first; the
 first page, the last and the current one are never hidden. A control in `both` mode folds down
 to icon-only as space runs out. At the narrowest step, the first and last controls are hidden:
-the first and last pills, still on screen, lead to the same pages.
+the first and last pills, still on screen, lead to the same pages. A bar without pages keeps them.
 
 Two consequences worth knowing. First, the bar is block-level and takes its parent's width —
 which is what makes the truncation container-dependent — so alignment goes through the `align`
@@ -170,7 +172,7 @@ alignment.
   can hide the text, and the accessible name must survive that.
 - A control that reaches the last page it can go to disables itself. When it held the keyboard
   focus, the focus moves to the page just reached, since a disabled button would otherwise hand
-  it back to the document.
+  it back to the document. Without pages, it moves to the nearest usable control.
 - The ellipsis is an inert, icon-only button hidden from assistive technologies: it is neither
   announced nor reachable by keyboard, which is also why it carries no accessible name at all.
 - Tabbing is natural — every visible button is a stop, as in a list of links. The left/right

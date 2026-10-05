@@ -80,12 +80,16 @@ describe('VPagination', () => {
       }
     })
 
-    it('clamps totalVisible to a minimum of 1', () => {
-      const { container } = render(VPagination, {
-        props: { length: 20, modelValue: 10, totalVisible: 0 },
-      })
+    it('at 0 or below, renders the controls alone', () => {
+      for (const totalVisible of [0, -3]) {
+        const { container, unmount } = render(VPagination, {
+          props: { length: 20, modelValue: 10, totalVisible, edgeControls: true },
+        })
 
-      expect(pageLabels(container)).toEqual(['10'])
+        expect(slotCount(container)).toBe(0)
+        expect(container.querySelectorAll('.v-pagination-control')).toHaveLength(4)
+        unmount()
+      }
     })
 
     it('marks the bounds with data-edge and the neighbours with their distance to the current page', () => {
@@ -716,6 +720,31 @@ describe('VPagination — links', () => {
 
     expect(page.value).toBe(5)
     expect(document.activeElement).toBe(getByRole('link', { name: 'Page 5' }))
+  })
+
+  it('without pages, hands the focus to the nearest usable control', async () => {
+    const page = ref(4)
+    const { getByRole } = render({
+      components: { VPagination },
+      setup: () => ({ page }),
+      template: '<VPagination v-model="page" :length="5" :total-visible="0" edge-controls />',
+    })
+    const next = getByRole('button', { name: 'Next page' })
+    next.focus()
+
+    await fireEvent.click(next)
+    await nextTick()
+
+    expect(page.value).toBe(5)
+    expect(document.activeElement).toBe(getByRole('button', { name: 'Previous page' }))
+
+    const first = getByRole('button', { name: 'First page' })
+    first.focus()
+    await fireEvent.click(first)
+    await nextTick()
+
+    expect(page.value).toBe(1)
+    expect(document.activeElement).toBe(getByRole('button', { name: 'Next page' }))
   })
 
   it('focus() reaches the current page when it is a link', async () => {
