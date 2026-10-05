@@ -24,6 +24,7 @@ const nav: NavMessages = {
   button: 'Bouton',
   'button-group': 'Groupe de boutons',
   calendar: 'Calendrier',
+  card: 'Carte',
   carousel: 'Carrousel',
   checkbox: 'Case à cocher',
   chip: 'Puce',

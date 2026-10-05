@@ -31,6 +31,7 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
     components: ['VCalendar'],
     internals: ['VCalendarMonth', 'VCalendarTimeGrid', 'VCalendarYear', 'VCalendarEvent'],
   },
+  { slug: 'card', components: ['VCard'] },
   { slug: 'carousel', components: ['VCarousel', 'VCarouselItem'] },
   { slug: 'checkbox', components: ['VCheckbox'] },
   { slug: 'chip', components: ['VChip'] },

@@ -322,6 +322,14 @@ export const semantic = {
     ),
     'size-snackbar-min': dimension('18rem', 'The minimum width of a snackbar (288px)'),
     'size-snackbar-max': dimension('36rem', 'The maximum width of a snackbar (576px)'),
+    'size-card-media': dimension(
+      '12rem',
+      'The width a horizontal VCard gives its media before the content wraps under it (192px)',
+    ),
+    'size-card-body-min': dimension(
+      '16rem',
+      'The narrowest content of a horizontal VCard: below it, the media moves above the content',
+    ),
     'size-badge-h': dimension('1.25rem', 'The height of a VBadge pill'),
     'size-badge-dot': dimension('0.625rem', 'The diameter of VBadge in dot mode'),
     'size-badge-ring': dimension('2px', 'The detaching ring of a bordered VBadge'),

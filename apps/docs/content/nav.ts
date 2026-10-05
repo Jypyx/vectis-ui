@@ -48,6 +48,7 @@ export const components = [
   entry('button'),
   entry('button-group'),
   entry('calendar'),
+  entry('card'),
   entry('carousel'),
   entry('checkbox'),
   entry('chip'),

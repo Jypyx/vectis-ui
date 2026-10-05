@@ -128,6 +128,10 @@ const descriptions: Record<DescribedToken, string> = {
     "La largeur par défaut de VDialog et VDialogAlert (400px), en l'absence de `width`",
   '--vectis-control-size-snackbar-min': "La largeur minimale d'une snackbar (288px)",
   '--vectis-control-size-snackbar-max': "La largeur maximale d'une snackbar (576px)",
+  '--vectis-control-size-card-media':
+    "La largeur du média d'un VCard horizontal avant que le contenu passe dessous (192px)",
+  '--vectis-control-size-card-body-min':
+    "La largeur minimale du contenu d'un VCard horizontal : en dessous, le média passe au-dessus du contenu",
   '--vectis-control-size-badge-h': "La hauteur d'un VBadge en pilule",
   '--vectis-control-size-badge-dot': "Le diamètre d'un VBadge en mode point",
   '--vectis-control-size-badge-ring': "L'anneau qui détache un VBadge bordé",

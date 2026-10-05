@@ -1,0 +1,81 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VCardStories from './VCard.stories'
+
+<Meta of={VCardStories} />
+
+# Card
+
+A surface that groups the content about one subject: a media, a title and subtitle, a body and a
+footer of actions. Each part is optional, and a part with no content leaves no empty space. With
+`href`, the whole card becomes a link.
+
+<Canvas of={VCardStories.Default} />
+
+<Controls of={VCardStories.Default} />
+
+## Variants
+
+`outline`, the default, draws a border on the page surface. `elevated` lifts a raised surface with
+a shadow. `filled` uses the muted surface with no border, for cards inside a page that already
+has a lot of lines.
+
+<Canvas of={VCardStories.Variants} />
+
+## Sizes
+
+`size` sets the padding and the gaps between the parts, from `sm` for dense lists to `lg` for a
+featured card. The typography does not change.
+
+<Canvas of={VCardStories.Sizes} />
+
+## Horizontal
+
+`orientation="horizontal"` places the media at the start of the content. When the card is
+narrower than the media (`--vectis-control-size-card-media`) and the content
+(`--vectis-control-size-card-body-min`) together, the media moves back above the content. This
+uses wrapping, not a container query, so the card keeps working inside a parent that sizes it
+from its content.
+
+<Canvas of={VCardStories.Horizontal} />
+
+## Linked cards
+
+With `href`, the title becomes a real `<a>` whose clickable area covers the card. A screen reader
+hears one link, named by the title, instead of all the card's text. Buttons and links placed in
+the card are raised above that area and keep their own behaviour.
+
+The attributes set on a linked card, except `class` and `style`, go to the link: this is where
+`target`, `rel` or a router's click handler belong. Without `href`, they all stay on the root.
+
+`headingLevel` turns the title into a heading, so that a grid of cards can be browsed by heading.
+The cards in a grid stretch to the height of their row, and their footers line up at the bottom.
+
+<Canvas of={VCardStories.LinkedGrid} />
+
+## Disabled
+
+`disabled` applies to a linked card: the link loses its address, is marked `aria-disabled`, and
+the title and media are dimmed. The body stays readable, and controls in the slots are not
+affected.
+
+<Canvas of={VCardStories.Disabled} />
+
+## Loading
+
+`loading` replaces the title, subtitle and body with placeholders, and the media too when there is
+one. The footer is hidden until the content arrives, and the card carries `aria-busy`. A loading
+card is silent by default, so that a grid of them is not read out a dozen times; `loadingText`
+announces it.
+
+<Canvas of={VCardStories.Loading} />
+
+## Accessibility
+
+- The card is a `<div>` by default. `as` renders it as an `<article>`, a `<section>` or a `<li>`
+  inside a list.
+- A linked card has one link, its title. Wrapping the card in an `<a>` would name the link with
+  all its text and could not contain buttons.
+- The focus ring of the link is drawn around the whole card, the area it activates.
+- Text inside a linked card cannot be selected by dragging over the stretched area; the controls
+  and links in the slots can still be used.
+- Images in `#media` need an `alt` text, or `alt=""` when they only decorate.

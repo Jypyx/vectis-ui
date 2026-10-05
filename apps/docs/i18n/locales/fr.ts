@@ -9,6 +9,7 @@ import breadcrumb from './fr/breadcrumb'
 import button from './fr/button'
 import buttonGroup from './fr/buttonGroup'
 import calendar from './fr/calendar'
+import card from './fr/card'
 import carousel from './fr/carousel'
 import checkbox from './fr/checkbox'
 import chip from './fr/chip'
@@ -84,6 +85,7 @@ export default defineI18nLocale((): DocsMessages => ({
   button,
   buttonGroup,
   calendar,
+  card,
   carousel,
   checkbox,
   chip,
