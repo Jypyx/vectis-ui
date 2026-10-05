@@ -128,8 +128,10 @@ wrapped onto two lines.
 - `#title`: the left zone of the global header (wins over `title`).
 - `#loading`: what the table shows while `loading` is set, in place of the spinner and the
   `loadingText` beside it.
-- `#empty` (scope: `{ search }`): what the table shows when no row is left, in place of
-  `emptyText`. `search` is the term that emptied it, the committed one in `serverSide` mode.
+- `#empty` (scope: `{ search }`): what the table shows when no row is left, in place of the
+  default VEmptyState. That one is titled `emptyText`, or from the dictionary "No data", or "No
+  results" after a search. `search` is the term that emptied it, the committed one in
+  `serverSide` mode.
 - `#head-<key>` (scope: `{ column }`): the label of a column header — rendered **inside** the sort
   button when the column is sortable, so place only non-interactive content there.
 - `#cell-<key>` (scope: `{ row, value, column }`): the content of a cell.

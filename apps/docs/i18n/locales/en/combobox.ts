@@ -92,7 +92,7 @@ export default {
         clearable: 'Adds an action to clear both selection and search.',
         clearLabel: 'Accessible name of the clear button. Defaults to the library dictionary.',
         emptyText:
-          'Empty-state text announced to screen readers. Keep it consistent with custom <code>#empty</code> content.',
+          'Title of the default <code>VEmptyState</code>, also announced to screen readers. Keep it consistent with custom <code>#empty</code> content.',
         filter:
           'Built-in accent-insensitive filtering, disabled filtering, or a custom function receiving the option and trimmed query.',
         searchDebounce:

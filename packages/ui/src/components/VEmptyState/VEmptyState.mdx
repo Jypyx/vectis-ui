@@ -1,0 +1,58 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VEmptyStateStories from './VEmptyState.stories'
+
+<Meta of={VEmptyStateStories} />
+
+# EmptyState
+
+A static block that says there is nothing to show yet, and offers what to do about it: an icon in
+a round badge, a title, a description and actions, centred.
+
+<Canvas of={VEmptyStateStories.Default} />
+
+<Controls of={VEmptyStateStories.Default} />
+
+## Parts
+
+- `icon` is drawn in a neutral round badge. The `#media` slot replaces the badge with an
+  illustration of your own.
+- `title` says what is empty in a few words.
+- `description`, or the default slot for text with links, says why or what to do next.
+- The `#actions` slot holds the buttons or links that get out of the empty state.
+
+Every part is optional and leaves no space when absent.
+
+## Title and heading level
+
+The title is a paragraph by default, which keeps an empty panel out of the document outline.
+`headingLevel` renders it as `<h1>` to `<h6>` without changing how it looks, for an empty state
+that stands for a whole page or section.
+
+<Canvas of={VEmptyStateStories.HeadingLevel} />
+
+## Sizes
+
+`size` scales the badge (`--vectis-control-size-empty-state-media-*`), the spacing and the
+title: `sm` for a panel or a list, `md` for a section, `lg` for a whole page. The title and the
+description wrap at `--vectis-control-size-empty-state-text-max`.
+
+<Canvas of={VEmptyStateStories.Sizes} />
+
+## In VDataTable and VCombobox
+
+Both components show a small VEmptyState when they have nothing to list. Its title is their
+`emptyText`. Its icon is a crossed-out magnifier after a search that found nothing, and an inbox
+otherwise. Their `#empty` slot still replaces it, for instance with a VEmptyState that has
+actions.
+
+<Canvas of={VEmptyStateStories.InDataTable} />
+
+<Canvas of={VEmptyStateStories.InCombobox} />
+
+## Accessibility
+
+- The badge icon is decorative and hidden from assistive technology: the title carries the
+  meaning.
+- The block has no live role. A component that empties as the reader types announces the change
+  itself, as VCombobox does.
+- With `headingLevel`, check that the level fits the headings around the block.

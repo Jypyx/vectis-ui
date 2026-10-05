@@ -10,12 +10,15 @@ import type { StyleValue } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
 import VCheckbox from '../VCheckbox/VCheckbox.vue'
+import VEmptyState from '../VEmptyState/VEmptyState.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import { arrow_downward as arrowDownwardIcon } from '../VIcon/icons/arrow_downward'
 import { arrow_drop_down as arrowDropDownIcon } from '../VIcon/icons/arrow_drop_down'
 import { arrow_upward as arrowUpwardIcon } from '../VIcon/icons/arrow_upward'
+import { inbox as inboxIcon } from '../VIcon/icons/inbox'
 import { search as searchIcon } from '../VIcon/icons/search'
+import { search_off as searchOffIcon } from '../VIcon/icons/search_off'
 import { swap_vert as swapVertIcon } from '../VIcon/icons/swap_vert'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
@@ -146,7 +149,10 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
    * system dictionary.
    */
   loadingText?: string
-  /** What is said when there is no row to show. It falls back to the design system dictionary. */
+  /**
+   * The title of the empty state shown when there is no row to show. It falls back to the design
+   * system dictionary, which words a table with no data and a search with no match differently.
+   */
   emptyText?: string
   /** A title above the table, on the left of its toolbar. */
   title?: string
@@ -261,7 +267,6 @@ const props = withDefaults(defineProps<DataTableProps<Row>>(), {
 
 const m = useMessages()
 const vectisLocale = useLocale()
-const resolvedEmptyText = computed(() => props.emptyText ?? m.value.dataTable.empty)
 const resolvedLoadingText = computed(() => props.loadingText ?? m.value.dataTable.loading)
 const resolvedSearchPlaceholder = computed(
   () => props.searchPlaceholder ?? m.value.dataTable.searchPlaceholder,
@@ -519,6 +524,11 @@ watch(search, () => {
 })
 
 const emptySearch = computed(() => (props.serverSide ? committedSearch.value : search.value))
+/** The title of the empty state: a table with no data does not read like a search with no match. */
+const resolvedEmptyText = computed(
+  () =>
+    props.emptyText ?? (emptySearch.value ? m.value.dataTable.noResults : m.value.dataTable.empty),
+)
 
 /*
  * `page` is the model, never the clamped `currentPage`. The clamp reads `total`, which is the
@@ -726,7 +736,13 @@ const heightStyle = computed<StyleValue | undefined>(() =>
           </tr>
           <tr v-else-if="displayedRows.length === 0">
             <td :colspan="colCount" class="v-data-table-state">
-              <slot name="empty" :search="emptySearch">{{ resolvedEmptyText }}</slot>
+              <slot name="empty" :search="emptySearch">
+                <VEmptyState
+                  size="sm"
+                  :icon="emptySearch ? searchOffIcon : inboxIcon"
+                  :title="resolvedEmptyText"
+                />
+              </slot>
             </td>
           </tr>
           <template v-else>
@@ -1054,6 +1070,14 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     padding: var(--vectis-space-6);
     text-align: center;
     color: var(--vectis-color-text-muted);
+  }
+
+  /*
+   * The cell already pads the default empty state. `[data-size]` lifts the selector above
+   * VEmptyState's own size rules, whose sheet may load after this one.
+   */
+  .v-data-table-state > .v-empty-state[data-size] {
+    padding: 0;
   }
 
   .v-data-table-state-loading {

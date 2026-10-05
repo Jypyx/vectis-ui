@@ -39,6 +39,7 @@ export const en: Messages = {
   },
   dataTable: {
     empty: 'No data',
+    noResults: 'No results',
     loading: 'Loading data…',
     searchLabel: 'Search the table',
     searchPlaceholder: 'Search…',

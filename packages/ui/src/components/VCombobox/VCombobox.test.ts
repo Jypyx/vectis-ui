@@ -663,6 +663,14 @@ describe('VCombobox asynchronous', () => {
     expect(state?.textContent).not.toContain('No results')
   })
 
+  it('no option: a small VEmptyState titled with emptyText', () => {
+    const { container } = renderCombobox({ options: [], emptyText: 'No country found' })
+    const empty = container.querySelector('.v-combobox-state .v-empty-state')
+    expect(empty?.getAttribute('data-size')).toBe('sm')
+    expect(empty?.querySelector('.v-empty-state-title')?.textContent).toBe('No country found')
+    expect(empty?.querySelector('.v-empty-state-icon')).toBeTruthy()
+  })
+
   it('loading with options: the options stay displayed', () => {
     const { container } = renderCombobox({ loading: true })
     expect(container.querySelectorAll('[role="option"]').length).toBe(4)

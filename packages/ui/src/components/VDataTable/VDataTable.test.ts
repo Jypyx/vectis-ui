@@ -202,7 +202,19 @@ describe('VDataTable', () => {
 
     await fireEvent.update(field, 'zzz')
     expect(bodyRowCount(container)).toBe(1)
-    expect(getByText('No data')).toBeTruthy()
+    expect(getByText('No results')).toBeTruthy()
+  })
+
+  it('the empty state says "No data" without a search, and emptyText overrides both', async () => {
+    const empty = render(VDataTable, { props: { columns: COLUMNS, rows: [], searchable: true } })
+    expect(empty.getByText('No data')).toBeTruthy()
+    empty.unmount()
+
+    const { getByRole, getByText } = render(VDataTable, {
+      props: { columns: COLUMNS, rows: ROWS_MANY, searchable: true, emptyText: 'Nothing here' },
+    })
+    await fireEvent.update(getByRole('searchbox', { name: 'Search the table' }), 'zzz')
+    expect(getByText('Nothing here')).toBeTruthy()
   })
 
   it('local pagination: slicing, a controlled page and clamping by derivation', async () => {

@@ -39,6 +39,7 @@ export const fr: Messages = {
   },
   dataTable: {
     empty: 'Aucune donnée',
+    noResults: 'Aucun résultat',
     loading: 'Chargement des données…',
     searchLabel: 'Rechercher dans le tableau',
     searchPlaceholder: 'Rechercher…',

@@ -41,7 +41,10 @@ export interface Messages {
     clear: string
   }
   dataTable: {
+    /** The empty table, when nothing is searched for. */
     empty: string
+    /** The empty table, when a search found no row. */
+    noResults: string
     loading: string
     searchLabel: string
     searchPlaceholder: string

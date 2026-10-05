@@ -78,7 +78,8 @@ export default {
         variant: 'Unframed or outlined table.',
         loading: 'Displays loading content instead of rows.',
         loadingText: 'Visible loading text. Defaults to the dictionary.',
-        emptyText: 'Empty-result text. Defaults to the dictionary.',
+        emptyText:
+          'Title of the <code>VEmptyState</code> shown for empty results. Defaults to the dictionary, which distinguishes no data from a search without results.',
         title: 'Toolbar title. Also names the table when no caption is provided.',
         searchable: 'Adds a toolbar search field.',
         searchPlaceholder: 'Search placeholder. Defaults to the dictionary.',
@@ -123,7 +124,8 @@ export default {
       slots: {
         title: 'Content replacing the toolbar title.',
         loading: 'Content replacing the loading spinner and text.',
-        empty: 'Empty-result content. Receives the current <code>search</code>.',
+        empty:
+          'Empty-result content, replacing the default <code>VEmptyState</code>. Receives the current <code>search</code>.',
       },
     },
   },

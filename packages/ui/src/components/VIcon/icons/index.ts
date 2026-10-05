@@ -32,6 +32,7 @@ import { expand_more } from './expand_more'
 import { first_page } from './first_page'
 import { folder_zip } from './folder_zip'
 import { image } from './image'
+import { inbox } from './inbox'
 import { info } from './info'
 import { last_page } from './last_page'
 import { more_horiz } from './more_horiz'
@@ -40,6 +41,7 @@ import { picture_as_pdf } from './picture_as_pdf'
 import { remove } from './remove'
 import { schedule } from './schedule'
 import { search } from './search'
+import { search_off } from './search_off'
 import { swap_vert } from './swap_vert'
 import { table_chart } from './table_chart'
 import { video_file } from './video_file'
@@ -74,6 +76,7 @@ export {
   first_page,
   folder_zip,
   image,
+  inbox,
   info,
   last_page,
   more_horiz,
@@ -82,6 +85,7 @@ export {
   remove,
   schedule,
   search,
+  search_off,
   swap_vert,
   table_chart,
   video_file,
@@ -94,7 +98,7 @@ export {
  *
  * NOTHING the library ships imports this barrel: a component imports the two or
  * three icon modules it draws, by name. Importing it from a component would pull all
- * 38 drawings back into every consumer's bundle and undo the split.
+ * 40 drawings back into every consumer's bundle and undo the split.
  */
 export const builtinIcons = {
   add,
@@ -123,6 +127,7 @@ export const builtinIcons = {
   first_page,
   folder_zip,
   image,
+  inbox,
   info,
   last_page,
   more_horiz,
@@ -131,6 +136,7 @@ export const builtinIcons = {
   remove,
   schedule,
   search,
+  search_off,
   swap_vert,
   table_chart,
   video_file,

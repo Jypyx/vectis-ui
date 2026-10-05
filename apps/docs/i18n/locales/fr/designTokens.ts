@@ -138,6 +138,14 @@ const descriptions: Record<DescribedToken, string> = {
     "La largeur du média d'un VCard horizontal avant que le contenu passe dessous (192px)",
   '--vectis-control-size-card-body-min':
     "La largeur minimale du contenu d'un VCard horizontal : en dessous, le média passe au-dessus du contenu",
+  '--vectis-control-size-empty-state-media-sm':
+    "Le diamètre de la pastille d'icône d'un petit VEmptyState (40px)",
+  '--vectis-control-size-empty-state-media-md':
+    "Le diamètre de la pastille d'icône d'un VEmptyState moyen (48px)",
+  '--vectis-control-size-empty-state-media-lg':
+    "Le diamètre de la pastille d'icône d'un grand VEmptyState (64px)",
+  '--vectis-control-size-empty-state-text-max':
+    "La largeur maximale du titre et de la description d'un VEmptyState avant retour à la ligne (448px)",
   '--vectis-control-size-field-label':
     "La largeur du libellé d'un VField placé à côté de son contrôle, avant que le contrôle passe dessous (160px)",
   '--vectis-control-size-field-control-min':

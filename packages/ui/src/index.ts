@@ -122,6 +122,11 @@ export type {
   CardSize,
   CardVariant,
 } from './components/VCard/VCard.vue'
+export { default as VEmptyState } from './components/VEmptyState/VEmptyState.vue'
+export type {
+  EmptyStateHeadingLevel,
+  EmptyStateSize,
+} from './components/VEmptyState/VEmptyState.vue'
 export { default as VBadge } from './components/VBadge/VBadge.vue'
 export type { BadgeVariant, BadgeTone, BadgeOverlayPosition } from './components/VBadge/VBadge.vue'
 export { default as VAvatar } from './components/VAvatar/VAvatar.vue'

@@ -342,6 +342,22 @@ export const semantic = {
       '16rem',
       'The narrowest content of a horizontal VCard: below it, the media moves above the content',
     ),
+    'size-empty-state-media-sm': dimension(
+      '2.5rem',
+      'The diameter of the icon badge of a small VEmptyState (40px)',
+    ),
+    'size-empty-state-media-md': dimension(
+      '3rem',
+      'The diameter of the icon badge of a medium VEmptyState (48px)',
+    ),
+    'size-empty-state-media-lg': dimension(
+      '4rem',
+      'The diameter of the icon badge of a large VEmptyState (64px)',
+    ),
+    'size-empty-state-text-max': dimension(
+      '28rem',
+      'The widest the title and description of a VEmptyState run before they wrap (448px)',
+    ),
     'size-field-label': dimension(
       '10rem',
       'The width of a VField label placed beside its control, before the control wraps under it (160px)',

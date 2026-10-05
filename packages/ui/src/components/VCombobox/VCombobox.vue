@@ -8,10 +8,13 @@
 import { computed, inject, reactive, ref, useId, watch, watchEffect } from 'vue'
 
 import VChip from '../VChip/VChip.vue'
+import VEmptyState from '../VEmptyState/VEmptyState.vue'
 import type { ChipSize } from '../VChip/VChip.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
+import { inbox as inboxIcon } from '../VIcon/icons/inbox'
+import { search_off as searchOffIcon } from '../VIcon/icons/search_off'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
 import VPopover from '../VPopover/VPopover.vue'
@@ -208,8 +211,9 @@ interface ComboboxProps {
   /** What that cross does, in words. It falls back to the design system dictionary. */
   clearLabel?: string
   /**
-   * What the panel says when the search matches nothing. It is also what a screen reader
-   * hears, even when the `#empty` slot draws something else: set both together.
+   * The title of the empty state the panel shows when the search matches nothing. It is also
+   * what a screen reader hears, even when the `#empty` slot draws something else: set both
+   * together.
    */
   emptyText?: string
   /** How the list is narrowed as one types. */
@@ -1125,7 +1129,14 @@ defineExpose({
         </slot>
       </div>
       <div v-else-if="filtered.length === 0" class="v-combobox-state" aria-hidden="true">
-        <slot name="empty" :query="searchTerm">{{ resolvedEmptyText }}</slot>
+        <slot name="empty" :query="searchTerm">
+          <VEmptyState
+            size="sm"
+            class="v-combobox-empty"
+            :icon="searchTerm ? searchOffIcon : inboxIcon"
+            :title="resolvedEmptyText"
+          />
+        </slot>
       </div>
 
       <!--
@@ -1258,6 +1269,16 @@ defineExpose({
     padding: var(--vectis-space-1) var(--control-padding-inline);
     font-size: var(--control-font-size);
     color: var(--vectis-color-text-muted);
+  }
+
+  /*
+   * The default empty state spans the panel. `[data-size]` lifts the selector above VEmptyState's
+   * own size rules, whose sheet may load after this one.
+   */
+  .v-combobox-state > .v-combobox-empty[data-size] {
+    flex: 1;
+    padding-block: var(--vectis-space-3);
+    padding-inline: 0;
   }
 
   /*

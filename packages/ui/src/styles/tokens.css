@@ -292,6 +292,10 @@
     --vectis-control-size-snackbar-max: 36rem;
     --vectis-control-size-card-media: 12rem;
     --vectis-control-size-card-body-min: 16rem;
+    --vectis-control-size-empty-state-media-sm: 2.5rem;
+    --vectis-control-size-empty-state-media-md: 3rem;
+    --vectis-control-size-empty-state-media-lg: 4rem;
+    --vectis-control-size-empty-state-text-max: 28rem;
     --vectis-control-size-field-label: 10rem;
     --vectis-control-size-field-control-min: 16rem;
     --vectis-control-size-badge-h: 1.25rem;

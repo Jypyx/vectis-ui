@@ -78,7 +78,8 @@ export default {
         variant: 'Tableau sans cadre ou avec bordure.',
         loading: 'Affiche le contenu de chargement à la place des lignes.',
         loadingText: 'Texte de chargement visible. Utilise le dictionnaire par défaut.',
-        emptyText: 'Texte des résultats vides. Utilise le dictionnaire par défaut.',
+        emptyText:
+          'Titre du <code>VEmptyState</code> affiché pour les résultats vides. Utilise par défaut le dictionnaire, qui distingue l’absence de données d’une recherche sans résultat.',
         title:
           'Titre de la barre d’outils. Nomme aussi le tableau si aucune légende n’est fournie.',
         searchable: 'Ajoute un champ de recherche dans la barre d’outils.',
@@ -126,7 +127,8 @@ export default {
       slots: {
         title: 'Contenu remplaçant le titre de la barre d’outils.',
         loading: 'Contenu remplaçant l’indicateur et le texte de chargement.',
-        empty: 'Contenu des résultats vides. Reçoit la <code>search</code> actuelle.',
+        empty:
+          'Contenu des résultats vides, à la place du <code>VEmptyState</code> par défaut. Reçoit la <code>search</code> actuelle.',
       },
     },
   },

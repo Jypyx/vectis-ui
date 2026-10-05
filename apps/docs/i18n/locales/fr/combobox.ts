@@ -94,7 +94,7 @@ export default {
         clearLabel:
           'Nom accessible du bouton d’effacement. Utilise le dictionnaire de la bibliothèque par défaut.',
         emptyText:
-          'Texte annoncé lorsque la liste est vide. Gardez-le cohérent avec le contenu personnalisé de <code>#empty</code>.',
+          'Titre du <code>VEmptyState</code> par défaut, aussi annoncé lorsque la liste est vide. Gardez-le cohérent avec le contenu personnalisé de <code>#empty</code>.',
         filter:
           'Filtrage intégré insensible aux accents, filtrage désactivé ou fonction personnalisée recevant l’option et la recherche sans espaces aux extrémités.',
         searchDebounce:
