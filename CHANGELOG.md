@@ -2,6 +2,30 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.11.0] - 2026-10-05
+
+### Upgrading from 0.10.x
+
+- **Joined button rows have no inner dividers by default.** VButtonGroup, VToggle and VPagination join their buttons without a line between them, the look `seamless` used to give. `seamless` is removed without an alias: remove it, and add `bordered` to the rows that should keep a line at every joint. Styles targeting `[data-seamless]` now apply by default. Target `[data-bordered]` for the divided rows.
+- **VMenu `triggerProps` include a `style`** that sets the anchor the menu is positioned against. `v-bind="triggerProps"` on a native element, VButton or VIconButton needs no change. A custom trigger component must forward `style` to the element it renders, or the menu loses its position.
+
+### Added
+
+- VButtonGroup, VToggle and VPagination `bordered` draws a line at every joint. It has no effect under `detached`.
+- VPagination `edgeControls` adds first and last page controls outside the previous and next ones, leading to the farthest reachable page in each direction. They follow `controls` (icon, text or both), are disabled with the previous or next control on the same side, carry `rel="first"` and `rel="last"` under `href`, and are hidden at the narrowest responsive step. `firstIcon`, `lastIcon`, `firstText` and `lastText` customise them, and the dictionary gains `pagination.first` and `pagination.last`.
+- The `first_page` and `last_page` built-in icons, importable from `vectis-ui/icons`.
+
+### Changed
+
+- VPagination `totalVisible` accepts values below 5. With fewer than five slots, the row shows that many consecutive pages around the current one, without the first and last pages or the ellipses. `1` shows the current page alone. Values from 1 to 4 previously rendered five slots.
+- VDataTable's footer pagination is detached and shows only the current page, between the first, previous, next and last controls, so its width no longer depends on the page count.
+
+### Fixed
+
+- VMenu panels stay attached to their trigger when a browser extension, such as a password manager, wraps `showPopover`. Submenus opened on hover or from the keyboard, and menus opened through `v-model:open` or `show()`, previously appeared in the top-left corner of the viewport.
+
+**Full diff:** [v0.10.3...v0.11.0](https://github.com/Jypyx/vectis-ui/compare/v0.10.3...v0.11.0)
+
 ## [0.10.3] - 2026-09-29
 
 No public API or runtime changes. No migration is required from 0.10.2.
