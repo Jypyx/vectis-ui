@@ -100,6 +100,19 @@ covers the top of it.
 
 <Canvas of={VInputGroupStories.EdgeCases} />
 
+## Error message
+
+`error` shows a message in place of the hint, in the danger colour, so that raising it does not
+grow the row. It takes the place of the hint in the group's `aria-describedby`, and a message that
+appears or changes after the first render is announced through a polite live region. A group may
+not carry `aria-invalid`: mark the segments at fault with their own `invalid` prop.
+
+```vue
+<VInputGroup label="…" :error="errors.amount">
+  <VInput :invalid="!!errors.amount" />
+</VInputGroup>
+```
+
 ## Accessibility
 
 - The row is a `role="group"`, named by its own `label` through `aria-labelledby`. That is the

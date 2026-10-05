@@ -79,6 +79,18 @@ through by fallthrough onto the input, not onto the wrapper. The invalid state i
 `:user-invalid` (native validation); the `invalid` prop allows forcing it — it sets
 `aria-invalid`.
 
+## Error message
+
+`error` shows a message in place of the hint, in the danger colour, so that raising it does not
+grow the field. It marks the radio invalid (`aria-invalid`) and takes the place of the hint in
+`aria-describedby`. A message that appears or changes after the first render is also announced
+through a polite live region; one present when the page loads is not. Clearing the prop brings the
+hint back.
+
+```vue
+<VRadio label="…" :error="errors.field" />
+```
+
 ## Accessibility
 
 - The label (prop or slot) names the control and the hint describes it; wrap the group in a `<fieldset>` with a

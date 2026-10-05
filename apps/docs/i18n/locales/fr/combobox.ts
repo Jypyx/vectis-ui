@@ -72,6 +72,8 @@ export default {
           'Formate le nombre de valeurs masquées par <code>max</code>. Reçoit ce nombre.',
         label:
           'Libellé visible. Sans nom visible, fournissez <code>aria-label</code> ou <code>aria-labelledby</code>.',
+        error:
+          'Message d’erreur affiché à la place de l’aide. Pose <code>aria-invalid</code>, est lié par <code>aria-describedby</code> et est annoncé quand il apparaît.',
         hint: 'Texte d’aide lié par <code>aria-describedby</code>.',
         size: 'Taille du champ et des options. Le champ reprend la taille définie par <code>VInputGroup</code>.',
         compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',

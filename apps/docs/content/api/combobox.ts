@@ -16,6 +16,7 @@ export default {
         { name: 'overflowText', type: '(count: number) => string' },
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
+        { name: 'error', type: 'string' },
         { name: 'size', type: 'ComboboxSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'placeholder', type: 'string' },

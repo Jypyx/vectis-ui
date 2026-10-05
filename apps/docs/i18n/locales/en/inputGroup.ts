@@ -36,6 +36,8 @@ export default {
       props: {
         label:
           'Shared visible label and accessible group name. Consumer <code>aria-label</code> or <code>aria-labelledby</code> takes precedence. Name each field separately.',
+        error:
+          'Error message shown in place of the hint, linked to the group through <code>aria-describedby</code> and announced when it appears. Mark the faulty segments with <code>invalid</code>.',
         hint: 'Shared help text below the row, linked to the group through <code>aria-describedby</code>.',
         size: 'Size of all segments. Overrides individual sizes; when omitted, each segment keeps its own.',
         compact:

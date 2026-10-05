@@ -132,6 +132,10 @@ const descriptions: Record<DescribedToken, string> = {
     "La largeur du média d'un VCard horizontal avant que le contenu passe dessous (192px)",
   '--vectis-control-size-card-body-min':
     "La largeur minimale du contenu d'un VCard horizontal : en dessous, le média passe au-dessus du contenu",
+  '--vectis-control-size-field-label':
+    "La largeur du libellé d'un VField placé à côté de son contrôle, avant que le contrôle passe dessous (160px)",
+  '--vectis-control-size-field-control-min':
+    "La largeur minimale du contrôle d'un VField à libellé latéral : en dessous, le libellé passe au-dessus du contrôle",
   '--vectis-control-size-badge-h': "La hauteur d'un VBadge en pilule",
   '--vectis-control-size-badge-dot': "Le diamètre d'un VBadge en mode point",
   '--vectis-control-size-badge-ring': "L'anneau qui détache un VBadge bordé",

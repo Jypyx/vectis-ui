@@ -58,6 +58,8 @@ export default {
         invalid:
           'Sets <code>aria-invalid</code> and the error style. Does not block form submission by itself.',
         label: 'Accessible group name. Displays no text; defaults to the library dictionary.',
+        error:
+          'Error message shown in place of the hint. Sets <code>aria-invalid</code>, is linked through <code>aria-describedby</code> and is announced when it appears.',
         hint: 'Help text linked through <code>aria-describedby</code>.',
         vModel: 'Code string without separators. Defaults to an empty string.',
       },

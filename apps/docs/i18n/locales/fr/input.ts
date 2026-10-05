@@ -20,7 +20,7 @@ export default {
     },
     states: {
       title: 'États',
-      text: '<code>disabled</code> bloque les interactions. <code>readonly</code> permet le focus et la copie. <code>invalid</code> signale une erreur. <code>loading</code> affiche un indicateur de chargement sans empêcher la saisie.',
+      text: '<code>disabled</code> bloque les interactions. <code>readonly</code> permet le focus et la copie. <code>invalid</code> signale une erreur, et <code>error</code> affiche aussi son message à la place de l’aide. <code>loading</code> affiche un indicateur de chargement sans empêcher la saisie.',
     },
     clickableIcons: {
       title: 'Icônes cliquables',
@@ -52,6 +52,8 @@ export default {
           'Empêche la saisie avec l’attribut natif <code>readonly</code>, sans le style de lecture seule. Conserve l’effacement pour les champs modifiés via un sélecteur.',
         label:
           'Libellé visible lié au champ. Si omis, fournissez <code>aria-label</code> ou <code>aria-labelledby</code>.',
+        error:
+          'Message d’erreur affiché à la place de l’aide. Pose <code>aria-invalid</code>, est lié par <code>aria-describedby</code> et est annoncé quand il apparaît.',
         hint: 'Texte d’aide sous le champ, lié par <code>aria-describedby</code>.',
         iconStart:
           'Icône de début. Devient un bouton avec <code>@click:icon-start</code> ; nécessite alors <code>iconStartLabel</code>.',

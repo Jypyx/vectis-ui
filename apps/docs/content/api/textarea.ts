@@ -18,6 +18,7 @@ export default {
         { name: 'readonly', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
+        { name: 'error', type: 'string' },
         { name: 'iconStart', type: 'IconSource' },
         { name: 'iconEnd', type: 'IconSource' },
         { name: 'iconStartLabel', type: 'string' },

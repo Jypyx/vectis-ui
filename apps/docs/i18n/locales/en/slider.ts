@@ -74,6 +74,8 @@ export default {
         disabled: 'Disables interaction.',
         label:
           'Accessible name without visible text. Range thumbs receive distinct start and end names.',
+        error:
+          'Error message shown in place of the hint. Sets <code>aria-invalid</code>, is linked through <code>aria-describedby</code> and is announced when it appears.',
         hint: 'Help text linked through <code>aria-describedby</code>.',
         orientation: 'Track direction. Vertical sliders place the minimum at the bottom.',
         inputs:

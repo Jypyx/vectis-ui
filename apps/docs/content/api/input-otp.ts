@@ -20,6 +20,7 @@ export default {
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
+        { name: 'error', type: 'string' },
         { name: 'v-model', key: 'vModel', type: 'string', default: "''" },
       ],
       events: [

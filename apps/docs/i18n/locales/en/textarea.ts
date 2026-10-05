@@ -32,7 +32,7 @@ export default {
     },
     states: {
       title: 'States',
-      text: '<code>disabled</code> blocks interaction. <code>readonly</code> allows focus and copying. <code>invalid</code> marks an error. <code>loading</code> shows a spinner while leaving the field editable.',
+      text: '<code>disabled</code> blocks interaction. <code>readonly</code> allows focus and copying. <code>invalid</code> marks an error, and <code>error</code> also shows its message in place of the hint. <code>loading</code> shows a spinner while leaving the field editable.',
     },
   },
   api: {
@@ -50,6 +50,8 @@ export default {
           'Prevents editing while allowing focus and copying. Hides the clear button unless <code>clearVisible</code> overrides it.',
         label:
           'Visible label linked to the textarea. When omitted, provide <code>aria-label</code> or <code>aria-labelledby</code>.',
+        error:
+          'Error message shown in place of the hint. Sets <code>aria-invalid</code>, is linked through <code>aria-describedby</code> and is announced when it appears.',
         hint: 'Help text below the field, linked through <code>aria-describedby</code>.',
         iconStart:
           'Start icon. Becomes a button with <code>@click:icon-start</code>; then requires <code>iconStartLabel</code>.',

@@ -66,6 +66,8 @@ export default {
           'Marque le contrôle comme invalide et applique le style d’erreur. Validez séparément la sélection de fichiers.',
         label:
           'Libellé visible. Sans nom visible, fournissez <code>aria-label</code> ou <code>aria-labelledby</code>.',
+        error:
+          'Message d’erreur affiché à la place de l’aide. Pose <code>aria-invalid</code>, est lié par <code>aria-describedby</code> et est annoncé quand il apparaît.',
         hint: 'Texte d’aide lié par <code>aria-describedby</code>.',
         placeholder:
           'Texte affiché quand la sélection est vide. Utilise le dictionnaire de la bibliothèque par défaut.',

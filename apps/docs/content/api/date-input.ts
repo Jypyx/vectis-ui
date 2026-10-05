@@ -22,6 +22,7 @@ export default {
         { name: 'showPicker', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
+        { name: 'error', type: 'string' },
         { name: 'placeholder', type: 'string' },
         { name: 'size', type: 'DateInputSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },

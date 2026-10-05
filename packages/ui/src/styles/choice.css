@@ -31,8 +31,13 @@
   }
 
   .v-choice-label,
-  .v-choice-hint {
+  .v-choice-hint,
+  .v-choice-error {
     margin-inline-start: var(--vectis-space-2);
+  }
+
+  .v-choice-error {
+    grid-column: 2;
   }
 
   /* Read caption weight explicitly rather than inheriting it from the host. */
@@ -48,11 +53,11 @@
     order: -1;
   }
 
-  .v-choice[data-label-position='start'] :is(.v-choice-label, .v-choice-hint) {
+  .v-choice[data-label-position='start'] :is(.v-choice-label, .v-choice-hint, .v-choice-error) {
     margin-inline: 0 var(--vectis-space-2);
   }
 
-  .v-choice[data-label-position='start'] .v-choice-hint {
+  .v-choice[data-label-position='start'] :is(.v-choice-hint, .v-choice-error) {
     grid-column: 1;
   }
 

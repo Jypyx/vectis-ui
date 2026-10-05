@@ -8,6 +8,7 @@ import { computed, inject, ref, useId } from 'vue'
 
 import VChip from '../VChip/VChip.vue'
 import type { ChipSize } from '../VChip/VChip.vue'
+import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
 import { attach_file as attachFileIcon } from '../VIcon/icons/attach_file'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
@@ -105,6 +106,12 @@ interface FileInputProps {
    */
   hint?: string
   /**
+   * A message saying what is wrong with the value, shown in place of the hint so that the field
+   * does not grow. It marks the field invalid, is read along with it, and is announced when it
+   * appears or changes.
+   */
+  error?: string
+  /**
    * What the field says while nothing is chosen. It falls back to the design system
    * dictionary.
    */
@@ -157,6 +164,7 @@ const props = withDefaults(defineProps<FileInputProps>(), {
   invalid: false,
   label: undefined,
   hint: undefined,
+  error: undefined,
   placeholder: undefined,
   iconStart: undefined,
   iconStartLabel: undefined,
@@ -313,6 +321,7 @@ const counterText = computed(() => {
 
 const hintId = useId()
 const counterId = useId()
+const errorId = useId()
 
 // @a11y
 /*
@@ -324,7 +333,8 @@ const counterId = useId()
 const describedBy = computed(() =>
   joinIds(
     attrs['aria-describedby'] as string | undefined,
-    !!props.hint && hintId,
+    !!props.error && errorId,
+    !!props.hint && !props.error && hintId,
     props.counter && counterId,
   ),
 )
@@ -424,7 +434,7 @@ defineExpose({
         :size="resolvedSize"
         :compact="resolvedCompact"
         :disabled="resolvedDisabled"
-        :invalid="invalid"
+        :invalid="invalid || !!error"
         :clearable="clearable"
         :clear-visible="clearVisible"
         :clear-label="resolvedClearLabel"
@@ -473,9 +483,10 @@ defineExpose({
       </VInput>
     </div>
 
-    <div v-if="hint || counter" class="v-file-input-meta v-field-meta">
+    <div v-if="hint || error || counter" class="v-file-input-meta v-field-meta">
+      <span v-if="error" :id="errorId" class="v-field-error v-file-input-error">{{ error }}</span>
       <VTypography
-        v-if="hint"
+        v-else-if="hint"
         :id="hintId"
         variant="caption"
         tone="muted"
@@ -489,6 +500,7 @@ defineExpose({
         </slot>
       </span>
     </div>
+    <VFieldAnnouncer :text="error" />
   </div>
 </template>
 

@@ -132,6 +132,12 @@ interface TimeInputProps {
   label?: string
   /** A line of help under the field. */
   hint?: string
+  /**
+   * A message saying what is wrong with the value, shown in place of the hint so that the field
+   * does not grow. It marks the field invalid, is read along with it, and is announced when it
+   * appears or changes.
+   */
+  error?: string
   /** What the field says while empty. */
   placeholder?: string
   /** The height of the field: 32, 40 or 48 pixels. */
@@ -200,6 +206,7 @@ const props = withDefaults(defineProps<TimeInputProps>(), {
   locale: undefined,
   label: undefined,
   hint: undefined,
+  error: undefined,
   placeholder: undefined,
   size: 'md',
   compact: false,
@@ -722,6 +729,7 @@ defineExpose({
       :filter="matchTime"
       :label="label"
       :hint="hint"
+      :error="error"
       :placeholder="placeholder"
       :size="resolvedSize"
       :compact="resolvedCompact"
@@ -754,6 +762,7 @@ defineExpose({
         :no-typing="!typing"
         :label="label"
         :hint="hint"
+        :error="error"
         :placeholder="placeholder ?? (typing ? m.timeInput.maskPlaceholder : undefined)"
         :size="resolvedSize"
         :compact="resolvedCompact"

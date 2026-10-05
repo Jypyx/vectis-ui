@@ -6,6 +6,7 @@
  */
 import { computed, inject, ref } from 'vue'
 
+import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconName, iconProps } from '../VIcon/iconProps'
 import { close as closeIcon } from '../VIcon/icons/close'
@@ -61,6 +62,12 @@ interface InputProps {
    * technology, so it is read out along with the label.
    */
   hint?: string
+  /**
+   * A message saying what is wrong with the value, shown in place of the hint so that the field
+   * does not grow. It marks the field invalid, is read along with it, and is announced when it
+   * appears or changes.
+   */
+  error?: string
   /**
    * An icon inside the field, at the start. It is decorative by default and becomes a real
    * button as soon as a `@click:icon-start` listener is attached, in which case it needs
@@ -128,6 +135,7 @@ const props = withDefaults(defineProps<InputProps>(), {
   readonly: false,
   label: undefined,
   hint: undefined,
+  error: undefined,
   iconStart: undefined,
   iconEnd: undefined,
   iconStartLabel: undefined,
@@ -196,10 +204,11 @@ const {
 const m = useMessages()
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.common.clear)
 
-const { fieldId, hintId, counterId, describedBy } = useFieldIds(
+const { fieldId, hintId, counterId, errorId, describedBy } = useFieldIds(
   attrs,
-  () => !!props.hint,
+  () => !!props.hint && !props.error,
   () => props.counter,
+  () => !!props.error,
 )
 
 const { hasIconStartHandler, hasIconEndHandler } = useIconClickHandlers({
@@ -283,7 +292,7 @@ defineExpose({
         :id="fieldId"
         ref="controlEl"
         v-model="model"
-        :aria-invalid="invalid || undefined"
+        :aria-invalid="invalid || !!error || undefined"
         v-bind="restAttrs"
         class="v-input-control"
         :type="type"
@@ -333,9 +342,11 @@ defineExpose({
       </slot>
     </div>
 
-    <VTypography v-if="hint" :id="hintId" variant="caption" tone="muted" class="v-input-hint">
+    <span v-if="error" :id="errorId" class="v-field-error v-input-error">{{ error }}</span>
+    <VTypography v-else-if="hint" :id="hintId" variant="caption" tone="muted" class="v-input-hint">
       {{ hint }}
     </VTypography>
+    <VFieldAnnouncer :text="error" />
   </div>
 </template>
 

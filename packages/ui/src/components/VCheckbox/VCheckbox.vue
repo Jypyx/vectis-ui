@@ -6,6 +6,8 @@
 
 import { ref, watchEffect } from 'vue'
 
+import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
+
 import { useFieldIds } from '../../composables/useFieldIds'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
@@ -20,6 +22,12 @@ interface CheckboxProps {
    * so it is read out after the label rather than as part of it.
    */
   hint?: string
+  /**
+   * A message saying what is wrong with the value, shown in place of the hint so that the field
+   * does not grow. It marks the field invalid, is read along with it, and is announced when it
+   * appears or changes.
+   */
+  error?: string
   /** Shows the box as partially checked, a dash instead of a tick. */
   indeterminate?: boolean
   /** Which side of the box the label sits on. */
@@ -48,6 +56,7 @@ interface CheckboxProps {
 const props = withDefaults(defineProps<CheckboxProps>(), {
   label: undefined,
   hint: undefined,
+  error: undefined,
   indeterminate: false,
   labelPosition: 'end',
   spread: false,
@@ -62,7 +71,12 @@ const props = withDefaults(defineProps<CheckboxProps>(), {
 // the wrapper they would take part in neither the form nor the accessibility tree.
 defineOptions({ inheritAttrs: false })
 const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
-const { hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
+const { hintId, errorId, describedBy } = useFieldIds(
+  attrs,
+  () => !!props.hint && !props.error,
+  undefined,
+  () => !!props.error,
+)
 
 /**
  * Whether the box is ticked. It starts unticked. `indeterminate` is a separate prop: the
@@ -124,7 +138,7 @@ defineExpose({
         v-model="model"
         type="checkbox"
         class="v-checkbox-input v-hidden-input"
-        :aria-invalid="invalid || undefined"
+        :aria-invalid="invalid || !!error || undefined"
         :aria-readonly="readonly || undefined"
         v-bind="forwardedAttrs"
         :disabled="disabled"
@@ -157,7 +171,11 @@ defineExpose({
         <slot>{{ label }}</slot>
       </span>
     </label>
-    <span v-if="hint" :id="hintId" class="v-checkbox-hint v-choice-hint">{{ hint }}</span>
+    <span v-if="error" :id="errorId" class="v-field-error v-checkbox-error v-choice-error">{{
+      error
+    }}</span>
+    <span v-else-if="hint" :id="hintId" class="v-checkbox-hint v-choice-hint">{{ hint }}</span>
+    <VFieldAnnouncer :text="error" />
   </span>
 </template>
 

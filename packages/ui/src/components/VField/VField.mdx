@@ -1,0 +1,82 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VFieldStories from './VField.stories'
+
+<Meta of={VFieldStories} />
+
+# Field
+
+A label, a hint and an error message around one control of any kind. `VField` owns no control: its
+default slot receives `fieldProps`, the attributes that tie the control to its label and messages,
+and the consumer binds them with `v-bind`. That works the same for a library control, a native
+element or a third-party component.
+
+```vue
+<VField label="Email" hint="Work address" :error="errors.email" required v-slot="{ fieldProps }">
+  <VInput v-bind="fieldProps" v-model="email" type="email" />
+</VField>
+```
+
+Library controls also have their own `label`, `hint` and `error` props. Use `VField` when the
+control does not, when the label sits beside the control, or to give every field of a form the
+same structure.
+
+<Canvas of={VFieldStories.Default} />
+
+<Controls of={VFieldStories.Default} />
+
+## What `fieldProps` holds
+
+- `id`: the attribute set on the `VField`, or a generated id. The label's `for` points at it.
+- `aria-describedby`: the error or, without one, the hint, after any reference set on the
+  `VField`.
+- `aria-invalid="true"` while there is an error.
+- `required` when the field is required.
+- The other attributes set on the `VField` (`name`, `autocomplete`, `data-*`), so that the
+  `VField` can be written like the control. `class` and `style` stay on the `VField` root.
+
+A key is absent rather than `undefined`: binding `fieldProps` never cancels a value the control
+sets itself, such as the `aria-invalid` of its own `invalid` prop.
+
+## Native control
+
+<Canvas of={VFieldStories.NativeControl} />
+
+## Error
+
+`error` shows a message in place of the hint, in the danger colour, so that raising it does not
+grow the field, and marks the control invalid. It takes the place of the hint in
+`aria-describedby` too. A message that appears or changes after the first render is announced
+through a polite live region; a message already present when the page loads is not, since it is
+read with the control.
+
+<Canvas of={VFieldStories.WithError} />
+
+## Required
+
+`required` adds an asterisk after the label and passes `required` to the control. The asterisk is
+hidden from assistive technology, which announces the native `required` state instead.
+
+## Label beside the control
+
+`labelPosition="start"` puts the label in a column of its own
+(`--vectis-control-size-field-label`). When the field is narrower than that column and
+`--vectis-control-size-field-control-min` together, the label moves back above the control. The
+first line of the label is centred on a medium control.
+
+<Canvas of={VFieldStories.LabelStart} />
+
+## Hidden label
+
+`hideLabel` hides the label visually. It still names the control for assistive technology: use it
+when the purpose of the field is clear from what surrounds it, such as a search field with an icon.
+
+<Canvas of={VFieldStories.HiddenLabel} />
+
+## Accessibility
+
+- The label is a native `<label for>`, so clicking it focuses the control. It only works with a
+  labelable element: for a group of controls, use `VFieldset`.
+- The hint, or the error in its place, is linked through `aria-describedby`.
+- The error live region is always mounted, so that the message is announced when it appears. The
+  first message rendered with the page is not announced.
+- The required asterisk is decorative; the native `required` attribute carries the state.

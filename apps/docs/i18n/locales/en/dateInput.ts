@@ -78,6 +78,8 @@ export default {
         showPicker: 'Adds a calendar to input mode. Picker mode always includes it.',
         label:
           'Visible label. Without a visible name, provide <code>aria-label</code> or <code>aria-labelledby</code>.',
+        error:
+          'Error message shown in place of the hint. Sets <code>aria-invalid</code>, is linked through <code>aria-describedby</code> and is announced when it appears.',
         hint: 'Help text linked through <code>aria-describedby</code>.',
         placeholder: 'Placeholder shown when the field is empty.',
         size: 'Component size.',

@@ -44,6 +44,8 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
   { slug: 'date-input', components: ['VDateInput'] },
   { slug: 'date-picker', components: ['VDatePicker'] },
   { slug: 'dialog', components: ['VDialog', 'VDialogAlert'] },
+  { slug: 'field', components: ['VField'] },
+  { slug: 'fieldset', components: ['VFieldset'] },
   { slug: 'file-input', components: ['VFileInput'] },
   { slug: 'file-picker', components: ['VFilePicker'] },
   { slug: 'hotkeys', components: ['VHotkeys'] },

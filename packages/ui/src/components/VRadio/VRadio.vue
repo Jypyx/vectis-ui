@@ -6,6 +6,8 @@
 
 import { ref } from 'vue'
 
+import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
+
 import { useFieldIds } from '../../composables/useFieldIds'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import type { ItemValue } from '../../types'
@@ -26,6 +28,12 @@ interface RadioProps {
    * technology, so it is read out after the label rather than as part of it.
    */
   hint?: string
+  /**
+   * A message saying what is wrong with the value, shown in place of the hint so that the field
+   * does not grow. It marks the field invalid, is read along with it, and is announced when it
+   * appears or changes.
+   */
+  error?: string
   /** Which side of the dot the label sits on. */
   labelPosition?: RadioLabelPosition
   /**
@@ -47,6 +55,7 @@ interface RadioProps {
 const props = withDefaults(defineProps<RadioProps>(), {
   label: undefined,
   hint: undefined,
+  error: undefined,
   labelPosition: 'end',
   spread: false,
   invalid: false,
@@ -60,7 +69,12 @@ const props = withDefaults(defineProps<RadioProps>(), {
 // on it would reach nothing.
 defineOptions({ inheritAttrs: false })
 const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
-const { hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
+const { hintId, errorId, describedBy } = useFieldIds(
+  attrs,
+  () => !!props.hint && !props.error,
+  undefined,
+  () => !!props.error,
+)
 
 /**
  * The value selected in the group, shared by every radio carrying the same `name`. It is
@@ -108,7 +122,7 @@ defineExpose({
         v-model="model"
         type="radio"
         class="v-radio-input v-hidden-input"
-        :aria-invalid="invalid || undefined"
+        :aria-invalid="invalid || !!error || undefined"
         v-bind="forwardedAttrs"
         :value="value"
         :disabled="disabled"
@@ -120,7 +134,11 @@ defineExpose({
         <slot>{{ label }}</slot>
       </span>
     </label>
-    <span v-if="hint" :id="hintId" class="v-radio-hint v-choice-hint">{{ hint }}</span>
+    <span v-if="error" :id="errorId" class="v-field-error v-radio-error v-choice-error">{{
+      error
+    }}</span>
+    <span v-else-if="hint" :id="hintId" class="v-radio-hint v-choice-hint">{{ hint }}</span>
+    <VFieldAnnouncer :text="error" />
   </span>
 </template>
 

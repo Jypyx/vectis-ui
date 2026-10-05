@@ -6,6 +6,7 @@
  */
 import { computed, provide, useId } from 'vue'
 
+import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
 import VTypography from '../VTypography/VTypography.vue'
 
 import { buttonGroupKey } from '../VButton/context'
@@ -31,6 +32,12 @@ interface InputGroupProps {
    */
   hint?: string
   /**
+   * A message saying what is wrong with the row, shown in place of the hint and read along with
+   * the group. It is announced when it appears or changes. Mark the segments at fault with
+   * `invalid`.
+   */
+  error?: string
+  /**
    * The height every segment takes, whatever it names for itself: a row of controls of
    * two heights stops reading as one object. Left out, each segment keeps its own.
    */
@@ -53,6 +60,7 @@ defineOptions({ inheritAttrs: false })
 const props = withDefaults(defineProps<InputGroupProps>(), {
   label: undefined,
   hint: undefined,
+  error: undefined,
   size: undefined,
   compact: undefined,
   disabled: undefined,
@@ -67,6 +75,7 @@ const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const labelId = useId()
 const hintId = useId()
+const errorId = useId()
 
 // @a11y
 // In the template comes after `v-bind="forwardedAttrs"` and would otherwise overwrite what the
@@ -87,7 +96,11 @@ const labelledBy = computed(() => {
 // single root: left to fallthrough, a consumer's `aria-describedby` would overwrite ours and
 // the hint would stop being announced, with nothing to show for it.
 const describedBy = computed(() =>
-  joinIds(attrs['aria-describedby'] as string | undefined, !!props.hint && hintId),
+  joinIds(
+    attrs['aria-describedby'] as string | undefined,
+    !!props.error && errorId,
+    !!props.hint && !props.error && hintId,
+  ),
 )
 
 // Getters, so the group's props stay reactive on the other side of the injection.
@@ -134,9 +147,17 @@ provide(buttonGroupKey, rowContext)
       <slot />
     </div>
 
-    <VTypography v-if="hint" :id="hintId" variant="caption" tone="muted" class="v-input-group-hint">
+    <span v-if="error" :id="errorId" class="v-field-error v-input-group-error">{{ error }}</span>
+    <VTypography
+      v-else-if="hint"
+      :id="hintId"
+      variant="caption"
+      tone="muted"
+      class="v-input-group-hint"
+    >
       {{ hint }}
     </VTypography>
+    <VFieldAnnouncer :text="error" />
   </div>
 </template>
 

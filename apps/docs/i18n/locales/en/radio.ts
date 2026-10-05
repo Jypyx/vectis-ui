@@ -28,6 +28,8 @@ export default {
       props: {
         label:
           'Visible label, replaced by the default slot. Without either, provide <code>aria-label</code> or <code>aria-labelledby</code>.',
+        error:
+          'Error message shown in place of the hint. Sets <code>aria-invalid</code>, is linked through <code>aria-describedby</code> and is announced when it appears.',
         hint: 'Help text below the label, linked through <code>aria-describedby</code>.',
         readonly:
           'Prevents selection changes while preserving focus and native form behavior. Set on every option. Announce read-only state on the group wrapper.',

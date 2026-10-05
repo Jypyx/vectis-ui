@@ -128,6 +128,18 @@ A very long placeholder is truncated cleanly rather than widening the field.
 
 <Canvas of={VInputStories.Showcase} />
 
+## Error message
+
+`error` shows a message in place of the hint, in the danger colour, so that raising it does not
+grow the field. It marks the control invalid (`aria-invalid`) and takes the place of the hint in
+`aria-describedby`. A message that appears or changes after the first render is also announced
+through a polite live region; one present when the page loads is not. Clearing the prop brings the
+hint back.
+
+```vue
+<VInput label="…" :error="errors.field" />
+```
+
 ## Accessibility
 
 - Always an accessible name: `label`, or `aria-label` by fallthrough failing that.

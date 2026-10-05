@@ -6,6 +6,7 @@
  */
 import { computed, ref } from 'vue'
 
+import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconName, iconProps } from '../VIcon/iconProps'
 import { close as closeIcon } from '../VIcon/icons/close'
@@ -60,6 +61,12 @@ interface TextareaProps {
    * that it is read out along with the label.
    */
   hint?: string
+  /**
+   * A message saying what is wrong with the value, shown in place of the hint so that the field
+   * does not grow. It marks the field invalid, is read along with it, and is announced when it
+   * appears or changes.
+   */
+  error?: string
   /**
    * An icon inside the field, at the start. It is decorative by default and becomes a real
    * button as soon as a `@click:icon-start` listener is attached, in which case it needs
@@ -123,6 +130,7 @@ const props = withDefaults(defineProps<TextareaProps>(), {
   readonly: false,
   label: undefined,
   hint: undefined,
+  error: undefined,
   iconStart: undefined,
   iconEnd: undefined,
   iconStartLabel: undefined,
@@ -182,10 +190,11 @@ const { attrs, rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs(
 const m = useMessages()
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.common.clear)
 
-const { fieldId, hintId, counterId, describedBy } = useFieldIds(
+const { fieldId, hintId, counterId, errorId, describedBy } = useFieldIds(
   attrs,
-  () => !!props.hint,
+  () => !!props.hint && !props.error,
   () => props.counter,
+  () => !!props.error,
 )
 
 // Every length measurement goes through this projection: a value straight from an API or
@@ -272,7 +281,7 @@ defineExpose({
         :id="fieldId"
         ref="controlEl"
         v-model="model"
-        :aria-invalid="invalid || undefined"
+        :aria-invalid="invalid || !!error || undefined"
         v-bind="restAttrs"
         class="v-textarea-control"
         :rows="resolvedRows"
@@ -310,8 +319,15 @@ defineExpose({
       </slot>
     </div>
 
-    <div v-if="hint || counter" class="v-textarea-meta v-field-meta">
-      <VTypography v-if="hint" :id="hintId" variant="caption" tone="muted" class="v-textarea-hint">
+    <div v-if="hint || error || counter" class="v-textarea-meta v-field-meta">
+      <span v-if="error" :id="errorId" class="v-field-error v-textarea-error">{{ error }}</span>
+      <VTypography
+        v-else-if="hint"
+        :id="hintId"
+        variant="caption"
+        tone="muted"
+        class="v-textarea-hint"
+      >
         {{ hint }}
       </VTypography>
       <span
@@ -323,6 +339,7 @@ defineExpose({
         {{ counterText }}
       </span>
     </div>
+    <VFieldAnnouncer :text="error" />
   </div>
 </template>
 

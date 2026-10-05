@@ -71,6 +71,8 @@ export default {
           'Formats the count of values hidden by <code>max</code>. Receives the hidden count.',
         label:
           'Visible label. Without a visible name, provide <code>aria-label</code> or <code>aria-labelledby</code>.',
+        error:
+          'Error message shown in place of the hint. Sets <code>aria-invalid</code>, is linked through <code>aria-describedby</code> and is announced when it appears.',
         hint: 'Help text linked through <code>aria-describedby</code>.',
         size: 'Field and option size. The field inherits a size set by <code>VInputGroup</code>.',
         compact: 'Reduces the control height without changing text or icons.',

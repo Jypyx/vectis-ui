@@ -65,6 +65,8 @@ export default {
           'Marks the control as invalid and applies the error style. Validate your file selection separately.',
         label:
           'Visible label. Without a visible name, provide <code>aria-label</code> or <code>aria-labelledby</code>.',
+        error:
+          'Error message shown in place of the hint. Sets <code>aria-invalid</code>, is linked through <code>aria-describedby</code> and is announced when it appears.',
         hint: 'Help text linked through <code>aria-describedby</code>.',
         placeholder: 'Text shown when the selection is empty. Defaults to the library dictionary.',
         iconStart:

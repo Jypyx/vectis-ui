@@ -164,6 +164,12 @@ interface ComboboxProps {
    * so it is read out along with the label.
    */
   hint?: string
+  /**
+   * A message saying what is wrong with the value, shown in place of the hint so that the field
+   * does not grow. It marks the field invalid, is read along with it, and is announced when it
+   * appears or changes.
+   */
+  error?: string
   /** The height of the field: 32, 40 or 48 pixels. */
   size?: ComboboxSize
   /** Takes 4px off the height, as everywhere else in the design system. */
@@ -240,6 +246,7 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   overflowText: undefined,
   label: undefined,
   hint: undefined,
+  error: undefined,
   size: 'md',
   compact: false,
   placeholder: undefined,
@@ -964,6 +971,7 @@ defineExpose({
         v-bind="fieldAttrs"
         :label="label"
         :hint="hint"
+        :error="error"
         :size="resolvedSize"
         :compact="resolvedCompact"
         :invalid="invalid"

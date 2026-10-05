@@ -58,6 +58,18 @@
     color: var(--vectis-color-danger-text);
   }
 
+  /*
+   * The error message, which takes the place of the hint so that raising it does not grow the
+   * field. Text alone: an icon would bring VIcon and its resolver into controls without them.
+   */
+  .v-field-error {
+    color: var(--vectis-color-danger-text);
+    font-family: var(--vectis-text-family);
+    font-size: var(--vectis-text-caption-size);
+    font-weight: var(--vectis-text-caption-weight);
+    line-height: var(--vectis-text-caption-leading);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .v-field-action {
       transition: none;

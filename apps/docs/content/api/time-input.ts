@@ -20,6 +20,7 @@ export default {
         { name: 'locale', type: 'string' },
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
+        { name: 'error', type: 'string' },
         { name: 'placeholder', type: 'string' },
         { name: 'size', type: 'TimeInputSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },

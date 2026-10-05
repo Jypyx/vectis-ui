@@ -74,6 +74,8 @@ export default {
         disabled: 'Désactive les interactions.',
         label:
           'Nom accessible sans texte visible. Les curseurs d’intervalle reçoivent des noms distincts de début et de fin.',
+        error:
+          'Message d’erreur affiché à la place de l’aide. Pose <code>aria-invalid</code>, est lié par <code>aria-describedby</code> et est annoncé quand il apparaît.',
         hint: 'Texte d’aide lié par <code>aria-describedby</code>.',
         orientation: 'Sens de la piste. Les sliders verticaux placent le minimum en bas.',
         inputs:

@@ -20,7 +20,7 @@ export default {
     },
     states: {
       title: 'States',
-      text: '<code>disabled</code> blocks interaction. <code>readonly</code> allows focus and copying. <code>invalid</code> marks an error. <code>loading</code> shows a spinner while leaving the field editable.',
+      text: '<code>disabled</code> blocks interaction. <code>readonly</code> allows focus and copying. <code>invalid</code> marks an error, and <code>error</code> also shows its message in place of the hint. <code>loading</code> shows a spinner while leaving the field editable.',
     },
     clickableIcons: {
       title: 'Clickable icons',
@@ -51,6 +51,8 @@ export default {
           'Prevents typing through native <code>readonly</code> without the read-only style. Keeps clearing available, for fields edited through a picker.',
         label:
           'Visible label linked to the input. When omitted, provide <code>aria-label</code> or <code>aria-labelledby</code>.',
+        error:
+          'Error message shown in place of the hint. Sets <code>aria-invalid</code>, is linked through <code>aria-describedby</code> and is announced when it appears.',
         hint: 'Help text below the field, linked through <code>aria-describedby</code>.',
         iconStart:
           'Start icon. Becomes a button with <code>@click:icon-start</code>; then requires <code>iconStartLabel</code>.',

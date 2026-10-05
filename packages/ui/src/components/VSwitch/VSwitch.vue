@@ -6,6 +6,8 @@
 
 import { ref } from 'vue'
 
+import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
+
 import { useFieldIds } from '../../composables/useFieldIds'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
@@ -20,6 +22,12 @@ interface SwitchProps {
    * so it is read out after the label rather than as part of it.
    */
   hint?: string
+  /**
+   * A message saying what is wrong with the value, shown in place of the hint so that the field
+   * does not grow. It marks the field invalid, is read along with it, and is announced when it
+   * appears or changes.
+   */
+  error?: string
   /** Which side of the switch the label sits on. */
   labelPosition?: SwitchLabelPosition
   /**
@@ -46,6 +54,7 @@ interface SwitchProps {
 const props = withDefaults(defineProps<SwitchProps>(), {
   label: undefined,
   hint: undefined,
+  error: undefined,
   labelPosition: 'end',
   spread: false,
   invalid: false,
@@ -59,7 +68,12 @@ const props = withDefaults(defineProps<SwitchProps>(), {
 // actually carries the switch role.
 defineOptions({ inheritAttrs: false })
 const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
-const { hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
+const { hintId, errorId, describedBy } = useFieldIds(
+  attrs,
+  () => !!props.hint && !props.error,
+  undefined,
+  () => !!props.error,
+)
 
 /** Whether the switch is on. It starts off. */
 const model = defineModel<boolean>({ default: false })
@@ -105,7 +119,7 @@ defineExpose({
         type="checkbox"
         role="switch"
         class="v-switch-input v-hidden-input"
-        :aria-invalid="invalid || undefined"
+        :aria-invalid="invalid || !!error || undefined"
         :aria-readonly="readonly || undefined"
         v-bind="forwardedAttrs"
         :disabled="disabled"
@@ -119,7 +133,11 @@ defineExpose({
         <slot>{{ label }}</slot>
       </span>
     </label>
-    <span v-if="hint" :id="hintId" class="v-switch-hint v-choice-hint">{{ hint }}</span>
+    <span v-if="error" :id="errorId" class="v-field-error v-switch-error v-choice-error">{{
+      error
+    }}</span>
+    <span v-else-if="hint" :id="hintId" class="v-switch-hint v-choice-hint">{{ hint }}</span>
+    <VFieldAnnouncer :text="error" />
   </span>
 </template>
 

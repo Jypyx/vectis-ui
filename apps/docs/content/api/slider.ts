@@ -19,6 +19,7 @@ export default {
         { name: 'size', type: 'SliderSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
+        { name: 'error', type: 'string' },
         { name: 'orientation', type: 'SliderOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },
         { name: 'inputs', type: 'SliderInputs', values: "false | 'ends' | 'top' | 'bottom'", default: 'false' },
         { name: 'ticks', type: 'boolean', default: 'false' },

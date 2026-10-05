@@ -330,6 +330,14 @@ export const semantic = {
       '16rem',
       'The narrowest content of a horizontal VCard: below it, the media moves above the content',
     ),
+    'size-field-label': dimension(
+      '10rem',
+      'The width of a VField label placed beside its control, before the control wraps under it (160px)',
+    ),
+    'size-field-control-min': dimension(
+      '16rem',
+      'The narrowest control of a VField with a side label: below it, the label moves above the control',
+    ),
     'size-badge-h': dimension('1.25rem', 'The height of a VBadge pill'),
     'size-badge-dot': dimension('0.625rem', 'The diameter of VBadge in dot mode'),
     'size-badge-ring': dimension('2px', 'The detaching ring of a bordered VBadge'),

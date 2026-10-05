@@ -11,6 +11,7 @@ export default {
       props: [
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
+        { name: 'error', type: 'string' },
         { name: 'labelPosition', type: 'SwitchLabelPosition', values: "'start' | 'end'", default: "'end'" },
         { name: 'spread', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },

@@ -6,6 +6,7 @@
  */
 
 import { computed, ref, useAttrs, useId, watch } from 'vue'
+import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
@@ -62,6 +63,12 @@ interface InputOTPProps {
    * tied to the row for assistive technology, so it is read out along with the label.
    */
   hint?: string
+  /**
+   * A message saying what is wrong with the value, shown in place of the hint so that the field
+   * does not grow. It marks the field invalid, is read along with it, and is announced when it
+   * appears or changes.
+   */
+  error?: string
 }
 
 const props = withDefaults(defineProps<InputOTPProps>(), {
@@ -76,6 +83,7 @@ const props = withDefaults(defineProps<InputOTPProps>(), {
   invalid: false,
   label: undefined,
   hint: undefined,
+  error: undefined,
 })
 
 const m = useMessages()
@@ -103,9 +111,15 @@ const nativeAttrs = computed(() =>
 // No `useFieldIds` here: the row is named by `aria-label` and renders no `<label>`, so the
 // field id that composable generates would have nothing to point it at.
 const hintId = useId()
+const errorId = useId()
 const describedBy = computed(() =>
-  joinIds(attrs['aria-describedby'] as string | undefined, !!props.hint && hintId),
+  joinIds(
+    attrs['aria-describedby'] as string | undefined,
+    !!props.error && errorId,
+    !!props.hint && !props.error && hintId,
+  ),
 )
+const isInvalid = computed(() => props.invalid || !!props.error)
 
 /**
  * The code as one string, without the separators: a `GT-###` template still yields three
@@ -343,7 +357,7 @@ defineExpose({
     role="group"
     :aria-label="ariaLabel"
     :aria-describedby="describedBy"
-    :data-invalid="invalid ? '' : undefined"
+    :data-invalid="isInvalid ? '' : undefined"
     :data-size="size"
     :data-compact="compact ? '' : undefined"
     :data-disabled="disabled ? '' : undefined"
@@ -361,7 +375,7 @@ defineExpose({
           :disabled="disabled"
           :readonly="readonly || undefined"
           :aria-label="m.inputOTP.slot(cell.slotIndex + 1, slotCount)"
-          :aria-invalid="invalid || undefined"
+          :aria-invalid="isInvalid || undefined"
           @input="onInput(cell.slotIndex, $event)"
           @keydown="onKeydown(cell.slotIndex, $event)"
           @focus="onFocus(cell.slotIndex, $event)"
@@ -394,9 +408,17 @@ defineExpose({
       @focus="focusBox(firstEmpty() === -1 ? 0 : firstEmpty())"
     />
 
-    <VTypography v-if="hint" :id="hintId" variant="caption" tone="muted" class="v-input-otp-hint">
+    <span v-if="error" :id="errorId" class="v-field-error v-input-otp-error">{{ error }}</span>
+    <VTypography
+      v-else-if="hint"
+      :id="hintId"
+      variant="caption"
+      tone="muted"
+      class="v-input-otp-hint"
+    >
       {{ hint }}
     </VTypography>
+    <VFieldAnnouncer :text="error" />
   </div>
 </template>
 

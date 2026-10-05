@@ -59,6 +59,8 @@ export default {
           'BCP 47 locale for time display. Overrides the global locale; <code>format</code> takes precedence.',
         label:
           'Visible label. Without a visible name, provide <code>aria-label</code> or <code>aria-labelledby</code>.',
+        error:
+          'Error message shown in place of the hint. Sets <code>aria-invalid</code>, is linked through <code>aria-describedby</code> and is announced when it appears.',
         hint: 'Help text linked through <code>aria-describedby</code>.',
         placeholder: 'Placeholder shown when the field is empty.',
         size: 'Component size.',

@@ -35,6 +35,8 @@ const nav: NavMessages = {
   'date-input': 'Date input',
   'date-picker': 'Date picker',
   dialog: 'Dialog',
+  field: 'Field',
+  fieldset: 'Fieldset',
   'file-input': 'File input',
   'file-picker': 'File picker',
   hotkeys: 'Hotkeys',

@@ -80,6 +80,8 @@ export default {
         showPicker: 'Ajoute un calendrier au mode saisie. Le mode calendrier l’inclut toujours.',
         label:
           'Libellé visible. Sans nom visible, fournissez <code>aria-label</code> ou <code>aria-labelledby</code>.',
+        error:
+          'Message d’erreur affiché à la place de l’aide. Pose <code>aria-invalid</code>, est lié par <code>aria-describedby</code> et est annoncé quand il apparaît.',
         hint: 'Texte d’aide lié par <code>aria-describedby</code>.',
         placeholder: 'Texte indicatif lorsque le champ est vide.',
         size: 'Taille du composant.',

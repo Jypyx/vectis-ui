@@ -22,6 +22,8 @@ import datePicker from './fr/datePicker'
 import designTokens from './fr/designTokens'
 import dialog from './fr/dialog'
 import error from './fr/error'
+import field from './fr/field'
+import fieldset from './fr/fieldset'
 import fileInput from './fr/fileInput'
 import filePicker from './fr/filePicker'
 import fontFamily from './fr/fontFamily'
@@ -94,6 +96,8 @@ export default defineI18nLocale((): DocsMessages => ({
   dateInput,
   datePicker,
   dialog,
+  field,
+  fieldset,
   fileInput,
   filePicker,
   hotkeys,

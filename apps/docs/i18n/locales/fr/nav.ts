@@ -33,6 +33,8 @@ const nav: NavMessages = {
   'date-input': 'Champ de date',
   'date-picker': 'Sélecteur de date',
   dialog: 'Boîte de dialogue',
+  field: 'Champ',
+  fieldset: 'Groupe de champs',
   'file-input': 'Champ de fichiers',
   'file-picker': 'Sélecteur de fichiers',
   hotkeys: 'Raccourcis clavier',

@@ -32,7 +32,7 @@ export default {
     },
     states: {
       title: 'États',
-      text: '<code>disabled</code> bloque les interactions. <code>readonly</code> permet le focus et la copie. <code>invalid</code> signale une erreur. <code>loading</code> affiche un indicateur de chargement sans empêcher la saisie.',
+      text: '<code>disabled</code> bloque les interactions. <code>readonly</code> permet le focus et la copie. <code>invalid</code> signale une erreur, et <code>error</code> affiche aussi son message à la place de l’aide. <code>loading</code> affiche un indicateur de chargement sans empêcher la saisie.',
     },
   },
   api: {
@@ -52,6 +52,8 @@ export default {
           'Empêche la modification tout en permettant le focus et la copie. Masque le bouton d’effacement sauf si <code>clearVisible</code> impose sa visibilité.',
         label:
           'Libellé visible lié à la zone de texte. Si omis, fournissez <code>aria-label</code> ou <code>aria-labelledby</code>.',
+        error:
+          'Message d’erreur affiché à la place de l’aide. Pose <code>aria-invalid</code>, est lié par <code>aria-describedby</code> et est annoncé quand il apparaît.',
         hint: 'Texte d’aide sous le champ, lié par <code>aria-describedby</code>.',
         iconStart:
           'Icône de début. Devient un bouton avec <code>@click:icon-start</code> ; nécessite alors <code>iconStartLabel</code>.',

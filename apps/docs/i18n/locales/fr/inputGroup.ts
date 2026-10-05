@@ -36,6 +36,8 @@ export default {
       props: {
         label:
           'Libellé visible commun et nom accessible du groupe. Les attributs <code>aria-label</code> ou <code>aria-labelledby</code> fournis prennent le pas sur cette prop. Nommez chaque champ séparément.',
+        error:
+          'Message d’erreur affiché à la place de l’aide, lié au groupe par <code>aria-describedby</code> et annoncé quand il apparaît. Marquez les segments en faute avec <code>invalid</code>.',
         hint: 'Texte d’aide commun sous la ligne, lié au groupe par <code>aria-describedby</code>.',
         size: 'Taille de tous les segments. Remplace les tailles individuelles ; si omise, chaque segment conserve la sienne.',
         compact:

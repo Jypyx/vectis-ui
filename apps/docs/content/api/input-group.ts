@@ -11,6 +11,7 @@ export default {
       props: [
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
+        { name: 'error', type: 'string' },
         { name: 'size', type: 'InputGroupSize', values: "'sm' | 'md' | 'lg'" },
         { name: 'compact', type: 'boolean' },
         { name: 'disabled', type: 'boolean' },

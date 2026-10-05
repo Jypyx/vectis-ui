@@ -1,0 +1,54 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VFieldsetStories from './VFieldset.stories'
+
+<Meta of={VFieldsetStories} />
+
+# Fieldset
+
+A native `<fieldset>` named by its `<legend>`: a group of radios, checkboxes or related fields,
+announced as one. It adds a hint, an error message, a required marker and the layout of the
+controls.
+
+```vue
+<VFieldset legend="Plan" :error="errors.plan" required v-slot="{ invalid, required }">
+  <VRadio v-model="plan" name="plan" value="free" label="Free" :invalid :required />
+  <VRadio v-model="plan" name="plan" value="pro" label="Pro" :invalid :required />
+</VFieldset>
+```
+
+<Canvas of={VFieldsetStories.Default} />
+
+<Controls of={VFieldsetStories.Default} />
+
+## Orientation
+
+`vertical`, the default, stacks the controls. `horizontal` lays them out in a row that wraps.
+
+<Canvas of={VFieldsetStories.Horizontal} />
+
+## Error and required
+
+`error` shows a message in place of the hint, so that raising it does not grow the group, and
+takes the place of the hint in the group's `aria-describedby`. A group may not carry
+`aria-invalid`, so the default slot receives `invalid`, true while there is an error, to set on the
+controls. `required` adds an asterisk after the legend and passes `required` to the slot.
+
+A message that appears or changes after the first render is announced through a polite live
+region.
+
+<Canvas of={VFieldsetStories.WithError} />
+
+## Hidden legend
+
+`hideLegend` hides the legend visually. The group keeps its name for assistive technology.
+
+<Canvas of={VFieldsetStories.HiddenLegend} />
+
+## Accessibility
+
+- The group is a native `<fieldset>`; the legend gives it its name.
+- Attributes fall through to the `<fieldset>`. The native `disabled` attribute disables every
+  form control inside.
+- The hint, or the error in its place, describes the group; screen readers read it when focus
+  enters the group.
+- The required asterisk is decorative: set `required` on the controls through the slot.

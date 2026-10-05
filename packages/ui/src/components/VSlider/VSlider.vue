@@ -6,6 +6,7 @@
  */
 
 import { computed, inject, reactive, ref, watch, watchEffect } from 'vue'
+import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
@@ -83,6 +84,12 @@ interface SliderProps {
    * than as part of it.
    */
   hint?: string
+  /**
+   * A message saying what is wrong with the value, shown in place of the hint so that the field
+   * does not grow. It marks the field invalid, is read along with it, and is announced when it
+   * appears or changes.
+   */
+  error?: string
   /** Turns the slider upright, with the lowest value at the bottom. */
   orientation?: SliderOrientation
   /**
@@ -116,6 +123,7 @@ const props = withDefaults(defineProps<SliderProps>(), {
   size: 'md',
   label: undefined,
   hint: undefined,
+  error: undefined,
   orientation: 'horizontal',
   inputs: false,
   ticks: false,
@@ -315,7 +323,13 @@ const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 // The hint is APPENDED to whatever the consumer already pointed at rather than replacing
 // it, which is why the binding below sits after the forwarded attributes, as on every
 // other field of the design system.
-const { hintId, describedBy } = useFieldIds(attrs, () => !!props.hint)
+const { hintId, errorId, describedBy } = useFieldIds(
+  attrs,
+  () => !!props.hint && !props.error,
+  undefined,
+  () => !!props.error,
+)
+const isInvalid = computed(() => props.invalid || !!props.error)
 
 /**
  * Where the fields go, `ends` standing in for any other truthy value: a bare `inputs`
@@ -463,7 +477,7 @@ defineExpose({
     :data-range="range ? '' : undefined"
     :data-disabled="resolvedDisabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
-    :data-invalid="invalid ? '' : undefined"
+    :data-invalid="isInvalid ? '' : undefined"
     :data-size="resolvedSize"
     :data-orientation="orientation"
     :data-inputs="inputsPlace || undefined"
@@ -488,7 +502,7 @@ defineExpose({
       :step="step"
       :disabled="resolvedDisabled"
       :readonly="readonly"
-      :invalid="invalid"
+      :invalid="isInvalid"
       :aria-label="fieldLabel(which)"
       @change="commitField(which)"
     />
@@ -515,7 +529,7 @@ defineExpose({
           :value="startValue"
           :aria-label="startLabel"
           :aria-valuetext="startValueText"
-          :aria-invalid="invalid || undefined"
+          :aria-invalid="isInvalid || undefined"
           :aria-readonly="readonly || undefined"
           @keydown="onThumbKeydown"
           @input="onThumbInput('start', $event)"
@@ -530,7 +544,7 @@ defineExpose({
         -->
         <input
           ref="endThumbEl"
-          :aria-invalid="invalid || undefined"
+          :aria-invalid="isInvalid || undefined"
           :aria-readonly="readonly || undefined"
           :aria-valuetext="endValueText"
           v-bind="forwardedAttrs"
@@ -583,11 +597,13 @@ defineExpose({
       :step="step"
       :disabled="resolvedDisabled"
       :readonly="readonly"
-      :invalid="invalid"
+      :invalid="isInvalid"
       :aria-label="fieldLabel(which)"
       @change="commitField(which)"
     />
-    <span v-if="hint" :id="hintId" class="v-slider-hint">{{ hint }}</span>
+    <span v-if="error" :id="errorId" class="v-field-error v-slider-error">{{ error }}</span>
+    <span v-else-if="hint" :id="hintId" class="v-slider-hint">{{ hint }}</span>
+    <VFieldAnnouncer :text="error" />
   </div>
 </template>
 
@@ -915,6 +931,10 @@ defineExpose({
     font-size: var(--vectis-text-caption-size);
     line-height: var(--vectis-text-caption-leading);
     color: var(--vectis-color-text-muted);
+  }
+
+  .v-slider-error {
+    grid-column: 1 / -1;
   }
 
   .v-slider[data-disabled] .v-slider-hint {
