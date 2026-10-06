@@ -634,6 +634,11 @@ defineExpose({
      * palette opened inside a wider dialog would otherwise take that dialog's width.
      */
     --command-palette-width: var(--vectis-control-size-command-palette-width);
+    /*
+     * Where a row's icon and a block's name start: the list padding plus the inline padding of
+     * a medium row. The field and the footer use it to line up with them.
+     */
+    --command-palette-inset: calc(var(--vectis-space-2) + var(--vectis-space-4));
     inline-size: var(--command-palette-width);
     max-inline-size: calc(100dvi - 2 * var(--vectis-space-4));
     max-block-size: calc(
@@ -669,9 +674,10 @@ defineExpose({
     flex: none;
     display: flex;
     align-items: center;
-    gap: var(--vectis-space-3);
+    /* The gap of a medium row, so the typed text starts where the labels do. */
+    gap: var(--vectis-space-2);
     min-block-size: var(--vectis-control-height-xl);
-    padding-inline: var(--vectis-space-4);
+    padding-inline: var(--command-palette-inset);
     border-block-end: 1px solid var(--vectis-color-border);
     /* The magnifier matches the larger text of the field, through VIcon's context size. */
     --vectis-icon-size: var(--vectis-icon-size-md);
@@ -776,7 +782,7 @@ defineExpose({
     flex: none;
     display: flex;
     align-items: center;
-    padding: var(--vectis-space-2) var(--vectis-space-4);
+    padding: var(--vectis-space-2) var(--command-palette-inset);
     border-block-start: 1px solid var(--vectis-color-border);
     font-size: var(--vectis-text-caption-size);
     line-height: var(--vectis-text-caption-leading);
