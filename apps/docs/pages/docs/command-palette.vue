@@ -52,5 +52,5 @@ useDocsHead('commandPalette')
     <CommandPaletteRecent />
   </DocsExample>
 
-  <DocsApi page="command-palette" :api="api" />
+  <DocsApi page="commandPalette" :api="api" />
 </template>
