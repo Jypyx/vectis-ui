@@ -50,6 +50,7 @@ const nav: NavMessages = {
   'input-otp': 'Input OTP',
   link: 'Link',
   menu: 'Menu',
+  meter: 'Meter',
   'number-input': 'Number input',
   pagination: 'Pagination',
   popover: 'Popover',

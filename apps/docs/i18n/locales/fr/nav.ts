@@ -48,6 +48,7 @@ const nav: NavMessages = {
   'input-otp': 'Code à usage unique',
   link: 'Lien',
   menu: 'Menu',
+  meter: 'Jauge',
   'number-input': 'Champ numérique',
   pagination: 'Pagination',
   popover: 'Popover',

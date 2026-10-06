@@ -112,6 +112,10 @@ const descriptions: Record<DescribedToken, string> = {
     'La hauteur maximale du panneau de liste de VCombobox (la zone qui défile)',
   '--vectis-control-size-menu-min': 'La largeur minimale du panneau de VMenu',
   '--vectis-control-size-menu-max': 'La largeur maximale du panneau de VMenu',
+  '--vectis-control-size-meter-thickness-sm': "L'épaisseur d'un VMeter petit (4px)",
+  '--vectis-control-size-meter-thickness-md': "L'épaisseur d'un VMeter moyen (8px)",
+  '--vectis-control-size-meter-thickness-lg': "L'épaisseur d'un VMeter grand (12px)",
+  '--vectis-control-size-meter-segment-gap': "L'espace entre deux segments de VMeter (2px)",
   '--vectis-control-size-progress-linear-thickness':
     "L'épaisseur par défaut de la barre de VProgressLinear (4px)",
   '--vectis-control-size-progress-linear-length':

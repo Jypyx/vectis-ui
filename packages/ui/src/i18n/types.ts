@@ -104,6 +104,13 @@ export interface Messages {
      */
     label: string
   }
+  meter: {
+    /**
+     * What a meter is called when the consumer gives it no label. A meter takes no name from the
+     * text beside it, so without this it would have none at all.
+     */
+    label: string
+  }
   /**
    * The keys of a keyboard shortcut, in words. Where a symbol exists it wins on screen, and the
    * word wins in what a screen reader says.

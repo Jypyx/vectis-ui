@@ -279,6 +279,10 @@
     --vectis-control-size-menu-max: 20rem;
     --vectis-control-size-progress-linear-thickness: 0.25rem;
     --vectis-control-size-progress-linear-length: 10rem;
+    --vectis-control-size-meter-thickness-sm: 0.25rem;
+    --vectis-control-size-meter-thickness-md: 0.5rem;
+    --vectis-control-size-meter-thickness-lg: 0.75rem;
+    --vectis-control-size-meter-segment-gap: 0.125rem;
     --vectis-control-size-progress-circular-diameter: 3rem;
     --vectis-control-size-progress-circular-thickness: 0.25rem;
     --vectis-control-size-skeleton-surface: 6rem;

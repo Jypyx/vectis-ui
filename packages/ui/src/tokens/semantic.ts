@@ -302,6 +302,10 @@ export const semantic = {
       '10rem',
       'The default length of a vertical VProgressLinear, which a height set on the bar replaces',
     ),
+    'size-meter-thickness-sm': dimension('0.25rem', 'The thickness of a small VMeter (4px)'),
+    'size-meter-thickness-md': dimension('0.5rem', 'The thickness of a medium VMeter (8px)'),
+    'size-meter-thickness-lg': dimension('0.75rem', 'The thickness of a large VMeter (12px)'),
+    'size-meter-segment-gap': dimension('0.125rem', 'The gap between two VMeter segments (2px)'),
     'size-progress-circular-diameter': dimension(
       '3rem',
       'The default diameter of VProgressCircular',

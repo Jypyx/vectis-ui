@@ -43,6 +43,7 @@ import installation from './en/installation'
 import jsHelpers from './en/jsHelpers'
 import link from './en/link'
 import menu from './en/menu'
+import meter from './en/meter'
 import nav from './en/nav'
 import numberInput from './en/numberInput'
 import pagination from './en/pagination'
@@ -117,6 +118,7 @@ export interface DocsMessages {
   inputOtp: typeof inputOtp
   link: typeof link
   menu: typeof menu
+  meter: typeof meter
   numberInput: typeof numberInput
   pagination: typeof pagination
   popover: typeof popover
@@ -197,6 +199,7 @@ export default defineI18nLocale((): DocsMessages => ({
   inputOtp,
   link,
   menu,
+  meter,
   numberInput,
   pagination,
   popover,

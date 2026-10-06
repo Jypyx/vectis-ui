@@ -71,6 +71,7 @@ export const en: Messages = {
     limitExceeded: (max) => `Exceeds the limit of ${max} characters`,
   },
   progress: { percent: (percent) => `${percent}%`, label: 'Progress' },
+  meter: { label: 'Meter' },
   hotkeys: {
     command: 'Command',
     ctrl: 'Ctrl',

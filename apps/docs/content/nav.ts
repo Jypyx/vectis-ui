@@ -72,6 +72,7 @@ export const components = [
   entry('input-otp'),
   entry('link'),
   entry('menu'),
+  entry('meter'),
   entry('number-input'),
   entry('pagination'),
   entry('popover'),

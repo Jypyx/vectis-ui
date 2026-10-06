@@ -74,6 +74,7 @@ export const fr: Messages = {
   // the character itself, and it would be indistinguishable from an ordinary space in a
   // review.
   progress: { percent: (percent) => `${percent}\u00A0%`, label: 'Progression' },
+  meter: { label: 'Jauge' },
   hotkeys: {
     command: 'Commande',
     ctrl: 'Ctrl',

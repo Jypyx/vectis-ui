@@ -1,0 +1,96 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VMeterStories from './VMeter.stories'
+
+<Meta of={VMeterStories} />
+
+# Meter
+
+A measurement within a known range: disk usage, a battery level, the strength of a password. Unlike
+VProgressLinear, the value is not on its way to completion; it is a reading, which may be good or
+bad depending on where it sits.
+
+The bar carries the `meter` role with `aria-valuenow`, `aria-valuemin`, `aria-valuemax` and
+`aria-valuetext`, rather than using the native `<meter>`: that element is styled only through vendor
+pseudo-elements, one rule set per engine, does not animate its fill in Firefox and cannot be split
+into segments. The semantics announced to screen readers are the same.
+
+<Canvas of={VMeterStories.Default} />
+
+<Controls of={VMeterStories.Default} />
+
+## Regions
+
+`low`, `high` and `optimum` follow the rules of the native `<meter>`. They divide the range into a
+low part, a middle part and a high part; the part holding `optimum` is good, the part next to it
+average, and the far part poor. The tone follows: `success`, `warning`, then `danger`. Without any
+of the three, the bar is in the accent colour.
+
+- Optimum between `low` and `high` (the default, at the middle of the range): the middle is good and
+  both ends are average, as for a humidity level.
+- Optimum below `low`: low values are good, as for a processor load.
+- Optimum above `high`: high values are good, as for a battery.
+
+<Canvas of={VMeterStories.Regions} />
+
+Colour alone does not tell the region apart. When the region matters, say it in words through
+`valueText`, as the password strength below does.
+
+## Tones
+
+`tone` fixes the colour, whatever the region. `color` takes a colour of your own, and the track is
+derived from it against the theme.
+
+<Canvas of={VMeterStories.Tones} />
+
+## Label and value
+
+`label` is written above the bar and names it by reference: there is no other way for a screen
+reader to learn what is measured. Without it, the bar takes a generic name from the dictionary;
+an `aria-label` or `aria-labelledby` of your own wins over both.
+
+The value is written at the end of the same line. It is a percentage of the range by default.
+`formatOptions` formats the value itself for the current locale with `Intl.NumberFormat`, such as a
+unit or a currency, and `valueText` replaces it with your own words. Screen readers read that same
+text through `aria-valuetext`, so the copy on screen is hidden from them.
+
+<Canvas of={VMeterStories.ValueText} />
+
+`hideLabel` and `hideValue` remove the text above the bar without removing what screen readers
+hear.
+
+<Canvas of={VMeterStories.HiddenText} />
+
+## Segments
+
+`segments` splits the bar into equal parts separated by a gap. The fill runs through them in
+order, so a value between two steps fills part of a segment.
+
+<Canvas of={VMeterStories.Segments} />
+
+## Changing value
+
+The fill moves to the new value and the tone changes with the region. The movement is removed when
+reduced motion is requested. A meter is not a live region: announce a change that matters
+elsewhere.
+
+<Canvas of={VMeterStories.Live} />
+
+## Sizes
+
+`size` sets the thickness of the bar, 4, 8 or 12 pixels, and the text above it is smaller at `sm`.
+The length is the container's: the meter takes the whole width available.
+
+<Canvas of={VMeterStories.Sizes} />
+
+## Right to left
+
+The bar fills from the reading start, and the segments follow the same direction.
+
+<Canvas of={VMeterStories.RightToLeft} />
+
+## Accessibility
+
+- The `meter` role exposes the value, its bounds and its text. Give every meter a `label`, visible
+  or hidden.
+- Colour shows the region but never alone: put the meaning into `valueText` when it matters.
+- In forced colours, the track is outlined and the fill painted in the system highlight colour.
