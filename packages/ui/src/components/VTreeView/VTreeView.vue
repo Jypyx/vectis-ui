@@ -9,6 +9,7 @@
 import { computed, onMounted, ref, shallowReactive, watch } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 
+import VCheckMark from '../VCheckbox/VCheckMark.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import VSpinner from '../VSpinner/VSpinner.vue'
 import { iconProps } from '../VIcon/iconProps'
@@ -532,27 +533,7 @@ defineExpose({
               mirrored
             />
           </span>
-          <span v-if="selectionMode === 'multiple'" class="v-tree-check" aria-hidden="true">
-            <svg class="v-tree-check-mark" viewBox="0 0 12 12">
-              <path
-                class="v-tree-check-tick"
-                d="M2.5 6.5l2.5 2.5 4.5-5.5"
-                fill="none"
-                stroke="currentcolor"
-                stroke-width="1.75"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-              <path
-                class="v-tree-check-dash"
-                d="M3 6h6"
-                fill="none"
-                stroke="currentcolor"
-                stroke-width="1.75"
-                stroke-linecap="round"
-              />
-            </svg>
-          </span>
+          <VCheckMark v-if="selectionMode === 'multiple'" />
           <slot name="icon" v-bind="slotProps(node)">
             <VIcon v-if="node.item.icon" class="v-tree-icon" v-bind="iconProps(node.item.icon)" />
           </slot>
@@ -688,41 +669,13 @@ defineExpose({
     color: var(--vectis-color-danger-text);
   }
 
-  /* A pill override on the interactive radius would otherwise turn the box into a disc. */
-  .v-tree-check {
-    display: inline-grid;
-    flex: none;
-    place-items: center;
-    inline-size: var(--vectis-control-size-check);
-    block-size: var(--vectis-control-size-check);
-    border: var(--vectis-control-border-width) solid var(--vectis-color-border-strong);
-    border-radius: min(
-      var(--vectis-radius-interactive),
-      calc(var(--vectis-control-size-check) / 4)
-    );
-    color: var(--vectis-color-text-on-accent);
-    transition:
-      background-color var(--vectis-duration-fast) var(--vectis-ease-default),
-      border-color var(--vectis-duration-fast) var(--vectis-ease-default);
-  }
-
-  .v-tree-check-mark {
-    inline-size: var(--vectis-control-size-check-mark);
-    block-size: var(--vectis-control-size-check-mark);
-  }
-
-  .v-tree-check-tick,
-  .v-tree-check-dash {
-    opacity: 0;
-  }
-
-  .v-tree-row:is([aria-checked='true'], [aria-checked='mixed']) .v-tree-check {
+  .v-tree-row:is([aria-checked='true'], [aria-checked='mixed']) .v-check-mark {
     background: var(--vectis-color-accent);
     border-color: var(--vectis-color-accent);
   }
 
-  .v-tree-row[aria-checked='true'] .v-tree-check-tick,
-  .v-tree-row[aria-checked='mixed'] .v-tree-check-dash {
+  .v-tree-row[aria-checked='true'] .v-check-mark-tick,
+  .v-tree-row[aria-checked='mixed'] .v-check-mark-dash {
     opacity: 1;
   }
 
@@ -736,7 +689,7 @@ defineExpose({
     color: inherit;
   }
 
-  .v-tree-row[aria-disabled='true'] .v-tree-check {
+  .v-tree-row[aria-disabled='true'] .v-check-mark {
     background: var(--vectis-color-surface-muted);
     border-color: var(--vectis-color-border);
     color: var(--vectis-color-text-subtle);
@@ -754,7 +707,7 @@ defineExpose({
     }
 
     .v-tree-row:is([aria-checked='true'], [aria-checked='mixed']):not([aria-disabled='true'])
-      .v-tree-check {
+      .v-check-mark {
       forced-color-adjust: none;
       background: Highlight;
       border-color: Highlight;
@@ -763,8 +716,7 @@ defineExpose({
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .v-tree-chevron,
-    .v-tree-check {
+    .v-tree-chevron {
       transition: none;
     }
   }

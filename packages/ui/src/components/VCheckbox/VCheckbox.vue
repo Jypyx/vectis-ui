@@ -7,6 +7,7 @@
 import { ref, watchEffect } from 'vue'
 
 import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
+import VCheckMark from './VCheckMark.vue'
 
 import { useFieldIds } from '../../composables/useFieldIds'
 import { useRootAttrs } from '../../composables/useRootAttrs'
@@ -146,27 +147,7 @@ defineExpose({
         @click="refuseWhenReadonly"
         @change="syncIndeterminate"
       />
-      <span class="v-checkbox-box" aria-hidden="true">
-        <svg class="v-checkbox-mark" viewBox="0 0 12 12">
-          <path
-            class="v-checkbox-mark-check"
-            d="M2.5 6.5l2.5 2.5 4.5-5.5"
-            fill="none"
-            stroke="currentcolor"
-            stroke-width="1.75"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <path
-            class="v-checkbox-mark-dash"
-            d="M3 6h6"
-            fill="none"
-            stroke="currentcolor"
-            stroke-width="1.75"
-            stroke-linecap="round"
-          />
-        </svg>
-      </span>
+      <VCheckMark />
       <span v-if="$slots.default || label" class="v-checkbox-label v-choice-label">
         <slot>{{ label }}</slot>
       </span>
@@ -182,38 +163,6 @@ defineExpose({
 <style>
 @layer vectis.components {
   /*
-   * A pill override on --vectis-radius-interactive would otherwise turn the box into a disc,
-   * and a round checkbox reads as a radio.
-   */
-  .v-checkbox-box {
-    display: inline-grid;
-    place-items: center;
-    width: var(--vectis-control-size-check);
-    height: var(--vectis-control-size-check);
-    background: transparent;
-    border: var(--vectis-control-border-width) solid var(--vectis-color-border-strong);
-    border-radius: min(
-      var(--vectis-radius-interactive),
-      calc(var(--vectis-control-size-check) / 4)
-    );
-    color: var(--vectis-color-text-on-accent);
-    transition:
-      background-color var(--vectis-duration-fast) var(--vectis-ease-default),
-      border-color var(--vectis-duration-fast) var(--vectis-ease-default);
-  }
-
-  .v-checkbox-mark {
-    width: var(--vectis-control-size-check-mark);
-    height: var(--vectis-control-size-check-mark);
-  }
-
-  .v-checkbox-mark-check,
-  .v-checkbox-mark-dash {
-    opacity: 0;
-    transition: opacity var(--vectis-duration-fast) var(--vectis-ease-default);
-  }
-
-  /*
    * The states below weigh (0,3,0), bar the read-only base at (0,2,0), so their ORDER
    * arbitrates them: checked, read-only, invalid, then disabled last. The two hovers sit at
    * (0,7,0) and therefore beat every one of them on specificity, order or no order; which is
@@ -222,7 +171,7 @@ defineExpose({
   .v-checkbox:not([data-readonly])
     .v-choice-row:hover
     .v-checkbox-input:not(:disabled, :checked, :indeterminate, :user-invalid, [aria-invalid='true'])
-    + .v-checkbox-box {
+    + .v-check-mark {
     border-color: color-mix(
       in oklab,
       var(--vectis-color-border-strong),
@@ -230,7 +179,7 @@ defineExpose({
     );
   }
 
-  .v-checkbox-input:is(:checked, :indeterminate) + .v-checkbox-box {
+  .v-checkbox-input:is(:checked, :indeterminate) + .v-check-mark {
     background: var(--vectis-color-accent);
     border-color: var(--vectis-color-accent);
   }
@@ -241,7 +190,7 @@ defineExpose({
       :checked,
       :indeterminate
     )
-    + .v-checkbox-box {
+    + .v-check-mark {
     background: var(--vectis-color-accent-hover);
     border-color: var(--vectis-color-accent-hover);
   }
@@ -251,25 +200,25 @@ defineExpose({
    * white would vanish against the light grey of the dark theme. `:where()` keeps both rules at
    * the weight of the states they sit between.
    */
-  :where(.v-checkbox[data-readonly]) .v-checkbox-input + .v-checkbox-box {
+  :where(.v-checkbox[data-readonly]) .v-checkbox-input + .v-check-mark {
     background: var(--vectis-color-surface-sunken);
     border-color: var(--vectis-color-border);
   }
 
   :where(.v-checkbox[data-readonly])
     .v-checkbox-input:is(:checked, :indeterminate)
-    + .v-checkbox-box {
+    + .v-check-mark {
     background: var(--vectis-color-text-muted);
     border-color: var(--vectis-color-text-muted);
     color: var(--vectis-color-surface);
   }
 
-  .v-checkbox-input:user-invalid + .v-checkbox-box,
-  .v-checkbox-input[aria-invalid='true'] + .v-checkbox-box {
+  .v-checkbox-input:user-invalid + .v-check-mark,
+  .v-checkbox-input[aria-invalid='true'] + .v-check-mark {
     border-color: var(--vectis-color-danger);
   }
 
-  .v-checkbox-input:disabled + .v-checkbox-box {
+  .v-checkbox-input:disabled + .v-check-mark {
     background: var(--vectis-color-surface-muted);
     border-color: var(--vectis-color-border);
     color: var(--vectis-color-text-subtle);
@@ -280,15 +229,15 @@ defineExpose({
    * properties, so a box can be both at once. Nothing but the source order decides what such a
    * box shows: the second rule hides the tick and the dash wins.
    */
-  .v-checkbox-input:checked + .v-checkbox-box .v-checkbox-mark-check {
+  .v-checkbox-input:checked + .v-check-mark .v-check-mark-tick {
     opacity: 1;
   }
 
-  .v-checkbox-input:indeterminate + .v-checkbox-box .v-checkbox-mark-check {
+  .v-checkbox-input:indeterminate + .v-check-mark .v-check-mark-tick {
     opacity: 0;
   }
 
-  .v-checkbox-input:indeterminate + .v-checkbox-box .v-checkbox-mark-dash {
+  .v-checkbox-input:indeterminate + .v-check-mark .v-check-mark-dash {
     opacity: 1;
   }
 
@@ -302,19 +251,11 @@ defineExpose({
         :checked,
         :indeterminate
       ):not(:disabled)
-      + .v-checkbox-box {
+      + .v-check-mark {
       forced-color-adjust: none;
       background: Highlight;
       border-color: Highlight;
       color: HighlightText;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .v-checkbox-box,
-    .v-checkbox-mark-check,
-    .v-checkbox-mark-dash {
-      transition: none;
     }
   }
 }
