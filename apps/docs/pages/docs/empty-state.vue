@@ -44,5 +44,5 @@ useDocsHead('emptyState')
     <EmptyStateComponents />
   </DocsExample>
 
-  <DocsApi page="empty-state" :api="api" />
+  <DocsApi page="emptyState" :api="api" />
 </template>

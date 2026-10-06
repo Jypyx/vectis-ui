@@ -60,5 +60,5 @@ useDocsHead('treeView')
     <TreeViewEndContent />
   </DocsExample>
 
-  <DocsApi page="tree-view" :api="api" />
+  <DocsApi page="treeView" :api="api" />
 </template>

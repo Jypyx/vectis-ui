@@ -44,5 +44,5 @@ useDocsHead('numberInput')
     <NumberInputStep />
   </DocsExample>
 
-  <DocsApi page="number-input" :api="api" />
+  <DocsApi page="numberInput" :api="api" />
 </template>

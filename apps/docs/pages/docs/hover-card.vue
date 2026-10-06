@@ -52,5 +52,5 @@ useDocsHead('hoverCard')
     <HoverCardLoadOnOpen />
   </DocsExample>
 
-  <DocsApi page="hover-card" :api="api" />
+  <DocsApi page="hoverCard" :api="api" />
 </template>

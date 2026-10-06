@@ -44,5 +44,5 @@ useDocsHead('contextMenu')
     <ContextMenuOpen />
   </DocsExample>
 
-  <DocsApi page="context-menu" :api="api" />
+  <DocsApi page="contextMenu" :api="api" />
 </template>
