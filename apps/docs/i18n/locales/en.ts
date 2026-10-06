@@ -32,6 +32,7 @@ import filePicker from './en/filePicker'
 import fontFamily from './en/fontFamily'
 import home from './en/home'
 import hotkeys from './en/hotkeys'
+import hoverCard from './en/hoverCard'
 import i18n from './en/i18n'
 import icon from './en/icon'
 import iconButton from './en/iconButton'
@@ -111,6 +112,7 @@ export interface DocsMessages {
   fileInput: typeof fileInput
   filePicker: typeof filePicker
   hotkeys: typeof hotkeys
+  hoverCard: typeof hoverCard
   icon: typeof icon
   iconButton: typeof iconButton
   input: typeof input
@@ -192,6 +194,7 @@ export default defineI18nLocale((): DocsMessages => ({
   fileInput,
   filePicker,
   hotkeys,
+  hoverCard,
   icon,
   iconButton,
   input,

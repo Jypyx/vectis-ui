@@ -107,6 +107,11 @@ export { default as VSwitch } from './components/VSwitch/VSwitch.vue'
 export type { SwitchLabelPosition } from './components/VSwitch/VSwitch.vue'
 export { default as VTooltip } from './components/VTooltip/VTooltip.vue'
 export type { TooltipPlacement, TooltipTriggerProps } from './components/VTooltip/VTooltip.vue'
+export { default as VHoverCard } from './components/VHoverCard/VHoverCard.vue'
+export type {
+  HoverCardPlacement,
+  HoverCardTriggerProps,
+} from './components/VHoverCard/VHoverCard.vue'
 export { default as VMenu } from './components/VMenu/VMenu.vue'
 export type { MenuTriggerProps } from './components/VMenu/VMenu.vue'
 export type { MenuPlacement, MenuSize } from './components/VMenu/context'

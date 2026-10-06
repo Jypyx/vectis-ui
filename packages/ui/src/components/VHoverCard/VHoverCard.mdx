@@ -1,0 +1,66 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VHoverCardStories from './VHoverCard.stories'
+
+<Meta of={VHoverCardStories} />
+
+# HoverCard
+
+A card previewing what a link leads to, such as a profile behind a mention, shown when the
+pointer or the keyboard focus rests on the trigger. It is a `popover="manual"` driven by the
+component: no stable HTML primitive opens a panel on hover with a delay, and manual mode leaves
+an open menu or popover untouched. The card is anchored in CSS, like VTooltip and VPopover.
+
+The trigger comes through the scoped default slot: binding `triggerProps` on it sets
+`aria-details`. The card's content goes in the `#content` slot and may hold links and buttons.
+
+<Canvas of={VHoverCardStories.Default} />
+
+<Controls of={VHoverCardStories.Default} />
+
+## Opening and closing
+
+The card opens once the pointer has rested on the trigger for `openDelay` (500 ms), and closes
+`closeDelay` (300 ms) after the pointer has left both the trigger and the card. That second
+delay is what lets the pointer cross the gap and stay on the card to use it. Pressing the
+trigger closes the card, so it never stands over what the trigger opens.
+
+<Canvas of={VHoverCardStories.OpenOnHover} />
+
+## Keyboard
+
+Keyboard focus on the trigger opens the card after the same delay. The card follows the trigger
+in the DOM, so Tab moves into its content; it closes once the focus has left both. Escape closes
+it from anywhere on the page and hands a focus inside the card back to the trigger. A focus
+given by a click does not open it.
+
+<Canvas of={VHoverCardStories.KeyboardAccess} />
+
+## In running text
+
+The wrapper is inline, so a trigger sits in a sentence. The card is a `<span>` and its content
+mounts on first opening: a trigger inside a `<p>` still produces valid server-rendered HTML.
+
+<Canvas of={VHoverCardStories.InText} />
+
+## Loading on open
+
+`v-model:open` reports every opening, hover included, which is the moment to fetch what the card
+shows. Setting it opens or closes the card at once, without the delays.
+
+<Canvas of={VHoverCardStories.LoadOnOpen} />
+
+## Exposed methods
+
+`show()` opens the card at once, `close()` closes it, and `el` is the card element.
+
+## Accessibility
+
+- `aria-details` tells assistive technology the trigger has details, without reading the whole
+  card on every focus as `aria-describedby` would. Support varies between screen readers; the
+  DOM order still places the card right after the trigger.
+- **A tap opens nothing.** There is no hover on a touch screen, so the trigger keeps its usual
+  meaning: whatever the card shows must also be reachable at the trigger's destination.
+- Escape dismisses the card without moving the pointer (WCAG 1.4.13), and the key is spent on it:
+  inside a VDialog it does not close the dialog as well.
+- The card stays while hovered or focused, so its content can be read and used.
+- The appearance animation, shared with `.v-floating`, respects `prefers-reduced-motion`.

@@ -41,6 +41,7 @@ const nav: NavMessages = {
   'file-input': 'Champ de fichiers',
   'file-picker': 'Sélecteur de fichiers',
   hotkeys: 'Raccourcis clavier',
+  'hover-card': 'Carte de survol',
   icon: 'Icône',
   'icon-button': 'Bouton icône',
   input: 'Champ de saisie',

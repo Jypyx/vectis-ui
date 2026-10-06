@@ -65,6 +65,7 @@ export const components = [
   entry('file-input'),
   entry('file-picker'),
   entry('hotkeys'),
+  entry('hover-card'),
   entry('icon'),
   entry('icon-button'),
   entry('input'),

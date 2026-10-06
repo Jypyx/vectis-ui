@@ -128,6 +128,7 @@ const descriptions: Record<DescribedToken, string> = {
   '--vectis-control-size-toast-width': "La largeur par défaut d'un toast",
   '--vectis-control-size-tooltip-max':
     "La largeur maximale d'une infobulle avant qu'elle ne passe à la ligne (288px)",
+  '--vectis-control-size-hover-card-max': "La largeur maximale d'un VHoverCard (320px)",
   '--vectis-control-size-dialog-width':
     "La largeur par défaut de VDialog et VDialogAlert (400px), en l'absence de `width`",
   '--vectis-control-size-rating-sm': "L'icône d'un petit VRating (20px)",

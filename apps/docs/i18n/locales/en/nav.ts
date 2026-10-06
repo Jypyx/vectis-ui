@@ -43,6 +43,7 @@ const nav: NavMessages = {
   'file-input': 'File input',
   'file-picker': 'File picker',
   hotkeys: 'Hotkeys',
+  'hover-card': 'Hover card',
   icon: 'Icon',
   'icon-button': 'Icon button',
   input: 'Input',

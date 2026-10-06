@@ -320,6 +320,7 @@ export const semantic = {
     ),
     'size-toast-width': dimension('22rem', 'The default width of a toast'),
     'size-tooltip-max': dimension('18rem', 'The widest a tooltip grows before it wraps (288px)'),
+    'size-hover-card-max': dimension('20rem', 'The widest a VHoverCard grows (320px)'),
     'size-dialog-width': dimension(
       '25rem',
       'The default width of VDialog and VDialogAlert (400px), when no `width` is given',

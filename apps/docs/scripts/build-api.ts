@@ -52,6 +52,7 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
   { slug: 'file-input', components: ['VFileInput'] },
   { slug: 'file-picker', components: ['VFilePicker'] },
   { slug: 'hotkeys', components: ['VHotkeys'] },
+  { slug: 'hover-card', components: ['VHoverCard'] },
   { slug: 'icon', components: ['VIcon'] },
   { slug: 'icon-button', components: ['VIconButton'] },
   { slug: 'input', components: ['VInput'] },
