@@ -212,8 +212,9 @@ const displayTime = computed(() => {
       + :is([data-marker='icon'], [data-marker='custom'])
     )
     > .v-timeline-connector {
+    /* Halved term by term: cssnano's calc parser rejects a bracketed group inside max(). */
     margin-block-end: calc(
-      var(--vectis-space-1) + max(0px, (var(--timeline-icon) - var(--timeline-line)) / 2)
+      var(--vectis-space-1) + max(0px, var(--timeline-icon) / 2 - var(--timeline-line) / 2)
     );
   }
 

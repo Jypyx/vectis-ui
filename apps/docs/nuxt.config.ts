@@ -99,6 +99,18 @@ export default defineNuxtConfig({
     '~/assets/css/docs-layout.css',
   ],
 
+  postcss: {
+    plugins: {
+      /*
+       * cssnano's calc reduction cannot parse the channel keywords of relative colour syntax,
+       * `calc(l + 0.06)`, and warns while leaving them as written; it has nothing to reduce in
+       * the library's sheets otherwise. Left off in development, as Nuxt does by default.
+       */
+      cssnano:
+        process.env.NODE_ENV === 'development' ? false : { preset: ['default', { calc: false }] },
+    },
+  },
+
   features: {
     /**
      * Serve shared CSS files for caching instead of repeating critical styles in every
