@@ -179,10 +179,43 @@ export function useVirtualList(options: VirtualListOptions): VirtualList {
   }
 
   // @core
+  // What the observer learns reaches the reactive state on the next frame, not from inside its
+  // callback. Rendered there, the rows entering the window and the new height of the list would
+  // be resizes the browser cannot deliver in the same pass, and it reports each such pass to the
+  // page as a "ResizeObserver loop" error. Deferred, they are ordinary first observations.
+  let commitFrame = 0
+  let containerChanged = false
+  let rowsChanged = false
+
+  function scheduleCommit() {
+    if (!commitFrame) commitFrame = requestAnimationFrame(commit)
+  }
+
+  function cancelCommit() {
+    if (commitFrame) cancelAnimationFrame(commitFrame)
+    commitFrame = 0
+    containerChanged = rowsChanged = false
+  }
+
+  function commit() {
+    commitFrame = 0
+    const el = options.scrollEl.value
+    if (el) {
+      if (containerChanged) readContainer(el)
+      // Also covers a container shown again after `display: none`, which has lost its scroll
+      // position without a scroll event.
+      scrollTop.value = el.scrollTop
+    }
+    if (rowsChanged) version.value++
+    containerChanged = rowsChanged = false
+  }
+
+  // @core
   // A row above the viewport that turns out taller or shorter than assumed pushes everything
-  // in view by the difference. The scroll position follows it, so what the reader is looking at
-  // stays put; the browser's own scroll anchoring is turned off by the consumer's stylesheet
-  // (`overflow-anchor: none`), or both corrections would apply.
+  // in view by the difference. The scroll position follows it at once, before the frame is
+  // painted, so what the reader is looking at stays put; the browser's own scroll anchoring is
+  // turned off by the consumer's stylesheet (`overflow-anchor: none`), or both corrections
+  // would apply.
   function onResize(entries: ResizeObserverEntry[]) {
     const el = options.scrollEl.value
     if (!el) return
@@ -194,27 +227,20 @@ export function useVirtualList(options: VirtualListOptions): VirtualList {
     const o = offsets.value
     const top = el.scrollTop - padStart.value
     let shift = 0
-    let changed = false
     for (const entry of entries) {
       if (entry.target === el || entry.target === options.listEl?.value) {
-        readContainer(el)
-        // Shown again after `display: none`, the container has lost its scroll position without
-        // a scroll event.
-        scrollTop.value = el.scrollTop
+        containerChanged = true
         continue
       }
       if (!entry.target.isConnected) continue
       const index = indexOf.get(entry.target)
       const delta = record(entry.target, entry.borderBoxSize[0]?.blockSize ?? 0)
       if (delta === 0) continue
-      changed = true
+      rowsChanged = true
       if (index !== undefined && o[index]! < top) shift += delta
     }
-    if (changed) version.value++
-    if (shift !== 0) {
-      el.scrollTop += shift
-      scrollTop.value = el.scrollTop
-    }
+    if (shift !== 0) el.scrollTop += shift
+    if (containerChanged || rowsChanged || shift !== 0) scheduleCommit()
   }
 
   /**
@@ -272,6 +298,7 @@ export function useVirtualList(options: VirtualListOptions): VirtualList {
         el.removeEventListener('scroll', onScroll)
         observer?.disconnect()
         observer = undefined
+        cancelCommit()
       })
     },
     { flush: 'post', immediate: true },
@@ -291,7 +318,10 @@ export function useVirtualList(options: VirtualListOptions): VirtualList {
     { flush: 'post' },
   )
 
-  onBeforeUnmount(() => observed.clear())
+  onBeforeUnmount(() => {
+    observed.clear()
+    cancelCommit()
+  })
 
   async function scrollToIndex(index: number, align: ScrollLogicalPosition = 'nearest') {
     const el = options.scrollEl.value
