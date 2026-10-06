@@ -19,12 +19,5 @@ const rows = [
 </script>
 
 <template>
-  <VDataTable
-    striped
-    :columns="columns"
-    :rows="rows"
-    row-key="name"
-    title="Projects"
-    caption="Organisation projects"
-  />
+  <VDataTable striped :columns="columns" :rows="rows" row-key="name" title="Projects" />
 </template>

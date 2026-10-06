@@ -59,6 +59,7 @@ const selectionText = (count: number) => `${count} project${count > 1 ? 's' : ''
     :rows="rows"
     row-key="name"
     title="Projects"
+    subtitle="Every project in the organisation"
     searchable
     search-placeholder="Search projects"
     selectable
@@ -69,7 +70,6 @@ const selectionText = (count: number) => `${count} project${count > 1 ? 's' : ''
     :per-page="8"
     :per-page-options="[8, 16, 24]"
     show-range
-    caption="Every project in the organisation"
   >
     <template #cell-owner="{ row }">
       <span class="owner">

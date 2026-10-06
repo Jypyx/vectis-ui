@@ -51,6 +51,5 @@ const rows = NAMES.map((name, index) => ({
     :rows="rows"
     row-key="name"
     title="Projects"
-    caption="Organisation projects"
   />
 </template>

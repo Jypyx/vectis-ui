@@ -29,7 +29,6 @@ const DIRECTIONS = { asc: 'ascending', desc: 'descending' }
       :rows="rows"
       row-key="name"
       title="Projects"
-      caption="Organisation projects"
     />
     <p class="state">
       Sorted by {{ sort ? `${sort.key}, ${DIRECTIONS[sort.direction]}` : 'nothing' }}

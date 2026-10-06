@@ -54,6 +54,5 @@ const perPage = ref(5)
     title="Projects"
     :per-page-options="[5, 10, 25]"
     show-range
-    caption="Organisation projects"
   />
 </template>

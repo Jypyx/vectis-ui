@@ -18,13 +18,7 @@ const rows = [
 </script>
 
 <template>
-  <VDataTable
-    :columns="columns"
-    :rows="rows"
-    row-key="name"
-    title="Projects"
-    caption="Organisation projects"
-  >
+  <VDataTable :columns="columns" :rows="rows" row-key="name" title="Projects">
     <template #head-updated="{ column }">
       <span class="heading"><VIcon :name="schedule" :size="16" />{{ column.label }}</span>
     </template>

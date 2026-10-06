@@ -51,6 +51,5 @@ const rows = NAMES.map((name, index) => ({
     searchable
     :per-page="6"
     show-range
-    caption="Organisation projects"
   />
 </template>

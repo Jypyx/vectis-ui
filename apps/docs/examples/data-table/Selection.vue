@@ -35,7 +35,6 @@ const selectRowLabel = (row: Project) => `Select ${row.name}`
       selectable
       :select-row-label="selectRowLabel"
       select-all-label="Select every project on this page"
-      caption="Organisation projects"
     />
     <p class="state">Selected: {{ selected.length ? selected.join(', ') : 'nothing' }}</p>
   </div>

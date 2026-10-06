@@ -18,9 +18,9 @@ const country = ref('')
 
 <template>
   <div class="stack">
-    <VDataTable :columns="COLUMNS" :rows="[]" empty-text="No orders" />
+    <VDataTable :columns="COLUMNS" :rows="[]" title="Orders" empty-text="No orders" />
 
-    <VDataTable :columns="COLUMNS" :rows="[]">
+    <VDataTable :columns="COLUMNS" :rows="[]" title="Orders">
       <template #empty>
         <VEmptyState
           size="sm"

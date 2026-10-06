@@ -49,12 +49,12 @@ describe('VDataTable', () => {
     vi.useRealTimers()
   })
 
-  it('renders a caption and th scope=col', () => {
-    const { container, getByText } = render(VDataTable, {
-      props: { columns: COLUMNS, rows: ROWS, caption: 'Projects' },
+  it('renders th scope=col and no caption', () => {
+    const { container } = render(VDataTable, {
+      props: { columns: COLUMNS, rows: ROWS, title: 'Projects' },
     })
-    expect(getByText('Projects').tagName).toBe('CAPTION')
     expect(container.querySelector('th')?.getAttribute('scope')).toBe('col')
+    expect(container.querySelector('caption')).toBeNull()
   })
 
   it('variant: data-variant set on the root, flat by default', () => {
@@ -160,19 +160,53 @@ describe('VDataTable', () => {
     expect(queryByRole('status')).toBeNull()
   })
 
-  it('puts the #title slot where the title prop goes', () => {
+  it('shows the subtitle under the title, in the header', () => {
+    const { container } = render(VDataTable, {
+      props: { columns: COLUMNS, rows: ROWS, title: 'Projects', subtitle: 'All of them' },
+    })
+    const header = container.querySelector('.v-data-table-header') as HTMLElement
+    expect(header.querySelector('.v-data-table-title')?.textContent?.trim()).toBe('Projects')
+    expect(header.querySelector('.v-data-table-subtitle')?.textContent?.trim()).toBe('All of them')
+  })
+
+  it('replaces the title and subtitle with the #header slot, keeping the search', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
     const Harness = harness(
       () => ({ columns: COLUMNS, rows: ROWS }),
       `
-        <VDataTable :columns="columns" :rows="rows" title="Ignored">
-          <template #title><strong>Projects</strong></template>
+        <VDataTable :columns="columns" :rows="rows" title="Ignored" subtitle="Ignored too" searchable>
+          <template #header><strong>Projects</strong></template>
         </VDataTable>
       `,
     )
     const { container } = render(Harness)
-    const title = container.querySelector('.v-data-table-title') as HTMLElement
-    expect(title.querySelector('strong')?.textContent).toBe('Projects')
-    expect(title.textContent).not.toContain('Ignored')
+    const header = container.querySelector('.v-data-table-header') as HTMLElement
+    expect(header.querySelector('strong')?.textContent).toBe('Projects')
+    expect(header.textContent).not.toContain('Ignored')
+    expect(header.querySelector('input[type="search"]')).toBeTruthy()
+  })
+
+  it('renders the #toolbar slot in a row between the header and the table', () => {
+    const Harness = harness(
+      () => ({ columns: COLUMNS, rows: ROWS }),
+      `
+        <VDataTable :columns="columns" :rows="rows" title="Projects">
+          <template #toolbar><button>New project</button></template>
+        </VDataTable>
+      `,
+    )
+    const { container } = render(Harness)
+    const toolbar = container.querySelector('.v-data-table-toolbar') as HTMLElement
+    expect(toolbar.querySelector('button')?.textContent).toBe('New project')
+    expect(toolbar.previousElementSibling?.classList.contains('v-data-table-header')).toBe(true)
+    expect(toolbar.nextElementSibling?.classList.contains('v-data-table-scroller')).toBe(true)
+  })
+
+  it('renders no toolbar row without the #toolbar slot', () => {
+    const { container } = render(VDataTable, {
+      props: { columns: COLUMNS, rows: ROWS, title: 'Projects' },
+    })
+    expect(container.querySelector('.v-data-table-toolbar')).toBeNull()
   })
 
   it('custom cell (with the column scope) and header slots', () => {
@@ -635,7 +669,7 @@ describe('VDataTable', () => {
   })
 
   describe('accessibility', () => {
-    it('is named by its title when it has no caption', () => {
+    it('is named by its title', () => {
       const { container } = render(VDataTable, {
         props: { columns: COLUMNS, rows: ROWS, title: 'Projects' },
       })
@@ -645,13 +679,46 @@ describe('VDataTable', () => {
       expect(container.querySelector(`[id="${id}"]`)?.textContent?.trim()).toBe('Projects')
     })
 
-    it('leaves the naming to a caption, or to the consumer', () => {
-      const withCaption = render(VDataTable, {
-        props: { columns: COLUMNS, rows: ROWS, title: 'Projects', caption: 'All projects' },
+    it('is described by its subtitle, unless the consumer describes it', () => {
+      const { container } = render(VDataTable, {
+        props: { columns: COLUMNS, rows: ROWS, title: 'Projects', subtitle: 'All of them' },
       })
-      expect(withCaption.container.querySelector('table')?.hasAttribute('aria-labelledby')).toBe(
-        false,
+      const id = container.querySelector('table')?.getAttribute('aria-describedby')
+      expect(container.querySelector(`[id="${id}"]`)?.textContent?.trim()).toBe('All of them')
+
+      const own = render(VDataTable, {
+        props: { columns: COLUMNS, rows: ROWS, title: 'Projects', subtitle: 'All of them' },
+        attrs: { 'aria-describedby': 'mine' },
+      })
+      expect(own.container.querySelector('table')?.getAttribute('aria-describedby')).toBe('mine')
+    })
+
+    it('leaves the naming to the consumer when the #header slot replaces the title', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const Harness = harness(
+        () => ({ columns: COLUMNS, rows: ROWS }),
+        `
+          <VDataTable :columns="columns" :rows="rows" title="Projects" subtitle="All of them">
+            <template #header><strong>Projects</strong></template>
+          </VDataTable>
+        `,
       )
+      const table = render(Harness).container.querySelector('table')
+      expect(table?.hasAttribute('aria-labelledby')).toBe(false)
+      expect(table?.hasAttribute('aria-describedby')).toBe(false)
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('no accessible name'))
+    })
+
+    it('does not warn once the consumer names the table', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      render(VDataTable, {
+        props: { columns: COLUMNS, rows: ROWS },
+        attrs: { 'aria-label': 'Mine' },
+      })
+      expect(warn).not.toHaveBeenCalled()
+    })
+
+    it('leaves the naming to the consumer', () => {
       const withLabel = render(VDataTable, {
         props: { columns: COLUMNS, rows: ROWS, title: 'Projects' },
         attrs: { 'aria-label': 'Mine' },

@@ -43,7 +43,7 @@ function loadMore() {
     row-key="id"
     :loading="loading"
     :has-more="hasMore"
-    caption="Activity"
+    title="Activity"
     @load-more="loadMore"
   />
 </template>

@@ -10,14 +10,7 @@ const columns = [
 
 <template>
   <div class="stack">
-    <VDataTable
-      loading
-      variant="outlined"
-      :columns="columns"
-      :rows="[]"
-      title="Loading"
-      caption="Projects being loaded"
-    />
+    <VDataTable loading variant="outlined" :columns="columns" :rows="[]" title="Loading" />
 
     <VDataTable
       variant="outlined"
@@ -25,7 +18,6 @@ const columns = [
       :rows="[]"
       empty-text="No project yet"
       title="Nothing to show"
-      caption="Projects, none of them"
     />
   </div>
 </template>

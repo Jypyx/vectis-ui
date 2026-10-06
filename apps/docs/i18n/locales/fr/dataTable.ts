@@ -23,8 +23,8 @@ export default {
       text: '<code>selectable</code> ajoute des cases par ligne et une case pour la page. Fournissez un <code>rowKey</code> stable ; <code>v-model:selected</code> contient ces identifiants.',
     },
     toolbar: {
-      title: "Barre d'outils",
-      text: 'Le slot <code>title</code> remplace le titre de la barre d’outils ; la recherche reste de l’autre côté.',
+      title: "En-tête et barre d'outils",
+      text: '<code>subtitle</code> décrit le tableau sous son titre. Le slot <code>toolbar</code> ajoute une rangée d’actions et de filtres entre l’en-tête et le tableau. Le slot <code>header</code> remplace le titre et le sous-titre ; nommez alors le tableau avec <code>aria-label</code>.',
     },
     customCells: {
       title: 'Cellules personnalisées',
@@ -52,7 +52,7 @@ export default {
     },
     fullHeight: {
       title: 'Pleine hauteur',
-      text: '<code>height</code> limite tout le composant, barre d’outils et pied compris. Les nombres utilisent des pixels ; les chaînes, des longueurs CSS.',
+      text: '<code>height</code> limite tout le composant, en-tête, barre d’outils et pied compris. Les nombres utilisent des pixels ; les chaînes, des longueurs CSS.',
     },
     serverSide: {
       title: 'Côté serveur',
@@ -82,15 +82,16 @@ export default {
         rows: 'Lignes à afficher.',
         rowKey:
           'Champ d’identifiant stable des lignes. Requis pour la sélection ; sinon, la position est utilisée.',
-        caption: 'Description du tableau annoncée par les technologies d’assistance.',
         variant: 'Tableau sans cadre ou avec bordure.',
         loading: 'Affiche le contenu de chargement à la place des lignes.',
         loadingText: 'Texte de chargement visible. Utilise le dictionnaire par défaut.',
         emptyText:
           'Titre du <code>VEmptyState</code> affiché pour les résultats vides. Utilise par défaut le dictionnaire, qui distingue l’absence de données d’une recherche sans résultat.',
         title:
-          'Titre de la barre d’outils. Nomme aussi le tableau si aucune légende n’est fournie.',
-        searchable: 'Ajoute un champ de recherche dans la barre d’outils.',
+          'Titre de l’en-tête. Nomme aussi le tableau, sauf si le slot <code>header</code> le remplace.',
+        subtitle:
+          'Ligne sous le titre. Décrit aussi le tableau pour les technologies d’assistance.',
+        searchable: 'Ajoute un champ de recherche dans l’en-tête.',
         searchPlaceholder: 'Texte indicatif de recherche. Utilise le dictionnaire par défaut.',
         searchLabel: 'Nom accessible du champ de recherche. Utilise le dictionnaire par défaut.',
         searchDebounce:
@@ -139,7 +140,9 @@ export default {
           'Changements de requête en mode serveur : recherche, tri, page et taille de page. Non émis au montage ni pour une valeur inchangée.',
       },
       slots: {
-        title: 'Contenu remplaçant le titre de la barre d’outils.',
+        header:
+          'Contenu remplaçant le titre et le sous-titre. La recherche reste à côté ; nommez le tableau avec <code>aria-label</code>.',
+        toolbar: 'Rangée entre l’en-tête et le tableau, pour les actions et les filtres.',
         loading: 'Contenu remplaçant l’indicateur et le texte de chargement.',
         empty:
           'Contenu des résultats vides, à la place du <code>VEmptyState</code> par défaut. Reçoit la <code>search</code> actuelle.',

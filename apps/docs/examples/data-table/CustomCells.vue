@@ -19,13 +19,7 @@ const numbers = new Intl.NumberFormat('en-GB')
 </script>
 
 <template>
-  <VDataTable
-    :columns="columns"
-    :rows="rows"
-    row-key="name"
-    title="Projects"
-    caption="Organisation projects"
-  >
+  <VDataTable :columns="columns" :rows="rows" row-key="name" title="Projects">
     <template #cell-owner="{ row }">
       <span class="owner">
         <VAvatar :name="row.owner" size="xs" />

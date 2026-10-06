@@ -5,7 +5,7 @@ import * as VDataTableStories from './VDataTable.stories'
 
 # DataTable
 
-A data table in strictly semantic HTML (`<table>`, `caption`, `scope`, `aria-sort`), composed of
+A data table in strictly semantic HTML (`<table>`, `scope`, `aria-sort`), composed of
 the design system's bricks: `VInput` for the search, `VCheckbox` for the selection, `VMenu` +
 `VButton` for the rows per page, `VPagination` for the footer. The whole local machinery (filtering
 → sorting → pagination) is a chain of pure derivations; a server mode short-circuits it entirely.
@@ -33,12 +33,24 @@ Overriding only one leaves the other two at their default.
 
 ## Header and search
 
-`title` (or the `#title` slot, which wins) fills the left zone of the global header; `searchable`
-displays a clearable search-type `VInput` on the right, bound to `v-model:search`. The local filter
+`title` fills the left zone of the header, with `subtitle` under it to say what the table holds.
+The `#header` slot replaces both with content of your own. `searchable` displays a clearable
+search-type `VInput` on the right, bound to `v-model:search`, whether or not a title stands beside
+it. The local filter
 is case- and accent-insensitive and only walks the **declared columns** — never the rows' other
 fields. A change of term returns to page 1.
 
 <Canvas of={VDataTableStories.Search} />
+
+## Toolbar
+
+The `#toolbar` slot adds a row between the header and the table, for actions and filters that
+apply to it. The row only exists when the slot is used; it wraps its content and spaces it out,
+and takes the frame's gutter in `outlined`.
+
+<Canvas of={VDataTableStories.HeaderAndToolbar} />
+
+<Canvas of={VDataTableStories.CustomHeader} />
 
 ## Pagination
 
@@ -101,8 +113,8 @@ it is loading. It works with or without `virtual`.
 `variant` drives the table's frame, on the scale shared with `VAccordion` and `VTabs`. `flat` (the
 default) adds no border and no background: the table sits bare, its header, rules and footer flush
 with the host container, and only the scrolling area rounds its corners, so the tinted heading and
-rows follow the surface radius. `outlined` encloses it in a surface of its own, rounded and ringed by a rule; the title
-bar, the caption and the footer then take the frame's gutter, aligned on the cells' padding — their
+rows follow the surface radius. `outlined` encloses it in a surface of its own, rounded and ringed by a rule; the header,
+the toolbar and the footer then take the frame's gutter, aligned on the cells' padding — their
 content lines up exactly with the first column's text and follows `compact`. Only the table keeps
 scrolling edge to edge.
 
@@ -144,7 +156,9 @@ wrapped onto two lines.
 
 ## Slots
 
-- `#title`: the left zone of the global header (wins over `title`).
+- `#header`: the left zone of the header, in place of `title` and `subtitle`. The search stays
+  beside it.
+- `#toolbar`: a row between the header and the table, for actions and filters.
 - `#loading`: what the table shows while `loading` is set, in place of the spinner and the
   `loadingText` beside it.
 - `#empty` (scope: `{ search }`): what the table shows when no row is left, in place of the
@@ -161,9 +175,11 @@ wrapped onto two lines.
 
 ## Accessibility
 
-- A native table: `caption` (a dedicated prop), `scope="col"` on the headers, `aria-sort` set on the
-  sorted `<th>`; the sort trigger is a real `<button>`. Without a caption, the `title` names the
-  table through `aria-labelledby`, unless you name it yourself.
+- A native table: `scope="col"` on the headers, `aria-sort` set on the sorted `<th>`; the sort
+  trigger is a real `<button>`. The `title` names the table through `aria-labelledby` and the
+  `subtitle` describes it through `aria-describedby`, unless you name or describe it yourself.
+- The `#header` slot replaces the title, which then no longer names the table: pass `aria-label`
+  or `aria-labelledby`. A table left without a name is reported in development.
 - The attributes passed through fallthrough (`aria-describedby`, `id`…) land on the `<table>`;
   `class` and `style` stay on the root.
 - A selected row: a `data-selected` marker and **not** `aria-selected` — that attribute is invalid on

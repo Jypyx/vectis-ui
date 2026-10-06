@@ -16,14 +16,7 @@ const rows = [
 
 <template>
   <div class="stack">
-    <VDataTable
-      :columns="columns"
-      :rows="rows"
-      row-key="name"
-      title="Flat"
-      searchable
-      caption="Organisation projects, flat"
-    />
+    <VDataTable :columns="columns" :rows="rows" row-key="name" title="Flat" searchable />
 
     <VDataTable
       variant="outlined"
@@ -32,7 +25,6 @@ const rows = [
       row-key="name"
       title="Outlined"
       searchable
-      caption="Organisation projects, outlined"
     />
   </div>
 </template>

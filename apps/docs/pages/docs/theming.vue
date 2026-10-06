@@ -50,7 +50,7 @@ const themeAttrCode = `<!-- No attribute at all is the light theme -->
 
 const themeScopeCode = `<!-- Use a dark theme for the aside. -->
 <main data-theme="light">
-  <VDataTable :columns="columns" :rows="rows" />
+  <VDataTable :columns="columns" :rows="rows" title="Projects" />
 
   <aside data-theme="dark">
     <VButton tone="accent">Deploy</VButton>

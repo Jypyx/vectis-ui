@@ -93,7 +93,6 @@ onMounted(() => load({ page: 1, perPage: 5, sortKey: null, sortDirection: null, 
     :per-page="5"
     :per-page-options="[5, 10]"
     show-range
-    caption="Organisation projects, a page at a time"
     @update:params="load"
   />
 </template>

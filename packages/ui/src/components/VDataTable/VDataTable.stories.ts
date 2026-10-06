@@ -4,6 +4,7 @@ import type { Component } from 'vue'
 import { computed, ref } from 'vue'
 
 import { storyText } from '../../stories/storyText'
+import VButton from '../VButton/VButton.vue'
 import VChip from '../VChip/VChip.vue'
 import VTypography from '../VTypography/VTypography.vue'
 import VDataTableSfc from './VDataTable.vue'
@@ -21,6 +22,9 @@ const t = storyText({
     archived: 'archived',
     projects: 'Projects',
     orgProjects: 'Organization projects',
+    orgProjectsSubtitle: 'Every project of the organization, active or archived.',
+    activeOnly: 'Active only',
+    newProject: 'New project',
     selection: 'Selection',
     none: 'none',
     projectsDash: (variant: string) => `Projects — ${variant}`,
@@ -37,6 +41,9 @@ const t = storyText({
     archived: 'archivé',
     projects: 'Projets',
     orgProjects: "Projets de l'organisation",
+    orgProjectsSubtitle: "Tous les projets de l'organisation, actifs ou archivés.",
+    activeOnly: 'Actifs seulement',
+    newProject: 'Nouveau projet',
     selection: 'Sélection',
     none: 'aucune',
     projectsDash: (variant: string) => `Projets — ${variant}`,
@@ -114,7 +121,7 @@ export const Default: Story = {
     components: { VDataTable },
     setup: () => ({ args, t, columns, rows }),
     template:
-      '<VDataTable v-bind="args" :columns="columns" :rows="rows" :caption="t.orgProjects" style="width: 640px" />',
+      '<VDataTable v-bind="args" :columns="columns" :rows="rows" :title="t.orgProjects" style="width: 640px" />',
   }),
 }
 
@@ -123,7 +130,7 @@ export const Sorting: Story = {
     components: { VDataTable },
     setup: () => ({ args, t, columns, rows }),
     template:
-      '<VDataTable v-bind="args" :columns="columns" :rows="rows" :caption="t.orgProjects" style="width: 640px" />',
+      '<VDataTable v-bind="args" :columns="columns" :rows="rows" :title="t.orgProjects" style="width: 640px" />',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -142,7 +149,7 @@ export const Sorting: Story = {
   },
 }
 
-/** The global header: the title on the left (the `title` prop or the #title slot), the search on the right. */
+/** The header: the title on the left, the search on the right. */
 export const Search: Story = {
   args: { searchable: true },
   render: (args) => ({
@@ -176,13 +183,70 @@ export const Search: Story = {
 }
 
 /** The footer: rows per page, "X–Y of Z" then the VPagination, grouped on the right. */
+/**
+ * `subtitle` under the title, which describes the table; the `#toolbar` slot adds a row of
+ * actions and filters between the header and the table.
+ */
+export const HeaderAndToolbar: Story = {
+  args: { searchable: true },
+  render: (args) => ({
+    components: { VDataTable, VButton },
+    setup: () => {
+      const activeOnly = ref(false)
+      const shown = computed(() =>
+        activeOnly.value ? rows.value.filter((row) => row.status === t.value.active) : rows.value,
+      )
+      return { args, t, columns, shown, activeOnly }
+    },
+    template: `
+      <VDataTable v-bind="args" :columns="columns" :rows="shown" :title="t.orgProjects"
+        :subtitle="t.orgProjectsSubtitle" style="width: 640px">
+        <template #toolbar>
+          <VButton variant="outline" tone="neutral" size="sm" :aria-pressed="activeOnly"
+            @click="activeOnly = !activeOnly">{{ t.activeOnly }}</VButton>
+          <VButton size="sm">{{ t.newProject }}</VButton>
+        </template>
+      </VDataTable>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const table = canvas.getByRole('table', { name: 'Organization projects' })
+    await expect(table).toHaveAccessibleDescription(
+      'Every project of the organization, active or archived.',
+    )
+    await userEvent.click(canvas.getByRole('button', { name: 'Active only' }))
+    await waitFor(() => {
+      expect(canvasElement.querySelectorAll('tbody tr').length).toBe(3)
+    })
+  },
+}
+
+/** The `#header` slot replaces the title and subtitle; the table is then named with `aria-label`. */
+export const CustomHeader: Story = {
+  args: { searchable: true },
+  render: (args) => ({
+    components: { VDataTable, VChip },
+    setup: () => ({ args, t, columns, rows }),
+    template: `
+      <VDataTable v-bind="args" :columns="columns" :rows="rows" :aria-label="t.orgProjects"
+        style="width: 640px">
+        <template #header>
+          <strong>{{ t.orgProjects }}</strong>
+          <VChip tone="neutral">{{ rows.length }}</VChip>
+        </template>
+      </VDataTable>
+    `,
+  }),
+}
+
 export const LocalPagination: Story = {
   args: { showRange: true },
   render: (args) => ({
     components: { VDataTable },
-    setup: () => ({ args, columns, rows: manyRows, perPage: ref(5), page: ref(1) }),
+    setup: () => ({ args, t, columns, rows: manyRows, perPage: ref(5), page: ref(1) }),
     template: `
-      <VDataTable v-bind="args" :columns="columns" :rows="rows" v-model:per-page="perPage" v-model:page="page"
+      <VDataTable v-bind="args" :title="t.projects" :columns="columns" :rows="rows" v-model:per-page="perPage" v-model:page="page"
         :per-page-options="[5, 10, 20]" style="width: 760px" />
     `,
   }),
@@ -207,9 +271,9 @@ export const RowsPerPage: Story = {
   args: { showRange: true },
   render: (args) => ({
     components: { VDataTable },
-    setup: () => ({ args, columns, rows: manyRows, perPage: ref(5), page: ref(2) }),
+    setup: () => ({ args, t, columns, rows: manyRows, perPage: ref(5), page: ref(2) }),
     template: `
-      <VDataTable v-bind="args" :columns="columns" :rows="rows" v-model:per-page="perPage" v-model:page="page"
+      <VDataTable v-bind="args" :title="t.projects" :columns="columns" :rows="rows" v-model:per-page="perPage" v-model:page="page"
         :per-page-options="[5, 10, 20]" style="width: 760px" />
     `,
   }),
@@ -241,7 +305,7 @@ export const Selection: Story = {
       perPage: ref(5),
     }),
     template: `
-      <VDataTable v-bind="args" :columns="columns" :rows="rows" v-model:selected="selected" v-model:per-page="perPage"
+      <VDataTable v-bind="args" :title="t.projects" :columns="columns" :rows="rows" v-model:selected="selected" v-model:per-page="perPage"
         :per-page-options="[5, 10]" style="width: 760px" />
       <VTypography tone="muted" style="margin-block-start: 8px">
         {{ t.selection }}: {{ selected.length ? selected.join(', ') : t.none }}
@@ -303,7 +367,7 @@ export const CustomCells: Story = {
     components: { VDataTable, VChip },
     setup: () => ({ args, t, columns, rows }),
     template: `
-      <VDataTable v-bind="args" :columns="columns" :rows="rows" :caption="t.orgProjects" style="width: 640px">
+      <VDataTable v-bind="args" :columns="columns" :rows="rows" :title="t.orgProjects" style="width: 640px">
         <template #cell-status="{ value }">
           <VChip :tone="value === t.active ? 'success' : 'neutral'">{{ value }}</VChip>
         </template>
@@ -318,7 +382,7 @@ export const CustomHeaders: Story = {
     components: { VDataTable },
     setup: () => ({ args, t, columns, rows }),
     template: `
-      <VDataTable v-bind="args" :columns="columns" :rows="rows" :caption="t.orgProjects" style="width: 640px">
+      <VDataTable v-bind="args" :columns="columns" :rows="rows" :title="t.orgProjects" style="width: 640px">
         <template #head-commits="{ column }">
           <span>{{ column.label }} {{ t.last30Days }}</span>
         </template>
@@ -375,14 +439,15 @@ export const Compact: Story = {
 
 /**
  * A frozen header: it assumes a bounded scroll area; here through `height`, which bounds the
- * whole component (the toolbar and the pagination included).
+ * whole component (the header and the pagination included).
  */
 export const StickyHeader: Story = {
   args: { stickyHeader: true, height: 320 },
   render: (args) => ({
     components: { VDataTable },
-    setup: () => ({ args, columns, rows: manyRows }),
-    template: '<VDataTable v-bind="args" :columns="columns" :rows="rows" style="width: 640px" />',
+    setup: () => ({ args, t, columns, rows: manyRows }),
+    template:
+      '<VDataTable v-bind="args" :title="t.projects" :columns="columns" :rows="rows" style="width: 640px" />',
   }),
 }
 
@@ -406,7 +471,7 @@ export const Virtual: Story = {
       return { args, t, columns, rows: generated }
     },
     template:
-      '<VDataTable v-bind="args" :columns="columns" :rows="rows" :caption="t.orgProjects" style="width: 640px" />',
+      '<VDataTable v-bind="args" :columns="columns" :rows="rows" :title="t.orgProjects" style="width: 640px" />',
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -463,12 +528,13 @@ export const InfiniteScroll: Story = {
         }, 400)
       }
       const hasMore = computed(() => loaded.value.length < 150)
-      return { args, columns, loaded, loading, hasMore, onLoadMore }
+      return { args, t, columns, loaded, loading, hasMore, onLoadMore }
     },
     template: `
       <div style="display: grid; gap: 8px; width: 640px">
         <VDataTable
           v-bind="args"
+          :title="t.projects"
           :columns="columns"
           :rows="loaded"
           :loading="loading"
@@ -537,8 +603,9 @@ export const Striped: Story = {
   args: { striped: true },
   render: (args) => ({
     components: { VDataTable },
-    setup: () => ({ args, columns, rows: computed(() => manyRows.value.slice(0, 8)) }),
-    template: '<VDataTable v-bind="args" :columns="columns" :rows="rows" style="width: 640px" />',
+    setup: () => ({ args, t, columns, rows: computed(() => manyRows.value.slice(0, 8)) }),
+    template:
+      '<VDataTable v-bind="args" :title="t.projects" :columns="columns" :rows="rows" style="width: 640px" />',
   }),
 }
 
@@ -598,7 +665,7 @@ export const Loading: Story = {
     components: { VDataTable },
     setup: () => ({ args, t, columns, rows }),
     template:
-      '<VDataTable v-bind="args" :columns="columns" :rows="rows" :caption="t.orgProjects" style="width: 640px" />',
+      '<VDataTable v-bind="args" :columns="columns" :rows="rows" :title="t.orgProjects" style="width: 640px" />',
   }),
 }
 
@@ -607,6 +674,6 @@ export const Empty: Story = {
     components: { VDataTable },
     setup: () => ({ args, t, columns }),
     template:
-      '<VDataTable v-bind="args" :columns="columns" :rows="[]" :empty-text="t.noProjectYet" style="width: 640px" />',
+      '<VDataTable v-bind="args" :title="t.projects" :columns="columns" :rows="[]" :empty-text="t.noProjectYet" style="width: 640px" />',
   }),
 }

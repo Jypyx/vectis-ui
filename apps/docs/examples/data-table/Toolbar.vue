@@ -31,41 +31,30 @@ const filtered = computed(() =>
     :rows="filtered"
     row-key="name"
     searchable
-    caption="Organisation projects"
+    title="Projects"
+    subtitle="Every project in the organisation"
   >
-    <template #title>
-      <div class="toolbar">
-        <span>Projects</span>
-        <VMenu match-trigger>
-          <template #trigger="{ triggerProps }">
-            <VButton
-              v-bind="triggerProps"
-              variant="outline"
-              tone="neutral"
-              size="sm"
-              :icon-end="expandMore"
-            >
-              Status: {{ status }}
-            </VButton>
-          </template>
-          <VMenuItem
-            v-for="option in ['All', 'Active', 'Archived']"
-            :key="option"
-            :label="option"
-            @select="status = option"
-          />
-        </VMenu>
-        <VButton size="sm">New project</VButton>
-      </div>
+    <template #toolbar>
+      <VMenu match-trigger>
+        <template #trigger="{ triggerProps }">
+          <VButton
+            v-bind="triggerProps"
+            variant="outline"
+            tone="neutral"
+            size="sm"
+            :icon-end="expandMore"
+          >
+            Status: {{ status }}
+          </VButton>
+        </template>
+        <VMenuItem
+          v-for="option in ['All', 'Active', 'Archived']"
+          :key="option"
+          :label="option"
+          @select="status = option"
+        />
+      </VMenu>
+      <VButton size="sm">New project</VButton>
     </template>
   </VDataTable>
 </template>
-
-<style scoped>
-.toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--vectis-space-3);
-}
-</style>

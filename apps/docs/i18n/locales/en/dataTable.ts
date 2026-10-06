@@ -23,8 +23,8 @@ export default {
       text: '<code>selectable</code> adds row checkboxes and a page-wide checkbox. Provide a stable <code>rowKey</code>; <code>v-model:selected</code> contains those identifiers.',
     },
     toolbar: {
-      title: 'Toolbar',
-      text: 'The <code>title</code> slot replaces the toolbar title; search remains on the other side.',
+      title: 'Header and toolbar',
+      text: '<code>subtitle</code> describes the table under its title. The <code>toolbar</code> slot adds a row for actions and filters between the header and the table. The <code>header</code> slot replaces the title and subtitle; name the table with <code>aria-label</code> then.',
     },
     customCells: {
       title: 'Custom cells',
@@ -52,7 +52,7 @@ export default {
     },
     fullHeight: {
       title: 'Full height',
-      text: '<code>height</code> bounds the whole component, including toolbar and footer. Numbers use pixels; strings use CSS lengths.',
+      text: '<code>height</code> bounds the whole component, including header, toolbar and footer. Numbers use pixels; strings use CSS lengths.',
     },
     serverSide: {
       title: 'Server side',
@@ -82,14 +82,15 @@ export default {
         rows: 'Rows to display.',
         rowKey:
           'Stable row identifier field. Required for selection; otherwise row position is used.',
-        caption: 'Table description announced by assistive technology.',
         variant: 'Unframed or outlined table.',
         loading: 'Displays loading content instead of rows.',
         loadingText: 'Visible loading text. Defaults to the dictionary.',
         emptyText:
           'Title of the <code>VEmptyState</code> shown for empty results. Defaults to the dictionary, which distinguishes no data from a search without results.',
-        title: 'Toolbar title. Also names the table when no caption is provided.',
-        searchable: 'Adds a toolbar search field.',
+        title:
+          'Header title. Also names the table, unless the <code>header</code> slot replaces it.',
+        subtitle: 'Line under the title. Also describes the table for assistive technology.',
+        searchable: 'Adds a search field to the header.',
         searchPlaceholder: 'Search placeholder. Defaults to the dictionary.',
         searchLabel: 'Accessible search field name. Defaults to the dictionary.',
         searchDebounce: 'Server search delay in milliseconds. 0 requests immediately.',
@@ -136,7 +137,9 @@ export default {
           'Server-mode query changes: search, sort, page and page size. Does not fire on mount or for unchanged values.',
       },
       slots: {
-        title: 'Content replacing the toolbar title.',
+        header:
+          'Content replacing the title and subtitle. The search stays beside it; name the table with <code>aria-label</code>.',
+        toolbar: 'Row between the header and the table, for actions and filters.',
         loading: 'Content replacing the loading spinner and text.',
         empty:
           'Empty-result content, replacing the default <code>VEmptyState</code>. Receives the current <code>search</code>.',

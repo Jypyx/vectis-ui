@@ -135,11 +135,6 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   /** Which field identifies a row. */
   rowKey?: string
   /**
-   * A sentence describing what the table holds. It is announced before the table itself,
-   * and is what tells a screen reader user whether it is worth exploring.
-   */
-  caption?: string
-  /**
    * How the table is framed: nothing at all, or a card with a raised background, a border
    * and rounded corners.
    */
@@ -156,9 +151,17 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
    * system dictionary, which words a table with no data and a search with no match differently.
    */
   emptyText?: string
-  /** A title above the table, on the left of its toolbar. */
+  /**
+   * A title above the table, which also names it for assistive technology. It is ignored when
+   * the `#header` slot replaces the title and subtitle.
+   */
   title?: string
-  /** Adds a search field to the toolbar. */
+  /**
+   * A line under the title saying what the table holds. It also describes the table for
+   * assistive technology.
+   */
+  subtitle?: string
+  /** Adds a search field to the header. */
   searchable?: boolean
   /** What that field says while empty. It falls back to the design system dictionary. */
   searchPlaceholder?: string
@@ -183,7 +186,7 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   /** Tightens the cells by one step, and everything the table renders with them. */
   compact?: boolean
   /**
-   * The height of the whole component, toolbar and pagination included: a number is read as
+   * The height of the whole component, header, toolbar and pagination included: a number is read as
    * pixels, anything else as a CSS length. Left out, the table takes its parent's height
    * whenever the parent has one.
    */
@@ -249,12 +252,12 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
 
 const props = withDefaults(defineProps<DataTableProps<Row>>(), {
   rowKey: undefined,
-  caption: undefined,
   variant: 'flat',
   loading: false,
   loadingText: undefined,
   emptyText: undefined,
   title: undefined,
+  subtitle: undefined,
   searchable: false,
   searchPlaceholder: undefined,
   searchLabel: undefined,
@@ -329,8 +332,13 @@ defineSlots<{
   [name: `cell-${string}`]: (scope: DataTableCellSlotProps<Row>) => unknown
   /** What a column's heading shows: a slot named after that column's key. */
   [name: `head-${string}`]: (scope: DataTableHeadSlotProps) => unknown
-  /** The left side of the toolbar, replacing the `title` prop. */
-  title?(): unknown
+  /**
+   * Replaces the title and subtitle with content of your own; the search field stays beside it.
+   * Name the table with `aria-label` or `aria-labelledby` then.
+   */
+  header?(): unknown
+  /** A row between the header and the table, for actions and filters. */
+  toolbar?(): unknown
   /** What the table shows while its rows are loading, replacing the spinner and its text. */
   loading?(): unknown
   /**
@@ -357,22 +365,25 @@ defineExpose({
 
 // @a11y
 /*
- * A caption already does, and so does a consumer's own `aria-label` or `aria-labelledby`, which
- * a reference to the title would override. Bound before the forwarded attributes, like every
- * state the component owns.
+ * The title names the table unless the `#header` slot replaced it, or the consumer named the
+ * table, whose own `aria-label` a reference to the title would override. Bound before the
+ * forwarded attributes, like every state the component owns.
  */
 const titleId = useId()
+const subtitleId = useId()
+const namedByConsumer = () =>
+  attrs['aria-label'] !== undefined || attrs['aria-labelledby'] !== undefined
 const tableLabelledBy = computed(() =>
-  props.caption ||
-  !(props.title || slots.title) ||
-  attrs['aria-label'] !== undefined ||
-  attrs['aria-labelledby'] !== undefined
-    ? undefined
-    : titleId,
+  props.title && !slots.header && !namedByConsumer() ? titleId : undefined,
 )
+const tableDescribedBy = computed(() => (props.subtitle && !slots.header ? subtitleId : undefined))
 
 // @devwarn
 if (isDev) {
+  if (!tableLabelledBy.value && !namedByConsumer())
+    console.warn(
+      '[VDataTable] the table has no accessible name: set `title`, or aria-label or aria-labelledby when the `#header` slot replaces it.',
+    )
   if (props.selectable && !props.rowKey)
     console.warn(
       '[VDataTable] `selectable` without `rowKey` — index-based identities are corrupted by sorting, filtering and pagination.',
@@ -752,10 +763,29 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     :data-selectable="selectable ? '' : undefined"
     :data-virtual="virtual ? '' : undefined"
   >
-    <div v-if="title || $slots.title || searchable" class="v-data-table-toolbar">
-      <VTypography :id="titleId" as="div" variant="heading-4" class="v-data-table-title">
-        <slot name="title">{{ title }}</slot>
-      </VTypography>
+    <div v-if="title || subtitle || $slots.header || searchable" class="v-data-table-header">
+      <slot name="header">
+        <div v-if="title || subtitle" class="v-data-table-titles">
+          <VTypography
+            v-if="title"
+            :id="titleId"
+            as="div"
+            variant="heading-4"
+            class="v-data-table-title"
+          >
+            {{ title }}
+          </VTypography>
+          <VTypography
+            v-if="subtitle"
+            :id="subtitleId"
+            variant="subtitle"
+            tone="muted"
+            class="v-data-table-subtitle"
+          >
+            {{ subtitle }}
+          </VTypography>
+        </div>
+      </slot>
       <VInput
         v-if="searchable"
         v-model="search"
@@ -770,20 +800,20 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       />
     </div>
 
+    <div v-if="$slots.toolbar" class="v-data-table-toolbar">
+      <slot name="toolbar" />
+    </div>
+
     <div ref="scrollerEl" class="v-data-table-scroller">
       <table
         ref="tableEl"
         class="v-data-table-table"
         :aria-labelledby="tableLabelledBy"
+        :aria-describedby="tableDescribedBy"
         :aria-rowcount="ariaRowCount"
         :aria-busy="loadingMore ? 'true' : undefined"
         v-bind="forwardedAttrs"
       >
-        <caption v-if="caption" class="v-data-table-caption">
-          {{
-            caption
-          }}
-        </caption>
         <thead ref="theadEl" class="v-data-table-head">
           <tr :aria-rowindex="virtual ? 1 : undefined">
             <th v-if="selectable" scope="col" class="v-data-table-select">
@@ -987,7 +1017,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     --data-table-head-pad-block: var(--vectis-space-2);
 
     /* The gutter between the frame and what it holds: nothing when the table is
-       unframed, so the caption, the toolbar and the footer sit flush with the edge, and
+       unframed, so the header, the toolbar and the footer sit flush with the edge, and
        the cells' own inline padding as soon as a frame appears. */
     --data-table-frame-pad: 0px;
 
@@ -1040,23 +1070,34 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
   /*
    * Unframed, the tinted heading and rows are rounded by the area that already clips them,
-   * not by the root: the toolbar and footer sit flush with the root's edges, and a clip there
+   * not by the root: the header, toolbar and footer sit flush with the root's edges, and a clip there
    * would crop their focus rings.
    */
   .v-data-table[data-variant='flat'] > .v-data-table-scroller {
     border-radius: var(--vectis-radius-surface);
   }
 
+  .v-data-table-header,
   .v-data-table-toolbar {
     flex: none;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
     gap: var(--vectis-space-3);
-    padding-block-start: var(--data-table-frame-pad);
     padding-block-end: var(--vectis-space-3);
     padding-inline: var(--data-table-frame-pad);
+  }
+
+  /* Whichever row comes first takes the frame's gutter above it. */
+  .v-data-table-header,
+  .v-data-table-toolbar:first-child {
+    padding-block-start: var(--data-table-frame-pad);
+  }
+
+  .v-data-table-titles {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
   }
 
   /*
@@ -1069,12 +1110,13 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   /* The search field is given a width of its own, overriding the full width VInput takes
-     by default. The selector is qualified by its context, which makes it one step more
-     specific than VInput's own rule and therefore independent of the order the two sheets
-     end up in. */
-  .v-data-table-toolbar .v-input {
+     by default, and is pushed to the end of the row even with no title beside it. The
+     selector is qualified by its context, which makes it one step more specific than
+     VInput's own rule and therefore independent of the order the two sheets end up in. */
+  .v-data-table-header > .v-data-table-search {
     inline-size: var(--vectis-control-size-table-search);
     max-inline-size: 100%;
+    margin-inline-start: auto;
   }
 
   .v-data-table-table {
@@ -1082,14 +1124,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     border-collapse: collapse;
     font-size: var(--vectis-text-body-md-size);
     color: var(--vectis-color-text);
-  }
-
-  .v-data-table-caption {
-    padding-block-end: var(--vectis-space-3);
-    padding-inline: var(--data-table-frame-pad);
-    text-align: start;
-    font-size: var(--vectis-text-body-md-size);
-    color: var(--vectis-color-text-muted);
   }
 
   .v-data-table-table th {

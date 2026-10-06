@@ -29,6 +29,5 @@ const rows = [
     searchable
     search-placeholder="Search projects"
     search-label="Search the projects"
-    caption="Organisation projects"
   />
 </template>

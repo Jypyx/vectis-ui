@@ -31,6 +31,6 @@ const selected = ref<DataTableRowId[]>([])
     :columns="columns"
     :rows="rows"
     row-key="id"
-    caption="Ten thousand projects"
+    title="Ten thousand projects"
   />
 </template>

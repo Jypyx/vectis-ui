@@ -45,7 +45,6 @@ const rows = NAMES.map((name, index) => ({
       :per-page="5"
       :per-page-options="[5, 10]"
       show-range
-      caption="Organisation projects"
     />
   </div>
 </template>

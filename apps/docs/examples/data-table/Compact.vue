@@ -29,6 +29,5 @@ const rows = [
     searchable
     :per-page="4"
     show-range
-    caption="Organisation projects"
   />
 </template>
