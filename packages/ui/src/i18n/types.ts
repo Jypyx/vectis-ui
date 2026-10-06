@@ -216,6 +216,10 @@ export interface Messages {
     /** One value out of the highest, both already formatted for the locale. */
     value: (value: string, max: string) => string
   }
+  resizable: {
+    /** What a panel is called when it has no label, which names the handle that resizes it. */
+    panel: (position: number) => string
+  }
   stepper: {
     /** What the list of steps is called. */
     label: string

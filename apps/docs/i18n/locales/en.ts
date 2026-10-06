@@ -56,6 +56,7 @@ import progressCircular from './en/progressCircular'
 import progressLinear from './en/progressLinear'
 import radio from './en/radio'
 import rating from './en/rating'
+import resizable from './en/resizable'
 import separator from './en/separator'
 import sideNavigation from './en/sideNavigation'
 import skeletonLoader from './en/skeletonLoader'
@@ -136,6 +137,7 @@ export interface DocsMessages {
   progressLinear: typeof progressLinear
   radio: typeof radio
   rating: typeof rating
+  resizable: typeof resizable
   separator: typeof separator
   sideNavigation: typeof sideNavigation
   skeletonLoader: typeof skeletonLoader
@@ -223,6 +225,7 @@ export default defineI18nLocale((): DocsMessages => ({
   progressLinear,
   radio,
   rating,
+  resizable,
   separator,
   sideNavigation,
   skeletonLoader,

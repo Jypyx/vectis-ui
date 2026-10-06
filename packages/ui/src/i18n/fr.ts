@@ -143,6 +143,9 @@ export const fr: Messages = {
     empty: 'Aucune note',
     value: (value, max) => `${value} sur ${max}`,
   },
+  resizable: {
+    panel: (position) => `Panneau ${position}`,
+  },
   stepper: {
     label: 'Progression',
     completed: 'Terminée',

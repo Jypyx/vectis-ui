@@ -1,0 +1,87 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VResizableStories from './VResizable.stories'
+
+<Meta of={VResizableStories} />
+
+# Resizable
+
+Panels that share a space, with a handle between each pair to resize them. VResizable holds two
+or more `VResizablePanel`s and places the handles itself.
+
+<Canvas of={VResizableStories.Default} />
+
+<Controls of={VResizableStories.Default} />
+
+## Sizes
+
+The v-model holds the size of each panel in percent of the space they share, adding up to 100.
+Left unbound, a panel starts from its `defaultSize`, and panels without one share what is left
+equally. Sizes are rendered as flex weights, so a server-rendered page needs no measurement and
+does not shift on hydration.
+
+A handle is dragged with the pointer, or focused and moved with the arrow keys by `step` percent.
+
+<Canvas of={VResizableStories.Drag} />
+
+`orientation="vertical"` stacks the panels. The group then needs a height.
+
+<Canvas of={VResizableStories.Vertical} />
+
+## Limits
+
+`minSize` and `maxSize` take a number in percent or a CSS length such as `240px` or `12rem`.
+Lengths are converted against the group when a handle moves, and also written in CSS, so they
+hold while the window is resized.
+
+<Canvas of={VResizableStories.Limits} />
+
+When a panel reaches its minimum, the handle takes the rest from the next panel along, and gives
+space to the next panel once a neighbour reaches its maximum.
+
+<Canvas of={VResizableStories.ThreePanels} />
+
+## Collapsing
+
+A `collapsible` panel collapses when a handle drags it past the middle of its minimum, or with
+Enter on its handle, and reopens at the size it had. `v-model:collapsed` follows it and can
+collapse or reopen it from outside, the other panels making room. `collapsedSize` keeps a strip,
+such as an icon rail; at 0, the default, the content is removed from the layout and from the tab
+order.
+
+<Canvas of={VResizableStories.Collapsible} />
+
+A handle reports on the panel before it, unless only the panel after it can collapse, as for a
+sidebar on the end side.
+
+<Canvas of={VResizableStories.CollapsibleEnd} />
+
+## Nesting
+
+A panel can hold a group of its own. Give the inner group `height: 100%`.
+
+<Canvas of={VResizableStories.Nested} />
+
+## Saving the sizes
+
+The v-model changes on every step of a drag; `change` fires once the sizes settle, which is the
+moment to save them. For a server-rendered page, a cookie lets the server render the saved sizes
+at once.
+
+<Canvas of={VResizableStories.Persisted} />
+
+## Disabled
+
+<Canvas of={VResizableStories.Disabled} />
+
+## Accessibility
+
+- Each handle is a focusable `separator`, as in the APG window splitter. `aria-valuenow`,
+  `aria-valuemin` and `aria-valuemax` give the size of its primary panel in percent, and
+  `aria-controls` points at that panel.
+- The handle is named after its primary panel's `label`, or "Panel 1" from the dictionary.
+- The arrow keys along the group move the handle, following the direction of the text. Home and
+  End give the primary panel its smallest and largest size, and Enter collapses or reopens it.
+- A horizontal group has vertical handles, marked `aria-orientation="vertical"`.
+- The line is a 1px border, visible in forced colours, and a wider invisible strip catches the
+  pointer. `grip` adds a visible grip to every handle.
+- A disabled group's handles leave the tab order and carry `aria-disabled`.

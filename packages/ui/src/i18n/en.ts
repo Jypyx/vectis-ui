@@ -140,6 +140,9 @@ export const en: Messages = {
     empty: 'No rating',
     value: (value, max) => `${value} out of ${max}`,
   },
+  resizable: {
+    panel: (position) => `Panel ${position}`,
+  },
   stepper: {
     label: 'Progress',
     completed: 'Completed',

@@ -318,6 +318,18 @@ export const semantic = {
       '6rem',
       'The default height of a surface-shaped VSkeletonLoader: a card, an image (96px)',
     ),
+    'size-resizable-hit': dimension(
+      '0.75rem',
+      'The width of the strip around a VResizable handle that catches the pointer (12px)',
+    ),
+    'size-resizable-grip-length': dimension(
+      '1.5rem',
+      'The length of the grip VResizable draws on its handles under `grip` (24px)',
+    ),
+    'size-resizable-grip-thickness': dimension(
+      '0.5rem',
+      'The thickness of the grip VResizable draws on its handles under `grip` (8px)',
+    ),
     'size-toast-width': dimension('22rem', 'The default width of a toast'),
     'size-tooltip-max': dimension('18rem', 'The widest a tooltip grows before it wraps (288px)'),
     'size-hover-card-max': dimension('20rem', 'The widest a VHoverCard grows (320px)'),

@@ -197,6 +197,7 @@ const COMPONENT_DIMENSIONS: { slugs: DocsSlug[]; prefixes: string[] }[] = [
   { slugs: ['progress-circular'], prefixes: ['size-progress-circular-'] },
   { slugs: ['progress-linear'], prefixes: ['size-progress-linear-'] },
   { slugs: ['rating'], prefixes: ['size-rating-'] },
+  { slugs: ['resizable'], prefixes: ['size-resizable-'] },
   { slugs: ['skeleton-loader'], prefixes: ['size-skeleton-'] },
   { slugs: ['slider'], prefixes: ['size-slider-'] },
   { slugs: ['snackbar'], prefixes: ['size-snackbar-'] },

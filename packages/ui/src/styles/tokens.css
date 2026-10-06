@@ -286,6 +286,9 @@
     --vectis-control-size-progress-circular-diameter: 3rem;
     --vectis-control-size-progress-circular-thickness: 0.25rem;
     --vectis-control-size-skeleton-surface: 6rem;
+    --vectis-control-size-resizable-hit: 0.75rem;
+    --vectis-control-size-resizable-grip-length: 1.5rem;
+    --vectis-control-size-resizable-grip-thickness: 0.5rem;
     --vectis-control-size-toast-width: 22rem;
     --vectis-control-size-tooltip-max: 18rem;
     --vectis-control-size-hover-card-max: 20rem;

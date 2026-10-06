@@ -60,6 +60,7 @@ const nav: NavMessages = {
   'progress-linear': 'Progression linéaire',
   radio: 'Bouton radio',
   rating: 'Notation',
+  resizable: 'Panneaux redimensionnables',
   separator: 'Séparateur',
   'side-navigation': 'Navigation latérale',
   'skeleton-loader': 'Squelette de chargement',

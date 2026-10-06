@@ -140,6 +140,12 @@ const descriptions: Record<DescribedToken, string> = {
   '--vectis-control-size-rating-sm': "L'icône d'un petit VRating (20px)",
   '--vectis-control-size-rating-md': "L'icône d'un VRating moyen (24px)",
   '--vectis-control-size-rating-lg': "L'icône d'un grand VRating (32px)",
+  '--vectis-control-size-resizable-hit':
+    'La largeur de la bande qui capte le pointeur autour d’une poignée de VResizable (12px)',
+  '--vectis-control-size-resizable-grip-length':
+    'La longueur de la pastille que VResizable dessine sur ses poignées avec `grip` (24px)',
+  '--vectis-control-size-resizable-grip-thickness':
+    'L’épaisseur de la pastille que VResizable dessine sur ses poignées avec `grip` (8px)',
   '--vectis-control-size-drawer-sm':
     "La largeur d'un petit VDrawer latéral, ou la hauteur d'un VDrawer en haut ou en bas (320px)",
   '--vectis-control-size-drawer-md':

@@ -62,6 +62,7 @@ const nav: NavMessages = {
   'progress-linear': 'Progress linear',
   radio: 'Radio',
   rating: 'Rating',
+  resizable: 'Resizable',
   separator: 'Separator',
   'side-navigation': 'Side navigation',
   'skeleton-loader': 'Skeleton loader',
