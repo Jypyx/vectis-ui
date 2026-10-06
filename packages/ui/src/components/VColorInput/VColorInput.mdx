@@ -1,0 +1,57 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VColorInputStories from './VColorInput.stories'
+
+<Meta of={VColorInputStories} />
+
+# ColorInput
+
+A form field holding a colour. VColorInput is a VInput into which the colour can be typed, with a
+swatch at its start that opens VColorPicker in a panel.
+
+<Canvas of={VColorInputStories.Default} />
+
+<Controls of={VColorInputStories.Default} />
+
+## Value
+
+`v-model` holds the colour written in `format` (`hex` by default, `rgb`, `hsl` or `oklch`), or
+`null` when the field is empty. The field accepts all four formats; Enter or leaving it rewrites
+what was typed in `format`, and anything that is not a colour puts the field back as it was.
+
+## Picker
+
+The swatch shows the current colour and opens the picker; the down arrow opens it from the field,
+moving the focus to the saturation and brightness area. Escape, or Enter on a track or a swatch,
+closes it and hands the focus back to the field, as does leaving the component. The picker writes
+the value as it moves. It has no text field of its own: the field is the one above it.
+
+<Canvas of={VColorInputStories.Keyboard} />
+
+`alpha`, `swatches` and `hideEyeDropper` are passed to the picker. With `alpha`, the swatch shows
+the opacity over a checkerboard.
+
+<Canvas of={VColorInputStories.AlphaAndSwatches} />
+
+## Clearing
+
+<Canvas of={VColorInputStories.Clearable} />
+
+## Field
+
+VColorInput follows the field model: `label`, `hint`, and `error`, which replaces the hint, marks
+the field invalid and is announced. Attributes such as `name` and `required` go to the text field.
+
+<Canvas of={VColorInputStories.WithError} />
+
+<Canvas of={VColorInputStories.Sizes} />
+
+`readonly` shows the colour without a picker; its swatch is no longer a button.
+
+<Canvas of={VColorInputStories.ReadonlyAndDisabled} />
+
+## Accessibility
+
+- The field is a combobox with `aria-haspopup="dialog"`, `aria-expanded` and `aria-controls`
+  pointing at the panel, a dialog named by `label` or "Choose a colour".
+- The swatch is a button named "Open colour picker" from the dictionary, or `pickerButtonLabel`.
+- Enter in the field takes the typed colour and never opens the panel.

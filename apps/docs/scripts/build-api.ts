@@ -35,6 +35,8 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
   { slug: 'carousel', components: ['VCarousel', 'VCarouselItem'] },
   { slug: 'checkbox', components: ['VCheckbox'] },
   { slug: 'chip', components: ['VChip'] },
+  { slug: 'color-input', components: ['VColorInput'] },
+  { slug: 'color-picker', components: ['VColorPicker'] },
   {
     slug: 'combobox',
     components: ['VCombobox'],

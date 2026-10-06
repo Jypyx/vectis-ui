@@ -266,6 +266,10 @@ export type {
   TimeInputPlacement,
   TimeInputFooterSlotProps,
 } from './components/VTimeInput/VTimeInput.vue'
+export { default as VColorPicker } from './components/VColorPicker/VColorPicker.vue'
+export type { ColorFormat, ColorSwatch } from './components/VColorPicker/VColorPicker.vue'
+export { default as VColorInput } from './components/VColorInput/VColorInput.vue'
+export type { ColorInputSize, ColorInputPlacement } from './components/VColorInput/VColorInput.vue'
 export { default as VCalendar } from './components/VCalendar/VCalendar.vue'
 export type {
   CalendarCell,

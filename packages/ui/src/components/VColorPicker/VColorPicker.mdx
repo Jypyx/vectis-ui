@@ -1,0 +1,73 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VColorPickerStories from './VColorPicker.stories'
+
+<Meta of={VColorPickerStories} />
+
+# ColorPicker
+
+A colour picker: an area for saturation and brightness, a hue track, and a text field taking the
+colour in any format. VColorPicker is built from native ranges, so assistive technology adjusts
+each channel on its own. To choose a colour from a form field, use VColorInput, which opens this
+picker in a panel.
+
+<Canvas of={VColorPickerStories.Default} />
+
+<Controls of={VColorPickerStories.Default} />
+
+## Value
+
+`v-model` holds the colour as a string written in `format`, or `null` before one is chosen.
+Dragging updates it continuously. The picker works in sRGB: an `oklch()` value outside it is
+clipped to the nearest colour the screen can show.
+
+The text field accepts hex (with or without `#`, 3, 4, 6 or 8 digits), `rgb()`, `hsl()` and
+`oklch()`, in the comma or the space syntax. Enter or leaving the field takes the colour; anything
+else, CSS colour names included, puts the field back as it was. Emptying it sets `null`.
+
+## Formats
+
+`format` decides how the value is written: `hex` (the default), `rgb`, `hsl` or `oklch`. The menu
+beside the field changes only what the field shows. `hideInput` removes the field and the menu.
+
+<Canvas of={VColorPickerStories.Formats} />
+
+## Alpha
+
+`alpha` adds an opacity track over a checkerboard. The alpha is written into the value only below
+1, so an opaque colour reads the same either way. Without `alpha`, a translucent value is read as
+opaque.
+
+<Canvas of={VColorPickerStories.Alpha} />
+
+## Swatches
+
+`swatches` offers preset colours under the picker: a colour string, or `{ color, label }` to give
+it a name. The swatch matching the current colour is checked.
+
+<Canvas of={VColorPickerStories.Swatches} />
+
+## Eyedropper
+
+Where the browser offers the `EyeDropper` API, a button picks a colour from anywhere on the
+screen, keeping the opacity already chosen. Elsewhere the button is not rendered.
+`hideEyeDropper` removes it everywhere.
+
+## Pointer
+
+<Canvas of={VColorPickerStories.Drag} />
+
+<Canvas of={VColorPickerStories.Disabled} />
+
+## Accessibility
+
+- The picker is a `role="group"` named "Colour picker" from the dictionary, or by `label`.
+- The area holds two hidden native ranges, "Saturation" and "Brightness". Only the first is in
+  the tab order; on either, the horizontal arrows and Home/End move the saturation, the vertical
+  arrows and Page Up/Page Down the brightness, Shift multiplies the arrows by ten. Both read the
+  two axes as their value, "Saturation 76%, brightness 96%".
+- The hue and opacity tracks are visible native ranges, their values read in degrees and
+  percentages for the locale.
+- The swatches are native radios in a `<fieldset>`: the arrow keys move between them. They belong
+  to no form; with `name`, the value is sent through a hidden input.
+- The colour content is never mirrored right to left, and forced colours leave it untouched.
+  Every thumb carries a light and a dark ring, visible on any colour.

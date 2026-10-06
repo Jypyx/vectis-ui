@@ -30,6 +30,8 @@ const nav: NavMessages = {
   carousel: 'Carousel',
   checkbox: 'Checkbox',
   chip: 'Chip',
+  'color-input': 'Colour input',
+  'color-picker': 'Colour picker',
   combobox: 'Combobox',
   'context-menu': 'Context menu',
   'data-table': 'Data table',

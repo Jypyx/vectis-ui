@@ -386,6 +386,28 @@ export const semantic = {
     'size-badge-dot': dimension('0.625rem', 'The diameter of VBadge in dot mode'),
     'size-badge-ring': dimension('2px', 'The detaching ring of a bordered VBadge'),
     'size-avatar-ring': dimension('2px', 'The ring separating stacked avatars (VAvatarGroup)'),
+    'size-color-picker-width': dimension('16rem', 'The width of VColorPicker (256px)'),
+    'size-color-picker-area': dimension(
+      '10rem',
+      "The height of VColorPicker's saturation and brightness area (160px)",
+    ),
+    'size-color-picker-track': dimension(
+      '0.75rem',
+      "The thickness of VColorPicker's hue and opacity tracks (12px)",
+    ),
+    'size-color-picker-thumb': dimension(
+      '1rem',
+      "The diameter of VColorPicker's thumbs, on the area and the tracks (16px)",
+    ),
+    'size-color-picker-preview': dimension(
+      '2rem',
+      'The disc showing the current colour in VColorPicker (32px)',
+    ),
+    'size-color-picker-swatch': dimension('1.5rem', 'The side of a VColorPicker swatch (24px)'),
+    'size-color-picker-checker': dimension(
+      '0.5rem',
+      'The side of the checkerboard showing through a translucent colour (8px)',
+    ),
     'size-date-picker-cell': dimension('2.5rem', 'The side of a VDatePicker day cell'),
     'size-date-picker-day': dimension(
       '{control.height.md}',

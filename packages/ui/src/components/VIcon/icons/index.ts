@@ -25,6 +25,7 @@ import { chevron_right } from './chevron_right'
 import { close } from './close'
 import { cloud_upload } from './cloud_upload'
 import { code } from './code'
+import { colorize } from './colorize'
 import { description } from './description'
 import { error } from './error'
 import { expand_less } from './expand_less'
@@ -72,6 +73,7 @@ export {
   close,
   cloud_upload,
   code,
+  colorize,
   description,
   error,
   expand_less,
@@ -104,7 +106,7 @@ export {
  *
  * NOTHING the library ships imports this barrel: a component imports the two or
  * three icon modules it draws, by name. Importing it from a component would pull all
- * 43 drawings back into every consumer's bundle and undo the split.
+ * 44 drawings back into every consumer's bundle and undo the split.
  */
 export const builtinIcons = {
   add,
@@ -126,6 +128,7 @@ export const builtinIcons = {
   close,
   cloud_upload,
   code,
+  colorize,
   description,
   error,
   expand_less,

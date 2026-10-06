@@ -94,6 +94,23 @@ export const fr: Messages = {
     right: 'Flèche droite',
     label: (keys) => `Raccourci clavier\u00A0: ${keys}`,
   },
+  colorPicker: {
+    label: 'Sélecteur de couleur',
+    saturation: 'Saturation',
+    brightness: 'Luminosité',
+    areaValue: (saturation, brightness) => `Saturation ${saturation}, luminosité ${brightness}`,
+    hue: 'Teinte',
+    alpha: 'Opacité',
+    value: 'Valeur de la couleur',
+    format: 'Format de la couleur',
+    eyeDropper: 'Prélever une couleur à l’écran',
+    swatches: 'Couleurs prédéfinies',
+  },
+  colorInput: {
+    clear: 'Effacer la couleur',
+    openPicker: 'Ouvrir le sélecteur de couleur',
+    pickerLabel: 'Choisir une couleur',
+  },
   datePicker: {
     label: 'Sélecteur de date',
     previousMonth: 'Mois précédent',

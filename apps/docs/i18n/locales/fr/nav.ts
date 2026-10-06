@@ -28,6 +28,8 @@ const nav: NavMessages = {
   carousel: 'Carrousel',
   checkbox: 'Case à cocher',
   chip: 'Puce',
+  'color-input': 'Champ de couleur',
+  'color-picker': 'Sélecteur de couleur',
   combobox: 'Liste déroulante',
   'context-menu': 'Menu contextuel',
   'data-table': 'Tableau de données',

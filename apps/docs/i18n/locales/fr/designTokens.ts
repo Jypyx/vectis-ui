@@ -166,6 +166,18 @@ const descriptions: Record<DescribedToken, string> = {
   '--vectis-control-size-badge-dot': "Le diamètre d'un VBadge en mode point",
   '--vectis-control-size-badge-ring': "L'anneau qui détache un VBadge bordé",
   '--vectis-control-size-avatar-ring': "L'anneau qui sépare les avatars empilés (VAvatarGroup)",
+  '--vectis-control-size-color-picker-width': 'La largeur de VColorPicker (256px)',
+  '--vectis-control-size-color-picker-area':
+    'La hauteur de la zone saturation et luminosité de VColorPicker (160px)',
+  '--vectis-control-size-color-picker-track':
+    "L'épaisseur des pistes de teinte et d'opacité de VColorPicker (12px)",
+  '--vectis-control-size-color-picker-thumb':
+    'Le diamètre des curseurs de VColorPicker, sur la zone et les pistes (16px)',
+  '--vectis-control-size-color-picker-preview':
+    'Le disque montrant la couleur courante dans VColorPicker (32px)',
+  '--vectis-control-size-color-picker-swatch': "Le côté d'une pastille de VColorPicker (24px)",
+  '--vectis-control-size-color-picker-checker':
+    'Le côté du damier visible à travers une couleur translucide (8px)',
   '--vectis-control-size-date-picker-cell': "Le côté d'une case de jour de VDatePicker",
   '--vectis-control-size-date-picker-day':
     'Le diamètre du disque sur lequel un jour de VDatePicker est dessiné ; la case grandit pour le contenir',

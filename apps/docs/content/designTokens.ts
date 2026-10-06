@@ -180,6 +180,7 @@ const COMPONENT_DIMENSIONS: { slugs: DocsSlug[]; prefixes: string[] }[] = [
   { slugs: ['card'], prefixes: ['size-card-'] },
   { slugs: ['carousel'], prefixes: ['size-carousel-'] },
   { slugs: ['checkbox', 'radio'], prefixes: ['border-width', 'size-check'] },
+  { slugs: ['color-picker'], prefixes: ['size-color-picker-'] },
   { slugs: ['combobox'], prefixes: ['size-combobox-'] },
   { slugs: ['data-table'], prefixes: ['size-table-'] },
   { slugs: ['date-picker'], prefixes: ['size-date-picker-'] },

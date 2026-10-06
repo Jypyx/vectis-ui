@@ -138,6 +138,37 @@ export interface Messages {
     /** What the shortcut is called, the combination arriving already spelled out: "Ctrl + K". */
     label: (keys: string) => string
   }
+  colorPicker: {
+    /** What the whole picker is called. */
+    label: string
+    /** The horizontal axis of the area. */
+    saturation: string
+    /** The vertical axis of the area. */
+    brightness: string
+    /**
+     * Both axes of the area, read whichever of its two inputs has the focus, the percentages
+     * already formatted for the locale.
+     */
+    areaValue: (saturation: string, brightness: string) => string
+    hue: string
+    /** The opacity track. */
+    alpha: string
+    /** The text field holding the colour as written. */
+    value: string
+    /** The menu choosing how that field writes the colour. */
+    format: string
+    /** The button that picks a colour from anywhere on the screen. */
+    eyeDropper: string
+    /** The group of preset colours. */
+    swatches: string
+  }
+  colorInput: {
+    clear: string
+    /** The swatch at the start of the field, which opens the picker. */
+    openPicker: string
+    /** What the panel holding the picker is called. */
+    pickerLabel: string
+  }
   datePicker: {
     /** What the whole picker is called, header and grid together. */
     label: string

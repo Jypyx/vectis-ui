@@ -13,6 +13,8 @@ import card from './en/card'
 import carousel from './en/carousel'
 import checkbox from './en/checkbox'
 import chip from './en/chip'
+import colorInput from './en/colorInput'
+import colorPicker from './en/colorPicker'
 import combobox from './en/combobox'
 import common from './en/common'
 import contextMenu from './en/contextMenu'
@@ -99,6 +101,8 @@ export interface DocsMessages {
   carousel: typeof carousel
   checkbox: typeof checkbox
   chip: typeof chip
+  colorInput: typeof colorInput
+  colorPicker: typeof colorPicker
   combobox: typeof combobox
   contextMenu: typeof contextMenu
   dataTable: typeof dataTable
@@ -181,6 +185,8 @@ export default defineI18nLocale((): DocsMessages => ({
   carousel,
   checkbox,
   chip,
+  colorInput,
+  colorPicker,
   combobox,
   contextMenu,
   dataTable,

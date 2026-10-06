@@ -91,6 +91,23 @@ export const en: Messages = {
     right: 'Right arrow',
     label: (keys) => `Keyboard shortcut: ${keys}`,
   },
+  colorPicker: {
+    label: 'Colour picker',
+    saturation: 'Saturation',
+    brightness: 'Brightness',
+    areaValue: (saturation, brightness) => `Saturation ${saturation}, brightness ${brightness}`,
+    hue: 'Hue',
+    alpha: 'Opacity',
+    value: 'Colour value',
+    format: 'Colour format',
+    eyeDropper: 'Pick a colour from the screen',
+    swatches: 'Preset colours',
+  },
+  colorInput: {
+    clear: 'Clear colour',
+    openPicker: 'Open colour picker',
+    pickerLabel: 'Choose a colour',
+  },
   datePicker: {
     label: 'Date picker',
     previousMonth: 'Previous month',

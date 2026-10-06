@@ -32,6 +32,7 @@ const EXPECTED = [
   'close',
   'cloud_upload',
   'code',
+  'colorize',
   'description',
   'error',
   'expand_less',

@@ -13,6 +13,8 @@ import card from './fr/card'
 import carousel from './fr/carousel'
 import checkbox from './fr/checkbox'
 import chip from './fr/chip'
+import colorInput from './fr/colorInput'
+import colorPicker from './fr/colorPicker'
 import combobox from './fr/combobox'
 import common from './fr/common'
 import contextMenu from './fr/contextMenu'
@@ -101,6 +103,8 @@ export default defineI18nLocale((): DocsMessages => ({
   carousel,
   checkbox,
   chip,
+  colorInput,
+  colorPicker,
   combobox,
   contextMenu,
   dataTable,

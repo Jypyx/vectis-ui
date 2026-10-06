@@ -52,6 +52,8 @@ export const components = [
   entry('carousel'),
   entry('checkbox'),
   entry('chip'),
+  entry('color-input'),
+  entry('color-picker'),
   entry('combobox'),
   entry('context-menu'),
   entry('data-table'),
