@@ -165,7 +165,6 @@ useHotkeyListener({
     vertical-align: middle;
     font-family: var(--vectis-text-family);
     font-size: var(--control-font-size);
-    --hotkeys-pad: var(--control-padding-inline);
   }
 
   /* The size comes from the shared class set on the ROOT: its variables inherit down,
@@ -217,16 +216,6 @@ useHotkeyListener({
   }
 
   /*
-   * When one key holds the whole combination, its ends take the same breathing room as the gaps
-   * inside it, which gives the key a single rhythm. The usual control padding is sized to wrap
-   * ONE short label; around three runs of text already spaced from one another, it reads as
-   * slack at the edges.
-   */
-  .v-hotkeys[data-attached] {
-    --hotkeys-pad: var(--control-gap);
-  }
-
-  /*
    * THE key recipe, written once for its two possible carriers: every cap by default, and the
    * whole shortcut alone when it is drawn as a single key; which is exactly what puts the
    * separator inside the key rather than between two of them. Written out twice, the two
@@ -238,7 +227,7 @@ useHotkeyListener({
     /* A minimum equal to the height makes a single-character key read as a square
        rather than as a sliver. */
     min-inline-size: var(--control-height);
-    padding-inline: var(--hotkeys-pad);
+    padding-inline: var(--control-padding-inline);
     border: 1px solid var(--hotkeys-border);
     border-radius: var(--vectis-radius-interactive);
     background: var(--hotkeys-bg);

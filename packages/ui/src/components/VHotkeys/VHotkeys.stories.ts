@@ -180,11 +180,8 @@ export const Attached: Story = {
     await expect(bg(attached!)).not.toBe(TRANSPARENT)
     await expect(bg(attached!.querySelector('.v-hotkeys-key')!)).toBe(TRANSPARENT)
 
-    const gapOf = (root: Element) =>
-      getComputedStyle(root.querySelector('.v-hotkeys-keys')!).columnGap
     const padOf = (el: Element) => getComputedStyle(el).paddingLeft
-    await expect(padOf(attached!)).toBe(gapOf(attached!))
-    await expect(padOf(detached!.querySelector('.v-hotkeys-key')!)).not.toBe(gapOf(detached!))
+    await expect(padOf(attached!)).toBe(padOf(detached!.querySelector('.v-hotkeys-key')!))
 
     /*
      * This locks the story's own `justify-items: start`, without which the pill was 138.5px
