@@ -1,11 +1,11 @@
 <script setup lang="ts">
 /**
  * Group generated options under their accessible label; groups and options are the listbox's
- * permitted children. The field renders the heading among the group's rows, so the virtual mode
+ * permitted children. The panel renders the heading among the group's rows, so the virtual mode
  * can measure it and leave it out like any other row.
  */
 
-interface ComboboxGroupProps {
+interface ListboxGroupProps {
   /** The name of the block. */
   label: string
   /**
@@ -15,7 +15,7 @@ interface ComboboxGroupProps {
   labelId?: string
 }
 
-defineProps<ComboboxGroupProps>()
+defineProps<ListboxGroupProps>()
 
 defineSlots<{
   /** The heading and the options belonging to this block. */
@@ -26,7 +26,7 @@ defineSlots<{
 <template>
   <div
     role="group"
-    class="v-combobox-group"
+    class="v-listbox-group"
     :aria-labelledby="labelId"
     :aria-label="labelId ? undefined : label"
   >
@@ -42,7 +42,7 @@ defineSlots<{
    * fit; the same reason the state rows and the foot of the list refuse it too. Its gap matches
    * the panel's, which the virtual mode relies on to size the space standing for hidden rows.
    */
-  .v-combobox-group {
+  .v-listbox-group {
     display: flex;
     flex: none;
     flex-direction: column;
@@ -50,7 +50,7 @@ defineSlots<{
   }
 
   /* The heading is a row of the panel: it is not something that can be chosen. */
-  .v-combobox-group-label {
+  .v-listbox-group-label {
     display: flex;
     flex: none;
     align-items: center;

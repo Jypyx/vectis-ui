@@ -265,7 +265,7 @@ export const Groups: Story = {
     const group = canvas.getByRole('group', { name: 'Europe' })
     const heightOf = (selector: string) =>
       (group.querySelector(selector) as HTMLElement).getBoundingClientRect().height
-    await expect(heightOf('.v-combobox-group-label')).toBeCloseTo(heightOf('.v-combobox-option'), 1)
+    await expect(heightOf('.v-listbox-group-label')).toBeCloseTo(heightOf('.v-listbox-option'), 1)
 
     // The panel overflows: the active option must be brought into view through the group
     // wrapper (the scroll container stays the panel). Not measurable in jsdom; which is the
@@ -284,7 +284,7 @@ export const Groups: Story = {
     await userEvent.keyboard('mor')
     await waitFor(() => expect(canvas.queryByRole('group', { name: 'Africa' })).toBeVisible())
     expect(canvas.queryByRole('group', { name: 'Europe' })).toBeNull()
-    expect(listbox.querySelectorAll('.v-combobox-separator').length).toBe(0)
+    expect(listbox.querySelectorAll('.v-listbox-separator').length).toBe(0)
 
     await userEvent.keyboard('{ArrowDown}{Enter}')
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('ma'))
@@ -356,7 +356,7 @@ export const TextDisplay: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const input = canvas.getByRole('combobox') as HTMLInputElement
-    const text = canvasElement.querySelector('.v-combobox-text') as HTMLElement
+    const text = canvasElement.querySelector('.v-listbox-text') as HTMLElement
     const field = canvasElement.querySelector('.v-input-field') as HTMLElement
 
     await expect(text).toHaveTextContent('France, Belgium, Switzerland, Canada, Luxembourg')
@@ -405,21 +405,21 @@ export const MaxValues: Story = {
     const [chipsRoot, textRoot] = [...canvasElement.querySelectorAll<HTMLElement>('.v-combobox')]
     const chipsInput = canvas.getByRole('combobox', { name: 'Served countries' })
 
-    const overflowChip = chipsRoot!.querySelector('.v-combobox-overflow-chip') as HTMLElement
+    const overflowChip = chipsRoot!.querySelector('.v-listbox-overflow-chip') as HTMLElement
     await expect(overflowChip).toHaveTextContent('+3')
     await expect(chipsRoot!.querySelectorAll('.v-chip')).toHaveLength(3)
 
     await userEvent.click(chipsInput)
-    await waitFor(() => expect(chipsRoot!.querySelector('.v-combobox-overflow-chip')).toBeNull())
+    await waitFor(() => expect(chipsRoot!.querySelector('.v-listbox-overflow-chip')).toBeNull())
     await expect(canvas.getAllByRole('button', { name: /^Remove / })).toHaveLength(5)
 
     await userEvent.click(canvas.getByRole('button', { name: /Neighbouring/ }))
     await waitFor(() =>
-      expect(chipsRoot!.querySelector('.v-combobox-overflow-chip')).toHaveTextContent('+3'),
+      expect(chipsRoot!.querySelector('.v-listbox-overflow-chip')).toHaveTextContent('+3'),
     )
 
-    const line = textRoot!.querySelector('.v-combobox-text') as HTMLElement
-    const count = textRoot!.querySelector('.v-combobox-overflow') as HTMLElement
+    const line = textRoot!.querySelector('.v-listbox-text') as HTMLElement
+    const count = textRoot!.querySelector('.v-listbox-overflow') as HTMLElement
     const chevron = textRoot!.querySelector('.v-combobox-chevron') as HTMLElement
     await expect(line).toHaveTextContent('France, Belgium, Switzerland')
     await expect(count).toHaveTextContent('+2 more countries')
@@ -849,8 +849,8 @@ export const WithIcons: Story = {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('combobox'))
     const options = await canvas.findAllByRole('option')
-    await expect(options[0]!.firstElementChild).not.toHaveClass('v-combobox-option-label')
-    await expect(options[4]!.firstElementChild).toHaveClass('v-combobox-option-label')
+    await expect(options[0]!.firstElementChild).not.toHaveClass('v-listbox-option-label')
+    await expect(options[4]!.firstElementChild).toHaveClass('v-listbox-option-label')
   },
 }
 

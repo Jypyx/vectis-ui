@@ -7,7 +7,7 @@ import VSeparator from '../VSeparator/VSeparator.vue'
 </script>
 
 <template>
-  <VSeparator role="presentation" class="v-combobox-separator" />
+  <VSeparator role="presentation" class="v-listbox-separator" />
 </template>
 
 <style>
@@ -18,7 +18,7 @@ import VSeparator from '../VSeparator/VSeparator.vue'
    * bundler happens to put last. The space above and below comes from the panel's own gap, so
    * no margin is added here.
    */
-  .v-separator.v-combobox-separator {
+  .v-separator.v-listbox-separator {
     margin-inline: calc(-1 * var(--vectis-space-1));
   }
 }

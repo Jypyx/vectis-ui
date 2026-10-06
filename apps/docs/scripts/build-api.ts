@@ -40,7 +40,14 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
   {
     slug: 'combobox',
     components: ['VCombobox'],
-    internals: ['VComboboxOption', 'VComboboxGroup', 'VComboboxSeparator'],
+    internals: [
+      'VListboxPanel',
+      'VListboxOption',
+      'VListboxGroup',
+      'VListboxSeparator',
+      'VListboxValues',
+      'VListboxChevron',
+    ],
   },
   {
     slug: 'command-palette',

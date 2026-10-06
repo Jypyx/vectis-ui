@@ -93,7 +93,7 @@ describe('VCombobox', () => {
     const { getByRole, container } = renderCombobox()
     const input = getByRole('combobox') as HTMLInputElement
     const labels = () =>
-      [...container.querySelectorAll('[role="option"] .v-combobox-option-label')].map((o) =>
+      [...container.querySelectorAll('[role="option"] .v-listbox-option-label')].map((o) =>
         o.textContent?.trim(),
       )
 
@@ -115,7 +115,7 @@ describe('VCombobox', () => {
     const input = getByRole('combobox') as HTMLInputElement
     expect(input.value).toBe('France')
     const labels = () =>
-      [...container.querySelectorAll('[role="option"] .v-combobox-option-label')].map((o) =>
+      [...container.querySelectorAll('[role="option"] .v-listbox-option-label')].map((o) =>
         o.textContent?.trim(),
       )
 
@@ -248,7 +248,7 @@ describe('VCombobox', () => {
       display: 'text',
       modelValue: ['fr', 're'],
     })
-    expect(container.querySelector('.v-combobox-text')?.textContent).toBe('France, Réunion')
+    expect(container.querySelector('.v-listbox-text')?.textContent).toBe('France, Réunion')
     expect(container.querySelector('.v-chip')).toBeNull()
     expect(queryAllByRole('button', { name: /Remove/ })).toHaveLength(0)
     // One line: the field does not take the arrangement that lets chips wrap
@@ -258,12 +258,12 @@ describe('VCombobox', () => {
     expect(emitted('update:modelValue').at(-1)).toEqual([['fr']])
 
     await rerender({ modelValue: [] })
-    expect(container.querySelector('.v-combobox-text')).toBeNull()
+    expect(container.querySelector('.v-listbox-text')).toBeNull()
   })
 
   it('display="text" changes nothing for a single value', () => {
     const { container, getByRole } = renderCombobox({ display: 'text', modelValue: 'fr' })
-    expect(container.querySelector('.v-combobox-text')).toBeNull()
+    expect(container.querySelector('.v-listbox-text')).toBeNull()
     expect((getByRole('combobox') as HTMLInputElement).value).toBe('France')
   })
 
@@ -282,7 +282,7 @@ describe('VCombobox', () => {
     const FIVE = ['fr', 'be', 're', 'mc', 'lu']
     const MANY = [...OPTIONS, { value: 'lu', label: 'Luxembourg' }]
     const chipLabels = (container: Element) =>
-      [...container.querySelectorAll('.v-chip:not(.v-combobox-overflow-chip)')].map((c) =>
+      [...container.querySelectorAll('.v-chip:not(.v-listbox-overflow-chip)')].map((c) =>
         c.textContent?.trim(),
       )
 
@@ -294,7 +294,7 @@ describe('VCombobox', () => {
         modelValue: FIVE,
       })
       expect(chipLabels(container)).toEqual(['France', 'Belgium'])
-      const overflow = container.querySelector('.v-combobox-overflow-chip') as HTMLElement
+      const overflow = container.querySelector('.v-listbox-overflow-chip') as HTMLElement
       expect(overflow.textContent?.trim()).toBe('+3')
       expect(overflow.dataset.tone).toBe('neutral')
       expect(overflow.querySelector('.v-chip-dismiss')).toBeNull()
@@ -309,7 +309,7 @@ describe('VCombobox', () => {
       })
       await fireEvent.focus(getByRole('combobox'))
       expect(chipLabels(container)).toHaveLength(5)
-      expect(container.querySelector('.v-combobox-overflow-chip')).toBeNull()
+      expect(container.querySelector('.v-listbox-overflow-chip')).toBeNull()
 
       await fireEvent.keyDown(getByRole('combobox'), { key: 'Backspace' })
       expect(emitted('update:modelValue').at(-1)).toEqual([['fr', 'be', 're', 'mc']])
@@ -324,7 +324,7 @@ describe('VCombobox', () => {
           modelValue: FIVE,
         })
         expect(chipLabels(container)).toHaveLength(5)
-        expect(container.querySelector('.v-combobox-overflow-chip')).toBeNull()
+        expect(container.querySelector('.v-listbox-overflow-chip')).toBeNull()
         unmount()
       }
     })
@@ -338,7 +338,7 @@ describe('VCombobox', () => {
         overflowText,
         modelValue: FIVE,
       })
-      expect(chips.container.querySelector('.v-combobox-overflow-chip')?.textContent?.trim()).toBe(
+      expect(chips.container.querySelector('.v-listbox-overflow-chip')?.textContent?.trim()).toBe(
         '+4 countries',
       )
       chips.unmount()
@@ -352,8 +352,8 @@ describe('VCombobox', () => {
         modelValue: FIVE,
       })
       // The count sits beside the line, never inside what the ellipsis cuts
-      expect(container.querySelector('.v-combobox-text')?.textContent).toBe('France')
-      expect(container.querySelector('.v-combobox-overflow')?.textContent?.trim()).toBe(
+      expect(container.querySelector('.v-listbox-text')?.textContent).toBe('France')
+      expect(container.querySelector('.v-listbox-overflow')?.textContent?.trim()).toBe(
         '+4 countries',
       )
     })
@@ -368,13 +368,13 @@ describe('VCombobox', () => {
         },
       })
       expect(container.querySelector('.custom')?.textContent).toBe('2 sm false')
-      expect(container.querySelector('.v-combobox-overflow-chip')).toBeNull()
+      expect(container.querySelector('.v-listbox-overflow-chip')).toBeNull()
     })
 
     it('changes nothing without multiple', () => {
       const { container, getByRole } = renderCombobox({ max: 1, modelValue: 'fr' })
       expect((getByRole('combobox') as HTMLInputElement).value).toBe('France')
-      expect(container.querySelector('.v-combobox-overflow, .v-combobox-overflow-chip')).toBeNull()
+      expect(container.querySelector('.v-listbox-overflow, .v-listbox-overflow-chip')).toBeNull()
     })
   })
 
@@ -408,8 +408,8 @@ describe('VCombobox', () => {
       [...container.querySelectorAll<HTMLElement>('[role="option"]')].find((o) =>
         o.textContent?.includes(text),
       )
-    expect(optionByText('France')?.querySelector('.v-combobox-option-check')).toBeTruthy()
-    expect(optionByText('Belgium')?.querySelector('.v-combobox-option-check')).toBeFalsy()
+    expect(optionByText('France')?.querySelector('.v-listbox-option-check')).toBeTruthy()
+    expect(optionByText('Belgium')?.querySelector('.v-listbox-option-check')).toBeFalsy()
   })
 })
 
@@ -441,7 +441,7 @@ describe('VCombobox grouped', () => {
     })
 
   const labels = (container: Element) =>
-    [...container.querySelectorAll('[role="option"] .v-combobox-option-label')].map((o) =>
+    [...container.querySelectorAll('[role="option"] .v-listbox-option-label')].map((o) =>
       o.textContent?.trim(),
     )
 
@@ -484,7 +484,7 @@ describe('VCombobox grouped', () => {
 
   it('orphaned separators are not rendered (head, tail, consecutive)', async () => {
     const { getByRole, container } = renderGroup()
-    const separators = () => container.querySelectorAll('.v-combobox-separator').length
+    const separators = () => container.querySelectorAll('.v-listbox-separator').length
     const panel = () => container.querySelector('[role="listbox"]')!
     expect(separators()).toBe(2)
 
@@ -496,8 +496,8 @@ describe('VCombobox grouped', () => {
     await fireEvent.update(getByRole('combobox') as HTMLInputElement, 'n')
     expect(labels(container)).toEqual(['France', 'Réunion', 'Japan'])
     expect(separators()).toBe(2)
-    expect(panel().firstElementChild?.classList.contains('v-combobox-separator')).toBe(false)
-    expect(panel().lastElementChild?.classList.contains('v-combobox-separator')).toBe(false)
+    expect(panel().firstElementChild?.classList.contains('v-listbox-separator')).toBe(false)
+    expect(panel().lastElementChild?.classList.contains('v-listbox-separator')).toBe(false)
   })
 
   it('a group option is selected and feeds the Chips like a bare option', async () => {
@@ -523,7 +523,7 @@ describe('VCombobox asynchronous', () => {
   })
 
   const labels = (container: Element) =>
-    [...container.querySelectorAll('[role="option"] .v-combobox-option-label')].map((o) =>
+    [...container.querySelectorAll('[role="option"] .v-listbox-option-label')].map((o) =>
       o.textContent?.trim(),
     )
 
@@ -774,9 +774,9 @@ describe('VCombobox asynchronous', () => {
       HTMLElement,
     ]
     expect(withIcon.querySelector('.v-icon-symbol')?.textContent).toBe('flag')
-    expect(withIcon.firstElementChild?.classList.contains('v-combobox-option-label')).toBe(false)
+    expect(withIcon.firstElementChild?.classList.contains('v-listbox-option-label')).toBe(false)
     expect(withoutIcon.querySelector('.v-icon-symbol')).toBeNull()
-    expect(withoutIcon.firstElementChild?.classList.contains('v-combobox-option-label')).toBe(true)
+    expect(withoutIcon.firstElementChild?.classList.contains('v-listbox-option-label')).toBe(true)
   })
 
   it('the #chip slot: it replaces the default VChip, and `remove` removes the value', async () => {
@@ -1134,7 +1134,7 @@ describe('VCombobox virtual', () => {
     await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
     const listbox = container.querySelector('[role="listbox"]')!
     expect(listbox.querySelectorAll('[role="option"]')).toHaveLength(6)
-    const spacer = listbox.querySelector<HTMLElement>('.v-combobox-spacer')!
+    const spacer = listbox.querySelector<HTMLElement>('.v-listbox-spacer')!
     expect(spacer.getAttribute('aria-hidden')).toBe('true')
     expect(parseFloat(spacer.style.blockSize)).toBeGreaterThan(30000)
   })
@@ -1193,14 +1193,14 @@ describe('VCombobox virtual', () => {
     const first = getByRole('group', { name: 'First' })
     // The heading is rendered at the top: it names its block.
     expect(first.getAttribute('aria-labelledby')).toBe(
-      first.querySelector('.v-combobox-group-label')!.id,
+      first.querySelector('.v-listbox-group-label')!.id,
     )
     // The last option of the second block is pinned without its heading.
     await fireEvent.keyDown(input, { key: 'ArrowUp' })
     await nextTick()
     const second = getByRole('group', { name: 'Second' })
     expect(second.getAttribute('aria-label')).toBe('Second')
-    expect(second.querySelector('.v-combobox-group-label')).toBeNull()
+    expect(second.querySelector('.v-listbox-group-label')).toBeNull()
     const option = second.querySelector('[role="option"]')!
     expect(option.getAttribute('aria-setsize')).toBe('20')
     expect(option.getAttribute('aria-posinset')).toBe('20')
@@ -1211,6 +1211,6 @@ describe('VCombobox virtual', () => {
     await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
     expect(container.querySelectorAll('[role="option"]')).toHaveLength(1000)
     expect(container.querySelector('[role="option"]')!.hasAttribute('aria-posinset')).toBe(false)
-    expect(container.querySelector('.v-combobox-spacer')).toBeNull()
+    expect(container.querySelector('.v-listbox-spacer')).toBeNull()
   })
 })

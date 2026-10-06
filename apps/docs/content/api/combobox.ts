@@ -48,9 +48,9 @@ export default {
       slots: [
         { name: 'start', type: '{}' },
         { name: 'value-end', key: 'valueEnd', type: '{}' },
-        { name: 'option', type: 'ComboboxOptionSlotProps' },
-        { name: 'chip', type: 'ComboboxChipSlotProps' },
-        { name: 'overflow', type: 'ComboboxOverflowSlotProps' },
+        { name: 'option', type: 'ListboxOptionSlotProps' },
+        { name: 'chip', type: 'ListboxChipSlotProps' },
+        { name: 'overflow', type: 'ListboxOverflowSlotProps' },
         { name: 'empty', type: 'ComboboxEmptySlotProps' },
         { name: 'loading', type: '{}' },
       ],
@@ -69,17 +69,6 @@ export default {
       definition: `export type ChipSize = 'xs' | 'sm'`,
     },
     {
-      name: 'ComboboxChipSlotProps',
-      definition: `export interface ComboboxChipSlotProps {
-  value: ItemValue
-  option: ComboboxOption | undefined
-  label: string
-  remove: () => void
-  size: ChipSize
-  compact: boolean
-}`,
-    },
-    {
       name: 'ComboboxEmptySlotProps',
       definition: `export interface ComboboxEmptySlotProps {
   query: string
@@ -90,47 +79,12 @@ export default {
       definition: `export type ComboboxFilter = boolean | ((option: ComboboxOption, query: string) => boolean)`,
     },
     {
-      name: 'ComboboxGroup',
-      definition: `export interface ComboboxGroup {
-  label: string
-  options: ComboboxOption[]
-}`,
-    },
-    {
       name: 'ComboboxItem',
-      definition: `export type ComboboxItem = ComboboxOption | ComboboxGroup | ComboboxSeparator`,
+      definition: `export type ComboboxItem = ListboxItem`,
     },
     {
       name: 'ComboboxOption',
-      definition: `export interface ComboboxOption {
-  value: ItemValue
-  label: string
-  icon?: IconSource
-  disabled?: boolean
-}`,
-    },
-    {
-      name: 'ComboboxOptionSlotProps',
-      definition: `export interface ComboboxOptionSlotProps {
-  option: ComboboxOption
-  index: number
-  active: boolean
-  selected: boolean
-}`,
-    },
-    {
-      name: 'ComboboxOverflowSlotProps',
-      definition: `export interface ComboboxOverflowSlotProps {
-  count: number
-  size: ChipSize
-  compact: boolean
-}`,
-    },
-    {
-      name: 'ComboboxSeparator',
-      definition: `export interface ComboboxSeparator {
-  separator: true
-}`,
+      definition: `export type ComboboxOption = ListboxOption`,
     },
     {
       name: 'IconRender',
@@ -148,6 +102,60 @@ export default {
     {
       name: 'ItemValue',
       definition: `export type ItemValue = string | number`,
+    },
+    {
+      name: 'ListboxChipSlotProps',
+      definition: `export interface ListboxChipSlotProps {
+  value: ItemValue
+  option: ListboxOption | undefined
+  label: string
+  remove: () => void
+  size: ChipSize
+  compact: boolean
+}`,
+    },
+    {
+      name: 'ListboxGroup',
+      definition: `export interface ListboxGroup {
+  label: string
+  options: ListboxOption[]
+}`,
+    },
+    {
+      name: 'ListboxItem',
+      definition: `export type ListboxItem = ListboxOption | ListboxGroup | ListboxSeparator`,
+    },
+    {
+      name: 'ListboxOption',
+      definition: `export interface ListboxOption {
+  value: ItemValue
+  label: string
+  icon?: IconSource
+  disabled?: boolean
+}`,
+    },
+    {
+      name: 'ListboxOptionSlotProps',
+      definition: `export interface ListboxOptionSlotProps {
+  option: ListboxOption
+  index: number
+  active: boolean
+  selected: boolean
+}`,
+    },
+    {
+      name: 'ListboxOverflowSlotProps',
+      definition: `export interface ListboxOverflowSlotProps {
+  count: number
+  size: ChipSize
+  compact: boolean
+}`,
+    },
+    {
+      name: 'ListboxSeparator',
+      definition: `export interface ListboxSeparator {
+  separator: true
+}`,
     },
   ],
   cssVars: [

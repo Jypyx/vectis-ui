@@ -9,7 +9,7 @@ import { iconProps } from '../VIcon/iconProps'
 import { check as checkIcon } from '../VIcon/icons/check'
 import type { IconSource } from '../VIcon/types'
 
-interface ComboboxOptionProps {
+interface ListboxOptionProps {
   /** An icon before the label: an icon name, or an explicit render. */
   icon?: IconSource
   /** Marks the option as one of the chosen ones, which also draws the tick. */
@@ -20,7 +20,7 @@ interface ComboboxOptionProps {
   disabled?: boolean
 }
 
-const props = withDefaults(defineProps<ComboboxOptionProps>(), {
+const props = withDefaults(defineProps<ListboxOptionProps>(), {
   icon: undefined,
   selected: false,
   active: false,
@@ -48,21 +48,21 @@ function onClick() {
     type="button"
     role="option"
     tabindex="-1"
-    class="v-combobox-option"
+    class="v-listbox-option"
     :aria-selected="selected"
     :aria-disabled="disabled ? 'true' : undefined"
     :data-active="active ? '' : undefined"
     @click="onClick"
   >
     <VIcon v-if="icon" v-bind="iconProps(icon)" />
-    <span class="v-combobox-option-label"><slot /></span>
-    <VIcon v-if="selected" :name="checkIcon" class="v-combobox-option-check" />
+    <span class="v-listbox-option-label"><slot /></span>
+    <VIcon v-if="selected" :name="checkIcon" class="v-listbox-option-check" />
   </button>
 </template>
 
 <style>
 @layer vectis.components {
-  .v-combobox-option {
+  .v-listbox-option {
     /*
      * Every dimension is inherited from the panel, which carries the shared size class, and the
      * icons follow through the same inheritance. The type is composite, exactly as in a menu
@@ -88,20 +88,20 @@ function onClick() {
 
   /* The zero minimum is what allows a long label to be compressed at all: a flex item
      otherwise refuses to shrink below its own content. */
-  .v-combobox-option-label {
+  .v-listbox-option-label {
     flex: 1;
     min-inline-size: 0;
   }
 
   /* A row is highlighted by the pointer resting on it, or by being the current one. There
      is deliberately no focus rule: the focus never arrives here, it stays in the field. */
-  .v-combobox-option:hover:not([aria-disabled='true']),
-  .v-combobox-option[data-active] {
+  .v-listbox-option:hover:not([aria-disabled='true']),
+  .v-listbox-option[data-active] {
     background: var(--vectis-color-surface-muted);
     outline: none;
   }
 
-  .v-combobox-option[aria-selected='true'] {
+  .v-listbox-option[aria-selected='true'] {
     color: var(--vectis-color-accent-text);
   }
 
@@ -109,7 +109,7 @@ function onClick() {
    * Matched on the ARIA state and not on the native one, which this component deliberately
    * never sets; see the introduction.
    */
-  .v-combobox-option[aria-disabled='true'] {
+  .v-listbox-option[aria-disabled='true'] {
     background: transparent;
     color: var(--vectis-color-text-subtle);
     cursor: not-allowed;

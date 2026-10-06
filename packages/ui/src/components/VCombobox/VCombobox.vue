@@ -5,26 +5,30 @@
  * supplies filtering, selection and keyboard navigation unavailable to native text inputs.
  */
 
-import { computed, inject, reactive, ref, useId, watch, watchEffect } from 'vue'
+import { computed, inject, ref, useId, watch } from 'vue'
 
-import VChip from '../VChip/VChip.vue'
 import VEmptyState from '../VEmptyState/VEmptyState.vue'
-import type { ChipSize } from '../VChip/VChip.vue'
-import VIcon from '../VIcon/VIcon.vue'
-import { iconProps } from '../VIcon/iconProps'
 import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
 import { inbox as inboxIcon } from '../VIcon/icons/inbox'
 import { search_off as searchOffIcon } from '../VIcon/icons/search_off'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
-import VPopover from '../VPopover/VPopover.vue'
-import VComboboxOption from './VComboboxOption.vue'
-import VComboboxGroup from './VComboboxGroup.vue'
-import VComboboxSeparator from './VComboboxSeparator.vue'
+import VListboxChevron from '../VListbox/VListboxChevron.vue'
+import VListboxPanel from '../VListbox/VListboxPanel.vue'
+import VListboxValues from '../VListbox/VListboxValues.vue'
 import VSpinner from '../VSpinner/VSpinner.vue'
 
 import { toggleValue } from '../../utils/array'
-import type { ItemValue } from '../../types'
+import type {
+  ItemValue,
+  ListboxGroup,
+  ListboxItem,
+  ListboxChipSlotProps,
+  ListboxOption,
+  ListboxOptionSlotProps,
+  ListboxOverflowSlotProps,
+  ListboxSeparator,
+} from '../../types'
 import { inputGroupKey } from '../VInput/context'
 
 import { chipScaleFor } from '../../utils/chip'
@@ -35,7 +39,7 @@ import { useRootAttrs } from '../../composables/useRootAttrs'
 
 import { useFocusoutDismiss } from '../../composables/useFocusoutDismiss'
 import { useInfiniteScroll } from '../../composables/useInfiniteScroll'
-import { useVirtualList, type VirtualSegment } from '../../composables/useVirtualList'
+import { selectionOf, useListbox } from '../../composables/useListbox'
 
 import { canClear } from '../../composables/useClearable'
 import { iconStartListener } from '../../composables/useIconClickHandlers'
@@ -44,46 +48,24 @@ import { useTimer } from '../../composables/useTimer'
 import { useMessages } from '../../i18n/state'
 
 /** One thing that can be chosen. */
-export interface ComboboxOption {
-  /**
-   * What choosing it means: this is what the value holds. A number is admitted because a
-   * list of options almost always comes from somewhere that keys its rows by one.
-   */
-  value: ItemValue
-  /** What it is called on screen, and what the search matches against. */
-  label: string
-  /** An icon before the label: an icon name, or an explicit render. */
-  icon?: IconSource
-  /** Shows the option without allowing it to be chosen. */
-  disabled?: boolean
-}
+export type ComboboxOption = ListboxOption
 
 /**
  * A named block of options, the equivalent of the grouping a native list offers. A
  * group none of whose options survive the search disappears entirely, its name
  * included.
  */
-export interface ComboboxGroup {
-  /** The name of the block. */
-  label: string
-  /** The options it holds. */
-  options: ComboboxOption[]
-}
+export type ComboboxGroup = ListboxGroup
 
 /**
- * A rule drawn between two blocks of options. It is purely decorative, and a separator
- * the search leaves stranded (at the top, at the bottom, or against another one) is
- * simply not drawn.
+ * A rule drawn between two blocks of options. It is purely decorative, and a separator the
+ * search leaves stranded (at the top, at the bottom, or against another one) is simply not
+ * drawn.
  */
-export interface ComboboxSeparator {
-  separator: true
-}
+export type ComboboxSeparator = ListboxSeparator
 
 /** Anything the list may hold: an option, a named block, or a separator. */
-export type ComboboxItem = ComboboxOption | ComboboxGroup | ComboboxSeparator
-
-const isGroup = (item: ComboboxItem): item is ComboboxGroup => 'options' in item
-const isSeparator = (item: ComboboxItem): item is ComboboxSeparator => 'separator' in item
+export type ComboboxItem = ListboxItem
 
 /**
  * How the list is narrowed as one types: by the component itself, not at all (when the
@@ -105,29 +87,13 @@ export type ComboboxSize = 'sm' | 'md' | 'lg'
 export type ComboboxDisplay = 'chip' | 'text'
 
 /** What the `#option` slot receives. */
-export interface ComboboxOptionSlotProps {
-  option: ComboboxOption
-  index: number
-  active: boolean
-  selected: boolean
-}
+export type ComboboxOptionSlotProps = ListboxOptionSlotProps
 
 /** What the `#chip` slot receives. */
-export interface ComboboxChipSlotProps {
-  value: ItemValue
-  option: ComboboxOption | undefined
-  label: string
-  remove: () => void
-  size: ChipSize
-  compact: boolean
-}
+export type ComboboxChipSlotProps = ListboxChipSlotProps
 
 /** What the `#overflow` slot receives. */
-export interface ComboboxOverflowSlotProps {
-  count: number
-  size: ChipSize
-  compact: boolean
-}
+export type ComboboxOverflowSlotProps = ListboxOverflowSlotProps
 
 /** What the `#empty` slot receives. */
 export interface ComboboxEmptySlotProps {
@@ -359,7 +325,6 @@ const optionsId = useId()
 
 const open = ref(false)
 const query = ref('')
-const activeIndex = ref(-1)
 const focused = ref(false)
 // The text in the field serves two purposes at once: it SHOWS the chosen label when a single
 // value is picked, and it is what one searches with. This flag tells the two apart; while it is
@@ -367,71 +332,7 @@ const focused = ref(false)
 // list again.
 const typed = ref(false)
 
-const selectedValues = computed<ItemValue[]>(() => {
-  if (props.multiple) return Array.isArray(model.value) ? model.value : []
-  // An empty string is what an emptied combobox says, and it is not a value. A NUMBER, on the
-  // other hand, is a value even at zero; hence the test on the empty string alone rather than
-  // on falsiness, which would drop the option keyed `0`.
-  return !Array.isArray(model.value) && model.value !== '' ? [model.value] : []
-})
-
-// Every option, flattened: the blocks unwrapped, the separators dropped, in the order they were
-// given. This is the ONE reading of the options the rest of the component does; the filtering,
-// the memory of what was chosen, the labels and the paging all ignore the hierarchy entirely.
-const allOptions = computed<ComboboxOption[]>(() =>
-  props.options.flatMap((item) => {
-    if (isSeparator(item)) return []
-    return isGroup(item) ? item.options : [item]
-  }),
-)
-
-// With a source that answers over the network, the options only ever hold the latest results,
-// and something already chosen is usually absent from them; without this, a chip would show a
-// raw identifier instead of a name, and a custom chip would lose the option's icon. It is kept
-// up to date by an effect rather than by watching the options, because the effect tracks the
-// ITERATION and therefore also notices a page appended in place.
-const optionCache = reactive(new Map<ItemValue, ComboboxOption>())
-watchEffect(() => {
-  const wanted = new Set(selectedValues.value)
-  for (const option of allOptions.value) {
-    if (wanted.has(option.value)) optionCache.set(option.value, option)
-  }
-  // Without this the memory would grow with every value chosen during the session rather than
-  // with the current selection; a slow leak in a long-lived multiple field fed by a paginated
-  // source.
-  for (const value of optionCache.keys()) if (!wanted.has(value)) optionCache.delete(value)
-})
-
-/*
- * A lookup from value to option, built once per list of options rather than searched each time.
- * Finding an option is done several times per chip and per render; for the chip itself, its
- * label and the name of its remove button; so a linear search here would cost the number of
- * chips times the number of options, on every keystroke.
- */
-const optionsByValue = computed(() => {
-  const map = new Map<ItemValue, ComboboxOption>()
-  for (const option of allOptions.value) if (!map.has(option.value)) map.set(option.value, option)
-  return map
-})
-
-/**
- * The selection as a set, so that asking "is this one chosen?" costs nothing however many are;
- * the same device VDataTable uses for its selected rows.
- */
-const selectedSet = computed(() => new Set(selectedValues.value))
-
-/**
- * An option coming from that memory is a reactive PROXY, since making the map reactive converts
- * the objects inside it. Compare options by their value and never by identity, or the two forms
- * of the same option will not match.
- */
-function optionOf(value: ItemValue) {
-  return optionsByValue.value.get(value) ?? optionCache.get(value)
-}
-
-function labelOf(value: ItemValue) {
-  return optionOf(value)?.label ?? String(value)
-}
+const selectedValues = computed(() => selectionOf(model.value, props.multiple))
 
 /*
  * Reading the label on every call is what keeps the filter reactive: flattening the options
@@ -453,17 +354,41 @@ const searchTerm = computed(() => (typed.value ? query.value.trim() : ''))
 // chose.
 const closedTerm = ref<string | null>(null)
 
-// This is what the keyboard counts through: blocks and separators do not appear in it, which is
-// exactly why the arrows never stop on one.
-const filtered = computed(() => {
-  const matcher = props.filter
-  const list = allOptions.value
-  if (matcher === false) return list
-  const q = closedTerm.value ?? searchTerm.value
-  if (!q) return list
-  if (typeof matcher === 'function') return list.filter((o) => matcher(o, q))
-  const needle = normalizeText(q)
-  return list.filter((o) => normalizedLabelOf(o).includes(needle))
+const panelRef = ref<InstanceType<typeof VListboxPanel> | null>(null)
+
+const {
+  allOptions,
+  visible: filtered,
+  optionOf,
+  labelOf,
+  remember,
+  activeIndex,
+  optionId,
+  highlightFirst,
+  highlightSelected,
+  move,
+  hover,
+  blocks,
+  measureRow,
+} = useListbox({
+  items: () => props.options,
+  filter: (list) => {
+    const matcher = props.filter
+    if (matcher === false) return list
+    const q = closedTerm.value ?? searchTerm.value
+    if (!q) return list
+    if (typeof matcher === 'function') return list.filter((o) => matcher(o, q))
+    const needle = normalizeText(q)
+    return list.filter((o) => normalizedLabelOf(o).includes(needle))
+  },
+  selected: () => selectedValues.value,
+  open: () => open.value,
+  id: optionsId,
+  panelEl: () => panelRef.value?.el ?? null,
+  virtual: () => props.virtual,
+  hasMore: () => props.hasMore,
+  size: () => resolvedSize.value,
+  compact: () => resolvedCompact.value,
 })
 
 // @a11y
@@ -474,70 +399,6 @@ const filtered = computed(() => {
 const stateAnnouncement = computed(() => {
   if (!open.value || filtered.value.length > 0) return ''
   return props.loading ? resolvedLoadingText.value : resolvedEmptyText.value
-})
-
-// Each option there carries its index in `filtered` (and not its position in the tree): ids,
-// highlight and the #option slot stay aligned on the keyboard navigation.
-type RenderedOption = { kind: 'option'; key: string; option: ComboboxOption; index: number }
-type RenderedNode =
-  | RenderedOption
-  | { kind: 'group'; key: string; id: string; label: string; options: RenderedOption[] }
-  | { kind: 'separator'; key: string }
-
-// Nothing here is keyed by VALUE. Two options may share one (a consumer's duplicate, or `1`
-// beside `'1'`, which a template literal spells the same), and a value-keyed index hands both
-// the same position, so both light up as active and Vue patches two rows under one key.
-const rendered = computed<RenderedNode[]>(() => {
-  const kept = new Set(filtered.value)
-  let next = 0
-
-  const entryOf = (option: ComboboxOption, key: string): RenderedOption | null => {
-    if (!kept.has(option)) return null
-    return { kind: 'option', key: `option:${key}`, option, index: next++ }
-  }
-
-  const nodes: RenderedNode[] = []
-  // A separator is held back and only drawn once something has come before it and something
-  // comes after it. That single rule covers all three ways the filtering can strand one: at the
-  // top of the list, at the bottom, and two in a row.
-  let pendingSeparator: string | null = null
-
-  for (const [i, item] of props.options.entries()) {
-    if (isSeparator(item)) {
-      if (nodes.length > 0) pendingSeparator = `sep:${i}`
-      continue
-    }
-
-    let node: RenderedNode | null
-    if (isGroup(item)) {
-      const options = item.options
-        .map((option, j) => entryOf(option, `${i}.${j}`))
-        .filter((entry): entry is RenderedOption => entry !== null)
-      // A block none of whose options survived is dropped entirely, its name included:
-      // a heading over nothing is worse than no heading.
-      node =
-        options.length > 0
-          ? {
-              kind: 'group',
-              key: `group:${i}`,
-              id: `${optionsId}-group-${i}`,
-              label: item.label,
-              options,
-            }
-          : null
-    } else {
-      node = entryOf(item, String(i))
-    }
-    if (!node) continue
-
-    if (pendingSeparator !== null) {
-      nodes.push({ kind: 'separator', key: pendingSeparator })
-      pendingSeparator = null
-    }
-    nodes.push(node)
-  }
-
-  return nodes
 })
 
 // Nothing native waits before sending a request, or refrains from sending the same one twice,
@@ -575,23 +436,12 @@ watch(searchTerm, (term) => {
   // matters when the filtering is left to the source: the visible list keeps the very same
   // reference until the answer arrives, so the watcher below would never fire and Enter would
   // do nothing in the meantime.
-  activeIndex.value = filtered.value.findIndex((o) => !o.disabled)
+  highlightFirst()
   // The page asked for under the previous term will never arrive, and the first page of the new
   // one may be exactly as long as the list it replaces; which the paging would not recognise as
   // an arrival.
   infiniteScroll.restart()
   emitSearch(term)
-})
-
-watch(filtered, (list) => {
-  // While the panel is open there must always be a valid option highlighted. It is moved back
-  // to the first result whenever the highlighted one has fallen out of the list or there was
-  // none at all; without that second case, a search that passed through "no result" would leave
-  // nothing highlighted, and Enter would not choose the single result that came back.
-  if (!open.value) return
-  if (activeIndex.value < 0 || activeIndex.value >= list.length) {
-    activeIndex.value = list.findIndex((o) => !o.disabled)
-  }
 })
 
 // With a single value, the field shows its label as ordinary text whenever it is not being
@@ -627,27 +477,6 @@ const collapsed = computed(
     (!focused.value || (textDisplay.value && props.readonly)),
 )
 
-// Unfolded, the reader is working on the selection, and every value must be there to be seen
-// and taken back; Backspace included, which would otherwise remove a value hidden behind the
-// "+X". `max: 0` means no limit, as on VAvatarGroup: a truthiness test, never `!= null`, which
-// would hide every value.
-const visibleValues = computed(() =>
-  collapsed.value && props.max ? selectedValues.value.slice(0, props.max) : selectedValues.value,
-)
-const overflowCount = computed(() => selectedValues.value.length - visibleValues.value.length)
-
-// Digits and a plus sign stay out of the dictionary, as VAvatarGroup's "+N" does: rephrasing
-// goes through `overflowText` or the `#overflow` slot.
-const resolvedOverflowText = computed(() =>
-  props.overflowText ? props.overflowText(overflowCount.value) : `+${overflowCount.value}`,
-)
-
-// The comma is universal punctuation rather than a word, so it stays out of the dictionary,
-// as in VFileInput's own text display.
-const displayText = computed(() =>
-  textDisplay.value ? visibleValues.value.map(labelOf).join(', ') : '',
-)
-
 // The field cannot work that out for itself, since the chips live outside its value, so the
 // answer is given to it explicitly, and the room for the cross is reserved accordingly.
 const clearVisible = computed(() =>
@@ -658,201 +487,6 @@ const clearVisible = computed(() =>
   ),
 )
 
-// @a11y
-// An option's id follows the OPTION, from its place among all the options, and never its place
-// in the filtered list: a screen reader announces the current option when
-// `aria-activedescendant` changes, and a positional id would keep the same value while the
-// filter slides another option under the highlight, which then goes unannounced. Still indexed
-// by the filtered position, which the keyboard counts through.
-const sourceIndex = computed(() => new Map(allOptions.value.map((option, i) => [option, i])))
-const optionId = (index: number) => {
-  const option = filtered.value[index]
-  return `${optionsId}-option-${option ? sourceIndex.value.get(option) : index}`
-}
-
-/**
- * The panel as one flat sequence of rows, the unit the virtual mode windows: a block's name is a
- * row of its own, above its options. Each row knows its block, so the rows rendered can be
- * gathered back into their groups. `set` and `position` are the option's place in its block, or
- * among the options outside any block.
- */
-type FlatOption = RenderedOption & { group?: string; set: number; position: number }
-type FlatRow =
-  | FlatOption
-  | { kind: 'heading'; key: string; id: string; label: string; group: string }
-  | { kind: 'separator'; key: string }
-
-const flat = computed(() => {
-  const rows: FlatRow[] = []
-  const labels = new Map<string, string>()
-  // Indexed by the option's place in `filtered`: where the keyboard's highlight sits in the rows.
-  const rowOfOption: number[] = []
-  const loose = rendered.value.filter((node) => node.kind === 'option').length
-  let looseSeen = 0
-  for (const node of rendered.value) {
-    if (node.kind === 'separator') rows.push(node)
-    else if (node.kind === 'option') {
-      rowOfOption[node.index] = rows.length
-      rows.push({ ...node, set: loose, position: ++looseSeen })
-    } else {
-      labels.set(node.key, node.label)
-      rows.push({
-        kind: 'heading',
-        key: `heading:${node.key}`,
-        id: node.id,
-        label: node.label,
-        group: node.key,
-      })
-      for (const [j, option] of node.options.entries()) {
-        rowOfOption[option.index] = rows.length
-        rows.push({ ...option, group: node.key, set: node.options.length, position: j + 1 })
-      }
-    }
-  }
-  return { rows, labels, rowOfOption }
-})
-
-// Only a starting guess for the virtual mode, every row being measured once rendered: the
-// height of an option at each size, 4px less when compact, as the control heights go.
-const OPTION_HEIGHT: Record<ComboboxSize, number> = { sm: 32, md: 40, lg: 48 }
-
-const panelRef = ref<InstanceType<typeof VPopover> | null>(null)
-
-// @a11y
-// The highlighted row stays rendered wherever the panel is scrolled: `aria-activedescendant`
-// must name an element that exists.
-const virtualList = useVirtualList({
-  scrollEl: computed(() => (props.virtual ? (panelRef.value?.el ?? null) : null)),
-  count: () => flat.value.rows.length,
-  key: (index) => flat.value.rows[index]?.key,
-  itemSize: () => OPTION_HEIGHT[resolvedSize.value] - (resolvedCompact.value ? 4 : 0),
-  overscan: () => 5,
-  initialCount: () => 10,
-  pinned: () => {
-    const row = flat.value.rowOfOption[activeIndex.value]
-    return row === undefined ? [] : [row]
-  },
-})
-const measureRow = virtualList.measure
-
-/**
- * A rendered option with its state worked out, once per row: `row` is what the option element
- * takes, `slot` what the `#option` slot receives, and both read the same two answers. `at` is
- * the row's place in the flat sequence, which the virtual mode measures it under.
- */
-type OptionRow = FlatOption & {
-  at: number
-  row: {
-    id: string
-    icon?: IconSource
-    active: boolean
-    selected: boolean
-    disabled?: boolean
-    'aria-setsize'?: number
-    'aria-posinset'?: number
-  }
-  slot: { option: ComboboxOption; index: number; active: boolean; selected: boolean }
-}
-type RowBlock =
-  | OptionRow
-  | { kind: 'heading'; key: string; id: string; label: string; at: number }
-  | { kind: 'separator'; key: string; at: number }
-  | { kind: 'spacer'; key: string; size: number }
-type PanelBlock =
-  RowBlock | { kind: 'group'; key: string; label: string; labelId?: string; children: RowBlock[] }
-
-function withState(entry: FlatOption, at: number): OptionRow {
-  const active = entry.index === activeIndex.value
-  const selected = selectedSet.value.has(entry.option.value)
-  // @a11y
-  // Only some options exist in the virtual mode, so each one says where it stands; the last
-  // block may still grow while pages are coming.
-  const placed = props.virtual
-    ? { 'aria-setsize': props.hasMore ? -1 : entry.set, 'aria-posinset': entry.position }
-    : {}
-  return {
-    ...entry,
-    at,
-    row: {
-      id: optionId(entry.index),
-      icon: entry.option.icon,
-      active,
-      selected,
-      disabled: entry.option.disabled,
-      ...placed,
-    },
-    slot: { option: entry.option, index: entry.index, active, selected },
-  }
-}
-
-// What the panel renders: the rows of the window and the space standing for the others,
-// gathered back into their blocks. Kept apart from `flat` on purpose: the highlight moves on
-// every arrow key, and only this pass over the rendered rows follows it; the filtering and the
-// grouping stay where they are.
-const blocks = computed<PanelBlock[]>(() => {
-  const { rows, labels } = flat.value
-  const segments: VirtualSegment[] = props.virtual
-    ? virtualList.segments.value
-    : rows.map((_, index) => ({ type: 'row', index }))
-  const groupAt = (segment: VirtualSegment | undefined) => {
-    const row = segment?.type === 'row' ? rows[segment.index] : undefined
-    return row && row.kind !== 'separator' ? row.group : undefined
-  }
-
-  const out: PanelBlock[] = []
-  let open: Extract<PanelBlock, { kind: 'group' }> | undefined
-  for (const [k, segment] of segments.entries()) {
-    let block: RowBlock
-    let group: string | undefined
-    if (segment.type === 'spacer') {
-      block = { kind: 'spacer', key: segment.key, size: segment.size }
-      // Between two rows of one block, the space stands for rows of that block.
-      const before = groupAt(segments[k - 1])
-      group = before === groupAt(segments[k + 1]) ? before : undefined
-    } else {
-      const row = rows[segment.index]!
-      block = row.kind === 'option' ? withState(row, segment.index) : { ...row, at: segment.index }
-      group = groupAt(segment)
-    }
-    if (group === undefined) {
-      open = undefined
-      out.push(block)
-      continue
-    }
-    if (open?.key !== group) {
-      open = { kind: 'group', key: group, label: labels.get(group)!, children: [] }
-      out.push(open)
-    }
-    if (block.kind === 'heading') open.labelId = block.id
-    open.children.push(block)
-  }
-  return out
-})
-
-function hover(entry: RenderedOption) {
-  if (!entry.option.disabled) activeIndex.value = entry.index
-}
-
-// @a11y
-// Since the focus never leaves the field, the browser has no reason to scroll the highlighted
-// option into view; nothing was focused. It is brought into view by hand instead, and asked for
-// the SMALLEST movement that reveals it, so an option already visible does not make the panel
-// jump.
-watch(
-  activeIndex,
-  (index) => {
-    if (index < 0) return
-    if (props.virtual) {
-      const row = flat.value.rowOfOption[index]
-      if (row !== undefined) void virtualList.scrollToIndex(row)
-      return
-    }
-    // Called optionally: the unit-test environment implements no scrolling at all.
-    document.getElementById(optionId(index))?.scrollIntoView?.({ block: 'nearest' })
-  },
-  { flush: 'post' },
-)
-
 // The single cut-off point of a frozen field: every route into the list; a click on the
 // control, the focus, a keystroke, typing; ends up here, so `readonly` is refused once rather
 // than guarded in each handler.
@@ -860,9 +494,7 @@ function openPanel() {
   if (resolvedDisabled.value || props.readonly || open.value) return
   closedTerm.value = null
   open.value = true
-  const list = filtered.value
-  const selectedIdx = list.findIndex((o) => !o.disabled && selectedSet.value.has(o.value))
-  activeIndex.value = selectedIdx >= 0 ? selectedIdx : list.findIndex((o) => !o.disabled)
+  highlightSelected()
   // Told to the source after the panel is marked open; the delayed emission checks that flag
   // before firing; which lets an outside source load its first page as the panel appears.
   emitSearch(searchTerm.value, true)
@@ -907,17 +539,6 @@ watch(
  * of it even while floating above the page.
  */
 const onFocusout = useFocusoutDismiss(rootEl, closePanel)
-
-// @a11y
-/*
- * The focus must never leave the field, and this is what prevents it. Without cancelling the
- * press, clicking an option takes the focus off the field, the handler above closes the panel
- * before the click is turned into a selection, and choosing with the mouse stops working
- * entirely.
- */
-function onPanelMousedown(event: MouseEvent) {
-  event.preventDefault()
-}
 
 /** The reader is typing: the text becomes a search, and the panel opens. */
 function onInput() {
@@ -975,7 +596,7 @@ function select(option: ComboboxOption) {
   if (option.disabled || props.readonly || resolvedDisabled.value) return
   // Remembered immediately: the option may vanish from the list; on the next search; before the
   // parent has even passed the new value back down.
-  optionCache.set(option.value, option)
+  remember(option)
   if (!props.multiple) closedTerm.value = searchTerm.value
   typed.value = false
   if (props.multiple) {
@@ -1012,22 +633,9 @@ function onClear() {
   typed.value = false
   // The list may still be open (a pointer press on the cross does not close it): the
   // highlight is moved to the first option rather than dropped, or Enter would do nothing.
-  activeIndex.value = open.value ? filtered.value.findIndex((o) => !o.disabled) : -1
+  if (open.value) highlightFirst()
+  else activeIndex.value = -1
   emit('clear')
-}
-
-// @keyboard
-function move(delta: number) {
-  const list = filtered.value
-  if (list.length === 0) return
-  // From "nothing highlighted" the first step lands on an END of the list: starting at -1,
-  // a step back would stop on the second-to-last option.
-  let i = activeIndex.value < 0 && delta < 0 ? 0 : activeIndex.value
-  for (let step = 0; step < list.length; step++) {
-    i = (i + delta + list.length) % list.length
-    if (!list[i]?.disabled) break
-  }
-  activeIndex.value = i
 }
 
 // @keyboard @a11y
@@ -1136,59 +744,27 @@ defineExpose({
         @clear="onClear"
       >
         <template v-if="multiple || $slots.start" #start>
-          <span v-if="displayText" class="v-combobox-text">{{ displayText }}</span>
-          <!-- A box of its own beside the line rather than the end of it: the labels are what
-               the ellipsis cuts, and the count of what they do not show must survive it. -->
-          <span v-if="textDisplay && overflowCount > 0" class="v-combobox-overflow">
-            <slot
-              name="overflow"
-              :count="overflowCount"
-              :size="chipScale.size"
-              :compact="chipScale.compact"
-              >{{ resolvedOverflowText }}</slot
-            >
-          </span>
-          <template v-for="value in multiple && !textDisplay ? visibleValues : []" :key="value">
-            <slot
-              name="chip"
-              :value="value"
-              :option="optionOf(value)"
-              :label="labelOf(value)"
-              :remove="() => removeValue(value)"
-              :size="chipScale.size"
-              :compact="chipScale.compact"
-            >
-              <VChip
-                tone="accent"
-                :size="chipScale.size"
-                :compact="chipScale.compact"
-                :dismissible="!readonly && !resolvedDisabled"
-                :dismiss-label="m.common.remove(labelOf(value))"
-                :disabled="resolvedDisabled"
-                @dismiss="removeValue(value)"
-                >{{ labelOf(value) }}</VChip
-              >
-            </slot>
-          </template>
-          <!-- Not wrapped, unlike the text display's counter: a box around an inline-flex chip
-               opens a line box, whose strut makes the field taller than its chips. Neutral
-               and not dismissible, so it reads as a summary rather than one more value. -->
-          <slot
-            v-if="multiple && !textDisplay && overflowCount > 0"
-            name="overflow"
-            :count="overflowCount"
-            :size="chipScale.size"
-            :compact="chipScale.compact"
+          <VListboxValues
+            v-if="multiple"
+            :values="selectedValues"
+            :display="display"
+            :max="max"
+            :collapsed="collapsed"
+            :overflow-text="overflowText"
+            :scale="chipScale"
+            :removable="!readonly"
+            :disabled="resolvedDisabled"
+            :label-of="labelOf"
+            :option-of="optionOf"
+            @remove="removeValue"
           >
-            <VChip
-              class="v-combobox-overflow-chip"
-              tone="neutral"
-              :size="chipScale.size"
-              :compact="chipScale.compact"
-              :disabled="resolvedDisabled"
-              >{{ resolvedOverflowText }}</VChip
-            >
-          </slot>
+            <template v-if="$slots.chip" #chip="chipProps">
+              <slot name="chip" v-bind="chipProps" />
+            </template>
+            <template v-if="$slots.overflow" #overflow="overflowProps">
+              <slot name="overflow" v-bind="overflowProps" />
+            </template>
+          </VListboxValues>
           <slot name="start" />
         </template>
 
@@ -1202,92 +778,29 @@ defineExpose({
         -->
         <template v-if="loading || !hideExpandIcon" #end>
           <VSpinner v-if="loading" class="v-combobox-spinner v-input-icon-end" aria-hidden="true" />
-          <VIcon
-            v-else
-            v-bind="iconProps(expandIcon)"
-            class="v-combobox-chevron v-input-icon-end"
-            aria-hidden="true"
-          />
+          <VListboxChevron v-else class="v-combobox-chevron" :icon="expandIcon" :open="open" />
         </template>
       </VInput>
     </div>
 
-    <!--
-      The panel itself carries both the listbox role and the scrolling. That single fact is what
-      the observer watching for the end of the list and the scrolling of the highlighted option
-      both rely on: inserting any wrapper between them breaks the two at once.
-    -->
-    <VPopover
+    <VListboxPanel
       :id="optionsId"
       ref="panelRef"
       v-model:open="open"
-      mode="manual"
       anchor="--combobox-anchor"
-      match-trigger
       :placement="placement"
-      role="listbox"
-      class="v-combobox-panel v-control"
-      :data-size="resolvedSize"
-      :data-compact="resolvedCompact ? '' : undefined"
-      :aria-multiselectable="multiple ? 'true' : undefined"
-      :data-virtual="virtual ? '' : undefined"
-      @mousedown="onPanelMousedown"
+      class="v-combobox-panel"
+      :size="resolvedSize"
+      :compact="resolvedCompact"
+      :multiple="multiple"
+      :virtual="virtual"
+      :blocks="blocks"
+      :measure="measureRow"
+      @select="select"
+      @highlight="hover"
     >
-      <!-- Blocks and separators exist for the eye alone: the keyboard counts through the
-           flat list of surviving options and therefore never encounters one. -->
-      <template v-for="block in blocks" :key="block.key">
-        <div
-          v-if="block.kind === 'spacer'"
-          class="v-combobox-spacer"
-          aria-hidden="true"
-          :style="{ blockSize: `${block.size}px` }"
-        />
-
-        <VComboboxSeparator
-          v-else-if="block.kind === 'separator'"
-          :ref="virtual ? (el) => measureRow(el, block.at) : undefined"
-        />
-
-        <VComboboxGroup
-          v-else-if="block.kind === 'group'"
-          :label="block.label"
-          :label-id="block.labelId"
-        >
-          <template v-for="child in block.children" :key="child.key">
-            <div
-              v-if="child.kind === 'spacer'"
-              class="v-combobox-spacer"
-              aria-hidden="true"
-              :style="{ blockSize: `${child.size}px` }"
-            />
-            <span
-              v-else-if="child.kind === 'heading'"
-              :id="child.id"
-              :ref="virtual ? (el) => measureRow(el, child.at) : undefined"
-              class="v-combobox-group-label"
-              >{{ child.label }}</span
-            >
-            <VComboboxOption
-              v-else-if="child.kind === 'option'"
-              :ref="virtual ? (el) => measureRow(el, child.at) : undefined"
-              v-bind="child.row"
-              @select="select(child.option)"
-              @pointermove="hover(child)"
-            >
-              <slot name="option" v-bind="child.slot">{{ child.option.label }}</slot>
-            </VComboboxOption>
-          </template>
-        </VComboboxGroup>
-
-        <VComboboxOption
-          v-else-if="block.kind === 'option'"
-          :ref="virtual ? (el) => measureRow(el, block.at) : undefined"
-          v-bind="block.row"
-          @select="select(block.option)"
-          @pointermove="hover(block)"
-        >
-          <slot name="option" v-bind="block.slot">{{ block.option.label }}</slot>
-        </VComboboxOption>
+      <template v-if="$slots.option" #option="slotProps">
+        <slot name="option" v-bind="slotProps" />
       </template>
 
       <!--
@@ -1320,7 +833,7 @@ defineExpose({
       <div v-if="hasMore" ref="sentinelEl" class="v-combobox-more" aria-hidden="true">
         <VSpinner v-if="loading" :label="resolvedLoadingText" />
       </div>
-    </VPopover>
+    </VListboxPanel>
 
     <!-- The spoken counterpart of the two panel states above. It sits OUTSIDE the
          listbox, being exactly the kind of content a listbox may not contain. -->
@@ -1355,23 +868,8 @@ defineExpose({
     anchor-name: --combobox-anchor;
   }
 
-  /*
-   * The panel comes from VPopover, which brings the floating element, its open state, its
-   * anchoring, its placement and its surface. It also carries the shared size class, so the
-   * options and the state rows read their dimensions from it with no size table here.
-   */
   .v-combobox-panel {
     max-block-size: var(--vectis-control-size-combobox-list-max-block);
-    overflow: auto;
-  }
-
-  /* The virtual mode corrects the scroll itself when a row above the view changes height. */
-  .v-combobox-panel[data-virtual] {
-    overflow-anchor: none;
-  }
-
-  .v-combobox-spacer {
-    flex: none;
   }
 
   /*
@@ -1380,17 +878,8 @@ defineExpose({
    * turns in the same place and occupy the same box; the field gives a spinner among its direct
    * children the size of an icon; so swapping one for the other shifts nothing.
    */
-  .v-combobox-chevron,
   .v-combobox-spinner {
     color: var(--vectis-color-text-muted);
-  }
-
-  .v-combobox-chevron {
-    transition: rotate var(--vectis-duration-fast) var(--vectis-ease-default);
-  }
-
-  .v-combobox[data-open] .v-combobox-chevron {
-    rotate: 180deg;
   }
 
   /*
@@ -1409,23 +898,8 @@ defineExpose({
    * selection cannot squeeze what is being typed down to nothing. Folded, the input is out of
    * the flow and the line takes the whole field.
    */
-  .v-combobox-text {
-    flex: 0 1 auto;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .v-combobox:not([data-collapsed]) .v-combobox-text {
+  .v-combobox:not([data-collapsed]) .v-listbox-text {
     max-inline-size: 50%;
-  }
-
-  /* The "+X" after a line of text never shrinks: the line gives way instead. */
-  .v-combobox-overflow {
-    flex: none;
-    white-space: nowrap;
-    color: var(--vectis-color-text-muted);
   }
 
   /*
@@ -1434,7 +908,7 @@ defineExpose({
    * then widens its container to fit every label instead of cutting them short, and the
    * ellipsis never shows.
    */
-  .v-combobox:has(.v-combobox-text) {
+  .v-combobox:has(.v-listbox-text) {
     min-inline-size: 0;
   }
 

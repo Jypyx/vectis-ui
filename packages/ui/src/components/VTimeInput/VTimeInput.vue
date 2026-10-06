@@ -10,7 +10,7 @@ import { computed, inject, provide, ref, watchEffect } from 'vue'
 
 import VButton from '../VButton/VButton.vue'
 import VCombobox from '../VCombobox/VCombobox.vue'
-import type { ComboboxOption } from '../VCombobox/VCombobox.vue'
+import type { ListboxOption } from '../../types'
 import { inputGroupKey } from '../VInput/context'
 import { schedule as scheduleIcon } from '../VIcon/icons/schedule'
 import type { IconSource } from '../VIcon/types'
@@ -650,7 +650,7 @@ const options = computed<TimeOption[]>(() => {
  * The search, which accepts the digit run as well as the words; "930" finds 9:30, the way the
  * typed form's mask reads what it is given.
  */
-const matchTime = (option: ComboboxOption, query: string) =>
+const matchTime = (option: ListboxOption, query: string) =>
   timeMatches(option.label, String(option.value), query)
 
 /**

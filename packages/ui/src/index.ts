@@ -9,7 +9,16 @@ import './styles/index.css'
 export { setLocale, registerMessages } from './i18n/state'
 export { en } from './i18n/en'
 export { fr } from './i18n/fr'
-export type { ItemValue } from './types'
+export type {
+  ItemValue,
+  ListboxGroup,
+  ListboxItem,
+  ListboxOption,
+  ListboxSeparator,
+  ListboxOptionSlotProps,
+  ListboxChipSlotProps,
+  ListboxOverflowSlotProps,
+} from './types'
 export type { Messages, MessagesInput } from './i18n/types'
 
 export { default as VIcon } from './components/VIcon/VIcon.vue'

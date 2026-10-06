@@ -37,7 +37,7 @@ lists below are identical apart from that `gap`.
 
 ## Inside the design system's panels
 
-`VMenuSeparator` and `VComboboxSeparator` **are** `VSeparator`s. They add one declaration each: a
+`VMenuSeparator` and `VListboxSeparator` **are** `VSeparator`s. They add one declaration each: a
 negative inline margin that takes the rule out to the panel's edges, compensating its padding.
 That override is written as a compound selector (`.v-separator.v-menu-separator`) because each
 component ships its own stylesheet and the order between two of them is decided by the consumer's
@@ -52,7 +52,7 @@ bundler — at equal specificity the winner would depend on that order.
 - `aria-orientation` is emitted for `vertical` **only** — a `separator` is horizontal by default,
   so setting it on a horizontal rule would restate the role.
 - When the container's role forbids a `separator` child, pass `role="presentation"`: it falls
-  through to the `<hr>` and the rule becomes purely visual. That is what `VComboboxSeparator`
+  through to the `<hr>` and the rule becomes purely visual. That is what `VListboxSeparator`
   does, a `role="listbox"` admitting only `option` and `group` as children. Keep such a rule
   horizontal — `aria-orientation` is not an allowed attribute on `role="presentation"`.
 - Inside a `<ul>`, use a decorative `<li>` (`VSideNavigationSeparator`), never an `<hr>`: a list

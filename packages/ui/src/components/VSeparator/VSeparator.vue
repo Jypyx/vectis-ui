@@ -31,7 +31,7 @@ withDefaults(defineProps<SeparatorProps>(), {
   .v-separator {
     flex: none;
     /*
-     * `.v-menu-separator` and `.v-combobox-separator` override that margin from THEIR own
+     * `.v-menu-separator` and `.v-listbox-separator` override that margin from THEIR own
      * sheet, and which of the two sheets the consumer's bundler puts last is not ours to
      * decide. Both are therefore written as the compound `.v-separator.v-x-separator`, and
      * every declaration added here falls under the same obligation.

@@ -34,7 +34,7 @@ describe('VSeparator', () => {
     expect(root(container).classList.contains('v-menu-separator')).toBe(true)
   })
 
-  it('a consumer role wins over the implicit one (the VComboboxSeparator contract)', () => {
+  it('a consumer role wins over the implicit one (the VListboxSeparator contract)', () => {
     const { container, queryByRole } = render(VSeparator, { attrs: { role: 'presentation' } })
     expect(root(container).getAttribute('role')).toBe('presentation')
     expect(queryByRole('separator')).toBeNull()
