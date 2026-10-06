@@ -33,7 +33,7 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
   },
   { slug: 'card', components: ['VCard'] },
   { slug: 'carousel', components: ['VCarousel', 'VCarouselItem'] },
-  { slug: 'checkbox', components: ['VCheckbox'] },
+  { slug: 'checkbox', components: ['VCheckbox'], internals: ['VCheckMark'] },
   { slug: 'chip', components: ['VChip'] },
   { slug: 'color-input', components: ['VColorInput'] },
   { slug: 'color-picker', components: ['VColorPicker'] },
@@ -123,7 +123,7 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
   { slug: 'toast', components: ['VToaster'], internals: ['VToast'] },
   { slug: 'toggle', components: ['VToggle', 'VToggleItem'] },
   { slug: 'tooltip', components: ['VTooltip'] },
-  { slug: 'tree-view', components: ['VTreeView'] },
+  { slug: 'tree-view', components: ['VTreeView'], internals: ['VCheckMark'] },
   { slug: 'typography', components: ['VTypography'] },
   { slug: 'virtual-list', components: ['VVirtualList'] },
 ]
