@@ -1,0 +1,83 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VContextMenuStories from './VContextMenu.stories'
+
+<Meta of={VContextMenuStories} />
+
+# ContextMenu
+
+A menu opened on a zone by the browser's `contextmenu` event: the right click, the long press on
+Android, the Menu key and Shift+F10. It reuses the panel of `VMenu`, so its items, groups,
+separators, submenus, sizes and keyboard navigation are the same.
+
+`VContextMenu` wraps the zone in an element (`as`, `div` by default) and takes the commands in its
+`#menu` slot. That slot receives `target`, the element the menu was opened on, so a single menu
+serves every item of a list:
+
+```vue
+<VContextMenu as="ul">
+  <li v-for="file in files" :key="file.id" :data-id="file.id">…</li>
+  <template #menu="{ target }">
+    <VMenuItem label="Rename" @select="rename(target?.closest('[data-id]'))" />
+  </template>
+</VContextMenu>
+```
+
+<Canvas of={VContextMenuStories.Default} />
+
+<Controls of={VContextMenuStories.Default} />
+
+## Position
+
+A zero-size anchor is placed at the pointer, and the panel opens with its corner on it, through CSS
+anchor positioning. Near an edge of the viewport the panel flips upwards, backwards, or both, so it
+always ends at the pointer:
+
+<Canvas of={VContextMenuStories.NearTheEdges} />
+
+On macOS and Linux the event fires on the press of the button. The menu then opens on the release:
+an auto popover opened while the button is still down would be dismissed by that release.
+
+## Keyboard
+
+The Menu key and Shift+F10 fire `contextmenu` on the focused element on Windows and Linux. The
+component also handles Shift+F10 itself, so macOS has it too. A keyboard opening places the menu
+under the focused element's start edge and focuses its first command. The rest is the `VMenu`
+keyboard: arrows with wrap-around, Enter and Space to choose, Escape and Tab to close.
+
+<Canvas of={VContextMenuStories.Keyboard} />
+
+## Submenus
+
+`VMenuItem`'s `#submenu` slot works as in `VMenu`.
+
+<Canvas of={VContextMenuStories.Submenus} />
+
+## The browser's own menu
+
+- Shift with a right click leaves the browser's menu, which Firefox does by itself anyway.
+- `disabled` leaves the browser's menu on the whole zone.
+- A `contextmenu` event that was already default-prevented is ignored: a nested `VContextMenu`
+  answers for its own zone, and your own handler can take over a part of it.
+- A right click inside the open menu shows nothing: a browser menu would cover this one.
+
+## Opening from code
+
+`v-model:open` follows every opening and closing. Set to `true`, it opens the menu under the
+focused element of the zone, or under the zone itself. The exposed `show(event)` opens it at
+a mouse event's position, for a zone wired by hand; `close()` closes it; `el` is the panel.
+
+## Accessibility
+
+- The panel is `role="menu"` with `menuitem` rows, as in `VMenu`. A pointer opening focuses the
+  panel and singles out no command; a keyboard opening focuses the first command.
+- Closing returns the focus to the element that held it before the opening, unless it has moved
+  elsewhere deliberately.
+- **A context menu is hidden by nature**: nothing tells a reader it exists, iOS Safari does not
+  fire `contextmenu` on a long press, and macOS keyboards have no Menu key. Make every command
+  reachable another way too, a "More" button with a `VMenu` for instance.
+- The zone needs focusable content (or a `tabindex`) for the keyboard to open the menu on it.
+- The opening animation respects `prefers-reduced-motion`.
+
+## Browser support
+
+The same as `VMenu`: Popover API and CSS anchor positioning, with no fallback.

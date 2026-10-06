@@ -29,6 +29,7 @@ const nav: NavMessages = {
   checkbox: 'Case à cocher',
   chip: 'Puce',
   combobox: 'Liste déroulante',
+  'context-menu': 'Menu contextuel',
   'data-table': 'Tableau de données',
   'date-input': 'Champ de date',
   'date-picker': 'Sélecteur de date',

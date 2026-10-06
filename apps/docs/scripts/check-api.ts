@@ -30,6 +30,7 @@ const EXTERNALS = new Set([
   'ButtonHTMLAttributes',
   'DateTimeFormatOptions',
   'E',
+  'Element',
   'File',
   'Intl',
   'KeyboardEvent',

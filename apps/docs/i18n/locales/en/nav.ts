@@ -31,6 +31,7 @@ const nav: NavMessages = {
   checkbox: 'Checkbox',
   chip: 'Chip',
   combobox: 'Combobox',
+  'context-menu': 'Context menu',
   'data-table': 'Data table',
   'date-input': 'Date input',
   'date-picker': 'Date picker',

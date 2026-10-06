@@ -15,6 +15,7 @@ import checkbox from './fr/checkbox'
 import chip from './fr/chip'
 import combobox from './fr/combobox'
 import common from './fr/common'
+import contextMenu from './fr/contextMenu'
 import cssClasses from './fr/cssClasses'
 import dataTable from './fr/dataTable'
 import dateInput from './fr/dateInput'
@@ -99,6 +100,7 @@ export default defineI18nLocale((): DocsMessages => ({
   checkbox,
   chip,
   combobox,
+  contextMenu,
   dataTable,
   dateInput,
   datePicker,

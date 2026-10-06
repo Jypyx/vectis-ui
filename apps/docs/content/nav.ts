@@ -53,6 +53,7 @@ export const components = [
   entry('checkbox'),
   entry('chip'),
   entry('combobox'),
+  entry('context-menu'),
   entry('data-table'),
   entry('date-input'),
   entry('date-picker'),
