@@ -186,6 +186,11 @@ export function useVirtualList(options: VirtualListOptions): VirtualList {
   function onResize(entries: ResizeObserverEntry[]) {
     const el = options.scrollEl.value
     if (!el) return
+    // A container taken out of the layout, by `display: none` or a closed `<details>`, reports
+    // itself and every row at zero. Recorded, those zeros would pull the next rows into the
+    // window, which would report zero in turn, one frame after another for as long as the list
+    // stays hidden. The sizes measured last are kept instead.
+    if (el.getClientRects().length === 0) return
     const o = offsets.value
     const top = el.scrollTop - padStart.value
     let shift = 0
@@ -193,6 +198,9 @@ export function useVirtualList(options: VirtualListOptions): VirtualList {
     for (const entry of entries) {
       if (entry.target === el || entry.target === options.listEl?.value) {
         readContainer(el)
+        // Shown again after `display: none`, the container has lost its scroll position without
+        // a scroll event.
+        scrollTop.value = el.scrollTop
         continue
       }
       if (!entry.target.isConnected) continue

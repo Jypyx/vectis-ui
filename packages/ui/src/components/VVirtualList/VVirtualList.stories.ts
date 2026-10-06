@@ -117,6 +117,15 @@ export const Default: Story = {
     expect(rows().at(-1)).toHaveAttribute('aria-posinset', '10000')
     list.scrollTop = 0
     await waitFor(() => expect(within(list).getByText('Invoice 1')).toBeVisible())
+
+    // Hidden for a while and shown again, as by `v-show` or a closed tab: the rows keep their
+    // measured heights, so the first frame shown is the same window, not one that walks back.
+    list.style.display = 'none'
+    await new Promise((resolve) => setTimeout(resolve, 300))
+    list.style.display = ''
+    await new Promise(requestAnimationFrame)
+    expect(rows()[0]).toHaveAttribute('aria-posinset', '1')
+    expect(within(list).getByText('Invoice 1')).toBeVisible()
   },
 }
 
