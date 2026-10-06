@@ -11,7 +11,13 @@
    * Read the complete typography recipe so host font weight and line height cannot override the
    * choice role.
    */
+  /*
+   * Positioned, so the hidden input and the announcer sit on the control. Positioned against
+   * an ancestor outside a scroll container instead, they would be neither clipped nor scrolled
+   * by it: they would stretch the page, and focusing the input would scroll the page to them.
+   */
   .v-choice {
+    position: relative;
     display: inline-grid;
     grid-template-columns: auto auto;
     align-items: center;

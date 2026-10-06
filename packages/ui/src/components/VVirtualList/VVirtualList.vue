@@ -223,9 +223,12 @@ defineExpose({
 @layer vectis.components {
   /*
    * The list corrects its scroll itself when a row above the view changes height; the browser's
-   * own anchoring would apply the same correction a second time.
+   * own anchoring would apply the same correction a second time. Positioned, so it contains the
+   * absolutely positioned parts of the rows: positioned against an ancestor beyond it, they
+   * escape its clip and stretch the page.
    */
   .v-virtual-list {
+    position: relative;
     display: block;
     overflow-y: auto;
     overflow-anchor: none;

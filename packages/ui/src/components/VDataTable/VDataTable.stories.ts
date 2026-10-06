@@ -483,6 +483,7 @@ export const Virtual: Story = {
     // Scrolled to the end, the last row ends where the scroller does, under a heading still in
     // place: every height is accounted for.
     const scroller = canvasElement.querySelector<HTMLElement>('.v-data-table-scroller')!
+    const pageHeight = document.documentElement.scrollHeight
     scroller.scrollTop = scroller.scrollHeight
     await waitFor(() => expect(canvas.getByText('Project 10000')).toBeInTheDocument())
     scroller.scrollTop = scroller.scrollHeight
@@ -494,6 +495,9 @@ export const Virtual: Story = {
     })
     const heading = table.querySelector('thead th')!.getBoundingClientRect()
     expect(Math.abs(heading.top - scroller.getBoundingClientRect().top)).toBeLessThan(1)
+    // The rows' absolutely positioned parts, their hidden checkboxes, stay inside the scroller
+    // rather than stretching the page down to where the rows sit in the scrolled content.
+    expect(document.documentElement.scrollHeight).toBe(pageHeight)
 
     await userEvent.click(canvas.getByRole('checkbox', { name: 'Select all' }).closest('label')!)
     await waitFor(() => expect(canvas.getByText('10000 items selected')).toBeInTheDocument())

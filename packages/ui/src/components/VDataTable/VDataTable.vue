@@ -1063,6 +1063,12 @@ const heightStyle = computed<StyleValue | undefined>(() =>
    * scrolling.
    */
   .v-data-table-scroller {
+    /*
+     * Positioned, so it contains the absolutely positioned parts of the cells, a consumer's
+     * included: positioned against an ancestor beyond it, they escape its clip and stretch the
+     * page.
+     */
+    position: relative;
     flex: 1 1 auto;
     min-block-size: 0;
     overflow: auto;
