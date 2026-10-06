@@ -182,6 +182,7 @@ const COMPONENT_DIMENSIONS: { slugs: DocsSlug[]; prefixes: string[] }[] = [
   { slugs: ['checkbox', 'radio'], prefixes: ['border-width', 'size-check'] },
   { slugs: ['color-picker'], prefixes: ['size-color-picker-'] },
   { slugs: ['combobox'], prefixes: ['size-combobox-'] },
+  { slugs: ['command-palette'], prefixes: ['size-command-palette-'] },
   { slugs: ['data-table'], prefixes: ['size-table-'] },
   { slugs: ['date-picker'], prefixes: ['size-date-picker-'] },
   { slugs: ['dialog'], prefixes: ['size-dialog-'] },

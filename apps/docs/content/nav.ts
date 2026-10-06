@@ -55,6 +55,7 @@ export const components = [
   entry('color-input'),
   entry('color-picker'),
   entry('combobox'),
+  entry('command-palette'),
   entry('context-menu'),
   entry('data-table'),
   entry('date-input'),

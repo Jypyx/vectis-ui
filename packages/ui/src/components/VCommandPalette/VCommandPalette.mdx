@@ -1,0 +1,83 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VCommandPaletteStories from './VCommandPalette.stories'
+
+<Meta of={VCommandPaletteStories} />
+
+# CommandPalette
+
+A search field over a list of commands, in a native modal `<dialog>`: type to narrow the list,
+walk it with the arrows, run a command with Enter. Like VDialog and VDrawer it is opened with
+`showModal()` through `useModalDialog`, so the top layer, the backdrop, the focus trap, the inert
+page and the focus returned to the trigger are all native. The palette sits near the top of the
+viewport rather than in its centre, so the field stays still while the list changes height.
+
+<Canvas of={VCommandPaletteStories.Default} />
+
+<Controls of={VCommandPaletteStories.Default} />
+
+## Commands
+
+`items` holds commands, named blocks of commands (`{ label, commands }`) and separators
+(`{ separator: true }`). A command has a `label`, and optionally a `description` under it, an
+`icon`, `keywords` the search also matches, and a `shortcut` shown at the end of its row through
+VHotkeys. That shortcut is displayed only: the palette does not listen for it.
+
+Choosing a command, by a click or by Enter, emits `select(command, event)` and closes the palette,
+unless the command has `keepOpen`. A command with `href` is a real link: Enter and a click follow
+it, and a modified or middle click opens it elsewhere while the palette stays open. With a router,
+call `event.preventDefault()` in `select` and push the address. `id` is free for your own use and
+comes back with the command.
+
+## Searching
+
+The search matches the label and the keywords, ignoring case and accents, and keeps the order of
+`items`. A block with no match disappears, name included, and a separator left at an end or next
+to another is not drawn. `filter` takes a rule of your own, or `false` when the source filters.
+
+`v-model:query` holds what is typed, and is emptied each time the palette closes. `search`
+reports it after `searchDebounce` milliseconds, and at once on opening; the same term is never
+reported twice in a row. `loading` shows a spinner in the field, and a loading row while there is
+nothing to show yet.
+
+<Canvas of={VCommandPaletteStories.AsyncSearch} />
+
+## Recent commands
+
+The palette keeps no history. Record each choice from `select`, and while the query is empty, put
+a block of the latest ones at the top of `items`.
+
+<Canvas of={VCommandPaletteStories.RecentCommands} />
+
+## Custom rows
+
+The `#item` slot receives `{ command, active }` and replaces the label and the description; the
+icon and the shortcut stay in place. `#empty` receives the searched term, `#loading` replaces the
+loading row and `#footer` the list of keys, which `hideFooter` removes.
+
+<Canvas of={VCommandPaletteStories.CustomItem} />
+
+## Opening
+
+`v-model:open` drives the palette and the `#trigger` slot hands out `triggerProps` for the button
+that opens it. `shortcut` (`mod+k` for ⌘K on a Mac and Ctrl+K elsewhere) listens on the whole page
+for a combination that opens the palette, and closes it again from its own field. It is ignored
+while typing in another field, and adds `aria-keyshortcuts` to `triggerProps`. Escape and a click
+on the backdrop close it. `show()`, `close()`, `focus()` and `el` are exposed through a `ref`.
+
+## Accessibility
+
+- The search field is a `combobox` controlling a `listbox`, and keeps the focus throughout:
+  `aria-activedescendant` names the active command, which carries `aria-selected="true"`. Option
+  ids follow the command rather than its position, so a filter sliding another command under the
+  highlight is announced.
+- `autofocus` puts the focus in the field when the dialog opens.
+- The palette and its list are named by `label`, the field by `searchLabel`, from the design
+  system dictionary by default.
+- Blocks are `group`s named by their heading. Separators are presentational, a listbox owning only
+  options and groups.
+- Disabled commands carry `aria-disabled`, are skipped by the arrows and cannot be chosen.
+- "No results" and the loading text are announced by a status region outside the listbox.
+- The footer listing the keys is hidden from assistive technology, which the combobox already
+  informs.
+- The active row stays marked in forced colours, and the palette appears without transition under
+  `prefers-reduced-motion: reduce`.

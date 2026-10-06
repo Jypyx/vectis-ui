@@ -131,6 +131,12 @@ const descriptions: Record<DescribedToken, string> = {
   '--vectis-control-size-hover-card-max': "La largeur maximale d'un VHoverCard (320px)",
   '--vectis-control-size-dialog-width':
     "La largeur par défaut de VDialog et VDialogAlert (400px), en l'absence de `width`",
+  '--vectis-control-size-command-palette-width':
+    "La largeur par défaut de VCommandPalette (640px), en l'absence de `width`",
+  '--vectis-control-size-command-palette-list-max-block':
+    'La hauteur maximale de la liste de commandes de VCommandPalette avant qu’elle ne défile (320px)',
+  '--vectis-control-size-command-palette-offset':
+    'La distance entre le haut de la fenêtre et VCommandPalette, qui garde le champ de recherche immobile quand la liste change de hauteur (96px)',
   '--vectis-control-size-rating-sm': "L'icône d'un petit VRating (20px)",
   '--vectis-control-size-rating-md': "L'icône d'un VRating moyen (24px)",
   '--vectis-control-size-rating-lg': "L'icône d'un grand VRating (32px)",

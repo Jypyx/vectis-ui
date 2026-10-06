@@ -16,6 +16,7 @@ import chip from './en/chip'
 import colorInput from './en/colorInput'
 import colorPicker from './en/colorPicker'
 import combobox from './en/combobox'
+import commandPalette from './en/commandPalette'
 import common from './en/common'
 import contextMenu from './en/contextMenu'
 import cssClasses from './en/cssClasses'
@@ -105,6 +106,7 @@ export interface DocsMessages {
   colorInput: typeof colorInput
   colorPicker: typeof colorPicker
   combobox: typeof combobox
+  commandPalette: typeof commandPalette
   contextMenu: typeof contextMenu
   dataTable: typeof dataTable
   dateInput: typeof dateInput
@@ -190,6 +192,7 @@ export default defineI18nLocale((): DocsMessages => ({
   colorInput,
   colorPicker,
   combobox,
+  commandPalette,
   contextMenu,
   dataTable,
   dateInput,

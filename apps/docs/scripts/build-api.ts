@@ -42,6 +42,11 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
     components: ['VCombobox'],
     internals: ['VComboboxOption', 'VComboboxGroup', 'VComboboxSeparator'],
   },
+  {
+    slug: 'command-palette',
+    components: ['VCommandPalette'],
+    internals: ['VCommandPaletteItem'],
+  },
   { slug: 'context-menu', components: ['VContextMenu'] },
   { slug: 'data-table', components: ['VDataTable'] },
   { slug: 'date-input', components: ['VDateInput'] },

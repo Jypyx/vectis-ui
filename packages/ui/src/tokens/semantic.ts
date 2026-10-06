@@ -325,6 +325,18 @@ export const semantic = {
       '25rem',
       'The default width of VDialog and VDialogAlert (400px), when no `width` is given',
     ),
+    'size-command-palette-width': dimension(
+      '40rem',
+      'The default width of VCommandPalette (640px), when no `width` is given',
+    ),
+    'size-command-palette-list-max-block': dimension(
+      '20rem',
+      "The tallest VCommandPalette's list of commands grows before it scrolls (320px)",
+    ),
+    'size-command-palette-offset': dimension(
+      '6rem',
+      'The distance from the top of the viewport to VCommandPalette, which keeps its search field still as the list changes height (96px)',
+    ),
     'size-stepper-indicator': dimension(
       '2rem',
       'The diameter of the circle holding a VStepper step number (32px)',

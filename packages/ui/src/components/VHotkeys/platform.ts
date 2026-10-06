@@ -237,6 +237,38 @@ export function resolveKeys(tokens: string[], platform: HotkeysPlatform): Resolv
   }))
 }
 
+/* The key names `aria-keyshortcuts` expects, which are those of `KeyboardEvent.key`. */
+const ARIA_KEYS: Record<string, string> = {
+  meta: 'Meta',
+  ctrl: 'Control',
+  alt: 'Alt',
+  shift: 'Shift',
+  enter: 'Enter',
+  esc: 'Escape',
+  space: 'Space',
+  backspace: 'Backspace',
+  delete: 'Delete',
+  tab: 'Tab',
+  up: 'ArrowUp',
+  down: 'ArrowDown',
+  left: 'ArrowLeft',
+  right: 'ArrowRight',
+}
+
+// @a11y
+/** Spells a combination as the `aria-keyshortcuts` attribute does: `Control+K`, `Meta+K`. */
+export function ariaKeyshortcuts(tokens: string[], platform: HotkeysPlatform): string {
+  return resolveKeys(tokens, platform)
+    .map(({ token }) =>
+      token === 'mod'
+        ? platform === 'mac'
+          ? 'Meta'
+          : 'Control'
+        : (ARIA_KEYS[token] ?? capLabel(token)),
+    )
+    .join('+')
+}
+
 function normalizeEventKey(event: KeyboardEvent): string {
   const key = event.key.toLowerCase()
   return ALIASES[key] ?? key

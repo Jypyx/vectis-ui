@@ -47,6 +47,18 @@ export interface Messages {
     empty: string
     clear: string
   }
+  commandPalette: {
+    /** What the palette itself is called. */
+    label: string
+    /** What its search field is called. */
+    searchLabel: string
+    placeholder: string
+    /** The search matched no command. */
+    empty: string
+    /** The key hints in the footer: the arrows, then Enter. Escape reuses `common.close`. */
+    navigate: string
+    choose: string
+  }
   dataTable: {
     /** The empty table, when nothing is searched for. */
     empty: string

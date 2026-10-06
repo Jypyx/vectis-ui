@@ -4,18 +4,11 @@
  * keyboard listeners only when listen is enabled.
  */
 
-import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
-import {
-  DEFAULT_PLATFORM,
-  capLabel,
-  detectPlatform,
-  isEditableTarget,
-  matchesEvent,
-  parseHotkeys,
-  resolveKeys,
-} from './platform'
+import { DEFAULT_PLATFORM, capLabel, detectPlatform, parseHotkeys, resolveKeys } from './platform'
 import type { HotkeysPlatform } from './platform'
+import { useHotkeyListener } from '../../composables/useHotkeyListener'
 import { useMessages } from '../../i18n/state'
 
 /** How a key cap is drawn. */
@@ -101,7 +94,6 @@ const m = useMessages()
 const detected = ref<HotkeysPlatform>(DEFAULT_PLATFORM)
 onMounted(() => {
   detected.value = detectPlatform()
-  if (props.listen) attach()
 })
 
 const platform = computed(() => props.platform ?? detected.value)
@@ -127,62 +119,13 @@ const spoken = computed(() =>
 )
 const resolvedLabel = computed(() => props.label ?? m.value.hotkeys.label(spoken.value))
 
-// @core
-/*
- * It is called `listening` and not `attached`. Every top-level binding of a `<script setup>` is
- * exposed to the template, where it SHADOWS the prop of the same name: called `attached`, this
- * flag would silently be what the template read instead of the prop, and the joined rendering
- * would follow whether a listener happened to be installed.
- */
-let listening = false
-
-function attach() {
-  if (listening || typeof document === 'undefined') return
-  document.addEventListener('keydown', onKeydown)
-  listening = true
-}
-
-function detach() {
-  if (!listening) return
-  document.removeEventListener('keydown', onKeydown)
-  listening = false
-}
-
-// @keyboard @core
-function onKeydown(event: KeyboardEvent) {
-  /* A held-down combination repeats at the system's auto-repeat rate, which would
-     reopen the consumer's palette a dozen times a second; only the first press
-     counts. */
-  if (!props.listen || event.repeat) return
-  /* A key another handler has already dealt with (a menu's arrow, a field's Enter) is not
-     a shortcut any more. And the Enter that confirms an input method's candidate is the
-     end of a word being typed, not a command. */
-  if (event.defaultPrevented || event.isComposing) return
-  /* The document sees a key typed inside a shadow root as coming from the shadow HOST, a
-     plain element: the field itself is the first entry of the composed path. */
-  if (!props.allowInInput && isEditableTarget(event.composedPath()[0] ?? event.target)) return
-  if (!matchesEvent(event, tokens.value, platform.value)) return
-  /*
-   * Escape is never cancelled. A cancelled Escape is not turned into a close request, so every
-   * open dialog and light-dismiss popover on the page would stop closing on it.
-   */
-  if (!props.allowDefault && !tokens.value.includes('esc')) event.preventDefault()
-  emit('trigger', event)
-}
-
-/* Attaching the listener once and simply returning early inside it would be shorter to
-   write, but a documentation page listing fifty shortcuts would then install fifty
-   document listeners that do nothing. Following the prop is what keeps that at zero. */
-watch(
-  () => props.listen,
-  (on) => (on ? attach() : detach()),
-)
-onBeforeUnmount(detach)
-/* A view kept alive by <KeepAlive> is never unmounted, only put aside: its shortcut must
-   stop with it, or a hidden page would go on answering the keyboard. */
-onDeactivated(detach)
-onActivated(() => {
-  if (props.listen) attach()
+useHotkeyListener({
+  tokens: () => tokens.value,
+  platform: () => platform.value,
+  enabled: () => props.listen,
+  allowDefault: () => props.allowDefault,
+  allowInInput: () => props.allowInInput,
+  onTrigger: (event) => emit('trigger', event),
 })
 </script>
 

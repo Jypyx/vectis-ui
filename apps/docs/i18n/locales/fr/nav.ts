@@ -31,6 +31,7 @@ const nav: NavMessages = {
   'color-input': 'Champ de couleur',
   'color-picker': 'Sélecteur de couleur',
   combobox: 'Liste déroulante',
+  'command-palette': 'Palette de commandes',
   'context-menu': 'Menu contextuel',
   'data-table': 'Tableau de données',
   'date-input': 'Champ de date',

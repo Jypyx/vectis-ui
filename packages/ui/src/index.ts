@@ -247,6 +247,17 @@ export type { DialogRole, DialogTriggerProps } from './components/VDialog/VDialo
 export { default as VDialogAlert } from './components/VDialog/VDialogAlert.vue'
 export { default as VDrawer } from './components/VDrawer/VDrawer.vue'
 export type { DrawerSide, DrawerSize } from './components/VDrawer/VDrawer.vue'
+export { default as VCommandPalette } from './components/VCommandPalette/VCommandPalette.vue'
+export type {
+  CommandPaletteCommand,
+  CommandPaletteEmptySlotProps,
+  CommandPaletteFilter,
+  CommandPaletteGroup,
+  CommandPaletteItem,
+  CommandPaletteItemSlotProps,
+  CommandPaletteSeparator,
+  CommandPaletteTriggerProps,
+} from './components/VCommandPalette/VCommandPalette.vue'
 export { default as VDatePicker } from './components/VDatePicker/VDatePicker.vue'
 export type {
   DatePickerSelection,

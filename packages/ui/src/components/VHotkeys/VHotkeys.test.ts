@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { KeepAlive, defineComponent, h, nextTick, ref } from 'vue'
 
 import VHotkeys from './VHotkeys.vue'
-import { capLabel, detectPlatform, parseHotkeys, resolveKeys } from './platform'
+import { ariaKeyshortcuts, capLabel, detectPlatform, parseHotkeys, resolveKeys } from './platform'
 
 /** The visible caps, in order. */
 function capsOf(container: Element): string[] {
@@ -108,6 +108,13 @@ describe('resolveKeys / capLabel', () => {
     expect(capLabel('k')).toBe('K')
     expect(capLabel('f5')).toBe('F5')
     expect(capLabel('/')).toBe('/')
+  })
+
+  it('ariaKeyshortcuts spells the combination with KeyboardEvent.key names', () => {
+    expect(ariaKeyshortcuts(parseHotkeys('mod+shift+k'), 'mac')).toBe('Meta+Shift+K')
+    expect(ariaKeyshortcuts(parseHotkeys('mod+shift+k'), 'windows')).toBe('Control+Shift+K')
+    expect(ariaKeyshortcuts(parseHotkeys('alt+up'), 'linux')).toBe('Alt+ArrowUp')
+    expect(ariaKeyshortcuts(parseHotkeys('esc'), 'other')).toBe('Escape')
   })
 })
 

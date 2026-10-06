@@ -38,6 +38,14 @@ export const fr: Messages = {
     empty: 'Aucun résultat',
     clear: 'Effacer la sélection',
   },
+  commandPalette: {
+    label: 'Palette de commandes',
+    searchLabel: 'Rechercher une commande',
+    placeholder: 'Saisissez une commande ou recherchez…',
+    empty: 'Aucun résultat',
+    navigate: 'Naviguer',
+    choose: 'Choisir',
+  },
   dataTable: {
     empty: 'Aucune donnée',
     noResults: 'Aucun résultat',

@@ -33,6 +33,7 @@ const nav: NavMessages = {
   'color-input': 'Colour input',
   'color-picker': 'Colour picker',
   combobox: 'Combobox',
+  'command-palette': 'Command palette',
   'context-menu': 'Context menu',
   'data-table': 'Data table',
   'date-input': 'Date input',
