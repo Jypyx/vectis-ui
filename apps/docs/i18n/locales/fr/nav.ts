@@ -80,6 +80,7 @@ const nav: NavMessages = {
   tooltip: 'Infobulle',
   'tree-view': 'Arborescence',
   typography: 'Typographie',
+  'virtual-list': 'Liste virtuelle',
 
   'js-helpers': 'Fonctions JavaScript',
   'css-classes': 'Classes CSS utilitaires',

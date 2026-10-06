@@ -77,6 +77,7 @@ import toggle from './fr/toggle'
 import tooltip from './fr/tooltip'
 import treeView from './fr/treeView'
 import typography from './fr/typography'
+import virtualList from './fr/virtualList'
 
 import type { DocsMessages } from './en'
 
@@ -159,6 +160,7 @@ export default defineI18nLocale((): DocsMessages => ({
   tooltip,
   treeView,
   typography,
+  virtualList,
 
   jsHelpers,
   cssClasses,

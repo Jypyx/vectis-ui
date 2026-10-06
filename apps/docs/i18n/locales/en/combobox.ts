@@ -50,6 +50,10 @@ export default {
       title: 'Infinite scroll',
       text: '<code>hasMore</code> enables <code>load-more</code> when the list end becomes visible. Append the next page to <code>options</code>.',
     },
+    virtual: {
+      title: 'Long lists',
+      text: '<code>virtual</code> renders only the options near the visible part of the panel, for lists of thousands. Rows are measured as they render, so a custom <code>#option</code> may vary in height.',
+    },
     customOption: {
       title: 'Custom options',
       text: 'Use <code>#option</code> to customize option content.',
@@ -102,6 +106,8 @@ export default {
         loadingText:
           'Loading text announced to screen readers. Keep it consistent with custom <code>#loading</code> content.',
         hasMore: 'Enables requests for another page when the list end becomes visible.',
+        virtual:
+          'Renders only the rows near the visible part of the panel, for lists of thousands. Options then carry their position in the list.',
         placement: 'Preferred panel position relative to the field.',
         vModel:
           'Selected string or number, or an array with <code>multiple</code>. Defaults to an empty string.',

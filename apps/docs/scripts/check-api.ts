@@ -40,6 +40,7 @@ const EXTERNALS = new Set([
   'Promise',
   'Record',
   'Row',
+  'T',
 ])
 
 /** Every capitalised identifier a printed type mentions, which is every type it is written in. */

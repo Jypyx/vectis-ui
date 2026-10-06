@@ -107,6 +107,7 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
   { slug: 'tooltip', components: ['VTooltip'] },
   { slug: 'tree-view', components: ['VTreeView'] },
   { slug: 'typography', components: ['VTypography'] },
+  { slug: 'virtual-list', components: ['VVirtualList'] },
 ]
 
 /**

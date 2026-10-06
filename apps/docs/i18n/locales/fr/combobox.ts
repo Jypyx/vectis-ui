@@ -50,6 +50,10 @@ export default {
       title: 'Défilement infini',
       text: '<code>hasMore</code> active <code>load-more</code> lorsque la fin de liste devient visible. Ajoutez la page suivante à <code>options</code>.',
     },
+    virtual: {
+      title: 'Longues listes',
+      text: '<code>virtual</code> ne rend que les options proches de la partie visible du panneau, pour des listes de plusieurs milliers. Les lignes sont mesurées à leur rendu : un <code>#option</code> personnalisé peut varier en hauteur.',
+    },
     customOption: {
       title: 'Options personnalisées',
       text: 'Utilisez <code>#option</code> pour personnaliser le contenu des options.',
@@ -104,6 +108,8 @@ export default {
         loadingText:
           'Texte de chargement annoncé aux lecteurs d’écran. Gardez-le cohérent avec le contenu personnalisé de <code>#loading</code>.',
         hasMore: 'Active la demande d’une nouvelle page lorsque la fin de liste devient visible.',
+        virtual:
+          'Ne rend que les lignes proches de la partie visible du panneau, pour des listes de plusieurs milliers. Les options portent alors leur position dans la liste.',
         placement: 'Position préférée du panneau par rapport au champ.',
         vModel:
           'Chaîne ou nombre sélectionné, ou tableau avec <code>multiple</code>. Vaut une chaîne vide par défaut.',

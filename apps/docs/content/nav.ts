@@ -104,6 +104,7 @@ export const components = [
   entry('tooltip'),
   entry('tree-view'),
   entry('typography'),
+  entry('virtual-list'),
 ] as const
 
 /** What the package exports besides components: the functions, and the one CSS class. */

@@ -1,13 +1,19 @@
 // @core
 /**
- * Observe the list's sentinel to request another page; retain ownership of data fetching with
- * the consumer.
+ * Observe a list's sentinel to request another page, for VCombobox and VVirtualList; retain
+ * ownership of data fetching with the consumer.
  */
 import { watch, type Ref } from 'vue'
 
 export interface InfiniteScrollOptions {
   /** The marker at the foot of the list. It is absent when there is nothing left to load. */
   sentinelEl: Ref<HTMLElement | null>
+  /**
+   * The scrolling frame the marker is watched within. Left to the viewport, a marker inside a
+   * panel floating above the page would count as visible from the very first moment, firing a
+   * burst of requests for every page at once.
+   */
+  root: (sentinel: HTMLElement) => Element | null
   /** Whether a page may be asked for right now: the panel open, more to come, none in flight. */
   canLoad: () => boolean
   /**
@@ -55,18 +61,13 @@ export function useInfiniteScroll(options: InfiniteScrollOptions): InfiniteScrol
       // be tolerated rather than assumed away; the behaviour is checked in a real
       // browser.
       if (!el || typeof IntersectionObserver === 'undefined') return
-      // The panel must be named as the frame the marker is watched within, and it is found by
-      // its ARIA role, which is public API, rather than by an internal class. Left unspecified,
-      // the frame would be the VIEWPORT; and since the panel floats above the page, the marker
-      // would count as visible from the very first moment, firing a burst of requests for every
-      // page at once.
-      const root = el.closest('[role="listbox"]')
+      const root = options.root(el)
       if (!root) return
       observer = new IntersectionObserver(onIntersect, {
         root,
-        // The next page is asked for half a panel before the marker is actually reached,
+        // The next page is asked for half a frame before the marker is actually reached,
         // so the list is already growing by the time the reader gets there. It is
-        // expressed as a proportion of the panel rather than as a number of pixels.
+        // expressed as a proportion of the frame rather than as a number of pixels.
         rootMargin: '0px 0px 50% 0px',
       })
       observer.observe(el)

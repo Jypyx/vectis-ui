@@ -76,6 +76,8 @@ const t = storyText({
     noCountryFound: 'No country found',
     neighbour: 'Neighbouring element (to move the focus away)',
     reference: 'Reference',
+    product: 'Product',
+    chooseProduct: 'Choose a product…',
     searchReference: 'Search for a reference…',
     noReference: 'No reference',
     fileType: 'File type',
@@ -107,6 +109,8 @@ const t = storyText({
     noCountryFound: 'Aucun pays trouvé',
     neighbour: 'Élément voisin (pour retirer le focus)',
     reference: 'Référence',
+    product: 'Produit',
+    chooseProduct: 'Choisir un produit…',
     searchReference: 'Rechercher une référence…',
     noReference: 'Aucune référence',
     fileType: 'Type de fichier',
@@ -745,6 +749,66 @@ export const InfiniteScroll: Story = {
     const listbox = canvas.getByRole('listbox')
     listbox.scrollTop = listbox.scrollHeight
     await waitFor(() => expect(canvas.getByTestId('count')).toHaveTextContent('40 / 120'))
+  },
+}
+
+/**
+ * `virtual` renders only the options near the visible part of the panel: ten thousand here. The
+ * highlighted option stays rendered wherever the panel is scrolled, and each option says where
+ * it stands in the list.
+ */
+export const Virtual: Story = {
+  render: (args) => ({
+    components: { VCombobox },
+    setup: () => {
+      const options = computed<ComboboxOption[]>(() =>
+        Array.from({ length: 10000 }, (_, i) => ({
+          value: i + 1,
+          label: `${t.value.product} ${String(i + 1).padStart(5, '0')}`,
+        })),
+      )
+      return { args, t, options, value: ref<string | number>('') }
+    },
+    template: `
+      <div style="width: 340px">
+        <VCombobox
+          v-bind="args"
+          v-model="value"
+          :options="options"
+          virtual
+          :aria-label="t.product"
+          :placeholder="t.chooseProduct"
+        />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('combobox')
+    await userEvent.click(input)
+    const listbox = canvas.getByRole('listbox')
+    await waitFor(() => expect(within(listbox).getAllByRole('option').length).toBeLessThan(40))
+
+    // ArrowUp wraps to the last option, ten thousand rows away, and brings it into view.
+    await userEvent.keyboard('{ArrowUp}')
+    await waitFor(() => {
+      const active = document.getElementById(input.getAttribute('aria-activedescendant')!)!
+      expect(active).toHaveTextContent('Product 10000')
+      expect(active).toHaveAttribute('aria-posinset', '10000')
+      const row = active.getBoundingClientRect()
+      const box = listbox.getBoundingClientRect()
+      expect(row.bottom).toBeLessThanOrEqual(box.bottom)
+      expect(row.top).toBeGreaterThanOrEqual(box.top)
+    })
+    await userEvent.keyboard('{ArrowDown}')
+    await waitFor(() => expect(listbox.scrollTop).toBe(0))
+
+    await userEvent.type(input, '0999')
+    await waitFor(() =>
+      expect(within(listbox).getAllByRole('option')[0]).toHaveTextContent('Product 00999'),
+    )
+    await userEvent.keyboard('{Enter}')
+    expect(input).toHaveValue('Product 00999')
   },
 }
 

@@ -82,6 +82,7 @@ const nav: NavMessages = {
   tooltip: 'Tooltip',
   'tree-view': 'Tree view',
   typography: 'Typography',
+  'virtual-list': 'Virtual list',
 
   'js-helpers': 'JavaScript helpers',
   'css-classes': 'CSS helper classes',

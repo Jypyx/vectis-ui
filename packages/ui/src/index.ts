@@ -218,6 +218,12 @@ export type {
   DataTableProps,
   DataTableVariant,
 } from './components/VDataTable/VDataTable.vue'
+export { default as VVirtualList } from './components/VVirtualList/VVirtualList.vue'
+export type {
+  VirtualListAlign,
+  VirtualListItemSlotProps,
+  VirtualListProps,
+} from './components/VVirtualList/VVirtualList.vue'
 export { default as VInputOTP } from './components/VInputOTP/VInputOTP.vue'
 export type { InputOTPSize, InputOTPFormat } from './components/VInputOTP/VInputOTP.vue'
 export { default as VMeter } from './components/VMeter/VMeter.vue'

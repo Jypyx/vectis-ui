@@ -1,0 +1,79 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VVirtualListStories from './VVirtualList.stories'
+
+<Meta of={VVirtualListStories} />
+
+# VirtualList
+
+A list too long to render whole. VVirtualList renders only the rows near its viewport, plus a
+few beyond each edge, and stands in for the others with empty space of the same height. Each row
+comes from the default slot, which receives `item` and `index`.
+
+<Canvas of={VVirtualListStories.Default} />
+
+<Controls of={VVirtualListStories.Default} />
+
+## Height
+
+VVirtualList is its own scroll container, so it needs a bounded height: `height` (pixels or any
+CSS length), or a height set by your own CSS, such as a flex or grid parent. A list that grows
+with its content has every row in view and renders them all; in development, a console warning
+says so.
+
+## Rows of different heights
+
+Each row is measured once it renders, and the measure is remembered under its `itemKey`, so a row
+that leaves the window and comes back is not measured again. `itemSize` is only the height
+assumed for rows not rendered yet: the closer it is to the real one, the steadier the scrollbar.
+When a row above the viewport turns out taller or shorter than assumed, the scroll position
+follows, so the rows in view do not move.
+
+Without `itemKey`, rows are identified by their position, which suits a list that only grows at
+the end. Set it when rows can be inserted, removed or reordered.
+
+<Canvas of={VVirtualListStories.VariableHeights} />
+
+## Scrolling to a row
+
+`scrollToIndex(index, align)` renders the row if needed and brings it into view. `align` is
+`start`, `center`, `end`, or `nearest` by default, which moves as little as possible.
+
+<Canvas of={VVirtualListStories.ScrollToIndex} />
+
+## Focusable rows
+
+The row holding the focus stays rendered while the list scrolls away from it, so the focus never
+falls back to the page. When every row holds a focusable control, `tabindex="-1"` removes the
+list's own tab stop.
+
+<Canvas of={VVirtualListStories.FocusableRows} />
+
+## Loading more rows
+
+`hasMore` makes the list emit `load-more` as its end comes into view; append the next rows to
+`items`. While `loading` is set, a row with a spinner and `loadingText` ends the list, and the
+`#loading` slot replaces its content.
+
+<Canvas of={VVirtualListStories.InfiniteScroll} />
+
+## Server rendering
+
+Before the list can measure its viewport, on the server and until hydration, it renders the first
+`initialCount` rows, 10 by default. The window then takes over on the client.
+
+## In a combobox
+
+VCombobox takes a `virtual` prop that windows its panel the same way, for lists of thousands of
+options.
+
+## Accessibility
+
+- The list has the `list` role and each rendered row the `listitem` role, with `aria-setsize`
+  and `aria-posinset` giving its place in the whole list. While `hasMore` is set, the total is
+  `-1`, unknown.
+- The list is focusable, so the arrow keys, Page Up, Page Down, Home and End scroll it. Name it
+  with `label`.
+- The loading row is hidden from assistive technology: the list carries `aria-busy="true"`
+  meanwhile.
+- Browser find-in-page and screen reader browse modes only reach rendered rows. Offer a search
+  or a filter for long lists.

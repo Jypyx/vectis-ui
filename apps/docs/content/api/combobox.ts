@@ -35,6 +35,7 @@ export default {
         { name: 'loading', type: 'boolean', default: 'false' },
         { name: 'loadingText', type: 'string' },
         { name: 'hasMore', type: 'boolean', default: 'false' },
+        { name: 'virtual', type: 'boolean', default: 'false' },
         { name: 'placement', type: 'ComboboxPlacement', values: "'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'", default: "'bottom-start'" },
         { name: 'v-model', key: 'vModel', type: 'ItemValue | ItemValue[]', default: "''" },
       ],

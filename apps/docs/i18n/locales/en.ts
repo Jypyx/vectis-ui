@@ -77,6 +77,7 @@ import toggle from './en/toggle'
 import tooltip from './en/tooltip'
 import treeView from './en/treeView'
 import typography from './en/typography'
+import virtualList from './en/virtualList'
 
 export interface DocsMessages {
   common: typeof common
@@ -161,6 +162,7 @@ export interface DocsMessages {
   tooltip: typeof tooltip
   treeView: typeof treeView
   typography: typeof typography
+  virtualList: typeof virtualList
 
   jsHelpers: typeof jsHelpers
   cssClasses: typeof cssClasses
@@ -245,6 +247,7 @@ export default defineI18nLocale((): DocsMessages => ({
   tooltip,
   treeView,
   typography,
+  virtualList,
 
   jsHelpers,
   cssClasses,

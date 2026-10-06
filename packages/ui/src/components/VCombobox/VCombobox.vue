@@ -21,7 +21,6 @@ import VPopover from '../VPopover/VPopover.vue'
 import VComboboxOption from './VComboboxOption.vue'
 import VComboboxGroup from './VComboboxGroup.vue'
 import VComboboxSeparator from './VComboboxSeparator.vue'
-import { useInfiniteScroll } from './infiniteScroll'
 import VSpinner from '../VSpinner/VSpinner.vue'
 
 import { toggleValue } from '../../utils/array'
@@ -35,6 +34,8 @@ import { useControlShape } from '../../composables/useControlShape'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 
 import { useFocusoutDismiss } from '../../composables/useFocusoutDismiss'
+import { useInfiniteScroll } from '../../composables/useInfiniteScroll'
+import { useVirtualList, type VirtualSegment } from '../../composables/useVirtualList'
 
 import { canClear } from '../../composables/useClearable'
 import { iconStartListener } from '../../composables/useIconClickHandlers'
@@ -239,6 +240,12 @@ interface ComboboxProps {
    * the end of the list comes into view.
    */
   hasMore?: boolean
+  /**
+   * Renders only the rows near the visible part of the panel, for lists of thousands of options.
+   * Rows are measured as they render, so a custom `#option` may vary in height. Options are then
+   * announced with their position in the list.
+   */
+  virtual?: boolean
   /** Where the list opens relative to the field. */
   placement?: ComboboxPlacement
 }
@@ -269,6 +276,7 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   loading: false,
   loadingText: undefined,
   hasMore: false,
+  virtual: false,
   placement: 'bottom-start',
 })
 
@@ -473,7 +481,7 @@ const stateAnnouncement = computed(() => {
 type RenderedOption = { kind: 'option'; key: string; option: ComboboxOption; index: number }
 type RenderedNode =
   | RenderedOption
-  | { kind: 'group'; key: string; label: string; options: RenderedOption[] }
+  | { kind: 'group'; key: string; id: string; label: string; options: RenderedOption[] }
   | { kind: 'separator'; key: string }
 
 // Nothing here is keyed by VALUE. Two options may share one (a consumer's duplicate, or `1`
@@ -508,7 +516,15 @@ const rendered = computed<RenderedNode[]>(() => {
       // A block none of whose options survived is dropped entirely, its name included:
       // a heading over nothing is worse than no heading.
       node =
-        options.length > 0 ? { kind: 'group', key: `group:${i}`, label: item.label, options } : null
+        options.length > 0
+          ? {
+              kind: 'group',
+              key: `group:${i}`,
+              id: `${optionsId}-group-${i}`,
+              label: item.label,
+              options,
+            }
+          : null
     } else {
       node = entryOf(item, String(i))
     }
@@ -655,45 +671,163 @@ const optionId = (index: number) => {
 }
 
 /**
- * A rendered option with its state worked out, once per row: `row` is what the option element
- * takes, `slot` what the `#option` slot receives, and both read the same two answers.
+ * The panel as one flat sequence of rows, the unit the virtual mode windows: a block's name is a
+ * row of its own, above its options. Each row knows its block, so the rows rendered can be
+ * gathered back into their groups. `set` and `position` are the option's place in its block, or
+ * among the options outside any block.
  */
-type OptionRow = RenderedOption & {
-  row: { id: string; icon?: IconSource; active: boolean; selected: boolean; disabled?: boolean }
-  slot: { option: ComboboxOption; index: number; active: boolean; selected: boolean }
-}
-type RowNode =
-  | OptionRow
-  | { kind: 'group'; key: string; label: string; options: OptionRow[] }
+type FlatOption = RenderedOption & { group?: string; set: number; position: number }
+type FlatRow =
+  | FlatOption
+  | { kind: 'heading'; key: string; id: string; label: string; group: string }
   | { kind: 'separator'; key: string }
 
-function withState(entry: RenderedOption): OptionRow {
+const flat = computed(() => {
+  const rows: FlatRow[] = []
+  const labels = new Map<string, string>()
+  // Indexed by the option's place in `filtered`: where the keyboard's highlight sits in the rows.
+  const rowOfOption: number[] = []
+  const loose = rendered.value.filter((node) => node.kind === 'option').length
+  let looseSeen = 0
+  for (const node of rendered.value) {
+    if (node.kind === 'separator') rows.push(node)
+    else if (node.kind === 'option') {
+      rowOfOption[node.index] = rows.length
+      rows.push({ ...node, set: loose, position: ++looseSeen })
+    } else {
+      labels.set(node.key, node.label)
+      rows.push({
+        kind: 'heading',
+        key: `heading:${node.key}`,
+        id: node.id,
+        label: node.label,
+        group: node.key,
+      })
+      for (const [j, option] of node.options.entries()) {
+        rowOfOption[option.index] = rows.length
+        rows.push({ ...option, group: node.key, set: node.options.length, position: j + 1 })
+      }
+    }
+  }
+  return { rows, labels, rowOfOption }
+})
+
+// Only a starting guess for the virtual mode, every row being measured once rendered: the
+// height of an option at each size, 4px less when compact, as the control heights go.
+const OPTION_HEIGHT: Record<ComboboxSize, number> = { sm: 32, md: 40, lg: 48 }
+
+const panelRef = ref<InstanceType<typeof VPopover> | null>(null)
+
+// @a11y
+// The highlighted row stays rendered wherever the panel is scrolled: `aria-activedescendant`
+// must name an element that exists.
+const virtualList = useVirtualList({
+  scrollEl: computed(() => (props.virtual ? (panelRef.value?.el ?? null) : null)),
+  count: () => flat.value.rows.length,
+  key: (index) => flat.value.rows[index]?.key,
+  itemSize: () => OPTION_HEIGHT[resolvedSize.value] - (resolvedCompact.value ? 4 : 0),
+  overscan: () => 5,
+  initialCount: () => 10,
+  pinned: () => {
+    const row = flat.value.rowOfOption[activeIndex.value]
+    return row === undefined ? [] : [row]
+  },
+})
+const measureRow = virtualList.measure
+
+/**
+ * A rendered option with its state worked out, once per row: `row` is what the option element
+ * takes, `slot` what the `#option` slot receives, and both read the same two answers. `at` is
+ * the row's place in the flat sequence, which the virtual mode measures it under.
+ */
+type OptionRow = FlatOption & {
+  at: number
+  row: {
+    id: string
+    icon?: IconSource
+    active: boolean
+    selected: boolean
+    disabled?: boolean
+    'aria-setsize'?: number
+    'aria-posinset'?: number
+  }
+  slot: { option: ComboboxOption; index: number; active: boolean; selected: boolean }
+}
+type RowBlock =
+  | OptionRow
+  | { kind: 'heading'; key: string; id: string; label: string; at: number }
+  | { kind: 'separator'; key: string; at: number }
+  | { kind: 'spacer'; key: string; size: number }
+type PanelBlock =
+  RowBlock | { kind: 'group'; key: string; label: string; labelId?: string; children: RowBlock[] }
+
+function withState(entry: FlatOption, at: number): OptionRow {
   const active = entry.index === activeIndex.value
   const selected = selectedSet.value.has(entry.option.value)
+  // @a11y
+  // Only some options exist in the virtual mode, so each one says where it stands; the last
+  // block may still grow while pages are coming.
+  const placed = props.virtual
+    ? { 'aria-setsize': props.hasMore ? -1 : entry.set, 'aria-posinset': entry.position }
+    : {}
   return {
     ...entry,
+    at,
     row: {
       id: optionId(entry.index),
       icon: entry.option.icon,
       active,
       selected,
       disabled: entry.option.disabled,
+      ...placed,
     },
     slot: { option: entry.option, index: entry.index, active, selected },
   }
 }
 
-// A row has to be written twice in the template, once inside a block and once at the top level
-// of the panel, a Vue template having no way to declare a reusable fragment. Kept apart from
-// `rendered` on purpose: the highlight moves on every arrow key, and only this cheap pass over
-// the tree follows it; the filtering and the grouping stay where they are.
-const rows = computed<RowNode[]>(() =>
-  rendered.value.map((node) => {
-    if (node.kind === 'option') return withState(node)
-    if (node.kind === 'group') return { ...node, options: node.options.map(withState) }
-    return node
-  }),
-)
+// What the panel renders: the rows of the window and the space standing for the others,
+// gathered back into their blocks. Kept apart from `flat` on purpose: the highlight moves on
+// every arrow key, and only this pass over the rendered rows follows it; the filtering and the
+// grouping stay where they are.
+const blocks = computed<PanelBlock[]>(() => {
+  const { rows, labels } = flat.value
+  const segments: VirtualSegment[] = props.virtual
+    ? virtualList.segments.value
+    : rows.map((_, index) => ({ type: 'row', index }))
+  const groupAt = (segment: VirtualSegment | undefined) => {
+    const row = segment?.type === 'row' ? rows[segment.index] : undefined
+    return row && row.kind !== 'separator' ? row.group : undefined
+  }
+
+  const out: PanelBlock[] = []
+  let open: Extract<PanelBlock, { kind: 'group' }> | undefined
+  for (const [k, segment] of segments.entries()) {
+    let block: RowBlock
+    let group: string | undefined
+    if (segment.type === 'spacer') {
+      block = { kind: 'spacer', key: segment.key, size: segment.size }
+      // Between two rows of one block, the space stands for rows of that block.
+      const before = groupAt(segments[k - 1])
+      group = before === groupAt(segments[k + 1]) ? before : undefined
+    } else {
+      const row = rows[segment.index]!
+      block = row.kind === 'option' ? withState(row, segment.index) : { ...row, at: segment.index }
+      group = groupAt(segment)
+    }
+    if (group === undefined) {
+      open = undefined
+      out.push(block)
+      continue
+    }
+    if (open?.key !== group) {
+      open = { kind: 'group', key: group, label: labels.get(group)!, children: [] }
+      out.push(open)
+    }
+    if (block.kind === 'heading') open.labelId = block.id
+    open.children.push(block)
+  }
+  return out
+})
 
 function hover(entry: RenderedOption) {
   if (!entry.option.disabled) activeIndex.value = entry.index
@@ -708,6 +842,11 @@ watch(
   activeIndex,
   (index) => {
     if (index < 0) return
+    if (props.virtual) {
+      const row = flat.value.rowOfOption[index]
+      if (row !== undefined) void virtualList.scrollToIndex(row)
+      return
+    }
     // Called optionally: the unit-test environment implements no scrolling at all.
     document.getElementById(optionId(index))?.scrollIntoView?.({ block: 'nearest' })
   },
@@ -731,11 +870,13 @@ function openPanel() {
 
 // Asking for the next page as the end of the list is reached. The observer itself, its
 // re-arming after each page and the lock that stops it firing twice all live in
-// `./infiniteScroll`; it is declared here so that closing the panel can reset it.
+// `useInfiniteScroll`; it is declared here so that closing the panel can reset it.
 const sentinelEl = ref<HTMLElement | null>(null)
 
 const infiniteScroll = useInfiniteScroll({
   sentinelEl,
+  // Found by its ARIA role, which is public API, rather than by an internal class.
+  root: (sentinel) => sentinel.closest('[role="listbox"]'),
   canLoad: () => open.value && props.hasMore && !props.loading,
   loaded: () => allOptions.value,
   onLoadMore: () => emit('load-more'),
@@ -1078,6 +1219,7 @@ defineExpose({
     -->
     <VPopover
       :id="optionsId"
+      ref="panelRef"
       v-model:open="open"
       mode="manual"
       anchor="--combobox-anchor"
@@ -1088,32 +1230,63 @@ defineExpose({
       :data-size="resolvedSize"
       :data-compact="resolvedCompact ? '' : undefined"
       :aria-multiselectable="multiple ? 'true' : undefined"
+      :data-virtual="virtual ? '' : undefined"
       @mousedown="onPanelMousedown"
     >
       <!-- Blocks and separators exist for the eye alone: the keyboard counts through the
            flat list of surviving options and therefore never encounters one. -->
-      <template v-for="node in rows" :key="node.key">
-        <VComboboxSeparator v-if="node.kind === 'separator'" />
+      <template v-for="block in blocks" :key="block.key">
+        <div
+          v-if="block.kind === 'spacer'"
+          class="v-combobox-spacer"
+          aria-hidden="true"
+          :style="{ blockSize: `${block.size}px` }"
+        />
 
-        <VComboboxGroup v-else-if="node.kind === 'group'" :label="node.label">
-          <VComboboxOption
-            v-for="entry in node.options"
-            :key="entry.key"
-            v-bind="entry.row"
-            @select="select(entry.option)"
-            @pointermove="hover(entry)"
-          >
-            <slot name="option" v-bind="entry.slot">{{ entry.option.label }}</slot>
-          </VComboboxOption>
+        <VComboboxSeparator
+          v-else-if="block.kind === 'separator'"
+          :ref="virtual ? (el) => measureRow(el, block.at) : undefined"
+        />
+
+        <VComboboxGroup
+          v-else-if="block.kind === 'group'"
+          :label="block.label"
+          :label-id="block.labelId"
+        >
+          <template v-for="child in block.children" :key="child.key">
+            <div
+              v-if="child.kind === 'spacer'"
+              class="v-combobox-spacer"
+              aria-hidden="true"
+              :style="{ blockSize: `${child.size}px` }"
+            />
+            <span
+              v-else-if="child.kind === 'heading'"
+              :id="child.id"
+              :ref="virtual ? (el) => measureRow(el, child.at) : undefined"
+              class="v-combobox-group-label"
+              >{{ child.label }}</span
+            >
+            <VComboboxOption
+              v-else-if="child.kind === 'option'"
+              :ref="virtual ? (el) => measureRow(el, child.at) : undefined"
+              v-bind="child.row"
+              @select="select(child.option)"
+              @pointermove="hover(child)"
+            >
+              <slot name="option" v-bind="child.slot">{{ child.option.label }}</slot>
+            </VComboboxOption>
+          </template>
         </VComboboxGroup>
 
         <VComboboxOption
-          v-else
-          v-bind="node.row"
-          @select="select(node.option)"
-          @pointermove="hover(node)"
+          v-else-if="block.kind === 'option'"
+          :ref="virtual ? (el) => measureRow(el, block.at) : undefined"
+          v-bind="block.row"
+          @select="select(block.option)"
+          @pointermove="hover(block)"
         >
-          <slot name="option" v-bind="node.slot">{{ node.option.label }}</slot>
+          <slot name="option" v-bind="block.slot">{{ block.option.label }}</slot>
         </VComboboxOption>
       </template>
 
@@ -1190,6 +1363,15 @@ defineExpose({
   .v-combobox-panel {
     max-block-size: var(--vectis-control-size-combobox-list-max-block);
     overflow: auto;
+  }
+
+  /* The virtual mode corrects the scroll itself when a row above the view changes height. */
+  .v-combobox-panel[data-virtual] {
+    overflow-anchor: none;
+  }
+
+  .v-combobox-spacer {
+    flex: none;
   }
 
   /*

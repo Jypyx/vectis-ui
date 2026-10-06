@@ -1123,3 +1123,94 @@ describe('VCombobox state kept in step', () => {
     })
   })
 })
+
+describe('VCombobox virtual', () => {
+  const MANY = Array.from({ length: 1000 }, (_, i) => ({ value: i, label: `Option ${i + 1}` }))
+
+  // jsdom lays nothing out: the panel has no height, so the window holds the first row and the
+  // five rows of margin below it.
+  it('renders only the rows of the window, the rest as one hidden spacer', async () => {
+    const { getByRole, container } = renderCombobox({ options: MANY, virtual: true })
+    await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
+    const listbox = container.querySelector('[role="listbox"]')!
+    expect(listbox.querySelectorAll('[role="option"]')).toHaveLength(6)
+    const spacer = listbox.querySelector<HTMLElement>('.v-combobox-spacer')!
+    expect(spacer.getAttribute('aria-hidden')).toBe('true')
+    expect(parseFloat(spacer.style.blockSize)).toBeGreaterThan(30000)
+  })
+
+  it('each option says where it stands in the list', async () => {
+    const { getByRole, container } = renderCombobox({ options: MANY, virtual: true })
+    await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
+    const option = container.querySelectorAll('[role="option"]')[1]!
+    expect(option.getAttribute('aria-setsize')).toBe('1000')
+    expect(option.getAttribute('aria-posinset')).toBe('2')
+  })
+
+  it('the total is unknown while more pages may come', async () => {
+    const { getByRole, container } = renderCombobox({ options: MANY, virtual: true, hasMore: true })
+    await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
+    expect(container.querySelector('[role="option"]')!.getAttribute('aria-setsize')).toBe('-1')
+  })
+
+  it('keeps the highlighted option rendered, so aria-activedescendant names an element', async () => {
+    const { getByRole } = renderCombobox({ options: MANY, virtual: true })
+    const input = getByRole('combobox')
+    await fireEvent.keyDown(input, { key: 'ArrowDown' })
+    // From the first option, ArrowUp wraps to the last one, far outside the window.
+    await fireEvent.keyDown(input, { key: 'ArrowUp' })
+    await nextTick()
+    const active = document.getElementById(input.getAttribute('aria-activedescendant')!)
+    expect(active?.textContent?.trim()).toBe('Option 1000')
+    await fireEvent.keyDown(input, { key: 'Enter' })
+    expect(input).toHaveProperty('value', 'Option 1000')
+  })
+
+  it('filtering renders the matching rows', async () => {
+    const { getByRole, container } = renderCombobox({ options: MANY, virtual: true })
+    await fireEvent.update(getByRole('combobox'), 'Option 99')
+    const labels = [...container.querySelectorAll('[role="option"]')].map((o) =>
+      o.textContent?.trim(),
+    )
+    expect(labels).toEqual([
+      'Option 99',
+      'Option 990',
+      'Option 991',
+      'Option 992',
+      'Option 993',
+      'Option 994',
+    ])
+  })
+
+  it('a block whose heading is outside the window is named by aria-label', async () => {
+    const groups = [
+      { label: 'First', options: MANY.slice(0, 20) },
+      { label: 'Second', options: MANY.slice(20, 40) },
+    ]
+    const { getByRole } = renderCombobox({ options: groups, virtual: true })
+    const input = getByRole('combobox')
+    await fireEvent.keyDown(input, { key: 'ArrowDown' })
+    const first = getByRole('group', { name: 'First' })
+    // The heading is rendered at the top: it names its block.
+    expect(first.getAttribute('aria-labelledby')).toBe(
+      first.querySelector('.v-combobox-group-label')!.id,
+    )
+    // The last option of the second block is pinned without its heading.
+    await fireEvent.keyDown(input, { key: 'ArrowUp' })
+    await nextTick()
+    const second = getByRole('group', { name: 'Second' })
+    expect(second.getAttribute('aria-label')).toBe('Second')
+    expect(second.querySelector('.v-combobox-group-label')).toBeNull()
+    const option = second.querySelector('[role="option"]')!
+    expect(option.getAttribute('aria-setsize')).toBe('20')
+    expect(option.getAttribute('aria-posinset')).toBe('20')
+  })
+
+  it('without virtual, every option is rendered and no position is set', async () => {
+    const { getByRole, container } = renderCombobox({ options: MANY })
+    await fireEvent.keyDown(getByRole('combobox'), { key: 'ArrowDown' })
+    expect(container.querySelectorAll('[role="option"]')).toHaveLength(1000)
+    expect(container.querySelector('[role="option"]')!.hasAttribute('aria-posinset')).toBe(false)
+    expect(container.querySelector('.v-combobox-spacer')).toBeNull()
+  })
+})
