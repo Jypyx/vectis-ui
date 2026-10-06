@@ -134,6 +134,7 @@ export const en: Messages = {
     increment: 'Increase',
     decrement: 'Decrease',
   },
+  splitButton: { menu: 'More options' },
   rating: {
     label: 'Rating',
     empty: 'No rating',

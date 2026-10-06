@@ -40,6 +40,7 @@ export { default as VIconButton } from './components/VIconButton/VIconButton.vue
 export type { IconButtonShape } from './components/VIconButton/VIconButton.vue'
 export { default as VButtonGroup } from './components/VButton/VButtonGroup.vue'
 export type { ButtonGroupOrientation } from './components/VButton/VButtonGroup.vue'
+export { default as VSplitButton } from './components/VSplitButton/VSplitButton.vue'
 export { default as VPagination } from './components/VPagination/VPagination.vue'
 export type {
   PaginationItemVariant,

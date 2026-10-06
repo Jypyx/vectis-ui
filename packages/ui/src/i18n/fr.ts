@@ -137,6 +137,7 @@ export const fr: Messages = {
     increment: 'Augmenter',
     decrement: 'Diminuer',
   },
+  splitButton: { menu: 'Plus d’options' },
   rating: {
     label: 'Note',
     empty: 'Aucune note',

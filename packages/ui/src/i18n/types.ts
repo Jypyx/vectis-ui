@@ -204,6 +204,10 @@ export interface Messages {
     /** The button that takes one step off the value. */
     decrement: string
   }
+  splitButton: {
+    /** The button that opens the menu of the other actions. */
+    menu: string
+  }
   rating: {
     /** What the group of icons is called when it has no label. */
     label: string

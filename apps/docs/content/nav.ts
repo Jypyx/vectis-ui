@@ -90,6 +90,7 @@ export const components = [
   entry('slider'),
   entry('snackbar'),
   entry('spinner'),
+  entry('split-button'),
   entry('stepper'),
   entry('switch'),
   entry('tabs'),

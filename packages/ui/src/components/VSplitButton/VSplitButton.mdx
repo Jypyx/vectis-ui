@@ -1,0 +1,71 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VSplitButtonStories from './VSplitButton.stories'
+
+<Meta of={VSplitButtonStories} />
+
+# SplitButton
+
+A main action joined to a menu of related ones. VSplitButton is a VButtonGroup holding a VButton
+and the VIconButton that opens a VMenu: `label` is the text of the main action, and the default
+slot takes the VMenuItem, VMenuGroup and VMenuSeparator of the menu, submenus included.
+
+<Canvas of={VSplitButtonStories.Default} />
+
+<Controls of={VSplitButtonStories.Default} />
+
+The main action emits `click`; each menu item emits its own `select`. `v-model:open` follows the
+menu.
+
+## Variants
+
+`variant`, `tone`, `size`, `compact` and `elevated` take the values of VButton and apply to both
+halves. A line always separates them, so a filled control does not read as a single wider button.
+
+<Canvas of={VSplitButtonStories.Variants} />
+
+<Canvas of={VSplitButtonStories.Tones} />
+
+## Sizes
+
+The menu button stays square at every size.
+
+<Canvas of={VSplitButtonStories.Sizes} />
+
+## States
+
+`disabled` turns off both halves. `loading` puts the spinner in the main action and disables the
+menu button as well, since an action is already under way.
+
+<Canvas of={VSplitButtonStories.States} />
+
+## Link and icons
+
+`href` turns the main action into a link, inert while disabled or loading. `iconStart`, `iconEnd`
+and `iconFilled` belong to the main action; `menuIcon` replaces the `expand_more` chevron.
+
+<Canvas of={VSplitButtonStories.LinkWithIcon} />
+
+## Menu placement
+
+The menu is anchored to the whole control rather than to the menu button. `placement` is
+`bottom-end` by default, so the menu lines up with the end of the control; the browser moves it
+to the other side when there is not enough room.
+
+<Canvas of={VSplitButtonStories.Placement} />
+
+`fullWidth` stretches the control: the main action takes the room and the menu button keeps its
+square. `matchWidth` keeps the menu at least as wide as the whole control, and `menuWidth` sets
+its width. `menuSize` sets the height of its rows.
+
+<Canvas of={VSplitButtonStories.FullWidth} />
+
+## Accessibility
+
+- Both halves are native buttons in a `role="group"`: Tab reaches the main action, then the menu
+  button.
+- The menu button carries `aria-haspopup="menu"`, `aria-expanded` and `aria-controls`. Its name is
+  "More options" from the dictionary; `menuLabel` replaces it, for instance "Other ways to save".
+- The menu follows VMenu: arrow keys, Home and End, and Escape returns the focus to the menu
+  button.
+- `class` and `style` stay on the group; every other attribute, `aria-describedby` included, goes
+  to the main action, which `focus()` and `el` also target.

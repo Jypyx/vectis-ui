@@ -66,6 +66,7 @@ const nav: NavMessages = {
   slider: 'Curseur',
   snackbar: 'Barre de confirmation',
   spinner: 'Indicateur de chargement',
+  'split-button': 'Bouton divisé',
   stepper: 'Étapes',
   switch: 'Interrupteur',
   tabs: 'Onglets',

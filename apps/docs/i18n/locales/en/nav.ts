@@ -68,6 +68,7 @@ const nav: NavMessages = {
   slider: 'Slider',
   snackbar: 'Snackbar',
   spinner: 'Spinner',
+  'split-button': 'Split button',
   stepper: 'Stepper',
   switch: 'Switch',
   tabs: 'Tabs',
