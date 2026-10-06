@@ -346,18 +346,21 @@ defineExpose({
   /*
    * The checkerboard shows through a translucent colour, drawn in the theme's own surface and
    * border colours; an empty field shows it alone. Forced colours leave the chip untouched: it
-   * is the value, not the theme's paint.
+   * is the value, not the theme's paint. As on VColorPicker's swatches, the edge is a
+   * translucent border shading the colour that runs under it, the checkerboard stopping inside:
+   * an opaque ring left a pale fringe on the antialiased pixels.
    */
   .v-color-input-chip {
     inline-size: var(--vectis-icon-size);
     block-size: var(--vectis-icon-size);
-    border-radius: var(--vectis-radius-xs);
+    border: 1px solid var(--vectis-color-border-on-fill);
+    border-radius: var(--vectis-radius-interactive);
     background:
-      linear-gradient(var(--color-input-chip, transparent), var(--color-input-chip, transparent)),
+      linear-gradient(var(--color-input-chip, transparent), var(--color-input-chip, transparent))
+        border-box,
       repeating-conic-gradient(var(--vectis-color-border) 0 25%, var(--vectis-color-surface) 0 50%)
         0 0 / var(--vectis-control-size-color-picker-checker)
-        var(--vectis-control-size-color-picker-checker);
-    box-shadow: inset 0 0 0 1px var(--vectis-color-border-strong);
+        var(--vectis-control-size-color-picker-checker) padding-box;
     forced-color-adjust: none;
   }
 

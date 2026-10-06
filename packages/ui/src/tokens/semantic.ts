@@ -35,7 +35,7 @@ export const semantic = {
     'border-strong': color('{color.gray.300}', 'The borders of form controls'),
     'border-on-fill': color(
       'oklch(0% 0 0 / 0.12)',
-      'A veil dividing a filled background: the seams of a bordered VButtonGroup',
+      'A veil edging or dividing a filled background: VButtonGroup seams, VColorPicker swatches',
     ),
 
     accent: color(
@@ -445,12 +445,16 @@ export const semantic = {
       "The thickness of VColorPicker's hue and opacity tracks (12px)",
     ),
     'size-color-picker-thumb': dimension(
-      '1rem',
-      "The diameter of VColorPicker's thumbs, on the area and the tracks (16px)",
+      '1.25rem',
+      "The diameter of VColorPicker's thumbs, on the area and the tracks (20px)",
     ),
     'size-color-picker-preview': dimension(
       '2rem',
       'The disc showing the current colour in VColorPicker (32px)',
+    ),
+    'size-color-picker-format': dimension(
+      '6rem',
+      "The width of VColorPicker's format menu, which holds its longest name (96px)",
     ),
     'size-color-picker-swatch': dimension('1.5rem', 'The side of a VColorPicker swatch (24px)'),
     'size-color-picker-checker': dimension(

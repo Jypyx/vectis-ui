@@ -10,6 +10,7 @@ import { computed, onMounted, ref, useId, watch } from 'vue'
 
 import VIconButton from '../VIconButton/VIconButton.vue'
 import VInput from '../VInput/VInput.vue'
+import VSelect from '../VSelect/VSelect.vue'
 import { colorize as colorizeIcon } from '../VIcon/icons/colorize'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useLocale, useMessages } from '../../i18n/state'
@@ -186,6 +187,11 @@ watch(
   () => props.format,
   (format) => (shownFormat.value = format),
 )
+
+const formatOptions = COLOR_FORMATS.map((format) => ({
+  value: format,
+  label: format.toUpperCase(),
+}))
 
 /** The text field's own copy, rewritten whenever the colour changes from elsewhere. */
 const fieldText = ref('')
@@ -367,16 +373,15 @@ defineExpose({
     </div>
 
     <div v-if="!hideInput" class="v-color-picker-fields">
-      <select
-        v-model="shownFormat"
+      <VSelect
+        :model-value="shownFormat"
         class="v-color-picker-format"
+        :options="formatOptions"
+        size="sm"
         :aria-label="m.colorPicker.format"
         :disabled="disabled"
-      >
-        <option v-for="option in COLOR_FORMATS" :key="option" :value="option">
-          {{ option.toUpperCase() }}
-        </option>
-      </select>
+        @update:model-value="shownFormat = $event as ColorFormat"
+      />
       <VInput
         v-model="fieldText"
         class="v-color-picker-value"
@@ -450,6 +455,13 @@ defineExpose({
    * paint: it is never mirrored in right-to-left text, and forced colours leave it untouched.
    * Its gradients run between literal black and white, the ends of the colour model.
    */
+
+  /*
+   * The edge of the preview and the swatches is a translucent border over the colour, which it
+   * shades rather than covers: an opaque grey ring left a pale fringe on the antialiased pixels.
+   * The colour runs under the border and the checkerboard stops inside it, so no square of the
+   * checkerboard shows through those pixels either.
+   */
   .v-color-picker-area,
   .v-color-picker-track,
   .v-color-picker-preview,
@@ -505,10 +517,10 @@ defineExpose({
     inline-size: var(--vectis-control-size-color-picker-preview);
     block-size: var(--vectis-control-size-color-picker-preview);
     border-radius: var(--vectis-radius-pill);
+    border: 1px solid var(--vectis-color-border-on-fill);
     background:
-      linear-gradient(var(--color-picker-color), var(--color-picker-color)),
-      var(--color-picker-checker);
-    box-shadow: inset 0 0 0 1px var(--vectis-color-border);
+      linear-gradient(var(--color-picker-color), var(--color-picker-color)) border-box,
+      var(--color-picker-checker) padding-box;
   }
 
   .v-color-picker-tracks {
@@ -592,24 +604,10 @@ defineExpose({
     gap: var(--vectis-space-2);
   }
 
-  .v-color-picker-format {
+  /* Qualified to outweigh the full width VSelect takes by default. */
+  .v-color-picker-fields .v-color-picker-format {
     flex: none;
-    block-size: var(--vectis-control-height-sm);
-    padding-inline: var(--vectis-space-2);
-    border: 1px solid var(--vectis-color-border-strong);
-    border-radius: var(--vectis-radius-interactive);
-    background: var(--vectis-color-surface);
-    color: var(--vectis-color-text);
-    font-family: var(--vectis-text-family);
-    font-size: var(--vectis-text-body-sm-size);
-    font-weight: var(--vectis-text-body-sm-weight);
-    line-height: var(--vectis-text-body-sm-leading);
-    cursor: pointer;
-  }
-
-  .v-color-picker-format:focus-visible {
-    outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
-    outline-offset: var(--vectis-focus-ring-offset);
+    inline-size: var(--vectis-control-size-color-picker-format);
   }
 
   .v-color-picker-value {
@@ -650,10 +648,10 @@ defineExpose({
     inline-size: var(--vectis-control-size-color-picker-swatch);
     block-size: var(--vectis-control-size-color-picker-swatch);
     border-radius: var(--vectis-radius-interactive);
+    border: 1px solid var(--vectis-color-border-on-fill);
     background:
-      linear-gradient(var(--color-picker-swatch), var(--color-picker-swatch)),
-      var(--color-picker-checker);
-    box-shadow: inset 0 0 0 1px var(--vectis-color-border);
+      linear-gradient(var(--color-picker-swatch), var(--color-picker-swatch)) border-box,
+      var(--color-picker-checker) padding-box;
   }
 
   /* An outline rather than a shadow marks the chosen swatch: forced colours keep outlines. */
@@ -680,13 +678,6 @@ defineExpose({
 
   .v-color-picker[data-disabled]
     :is(.v-color-picker-area, .v-color-picker-track, .v-color-picker-swatch) {
-    cursor: not-allowed;
-  }
-
-  .v-color-picker-format:disabled {
-    border-color: var(--vectis-color-border);
-    background: var(--vectis-color-surface-muted);
-    color: var(--vectis-color-text-subtle);
     cursor: not-allowed;
   }
 }

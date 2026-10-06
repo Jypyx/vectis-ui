@@ -124,9 +124,11 @@ describe('VColorPicker', () => {
 
     it('the format menu changes what the field shows, not the model', async () => {
       const { value, field, getByRole } = renderPicker()
-      const menu = getByRole<HTMLSelectElement>('combobox', { name: 'Colour format' })
-      expect(menu.value).toBe('hex')
-      await fireEvent.update(menu, 'oklch')
+      const menu = getByRole('combobox', { name: 'Colour format' })
+      expect(menu.textContent?.trim()).toBe('HEX')
+      await fireEvent.click(menu)
+      await fireEvent.click(getByRole('option', { name: 'OKLCH' }))
+      expect(menu.textContent?.trim()).toBe('OKLCH')
       expect(field().value).toBe('oklch(62.3% 0.188 259.8)')
       expect(value.value).toBe('#3b82f6')
     })
@@ -231,7 +233,8 @@ describe('VColorPicker', () => {
       const { value, findByRole } = renderPicker()
       await fireEvent.click(await findByRole('button', { name: 'Pick a colour from the screen' }))
       expect(value.value).toBe('#3b82f6')
-      expect(renderPicker('hide-eye-dropper').container.querySelector('button')).toBeNull()
+      const { container } = renderPicker('hide-eye-dropper')
+      expect(container.querySelector('.v-color-picker-eye-dropper')).toBeNull()
     })
   })
 

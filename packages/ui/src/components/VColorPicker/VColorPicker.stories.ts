@@ -100,7 +100,8 @@ export const Alpha: Story = {
 export const Formats: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Colour format' }), 'oklch')
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Colour format' }))
+    await userEvent.click(await canvas.findByRole('option', { name: 'OKLCH' }))
     expect(canvas.getByRole('textbox', { name: 'Colour value' })).toHaveValue(
       'oklch(62.3% 0.188 259.8)',
     )

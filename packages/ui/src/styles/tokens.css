@@ -328,8 +328,9 @@
     --vectis-control-size-color-picker-width: 16rem;
     --vectis-control-size-color-picker-area: 10rem;
     --vectis-control-size-color-picker-track: 0.75rem;
-    --vectis-control-size-color-picker-thumb: 1rem;
+    --vectis-control-size-color-picker-thumb: 1.25rem;
     --vectis-control-size-color-picker-preview: 2rem;
+    --vectis-control-size-color-picker-format: 6rem;
     --vectis-control-size-color-picker-swatch: 1.5rem;
     --vectis-control-size-color-picker-checker: 0.5rem;
     --vectis-control-size-date-picker-cell: 2.5rem;

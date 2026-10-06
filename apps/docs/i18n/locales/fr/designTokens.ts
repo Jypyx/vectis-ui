@@ -21,7 +21,7 @@ const descriptions: Record<DescribedToken, string> = {
   '--vectis-color-border': 'Les séparateurs, et le cadre des cartes, des tableaux et des panneaux',
   '--vectis-color-border-strong': 'La bordure des contrôles de formulaire',
   '--vectis-color-border-on-fill':
-    "Un voile séparant un fond plein : les jointures d'un VButtonGroup bordé",
+    'Un voile bordant ou séparant un fond plein : jointures de VButtonGroup, pastilles de VColorPicker',
   '--vectis-color-accent':
     "La couleur de marque : boutons pleins, contrôles cochés, l'élément sélectionné",
   '--vectis-color-accent-hover': "La couleur d'accent au survol",
@@ -197,9 +197,11 @@ const descriptions: Record<DescribedToken, string> = {
   '--vectis-control-size-color-picker-track':
     "L'épaisseur des pistes de teinte et d'opacité de VColorPicker (12px)",
   '--vectis-control-size-color-picker-thumb':
-    'Le diamètre des curseurs de VColorPicker, sur la zone et les pistes (16px)',
+    'Le diamètre des curseurs de VColorPicker, sur la zone et les pistes (20px)',
   '--vectis-control-size-color-picker-preview':
     'Le disque montrant la couleur courante dans VColorPicker (32px)',
+  '--vectis-control-size-color-picker-format':
+    'La largeur du menu de format de VColorPicker, qui contient son nom le plus long (96px)',
   '--vectis-control-size-color-picker-swatch': "Le côté d'une pastille de VColorPicker (24px)",
   '--vectis-control-size-color-picker-checker':
     'Le côté du damier visible à travers une couleur translucide (8px)',
