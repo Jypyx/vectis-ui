@@ -57,6 +57,7 @@ import progressLinear from './fr/progressLinear'
 import radio from './fr/radio'
 import rating from './fr/rating'
 import resizable from './fr/resizable'
+import select from './fr/select'
 import separator from './fr/separator'
 import sideNavigation from './fr/sideNavigation'
 import skeletonLoader from './fr/skeletonLoader'
@@ -141,6 +142,7 @@ export default defineI18nLocale((): DocsMessages => ({
   radio,
   rating,
   resizable,
+  select,
   separator,
   sideNavigation,
   skeletonLoader,

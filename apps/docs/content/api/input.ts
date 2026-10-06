@@ -41,6 +41,7 @@ export default {
       slots: [
         { name: 'start', type: '{}' },
         { name: 'value-end', key: 'valueEnd', type: '{}' },
+        { name: 'control', type: '{ controlProps: InputControlProps; }' },
         { name: 'end', type: '{}' },
       ],
     },
@@ -65,6 +66,16 @@ export default {
     {
       name: 'IconSource',
       definition: `export type IconSource = string | BuiltinIcon | IconRender`,
+    },
+    {
+      name: 'InputControlProps',
+      definition: `export type InputControlProps = {
+  id: string
+  class: string
+  disabled: boolean
+  'aria-invalid'?: true
+  'aria-describedby'?: string
+} & Record<string, unknown>`,
     },
   ],
 } satisfies PageApi

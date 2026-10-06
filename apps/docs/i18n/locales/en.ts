@@ -57,6 +57,7 @@ import progressLinear from './en/progressLinear'
 import radio from './en/radio'
 import rating from './en/rating'
 import resizable from './en/resizable'
+import select from './en/select'
 import separator from './en/separator'
 import sideNavigation from './en/sideNavigation'
 import skeletonLoader from './en/skeletonLoader'
@@ -139,6 +140,7 @@ export interface DocsMessages {
   radio: typeof radio
   rating: typeof rating
   resizable: typeof resizable
+  select: typeof select
   separator: typeof separator
   sideNavigation: typeof sideNavigation
   skeletonLoader: typeof skeletonLoader
@@ -228,6 +230,7 @@ export default defineI18nLocale((): DocsMessages => ({
   radio,
   rating,
   resizable,
+  select,
   separator,
   sideNavigation,
   skeletonLoader,

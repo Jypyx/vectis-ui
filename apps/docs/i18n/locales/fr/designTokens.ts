@@ -110,6 +110,8 @@ const descriptions: Record<DescribedToken, string> = {
     "La longueur de l'indicateur actif de VCarousel, qui s'étire d'un point en pilule",
   '--vectis-control-size-combobox-list-max-block':
     'La hauteur maximale du panneau de liste de VCombobox (la zone qui défile)',
+  '--vectis-control-size-select-list-max-block':
+    'La hauteur maximale du panneau de liste de VSelect (la zone qui défile)',
   '--vectis-control-size-menu-min': 'La largeur minimale du panneau de VMenu',
   '--vectis-control-size-menu-max': 'La largeur maximale du panneau de VMenu',
   '--vectis-control-size-meter-thickness-sm': "L'épaisseur d'un VMeter petit (4px)",

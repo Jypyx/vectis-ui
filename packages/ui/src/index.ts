@@ -101,7 +101,7 @@ export type {
 } from './components/VToggle/VToggle.vue'
 export { default as VToggleItem } from './components/VToggle/VToggleItem.vue'
 export { default as VInput } from './components/VInput/VInput.vue'
-export type { InputSize, InputType } from './components/VInput/VInput.vue'
+export type { InputControlProps, InputSize, InputType } from './components/VInput/VInput.vue'
 export { default as VInputGroup } from './components/VInput/VInputGroup.vue'
 export type { InputGroupSize } from './components/VInput/VInputGroup.vue'
 export { default as VNumberInput } from './components/VNumberInput/VNumberInput.vue'
@@ -198,6 +198,19 @@ export type {
   ComboboxOverflowSlotProps,
   ComboboxEmptySlotProps,
 } from './components/VCombobox/VCombobox.vue'
+export { default as VSelect } from './components/VSelect/VSelect.vue'
+export type {
+  SelectOption,
+  SelectGroup,
+  SelectSeparator,
+  SelectItem,
+  SelectSize,
+  SelectPlacement,
+  SelectDisplay,
+  SelectOptionSlotProps,
+  SelectChipSlotProps,
+  SelectOverflowSlotProps,
+} from './components/VSelect/VSelect.vue'
 export { default as VLink } from './components/VLink/VLink.vue'
 export type { LinkTone, LinkUnderline } from './components/VLink/VLink.vue'
 export { default as VBreadcrumb } from './components/VBreadcrumb/VBreadcrumb.vue'

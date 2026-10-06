@@ -87,6 +87,17 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
   { slug: 'radio', components: ['VRadio'] },
   { slug: 'rating', components: ['VRating'] },
   { slug: 'resizable', components: ['VResizable', 'VResizablePanel'] },
+  {
+    slug: 'select',
+    components: ['VSelect'],
+    internals: [
+      'VListboxPanel',
+      'VListboxOption',
+      'VListboxGroup',
+      'VListboxValues',
+      'VListboxChevron',
+    ],
+  },
   { slug: 'separator', components: ['VSeparator'] },
   {
     slug: 'side-navigation',

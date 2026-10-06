@@ -30,6 +30,19 @@ export type InputSize = 'sm' | 'md' | 'lg'
 /** The native type of the input, which also decides the keyboard a phone offers. */
 export type InputType = 'text' | 'email' | 'number' | 'password' | 'search' | 'tel' | 'url'
 
+/**
+ * What the `#control` slot hands over, to bind on the element replacing the input: its id, which
+ * the label points at, the class the field's states are drawn from, the references to the hint
+ * and the error, and the attributes set on the field other than `class` and `style`.
+ */
+export type InputControlProps = {
+  id: string
+  class: string
+  disabled: boolean
+  'aria-invalid'?: true
+  'aria-describedby'?: string
+} & Record<string, unknown>
+
 interface InputProps {
   /** The height of the field: 32, 40 or 48 pixels. */
   size?: InputSize
@@ -173,6 +186,13 @@ defineSlots<{
    */
   'value-end'?(): unknown
   /**
+   * Replaces the input with another control, for a field composed on top of this one: VSelect
+   * puts its button here. Bind `controlProps` on it; the field then draws its focus, invalid and
+   * disabled states from that control. The model, the limit and the counter apply to the input
+   * alone.
+   */
+  control?(props: { controlProps: InputControlProps }): unknown
+  /**
    * Content at the end of the field, which replaces `iconEnd`. It is hidden while
    * the field is loading, the spinner taking that place.
    */
@@ -241,6 +261,17 @@ const { counterText, over } = useTextLimit({
   softLimit: () => props.softLimit,
 })
 
+// The same order as on the input: the consumer's attributes win over the invalid state, and the
+// field's own ties win over theirs.
+const controlProps = computed<InputControlProps>(() => ({
+  'aria-invalid': props.invalid || !!props.error || undefined,
+  ...restAttrs.value,
+  id: fieldId.value,
+  class: 'v-input-control',
+  disabled: resolvedDisabled.value,
+  'aria-describedby': describedBy.value,
+}))
+
 // The real input sits inside the wrapper, out of reach of whoever renders this component. These
 // three are how the components built on it get there; VCombobox refocuses the field and selects
 // its text this way.
@@ -288,19 +319,21 @@ defineExpose({
       <VIcon v-else-if="iconStart" v-bind="iconProps(iconStart)" class="v-input-icon-start" />
       <slot name="start" />
 
-      <input
-        :id="fieldId"
-        ref="controlEl"
-        v-model="model"
-        :aria-invalid="invalid || !!error || undefined"
-        v-bind="restAttrs"
-        class="v-input-control"
-        :type="type"
-        :maxlength="softLimit ? undefined : maxlength"
-        :disabled="resolvedDisabled"
-        :readonly="readonly || noTyping || undefined"
-        :aria-describedby="describedBy"
-      />
+      <slot name="control" :control-props="controlProps">
+        <input
+          :id="fieldId"
+          ref="controlEl"
+          v-model="model"
+          :aria-invalid="invalid || !!error || undefined"
+          v-bind="restAttrs"
+          class="v-input-control"
+          :type="type"
+          :maxlength="softLimit ? undefined : maxlength"
+          :disabled="resolvedDisabled"
+          :readonly="readonly || noTyping || undefined"
+          :aria-describedby="describedBy"
+        />
+      </slot>
 
       <span
         v-if="counter"

@@ -292,6 +292,10 @@ export const semantic = {
       '18rem',
       "The maximum height of VCombobox's list panel (the scrolling area)",
     ),
+    'size-select-list-max-block': dimension(
+      '18rem',
+      "The maximum height of VSelect's list panel (the scrolling area)",
+    ),
     'size-menu-min': dimension('11rem', "The minimum width of VMenu's panel"),
     'size-menu-max': dimension('20rem', "The maximum width of VMenu's panel"),
     'size-progress-linear-thickness': dimension(

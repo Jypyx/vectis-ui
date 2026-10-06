@@ -85,6 +85,7 @@ export const components = [
   entry('radio'),
   entry('rating'),
   entry('resizable'),
+  entry('select'),
   entry('separator'),
   entry('side-navigation'),
   entry('skeleton-loader'),

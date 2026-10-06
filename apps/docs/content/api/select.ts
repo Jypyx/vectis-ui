@@ -1,0 +1,138 @@
+/*
+ * GENERATED FILE — do not edit by hand.
+ * Regenerate: pnpm --filter vectis-docs api  ·  Source: scripts/build-api.ts
+ */
+import type { PageApi } from './types'
+
+export default {
+  components: [
+    {
+      name: 'VSelect',
+      props: [
+        { name: 'options', type: 'SelectItem[]' },
+        { name: 'multiple', type: 'boolean', default: 'false' },
+        { name: 'display', type: 'SelectDisplay', values: "'chip' | 'text'", default: "'chip'" },
+        { name: 'max', type: 'number' },
+        { name: 'overflowText', type: '(count: number) => string' },
+        { name: 'label', type: 'string' },
+        { name: 'hint', type: 'string' },
+        { name: 'error', type: 'string' },
+        { name: 'size', type: 'SelectSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
+        { name: 'compact', type: 'boolean', default: 'false' },
+        { name: 'placeholder', type: 'string' },
+        { name: 'disabled', type: 'boolean', default: 'false' },
+        { name: 'readonly', type: 'boolean', default: 'false' },
+        { name: 'invalid', type: 'boolean', default: 'false' },
+        { name: 'iconStart', type: 'IconSource' },
+        { name: 'iconStartLabel', type: 'string' },
+        { name: 'expandIcon', type: 'IconSource', default: 'expand_more' },
+        { name: 'clearable', type: 'boolean', default: 'false' },
+        { name: 'clearLabel', type: 'string' },
+        { name: 'placement', type: 'SelectPlacement', values: "'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'", default: "'bottom-start'" },
+        { name: 'v-model', key: 'vModel', type: 'ItemValue | ItemValue[]', default: "''" },
+      ],
+      events: [
+        { name: 'click:icon-start', key: 'clickIconStart', type: '[event: MouseEvent]' },
+        { name: 'clear', type: '[]' },
+      ],
+      slots: [
+        { name: 'start', type: '{}' },
+        { name: 'value-end', key: 'valueEnd', type: '{}' },
+        { name: 'option', type: 'ListboxOptionSlotProps' },
+        { name: 'chip', type: 'ListboxChipSlotProps' },
+        { name: 'overflow', type: 'ListboxOverflowSlotProps' },
+      ],
+    },
+  ],
+  types: [
+    {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'ChipSize',
+      definition: `export type ChipSize = 'xs' | 'sm'`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
+    },
+    {
+      name: 'ItemValue',
+      definition: `export type ItemValue = string | number`,
+    },
+    {
+      name: 'ListboxChipSlotProps',
+      definition: `export interface ListboxChipSlotProps {
+  value: ItemValue
+  option: ListboxOption | undefined
+  label: string
+  remove: () => void
+  size: ChipSize
+  compact: boolean
+}`,
+    },
+    {
+      name: 'ListboxGroup',
+      definition: `export interface ListboxGroup {
+  label: string
+  options: ListboxOption[]
+}`,
+    },
+    {
+      name: 'ListboxItem',
+      definition: `export type ListboxItem = ListboxOption | ListboxGroup | ListboxSeparator`,
+    },
+    {
+      name: 'ListboxOption',
+      definition: `export interface ListboxOption {
+  value: ItemValue
+  label: string
+  icon?: IconSource
+  disabled?: boolean
+}`,
+    },
+    {
+      name: 'ListboxOptionSlotProps',
+      definition: `export interface ListboxOptionSlotProps {
+  option: ListboxOption
+  index: number
+  active: boolean
+  selected: boolean
+}`,
+    },
+    {
+      name: 'ListboxOverflowSlotProps',
+      definition: `export interface ListboxOverflowSlotProps {
+  count: number
+  size: ChipSize
+  compact: boolean
+}`,
+    },
+    {
+      name: 'ListboxSeparator',
+      definition: `export interface ListboxSeparator {
+  separator: true
+}`,
+    },
+    {
+      name: 'SelectItem',
+      definition: `export type SelectItem = ListboxItem`,
+    },
+  ],
+  cssVars: [
+    { name: '--vectis-control-size-select-list-max-block', value: '18rem' },
+  ],
+} satisfies PageApi

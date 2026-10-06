@@ -38,6 +38,7 @@ export const en: Messages = {
     empty: 'No results',
     clear: 'Clear selection',
   },
+  select: { clear: 'Clear selection' },
   commandPalette: {
     label: 'Command palette',
     searchLabel: 'Search commands',

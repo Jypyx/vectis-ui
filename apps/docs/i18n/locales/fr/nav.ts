@@ -61,6 +61,7 @@ const nav: NavMessages = {
   radio: 'Bouton radio',
   rating: 'Notation',
   resizable: 'Panneaux redimensionnables',
+  select: 'Sélecteur',
   separator: 'Séparateur',
   'side-navigation': 'Navigation latérale',
   'skeleton-loader': 'Squelette de chargement',

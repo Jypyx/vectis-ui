@@ -88,6 +88,8 @@ export default {
         start: 'Content after <code>iconStart</code>. Does not replace the icon.',
         valueEnd: 'Content after the value and counter, before the clear button and end icon.',
         end: 'Content replacing <code>iconEnd</code>. Hidden while loading.',
+        control:
+          'Control replacing the input, for composed fields. Bind the received <code>controlProps</code> on it: id, field class, ARIA links and forwarded attributes.',
       },
     },
   },

@@ -1,0 +1,130 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VSelectStories from './VSelect.stories'
+
+<Meta of={VSelectStories} />
+
+# Select
+
+A choice among a list of options, with the behaviour of a native `<select>` and the look of
+`VCombobox`. A native `<select>` cannot draw its open list with the design system on every
+supported engine, so `VSelect` follows the ARIA **select-only combobox** pattern:
+
+- a native **`<button role="combobox">`** inside `VInput`'s field, which keeps the focus;
+- the same list panel as `VCombobox` (`role="listbox"`, top layer, anchored on the field);
+- a **hidden native `<select>`**, which carries the value into forms.
+
+There is nothing to type: the field is a button, and letters typed on it highlight an option, as
+on a native list. For a searchable list, use `VCombobox`.
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { VSelect, type SelectOption } from 'vectis-ui'
+
+const countries: SelectOption[] = [
+  { value: 'fr', label: 'France' },
+  { value: 'be', label: 'Belgium' },
+  { value: 'ca', label: 'Canada' },
+]
+const value = ref('')
+</script>
+
+<template>
+  <VSelect v-model="value" :options="countries" label="Country" placeholder="Choose a country…" />
+</template>
+```
+
+<Canvas of={VSelectStories.Default} />
+
+<Controls of={VSelectStories.Default} />
+
+## Options
+
+Options take the same shape as `VCombobox`'s: `{ value, label, icon?, disabled? }`. The `value`
+feeds the `v-model` and may be a string or a number; a `disabled` option is shown but cannot be
+chosen or reached with the keyboard. While nothing is chosen the value is `''`, and the field shows
+`placeholder`: no option is chosen for the reader.
+
+## Groups and separators
+
+An entry may be a **named group**, `{ label, options }`, the equivalent of an `<optgroup>`, or a
+**separator**, `{ separator: true }`. The keyboard steps over both.
+
+<Canvas of={VSelectStories.Groups} />
+
+## Customizing an option
+
+The `#option` slot receives `{ option, index, active, selected }` and replaces the label of each
+row.
+
+<Canvas of={VSelectStories.CustomOption} />
+
+## Multiple selection
+
+`multiple` makes the value a list. The list stays open while options are toggled, and each value
+is a chip whose cross removes it. While the field is not focused, `max` sums up the values beyond
+it as "+X", which `overflowText` or the `#overflow` slot rephrase. The `#chip` slot replaces a
+chip.
+
+<Canvas of={VSelectStories.Multiple} />
+
+`display="text"` spells the values out on one line instead, cut short with an ellipsis.
+
+<Canvas of={VSelectStories.MultipleText} />
+
+## Clearing
+
+`clearable` offers a cross that empties the selection, emits `clear` and gives the focus back to
+the field.
+
+<Canvas of={VSelectStories.Clearable} />
+
+## Forms
+
+The hidden `<select>` receives `name`, `form`, `required` and `autocomplete`, and mirrors the
+value: numbers are submitted as their text, and a multiple field submits one entry per value.
+
+- **Validation**: `required` is checked by the browser on submission. A failed check focuses the
+  field and marks it invalid until a value satisfies it.
+- **Autofill** writing the hidden `<select>` updates the `v-model`.
+- **Reset**: a form reset restores the value the field was created with.
+- A `disabled` field is not submitted; a `readonly` one is.
+
+<Canvas of={VSelectStories.InAForm} />
+
+## States and sizes
+
+`disabled`, `readonly`, `invalid` and `error` behave as on `VInput`. A read-only field stays
+focusable and announces its value, but its list never opens. `size` and `compact` follow the other
+fields.
+
+<Canvas of={VSelectStories.States} />
+
+<Canvas of={VSelectStories.Sizes} />
+
+## Accessibility
+
+- The button carries `role="combobox"`, `aria-expanded` and `aria-controls`; the panel carries
+  `role="listbox"`, and each option `role="option"` and `aria-selected`. A multiple list carries
+  `aria-multiselectable`.
+- **The focus stays on the button**; the current option is named by `aria-activedescendant`. The
+  button's text is the field's value: the chosen label, or every chosen label in a multiple field,
+  where the visible line of a text display is hidden from assistive technology so it is read once.
+- `label` names the button through `<label for>`; without one, set `aria-label`. `required`
+  reaches the button as `aria-required`, and `readonly` as `aria-readonly`.
+- Keyboard, closed: Down, Up, Enter and Space open the list on the chosen option; Home and End open
+  it on the first or last option; a letter opens it on the first matching option.
+- Keyboard, open: Up and Down move (wrapping, skipping disabled options); Home, End, Page Up and
+  Page Down jump; letters typed within half a second form a prefix, and a repeated letter cycles;
+  Enter and Space choose; Alt+Up chooses and closes; Escape closes without changing the value; Tab
+  chooses the highlighted option of a single list, then moves on.
+- The hidden `<select>` is out of the tab order and hidden from assistive technology. When the
+  browser focuses it after a failed validation, it hands the focus to the button.
+
+The clear cross is named from the design system dictionary (`select.clear`), and `clearLabel`
+adjusts it case by case.
+
+## Browser support
+
+The panel uses the **Popover API** and **CSS Anchor Positioning**, as `VCombobox` does, with no
+fallback.

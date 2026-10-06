@@ -1,5 +1,6 @@
 import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
+import { h } from 'vue'
 
 import VInput from './VInput.vue'
 
@@ -253,5 +254,25 @@ describe('VInput — noTyping and the counter', () => {
     const ids = getByRole('textbox').getAttribute('aria-describedby')!.split(' ')
     expect(ids).toHaveLength(2)
     expect(ids[1]).toBe(counter.id)
+  })
+
+  it('#control replaces the input and receives the ties to the label and the messages', () => {
+    const { getByRole, container } = render(VInput, {
+      props: { label: 'Country', hint: 'Help', error: 'Wrong', disabled: true },
+      attrs: { 'data-test': 'x' },
+      slots: {
+        control: ({ controlProps }: { controlProps: Record<string, unknown> }) =>
+          h('button', { type: 'button', ...controlProps }, 'France'),
+      },
+    })
+    expect(container.querySelector('input')).toBeNull()
+    const control = getByRole('button', { name: 'Country' }) as HTMLButtonElement
+    expect(control.classList.contains('v-input-control')).toBe(true)
+    expect(control.getAttribute('aria-invalid')).toBe('true')
+    expect(control.getAttribute('aria-describedby')).toBe(
+      container.querySelector('.v-input-error')!.id,
+    )
+    expect(control.getAttribute('data-test')).toBe('x')
+    expect(control.disabled).toBe(true)
   })
 })

@@ -47,6 +47,9 @@ export interface Messages {
     empty: string
     clear: string
   }
+  select: {
+    clear: string
+  }
   commandPalette: {
     /** What the palette itself is called. */
     label: string

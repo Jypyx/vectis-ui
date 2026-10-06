@@ -92,6 +92,8 @@ export default {
         valueEnd:
           'Contenu après la valeur et le compteur, avant le bouton d’effacement et l’icône de fin.',
         end: 'Contenu remplaçant <code>iconEnd</code>. Masqué pendant le chargement.',
+        control:
+          'Contrôle remplaçant l’input, pour les champs composés. Liez-lui les <code>controlProps</code> reçues : id, classe du champ, liens ARIA et attributs transmis.',
       },
     },
   },
