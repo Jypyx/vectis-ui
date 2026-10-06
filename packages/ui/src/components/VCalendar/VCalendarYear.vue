@@ -191,7 +191,7 @@ defineExpose({
   }
 
   .v-calendar-year-title:hover {
-    background: var(--vectis-color-surface-muted);
+    background: var(--calendar-hover-bg);
   }
 
   .v-calendar-year-count {

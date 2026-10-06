@@ -108,7 +108,7 @@ const meta: Meta = {
   title: 'Components/DataTable',
   component: VDataTable as Meta['component'],
   argTypes: {
-    variant: { control: 'inline-radio', options: ['flat', 'outlined'] },
+    variant: { control: 'inline-radio', options: ['flat', 'outline', 'elevated', 'filled'] },
   },
   args: { rowKey: 'name' },
 }
@@ -392,14 +392,20 @@ export const CustomHeaders: Story = {
 }
 
 /**
- * Decoration of the container; the same scale as VAccordion: `flat` (the default) and
- * `outlined`.
+ * The frame around the rows and the footer, on the scale shared with VCard: `flat` (the
+ * default), `outline`, `elevated` and `filled`. The header stays outside the frame.
  */
 export const Variants: Story = {
   args: { searchable: true },
   render: (args) => ({
     components: { VDataTable },
-    setup: () => ({ args, t, columns, rows, variants: ['flat', 'outlined'] as const }),
+    setup: () => ({
+      args,
+      t,
+      columns,
+      rows,
+      variants: ['flat', 'outline', 'elevated', 'filled'] as const,
+    }),
     template: `
       <div style="display: grid; gap: 32px; width: 680px">
         <VDataTable
@@ -415,12 +421,25 @@ export const Variants: Story = {
     `,
   }),
   // Jsdom computes no style: unframed, the scrolling area rounds the tinted heading, while the
-  // root stays unclipped so the search field's focus ring is not cropped.
+  // root stays unclipped so the search field's focus ring is not cropped. Framed, the frame
+  // clips the rows and the footer, and the header stays outside it.
   play: async ({ canvasElement }) => {
     const flat = canvasElement.querySelector<HTMLElement>('.v-data-table[data-variant="flat"]')!
     const scroller = flat.querySelector<HTMLElement>('.v-data-table-scroller')!
     await expect(getComputedStyle(scroller).borderTopLeftRadius).not.toBe('0px')
     await expect(getComputedStyle(flat).overflow).toBe('visible')
+    const outline = canvasElement.querySelector<HTMLElement>(
+      '.v-data-table[data-variant="outline"]',
+    )!
+    const frame = outline.querySelector<HTMLElement>('.v-data-table-frame')!
+    await expect(getComputedStyle(frame).overflow).toBe('clip')
+    await expect(getComputedStyle(frame).borderTopWidth).toBe('1px')
+    await expect(getComputedStyle(outline).borderTopWidth).toBe('0px')
+    await expect(frame.contains(outline.querySelector('.v-data-table-header'))).toBe(false)
+    const elevatedFrame = canvasElement.querySelector<HTMLElement>(
+      '.v-data-table[data-variant="elevated"] > .v-data-table-frame',
+    )!
+    await expect(getComputedStyle(elevatedFrame).borderTopWidth).toBe('0px')
   },
 }
 
@@ -569,7 +588,7 @@ export const InfiniteScroll: Story = {
  */
 export const FullHeight: Story = {
   args: {
-    variant: 'outlined',
+    variant: 'outline',
     searchable: true,
     stickyHeader: true,
     showRange: true,
@@ -590,7 +609,7 @@ export const FullHeight: Story = {
     const scroller = canvasElement.querySelector('.v-data-table-scroller') as HTMLElement
 
     // The component matches the parent, and the overflow scrolls (instead of being cropped by
-    // the outlined variant's `overflow: clip`)
+    // the frame's `overflow: clip`)
     expect(Math.round(wrapper.getBoundingClientRect().height)).toBe(460)
     expect(scroller.scrollHeight).toBeGreaterThan(scroller.clientHeight)
 

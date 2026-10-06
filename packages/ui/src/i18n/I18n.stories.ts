@@ -117,7 +117,7 @@ const SHOWCASE = `
       row-key="name"
       searchable
       selectable
-      variant="outlined"
+      variant="outline"
       :per-page="5"
       :per-page-options="[5, 10]"
       show-range

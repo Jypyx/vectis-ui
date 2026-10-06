@@ -4,7 +4,7 @@ export default {
   examples: {
     variants: {
       title: 'Variantes',
-      text: '<code>flat</code> laisse le groupe sans cadre ; <code>outlined</code> ajoute un fond et une bordure.',
+      text: '<code>flat</code> laisse le groupe sans cadre. <code>outline</code> ajoute une bordure, <code>elevated</code> une surface surélevée avec une ombre et <code>filled</code> une surface atténuée.',
     },
     exclusive: {
       title: 'Une section à la fois',
@@ -31,7 +31,7 @@ export default {
     VAccordion: {
       props: {
         multiple: 'Permet de conserver plusieurs sections ouvertes.',
-        variant: 'Groupe sans cadre ou avec bordure.',
+        variant: 'Groupe sans cadre, ou encadré par une bordure, une ombre ou un fond atténué.',
         expandIcon:
           'Icône de section fermée. Tourne à l’ouverture sauf si <code>collapseIcon</code> est défini.',
         collapseIcon: 'Icône de section ouverte remplaçant l’icône tournée.',

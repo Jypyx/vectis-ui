@@ -4,7 +4,7 @@ export default {
   examples: {
     variants: {
       title: 'Variants and tones',
-      text: '<code>flat</code> underlines the selected tab, <code>outlined</code> adds a frame, and <code>inset</code> uses a recessed track. <code>tone</code> colours the selection.',
+      text: '<code>flat</code> underlines the selected tab. <code>outline</code>, <code>elevated</code> and <code>filled</code> add a frame with a border, a shadow or a muted surface, and <code>inset</code> uses a recessed track. <code>tone</code> colours the selection.',
     },
     sizes: {
       title: 'Sizes',
@@ -54,7 +54,8 @@ export default {
   api: {
     VTabs: {
       props: {
-        variant: 'Tab bar style: underlined, framed or inset.',
+        variant:
+          'Tab bar style: underlined, framed by a border, a shadow or a muted fill, or inset.',
         tone: 'Colour of the selected tab.',
         size: 'Component size.',
         compact: 'Reduces the control height without changing text or icons.',

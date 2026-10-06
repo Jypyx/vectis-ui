@@ -47,6 +47,9 @@ export type CalendarView = 'day' | '4days' | 'week' | 'month' | 'year' | 'custom
 /** Whether times are written on a twelve or a twenty-four hour clock. */
 export type CalendarFormat = HourFormat
 
+/** How the view is set off from the page: nothing, a border, a shadow, or a muted fill. */
+export type CalendarVariant = 'flat' | 'outline' | 'elevated' | 'filled'
+
 /**
  * The shape an event's card takes: a block, which fills the box the calendar gives it and
  * can show a second line, or a chip, one line high in a row of others.

@@ -538,7 +538,7 @@ defineExpose({
     position: sticky;
     inset-block-start: 0;
     z-index: 4;
-    background: var(--vectis-color-surface);
+    background: var(--calendar-surface);
     border-block-end: 1px solid var(--vectis-color-border);
   }
 
@@ -596,7 +596,7 @@ defineExpose({
   /* Disjoint from today rather than less specific: the two live in different sheets, where a
      tie would be settled by whichever one the consumer's bundler emitted last. */
   .v-calendar-month-day:hover:not(.v-calendar-today) {
-    background: var(--vectis-color-surface-muted);
+    background: var(--calendar-hover-bg);
   }
 
   /*

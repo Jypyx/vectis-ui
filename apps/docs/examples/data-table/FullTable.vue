@@ -54,7 +54,7 @@ const selectionText = (count: number) => `${count} project${count > 1 ? 's' : ''
 <template>
   <VDataTable
     v-model:selected="selected"
-    variant="outlined"
+    variant="outline"
     :columns="columns"
     :rows="rows"
     row-key="name"

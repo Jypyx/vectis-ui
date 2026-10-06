@@ -14,8 +14,8 @@ import { useInertLink } from '../../composables/useInertLink'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { isDev } from '../../utils/env'
 
-/** How the card is set off from the page: a border, a shadow, or a muted fill. */
-export type CardVariant = 'outline' | 'elevated' | 'filled'
+/** How the card is set off from the page: nothing, a border, a shadow, or a muted fill. */
+export type CardVariant = 'flat' | 'outline' | 'elevated' | 'filled'
 /** Whether the media sits above the content or beside it. */
 export type CardOrientation = 'vertical' | 'horizontal'
 /** How much room the card leaves around and between its parts. */
@@ -25,8 +25,9 @@ export type CardHeadingLevel = 1 | 2 | 3 | 4 | 5 | 6
 
 interface CardProps {
   /**
-   * How the card is set off from the page: a border (`outline`, the default), a shadow over a
-   * raised surface (`elevated`), or a muted fill with no border (`filled`).
+   * How the card is set off from the page: nothing at all (`flat`), a border (`outline`, the
+   * default), a shadow over a raised surface (`elevated`), or a muted fill with no border
+   * (`filled`).
    */
   variant?: CardVariant
   /**
@@ -220,6 +221,10 @@ if (isDev) {
     --card-gap: var(--vectis-space-4);
   }
 
+  .v-card[data-variant='flat'] {
+    background: transparent;
+  }
+
   .v-card[data-variant='outline'] {
     border-color: var(--vectis-color-border);
   }
@@ -331,6 +336,10 @@ if (isDev) {
   .v-card:has(.v-card-link:focus-visible) {
     outline: var(--vectis-focus-ring-width) solid var(--vectis-focus-ring-color);
     outline-offset: var(--vectis-focus-ring-offset);
+  }
+
+  .v-card[data-interactive][data-variant='flat']:not([data-disabled]):hover {
+    background: var(--vectis-color-surface-muted);
   }
 
   .v-card[data-interactive][data-variant='outline']:not([data-disabled]):hover {

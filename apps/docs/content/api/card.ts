@@ -9,7 +9,7 @@ export default {
     {
       name: 'VCard',
       props: [
-        { name: 'variant', type: 'CardVariant', values: "'outline' | 'elevated' | 'filled'", default: "'outline'" },
+        { name: 'variant', type: 'CardVariant', values: "'flat' | 'outline' | 'elevated' | 'filled'", default: "'outline'" },
         { name: 'orientation', type: 'CardOrientation', values: "'vertical' | 'horizontal'", default: "'vertical'" },
         { name: 'size', type: 'CardSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
         { name: 'title', type: 'string' },

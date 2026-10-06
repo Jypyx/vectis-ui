@@ -72,7 +72,10 @@ const meta = {
   title: 'Components/Tabs',
   component: VTabs,
   argTypes: {
-    variant: { control: 'inline-radio', options: ['flat', 'outlined', 'inset'] },
+    variant: {
+      control: 'inline-radio',
+      options: ['flat', 'outline', 'elevated', 'filled', 'inset'],
+    },
     tone: {
       control: 'inline-radio',
       options: ['accent', 'neutral', 'danger'],
@@ -129,20 +132,23 @@ export const Default: Story = {
   },
 }
 
-/** The three decorations: `flat` (default), `outlined` (a card) and `inset` (a hollow track). */
+/**
+ * The five variants: `flat` (default), three cards around the same track (`outline`, `elevated`
+ * and `filled`) and `inset` (a hollow track).
+ */
 export const Variants: Story = {
   render: () => ({
     components: { VTabs, VTab, VTabPanel },
     setup: () => ({
-      variants: ['flat', 'outlined', 'inset'],
-      tabs: ref({ flat: 'a', outlined: 'a', inset: 'a', bar: 'a' }),
+      variants: ['flat', 'outline', 'elevated', 'filled', 'inset'],
+      tabs: ref({ flat: 'a', outline: 'a', elevated: 'a', filled: 'a', inset: 'a', bar: 'a' }),
       t,
     }),
     /*
-     * The panels are rendered: it is the whole component that `outlined` encloses in a card,
-     * and the bar's track becomes the rule separating them. No padding is set on the panels:
-     * the frame's gutter is what spaces them out in `outlined`, and the two bare frames hold
-     * their content off the bar with no indent.
+     * The panels are rendered: it is the whole component that a framed variant encloses in a
+     * card, and the bar's track becomes the rule separating them. No padding is set on the
+     * panels: the frame's gutter is what spaces them out in a card, and the two bare variants
+     * hold their content off the bar with no indent.
      */
     template: `
       <div style="display: grid; gap: 32px; width: 480px">
@@ -157,7 +163,7 @@ export const Variants: Story = {
           </template>
         </VTabs>
 
-        <VTabs variant="outlined" v-model="tabs.bar">
+        <VTabs variant="outline" v-model="tabs.bar">
           <VTab value="a" label="Overview" />
           <VTab value="b" label="Details" />
           <VTab value="c" label="History" />
@@ -166,13 +172,20 @@ export const Variants: Story = {
     `,
   }),
   // Jsdom computes no style: a tab on the track keeps its radius away from the indicator's edge
-  // and stays square along it, and the tabs are spaced rather than contiguous.
+  // and stays square along it, and the tabs are spaced rather than contiguous. The elevated card
+  // has no border, so its first tab takes the card's full radius rather than the inner one.
   play: async ({ canvasElement }) => {
     const flat = canvasElement.querySelector<HTMLElement>('.v-tabs[data-variant="flat"]')!
     const tab = within(flat).getByRole('tab', { name: 'Details' })
     await expect(getComputedStyle(tab).borderTopLeftRadius).not.toBe('0px')
     await expect(getComputedStyle(tab).borderBottomLeftRadius).toBe('0px')
     await expect(getComputedStyle(tab.parentElement!).columnGap).not.toBe('0px')
+    const elevated = canvasElement.querySelector<HTMLElement>('.v-tabs[data-variant="elevated"]')!
+    const first = within(elevated).getByRole('tab', { name: 'Overview' })
+    await expect(getComputedStyle(elevated).borderTopWidth).toBe('0px')
+    await expect(getComputedStyle(first).borderTopLeftRadius).toBe(
+      getComputedStyle(elevated).borderTopLeftRadius,
+    )
   },
 }
 
@@ -181,8 +194,8 @@ export const Tones: Story = {
     components: { VTabs, VTab },
     setup: () => ({
       tones: ['accent', 'neutral', 'danger'],
-      // `outlined` renders the tones identically to `flat` (the frame is agnostic
-      // to the tone): adding it would only double the board.
+      // The framed variants render the tones identically to `flat` (the frame is agnostic
+      // to the tone): adding them would only multiply the board.
       variants: ['flat', 'inset'],
       tab: ref('b'),
     }),
@@ -284,7 +297,7 @@ export const Vertical: Story = {
           </template>
         </VTabs>
 
-        <VTabs variant="outlined" orientation="vertical" v-model="framed" style="min-height: 220px">
+        <VTabs variant="outline" orientation="vertical" v-model="framed" style="min-height: 220px">
           <VTab value="overview" label="Overview" icon-start="dashboard" />
           <VTab value="details" label="Details" icon-start="tune" />
           <VTab value="history" label="History" icon-start="history" />

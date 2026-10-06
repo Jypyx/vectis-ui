@@ -3,7 +3,7 @@ import { VAccordion, VAccordionItem } from 'vectis-ui'
 </script>
 
 <template>
-  <VAccordion variant="outlined" expand-icon="add" collapse-icon="remove">
+  <VAccordion variant="outline" expand-icon="add" collapse-icon="remove">
     <VAccordionItem title="Where do these two icons come from?" default-open>
       From the icon set wired into the application, since both are given here as names.
     </VAccordionItem>

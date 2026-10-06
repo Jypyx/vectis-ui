@@ -2,6 +2,10 @@ export default {
   title: 'Calendrier',
   lead: '<code>VCalendar</code> affiche des événements par jour, semaine, mois ou année. Déplacez et redimensionnez les événements à la souris ou au clavier ; fournissez vos propres formulaires de création et de modification.',
   examples: {
+    variants: {
+      title: 'Variantes',
+      text: '<code>variant</code> encadre la vue d’une bordure (<code>outline</code>, par défaut), d’une surface surélevée avec une ombre (<code>elevated</code>), d’une surface atténuée (<code>filled</code>) ou de rien (<code>flat</code>). La barre d’outils reste hors du cadre.',
+    },
     month: {
       title: 'Mois',
       text: '<code>monthEventLimit</code> limite le nombre de cartes par jour. Un compteur indique les événements restants.',
@@ -42,6 +46,7 @@ export default {
   api: {
     VCalendar: {
       props: {
+        variant: 'Cadre de la vue : une bordure, une ombre, un fond atténué ou aucun.',
         views: 'Vues proposées dans le menu, dans l’ordre d’affichage.',
         customDays: 'Nombre de jours de la vue personnalisée et pas de navigation.',
         weekdays:

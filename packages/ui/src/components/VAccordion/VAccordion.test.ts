@@ -119,7 +119,7 @@ describe('VAccordion', () => {
     const variantOf = (attrs = '') =>
       renderWith(attrs).container.querySelector('.v-accordion')?.getAttribute('data-variant')
     expect(variantOf()).toBe('flat')
-    expect(variantOf('variant="outlined"')).toBe('outlined')
+    expect(variantOf('variant="outline"')).toBe('outline')
   })
 
   it('compact: data-compact set on the root only when requested', () => {

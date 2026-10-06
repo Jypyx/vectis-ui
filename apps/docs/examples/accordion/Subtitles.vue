@@ -4,7 +4,7 @@ import { description, notifications, schedule } from 'vectis-ui/icons'
 </script>
 
 <template>
-  <VAccordion variant="outlined">
+  <VAccordion variant="outline">
     <VAccordionItem
       :icon="notifications"
       title="Notifications"

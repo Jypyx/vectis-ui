@@ -36,7 +36,7 @@ export default {
     },
     variants: {
       title: 'Variantes',
-      text: '<code>flat</code> laisse le tableau sans cadre ; <code>outlined</code> ajoute un fond de carte et une bordure.',
+      text: '<code>flat</code> laisse le tableau sans cadre. <code>outline</code> ajoute une bordure, <code>elevated</code> une surface surélevée avec une ombre et <code>filled</code> une surface atténuée. Le cadre entoure les lignes et le pied ; l’en-tête reste à l’extérieur.',
     },
     compact: {
       title: 'Compact',
@@ -82,7 +82,7 @@ export default {
         rows: 'Lignes à afficher.',
         rowKey:
           'Champ d’identifiant stable des lignes. Requis pour la sélection ; sinon, la position est utilisée.',
-        variant: 'Tableau sans cadre ou avec bordure.',
+        variant: 'Lignes sans cadre, ou encadrées par une bordure, une ombre ou un fond atténué.',
         loading: 'Affiche le contenu de chargement à la place des lignes.',
         loadingText: 'Texte de chargement visible. Utilise le dictionnaire par défaut.',
         emptyText:

@@ -19,7 +19,7 @@ const framed = ref('overview')
       </template>
     </VTabs>
 
-    <VTabs v-model="framed" orientation="vertical" variant="outlined" label="Project, framed">
+    <VTabs v-model="framed" orientation="vertical" variant="outline" label="Project, framed">
       <VTab value="overview" label="Overview" />
       <VTab value="activity" label="Activity" />
       <VTab value="settings" label="Settings" />

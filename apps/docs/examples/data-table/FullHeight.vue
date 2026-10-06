@@ -35,7 +35,7 @@ const rows = NAMES.map((name, index) => ({
 <template>
   <div class="panel">
     <VDataTable
-      variant="outlined"
+      variant="outline"
       sticky-header
       :columns="columns"
       :rows="rows"

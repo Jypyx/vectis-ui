@@ -318,6 +318,17 @@ system's global locale. The words in the toolbar come from the dictionary and tr
 
 <Canvas of={VCalendarStories.Localization} />
 
+## Variants
+
+`variant` frames the view on the scale shared with `VCard`, `VAccordion`, `VDataTable` and `VTabs`:
+a 1px rule on the page surface (`outline`, the default), a shadow over a raised surface with no
+border (`elevated`), the muted surface with no border (`filled`), or nothing at all (`flat`), for a
+calendar placed in a container that already frames it. The toolbar always stays outside the frame.
+The sticky day names take the frame's surface, and on `filled` the hover of a day number is a shade
+darker than the fill so that it remains visible.
+
+<Canvas of={VCalendarStories.Variants} />
+
 ## Height
 
 The calendar fills the height it is given: make its parent a fixed height, or a flex column, and the

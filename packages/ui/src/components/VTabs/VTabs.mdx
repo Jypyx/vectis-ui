@@ -35,14 +35,17 @@ container, whose surface they inherit. On a track, the tabs keep their radius an
 except on the edge the indicator runs along: there the corners stay square, so the indicator lies
 flush with the track.
 
-`outlined` takes `flat` line for line and encloses it in a card: a rule, rounded corners and a raised
-background, on the decoration scale shared with `VAccordion` and `VDataTable`. The frame surrounds
+`outline`, `elevated` and `filled` take `flat` line for line and enclose it in a card with rounded
+corners, on the scale shared with `VCard`, `VAccordion`, `VDataTable` and `VCalendar`: a 1px rule
+on the page surface (`outline`), a shadow over a raised surface with no border (`elevated`), or the
+muted surface with no border (`filled`). On `filled`, the hover of the neutral tabs is a shade
+darker than the fill so that it remains visible. The frame surrounds
 the **whole** component, bar and panels: the track then changes role without changing appearance — it
 becomes the rule that separates the tabs from their content, inside the frame. The bar takes no gutter:
 the tabs sit against the card's border and the track runs edge to edge, so the padding is the panels'
 alone. Each tab is rounded as in `flat`; an end tab that lands on the frame's own corner takes the
 card's inner radius there instead, so the two curves stay concentric. With no `#panels` slot there is nothing to
-separate: the track fades away, the card's border replaces it, and the card clips its corners, the
+separate: the track fades away, the card's edge replaces it, and the card clips its corners, the
 tabs having nothing left to be set back from.
 
 `inset` places the tabs in a hollow track and raises the active one — that is `VButton`'s `elevated`
@@ -58,7 +61,7 @@ aligned with whatever the page puts above and below the component.
 ## Tones
 
 `tone` colours the active tab; the inactive tabs stay neutral so the selection stands out on its own.
-The indicator of the `flat` and `outlined` variants is painted in `currentColor`: it follows the tone
+The indicator of every variant but `inset` is painted in `currentColor`: it follows the tone
 without being coupled to it, and turns grey along with the text when the tab is disabled. There is no
 custom colour here — a tab is navigation, not a label.
 
@@ -168,7 +171,7 @@ bar out of the tab order. On mount, the selected tab is scrolled into view at on
 overflows.
 
 A `VTab` is a direct child of the row: wrapping one (in a `VTooltip`, for instance) puts an element
-the `tablist` does not own between the two, and the rounded ends of the `outlined` frame no longer
+the `tablist` does not own between the two, and the rounded ends of a framed variant no longer
 find the first and last tabs. Used outside a `VTabs` altogether, a `VTab` is an ordinary button.
 
 <Canvas of={VTabsStories.Disabled} />

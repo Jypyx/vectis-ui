@@ -21,7 +21,7 @@ const rows = [
 <template>
   <VDataTable
     compact
-    variant="outlined"
+    variant="outline"
     :columns="columns"
     :rows="rows"
     row-key="name"

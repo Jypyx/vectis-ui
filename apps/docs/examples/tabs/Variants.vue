@@ -2,12 +2,14 @@
 import { ref } from 'vue'
 import { VTab, VTabs, type TabsTone, type TabsVariant } from 'vectis-ui'
 
-const variants: TabsVariant[] = ['flat', 'outlined', 'inset']
+const variants: TabsVariant[] = ['flat', 'outline', 'elevated', 'filled', 'inset']
 const tones: TabsTone[] = ['accent', 'neutral', 'danger']
 
 const selectedByVariant = ref<Record<string, string>>({
   flat: 'overview',
-  outlined: 'overview',
+  outline: 'overview',
+  elevated: 'overview',
+  filled: 'overview',
   inset: 'overview',
 })
 const selectedByTone = ref<Record<string, string>>({

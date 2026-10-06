@@ -82,7 +82,7 @@ onMounted(() => load({ page: 1, perPage: 5, sortKey: null, sortDirection: null, 
 <template>
   <VDataTable
     server-side
-    variant="outlined"
+    variant="outline"
     :columns="columns"
     :rows="rows"
     :total="total"

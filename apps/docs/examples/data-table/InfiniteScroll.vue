@@ -36,7 +36,7 @@ function loadMore() {
   <VDataTable
     virtual
     sticky-header
-    variant="outlined"
+    variant="outline"
     :height="360"
     :columns="columns"
     :rows="rows"

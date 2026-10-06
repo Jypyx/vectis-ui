@@ -12,7 +12,7 @@ export default {
         { name: 'columns', type: 'DataTableColumn[]' },
         { name: 'rows', type: 'Row[]' },
         { name: 'rowKey', type: 'string' },
-        { name: 'variant', type: 'DataTableVariant', values: "'flat' | 'outlined'", default: "'flat'" },
+        { name: 'variant', type: 'DataTableVariant', values: "'flat' | 'outline' | 'elevated' | 'filled'", default: "'flat'" },
         { name: 'loading', type: 'boolean', default: 'false' },
         { name: 'loadingText', type: 'string' },
         { name: 'emptyText', type: 'string' },

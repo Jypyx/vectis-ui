@@ -345,21 +345,21 @@ describe('VTabs', () => {
       const variantOf = (tabsAttrs?: string) =>
         mount({ tabsAttrs }).container.querySelector('.v-tabs')?.getAttribute('data-variant')
       expect(variantOf()).toBe('flat')
-      expect(variantOf('variant="outlined"')).toBe('outlined')
+      expect(variantOf('variant="outline"')).toBe('outline')
       expect(variantOf('variant="inset"')).toBe('inset')
     })
 
     /*
      * The only real logic on this axis (everything else is CSS, out of jsdom's reach):
-     * `outlined` is a decorated `flat`, so it does not raise the active tab; inside a card, the
-     * frame is what carries the elevation.
+     * the framed variants are a decorated `flat`, so they do not raise the active tab; inside a
+     * card, the frame is what carries the elevation.
      */
     it("only `inset` raises the active tab (mapping to VButton's elevated)", () => {
       const activeTabOf = (tabsAttrs?: string) => tabsOf(mount({ tabsAttrs }).container)[0]
       expect(activeTabOf()?.getAttribute('data-variant')).toBe('ghost')
       expect(activeTabOf('variant="inset"')?.getAttribute('data-variant')).toBe('ghost')
       expect(activeTabOf()?.hasAttribute('data-elevated')).toBe(false)
-      expect(activeTabOf('variant="outlined"')?.hasAttribute('data-elevated')).toBe(false)
+      expect(activeTabOf('variant="elevated"')?.hasAttribute('data-elevated')).toBe(false)
       expect(activeTabOf('variant="inset"')?.hasAttribute('data-elevated')).toBe(true)
     })
   })

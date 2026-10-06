@@ -45,6 +45,15 @@ const cells = (container: Element) => [...container.querySelectorAll('.v-calenda
 const columnsOf = (container: Element) =>
   new Set(cells(container).map((cell) => (cell as HTMLElement).dataset.iso))
 
+describe('the variant', () => {
+  it('is set on the root, outline by default', () => {
+    const variantOf = (props?: Record<string, unknown>) =>
+      mount(props).container.querySelector('.v-calendar')?.getAttribute('data-variant')
+    expect(variantOf()).toBe('outline')
+    expect(variantOf({ variant: 'filled' })).toBe('filled')
+  })
+})
+
 describe('the days on show', () => {
   it('shows a column for every day of the week', () => {
     const { container } = mount()

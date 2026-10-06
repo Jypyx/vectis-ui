@@ -4,7 +4,7 @@ export default {
   examples: {
     variants: {
       title: 'Variants',
-      text: '<code>variant</code> selects <code>outline</code>, <code>elevated</code> or <code>filled</code>.',
+      text: '<code>variant</code> selects <code>flat</code>, <code>outline</code>, <code>elevated</code> or <code>filled</code>.',
     },
     sizes: {
       title: 'Sizes',

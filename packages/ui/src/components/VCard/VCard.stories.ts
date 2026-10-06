@@ -51,7 +51,7 @@ const meta = {
   title: 'Components/Card',
   component: VCard,
   argTypes: {
-    variant: { control: 'inline-radio', options: ['outline', 'elevated', 'filled'] },
+    variant: { control: 'inline-radio', options: ['flat', 'outline', 'elevated', 'filled'] },
     orientation: { control: 'inline-radio', options: ['vertical', 'horizontal'] },
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     title: { control: 'text' },
@@ -91,13 +91,13 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-/** The three variants, as they sit on the page surface. */
+/** The four variants, as they sit on the page surface. */
 export const Variants: Story = {
   render: () => ({
     components: { VCard },
-    setup: () => ({ t, variants: ['outline', 'elevated', 'filled'] }),
+    setup: () => ({ t, variants: ['flat', 'outline', 'elevated', 'filled'] }),
     template: `
-      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 240px)); gap: 16px">
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 240px)); gap: 16px">
         <VCard v-for="variant in variants" :key="variant" :variant="variant" :title="variant">
           {{ t.forestBody }}
         </VCard>

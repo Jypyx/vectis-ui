@@ -11,8 +11,8 @@ import type { IconSource } from '../VIcon/types'
 
 import { accordionKey } from './context'
 
-/** How much decoration the block carries. */
-export type AccordionVariant = 'flat' | 'outlined'
+/** How the group is set off from the page: nothing, a border, a shadow, or a muted fill. */
+export type AccordionVariant = 'flat' | 'outline' | 'elevated' | 'filled'
 
 interface AccordionProps {
   /**
@@ -22,9 +22,10 @@ interface AccordionProps {
    */
   multiple?: boolean
   /**
-   * How the group is decorated. `flat`, the default, draws nothing and lets the
-   * accordion sit directly on the surface behind it; `outlined` gives it a raised
-   * background, a border and rounded corners, so it reads as a card.
+   * How the group is set off from the page. `flat`, the default, draws nothing and lets
+   * the accordion sit directly on the surface behind it. The other three frame it with
+   * rounded corners, like a card: a border on the page surface (`outline`), a shadow over
+   * a raised surface (`elevated`), or a muted fill with no border (`filled`).
    */
   variant?: AccordionVariant
   /**
@@ -99,17 +100,42 @@ provide(accordionKey, {
     --accordion-pad-delta: var(--vectis-space-1);
   }
 
-  .v-accordion[data-variant='outlined'] {
+  .v-accordion:is([data-variant='outline'], [data-variant='elevated'], [data-variant='filled']) {
     --accordion-corner-radius: calc(var(--vectis-radius-surface) - 1px);
 
-    background: var(--vectis-color-surface-raised);
-    border: 1px solid var(--vectis-color-border);
+    /* Transparent rather than absent on `filled`: forced colours paint it. `elevated` has
+       none, so that the separators and the hover reach the edge its shadow draws. */
+    border: 1px solid transparent;
     border-radius: var(--vectis-radius-surface);
     /* The clip is what keeps the first and last rows' hover inside the rounded corners, so
-       it belongs to the variant that HAS corners. `clip` and not `hidden`: `hidden` makes
+       it belongs to the variants that HAVE corners. `clip` and not `hidden`: `hidden` makes
        the box a scroll container, which captures every `position: sticky` in the content
        and pins it to the accordion instead of the page. */
     overflow: clip;
+  }
+
+  .v-accordion[data-variant='outline'] {
+    background: var(--vectis-color-surface);
+    border-color: var(--vectis-color-border);
+  }
+
+  .v-accordion[data-variant='elevated'] {
+    --accordion-corner-radius: var(--vectis-radius-surface);
+
+    border: none;
+    background: var(--vectis-color-surface-raised);
+    box-shadow: var(--vectis-shadow-sm);
+  }
+
+  /* The usual hover is the muted surface itself, which would vanish on this fill. */
+  .v-accordion[data-variant='filled'] {
+    --accordion-hover-bg: color-mix(
+      in oklab,
+      var(--vectis-color-surface-muted),
+      var(--vectis-color-text) 4%
+    );
+
+    background: var(--vectis-color-surface-muted);
   }
 }
 </style>

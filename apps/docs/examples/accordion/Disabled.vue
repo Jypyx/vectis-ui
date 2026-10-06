@@ -3,7 +3,7 @@ import { VAccordion, VAccordionItem } from 'vectis-ui'
 </script>
 
 <template>
-  <VAccordion variant="outlined">
+  <VAccordion variant="outline">
     <VAccordionItem title="Personal details" default-open>
       Your name, your address and how we may contact you.
     </VAccordionItem>

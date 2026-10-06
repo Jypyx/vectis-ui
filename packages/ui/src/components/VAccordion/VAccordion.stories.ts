@@ -36,8 +36,12 @@ const t = storyText({
     flatBody: 'No border, no background: the accordion inherits its container surface.',
     separatorsTitle: 'The separators remain',
     separatorsBody: 'They belong to reading the list, not to framing it.',
-    outlinedTitle: 'outlined — border and radius',
-    outlinedBody: 'A 1px rule surrounds the group, on a raised background.',
+    outlineTitle: 'outline — border and radius',
+    outlineBody: 'A 1px rule surrounds the group, on the page surface.',
+    elevatedTitle: 'elevated — shadow',
+    elevatedBody: 'A shadow lifts the group, on a raised surface with no border.',
+    filledTitle: 'filled — muted fill',
+    filledBody: 'A muted surface sets the group apart, with no border.',
     nestedRadiusTitle: 'Nested inner radius',
     nestedRadiusBody: 'The corners of the end items follow the group clip.',
     available: 'Available',
@@ -77,8 +81,12 @@ const t = storyText({
     flatBody: "Ni bordure, ni fond : l'accordéon hérite de la surface de son conteneur.",
     separatorsTitle: 'Les séparateurs subsistent',
     separatorsBody: 'Ils appartiennent à la lecture de la liste, pas à son cadre.',
-    outlinedTitle: 'outlined — bordure et rayon',
-    outlinedBody: 'Un trait de 1px cerne le groupe, sur un fond surélevé.',
+    outlineTitle: 'outline — bordure et rayon',
+    outlineBody: 'Un trait de 1px cerne le groupe, sur la surface de la page.',
+    elevatedTitle: 'elevated — ombre',
+    elevatedBody: 'Une ombre soulève le groupe, sur une surface surélevée sans bordure.',
+    filledTitle: 'filled — fond atténué',
+    filledBody: 'Une surface atténuée détache le groupe, sans bordure.',
     nestedRadiusTitle: 'Rayon intérieur emboîté',
     nestedRadiusBody: "Les coins des items d'extrémité suivent la découpe du groupe.",
     available: 'Disponible',
@@ -95,7 +103,7 @@ const meta = {
   component: VAccordion,
   argTypes: {
     multiple: { control: 'boolean' },
-    variant: { control: 'inline-radio', options: ['flat', 'outlined'] },
+    variant: { control: 'inline-radio', options: ['flat', 'outline', 'elevated', 'filled'] },
     compact: { control: 'boolean' },
     expandIcon: { control: 'text' },
     collapseIcon: { control: 'text' },
@@ -221,7 +229,10 @@ export const CustomIcons: Story = {
   },
 }
 
-/** The two decorations: `flat` (the default, none) and `outlined` (raised background, border, radius). */
+/**
+ * The four variants: `flat` (the default, none), then three frames with rounded corners: a
+ * border (`outline`), a shadow (`elevated`) and a muted fill (`filled`).
+ */
 export const Variants: Story = {
   render: () => ({
     components: { VAccordion, VAccordionItem },
@@ -233,8 +244,18 @@ export const Variants: Story = {
           <VAccordionItem :title="t.separatorsTitle">{{ t.separatorsBody }}</VAccordionItem>
         </VAccordion>
 
-        <VAccordion variant="outlined">
-          <VAccordionItem :title="t.outlinedTitle">{{ t.outlinedBody }}</VAccordionItem>
+        <VAccordion variant="outline">
+          <VAccordionItem :title="t.outlineTitle">{{ t.outlineBody }}</VAccordionItem>
+          <VAccordionItem :title="t.nestedRadiusTitle">{{ t.nestedRadiusBody }}</VAccordionItem>
+        </VAccordion>
+
+        <VAccordion variant="elevated">
+          <VAccordionItem :title="t.elevatedTitle">{{ t.elevatedBody }}</VAccordionItem>
+          <VAccordionItem :title="t.nestedRadiusTitle">{{ t.nestedRadiusBody }}</VAccordionItem>
+        </VAccordion>
+
+        <VAccordion variant="filled">
+          <VAccordionItem :title="t.filledTitle">{{ t.filledBody }}</VAccordionItem>
           <VAccordionItem :title="t.nestedRadiusTitle">{{ t.nestedRadiusBody }}</VAccordionItem>
         </VAccordion>
       </div>
@@ -242,13 +263,18 @@ export const Variants: Story = {
   }),
   // Jsdom computes no style, so this is the only guard: a flat accordion must not become a
   // scroll container (it would capture a `position: sticky` in its content), so its rows round
-  // their own corners; the outlined one clips its rows to its corners without becoming one either.
+  // their own corners; the framed ones clip their rows to their corners without becoming one either.
+  // The elevated one has no border at all, so its separators reach the edge of its shadow.
   play: async ({ canvasElement }) => {
-    const [flat, outlined] = [...canvasElement.querySelectorAll<HTMLElement>('.v-accordion')]
+    const [flat, ...framed] = [...canvasElement.querySelectorAll<HTMLElement>('.v-accordion')]
+    const elevated = canvasElement.querySelector<HTMLElement>(
+      '.v-accordion[data-variant="elevated"]',
+    )!
+    await expect(getComputedStyle(elevated).borderTopWidth).toBe('0px')
     await expect(getComputedStyle(flat!).overflow).toBe('visible')
     const summary = flat!.querySelector<HTMLElement>('.v-accordion-summary')!
     await expect(getComputedStyle(summary).borderTopLeftRadius).not.toBe('0px')
-    await expect(getComputedStyle(outlined!).overflow).toBe('clip')
+    for (const accordion of framed) await expect(getComputedStyle(accordion).overflow).toBe('clip')
   },
 }
 

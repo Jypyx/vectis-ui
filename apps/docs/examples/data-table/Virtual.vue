@@ -26,7 +26,7 @@ const selected = ref<DataTableRowId[]>([])
     virtual
     sticky-header
     selectable
-    variant="outlined"
+    variant="outline"
     :height="400"
     :columns="columns"
     :rows="rows"

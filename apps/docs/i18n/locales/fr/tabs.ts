@@ -4,7 +4,7 @@ export default {
   examples: {
     variants: {
       title: 'Variantes et tonalités',
-      text: '<code>flat</code> souligne l’onglet sélectionné, <code>outlined</code> ajoute un cadre et <code>inset</code> utilise un fond en creux. <code>tone</code> colore la sélection.',
+      text: '<code>flat</code> souligne l’onglet sélectionné. <code>outline</code>, <code>elevated</code> et <code>filled</code> ajoutent un cadre avec une bordure, une ombre ou une surface atténuée, et <code>inset</code> utilise un fond en creux. <code>tone</code> colore la sélection.',
     },
     sizes: {
       title: 'Tailles',
@@ -54,7 +54,8 @@ export default {
   api: {
     VTabs: {
       props: {
-        variant: 'Style de barre : souligné, encadré ou en creux.',
+        variant:
+          'Style de barre : souligné, encadré par une bordure, une ombre ou un fond atténué, ou en creux.',
         tone: 'Couleur de l’onglet sélectionné.',
         size: 'Taille du composant.',
         compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',

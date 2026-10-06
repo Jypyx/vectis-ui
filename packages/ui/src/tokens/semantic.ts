@@ -473,7 +473,7 @@ export const semantic = {
     ),
     'size-tab-indicator': dimension(
       '2px',
-      'The thickness of the active tab indicator (VTabs, flat/outlined)',
+      'The thickness of the active tab indicator (VTabs, every variant but inset)',
     ),
     'size-table-search': dimension('16rem', "The width of VDataTable's search field"),
     'size-time-picker-dial': dimension('16rem', "The diameter of VTimePicker's clock face"),

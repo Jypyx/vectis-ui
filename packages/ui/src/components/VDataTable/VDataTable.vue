@@ -120,8 +120,8 @@ export interface DataTableRange {
   total: number
 }
 
-/** How much decoration the table carries. */
-export type DataTableVariant = 'flat' | 'outlined'
+/** How the rows are set off from the page: nothing, a border, a shadow, or a muted fill. */
+export type DataTableVariant = 'flat' | 'outline' | 'elevated' | 'filled'
 
 // This interface is exported rather than kept local, and it is generic rather than referring to
 // the component's own type parameter. A component typed over its rows inlines the whole
@@ -135,8 +135,10 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   /** Which field identifies a row. */
   rowKey?: string
   /**
-   * How the table is framed: nothing at all, or a card with a raised background, a border
-   * and rounded corners.
+   * How the rows and the footer are framed: nothing at all (`flat`, the default), or a card
+   * with rounded corners set off by a border on the page surface (`outline`), a shadow over a
+   * raised surface (`elevated`), or a muted fill (`filled`). The header and the toolbar stay
+   * outside the frame.
    */
   variant?: DataTableVariant
   /** Shows that the rows are being loaded. */
@@ -804,202 +806,208 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       <slot name="toolbar" />
     </div>
 
-    <div ref="scrollerEl" class="v-data-table-scroller">
-      <table
-        ref="tableEl"
-        class="v-data-table-table"
-        :aria-labelledby="tableLabelledBy"
-        :aria-describedby="tableDescribedBy"
-        :aria-rowcount="ariaRowCount"
-        :aria-busy="loadingMore ? 'true' : undefined"
-        v-bind="forwardedAttrs"
-      >
-        <thead ref="theadEl" class="v-data-table-head">
-          <tr :aria-rowindex="virtual ? 1 : undefined">
-            <th v-if="selectable" scope="col" class="v-data-table-select">
-              <VCheckbox
-                :model-value="allVisibleSelected"
-                :indeterminate="masterIndeterminate"
-                :disabled="masterDisabled"
-                :aria-label="resolvedSelectAllLabel"
-                @update:model-value="toggleMaster"
-              />
-            </th>
-            <th
-              v-for="column in columns"
-              :key="column.key"
-              scope="col"
-              :data-align="column.align"
-              :aria-sort="ariaSort(column)"
-            >
-              <button
-                v-if="column.sortable"
-                type="button"
-                class="v-data-table-sort"
-                :data-direction="sort?.key === column.key ? sort.direction : undefined"
-                @click="toggleSort(column.key)"
-              >
-                <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>
-                <!-- Decorative, and deliberately so: given no label, an icon hides itself
-                     from screen readers. What the sort state is, is already carried by
-                     the heading itself. -->
-                <VIcon class="v-data-table-sort-icon" v-bind="iconProps(sortIconFor(column))" />
-              </button>
-              <template v-else>
-                <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>
-              </template>
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          ref="tbodyEl"
-          @focusin="focusedIndex = rowIndexOf($event.target)"
-          @focusout="focusedIndex = rowIndexOf($event.relatedTarget)"
+    <!-- What the variant frames: the rows and the footer under them, while the header and the
+         toolbar stay outside, on the surface of the page. -->
+    <div class="v-data-table-frame">
+      <div ref="scrollerEl" class="v-data-table-scroller">
+        <table
+          ref="tableEl"
+          class="v-data-table-table"
+          :aria-labelledby="tableLabelledBy"
+          :aria-describedby="tableDescribedBy"
+          :aria-rowcount="ariaRowCount"
+          :aria-busy="loadingMore ? 'true' : undefined"
+          v-bind="forwardedAttrs"
         >
-          <!--
-            The order matters: loading is checked before emptiness, so a table waiting for its
-            rows never claims there are none.
-          -->
-          <tr v-if="loading && !loadingMore">
-            <td :colspan="colCount" class="v-data-table-state">
-              <slot name="loading">
-                <!-- The spinner carries the text for a screen reader, so the visible copy is
-                     hidden from it: read twice, the cell would say it is loading twice. -->
-                <span class="v-data-table-state-loading">
-                  <VSpinner :label="resolvedLoadingText" />
-                  <span aria-hidden="true">{{ resolvedLoadingText }}</span>
-                </span>
-              </slot>
-            </td>
-          </tr>
-          <tr v-else-if="displayedRows.length === 0">
-            <td :colspan="colCount" class="v-data-table-state">
-              <slot name="empty" :search="emptySearch">
-                <VEmptyState
-                  size="sm"
-                  :icon="emptySearch ? searchOffIcon : inboxIcon"
-                  :title="resolvedEmptyText"
+          <thead ref="theadEl" class="v-data-table-head">
+            <tr :aria-rowindex="virtual ? 1 : undefined">
+              <th v-if="selectable" scope="col" class="v-data-table-select">
+                <VCheckbox
+                  :model-value="allVisibleSelected"
+                  :indeterminate="masterIndeterminate"
+                  :disabled="masterDisabled"
+                  :aria-label="resolvedSelectAllLabel"
+                  @update:model-value="toggleMaster"
                 />
-              </slot>
-            </td>
-          </tr>
-          <template v-else>
-            <template
-              v-for="segment in rowSegments"
-              :key="segment.type === 'row' ? visibleIds[segment.index] : segment.key"
-            >
-              <tr v-if="segment.type === 'spacer'" class="v-data-table-spacer" aria-hidden="true">
-                <td :colspan="colCount" :style="{ blockSize: `${segment.size}px` }" />
-              </tr>
-              <tr
-                v-else
-                :ref="virtual ? (el) => measureRow(el as Element | null, segment.index) : undefined"
-                :data-index="virtual ? segment.index : undefined"
-                :aria-rowindex="virtual ? pageOffset + segment.index + 2 : undefined"
-                :data-stripe="striped && segment.index % 2 === 1 ? '' : undefined"
-                :data-selected="
-                  selectable && isSelected(visibleIds[segment.index]!) ? '' : undefined
-                "
+              </th>
+              <th
+                v-for="column in columns"
+                :key="column.key"
+                scope="col"
+                :data-align="column.align"
+                :aria-sort="ariaSort(column)"
               >
-                <!--
-                  The selection is marked with a plain attribute and not with the ARIA selected
-                  state, which is invalid on the row of a table: it belongs to a grid. What tells
-                  assistive technology that a row is selected is its checkbox being checked.
-                -->
-                <td v-if="selectable" class="v-data-table-select">
-                  <VCheckbox
-                    :model-value="isSelected(visibleIds[segment.index]!)"
-                    :aria-label="rowSelectLabel(displayedRows[segment.index]!, segment.index)"
-                    @update:model-value="toggleRow(visibleIds[segment.index]!)"
-                  />
-                </td>
-                <td v-for="column in columns" :key="column.key" :data-align="column.align">
-                  <slot
-                    :name="`cell-${column.key}`"
-                    :row="displayedRows[segment.index]!"
-                    :value="displayedRows[segment.index]![column.key]"
-                    :column="column"
-                  >
-                    {{ displayedRows[segment.index]![column.key] }}
-                  </slot>
-                </td>
-              </tr>
-            </template>
+                <button
+                  v-if="column.sortable"
+                  type="button"
+                  class="v-data-table-sort"
+                  :data-direction="sort?.key === column.key ? sort.direction : undefined"
+                  @click="toggleSort(column.key)"
+                >
+                  <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>
+                  <!-- Decorative, and deliberately so: given no label, an icon hides itself
+                       from screen readers. What the sort state is, is already carried by
+                       the heading itself. -->
+                  <VIcon class="v-data-table-sort-icon" v-bind="iconProps(sortIconFor(column))" />
+                </button>
+                <template v-else>
+                  <slot :name="`head-${column.key}`" :column="column">{{ column.label }}</slot>
+                </template>
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            ref="tbodyEl"
+            @focusin="focusedIndex = rowIndexOf($event.target)"
+            @focusout="focusedIndex = rowIndexOf($event.relatedTarget)"
+          >
             <!--
-              A single element for as long as more rows may come: replacing it would cancel the
-              observation, and no further rows would be asked for. Hidden from assistive
-              technology, which hears `aria-busy` on the table instead.
+              The order matters: loading is checked before emptiness, so a table waiting for its
+              rows never claims there are none.
             -->
-            <tr v-if="hasMore" ref="sentinelEl" class="v-data-table-more" aria-hidden="true">
-              <td :colspan="colCount">
-                <span v-if="loading" class="v-data-table-state-loading">
-                  <VSpinner />
-                  <span>{{ resolvedLoadingText }}</span>
-                </span>
+            <tr v-if="loading && !loadingMore">
+              <td :colspan="colCount" class="v-data-table-state">
+                <slot name="loading">
+                  <!-- The spinner carries the text for a screen reader, so the visible copy is
+                       hidden from it: read twice, the cell would say it is loading twice. -->
+                  <span class="v-data-table-state-loading">
+                    <VSpinner :label="resolvedLoadingText" />
+                    <span aria-hidden="true">{{ resolvedLoadingText }}</span>
+                  </span>
+                </slot>
               </td>
             </tr>
-          </template>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- The footer has two zones: what is selected on the left, and on the right the page
-         size, the range and the pagination, in that order. -->
-    <div v-if="paginated || selectable" class="v-data-table-footer">
-      <span v-if="selectable" class="v-data-table-selection" aria-live="polite">{{
-        selectionSummary
-      }}</span>
-      <div v-if="paginated" class="v-data-table-footer-end">
-        <div v-if="perPageOptions?.length" class="v-data-table-per-page">
-          <span class="v-data-table-per-page-label" aria-hidden="true">{{
-            resolvedPerPageText
-          }}</span>
-          <!-- The panel is told to match its trigger, which here replaces the default
-               minimum width with something sensible: a menu of "10", "25", "50" has no
-               use for the width a menu of commands assumes, and it still cannot end up
-               narrower than the button opening it. -->
-          <VMenu size="sm" :compact="compact" placement="top-end" match-trigger>
-            <template #trigger="{ triggerProps }">
-              <VButton
-                variant="ghost"
-                tone="neutral"
-                size="sm"
-                :compact="compact"
-                v-bind="triggerProps"
-                :aria-label="m.dataTable.perPageValue(resolvedPerPageText, perPage ?? 0)"
+            <tr v-else-if="displayedRows.length === 0">
+              <td :colspan="colCount" class="v-data-table-state">
+                <slot name="empty" :search="emptySearch">
+                  <VEmptyState
+                    size="sm"
+                    :icon="emptySearch ? searchOffIcon : inboxIcon"
+                    :title="resolvedEmptyText"
+                  />
+                </slot>
+              </td>
+            </tr>
+            <template v-else>
+              <template
+                v-for="segment in rowSegments"
+                :key="segment.type === 'row' ? visibleIds[segment.index] : segment.key"
               >
-                {{ perPage }}
-                <VIcon :name="arrowDropDownIcon" />
-              </VButton>
+                <tr v-if="segment.type === 'spacer'" class="v-data-table-spacer" aria-hidden="true">
+                  <td :colspan="colCount" :style="{ blockSize: `${segment.size}px` }" />
+                </tr>
+                <tr
+                  v-else
+                  :ref="
+                    virtual ? (el) => measureRow(el as Element | null, segment.index) : undefined
+                  "
+                  :data-index="virtual ? segment.index : undefined"
+                  :aria-rowindex="virtual ? pageOffset + segment.index + 2 : undefined"
+                  :data-stripe="striped && segment.index % 2 === 1 ? '' : undefined"
+                  :data-selected="
+                    selectable && isSelected(visibleIds[segment.index]!) ? '' : undefined
+                  "
+                >
+                  <!--
+                    The selection is marked with a plain attribute and not with the ARIA selected
+                    state, which is invalid on the row of a table: it belongs to a grid. What tells
+                    assistive technology that a row is selected is its checkbox being checked.
+                  -->
+                  <td v-if="selectable" class="v-data-table-select">
+                    <VCheckbox
+                      :model-value="isSelected(visibleIds[segment.index]!)"
+                      :aria-label="rowSelectLabel(displayedRows[segment.index]!, segment.index)"
+                      @update:model-value="toggleRow(visibleIds[segment.index]!)"
+                    />
+                  </td>
+                  <td v-for="column in columns" :key="column.key" :data-align="column.align">
+                    <slot
+                      :name="`cell-${column.key}`"
+                      :row="displayedRows[segment.index]!"
+                      :value="displayedRows[segment.index]![column.key]"
+                      :column="column"
+                    >
+                      {{ displayedRows[segment.index]![column.key] }}
+                    </slot>
+                  </td>
+                </tr>
+              </template>
+              <!--
+                A single element for as long as more rows may come: replacing it would cancel the
+                observation, and no further rows would be asked for. Hidden from assistive
+                technology, which hears `aria-busy` on the table instead.
+              -->
+              <tr v-if="hasMore" ref="sentinelEl" class="v-data-table-more" aria-hidden="true">
+                <td :colspan="colCount">
+                  <span v-if="loading" class="v-data-table-state-loading">
+                    <VSpinner />
+                    <span>{{ resolvedLoadingText }}</span>
+                  </span>
+                </td>
+              </tr>
             </template>
-            <VMenuItem
-              v-for="option in perPageOptions"
-              :key="option"
-              :label="String(option)"
-              :selected="option === perPage"
-              @select="perPage = option"
-            />
-          </VMenu>
-        </div>
-        <span v-if="showRange" class="v-data-table-range" aria-live="polite">{{
-          rangeSummary
+          </tbody>
+        </table>
+      </div>
+
+      <!-- The footer has two zones: what is selected on the left, and on the right the page
+           size, the range and the pagination, in that order. -->
+      <div v-if="paginated || selectable" class="v-data-table-footer">
+        <span v-if="selectable" class="v-data-table-selection" aria-live="polite">{{
+          selectionSummary
         }}</span>
-        <!--
-          Named after the table rather than with the generic pagination wording: a page holding
-          this table and a pagination of its own would otherwise expose two navigation landmarks
-          with the same name, and a screen reader user could not tell them apart.
-        -->
-        <VPagination
-          v-model="page"
-          :label="m.dataTable.pagination"
-          :length="pageCount"
-          size="sm"
-          :compact="compact"
-          align="end"
-          :total-visible="0"
-          edge-controls
-          detached
-        />
+        <div v-if="paginated" class="v-data-table-footer-end">
+          <div v-if="perPageOptions?.length" class="v-data-table-per-page">
+            <span class="v-data-table-per-page-label" aria-hidden="true">{{
+              resolvedPerPageText
+            }}</span>
+            <!-- The panel is told to match its trigger, which here replaces the default
+                 minimum width with something sensible: a menu of "10", "25", "50" has no
+                 use for the width a menu of commands assumes, and it still cannot end up
+                 narrower than the button opening it. -->
+            <VMenu size="sm" :compact="compact" placement="top-end" match-trigger>
+              <template #trigger="{ triggerProps }">
+                <VButton
+                  variant="ghost"
+                  tone="neutral"
+                  size="sm"
+                  :compact="compact"
+                  v-bind="triggerProps"
+                  :aria-label="m.dataTable.perPageValue(resolvedPerPageText, perPage ?? 0)"
+                >
+                  {{ perPage }}
+                  <VIcon :name="arrowDropDownIcon" />
+                </VButton>
+              </template>
+              <VMenuItem
+                v-for="option in perPageOptions"
+                :key="option"
+                :label="String(option)"
+                :selected="option === perPage"
+                @select="perPage = option"
+              />
+            </VMenu>
+          </div>
+          <span v-if="showRange" class="v-data-table-range" aria-live="polite">{{
+            rangeSummary
+          }}</span>
+          <!--
+            Named after the table rather than with the generic pagination wording: a page holding
+            this table and a pagination of its own would otherwise expose two navigation landmarks
+            with the same name, and a screen reader user could not tell them apart.
+          -->
+          <VPagination
+            v-model="page"
+            :label="m.dataTable.pagination"
+            :length="pageCount"
+            size="sm"
+            :compact="compact"
+            align="end"
+            :total-visible="0"
+            edge-controls
+            detached
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -1016,9 +1024,9 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     --data-table-pad-inline: var(--vectis-space-3);
     --data-table-head-pad-block: var(--vectis-space-2);
 
-    /* The gutter between the frame and what it holds: nothing when the table is
-       unframed, so the header, the toolbar and the footer sit flush with the edge, and
-       the cells' own inline padding as soon as a frame appears. */
+    /* The gutter between the frame and the footer it holds: nothing when the table is
+       unframed, so the footer sits flush with the edge, and the cells' own inline padding
+       as soon as a frame appears. */
     --data-table-frame-pad: 0px;
 
     font-family: var(--vectis-text-family);
@@ -1039,15 +1047,25 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     --data-table-head-pad-block: var(--vectis-space-1);
   }
 
+  /* The same `min-block-size: 0` as the scrolling area below, one level up. */
+  .v-data-table-frame {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-block-size: 0;
+  }
+
   /*
    * The card. The unframed default has nothing to undo, since it declares no decoration at all;
-   * whatever surrounds the table is what provides the surface then.
+   * whatever surrounds the table is what provides the surface then. The border is transparent
+   * rather than absent on `filled`: forced colours paint it. `elevated` has none, so that the
+   * rules between the rows reach the edge its shadow draws.
    */
-  .v-data-table[data-variant='outlined'] {
+  .v-data-table:is([data-variant='outline'], [data-variant='elevated'], [data-variant='filled'])
+    > .v-data-table-frame {
     --data-table-frame-pad: var(--data-table-pad-inline);
 
-    background: var(--vectis-color-surface-raised);
-    border: 1px solid var(--vectis-color-border);
+    border: 1px solid transparent;
     border-radius: var(--vectis-radius-surface);
     /*
      * `clip` and not `hidden`. Hiding the overflow would make this element a scroll container
@@ -1055,6 +1073,30 @@ const heightStyle = computed<StyleValue | undefined>(() =>
      * actually scrolls; which is to say it would not stick at all.
      */
     overflow: clip;
+  }
+
+  .v-data-table[data-variant='outline'] > .v-data-table-frame {
+    background: var(--vectis-color-surface);
+    border-color: var(--vectis-color-border);
+  }
+
+  .v-data-table[data-variant='elevated'] > .v-data-table-frame {
+    border: none;
+    background: var(--vectis-color-surface-raised);
+    box-shadow: var(--vectis-shadow-sm);
+  }
+
+  /* The heading's usual tint is the muted surface itself, which would merge into this fill. */
+  .v-data-table[data-variant='filled'] {
+    --data-table-head-bg: color-mix(
+      in oklab,
+      var(--vectis-color-surface-muted),
+      var(--vectis-color-text) 4%
+    );
+  }
+
+  .v-data-table[data-variant='filled'] > .v-data-table-frame {
+    background: var(--vectis-color-surface-muted);
   }
 
   /*
@@ -1076,10 +1118,10 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
   /*
    * Unframed, the tinted heading and rows are rounded by the area that already clips them,
-   * not by the root: the header, toolbar and footer sit flush with the root's edges, and a clip there
-   * would crop their focus rings.
+   * not by the frame: the footer sits flush with the frame's edges, and a clip there would
+   * crop its focus rings.
    */
-  .v-data-table[data-variant='flat'] > .v-data-table-scroller {
+  .v-data-table[data-variant='flat'] > .v-data-table-frame > .v-data-table-scroller {
     border-radius: var(--vectis-radius-surface);
   }
 
@@ -1091,13 +1133,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     align-items: center;
     gap: var(--vectis-space-3);
     padding-block-end: var(--vectis-space-3);
-    padding-inline: var(--data-table-frame-pad);
-  }
-
-  /* Whichever row comes first takes the frame's gutter above it. */
-  .v-data-table-header,
-  .v-data-table-toolbar:first-child {
-    padding-block-start: var(--data-table-frame-pad);
   }
 
   .v-data-table-titles {
@@ -1147,7 +1182,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
      * `sunken`: the striped rows already take `sunken`, and a heading painted the same would
      * read as one more stripe.
      */
-    background-color: var(--vectis-color-surface-muted);
+    background-color: var(--data-table-head-bg, var(--vectis-color-surface-muted));
     border-block-end: 1px solid var(--vectis-color-border);
   }
 

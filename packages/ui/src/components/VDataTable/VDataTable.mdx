@@ -46,7 +46,7 @@ fields. A change of term returns to page 1.
 
 The `#toolbar` slot adds a row between the header and the table, for actions and filters that
 apply to it. The row only exists when the slot is used; it wraps its content and spaces it out,
-and takes the frame's gutter in `outlined`.
+and stays outside the frame, like the header.
 
 <Canvas of={VDataTableStories.HeaderAndToolbar} />
 
@@ -110,13 +110,17 @@ it is loading. It works with or without `virtual`.
 
 ## Decoration
 
-`variant` drives the table's frame, on the scale shared with `VAccordion` and `VTabs`. `flat` (the
-default) adds no border and no background: the table sits bare, its header, rules and footer flush
-with the host container, and only the scrolling area rounds its corners, so the tinted heading and
-rows follow the surface radius. `outlined` encloses it in a surface of its own, rounded and ringed by a rule; the header,
-the toolbar and the footer then take the frame's gutter, aligned on the cells' padding — their
-content lines up exactly with the first column's text and follows `compact`. Only the table keeps
-scrolling edge to edge.
+`variant` drives the table's frame, on the scale shared with `VCard`, `VAccordion`, `VTabs` and
+`VCalendar`. `flat` (the default) adds no border and no background: the table sits bare, its
+header, rules and footer flush with the host container, and only the scrolling area rounds its
+corners, so the tinted heading and rows follow the surface radius.
+
+The three other variants enclose the rows and the footer in a surface of their own with rounded
+corners: a 1px rule on the page surface (`outline`), a shadow over a raised surface with no border
+(`elevated`), or the muted surface with no border (`filled`). The header and the toolbar stay
+outside, on the page. The footer takes the frame's gutter, aligned on the cells' padding, so its
+content lines up with the last column and follows `compact`. Only the table keeps scrolling edge to
+edge. On `filled`, the heading row is a shade darker than the fill so that it stays distinct.
 
 <Canvas of={VDataTableStories.Variants} />
 

@@ -161,7 +161,12 @@ function onFocus() {
    * On a track the tabs keep their radius except on the edge the indicator is drawn along:
    * there the indicator lies flush with the rule, which a rounded corner would notch.
    */
-  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='horizontal']
+  .v-tabs:is(
+      [data-variant='flat'],
+      [data-variant='outline'],
+      [data-variant='elevated'],
+      [data-variant='filled']
+    )[data-orientation='horizontal']
     > .v-tabs-bar
     > .v-tabs-list
     .v-tab[data-size] {
@@ -169,7 +174,12 @@ function onFocus() {
     border-end-end-radius: 0;
   }
 
-  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
+  .v-tabs:is(
+      [data-variant='flat'],
+      [data-variant='outline'],
+      [data-variant='elevated'],
+      [data-variant='filled']
+    )[data-orientation='vertical']
     > .v-tabs-bar
     > .v-tabs-list
     .v-tab[data-size] {
@@ -183,24 +193,35 @@ function onFocus() {
    * spans, the tabs being the only buttons, which makes the distinction work. The first-tab
    * rule ties with the vertical one above on specificity, so it must stay after it.
    */
-  .v-tabs[data-variant='outlined'] > .v-tabs-bar > .v-tabs-list .v-tab[data-size]:first-of-type {
-    border-start-start-radius: calc(var(--vectis-radius-surface) - 1px);
+  .v-tabs:is([data-variant='outline'], [data-variant='elevated'], [data-variant='filled'])
+    > .v-tabs-bar
+    > .v-tabs-list
+    .v-tab[data-size]:first-of-type {
+    border-start-start-radius: var(--tabs-corner-radius);
   }
 
-  .v-tabs[data-variant='outlined'][data-orientation='horizontal']
+  .v-tabs:is(
+      [data-variant='outline'],
+      [data-variant='elevated'],
+      [data-variant='filled']
+    )[data-orientation='horizontal']
     > .v-tabs-bar
     > .v-tabs-list
     .v-tab[data-size]:last-of-type {
-    border-start-end-radius: calc(var(--vectis-radius-surface) - 1px);
+    border-start-end-radius: var(--tabs-corner-radius);
   }
 
   /* Turned vertical, the track has migrated to the end edge, so the free edge is the
      start one: that is where the ends of the column round their corners. */
-  .v-tabs[data-variant='outlined'][data-orientation='vertical']
+  .v-tabs:is(
+      [data-variant='outline'],
+      [data-variant='elevated'],
+      [data-variant='filled']
+    )[data-orientation='vertical']
     > .v-tabs-bar
     > .v-tabs-list
     .v-tab[data-size]:last-of-type {
-    border-end-start-radius: calc(var(--vectis-radius-surface) - 1px);
+    border-end-start-radius: var(--tabs-corner-radius);
   }
 
   /*
@@ -208,7 +229,12 @@ function onFocus() {
    * variables: that way it follows the selected tone and the grey of a disabled tab on its own,
    * without this file having to know anything about either.
    */
-  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])
+  .v-tabs:is(
+      [data-variant='flat'],
+      [data-variant='outline'],
+      [data-variant='elevated'],
+      [data-variant='filled']
+    )
     > .v-tabs-bar
     > .v-tabs-list
     .v-tab[data-size]::after {
@@ -222,7 +248,12 @@ function onFocus() {
     transition: opacity var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
+  .v-tabs:is(
+      [data-variant='flat'],
+      [data-variant='outline'],
+      [data-variant='elevated'],
+      [data-variant='filled']
+    )[data-orientation='vertical']
     > .v-tabs-bar
     > .v-tabs-list
     .v-tab[data-size]::after {
@@ -233,7 +264,12 @@ function onFocus() {
     inline-size: var(--vectis-control-size-tab-indicator);
   }
 
-  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])
+  .v-tabs:is(
+      [data-variant='flat'],
+      [data-variant='outline'],
+      [data-variant='elevated'],
+      [data-variant='filled']
+    )
     > .v-tabs-bar
     > .v-tabs-list
     .v-tab[data-size][aria-selected='true']::after {
@@ -241,7 +277,12 @@ function onFocus() {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .v-tabs:is([data-variant='flat'], [data-variant='outlined'])
+    .v-tabs:is(
+        [data-variant='flat'],
+        [data-variant='outline'],
+        [data-variant='elevated'],
+        [data-variant='filled']
+      )
       > .v-tabs-bar
       > .v-tabs-list
       .v-tab[data-size]::after {

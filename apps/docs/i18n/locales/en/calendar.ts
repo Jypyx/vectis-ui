@@ -2,6 +2,10 @@ export default {
   title: 'Calendar',
   lead: '<code>VCalendar</code> displays events in day, week, month or year views. Move and resize events with the pointer or keyboard; provide your own creation and editing forms.',
   examples: {
+    variants: {
+      title: 'Variants',
+      text: '<code>variant</code> frames the view with a border (<code>outline</code>, the default), a raised surface with a shadow (<code>elevated</code>), a muted surface (<code>filled</code>) or nothing (<code>flat</code>). The toolbar stays outside the frame.',
+    },
     month: {
       title: 'Month',
       text: '<code>monthEventLimit</code> caps the event cards shown per day. A count indicates the remaining events.',
@@ -42,6 +46,7 @@ export default {
   api: {
     VCalendar: {
       props: {
+        variant: 'Frame of the view: a border, a shadow, a muted fill or none.',
         views: 'Views offered in the menu, in display order.',
         customDays: 'Number of days in the custom view and its navigation step.',
         weekdays:

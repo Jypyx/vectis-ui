@@ -16,6 +16,8 @@ import CalendarMonth from '~/examples/calendar/Month.vue'
 import calendarMonthSource from '~/examples/calendar/Month.vue?raw'
 import CalendarOverlapping from '~/examples/calendar/Overlapping.vue'
 import calendarOverlappingSource from '~/examples/calendar/Overlapping.vue?raw'
+import CalendarVariants from '~/examples/calendar/Variants.vue'
+import calendarVariantsSource from '~/examples/calendar/Variants.vue?raw'
 import CalendarWeekdays from '~/examples/calendar/Weekdays.vue'
 import calendarWeekdaysSource from '~/examples/calendar/Weekdays.vue?raw'
 import CalendarYear from '~/examples/calendar/Year.vue'
@@ -37,6 +39,12 @@ useDocsHead('calendar')
   </DocsExample>
 
   <h2 id="examples">{{ t('common.examples') }}</h2>
+
+  <h3 id="variants">{{ t('calendar.examples.variants.title') }}</h3>
+  <DocsProse keypath="calendar.examples.variants.text" />
+  <DocsExample :source="calendarVariantsSource" stack>
+    <CalendarVariants />
+  </DocsExample>
 
   <h3 id="month">{{ t('calendar.examples.month.title') }}</h3>
   <DocsProse keypath="calendar.examples.month.text" />

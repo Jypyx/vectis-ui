@@ -4,6 +4,7 @@ import { VCard } from 'vectis-ui'
 
 <template>
   <div class="grid">
+    <VCard variant="flat" title="Flat">No border and no background.</VCard>
     <VCard variant="outline" title="Outline">A border on the page surface.</VCard>
     <VCard variant="elevated" title="Elevated">A raised surface with a shadow.</VCard>
     <VCard variant="filled" title="Filled">A muted surface with no border.</VCard>

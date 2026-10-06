@@ -3,7 +3,7 @@ import { VAccordion, VAccordionItem } from 'vectis-ui'
 </script>
 
 <template>
-  <VAccordion variant="outlined" compact>
+  <VAccordion variant="outline" compact>
     <VAccordionItem title="Runtime" subtitle="Node 20.11" default-open>
       The oldest version the package is tested against.
     </VAccordionItem>

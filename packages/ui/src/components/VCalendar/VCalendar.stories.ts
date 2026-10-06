@@ -158,6 +158,50 @@ export const Views: Story = {
 }
 
 /**
+ * The four variants frame the view the way a card is framed, the toolbar staying outside:
+ * `outline` (the default), `elevated`, `filled` and `flat`.
+ */
+export const Variants: Story = {
+  render: () => ({
+    components: { VCalendar },
+    setup: () => ({
+      date: ANCHOR,
+      events: ref(week()),
+      variants: ['outline', 'elevated', 'filled', 'flat'],
+    }),
+    template: `
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; padding: 16px">
+        <div v-for="variant in variants" :key="variant" style="height: 360px">
+          <VCalendar
+            :variant="variant"
+            :date="date"
+            view="day"
+            :views="['day']"
+            :day-start="8"
+            :day-end="14"
+            :label="'Schedule, ' + variant"
+            v-model:events="events"
+          />
+        </div>
+      </div>
+    `,
+  }),
+  // Jsdom computes no style: only the elevated view casts a shadow, and has no border so that the
+  // grid's rules reach its edge; the flat one paints no edge at all.
+  play: async ({ canvasElement }) => {
+    const viewOf = (variant: string) =>
+      canvasElement.querySelector<HTMLElement>(
+        `.v-calendar[data-variant="${variant}"] .v-calendar-view`,
+      )!
+    await waitFor(() => expect(viewOf('outline')).toBeVisible())
+    await expect(getComputedStyle(viewOf('elevated')).boxShadow).not.toBe('none')
+    await expect(getComputedStyle(viewOf('outline')).boxShadow).toBe('none')
+    await expect(getComputedStyle(viewOf('elevated')).borderTopWidth).toBe('0px')
+    await expect(getComputedStyle(viewOf('flat')).borderTopColor).toBe('rgba(0, 0, 0, 0)')
+  },
+}
+
+/**
  * The month view is a summary: each day shows as many events as it has room for, then says
  * how many are left. Choosing a day's number opens it on its own.
  */

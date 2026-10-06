@@ -10,10 +10,10 @@ const columns = [
 
 <template>
   <div class="stack">
-    <VDataTable loading variant="outlined" :columns="columns" :rows="[]" title="Loading" />
+    <VDataTable loading variant="outline" :columns="columns" :rows="[]" title="Loading" />
 
     <VDataTable
-      variant="outlined"
+      variant="outline"
       :columns="columns"
       :rows="[]"
       empty-text="No project yet"

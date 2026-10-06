@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, nextTick, ref } from 'vue'
 
 import VDataTable from './VDataTable.vue'
+import type { DataTableVariant } from './VDataTable.vue'
 
 const COLUMNS = [
   { key: 'name', label: 'Name', sortable: true },
@@ -58,12 +59,12 @@ describe('VDataTable', () => {
   })
 
   it('variant: data-variant set on the root, flat by default', () => {
-    const variantOf = (variant?: 'flat' | 'outlined') =>
+    const variantOf = (variant?: DataTableVariant) =>
       render(VDataTable, { props: { columns: COLUMNS, rows: ROWS, variant } })
         .container.querySelector('.v-data-table')
         ?.getAttribute('data-variant')
     expect(variantOf()).toBe('flat')
-    expect(variantOf('outlined')).toBe('outlined')
+    expect(variantOf('outline')).toBe('outline')
   })
 
   it('sorting: asc → desc → none, with aria-sort', async () => {
@@ -199,7 +200,7 @@ describe('VDataTable', () => {
     const toolbar = container.querySelector('.v-data-table-toolbar') as HTMLElement
     expect(toolbar.querySelector('button')?.textContent).toBe('New project')
     expect(toolbar.previousElementSibling?.classList.contains('v-data-table-header')).toBe(true)
-    expect(toolbar.nextElementSibling?.classList.contains('v-data-table-scroller')).toBe(true)
+    expect(toolbar.nextElementSibling?.classList.contains('v-data-table-frame')).toBe(true)
   })
 
   it('renders no toolbar row without the #toolbar slot', () => {

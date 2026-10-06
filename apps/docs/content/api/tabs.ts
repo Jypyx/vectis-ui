@@ -9,7 +9,7 @@ export default {
     {
       name: 'VTabs',
       props: [
-        { name: 'variant', type: 'TabsVariant', values: "'flat' | 'outlined' | 'inset'", default: "'flat'" },
+        { name: 'variant', type: 'TabsVariant', values: "'flat' | 'outline' | 'elevated' | 'filled' | 'inset'", default: "'flat'" },
         { name: 'tone', type: 'TabsTone', values: "'accent' | 'neutral' | 'danger'", default: "'accent'" },
         { name: 'size', type: 'TabsSize', values: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
         { name: 'compact', type: 'boolean', default: 'false' },

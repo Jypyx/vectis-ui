@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { VDataTable } from 'vectis-ui'
+import { VDataTable, type DataTableVariant } from 'vectis-ui'
+
+const variants: DataTableVariant[] = ['flat', 'outline', 'elevated', 'filled']
 
 const columns = [
   { key: 'name', label: 'Project', sortable: true },
@@ -16,14 +18,14 @@ const rows = [
 
 <template>
   <div class="stack">
-    <VDataTable :columns="columns" :rows="rows" row-key="name" title="Flat" searchable />
-
     <VDataTable
-      variant="outlined"
+      v-for="variant in variants"
+      :key="variant"
+      :variant="variant"
       :columns="columns"
       :rows="rows"
       row-key="name"
-      title="Outlined"
+      :title="variant"
       searchable
     />
   </div>

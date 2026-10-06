@@ -212,7 +212,7 @@ const descriptions: Record<DescribedToken, string> = {
   '--vectis-control-size-date-picker-nav-min':
     "La largeur minimale des boutons de choix du mois et de l'année de VDatePicker (environ 86px)",
   '--vectis-control-size-tab-indicator':
-    "L'épaisseur de l'indicateur de l'onglet actif (VTabs, flat et outlined)",
+    "L'épaisseur de l'indicateur de l'onglet actif (VTabs, toutes les variantes sauf inset)",
   '--vectis-control-size-table-search': 'La largeur du champ de recherche de VDataTable',
   '--vectis-control-size-time-picker-dial': 'Le diamètre du cadran de VTimePicker',
   '--vectis-control-size-time-picker-number':

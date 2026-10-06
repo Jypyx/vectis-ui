@@ -4,7 +4,7 @@ export default {
   examples: {
     variants: {
       title: 'Variants',
-      text: '<code>flat</code> leaves the group unframed; <code>outlined</code> adds a background and border.',
+      text: '<code>flat</code> leaves the group unframed. <code>outline</code> adds a border, <code>elevated</code> a raised surface with a shadow and <code>filled</code> a muted surface.',
     },
     exclusive: {
       title: 'One section at a time',
@@ -31,7 +31,7 @@ export default {
     VAccordion: {
       props: {
         multiple: 'Allows several sections to remain open.',
-        variant: 'Unframed or outlined group.',
+        variant: 'Unframed group, or framed by a border, a shadow or a muted fill.',
         expandIcon:
           'Closed-section icon. Rotates when open unless <code>collapseIcon</code> is set.',
         collapseIcon: 'Open-section icon replacing the rotated expand icon.',

@@ -36,7 +36,7 @@ export default {
     },
     variants: {
       title: 'Variants',
-      text: '<code>flat</code> leaves the table unframed; <code>outlined</code> adds a card surface and border.',
+      text: '<code>flat</code> leaves the table unframed. <code>outline</code> adds a border, <code>elevated</code> a raised surface with a shadow and <code>filled</code> a muted surface. The frame surrounds the rows and the footer; the header stays outside.',
     },
     compact: {
       title: 'Compact',
@@ -82,7 +82,7 @@ export default {
         rows: 'Rows to display.',
         rowKey:
           'Stable row identifier field. Required for selection; otherwise row position is used.',
-        variant: 'Unframed or outlined table.',
+        variant: 'Unframed rows, or framed by a border, a shadow or a muted fill.',
         loading: 'Displays loading content instead of rows.',
         loadingText: 'Visible loading text. Defaults to the dictionary.',
         emptyText:

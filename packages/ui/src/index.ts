@@ -331,6 +331,7 @@ export type {
   CalendarEventSlotProps,
   CalendarEventTimes,
   CalendarFormat,
+  CalendarVariant,
   CalendarView,
 } from './components/VCalendar/types'
 export { default as VFileInput } from './components/VFileInput/VFileInput.vue'

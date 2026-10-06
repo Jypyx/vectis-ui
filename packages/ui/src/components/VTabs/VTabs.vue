@@ -25,8 +25,11 @@ import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
-/** How the bar is drawn: a rule under the tabs, the same inside a card, or a sunken track. */
-export type TabsVariant = 'flat' | 'outlined' | 'inset'
+/**
+ * How the tabs are set off from the page: a rule under the tabs alone, the same inside a card
+ * framed by a border, a shadow or a muted fill, or a sunken track.
+ */
+export type TabsVariant = 'flat' | 'outline' | 'elevated' | 'filled' | 'inset'
 /** The colour of the selected tab. */
 export type TabsTone = 'accent' | 'neutral' | 'danger'
 /** The height of the tabs, from the scale every control shares. */
@@ -39,7 +42,12 @@ export type TabsAlign = 'start' | 'center' | 'end'
 export type TabsActivation = 'manual' | 'automatic'
 
 interface TabsProps {
-  /** How the bar is framed. */
+  /**
+   * How the tabs are set off from the page. `flat`, the default, draws a rule under the tabs
+   * and nothing around them. `outline`, `elevated` and `filled` put the tabs and their panels in
+   * a card with the same rule inside it: a border on the page surface, a shadow over a raised
+   * surface, or a muted fill. `inset` draws the tabs as segments of a sunken track.
+   */
   variant?: TabsVariant
   /** The colour the selected tab takes. The others stay neutral whatever this says. */
   tone?: TabsTone
@@ -405,12 +413,42 @@ defineExpose({
 
   /*
    * Keep card inner-radius calculations aligned with the tab corners; avoid clipping panel
-   * focus rings and edge-to-edge consumer content.
+   * focus rings and edge-to-edge consumer content. The border is transparent rather than absent
+   * on `filled`: forced colours paint it. `elevated` has none, so that the rule under the tabs
+   * reaches the edge its shadow draws; its end tabs then take the full radius.
    */
-  .v-tabs[data-variant='outlined'] {
-    background: var(--vectis-color-surface-raised);
-    border: 1px solid var(--vectis-color-border);
+  .v-tabs:is([data-variant='outline'], [data-variant='elevated'], [data-variant='filled']) {
+    --tabs-corner-radius: calc(var(--vectis-radius-surface) - 1px);
+
+    border: 1px solid transparent;
     border-radius: var(--vectis-radius-surface);
+  }
+
+  .v-tabs[data-variant='outline'] {
+    background: var(--vectis-color-surface);
+    border-color: var(--vectis-color-border);
+  }
+
+  .v-tabs[data-variant='elevated'] {
+    --tabs-corner-radius: var(--vectis-radius-surface);
+
+    border: none;
+    background: var(--vectis-color-surface-raised);
+    box-shadow: var(--vectis-shadow-sm);
+  }
+
+  .v-tabs[data-variant='filled'] {
+    background: var(--vectis-color-surface-muted);
+  }
+
+  /* A neutral ghost hovers with the muted surface, which would vanish on this fill: the
+     unselected tabs and the scroll buttons take a shade darker instead. */
+  .v-tabs[data-variant='filled'] > .v-tabs-bar [data-tone='neutral'] {
+    --tone-bg-soft: color-mix(
+      in oklab,
+      var(--vectis-color-surface-muted),
+      var(--vectis-color-text) 4%
+    );
   }
 
   .v-tabs-bar {
@@ -443,15 +481,26 @@ defineExpose({
 
   /*
    * Inside a card it is what separates the tabs from the panels; which is why that edge is left
-   * without a gutter, since otherwise the rule would separate nothing from nothing. Both frames
-   * are named explicitly rather than excluding the third: a fourth frame will have to opt in by
-   * hand instead of inheriting this silently.
+   * without a gutter, since otherwise the rule would separate nothing from nothing. The variants
+   * with a track are named explicitly rather than excluding `inset`: a new variant will have to
+   * opt in by hand instead of inheriting this silently.
    */
-  .v-tabs:is([data-variant='flat'], [data-variant='outlined']) > .v-tabs-bar {
+  .v-tabs:is(
+      [data-variant='flat'],
+      [data-variant='outline'],
+      [data-variant='elevated'],
+      [data-variant='filled']
+    )
+    > .v-tabs-bar {
     border-block-end: 1px solid var(--vectis-color-border);
   }
 
-  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
+  .v-tabs:is(
+      [data-variant='flat'],
+      [data-variant='outline'],
+      [data-variant='elevated'],
+      [data-variant='filled']
+    )[data-orientation='vertical']
     > .v-tabs-bar {
     border-block-end: none;
     border-inline-start: 1px solid var(--vectis-color-border);
@@ -462,7 +511,12 @@ defineExpose({
    * decides. Moving it up would leave the vertical framed case with two rules on one side and
    * none between the two areas.
    */
-  .v-tabs[data-variant='outlined'][data-orientation='vertical'] > .v-tabs-bar {
+  .v-tabs:is(
+      [data-variant='outline'],
+      [data-variant='elevated'],
+      [data-variant='filled']
+    )[data-orientation='vertical']
+    > .v-tabs-bar {
     border-inline-start: none;
     border-inline-end: 1px solid var(--vectis-color-border);
   }
@@ -490,20 +544,37 @@ defineExpose({
   /* Pulling the row one pixel into the track is what lets the selected tab's indicator
      COVER that line rather than sit on top of it, which would read as a thicker rule.
    */
-  .v-tabs:is([data-variant='flat'], [data-variant='outlined']) > .v-tabs-bar > .v-tabs-list {
+  .v-tabs:is(
+      [data-variant='flat'],
+      [data-variant='outline'],
+      [data-variant='elevated'],
+      [data-variant='filled']
+    )
+    > .v-tabs-bar
+    > .v-tabs-list {
     margin-block-end: -1px;
   }
 
   /* The row is now a pixel taller than the tabs it holds, so they are pushed against
      its end edge; the indicator each tab draws there then falls exactly on the
      track. */
-  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='horizontal']
+  .v-tabs:is(
+      [data-variant='flat'],
+      [data-variant='outline'],
+      [data-variant='elevated'],
+      [data-variant='filled']
+    )[data-orientation='horizontal']
     > .v-tabs-bar
     > .v-tabs-list {
     align-items: flex-end;
   }
 
-  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
+  .v-tabs:is(
+      [data-variant='flat'],
+      [data-variant='outline'],
+      [data-variant='elevated'],
+      [data-variant='filled']
+    )[data-orientation='vertical']
     > .v-tabs-bar
     > .v-tabs-list {
     margin-block-end: 0;
@@ -511,7 +582,13 @@ defineExpose({
   }
 
   /* Same specificity as the rule above, so again it is the order that decides. */
-  .v-tabs[data-variant='outlined'][data-orientation='vertical'] > .v-tabs-bar > .v-tabs-list {
+  .v-tabs:is(
+      [data-variant='outline'],
+      [data-variant='elevated'],
+      [data-variant='filled']
+    )[data-orientation='vertical']
+    > .v-tabs-bar
+    > .v-tabs-list {
     margin-inline-start: 0;
   }
 
@@ -519,16 +596,25 @@ defineExpose({
    * This is the one place the card may clip, and the one place it must. Nothing is lost to the
    * clip: there is no panel, hence no outer focus ring, and a tab draws its own ring inwards.
    */
-  .v-tabs[data-variant='outlined']:not(:has(> .v-tabs-panels)) {
+  .v-tabs:is([data-variant='outline'], [data-variant='elevated'], [data-variant='filled']):not(
+      :has(> .v-tabs-panels)
+    ) {
     overflow: clip;
   }
 
-  .v-tabs[data-variant='outlined']:not(:has(> .v-tabs-panels)) > .v-tabs-bar {
+  .v-tabs:is([data-variant='outline'], [data-variant='elevated'], [data-variant='filled']):not(
+      :has(> .v-tabs-panels)
+    )
+    > .v-tabs-bar {
     border-block-end: none;
     border-inline-end: none;
   }
 
-  .v-tabs[data-variant='outlined']:not(:has(> .v-tabs-panels)) > .v-tabs-bar > .v-tabs-list {
+  .v-tabs:is([data-variant='outline'], [data-variant='elevated'], [data-variant='filled']):not(
+      :has(> .v-tabs-panels)
+    )
+    > .v-tabs-bar
+    > .v-tabs-list {
     margin-block-end: 0;
   }
 
@@ -584,8 +670,8 @@ defineExpose({
   /*
    * The axis follows the ORIENTATION and not the writing mode, so it cannot be a single logical
    * declaration: the bar is above the panels when horizontal and beside them when vertical.
-   * Both variants are named explicitly rather than excluding the framed one, as in the track
-   * rules above: a fourth frame opts in by hand.
+   * Both unframed variants are named explicitly rather than excluding the framed ones, as in
+   * the track rules above: a new variant opts in by hand.
    */
   .v-tabs:is([data-variant='flat'], [data-variant='inset'])[data-orientation='horizontal']
     > .v-tabs-panels {
@@ -600,7 +686,8 @@ defineExpose({
   /* Inside a card the gutter is the panels' alone, on all four sides: the bar spends
      none, so the tabs and their track reach the frame and the content is the only thing
      set back from it. */
-  .v-tabs[data-variant='outlined'] > .v-tabs-panels {
+  .v-tabs:is([data-variant='outline'], [data-variant='elevated'], [data-variant='filled'])
+    > .v-tabs-panels {
     padding: var(--tabs-panels-pad);
   }
 

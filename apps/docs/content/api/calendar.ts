@@ -9,6 +9,7 @@ export default {
     {
       name: 'VCalendar',
       props: [
+        { name: 'variant', type: 'CalendarVariant', values: "'flat' | 'outline' | 'elevated' | 'filled'", default: "'outline'" },
         { name: 'views', type: 'CalendarView[]', default: "['day', '4days', 'week']" },
         { name: 'customDays', type: 'number', default: '4' },
         { name: 'weekdays', type: 'number[]' },

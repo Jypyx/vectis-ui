@@ -151,7 +151,7 @@ const { openAttr, onToggle, onSummaryClick } = useDetailsOpen(open, {
   }
 
   .v-accordion-summary:hover:not([data-disabled]) {
-    background: var(--vectis-color-surface-muted);
+    background: var(--accordion-hover-bg, var(--vectis-color-surface-muted));
   }
 
   .v-accordion-summary:focus-visible {

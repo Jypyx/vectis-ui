@@ -50,10 +50,17 @@ import type {
   CalendarEventSlotProps,
   CalendarEventTimes,
   CalendarFormat,
+  CalendarVariant,
   CalendarView,
 } from './types'
 
 export interface CalendarProps {
+  /**
+   * How the view is framed: nothing at all (`flat`), or rounded corners set off by a border on
+   * the page surface (`outline`, the default), a shadow over a raised surface (`elevated`), or
+   * a muted fill (`filled`). The toolbar stays outside the frame.
+   */
+  variant?: CalendarVariant
   /**
    * Which views the menu offers, in the order it lists them. Narrowing it is how a
    * calendar that only ever shows weeks stops offering anything else.
@@ -124,6 +131,7 @@ export interface CalendarProps {
 }
 
 const props = withDefaults(defineProps<CalendarProps>(), {
+  variant: 'outline',
   views: () => ['day', '4days', 'week'],
   customDays: 4,
   weekdays: undefined,
@@ -462,6 +470,7 @@ defineExpose({
     class="v-calendar"
     :class="rootClass"
     :style="rootStyle"
+    :data-variant="variant"
     :data-disabled="disabled ? '' : undefined"
   >
     <section
@@ -620,6 +629,14 @@ defineExpose({
 <style>
 @layer vectis.components {
   .v-calendar {
+    /*
+     * The surface under the view, which its sticky headings repeat to stay opaque, and the
+     * hover tint that has to stand out from it. Unframed, the page surface is the best guess at
+     * what lies behind.
+     */
+    --calendar-surface: var(--vectis-color-surface);
+    --calendar-hover-bg: var(--vectis-color-surface-muted);
+
     display: flex;
     block-size: 100%;
     min-block-size: 0;
@@ -698,8 +715,38 @@ defineExpose({
     overflow: auto;
     block-size: 100%;
     min-block-size: 0;
-    border: 1px solid var(--vectis-color-border);
+    /* Transparent rather than absent: forced colours paint it. Only `elevated` drops it, so
+       that the grid's rules reach the edge its shadow draws. */
+    border: 1px solid transparent;
     border-radius: var(--vectis-radius-surface);
+  }
+
+  .v-calendar[data-variant='outline'] .v-calendar-view {
+    background: var(--calendar-surface);
+    border-color: var(--vectis-color-border);
+  }
+
+  .v-calendar[data-variant='elevated'] {
+    --calendar-surface: var(--vectis-color-surface-raised);
+  }
+
+  .v-calendar[data-variant='elevated'] .v-calendar-view {
+    border: none;
+    background: var(--calendar-surface);
+    box-shadow: var(--vectis-shadow-sm);
+  }
+
+  .v-calendar[data-variant='filled'] {
+    --calendar-surface: var(--vectis-color-surface-muted);
+    --calendar-hover-bg: color-mix(
+      in oklab,
+      var(--vectis-color-surface-muted),
+      var(--vectis-color-text) 4%
+    );
+  }
+
+  .v-calendar[data-variant='filled'] .v-calendar-view {
+    background: var(--calendar-surface);
   }
 
   /*

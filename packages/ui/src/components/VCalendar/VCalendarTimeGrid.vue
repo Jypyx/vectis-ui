@@ -1216,7 +1216,7 @@ defineExpose({
     position: sticky;
     inset-block-start: 0;
     z-index: 4;
-    background: var(--vectis-color-surface);
+    background: var(--calendar-surface);
     border-block-end: 1px solid var(--vectis-color-border);
   }
 
