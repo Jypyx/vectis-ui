@@ -244,7 +244,7 @@ function indexTypes(): Map<string, string> {
   return declarations
 }
 
-/** The type declarations of one module, an SFC's `<script setup>` included. */
+/** The exported type declarations of one module, an SFC's `<script setup>` included. */
 function typesIn(file: string): [string, string][] {
   const text = readFileSync(file, 'utf8')
 
@@ -259,6 +259,9 @@ function typesIn(file: string): [string, string][] {
   const declared: [string, string][] = []
   for (const node of source.statements) {
     if (!ts.isTypeAliasDeclaration(node) && !ts.isInterfaceDeclaration(node)) continue
+    // Private types belong to their module and can share a name with another component's
+    // generic parameter, such as CommandPalette's internal Row and DataTable's row type.
+    if (!node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)) continue
     declared.push([node.name.text, withoutComments(node.getText(source))])
   }
   return declared
