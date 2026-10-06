@@ -12,6 +12,8 @@ import DataTableFullHeight from '~/examples/data-table/FullHeight.vue'
 import dataTableFullHeightSource from '~/examples/data-table/FullHeight.vue?raw'
 import DataTableFullTable from '~/examples/data-table/FullTable.vue'
 import dataTableFullTableSource from '~/examples/data-table/FullTable.vue?raw'
+import DataTableInfiniteScroll from '~/examples/data-table/InfiniteScroll.vue'
+import dataTableInfiniteScrollSource from '~/examples/data-table/InfiniteScroll.vue?raw'
 import DataTablePagination from '~/examples/data-table/Pagination.vue'
 import dataTablePaginationSource from '~/examples/data-table/Pagination.vue?raw'
 import DataTableRowsPerPage from '~/examples/data-table/RowsPerPage.vue'
@@ -34,6 +36,8 @@ import DataTableToolbar from '~/examples/data-table/Toolbar.vue'
 import dataTableToolbarSource from '~/examples/data-table/Toolbar.vue?raw'
 import DataTableVariants from '~/examples/data-table/Variants.vue'
 import dataTableVariantsSource from '~/examples/data-table/Variants.vue?raw'
+import DataTableVirtual from '~/examples/data-table/Virtual.vue'
+import dataTableVirtualSource from '~/examples/data-table/Virtual.vue?raw'
 
 definePageMeta({ layout: 'docs' })
 
@@ -134,6 +138,18 @@ useDocsHead('dataTable')
   <DocsProse keypath="dataTable.examples.serverSide.text" />
   <DocsExample :source="dataTableServerSideSource" stack>
     <DataTableServerSide />
+  </DocsExample>
+
+  <h3 id="long-tables">{{ t('dataTable.examples.virtual.title') }}</h3>
+  <DocsProse keypath="dataTable.examples.virtual.text" />
+  <DocsExample :source="dataTableVirtualSource" stack>
+    <DataTableVirtual />
+  </DocsExample>
+
+  <h3 id="infinite-scroll">{{ t('dataTable.examples.infiniteScroll.title') }}</h3>
+  <DocsProse keypath="dataTable.examples.infiniteScroll.text" />
+  <DocsExample :source="dataTableInfiniteScrollSource" stack>
+    <DataTableInfiniteScroll />
   </DocsExample>
 
   <h3 id="states">{{ t('dataTable.examples.states.title') }}</h3>

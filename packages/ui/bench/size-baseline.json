@@ -3,8 +3,8 @@
   "minBytes": 128,
   "entries": {
     "core.css": 5722,
-    "all.css": 31605,
-    "library.js": 149186,
+    "all.css": 31639,
+    "library.js": 150278,
     "VAccordion.css": 293,
     "VAccordion.js": 811,
     "VAccordionItem.css": 568,
@@ -46,7 +46,7 @@
     "VColorPicker.css": 1247,
     "VColorPicker.js": 14933,
     "VCombobox.css": 609,
-    "VCombobox.js": 21045,
+    "VCombobox.js": 21097,
     "VComboboxGroup.css": 262,
     "VComboboxGroup.js": 470,
     "VComboboxOption.css": 426,
@@ -59,8 +59,8 @@
     "VCommandPaletteItem.js": 7832,
     "VContextMenu.css": 197,
     "VContextMenu.js": 3719,
-    "VDataTable.css": 1065,
-    "VDataTable.js": 23674,
+    "VDataTable.css": 1114,
+    "VDataTable.js": 26622,
     "VDateInput.css": 285,
     "VDateInput.js": 23797,
     "VDatePicker.css": 1289,
@@ -156,7 +156,7 @@
     "VTextarea.css": 915,
     "VTextarea.js": 8633,
     "VTimeInput.css": 413,
-    "VTimeInput.js": 34630,
+    "VTimeInput.js": 34688,
     "VTimeline.css": 553,
     "VTimeline.js": 992,
     "VTimelineItem.css": 1119,
@@ -176,6 +176,6 @@
     "VTypography.css": 680,
     "VTypography.js": 688,
     "VVirtualList.css": 330,
-    "VVirtualList.js": 6692
+    "VVirtualList.js": 6742
   }
 }

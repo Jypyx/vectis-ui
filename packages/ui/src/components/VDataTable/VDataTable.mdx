@@ -78,6 +78,24 @@ to the consumer.
 
 <Canvas of={VDataTableStories.ServerSide} />
 
+## Long tables
+
+`virtual` renders only the rows near the visible part of the table, for tables of thousands of
+rows; the others are stood in for by empty rows of the same height. Like `stickyHeader`, it needs a
+bounded height: `height`, or a parent with a height of its own. Rows are measured as they render,
+so they may vary in height, and the row holding the focus stays rendered while the table scrolls.
+It combines with every other feature: sorting, search, selection, pagination (the page shown is
+windowed) and server mode. The heading checkbox still takes every row of the page shown, rendered
+or not, and the footer says how many are selected.
+
+<Canvas of={VDataTableStories.Virtual} />
+
+`hasMore` asks for the next rows through `load-more` as the end of the rows comes into view; append
+them to `rows`. While `loading`, the rows already there stay on show and the foot of the table says
+it is loading. It works with or without `virtual`.
+
+<Canvas of={VDataTableStories.InfiniteScroll} />
+
 ## Decoration
 
 `variant` drives the table's frame, on the scale shared with `VAccordion` and `VTabs`. `flat` (the
@@ -152,6 +170,10 @@ wrapped onto two lines.
   checked box. The boxes get their name through `selectAllLabel` and `selectRowLabel`; a row is
   numbered by its position in the whole table, so page 2 does not start again at "Select row 1".
 - The "select all" box is disabled while no row is on screen and while the table is loading.
+- In virtual mode, the table carries `aria-rowcount` and every row `aria-rowindex`, the heading row
+  being the first, so a screen reader announces each row's place in the whole table. The count is
+  `-1`, unknown, while `hasMore` is set; the loading foot is hidden and the table is
+  `aria-busy="true"` meanwhile.
 - The "X–Y of Z" text is in `aria-live="polite"`: page changes are announced.
 - Every default label comes from the design system dictionary and is overridable through props
   (`searchLabel`, `perPageText`, `selectAllLabel`…).

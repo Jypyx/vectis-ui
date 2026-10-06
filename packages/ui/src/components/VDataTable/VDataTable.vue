@@ -34,7 +34,9 @@ import { isDev } from '../../utils/env'
 import { clamp } from '../../utils/number'
 import { createNormalizedCache, normalizeText } from '../../utils/text'
 
+import { useInfiniteScroll } from '../../composables/useInfiniteScroll'
 import { useRootAttrs } from '../../composables/useRootAttrs'
+import { useVirtualList, type VirtualSegment } from '../../composables/useVirtualList'
 
 import { useTimer } from '../../composables/useTimer'
 import { useLocale, useMessages } from '../../i18n/state'
@@ -232,6 +234,17 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
    * the server can answer it.
    */
   serverSide?: boolean
+  /**
+   * Renders only the rows near the visible part of the table, for tables of thousands of rows.
+   * It needs a bounded height, like `stickyHeader`. Rows are measured as they render, so they
+   * may vary in height, and each one is announced with its place in the whole table.
+   */
+  virtual?: boolean
+  /**
+   * Says that more rows are to come, which makes the table ask for them through `load-more` as
+   * the end of its rows comes into view. While `loading`, the rows already there stay on show.
+   */
+  hasMore?: boolean
 }
 
 const props = withDefaults(defineProps<DataTableProps<Row>>(), {
@@ -263,6 +276,8 @@ const props = withDefaults(defineProps<DataTableProps<Row>>(), {
   selectionText: undefined,
   selectRowLabel: undefined,
   serverSide: false,
+  virtual: false,
+  hasMore: false,
 })
 
 const m = useMessages()
@@ -305,6 +320,8 @@ const emit = defineEmits<{
    * the sort or the search has changed, the last one after its delay.
    */
   'update:params': [params: DataTableParams]
+  /** The end of the rows has come into view while `hasMore` is set: send the next ones. */
+  'load-more': []
 }>()
 
 defineSlots<{
@@ -600,8 +617,92 @@ function toggleMaster() {
 function rowSelectLabel(row: Row, index: number): string {
   // The position in the whole table, or every page would have its own "Select row 1". The
   // dictionary counts from one as a human does, the prop from zero as code does.
-  const position = (paginated.value ? (currentPage.value - 1) * (perPage.value ?? 0) : 0) + index
+  const position = pageOffset.value + index
   return props.selectRowLabel?.(row, position) ?? m.value.dataTable.selectRow(position + 1)
+}
+
+/** How many rows of the whole table come before the page on show. */
+const pageOffset = computed(() =>
+  paginated.value ? (currentPage.value - 1) * (perPage.value ?? 0) : 0,
+)
+
+const scrollerEl = ref<HTMLElement | null>(null)
+const theadEl = ref<HTMLElement | null>(null)
+const tbodyEl = ref<HTMLElement | null>(null)
+
+// @a11y
+// The row holding the focus stays rendered while the table scrolls away from it: dropping it
+// would send the focus back to the page.
+const focusedIndex = ref(-1)
+
+function rowIndexOf(target: EventTarget | null) {
+  if (!(target instanceof Element)) return -1
+  const row = target.closest('tr')
+  if (!row || row.parentElement !== tbodyEl.value || row.dataset.index === undefined) return -1
+  return Number(row.dataset.index)
+}
+
+// Only a starting guess, every row being measured once rendered: a line of body text between
+// the cells' block padding, and the border under it.
+const ROW_HEIGHT = { regular: 46, compact: 38 }
+
+const virtualList = useVirtualList({
+  scrollEl: computed(() => (props.virtual ? scrollerEl.value : null)),
+  listEl: tbodyEl,
+  count: () => displayedRows.value.length,
+  key: (index) => visibleIds.value[index],
+  itemSize: () => (props.compact ? ROW_HEIGHT.compact : ROW_HEIGHT.regular),
+  overscan: () => 5,
+  initialCount: () => 20,
+  pinned: () => (focusedIndex.value >= 0 ? [focusedIndex.value] : []),
+  insetStart: () => (props.stickyHeader ? (theadEl.value?.offsetHeight ?? 0) : 0),
+})
+const measureRow = virtualList.measure
+
+/** The rows to render: those of the window and the space for the others, or every row. */
+const rowSegments = computed<VirtualSegment[]>(() =>
+  props.virtual
+    ? virtualList.segments.value
+    : displayedRows.value.map((_, index) => ({ type: 'row', index })),
+)
+
+// @a11y
+// Only some rows exist in the virtual mode, so the table says how many it has and each row
+// where it stands, the heading row being the first. The total is unknown while more may come.
+const ariaRowCount = computed(() => {
+  if (!props.virtual) return undefined
+  return props.hasMore ? -1 : totalCount.value + 1
+})
+
+// The full loading state replaces the rows, except while the next ones are on their way: the
+// rows already loaded then stay, and the foot of the table says it is loading.
+const loadingMore = computed(() => props.loading && props.hasMore && displayedRows.value.length > 0)
+
+const sentinelEl = ref<HTMLElement | null>(null)
+useInfiniteScroll({
+  sentinelEl,
+  root: () => scrollerEl.value,
+  canLoad: () => props.hasMore && !props.loading,
+  loaded: () => props.rows,
+  onLoadMore: () => emit('load-more'),
+})
+
+// @devwarn
+// A table without a bounded height grows with its rows, so every row is in view and rendered.
+if (isDev) {
+  watch(
+    rowSegments,
+    (segments) => {
+      const el = scrollerEl.value
+      if (!props.virtual || !el || displayedRows.value.length < 100) return
+      if (el.scrollHeight > el.clientHeight) return
+      if (segments.some((segment) => segment.type === 'spacer')) return
+      console.warn(
+        '[VDataTable] `virtual` renders every row because the table does not scroll: give it a `height` or a parent with a height.',
+      )
+    },
+    { flush: 'post', once: true },
+  )
 }
 
 watch(perPage, () => {
@@ -649,6 +750,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     :data-compact="compact ? '' : undefined"
     :data-sticky-header="stickyHeader ? '' : undefined"
     :data-selectable="selectable ? '' : undefined"
+    :data-virtual="virtual ? '' : undefined"
   >
     <div v-if="title || $slots.title || searchable" class="v-data-table-toolbar">
       <VTypography :id="titleId" as="div" variant="heading-4" class="v-data-table-title">
@@ -668,11 +770,13 @@ const heightStyle = computed<StyleValue | undefined>(() =>
       />
     </div>
 
-    <div class="v-data-table-scroller">
+    <div ref="scrollerEl" class="v-data-table-scroller">
       <table
         ref="tableEl"
         class="v-data-table-table"
         :aria-labelledby="tableLabelledBy"
+        :aria-rowcount="ariaRowCount"
+        :aria-busy="loadingMore ? 'true' : undefined"
         v-bind="forwardedAttrs"
       >
         <caption v-if="caption" class="v-data-table-caption">
@@ -680,8 +784,8 @@ const heightStyle = computed<StyleValue | undefined>(() =>
             caption
           }}
         </caption>
-        <thead class="v-data-table-head">
-          <tr>
+        <thead ref="theadEl" class="v-data-table-head">
+          <tr :aria-rowindex="virtual ? 1 : undefined">
             <th v-if="selectable" scope="col" class="v-data-table-select">
               <VCheckbox
                 :model-value="allVisibleSelected"
@@ -717,12 +821,16 @@ const heightStyle = computed<StyleValue | undefined>(() =>
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody
+          ref="tbodyEl"
+          @focusin="focusedIndex = rowIndexOf($event.target)"
+          @focusout="focusedIndex = rowIndexOf($event.relatedTarget)"
+        >
           <!--
             The order matters: loading is checked before emptiness, so a table waiting for its
             rows never claims there are none.
           -->
-          <tr v-if="loading">
+          <tr v-if="loading && !loadingMore">
             <td :colspan="colCount" class="v-data-table-state">
               <slot name="loading">
                 <!-- The spinner carries the text for a screen reader, so the visible copy is
@@ -746,32 +854,58 @@ const heightStyle = computed<StyleValue | undefined>(() =>
             </td>
           </tr>
           <template v-else>
-            <tr
-              v-for="(row, index) in displayedRows"
-              :key="visibleIds[index]"
-              :data-selected="selectable && isSelected(visibleIds[index]!) ? '' : undefined"
+            <template
+              v-for="segment in rowSegments"
+              :key="segment.type === 'row' ? visibleIds[segment.index] : segment.key"
             >
-              <!--
-                The selection is marked with a plain attribute and not with the ARIA selected
-                state, which is invalid on the row of a table: it belongs to a grid. What tells
-                assistive technology that a row is selected is its checkbox being checked.
-              -->
-              <td v-if="selectable" class="v-data-table-select">
-                <VCheckbox
-                  :model-value="isSelected(visibleIds[index]!)"
-                  :aria-label="rowSelectLabel(row, index)"
-                  @update:model-value="toggleRow(visibleIds[index]!)"
-                />
-              </td>
-              <td v-for="column in columns" :key="column.key" :data-align="column.align">
-                <slot
-                  :name="`cell-${column.key}`"
-                  :row="row"
-                  :value="row[column.key]"
-                  :column="column"
-                >
-                  {{ row[column.key] }}
-                </slot>
+              <tr v-if="segment.type === 'spacer'" class="v-data-table-spacer" aria-hidden="true">
+                <td :colspan="colCount" :style="{ blockSize: `${segment.size}px` }" />
+              </tr>
+              <tr
+                v-else
+                :ref="virtual ? (el) => measureRow(el as Element | null, segment.index) : undefined"
+                :data-index="virtual ? segment.index : undefined"
+                :aria-rowindex="virtual ? pageOffset + segment.index + 2 : undefined"
+                :data-stripe="striped && segment.index % 2 === 1 ? '' : undefined"
+                :data-selected="
+                  selectable && isSelected(visibleIds[segment.index]!) ? '' : undefined
+                "
+              >
+                <!--
+                  The selection is marked with a plain attribute and not with the ARIA selected
+                  state, which is invalid on the row of a table: it belongs to a grid. What tells
+                  assistive technology that a row is selected is its checkbox being checked.
+                -->
+                <td v-if="selectable" class="v-data-table-select">
+                  <VCheckbox
+                    :model-value="isSelected(visibleIds[segment.index]!)"
+                    :aria-label="rowSelectLabel(displayedRows[segment.index]!, segment.index)"
+                    @update:model-value="toggleRow(visibleIds[segment.index]!)"
+                  />
+                </td>
+                <td v-for="column in columns" :key="column.key" :data-align="column.align">
+                  <slot
+                    :name="`cell-${column.key}`"
+                    :row="displayedRows[segment.index]!"
+                    :value="displayedRows[segment.index]![column.key]"
+                    :column="column"
+                  >
+                    {{ displayedRows[segment.index]![column.key] }}
+                  </slot>
+                </td>
+              </tr>
+            </template>
+            <!--
+              A single element for as long as more rows may come: replacing it would cancel the
+              observation, and no further rows would be asked for. Hidden from assistive
+              technology, which hears `aria-busy` on the table instead.
+            -->
+            <tr v-if="hasMore" ref="sentinelEl" class="v-data-table-more" aria-hidden="true">
+              <td :colspan="colCount">
+                <span v-if="loading" class="v-data-table-state-loading">
+                  <VSpinner />
+                  <span>{{ resolvedLoadingText }}</span>
+                </span>
               </td>
             </tr>
           </template>
@@ -992,7 +1126,8 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     inline-size: 0;
   }
 
-  .v-data-table[data-striped] tbody tr:nth-child(even) {
+  /* By the row's own index: in the virtual mode, the space standing for hidden rows is a row too. */
+  .v-data-table[data-striped] tbody tr[data-stripe] {
     background-color: var(--vectis-color-surface-sunken);
   }
 
@@ -1064,6 +1199,28 @@ const heightStyle = computed<StyleValue | undefined>(() =>
 
   .v-data-table-sort[data-direction] .v-data-table-sort-icon {
     opacity: 1;
+  }
+
+  /* The table corrects its scroll itself when a row above the view changes height. */
+  .v-data-table[data-virtual] .v-data-table-scroller {
+    overflow-anchor: none;
+  }
+
+  .v-data-table-table .v-data-table-spacer td {
+    padding: 0;
+    border: none;
+  }
+
+  /*
+   * The foot of the rows: the marker watched for their end, and where the next rows are said
+   * to be loading. It keeps a real height, a box of none making the crossing unreliable.
+   */
+  .v-data-table-table .v-data-table-more td {
+    block-size: var(--vectis-control-height-md);
+    padding: var(--vectis-space-2);
+    border: none;
+    text-align: center;
+    color: var(--vectis-color-text-muted);
   }
 
   .v-data-table-state {

@@ -58,6 +58,14 @@ export default {
       title: 'Server side',
       text: '<code>serverSide</code> displays supplied rows without local search, sort or pagination. Listen to <code>update:params</code>, fetch the rows and provide <code>total</code>. <code>searchDebounce</code> delays search requests.',
     },
+    virtual: {
+      title: 'Long tables',
+      text: '<code>virtual</code> renders only the rows near the visible part of the table, for tables of thousands of rows. Like <code>stickyHeader</code>, it needs a bounded height. Rows are measured as they render, and the heading checkbox still takes every row.',
+    },
+    infiniteScroll: {
+      title: 'Infinite scroll',
+      text: '<code>hasMore</code> emits <code>load-more</code> as the end of the rows comes into view. Append the next rows to <code>rows</code>; while <code>loading</code>, the rows already there stay on show.',
+    },
     states: {
       title: 'Loading and empty',
       text: 'Loading takes precedence over empty results. Customize these states with <code>loadingText</code>, <code>emptyText</code> or their slots.',
@@ -107,17 +115,23 @@ export default {
           'Function naming each checkbox from its row and global zero-based index. Defaults to a row number.',
         serverSide:
           'Delegates search, sort and pagination to the server through <code>update:params</code>.',
+        virtual:
+          'Renders only the rows near the visible part of the table. Needs a bounded height; rows then carry <code>aria-rowindex</code>.',
+        hasMore:
+          'Emits <code>load-more</code> as the end of the rows comes into view. The rows stay on show while loading.',
         vModelSort:
           'Sort key and direction, or <code>null</code>. Changing sort preserves the page.',
         vModelPage:
           'Page number from 1. Search and page-size changes reset it to 1. Out-of-range values display the nearest page without rewriting the model.',
         vModelPerPage: 'Rows per page. Values above 0 enable pagination.',
         vModelSelected:
-          'Selected <code>rowKey</code> identifiers, preserved across pages. The header checkbox covers only visible rows.',
+          'Selected <code>rowKey</code> identifiers, preserved across pages. The header checkbox covers the rows of the page shown, rendered or not.',
         vModelSearch:
           'Search query. Local search ignores case and accents; server mode reports it without filtering.',
       },
       events: {
+        loadMore:
+          'The end of the rows came into view while <code>hasMore</code> is set: append the next rows.',
         updateParams:
           'Server-mode query changes: search, sort, page and page size. Does not fire on mount or for unchanged values.',
       },

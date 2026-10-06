@@ -39,6 +39,8 @@ export default {
         { name: 'selectionText', type: '(count: number) => string' },
         { name: 'selectRowLabel', type: '(row: Row, index: number) => string' },
         { name: 'serverSide', type: 'boolean', default: 'false' },
+        { name: 'virtual', type: 'boolean', default: 'false' },
+        { name: 'hasMore', type: 'boolean', default: 'false' },
         { name: 'v-model:sort', key: 'vModelSort', type: 'DataTableSort | null', default: 'null' },
         { name: 'v-model:page', key: 'vModelPage', type: 'number', default: '1' },
         { name: 'v-model:perPage', key: 'vModelPerPage', type: 'number' },
@@ -46,6 +48,7 @@ export default {
         { name: 'v-model:search', key: 'vModelSearch', type: 'string', default: "''" },
       ],
       events: [
+        { name: 'load-more', key: 'loadMore', type: '[]' },
         { name: 'update:params', key: 'updateParams', type: '[params: DataTableParams]' },
       ],
       slots: [

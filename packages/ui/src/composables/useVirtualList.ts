@@ -31,6 +31,17 @@ export interface VirtualListOptions {
   initialCount: () => number
   /** Rows kept rendered wherever the scroll is: the active option, the row holding the focus. */
   pinned?: () => readonly number[]
+  /**
+   * The element the rows sit in, when content comes before it inside the scroll container: a
+   * table's caption and heading. Its distance from the top of the scrolled content replaces the
+   * container's top padding.
+   */
+  listEl?: Readonly<Ref<HTMLElement | null>>
+  /**
+   * The height a sticky element covers at the top of the viewport, a table's frozen heading:
+   * an alignment keeps rows out from under it. The container's top padding otherwise.
+   */
+  insetStart?: () => number
 }
 
 /** A row to render, or a block of empty space standing for the rows left out. */
@@ -155,9 +166,16 @@ export function useVirtualList(options: VirtualListOptions): VirtualList {
 
   function readContainer(el: HTMLElement) {
     const style = getComputedStyle(el)
+    const list = options.listEl?.value
     viewport.value = el.clientHeight
-    padStart.value = parseFloat(style.paddingTop) || 0
+    padStart.value = list ? positionIn(el, list) : parseFloat(style.paddingTop) || 0
     gap.value = parseFloat(style.rowGap) || 0
+  }
+
+  /** Where an element starts in the scrolled content of the container, scroll included. */
+  function positionIn(el: HTMLElement, target: Element) {
+    const top = target.getBoundingClientRect().top - el.getBoundingClientRect().top
+    return top / scaleOf(el) - el.clientTop + el.scrollTop
   }
 
   // @core
@@ -173,7 +191,7 @@ export function useVirtualList(options: VirtualListOptions): VirtualList {
     let shift = 0
     let changed = false
     for (const entry of entries) {
-      if (entry.target === el) {
+      if (entry.target === el || entry.target === options.listEl?.value) {
         readContainer(el)
         continue
       }
@@ -239,6 +257,7 @@ export function useVirtualList(options: VirtualListOptions): VirtualList {
       if (typeof ResizeObserver !== 'undefined') {
         observer = new ResizeObserver(onResize)
         observer.observe(el)
+        if (options.listEl?.value) observer.observe(options.listEl.value)
         for (const row of observed) observer.observe(row)
       }
       onCleanup(() => {
@@ -290,13 +309,10 @@ export function useVirtualList(options: VirtualListOptions): VirtualList {
 
   function alignTo(el: HTMLElement, row: HTMLElement, align: ScrollLogicalPosition) {
     const style = getComputedStyle(el)
-    const padTop = parseFloat(style.paddingTop) || 0
+    const padTop = options.insetStart?.() ?? (parseFloat(style.paddingTop) || 0)
     const padBottom = parseFloat(style.paddingBottom) || 0
-    const scale = scaleOf(el)
-    const box = el.getBoundingClientRect()
-    const rect = row.getBoundingClientRect()
-    const top = (rect.top - box.top) / scale - el.clientTop + el.scrollTop
-    const height = rect.height / scale
+    const top = positionIn(el, row)
+    const height = row.getBoundingClientRect().height / scaleOf(el)
     const bottom = top + height
     const view = el.clientHeight
     let next = el.scrollTop

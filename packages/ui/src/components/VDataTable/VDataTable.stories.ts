@@ -379,6 +379,112 @@ export const StickyHeader: Story = {
 }
 
 /**
+ * `virtual` renders only the rows near the visible part of the table: ten thousand here, under a
+ * frozen heading. The heading checkbox still takes every row.
+ */
+export const Virtual: Story = {
+  args: { stickyHeader: true, height: 400, virtual: true, selectable: true, striped: true },
+  render: (args) => ({
+    components: { VDataTable },
+    setup: () => {
+      const generated = computed(() =>
+        Array.from({ length: 10000 }, (_, index) => ({
+          name: `${t.value.project} ${index + 1}`,
+          owner: OWNERS[index % OWNERS.length],
+          status: index % 3 === 0 ? t.value.archived : t.value.active,
+          commits: ((index + 3) * 37) % 500,
+        })),
+      )
+      return { args, t, columns, rows: generated }
+    },
+    template:
+      '<VDataTable v-bind="args" :columns="columns" :rows="rows" :caption="t.orgProjects" style="width: 640px" />',
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const table = canvas.getByRole('table')
+    expect(table).toHaveAttribute('aria-rowcount', '10001')
+    const bodyRows = () => [...table.querySelectorAll('tbody tr[aria-rowindex]')]
+    await waitFor(() => expect(bodyRows().length).toBeLessThan(40))
+
+    // Scrolled to the end, the last row ends where the scroller does, under a heading still in
+    // place: every height is accounted for.
+    const scroller = canvasElement.querySelector<HTMLElement>('.v-data-table-scroller')!
+    scroller.scrollTop = scroller.scrollHeight
+    await waitFor(() => expect(canvas.getByText('Project 10000')).toBeInTheDocument())
+    scroller.scrollTop = scroller.scrollHeight
+    await waitFor(() => {
+      const last = bodyRows().at(-1)!
+      expect(last).toHaveAttribute('aria-rowindex', '10001')
+      const gap = scroller.getBoundingClientRect().bottom - last.getBoundingClientRect().bottom
+      expect(Math.abs(gap)).toBeLessThan(2)
+    })
+    const heading = table.querySelector('thead th')!.getBoundingClientRect()
+    expect(Math.abs(heading.top - scroller.getBoundingClientRect().top)).toBeLessThan(1)
+
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Select all' }).closest('label')!)
+    await waitFor(() => expect(canvas.getByText('10000 items selected')).toBeInTheDocument())
+    scroller.scrollTop = 0
+    await waitFor(() => expect(canvas.getByText('Project 1')).toBeVisible())
+  },
+}
+
+/**
+ * `hasMore` asks for the next rows through `load-more` as the end of the rows comes into view;
+ * the rows already there stay while the next ones load.
+ */
+export const InfiniteScroll: Story = {
+  args: { stickyHeader: true, height: 360, virtual: true },
+  render: (args) => ({
+    components: { VDataTable },
+    setup: () => {
+      const page = (from: number) =>
+        Array.from({ length: 30 }, (_, i) => ({
+          name: `${t.value.project} ${from + i + 1}`,
+          owner: OWNERS[(from + i) % OWNERS.length],
+          status: t.value.active,
+          commits: ((from + i + 3) * 37) % 500,
+        }))
+      const loaded = ref(page(0))
+      const loading = ref(false)
+      function onLoadMore() {
+        loading.value = true
+        setTimeout(() => {
+          loaded.value = [...loaded.value, ...page(loaded.value.length)]
+          loading.value = false
+        }, 400)
+      }
+      const hasMore = computed(() => loaded.value.length < 150)
+      return { args, columns, loaded, loading, hasMore, onLoadMore }
+    },
+    template: `
+      <div style="display: grid; gap: 8px; width: 640px">
+        <VDataTable
+          v-bind="args"
+          :columns="columns"
+          :rows="loaded"
+          :loading="loading"
+          :has-more="hasMore"
+          @load-more="onLoadMore"
+        />
+        <output data-testid="count">{{ loaded.length }}</output>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const table = canvas.getByRole('table')
+    expect(table).toHaveAttribute('aria-rowcount', '-1')
+    const scroller = canvasElement.querySelector<HTMLElement>('.v-data-table-scroller')!
+    scroller.scrollTop = scroller.scrollHeight
+    await waitFor(() => expect(table).toHaveAttribute('aria-busy', 'true'))
+    expect(canvas.getByText('Project 30')).toBeInTheDocument()
+    await waitFor(() => expect(canvas.getByTestId('count')).toHaveTextContent('60'))
+    await waitFor(() => expect(table).not.toHaveAttribute('aria-busy'))
+  },
+}
+
+/**
  * A height driven by the parent: the table takes 100% of its container and does not shrink on
  * an incomplete page; the last page (2 rows) is exactly the same height as a full one, and the
  * pagination stays stuck to the bottom.

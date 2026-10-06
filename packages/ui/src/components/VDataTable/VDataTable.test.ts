@@ -701,3 +701,124 @@ describe('VDataTable', () => {
     expect(table.value?.el).toBe(container.querySelector('table'))
   })
 })
+
+describe('VDataTable virtual', () => {
+  const MANY = Array.from({ length: 1000 }, (_, i) => ({
+    id: i + 1,
+    name: `Row ${i + 1}`,
+    count: i,
+  }))
+  const renderMany = (props: Record<string, unknown> = {}) =>
+    render(VDataTable, {
+      props: { columns: COLUMNS, rows: MANY, rowKey: 'id', virtual: true, ...props },
+    })
+  const dataRows = (container: Element) => [
+    ...container.querySelectorAll('tbody tr:not(.v-data-table-spacer):not(.v-data-table-more)'),
+  ]
+
+  // jsdom lays nothing out: the scroller has no height, so the window holds the first row and
+  // the five rows of margin below it.
+  it('renders only the rows of the window, the rest as one hidden spacer row', async () => {
+    const { container } = renderMany()
+    await nextTick()
+    expect(dataRows(container)).toHaveLength(6)
+    const spacer = container.querySelector('tbody .v-data-table-spacer')!
+    expect(spacer.getAttribute('aria-hidden')).toBe('true')
+    expect(spacer.querySelector('td')!.getAttribute('colspan')).toBe('2')
+  })
+
+  it('the table counts its rows, and each row says where it stands', async () => {
+    const { container } = renderMany()
+    await nextTick()
+    expect(container.querySelector('table')!.getAttribute('aria-rowcount')).toBe('1001')
+    expect(container.querySelector('thead tr')!.getAttribute('aria-rowindex')).toBe('1')
+    expect(dataRows(container)[1]!.getAttribute('aria-rowindex')).toBe('3')
+  })
+
+  it('row positions count the pages before the one on show', async () => {
+    const { container } = renderMany({ perPage: 10, page: 3 })
+    await nextTick()
+    expect(dataRows(container)[0]!.getAttribute('aria-rowindex')).toBe('22')
+  })
+
+  it('without virtual, every row is rendered and no position is set', () => {
+    const { container } = renderMany({ virtual: false })
+    expect(dataRows(container)).toHaveLength(1000)
+    expect(container.querySelector('table')!.hasAttribute('aria-rowcount')).toBe(false)
+    expect(container.querySelector('tbody .v-data-table-spacer')).toBeNull()
+  })
+
+  it('stripes by the row index, which the spacer rows do not shift', async () => {
+    const { container } = renderMany({ striped: true })
+    await nextTick()
+    const stripes = dataRows(container).map((row) => row.hasAttribute('data-stripe'))
+    expect(stripes).toEqual([false, true, false, true, false, true])
+  })
+
+  it('the heading checkbox takes every row of the table, rendered or not', async () => {
+    const { getByRole, emitted } = renderMany({ selectable: true })
+    await fireEvent.click(getByRole('checkbox', { name: 'Select all' }))
+    expect((emitted('update:selected')![0] as [unknown[]])[0]).toHaveLength(1000)
+  })
+
+  it('keeps the row holding the focus rendered when the table scrolls away from it', async () => {
+    const scrolled = new WeakMap<Element, number>()
+    vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      return this.classList.contains('v-data-table-scroller') ? 200 : 0
+    })
+    Object.defineProperty(HTMLElement.prototype, 'scrollTop', {
+      configurable: true,
+      get(this: HTMLElement) {
+        return scrolled.get(this) ?? 0
+      },
+      set(this: HTMLElement, value: number) {
+        scrolled.set(this, value)
+      },
+    })
+    try {
+      const { container, getByRole } = renderMany({ selectable: true })
+      await nextTick()
+      const checkbox = getByRole('checkbox', { name: 'Select row 3' })
+      checkbox.focus()
+      const scroller = container.querySelector<HTMLElement>('.v-data-table-scroller')!
+      scroller.scrollTop = 20000
+      await fireEvent.scroll(scroller)
+      await nextTick()
+      expect(dataRows(container)[0]!.getAttribute('aria-rowindex')).toBe('4')
+      expect(dataRows(container)[1]!.getAttribute('aria-rowindex')).not.toBe('5')
+      expect(document.activeElement).toBe(checkbox)
+    } finally {
+      delete (HTMLElement.prototype as { scrollTop?: number }).scrollTop
+    }
+  })
+
+  describe('hasMore', () => {
+    it('ends the rows with a hidden marker row', () => {
+      const { container } = render(VDataTable, {
+        props: { columns: COLUMNS, rows: ROWS, hasMore: true },
+      })
+      const more = container.querySelector('tbody tr.v-data-table-more')!
+      expect(more.getAttribute('aria-hidden')).toBe('true')
+      expect(container.querySelector('tbody')!.lastElementChild).toBe(more)
+    })
+
+    it('while the next rows load, the rows stay and the table is busy', () => {
+      const { container } = render(VDataTable, {
+        props: { columns: COLUMNS, rows: ROWS, hasMore: true, loading: true },
+      })
+      expect(firstColumnCells(container).slice(0, 3)).toEqual(['Brume', 'Atlas', 'Vectis'])
+      expect(container.querySelector('table')!.getAttribute('aria-busy')).toBe('true')
+      expect(container.querySelector('.v-data-table-more')!.textContent).toContain('Loading')
+    })
+
+    it('with no row yet, loading shows the full loading state', () => {
+      const { container } = render(VDataTable, {
+        props: { columns: COLUMNS, rows: [], hasMore: true, loading: true },
+      })
+      expect(container.querySelector('.v-data-table-state')).not.toBeNull()
+      expect(container.querySelector('table')!.hasAttribute('aria-busy')).toBe(false)
+    })
+  })
+})
