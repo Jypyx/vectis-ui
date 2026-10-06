@@ -33,6 +33,10 @@ export const semantic = {
 
     border: color('{color.gray.200}', 'Dividers, and the frames of cards, tables and panels'),
     'border-strong': color('{color.gray.300}', 'The borders of form controls'),
+    'border-on-fill': color(
+      'oklch(0% 0 0 / 0.12)',
+      'A veil dividing a filled background: the seams of a bordered VButtonGroup',
+    ),
 
     accent: color(
       '{color.indigo.600}',

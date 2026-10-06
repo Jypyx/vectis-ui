@@ -302,7 +302,8 @@ defineExpose({
     .v-button:not(:where(.v-overlay *))::before {
     inset-block: -1px;
     inset-inline-start: -1px;
-    border-inline-start: 1px solid var(--vectis-color-border);
+    border-inline-start-width: 1px;
+    border-inline-start-style: solid;
   }
 
   .v-button-group[data-orientation='vertical'] > .v-button:not(:first-child)::before,
@@ -311,7 +312,120 @@ defineExpose({
     .v-button:not(:where(.v-overlay *))::before {
     inset-inline: -1px;
     inset-block-start: -1px;
-    border-block-start: 1px solid var(--vectis-color-border);
+    border-block-start-width: 1px;
+    border-block-start-style: solid;
+  }
+
+  /*
+   * The seam takes the paint of the segment carrying it. On a filled one it is a veil, which
+   * follows every tone, a custom colour and the hover and pressed backgrounds without a value of
+   * its own; an outline one lends its own border, through `inherit`, and a ghost one, which has
+   * none, the divider grey. The variants exclude one another, so no order arbitrates.
+   */
+  .v-button-group[data-bordered]
+    > .v-button:not(:first-child):is([data-variant='solid'], [data-variant='soft'])::before,
+  .v-button-group[data-bordered]
+    > :not(:where(.v-overlay, .v-button-group)):not(:first-child)
+    .v-button:is([data-variant='solid'], [data-variant='soft']):not(:where(.v-overlay *))::before {
+    border-color: var(--vectis-color-border-on-fill);
+  }
+
+  .v-button-group[data-bordered] > .v-button:not(:first-child)[data-variant='outline']::before,
+  .v-button-group[data-bordered]
+    > :not(:where(.v-overlay, .v-button-group)):not(:first-child)
+    .v-button[data-variant='outline']:not(:where(.v-overlay *))::before {
+    border-color: inherit;
+  }
+
+  .v-button-group[data-bordered] > .v-button:not(:first-child)[data-variant='ghost']::before,
+  .v-button-group[data-bordered]
+    > :not(:where(.v-overlay, .v-button-group)):not(:first-child)
+    .v-button[data-variant='ghost']:not(:where(.v-overlay *))::before {
+    border-color: var(--vectis-color-border);
+  }
+
+  /*
+   * Neutral solid inverts text and surface, so the theme's veil would vanish into it: there the
+   * seam is drawn from the segment's own text colour, lightening in the light theme and
+   * darkening in the dark one. One attribute heavier than the filled rule.
+   */
+  .v-button-group[data-bordered]
+    > .v-button:not(:first-child)[data-variant='solid'][data-tone='neutral']::before,
+  .v-button-group[data-bordered]
+    > :not(:where(.v-overlay, .v-button-group)):not(:first-child)
+    .v-button[data-variant='solid'][data-tone='neutral']:not(:where(.v-overlay *))::before {
+    border-color: color-mix(in oklab, var(--tone-text-solid) 25%, transparent);
+  }
+
+  /*
+   * Beside a filled segment, its background already marks the edge, and a line between a filled
+   * and an unfilled one would belong to neither. The previous segment is read through `+`, and
+   * through `+ .v-overlay +` when a menu's panel sits between the two. At (0,7,0) these beat
+   * every colour above.
+   */
+  .v-button-group[data-bordered]
+    > :is(
+      .v-button:not([data-variant='solid'], [data-variant='soft']),
+      :not(:where(.v-overlay, .v-button-group)):has(
+        .v-button:not([data-variant='solid'], [data-variant='soft']):not(:where(.v-overlay *))
+      ),
+      :is(
+          .v-button:not([data-variant='solid'], [data-variant='soft']),
+          :not(:where(.v-overlay, .v-button-group)):has(
+            .v-button:not([data-variant='solid'], [data-variant='soft']):not(:where(.v-overlay *))
+          )
+        )
+        + .v-overlay
+    )
+    + .v-button:is([data-variant='solid'], [data-variant='soft'])::before,
+  .v-button-group[data-bordered]
+    > :is(
+      .v-button:not([data-variant='solid'], [data-variant='soft']),
+      :not(:where(.v-overlay, .v-button-group)):has(
+        .v-button:not([data-variant='solid'], [data-variant='soft']):not(:where(.v-overlay *))
+      ),
+      :is(
+          .v-button:not([data-variant='solid'], [data-variant='soft']),
+          :not(:where(.v-overlay, .v-button-group)):has(
+            .v-button:not([data-variant='solid'], [data-variant='soft']):not(:where(.v-overlay *))
+          )
+        )
+        + .v-overlay
+    )
+    + :not(:where(.v-overlay, .v-button-group))
+    .v-button:is([data-variant='solid'], [data-variant='soft']):not(:where(.v-overlay *))::before,
+  .v-button-group[data-bordered]
+    > :is(
+      .v-button:is([data-variant='solid'], [data-variant='soft']),
+      :not(:where(.v-overlay, .v-button-group)):has(
+        .v-button:is([data-variant='solid'], [data-variant='soft']):not(:where(.v-overlay *))
+      ),
+      :is(
+          .v-button:is([data-variant='solid'], [data-variant='soft']),
+          :not(:where(.v-overlay, .v-button-group)):has(
+            .v-button:is([data-variant='solid'], [data-variant='soft']):not(:where(.v-overlay *))
+          )
+        )
+        + .v-overlay
+    )
+    + .v-button:not([data-variant='solid'], [data-variant='soft'])::before,
+  .v-button-group[data-bordered]
+    > :is(
+      .v-button:is([data-variant='solid'], [data-variant='soft']),
+      :not(:where(.v-overlay, .v-button-group)):has(
+        .v-button:is([data-variant='solid'], [data-variant='soft']):not(:where(.v-overlay *))
+      ),
+      :is(
+          .v-button:is([data-variant='solid'], [data-variant='soft']),
+          :not(:where(.v-overlay, .v-button-group)):has(
+            .v-button:is([data-variant='solid'], [data-variant='soft']):not(:where(.v-overlay *))
+          )
+        )
+        + .v-overlay
+    )
+    + :not(:where(.v-overlay, .v-button-group))
+    .v-button:not([data-variant='solid'], [data-variant='soft']):not(:where(.v-overlay *))::before {
+    border-color: transparent;
   }
 
   /*

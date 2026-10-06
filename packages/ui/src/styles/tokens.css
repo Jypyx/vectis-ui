@@ -159,6 +159,7 @@
     --vectis-color-text-on-warning: var(--vectis-color-gray-950);
     --vectis-color-border: var(--vectis-color-gray-200);
     --vectis-color-border-strong: var(--vectis-color-gray-300);
+    --vectis-color-border-on-fill: oklch(0% 0 0 / 0.12);
     --vectis-color-accent: var(--vectis-color-indigo-600);
     --vectis-color-accent-hover: var(--vectis-color-indigo-700);
     --vectis-color-accent-active: var(--vectis-color-indigo-800);
@@ -382,6 +383,7 @@
     --vectis-color-text-on-accent: var(--vectis-color-white);
     --vectis-color-border: var(--vectis-color-gray-800);
     --vectis-color-border-strong: var(--vectis-color-gray-700);
+    --vectis-color-border-on-fill: oklch(100% 0 0 / 0.15);
     --vectis-color-accent: var(--vectis-color-indigo-500);
     --vectis-color-accent-hover: var(--vectis-color-indigo-400);
     --vectis-color-accent-active: var(--vectis-color-indigo-300);

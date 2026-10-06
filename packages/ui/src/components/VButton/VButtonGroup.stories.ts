@@ -127,25 +127,78 @@ export const Variants: Story = {
     components: { VButtonGroup, VButton },
     setup: () => ({ t }),
     template: `
-      <div style="display: grid; gap: 16px">
-        <VButtonGroup variant="solid" label="Solid">
+      <div style="display: grid; gap: 16px; justify-items: start">
+        <VButtonGroup bordered variant="solid" label="Solid">
           <VButton>{{ t.day }}</VButton>
           <VButton>{{ t.week }}</VButton>
           <VButton>{{ t.month }}</VButton>
         </VButtonGroup>
-        <VButtonGroup variant="outline" tone="neutral" label="Outline">
+        <VButtonGroup bordered variant="solid" tone="neutral" label="Neutral solid">
           <VButton>{{ t.day }}</VButton>
           <VButton>{{ t.week }}</VButton>
           <VButton>{{ t.month }}</VButton>
         </VButtonGroup>
-        <VButtonGroup variant="soft" label="Tonal">
+        <VButtonGroup bordered variant="soft" label="Tonal">
           <VButton>{{ t.day }}</VButton>
           <VButton>{{ t.week }}</VButton>
           <VButton>{{ t.month }}</VButton>
+        </VButtonGroup>
+        <VButtonGroup bordered variant="outline" tone="neutral" label="Outline">
+          <VButton>{{ t.day }}</VButton>
+          <VButton>{{ t.week }}</VButton>
+          <VButton>{{ t.month }}</VButton>
+        </VButtonGroup>
+        <VButtonGroup bordered variant="ghost" tone="neutral" label="Ghost">
+          <VButton>{{ t.day }}</VButton>
+          <VButton>{{ t.week }}</VButton>
+          <VButton>{{ t.month }}</VButton>
+        </VButtonGroup>
+        <VButtonGroup bordered tone="neutral" label="Mixed">
+          <VButton variant="ghost">{{ t.day }}</VButton>
+          <VButton variant="solid">{{ t.week }}</VButton>
+          <VButton variant="ghost">{{ t.month }}</VButton>
+          <VButton variant="ghost">{{ t.settings }}</VButton>
         </VButtonGroup>
       </div>
     `,
   }),
+  /* Seam colours resolve only in a browser: jsdom computes neither pseudo-elements nor tokens. */
+  play: async ({ canvasElement }) => {
+    const TRANSPARENT = 'rgba(0, 0, 0, 0)'
+    const canvas = within(canvasElement)
+    const segmentsOf = (name: string) =>
+      within(canvas.getByRole('group', { name })).getAllByRole('button')
+    const seamOf = (button: HTMLElement) =>
+      getComputedStyle(button, '::before').borderInlineStartColor
+    // A probe in the canvas resolves a token as the active theme computes it.
+    const resolve = (value: string) => {
+      const probe = document.createElement('span')
+      probe.style.borderInlineStartColor = value
+      canvasElement.append(probe)
+      const color = getComputedStyle(probe).borderInlineStartColor
+      probe.remove()
+      return color
+    }
+    const veil = resolve('var(--vectis-color-border-on-fill)')
+
+    for (const name of ['Solid', 'Tonal']) {
+      await expect(seamOf(segmentsOf(name)[1]!)).toBe(veil)
+    }
+
+    const neutral = seamOf(segmentsOf('Neutral solid')[1]!)
+    await expect(neutral).not.toBe(veil)
+    await expect(neutral).not.toBe(TRANSPARENT)
+
+    const outlineWeek = segmentsOf('Outline')[1]!
+    await expect(seamOf(outlineWeek)).toBe(getComputedStyle(outlineWeek).borderInlineStartColor)
+
+    await expect(seamOf(segmentsOf('Ghost')[1]!)).toBe(resolve('var(--vectis-color-border)'))
+
+    const [, selected, after, last] = segmentsOf('Mixed')
+    await expect(seamOf(selected!)).toBe(TRANSPARENT)
+    await expect(seamOf(after!)).toBe(TRANSPARENT)
+    await expect(seamOf(last!)).toBe(resolve('var(--vectis-color-border)'))
+  },
 }
 
 export const Detached: Story = {

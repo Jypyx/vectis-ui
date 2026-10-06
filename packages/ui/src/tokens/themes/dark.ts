@@ -20,6 +20,7 @@ export const dark = {
 
     border: color('{color.gray.800}'),
     'border-strong': color('{color.gray.700}'),
+    'border-on-fill': color('oklch(100% 0 0 / 0.15)'),
 
     accent: color('{color.indigo.500}'),
     'accent-hover': color('{color.indigo.400}'),

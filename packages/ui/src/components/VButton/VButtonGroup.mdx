@@ -72,9 +72,16 @@ it is the width alone, since a column already stretches every segment across it.
 
 ## Variants
 
-On a `bordered` row the seam adapts: for the filled variants (`solid`/`soft`, transparent border)
-a thin `--vectis-color-border` line materializes the separation; for `outline` it unifies the
-joint. One `variant` on the group covers the whole row.
+On a `bordered` row the seam follows the variant of the segment it separates:
+
+- `solid` and `soft` take `--vectis-color-border-on-fill`, a veil that darkens the background in
+  the light theme and lightens it in the dark one, whatever the tone. A neutral `solid` segment,
+  whose background is inverted, gets the opposite veil.
+- `outline` takes the segment's own border colour, so the seam and the frame read as one line.
+- `ghost` takes `--vectis-color-border`.
+
+Next to a filled segment, the seam is hidden: the background already marks the edge. This applies
+to a selected item in a `VToggle`. One `variant` on the group covers the whole row.
 
 <Canvas of={VButtonGroupStories.Variants} />
 

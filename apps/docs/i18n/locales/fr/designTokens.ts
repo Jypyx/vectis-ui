@@ -20,6 +20,8 @@ const descriptions: Record<DescribedToken, string> = {
     "Le texte posé sur un fond d'avertissement plein (l'ambre est trop clair pour du blanc)",
   '--vectis-color-border': 'Les séparateurs, et le cadre des cartes, des tableaux et des panneaux',
   '--vectis-color-border-strong': 'La bordure des contrôles de formulaire',
+  '--vectis-color-border-on-fill':
+    "Un voile séparant un fond plein : les jointures d'un VButtonGroup bordé",
   '--vectis-color-accent':
     "La couleur de marque : boutons pleins, contrôles cochés, l'élément sélectionné",
   '--vectis-color-accent-hover': "La couleur d'accent au survol",
