@@ -492,9 +492,6 @@ defineExpose({
    */
   .v-tabs:is([data-variant='flat'], [data-variant='outlined']) > .v-tabs-bar > .v-tabs-list {
     margin-block-end: -1px;
-    /* On a track the tabs are contiguous segments and not a queue of buttons: no gap
-       here, and no rounded corners on the tabs themselves. */
-    --tabs-list-gap: 0px;
   }
 
   /* The row is now a pixel taller than the tabs it holds, so they are pushed against

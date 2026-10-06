@@ -99,8 +99,9 @@ it is loading. It works with or without `virtual`.
 ## Decoration
 
 `variant` drives the table's frame, on the scale shared with `VAccordion` and `VTabs`. `flat` (the
-default) adds nothing: the table sits bare, its header, rules and footer flush with the host
-container. `outlined` encloses it in a surface of its own, rounded and ringed by a rule; the title
+default) adds no border and no background: the table sits bare, its header, rules and footer flush
+with the host container, and only the scrolling area rounds its corners, so the tinted heading and
+rows follow the surface radius. `outlined` encloses it in a surface of its own, rounded and ringed by a rule; the title
 bar, the caption and the footer then take the frame's gutter, aligned on the cells' padding — their
 content lines up exactly with the first column's text and follows `compact`. Only the table keeps
 scrolling edge to edge.

@@ -89,6 +89,12 @@ provide(accordionKey, {
     font-family: var(--vectis-text-family);
   }
 
+  /* Read by the first and last rows to round their hover. Without a frame there is no clip,
+     so the rows carry the whole radius. */
+  .v-accordion[data-variant='flat'] {
+    --accordion-corner-radius: var(--vectis-radius-surface);
+  }
+
   .v-accordion[data-compact] {
     --accordion-pad-delta: var(--vectis-space-1);
   }

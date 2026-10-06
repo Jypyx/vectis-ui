@@ -31,17 +31,17 @@ any state exchange between them.
 
 `flat` (the default) underlines the active tab with an indicator that covers the bar's track; the
 tabs stay `ghost`, and nothing is painted around them — the bar and the panels sit bare in the host
-container, whose surface they inherit. On a track, the tabs are **contiguous, square-cornered
-segments**: it is the indicator and the track that carve the bar, not the buttons' silhouette.
+container, whose surface they inherit. On a track, the tabs keep their radius and their spacing,
+except on the edge the indicator runs along: there the corners stay square, so the indicator lies
+flush with the track.
 
 `outlined` takes `flat` line for line and encloses it in a card: a rule, rounded corners and a raised
 background, on the decoration scale shared with `VAccordion` and `VDataTable`. The frame surrounds
 the **whole** component, bar and panels: the track then changes role without changing appearance — it
 becomes the rule that separates the tabs from their content, inside the frame. The bar takes no gutter:
 the tabs sit against the card's border and the track runs edge to edge, so the padding is the panels'
-alone. The tab row takes its radius back at the ends only — the internal seams stay square, on the
-`VButtonGroup` idiom — on the side the track does not occupy, and that radius is the card's inner one,
-since an end tab now lands on the frame's own corner. With no `#panels` slot there is nothing to
+alone. Each tab is rounded as in `flat`; an end tab that lands on the frame's own corner takes the
+card's inner radius there instead, so the two curves stay concentric. With no `#panels` slot there is nothing to
 separate: the track fades away, the card's border replaces it, and the card clips its corners, the
 tabs having nothing left to be set back from.
 

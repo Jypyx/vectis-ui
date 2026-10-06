@@ -350,6 +350,14 @@ export const Variants: Story = {
       </div>
     `,
   }),
+  // Jsdom computes no style: unframed, the scrolling area rounds the tinted heading, while the
+  // root stays unclipped so the search field's focus ring is not cropped.
+  play: async ({ canvasElement }) => {
+    const flat = canvasElement.querySelector<HTMLElement>('.v-data-table[data-variant="flat"]')!
+    const scroller = flat.querySelector<HTMLElement>('.v-data-table-scroller')!
+    await expect(getComputedStyle(scroller).borderTopLeftRadius).not.toBe('0px')
+    await expect(getComputedStyle(flat).overflow).toBe('visible')
+  },
 }
 
 /** Reduced density: cell paddings one notch down, the composed parts in compact. */

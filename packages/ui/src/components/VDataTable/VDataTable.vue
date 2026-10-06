@@ -1038,6 +1038,15 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     overflow: auto;
   }
 
+  /*
+   * Unframed, the tinted heading and rows are rounded by the area that already clips them,
+   * not by the root: the toolbar and footer sit flush with the root's edges, and a clip there
+   * would crop their focus rings.
+   */
+  .v-data-table[data-variant='flat'] > .v-data-table-scroller {
+    border-radius: var(--vectis-radius-surface);
+  }
+
   .v-data-table-toolbar {
     flex: none;
     display: flex;

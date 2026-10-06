@@ -158,22 +158,30 @@ function onFocus() {
   }
 
   /*
-   * On a track the tabs are contiguous SEGMENTS with square corners: what carves the bar up is
-   * the rule and the indicator, not the silhouette of each button. Rounded corners would leave
-   * pale notches above the rule, and a gap would break the row of hover highlights into
-   * islands.
+   * On a track the tabs keep their radius except on the edge the indicator is drawn along:
+   * there the indicator lies flush with the rule, which a rounded corner would notch.
    */
-  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])
+  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='horizontal']
     > .v-tabs-bar
     > .v-tabs-list
     .v-tab[data-size] {
-    border-radius: 0;
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+  }
+
+  .v-tabs:is([data-variant='flat'], [data-variant='outlined'])[data-orientation='vertical']
+    > .v-tabs-bar
+    > .v-tabs-list
+    .v-tab[data-size] {
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
   }
 
   /*
    * The selectors ask for the first and last of their TYPE rather than the first and last
    * child, because the scroll markers are the row's real first and last children. They are
-   * spans, the tabs being the only buttons, which makes the distinction work.
+   * spans, the tabs being the only buttons, which makes the distinction work. The first-tab
+   * rule ties with the vertical one above on specificity, so it must stay after it.
    */
   .v-tabs[data-variant='outlined'] > .v-tabs-bar > .v-tabs-list .v-tab[data-size]:first-of-type {
     border-start-start-radius: calc(var(--vectis-radius-surface) - 1px);

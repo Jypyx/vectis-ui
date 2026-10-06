@@ -33,7 +33,7 @@ const t = storyText({
     sessionsSub: 'Connected devices',
     sessionsBody: 'Or a subtitle with no icon.',
     flatTitle: 'flat — no decoration',
-    flatBody: 'No border, no radius, no background: the accordion inherits its container surface.',
+    flatBody: 'No border, no background: the accordion inherits its container surface.',
     separatorsTitle: 'The separators remain',
     separatorsBody: 'They belong to reading the list, not to framing it.',
     outlinedTitle: 'outlined — border and radius',
@@ -74,7 +74,7 @@ const t = storyText({
     sessionsSub: 'Appareils connectés',
     sessionsBody: 'Ou un sous-titre sans icône.',
     flatTitle: 'flat — aucun habillage',
-    flatBody: "Ni bordure, ni rayon, ni fond : l'accordéon hérite de la surface de son conteneur.",
+    flatBody: "Ni bordure, ni fond : l'accordéon hérite de la surface de son conteneur.",
     separatorsTitle: 'Les séparateurs subsistent',
     separatorsBody: 'Ils appartiennent à la lecture de la liste, pas à son cadre.',
     outlinedTitle: 'outlined — bordure et rayon',
@@ -241,11 +241,13 @@ export const Variants: Story = {
     `,
   }),
   // Jsdom computes no style, so this is the only guard: a flat accordion must not become a
-  // scroll container (it would capture a `position: sticky` in its content), and the outlined
-  // one clips its rows to its corners without becoming one either.
+  // scroll container (it would capture a `position: sticky` in its content), so its rows round
+  // their own corners; the outlined one clips its rows to its corners without becoming one either.
   play: async ({ canvasElement }) => {
     const [flat, outlined] = [...canvasElement.querySelectorAll<HTMLElement>('.v-accordion')]
     await expect(getComputedStyle(flat!).overflow).toBe('visible')
+    const summary = flat!.querySelector<HTMLElement>('.v-accordion-summary')!
+    await expect(getComputedStyle(summary).borderTopLeftRadius).not.toBe('0px')
     await expect(getComputedStyle(outlined!).overflow).toBe('clip')
   },
 }

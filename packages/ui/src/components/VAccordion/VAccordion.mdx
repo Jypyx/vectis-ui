@@ -59,9 +59,10 @@ exchanged in CSS according to the `<details>` state — useful for a non-directi
 ## Variants
 
 `variant` drives the group's decoration, on a scale shared with `VDataTable` and `VTabs`. `flat`
-(the default) sets none — no border, no radius, no background: it is the variant for an accordion
+(the default) sets no border and no background: it is the variant for an accordion
 placed inside a container that already carries its own frame (a side panel, a card, a sheet),
-whose surface it then inherits. `outlined` presents it as a card: a 1px rule, rounded corners and
+whose surface it then inherits. The hover of the first and last items still follows the surface
+radius, so the group reads as one rounded block. `outlined` presents it as a card: a 1px rule, rounded corners and
 a raised background.
 
 The separators between items, on the other hand, stay in place in both variants: they belong to

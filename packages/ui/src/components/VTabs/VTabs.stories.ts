@@ -165,6 +165,15 @@ export const Variants: Story = {
       </div>
     `,
   }),
+  // Jsdom computes no style: a tab on the track keeps its radius away from the indicator's edge
+  // and stays square along it, and the tabs are spaced rather than contiguous.
+  play: async ({ canvasElement }) => {
+    const flat = canvasElement.querySelector<HTMLElement>('.v-tabs[data-variant="flat"]')!
+    const tab = within(flat).getByRole('tab', { name: 'Details' })
+    await expect(getComputedStyle(tab).borderTopLeftRadius).not.toBe('0px')
+    await expect(getComputedStyle(tab).borderBottomLeftRadius).toBe('0px')
+    await expect(getComputedStyle(tab.parentElement!).columnGap).not.toBe('0px')
+  },
 }
 
 export const Tones: Story = {
