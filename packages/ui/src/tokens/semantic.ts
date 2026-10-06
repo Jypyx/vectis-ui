@@ -333,6 +333,23 @@ export const semantic = {
       '1.5rem',
       'The shortest a horizontal VStepper connector gets between two steps (24px)',
     ),
+    'size-timeline-dot-sm': dimension(
+      '0.5rem',
+      'The dot marking an event of a small VTimeline (8px)',
+    ),
+    'size-timeline-dot-md': dimension('0.625rem', 'The dot marking an event of a VTimeline (10px)'),
+    'size-timeline-icon-sm': dimension(
+      '1.5rem',
+      'The round badge holding the icon of an event in a small VTimeline (24px)',
+    ),
+    'size-timeline-icon-md': dimension(
+      '2rem',
+      'The round badge holding the icon of an event in a VTimeline (32px)',
+    ),
+    'size-timeline-item-min': dimension(
+      '12rem',
+      'The narrowest an event of a horizontal VTimeline gets before the list scrolls (192px)',
+    ),
     'size-rating-sm': dimension('1.25rem', 'The icon of a small VRating (20px)'),
     'size-rating-md': dimension('1.5rem', 'The icon of a medium VRating (24px)'),
     'size-rating-lg': dimension('2rem', 'The icon of a large VRating (32px)'),

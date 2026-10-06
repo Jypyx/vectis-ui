@@ -71,6 +71,7 @@ const nav: NavMessages = {
   textarea: 'Zone de texte',
   'time-input': "Champ d'heure",
   'time-picker': "Sélecteur d'heure",
+  timeline: 'Frise chronologique',
   toast: 'Notification',
   toggle: 'Groupe à bascule',
   tooltip: 'Infobulle',

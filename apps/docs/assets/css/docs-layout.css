@@ -582,8 +582,13 @@ html {
   background: var(--vectis-color-surface-raised);
 }
 .vd-demo[data-stack],
+/*
+ * A single line: in a wrapping column, an example is measured at its max-content width before it
+ * is stretched, which is zero for a size container and makes it as tall as a one-word column.
+ */
 .vd-example-preview[data-stack] {
   flex-direction: column;
+  flex-wrap: nowrap;
   align-items: stretch;
 }
 .vd-demo[data-theme] {

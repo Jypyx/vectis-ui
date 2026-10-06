@@ -95,6 +95,7 @@ export const components = [
   entry('textarea'),
   entry('time-input'),
   entry('time-picker'),
+  entry('timeline'),
   entry('toast'),
   entry('toggle'),
   entry('tooltip'),

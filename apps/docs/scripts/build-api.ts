@@ -94,6 +94,7 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
   { slug: 'textarea', components: ['VTextarea'] },
   { slug: 'time-input', components: ['VTimeInput'] },
   { slug: 'time-picker', components: ['VTimePicker'] },
+  { slug: 'timeline', components: ['VTimeline', 'VTimelineItem'] },
   { slug: 'toast', components: ['VToaster'], internals: ['VToast'] },
   { slug: 'toggle', components: ['VToggle', 'VToggleItem'] },
   { slug: 'tooltip', components: ['VTooltip'] },

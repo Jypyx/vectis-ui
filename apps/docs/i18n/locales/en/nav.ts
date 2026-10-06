@@ -73,6 +73,7 @@ const nav: NavMessages = {
   textarea: 'Textarea',
   'time-input': 'Time input',
   'time-picker': 'Time picker',
+  timeline: 'Timeline',
   toast: 'Toast',
   toggle: 'Toggle',
   tooltip: 'Tooltip',

@@ -68,6 +68,7 @@ import textarea from './fr/textarea'
 import theming from './fr/theming'
 import timeInput from './fr/timeInput'
 import timePicker from './fr/timePicker'
+import timeline from './fr/timeline'
 import toast from './fr/toast'
 import toggle from './fr/toggle'
 import tooltip from './fr/tooltip'
@@ -146,6 +147,7 @@ export default defineI18nLocale((): DocsMessages => ({
   textarea,
   timeInput,
   timePicker,
+  timeline,
   toast,
   toggle,
   tooltip,

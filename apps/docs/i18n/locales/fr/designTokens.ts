@@ -144,6 +144,15 @@ const descriptions: Record<DescribedToken, string> = {
     "Le diamètre du cercle qui porte le numéro d'une étape de VStepper (32px)",
   '--vectis-control-size-stepper-connector-min':
     "La longueur minimale d'un trait de liaison horizontal entre deux étapes de VStepper (24px)",
+  '--vectis-control-size-timeline-dot-sm':
+    "Le point qui marque un événement d'un petit VTimeline (8px)",
+  '--vectis-control-size-timeline-dot-md': "Le point qui marque un événement d'un VTimeline (10px)",
+  '--vectis-control-size-timeline-icon-sm':
+    "La pastille ronde qui porte l'icône d'un événement d'un petit VTimeline (24px)",
+  '--vectis-control-size-timeline-icon-md':
+    "La pastille ronde qui porte l'icône d'un événement d'un VTimeline (32px)",
+  '--vectis-control-size-timeline-item-min':
+    "La largeur minimale d'un événement d'un VTimeline horizontal avant que la liste ne défile (192px)",
   '--vectis-control-size-snackbar-min': "La largeur minimale d'une snackbar (288px)",
   '--vectis-control-size-snackbar-max': "La largeur maximale d'une snackbar (576px)",
   '--vectis-control-size-card-media':

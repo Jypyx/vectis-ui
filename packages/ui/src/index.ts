@@ -148,6 +148,15 @@ export type {
   EmptyStateHeadingLevel,
   EmptyStateSize,
 } from './components/VEmptyState/VEmptyState.vue'
+export { default as VTimeline } from './components/VTimeline/VTimeline.vue'
+export type {
+  TimelineLayout,
+  TimelineOrientation,
+  TimelineSize,
+} from './components/VTimeline/VTimeline.vue'
+export type { TimelineHeadingLevel } from './components/VTimeline/context'
+export { default as VTimelineItem } from './components/VTimeline/VTimelineItem.vue'
+export type { TimelineItemTone } from './components/VTimeline/VTimelineItem.vue'
 export { default as VBadge } from './components/VBadge/VBadge.vue'
 export type { BadgeVariant, BadgeTone, BadgeOverlayPosition } from './components/VBadge/VBadge.vue'
 export { default as VAvatar } from './components/VAvatar/VAvatar.vue'

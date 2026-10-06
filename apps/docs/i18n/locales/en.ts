@@ -68,6 +68,7 @@ import textarea from './en/textarea'
 import theming from './en/theming'
 import timeInput from './en/timeInput'
 import timePicker from './en/timePicker'
+import timeline from './en/timeline'
 import toast from './en/toast'
 import toggle from './en/toggle'
 import tooltip from './en/tooltip'
@@ -148,6 +149,7 @@ export interface DocsMessages {
   textarea: typeof textarea
   timeInput: typeof timeInput
   timePicker: typeof timePicker
+  timeline: typeof timeline
   toast: typeof toast
   toggle: typeof toggle
   tooltip: typeof tooltip
@@ -228,6 +230,7 @@ export default defineI18nLocale((): DocsMessages => ({
   textarea,
   timeInput,
   timePicker,
+  timeline,
   toast,
   toggle,
   tooltip,

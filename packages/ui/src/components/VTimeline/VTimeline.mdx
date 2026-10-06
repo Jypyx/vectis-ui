@@ -1,0 +1,84 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VTimelineStories from './VTimeline.stories'
+
+<Meta of={VTimelineStories} />
+
+# Timeline
+
+An ordered list of dated events. VTimeline holds the list and its layout; each `VTimelineItem` is
+one event, with a marker on the line, a date, a title and content of its own.
+
+<Canvas of={VTimelineStories.Default} />
+
+<Controls of={VTimelineStories.Default} />
+
+## Dates
+
+`datetime` takes an ISO string and renders it in a `<time datetime>`, written out in the locale at
+the precision it gives: a year (`2019`), a month (`2026-10`), a day (`2026-10-06`) or a moment
+(`2026-10-06T14:30`). `formatOptions` on VTimeline changes how days and moments are written, and
+`locale` the language they are written in.
+
+A moment with an offset (`Z`, `+02:00`) is shown in the time zone the code runs in. On a page
+rendered on a server, set `timeZone` in `formatOptions`, or the server and the browser may write
+different times.
+
+`timeText` replaces the visible text, for a relative date such as "2 hours ago"; the `<time>`
+keeps the exact moment for machines.
+
+<Canvas of={VTimelineStories.RelativeDates} />
+
+## Layouts
+
+`layout` places the date of a vertical timeline. `stacked`, the default, writes it above the title.
+`split` gives the dates a column of their own across the line, as wide as the longest date up to a
+third of the width.
+
+<Canvas of={VTimelineStories.Split} />
+
+`alternate` sends every other event across the line, its date facing it.
+
+<Canvas of={VTimelineStories.Alternate} />
+
+Below 30rem for `split` and 36rem for `alternate`, both fall back to `stacked`. The timeline then
+measures the space it is given, so it takes its width from its parent: in a flex row, give it a
+basis of its own.
+
+<Canvas of={VTimelineStories.NarrowSpace} />
+
+## Horizontal
+
+`orientation="horizontal"` lays the events across, their markers, dates and titles in line. When
+they no longer fit, the list scrolls; it is a tab stop so that a keyboard can scroll it.
+
+<Canvas of={VTimelineStories.Horizontal} />
+
+## Markers
+
+`tone` paints the marker, `accent` by default. `icon` draws it in a round badge instead of a dot,
+and the line stays straight through dots and badges alike.
+
+<Canvas of={VTimelineStories.IconsAndTones} />
+
+The `#marker` slot replaces the dot or the badge, with an avatar for instance.
+
+<Canvas of={VTimelineStories.CustomMarker} />
+
+## Size
+
+`size="sm"` tightens the spacing, the markers and the content text.
+
+<Canvas of={VTimelineStories.Small} />
+
+## Accessibility
+
+- The timeline is a native `<ol>`: screen readers announce the number of events and the position
+  of each one. Give it a name with `aria-label` or `aria-labelledby` when the page holds more than
+  one.
+- Dates are `<time datetime>` elements, machine readable whatever their visible text.
+- Titles are paragraphs by default; `headingLevel` renders them as headings of that level, which
+  puts them in the document outline.
+- Markers and the line are decoration, hidden from assistive technology. A tone or an icon must
+  never be the only way an event says what it is: write it in the title.
+- A horizontal timeline is focusable, so its scrolling area can be reached with the keyboard.
+- In forced colours, the dots, badges and line are drawn as borders, which the system colours keep.

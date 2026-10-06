@@ -203,6 +203,7 @@ const COMPONENT_DIMENSIONS: { slugs: DocsSlug[]; prefixes: string[] }[] = [
   { slugs: ['switch'], prefixes: ['size-switch-'] },
   { slugs: ['tabs'], prefixes: ['size-tab-'] },
   { slugs: ['time-picker'], prefixes: ['size-time-picker-'] },
+  { slugs: ['timeline'], prefixes: ['size-timeline-'] },
   { slugs: ['toast'], prefixes: ['size-toast-'] },
   { slugs: ['tooltip'], prefixes: ['size-tooltip-'] },
 ]

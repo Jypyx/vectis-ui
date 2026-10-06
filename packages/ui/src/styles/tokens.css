@@ -292,6 +292,11 @@
     --vectis-control-size-dialog-width: 25rem;
     --vectis-control-size-stepper-indicator: 2rem;
     --vectis-control-size-stepper-connector-min: 1.5rem;
+    --vectis-control-size-timeline-dot-sm: 0.5rem;
+    --vectis-control-size-timeline-dot-md: 0.625rem;
+    --vectis-control-size-timeline-icon-sm: 1.5rem;
+    --vectis-control-size-timeline-icon-md: 2rem;
+    --vectis-control-size-timeline-item-min: 12rem;
     --vectis-control-size-rating-sm: 1.25rem;
     --vectis-control-size-rating-md: 1.5rem;
     --vectis-control-size-rating-lg: 2rem;
