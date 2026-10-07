@@ -24,7 +24,7 @@ export default {
     },
     disabled: {
       title: 'Sections désactivées',
-      text: 'Les sections désactivées ne peuvent pas être ouvertes ou fermées et sont ignorées par la navigation au clavier.',
+      text: 'Les sections désactivées ne s’ouvrent ni ne se ferment, et la navigation au clavier les ignore.',
     },
   },
   api: {

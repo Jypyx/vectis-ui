@@ -8,7 +8,7 @@ export default {
     },
     inheritedColour: {
       title: 'Couleur héritée',
-      text: '<code>tone="inherit"</code> prend la couleur du texte qui entoure le lien, comme une ligne de pied de page atténuée, et passe à la couleur d’accent au survol. Gardez le soulignement : c’est alors lui qui distingue le lien.',
+      text: '<code>tone="inherit"</code> prend la couleur du texte qui entoure le lien, comme une ligne de pied de page atténuée, et passe à la couleur d’accent au survol. Gardez le soulignement : c’est alors lui qui distingue le lien.',
     },
     underline: {
       title: 'Soulignement',

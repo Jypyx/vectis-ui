@@ -43,8 +43,8 @@ export default {
     VButton: {
       props: {
         variant:
-          'Style visuel : <code>solid</code> pour un fond plein, <code>soft</code> pour un fond teinté, <code>outline</code> pour une bordure ou <code>ghost</code> pour un fond transparent jusqu’au survol. <code>VButtonGroup</code> impose sa valeur.',
-        tone: 'Intention de l’action : <code>accent</code> pour une action principale, <code>neutral</code> pour une action secondaire ou <code>danger</code> pour une action destructive. Si omis, reprend le ton de <code>VButtonGroup</code>, ou <code>accent</code> hors d’un groupe.',
+          'Style visuel : <code>solid</code> pour un fond plein, <code>soft</code> pour un fond teinté, <code>outline</code> pour une bordure ou <code>ghost</code> pour un fond transparent jusqu’au survol. <code>VButtonGroup</code> impose sa valeur.',
+        tone: 'Intention de l’action : <code>accent</code> pour une action principale, <code>neutral</code> pour une action secondaire ou <code>danger</code> pour une action destructive. Si omis, reprend le ton de <code>VButtonGroup</code>, ou <code>accent</code> hors d’un groupe.',
         elevated:
           'Ajoute une ombre et, pour <code>ghost</code> et <code>outline</code>, un fond. <code>VButtonGroup</code> impose sa valeur.',
         size: 'Taille du bouton. <code>VButtonGroup</code> impose sa valeur.',

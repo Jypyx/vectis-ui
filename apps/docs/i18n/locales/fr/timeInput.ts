@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> définit la taille du champ ; <code>compact</code> réduit sa hauteur.',
+      text: '<code>size</code> définit la taille du champ ; <code>compact</code> réduit sa hauteur.',
     },
     modes: {
       title: 'Modes',
@@ -47,18 +47,18 @@ export default {
     VTimeInput: {
       props: {
         format:
-          'Affichage sur 12 ou 24 heures. Dépend de la locale par défaut ; le modèle utilise toujours 24 heures.',
+          'Affichage sur 12 ou 24 heures. Dépend de la locale par défaut ; le modèle utilise toujours 24 heures.',
         mode: 'Saisie, sélection sur horloge ou liste d’heures filtrable.',
         showPicker:
-          'Ajoute une horloge au mode saisie. Le mode horloge l’inclut toujours ; le mode liste l’ignore.',
+          'Ajoute une horloge au mode saisie. Le mode horloge l’inclut toujours ; le mode liste l’ignore.',
         minuteStep:
           'Pas de l’horloge et intervalle de la liste en minutes. Ne limite pas les valeurs saisies.',
         min: 'Première heure autorisée, incluse, au format <code>HH:mm</code>.',
         max: 'Dernière heure autorisée, incluse, au format <code>HH:mm</code>.',
-        allowedHours: 'Heures autorisées : tableau ou prédicat recevant une valeur sur 24 heures.',
-        allowedMinutes: 'Minutes autorisées : tableau ou prédicat.',
+        allowedHours: 'Heures autorisées : tableau ou prédicat recevant une valeur sur 24 heures.',
+        allowedMinutes: 'Minutes autorisées : tableau ou prédicat.',
         locale:
-          'Locale BCP 47 pour l’affichage des heures. Remplace la locale globale ; <code>format</code> est prioritaire.',
+          'Locale BCP 47 pour l’affichage des heures. Remplace la locale globale ; <code>format</code> est prioritaire.',
         label:
           'Libellé visible. Sans nom visible, fournissez <code>aria-label</code> ou <code>aria-labelledby</code>.',
         error:
@@ -73,7 +73,7 @@ export default {
         invalid:
           'Définit <code>aria-invalid</code> et le style d’erreur. Ne bloque pas à lui seul l’envoi du formulaire.',
         iconStart:
-          'Icône de début. Un écouteur <code>@click:icon-start</code> en fait un bouton ; fournissez <code>iconStartLabel</code>.',
+          'Icône de début. Un écouteur <code>@click:icon-start</code> en fait un bouton ; fournissez <code>iconStartLabel</code>.',
         iconStartLabel: 'Nom accessible du bouton d’icône de début.',
         pickerLabel:
           'Nom accessible du bouton horloge. Utilise le dictionnaire de la bibliothèque par défaut.',
@@ -88,7 +88,7 @@ export default {
         vModel: 'Heure sur 24 heures au format <code>HH:mm</code>, ou <code>null</code>.',
       },
       events: {
-        clear: 'L’heure a été effacée ; le modèle est déjà réinitialisé.',
+        clear: 'L’heure a été effacée ; le modèle est déjà réinitialisé.',
         clickIconStart: 'Le bouton de l’icône de début a été activé.',
       },
       slots: {

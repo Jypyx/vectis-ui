@@ -8,7 +8,7 @@ export default {
     },
     selectedVariants: {
       title: 'Comment la sélection est dessinée',
-      text: '<code>selectedVariant</code> définit le style de la page actuelle : plein, atténué ou sans fond.',
+      text: '<code>selectedVariant</code> définit le style de la page actuelle : plein, atténué ou sans fond.',
     },
     detached: {
       title: 'Détaché',
@@ -20,7 +20,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> définit la taille des boutons ; <code>compact</code> réduit leur hauteur.',
+      text: '<code>size</code> définit la taille des boutons ; <code>compact</code> réduit leur hauteur.',
     },
     length: {
       title: 'Nombre de pages',
@@ -60,7 +60,7 @@ export default {
       props: {
         length: 'Nombre total de pages.',
         totalVisible:
-          'Nombre maximal d’emplacements de pages et de points de suspension ; 0 ne laisse que les contrôles. Absent, affiche toutes les pages.',
+          'Nombre maximal d’emplacements de pages et de points de suspension ; 0 ne laisse que les contrôles. Absent, affiche toutes les pages.',
         detached: 'Sépare les boutons de page.',
         bordered:
           'Ajoute des séparateurs entre les boutons joints. Ignoré si les boutons sont séparés.',
@@ -71,7 +71,7 @@ export default {
         compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
         elevated: 'Ajoute une ombre à la ligne ou aux boutons séparés.',
         align: 'Alignement de la ligne dans la largeur disponible.',
-        controls: 'Contenu précédent/suivant : icônes, texte, les deux ou <code>false</code>.',
+        controls: 'Contenu précédent/suivant : icônes, texte, les deux ou <code>false</code>.',
         prevIcon: 'Icône du contrôle précédent.',
         nextIcon: 'Icône du contrôle suivant.',
         prevText:
@@ -97,7 +97,7 @@ export default {
       },
       events: {
         navigate:
-          'Activation d’une page, avant la mise à jour du modèle. Reçoit la page et le clic ; appelez <code>preventDefault()</code> pour le routage. Les clics avec une touche modificatrice ne l’émettent pas.',
+          'Activation d’une page, avant la mise à jour du modèle. Reçoit la page et le clic ; appelez <code>preventDefault()</code> pour le routage. Les clics avec une touche modificatrice ne l’émettent pas.',
       },
     },
   },

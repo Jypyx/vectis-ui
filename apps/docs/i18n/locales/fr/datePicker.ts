@@ -4,11 +4,11 @@ export default {
   examples: {
     range: {
       title: 'Période',
-      text: 'Sélectionnez le début puis la fin de la période. Le modèle est <code>{ start, end }</code> ; chaque borne peut valoir <code>null</code> tant que la période est incomplète.',
+      text: 'Sélectionnez le début puis la fin de la période. Le modèle est <code>{ start, end }</code> ; chaque borne peut valoir <code>null</code> tant que la période est incomplète.',
     },
     multiple: {
       title: 'Dates multiples',
-      text: 'Sélectionnez des dates pour les ajouter au tableau de dates ISO ; sélectionnez-les à nouveau pour les retirer.',
+      text: 'Sélectionnez des dates pour les ajouter au tableau de dates ISO ; sélectionnez-les à nouveau pour les retirer.',
     },
     presets: {
       title: 'Raccourcis',
@@ -38,7 +38,7 @@ export default {
   api: {
     VDatePicker: {
       props: {
-        selection: 'Mode de sélection : une date, une période ou plusieurs dates.',
+        selection: 'Mode de sélection : une date, une période ou plusieurs dates.',
         locale:
           'Locale BCP 47 pour l’affichage des dates et le début de semaine. Remplace la locale globale.',
         firstDayOfWeek:
@@ -46,7 +46,7 @@ export default {
         min: 'Première date sélectionnable au format <code>YYYY-MM-DD</code>. Limite aussi la navigation.',
         max: 'Dernière date sélectionnable au format <code>YYYY-MM-DD</code>. Limite aussi la navigation.',
         disabledDates:
-          'Dates indisponibles : tableau de chaînes ISO ou prédicat. Les jours restent visibles et accessibles au clavier.',
+          'Dates indisponibles : tableau de chaînes ISO ou prédicat. Les jours restent visibles et accessibles au clavier.',
         showAdjacentDays: 'Affiche les jours des mois voisins.',
         selectAdjacentDays:
           'Permet de sélectionner les jours des mois voisins et ouvre le mois choisi. Implique <code>showAdjacentDays</code>.',
@@ -56,7 +56,7 @@ export default {
         readonly:
           'Empêche la sélection. La navigation entre les mois et les années reste disponible.',
         label:
-          'Nom accessible du calendrier. Utilise le dictionnaire par défaut ; l’attribut <code>aria-label</code> fourni est prioritaire.',
+          'Nom accessible du calendrier. Utilise le dictionnaire par défaut ; l’attribut <code>aria-label</code> fourni est prioritaire.',
         vModel:
           'Date ISO ou <code>null</code> pour une sélection unique, <code>{ start, end }</code> pour une période, tableau de dates ISO pour une sélection multiple.',
       },

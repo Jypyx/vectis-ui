@@ -12,7 +12,7 @@ export default {
     },
     icon: {
       title: 'Icône',
-      text: '<code>icon</code> remplace l’icône du ton. <code>hideIcon</code> la retire. L’icône est décorative : le texte doit porter le sens.',
+      text: '<code>icon</code> remplace l’icône du ton. <code>hideIcon</code> la retire. L’icône est décorative : le texte doit porter le sens.',
     },
     actions: {
       title: 'Actions',
@@ -24,7 +24,7 @@ export default {
     },
     live: {
       title: 'Annonce',
-      text: 'Par défaut, l’alerte est lue avec le reste de la page. <code>live</code> l’annonce : <code>role="status"</code>, ou <code>role="alert"</code> pour le ton <code>danger</code>. Utilisez-le pour les alertes qui apparaissent après une action.',
+      text: 'Par défaut, l’alerte est lue avec le reste de la page. <code>live</code> l’annonce : <code>role="status"</code>, ou <code>role="alert"</code> pour le ton <code>danger</code>. Utilisez-le pour les alertes qui apparaissent après une action.',
     },
   },
   api: {

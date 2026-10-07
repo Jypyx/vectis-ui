@@ -12,7 +12,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> définit la taille du chip ; <code>compact</code> réduit sa hauteur.',
+      text: '<code>size</code> définit la taille du chip ; <code>compact</code> réduit sa hauteur.',
     },
     customColors: {
       title: 'Couleurs personnalisées',
@@ -24,7 +24,7 @@ export default {
     },
     clickable: {
       title: 'Cliquable et liens',
-      text: '<code>clickable</code> affiche un bouton ; <code>href</code> affiche un lien. Sans ces props, le chip est un contenu simple.',
+      text: '<code>clickable</code> affiche un bouton ; <code>href</code> affiche un lien. Sans ces props, le chip est un contenu simple.',
     },
     selection: {
       title: 'Sélection',

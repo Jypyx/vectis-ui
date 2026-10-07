@@ -28,7 +28,7 @@ export default {
     },
     customContent: {
       title: 'Du contenu dans la barre',
-      text: '<code>showValue</code> affiche le pourcentage ; <code>valuePosition</code> le positionne. Le slot par défaut reçoit <code>value</code>, <code>max</code> et <code>percent</code>. Il est rendu deux fois : utilisez du contenu non interactif sans effets de bord.',
+      text: '<code>showValue</code> affiche le pourcentage ; <code>valuePosition</code> le positionne. Le slot par défaut reçoit <code>value</code>, <code>max</code> et <code>percent</code>. Il est rendu deux fois : utilisez du contenu non interactif sans effets de bord.',
     },
     orientation: {
       title: 'Orientation',
@@ -39,7 +39,7 @@ export default {
     VProgressLinear: {
       props: {
         label:
-          'Libellé au-dessus de la barre, qui la nomme aussi. Sans lui, le dictionnaire fournit un nom accessible ; les attributs ARIA de nommage fournis sont prioritaires.',
+          'Libellé au-dessus de la barre, qui la nomme aussi. Sans lui, le dictionnaire fournit un nom accessible ; les attributs ARIA de nommage fournis sont prioritaires.',
         hideLabel: 'Masque visuellement le libellé, qui reste le nom de la barre.',
         value: 'Valeur de progression, limitée entre 0 et <code>max</code>.',
         max: 'Valeur représentant la fin de la tâche.',
@@ -56,7 +56,7 @@ export default {
       },
       slots: {
         default:
-          'Contenu remplaçant le pourcentage. Reçoit <code>value</code>, <code>max</code> et <code>percent</code>. Rendu deux fois ; gardez le contenu non interactif et sans effets de bord.',
+          'Contenu remplaçant le pourcentage. Reçoit <code>value</code>, <code>max</code> et <code>percent</code>. Rendu deux fois ; gardez le contenu non interactif et sans effets de bord.',
       },
     },
   },

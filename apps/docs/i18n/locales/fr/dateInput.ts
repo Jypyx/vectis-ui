@@ -8,11 +8,11 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> définit la taille du champ ; <code>compact</code> réduit sa hauteur.',
+      text: '<code>size</code> définit la taille du champ ; <code>compact</code> réduit sa hauteur.',
     },
     modes: {
       title: 'Modes',
-      text: '<code>input</code> accepte une date numérique localisée. <code>showPicker</code> y ajoute un calendrier. <code>picker</code> utilise uniquement le calendrier ; les sélections de période et de dates multiples imposent ce mode.',
+      text: '<code>input</code> accepte une date numérique localisée. <code>showPicker</code> y ajoute un calendrier. <code>picker</code> utilise uniquement le calendrier ; les sélections de période et de dates multiples imposent ce mode.',
     },
     range: {
       title: 'Période',
@@ -52,7 +52,7 @@ export default {
     },
     localization: {
       title: 'Localisation',
-      text: '<code>locale</code> définit les noms et l’ordre des éléments de date. <code>displayFormat</code> personnalise l’affichage en mode calendrier ; il ne modifie pas le masque de saisie.',
+      text: '<code>locale</code> définit les noms et l’ordre des éléments de date. <code>displayFormat</code> personnalise l’affichage en mode calendrier ; il ne modifie pas le masque de saisie.',
     },
     placement: {
       title: 'Placement',
@@ -62,7 +62,7 @@ export default {
   api: {
     VDateInput: {
       props: {
-        selection: 'Mode de sélection : une date, une période ou plusieurs dates.',
+        selection: 'Mode de sélection : une date, une période ou plusieurs dates.',
         locale:
           'Locale BCP 47 pour l’affichage des dates et le début de semaine. Remplace la locale globale.',
         firstDayOfWeek:
@@ -70,7 +70,7 @@ export default {
         min: 'Première date sélectionnable au format <code>YYYY-MM-DD</code>. Limite aussi la navigation.',
         max: 'Dernière date sélectionnable au format <code>YYYY-MM-DD</code>. Limite aussi la navigation.',
         disabledDates:
-          'Dates indisponibles : tableau de chaînes ISO ou prédicat. Les jours restent visibles et accessibles au clavier.',
+          'Dates indisponibles : tableau de chaînes ISO ou prédicat. Les jours restent visibles et accessibles au clavier.',
         showAdjacentDays: 'Affiche les jours des mois voisins.',
         selectAdjacentDays:
           'Permet de sélectionner les jours des mois voisins et ouvre le mois choisi. Implique <code>showAdjacentDays</code>.',
@@ -91,7 +91,7 @@ export default {
         invalid:
           'Définit <code>aria-invalid</code> et le style d’erreur. Ne bloque pas à lui seul l’envoi du formulaire.',
         iconStart:
-          'Icône de début. Un écouteur <code>@click:icon-start</code> en fait un bouton ; fournissez <code>iconStartLabel</code>.',
+          'Icône de début. Un écouteur <code>@click:icon-start</code> en fait un bouton ; fournissez <code>iconStartLabel</code>.',
         iconStartLabel: 'Nom accessible du bouton d’icône de début.',
         pickerLabel:
           'Nom accessible du bouton calendrier. Utilise le dictionnaire de la bibliothèque par défaut.',
@@ -107,10 +107,10 @@ export default {
           'Options d’affichage en mode calendrier. Ne modifie pas le masque de saisie numérique.',
         placement: 'Position souhaitée du panneau par rapport au champ.',
         vModel:
-          'Date ISO ou <code>null</code>, période <code>{ start, end }</code> ou tableau de dates ISO. La saisie ne modifie le modèle que si elle est complète et autorisée ; les autres valeurs sont annulées à la perte du focus.',
+          'Date ISO ou <code>null</code>, période <code>{ start, end }</code> ou tableau de dates ISO. La saisie ne modifie le modèle que si elle est complète et autorisée ; les autres valeurs sont annulées à la perte du focus.',
       },
       events: {
-        clear: 'La sélection a été effacée ; le modèle est déjà réinitialisé.',
+        clear: 'La sélection a été effacée ; le modèle est déjà réinitialisé.',
         clickIconStart: 'Le bouton de l’icône de début a été activé.',
       },
       slots: {

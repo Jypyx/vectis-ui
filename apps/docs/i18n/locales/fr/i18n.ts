@@ -16,7 +16,7 @@ export default {
   addBody:
     'Enregistrez un dictionnaire sous son code de langue, par exemple <code>de</code>. Un dictionnaire partiel conserve les valeurs déjà enregistrées pour les clés omises, puis utilise l’anglais en dernier recours.',
   addTyping:
-    'Utilisez <code>MessagesInput</code> pour vérifier les espaces de noms, les clés et les paramètres des messages. Les dictionnaires ont deux niveaux : espace de noms et clé.',
+    'Utilisez <code>MessagesInput</code> pour vérifier les espaces de noms, les clés et les paramètres des messages. Les dictionnaires ont deux niveaux : espace de noms et clé.',
   precedenceBody:
     '<code>en-GB</code> et <code>en-US</code> partagent le dictionnaire <code>en</code>, mais utilisent des formats régionaux différents. Les props de texte, comme <code>loadingText</code>, remplacent les messages correspondants du dictionnaire.',
 

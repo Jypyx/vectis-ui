@@ -56,23 +56,23 @@ export default {
       props: {
         orientation: 'Disposition en ligne horizontale ou en colonne verticale.',
         detached:
-          'Sépare les boutons par un espace. Chacun garde ses coins et bordures ; les réglages d’apparence du groupe restent appliqués.',
+          'Sépare les boutons par un espace. Chacun garde ses coins et bordures ; les réglages d’apparence du groupe restent appliqués.',
         bordered:
           'Ajoute des séparateurs entre les boutons joints. Sans effet avec <code>detached</code>.',
         fullWidth:
           'Occupe toute la largeur du parent. Les boutons horizontaux ont la même largeur, mais peuvent déborder si leur contenu est trop large.',
         variant:
-          'Style visuel de tous les boutons. Remplace les variantes individuelles ; si omis, chaque bouton conserve la sienne.',
+          'Style visuel de tous les boutons. Remplace les variantes individuelles ; si omis, chaque bouton conserve la sienne.',
         tone: 'Ton appliqué aux boutons sans <code>tone</code> propre.',
-        size: 'Taille de tous les boutons. Remplace les tailles individuelles ; si omise, chaque bouton conserve la sienne.',
+        size: 'Taille de tous les boutons. Remplace les tailles individuelles ; si omise, chaque bouton conserve la sienne.',
         compact:
-          'Réduit la hauteur des boutons. Remplace les valeurs individuelles, même avec <code>false</code> ; si omis, chaque bouton conserve la sienne.',
+          'Réduit la hauteur des boutons. Remplace les valeurs individuelles, même avec <code>false</code> ; si omis, chaque bouton conserve la sienne.',
         elevated:
-          'Ajoute une ombre au groupe, ou à chaque bouton avec <code>detached</code>. Remplace les valeurs individuelles, même avec <code>false</code> ; si omis, chaque bouton conserve la sienne.',
+          'Ajoute une ombre au groupe, ou à chaque bouton avec <code>detached</code>. Remplace les valeurs individuelles, même avec <code>false</code> ; si omis, chaque bouton conserve la sienne.',
         disabled:
           'Désactive tous les boutons. La valeur <code>false</code> ne réactive pas les boutons désactivés individuellement.',
         label:
-          'Nom accessible du groupe, par exemple « Mise en forme ». Les attributs <code>aria-label</code> ou <code>aria-labelledby</code> fournis prennent le pas sur cette prop.',
+          'Nom accessible du groupe, par exemple « Mise en forme ». Les attributs <code>aria-label</code> ou <code>aria-labelledby</code> fournis prennent le pas sur cette prop.',
       },
       slots: {
         default: 'Les composants <code>VButton</code> et <code>VIconButton</code> à regrouper.',

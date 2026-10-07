@@ -36,7 +36,7 @@ export default {
           'Message d’erreur affiché à la place de l’aide. Pose <code>aria-invalid</code>, est lié par <code>aria-describedby</code> et est annoncé quand il apparaît.',
         hint: 'Texte d’aide sous le libellé, lié par <code>aria-describedby</code>.',
         readonly:
-          'Empêche les changements et conserve la possibilité de recevoir le focus. Définit <code>aria-readonly</code> ; l’envoi et la validation natifs du formulaire restent applicables.',
+          'Empêche les changements et conserve la possibilité de recevoir le focus. Définit <code>aria-readonly</code> ; l’envoi et la validation natifs du formulaire restent applicables.',
         indeterminate:
           'Affiche une sélection partielle. Indépendant du <code>v-model</code>, qui reste booléen.',
         labelPosition:

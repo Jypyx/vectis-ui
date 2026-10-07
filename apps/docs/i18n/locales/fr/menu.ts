@@ -20,11 +20,11 @@ export default {
     },
     submenus: {
       title: 'Sous-menus',
-      text: 'Le slot <code>submenu</code> ajoute des commandes imbriquées. Le survol ouvre le sous-menu après un délai ; les flèches gauche et droite permettent d’y entrer et d’en sortir.',
+      text: 'Le slot <code>submenu</code> ajoute des commandes imbriquées. Le survol ouvre le sous-menu après un délai ; les flèches gauche et droite permettent d’y entrer et d’en sortir.',
     },
     sizes: {
       title: 'Tailles',
-      text: 'Définissez <code>size</code> et <code>compact</code> sur le menu ; les sous-menus en héritent.',
+      text: 'Définissez <code>size</code> et <code>compact</code> sur le menu ; les sous-menus en héritent.',
     },
     width: {
       title: 'Largeur',
@@ -42,11 +42,11 @@ export default {
   api: {
     VMenu: {
       props: {
-        placement: 'Position souhaitée du panneau ; ajustée si l’espace manque.',
+        placement: 'Position souhaitée du panneau ; ajustée si l’espace manque.',
         size: 'Taille des lignes héritée par les sous-menus.',
         compact: 'Réduit la hauteur des lignes, sous-menus compris.',
         width:
-          'Largeur du panneau principal. Les nombres utilisent des pixels ; les chaînes, des longueurs ou mots-clés CSS.',
+          'Largeur du panneau principal. Les nombres utilisent des pixels ; les chaînes, des longueurs ou mots-clés CSS.',
         matchTrigger:
           'La largeur minimale du panneau principal correspond au déclencheur. Sans effet sur les sous-menus.',
         vModelOpen:
@@ -65,7 +65,7 @@ export default {
         iconStart: 'Icône avant le libellé. Remplacée par <code>start</code>.',
         iconEnd: 'Icône après le libellé. Remplacée par <code>end</code>.',
         selected: 'Met en évidence et annonce le choix actuel.',
-        tone: 'Neutre ou danger ; utilisez danger pour les commandes destructives.',
+        tone: 'Neutre ou danger ; utilisez danger pour les commandes destructives.',
         disabled: 'Désactive la commande et l’ignore dans la navigation par flèches.',
         href: 'Destination du lien.',
       },

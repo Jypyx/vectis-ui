@@ -1,6 +1,6 @@
 export default {
   title: 'Squelette de chargement',
-  lead: '<code>VSkeletonLoader</code> réserve la place du contenu en cours de chargement. Il est décoratif par défaut ; marquez la zone parente avec <code>aria-busy</code>.',
+  lead: '<code>VSkeletonLoader</code> réserve la place du contenu en cours de chargement. Il est décoratif par défaut ; marquez la zone parente avec <code>aria-busy</code>.',
   examples: {
     shapes: {
       title: 'Formes',
@@ -38,7 +38,7 @@ export default {
   api: {
     VSkeletonLoader: {
       props: {
-        shape: 'Forme de l’espace réservé : texte, contrôle, capsule, cercle ou surface.',
+        shape: 'Forme de l’espace réservé : texte, contrôle, capsule, cercle ou surface.',
         size: 'Taille des formes de contrôle, de capsule et de cercle.',
         compact: 'Réduit la hauteur des formes dimensionnées comme des contrôles.',
         width:
@@ -50,7 +50,7 @@ export default {
         color: 'Couleur de fond personnalisée.',
         announce: 'Annonce le chargement aux technologies d’assistance. Désactivé par défaut.',
         label:
-          'Texte de chargement accessible. Active aussi l’annonce ; utilise le dictionnaire de la bibliothèque par défaut.',
+          'Texte de chargement accessible. Active aussi l’annonce ; utilise le dictionnaire de la bibliothèque par défaut.',
       },
     },
   },

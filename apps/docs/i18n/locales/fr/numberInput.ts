@@ -4,7 +4,7 @@ export default {
   examples: {
     controls: {
       title: 'Boutons',
-      text: '<code>controls</code> place les boutons de pas de part et d’autre, les empile à la fin ou les retire. Ils restent hors de l’ordre de tabulation : les flèches du clavier agissent depuis le champ.',
+      text: '<code>controls</code> place les boutons de pas de part et d’autre, les empile à la fin ou les retire. Ils restent hors de l’ordre de tabulation : les flèches du clavier agissent depuis le champ.',
     },
     formatting: {
       title: 'Formatage',
@@ -22,7 +22,7 @@ export default {
         max: 'Plus grande valeur. Une valeur saisie supérieure y est ramenée à la validation.',
         step: 'Déplacement des flèches et des boutons. Page précédente et Page suivante déplacent de dix pas.',
         formatOptions:
-          'Options d’<code>Intl.NumberFormat</code> pour la valeur affichée : devise, unité, pourcentage ou décimales.',
+          'Options d’<code>Intl.NumberFormat</code> pour la valeur affichée : devise, unité, pourcentage ou décimales.',
         locale:
           'Locale utilisée pour formater et lire le nombre. Par défaut, celle de la bibliothèque.',
         controls: 'Position des boutons de pas.',

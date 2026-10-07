@@ -4,7 +4,7 @@ export default {
   examples: {
     links: {
       title: 'Liens et actions',
-      text: 'Les éléments avec <code>href</code> sont des liens ; les autres sont des boutons. <code>current</code> marque la page actuelle. Les branches ignorent <code>href</code>.',
+      text: 'Les éléments avec <code>href</code> sont des liens ; les autres sont des boutons. <code>current</code> marque la page actuelle. Les branches ignorent <code>href</code>.',
     },
     sublabels: {
       title: 'Sous-libellés',
@@ -36,7 +36,7 @@ export default {
     },
     disabled: {
       title: 'Lignes désactivées',
-      text: 'Les éléments désactivés quittent le parcours clavier ; les branches désactivées ne peuvent pas être ouvertes ou fermées.',
+      text: 'Les éléments désactivés sortent du parcours clavier ; les branches désactivées ne s’ouvrent ni ne se ferment.',
     },
     sizes: {
       title: 'Tailles',

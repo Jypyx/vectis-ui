@@ -12,7 +12,7 @@ export default {
     },
     collapsible: {
       title: 'Panneaux repliables',
-      text: 'Un panneau <code>collapsible</code> se replie quand on le tire au-delà de la moitié de son minimum, ou avec Entrée sur sa poignée, et se rouvre à sa taille précédente. <code>v-model:collapsed</code> suit son état. <code>collapsedSize</code> garde une bande, comme un rail d’icônes ; à 0, le contenu sort de la mise en page et de l’ordre de tabulation.',
+      text: 'Un panneau <code>collapsible</code> se replie quand on le tire au-delà de la moitié de son minimum, ou avec Entrée sur sa poignée, et se rouvre à sa taille précédente. <code>v-model:collapsed</code> suit son état. <code>collapsedSize</code> garde une bande, comme un rail d’icônes ; à 0, le contenu sort de la mise en page et de l’ordre de tabulation.',
     },
     nested: {
       title: 'Groupes imbriqués',
@@ -20,7 +20,7 @@ export default {
     },
     persisted: {
       title: 'Enregistrer les tailles',
-      text: 'Le v-model contient les tailles en pourcentage et change pendant le glisser. <code>change</code> est émis quand elles se stabilisent : c’est le moment de les enregistrer. Pour une page rendue sur le serveur, un cookie permet au serveur d’afficher directement les tailles enregistrées.',
+      text: 'Le v-model contient les tailles en pourcentage et change pendant le glisser. <code>change</code> est émis quand elles se stabilisent : c’est le moment de les enregistrer. Pour une page rendue sur le serveur, un cookie permet au serveur d’afficher directement les tailles enregistrées.',
     },
   },
   api: {
@@ -35,7 +35,7 @@ export default {
           'Taille de chaque panneau en pourcentage de l’espace partagé, pour un total de 100. Sans liaison, les panneaux partent de leur <code>defaultSize</code>.',
       },
       events: {
-        change: 'Émet les tailles une fois stabilisées : après un glisser, une touche ou un repli.',
+        change: 'Émet les tailles une fois stabilisées : après un glisser, une touche ou un repli.',
       },
       slots: {
         default: 'Les <code>VResizablePanel</code>, au moins deux.',
@@ -46,8 +46,8 @@ export default {
         index: 'Position du panneau, attribuée par le groupe. Ne pas la définir.',
         defaultSize:
           'Taille de départ en pourcentage quand le v-model n’en donne pas. Les panneaux sans taille se partagent le reste.',
-        minSize: 'Taille minimale : un nombre en pourcentage ou une longueur CSS.',
-        maxSize: 'Taille maximale : un nombre en pourcentage ou une longueur CSS.',
+        minSize: 'Taille minimale : un nombre en pourcentage ou une longueur CSS.',
+        maxSize: 'Taille maximale : un nombre en pourcentage ou une longueur CSS.',
         collapsible:
           'Permet de replier le panneau en le faisant glisser ou avec Entrée sur sa poignée.',
         collapsedSize:

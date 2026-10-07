@@ -16,7 +16,7 @@ export default {
     },
     segments: {
       title: 'Segments',
-      text: '<code>segments</code> découpe la barre en parts égales. La couleur seule ne distingue pas la zone : dites-la dans <code>valueText</code> quand elle compte.',
+      text: '<code>segments</code> découpe la barre en parts égales. La couleur seule ne distingue pas la zone : dites-la dans <code>valueText</code> quand elle compte.',
     },
     sizes: {
       title: 'Tailles',
@@ -38,7 +38,7 @@ export default {
         optimum:
           'Meilleure valeur. Sa partie de la plage est bonne, la voisine moyenne et l’opposée mauvaise.',
         label:
-          'Ce qui est mesuré, affiché au-dessus de la barre et la nommant. Utilise le dictionnaire par défaut ; les attributs ARIA de nommage fournis sont prioritaires.',
+          'Ce qui est mesuré, affiché au-dessus de la barre et la nommant. Utilise le dictionnaire par défaut ; les attributs ARIA de nommage fournis sont prioritaires.',
         hideLabel: 'Masque le libellé à l’écran. Les lecteurs d’écran le lisent toujours.',
         valueText: 'Texte remplaçant la valeur formatée, à l’écran et pour les lecteurs d’écran.',
         formatOptions: 'Options de <code>Intl.NumberFormat</code> formatant la valeur elle-même.',

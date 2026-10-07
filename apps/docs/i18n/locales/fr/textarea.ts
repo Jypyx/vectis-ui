@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> ajuste les espacements internes, le texte et les icônes. <code>rows</code> définit le nombre de lignes ; <code>compact</code> réduit les espacements verticaux.',
+      text: '<code>size</code> ajuste les espacements internes, le texte et les icônes. <code>rows</code> définit le nombre de lignes ; <code>compact</code> réduit les espacements verticaux.',
     },
     icons: {
       title: 'Icônes',
@@ -38,7 +38,7 @@ export default {
   api: {
     VTextarea: {
       props: {
-        size: 'Ajuste les espacements internes, le texte et les icônes. Utilisez <code>rows</code> pour définir le nombre de lignes.',
+        size: 'Ajuste les marges internes, le texte et les icônes. <code>rows</code> fixe le nombre de lignes.',
         compact:
           'Réduit les espacements verticaux sans modifier le nombre de lignes, le texte ni les icônes.',
         rows: 'Nombre de lignes visibles, arrondi à un entier d’au moins 1. Avec <code>autoGrow</code>, définit la hauteur minimale.',
@@ -56,9 +56,9 @@ export default {
           'Message d’erreur affiché à la place de l’aide. Pose <code>aria-invalid</code>, est lié par <code>aria-describedby</code> et est annoncé quand il apparaît.',
         hint: 'Texte d’aide sous le champ, lié par <code>aria-describedby</code>.',
         iconStart:
-          'Icône de début. Devient un bouton avec <code>@click:icon-start</code> ; nécessite alors <code>iconStartLabel</code>.',
+          'Icône de début. Devient un bouton avec <code>@click:icon-start</code> ; nécessite alors <code>iconStartLabel</code>.',
         iconEnd:
-          'Icône de fin. Devient un bouton avec <code>@click:icon-end</code> ; nécessite alors <code>iconEndLabel</code>. Remplacée par <code>#end</code> ou l’indicateur de chargement.',
+          'Icône de fin. Devient un bouton avec <code>@click:icon-end</code> ; nécessite alors <code>iconEndLabel</code>. Remplacée par <code>#end</code> ou l’indicateur de chargement.',
         iconStartLabel: 'Nom accessible du bouton d’icône de début.',
         iconEndLabel: 'Nom accessible du bouton d’icône de fin.',
         loading:
@@ -76,7 +76,7 @@ export default {
         softLimit:
           'Autorise le dépassement de <code>maxlength</code> et signale une erreur de validation native tant que la valeur dépasse la limite.',
         counter:
-          'Nombre de caractères sous le champ : <code>12/80</code> avec une limite, ou <code>12</code> sans limite.',
+          'Nombre de caractères sous le champ : <code>12/80</code> avec une limite, ou <code>12</code> sans limite.',
         vModel: 'Texte du champ. Vaut une chaîne vide par défaut.',
       },
       events: {

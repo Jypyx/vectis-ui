@@ -20,23 +20,23 @@ export default {
     },
     selection: {
       title: 'Sélection',
-      text: '<code>selectable</code> ajoute des cases par ligne et une case pour la page. Fournissez un <code>rowKey</code> stable ; <code>v-model:selected</code> contient ces identifiants.',
+      text: '<code>selectable</code> ajoute des cases par ligne et une case pour la page. Fournissez un <code>rowKey</code> stable ; <code>v-model:selected</code> contient ces identifiants.',
     },
     toolbar: {
       title: "En-tête et barre d'outils",
-      text: '<code>subtitle</code> décrit le tableau sous son titre. Le slot <code>toolbar</code> ajoute une rangée d’actions et de filtres entre l’en-tête et le tableau. Le slot <code>header</code> remplace le titre et le sous-titre ; nommez alors le tableau avec <code>aria-label</code>.',
+      text: '<code>subtitle</code> décrit le tableau sous son titre. Le slot <code>toolbar</code> ajoute une rangée d’actions et de filtres entre l’en-tête et le tableau. Le slot <code>header</code> remplace le titre et le sous-titre ; nommez alors le tableau avec <code>aria-label</code>.',
     },
     customCells: {
       title: 'Cellules personnalisées',
-      text: 'Un slot correspondant à une clé de colonne remplace ses cellules. Il reçoit la ligne, la valeur brute et la colonne ; le tri et la recherche utilisent toujours la valeur brute.',
+      text: 'Un slot correspondant à une clé de colonne remplace ses cellules. Il reçoit la ligne, la valeur brute et la colonne ; le tri et la recherche utilisent toujours la valeur brute.',
     },
     customHeadings: {
       title: 'En-têtes personnalisés',
-      text: 'Utilisez <code>head-</code> suivi d’une clé de colonne pour personnaliser son en-tête. Les en-têtes triables contiennent un bouton : gardez le slot non interactif.',
+      text: 'Utilisez <code>head-</code> suivi d’une clé de colonne pour personnaliser son en-tête. Les en-têtes triables contiennent un bouton : gardez le slot non interactif.',
     },
     variants: {
       title: 'Variantes',
-      text: '<code>flat</code> laisse le tableau sans cadre. <code>outline</code> ajoute une bordure, <code>elevated</code> une surface surélevée avec une ombre et <code>filled</code> une surface atténuée. Le cadre entoure les lignes et le pied ; l’en-tête reste à l’extérieur.',
+      text: '<code>flat</code> laisse le tableau sans cadre. <code>outline</code> ajoute une bordure, <code>elevated</code> une surface surélevée avec une ombre et <code>filled</code> une surface atténuée. Le cadre entoure les lignes et le pied ; l’en-tête reste à l’extérieur.',
     },
     compact: {
       title: 'Compact',
@@ -52,7 +52,7 @@ export default {
     },
     fullHeight: {
       title: 'Pleine hauteur',
-      text: '<code>height</code> limite tout le composant, en-tête, barre d’outils et pied compris. Les nombres utilisent des pixels ; les chaînes, des longueurs CSS.',
+      text: '<code>height</code> limite tout le composant, en-tête, barre d’outils et pied compris. Les nombres utilisent des pixels ; les chaînes, des longueurs CSS.',
     },
     serverSide: {
       title: 'Côté serveur',
@@ -64,7 +64,7 @@ export default {
     },
     infiniteScroll: {
       title: 'Défilement infini',
-      text: '<code>hasMore</code> émet <code>load-more</code> quand la fin des lignes approche. Ajoutez les lignes suivantes à <code>rows</code> ; pendant <code>loading</code>, les lignes déjà là restent affichées.',
+      text: '<code>hasMore</code> émet <code>load-more</code> quand la fin des lignes approche. Ajoutez les lignes suivantes à <code>rows</code> ; pendant <code>loading</code>, les lignes déjà là restent affichées.',
     },
     states: {
       title: 'Chargement et vide',
@@ -81,7 +81,7 @@ export default {
         columns: 'Colonnes dans l’ordre d’affichage.',
         rows: 'Lignes à afficher.',
         rowKey:
-          'Champ d’identifiant stable des lignes. Requis pour la sélection ; sinon, la position est utilisée.',
+          'Champ d’identifiant stable des lignes. Requis pour la sélection ; sinon, la position est utilisée.',
         variant: 'Lignes sans cadre, ou encadrées par une bordure, une ombre ou un fond atténué.',
         loading: 'Affiche le contenu de chargement à la place des lignes.',
         loadingText: 'Texte de chargement visible. Utilise le dictionnaire par défaut.',
@@ -101,7 +101,7 @@ export default {
           'Conserve les en-têtes visibles au défilement. Nécessite une hauteur limitée.',
         compact: 'Réduit les espacements des cellules et la hauteur des contrôles.',
         height:
-          'Hauteur totale. Les nombres utilisent des pixels ; les chaînes, des longueurs CSS. Sinon, hérite de la hauteur limitée du parent.',
+          'Hauteur totale. Les nombres utilisent des pixels ; les chaînes, des longueurs CSS. Sinon, hérite de la hauteur limitée du parent.',
         sortIcon: 'Icône d’une colonne triable non triée.',
         sortAscIcon: 'Icône de tri croissant.',
         sortDescIcon: 'Icône de tri décroissant.',
@@ -115,13 +115,13 @@ export default {
         selectAllLabel:
           'Nom accessible de la sélection de page. Utilise le dictionnaire par défaut.',
         selectionText:
-          'Fonction formatant le nombre sélectionné. Utilise le dictionnaire par défaut ; vide sans sélection.',
+          'Fonction formatant le nombre sélectionné. Utilise le dictionnaire par défaut ; vide sans sélection.',
         selectRowLabel:
           'Fonction nommant chaque case à partir de sa ligne et de son index global commençant à 0. Numéro de ligne par défaut.',
         serverSide:
           'Délègue la recherche, le tri et la pagination au serveur via <code>update:params</code>.',
         virtual:
-          'Ne rend que les lignes proches de la partie visible de la table. Demande une hauteur bornée ; les lignes portent alors <code>aria-rowindex</code>.',
+          'Ne rend que les lignes proches de la partie visible de la table. Demande une hauteur bornée ; les lignes portent alors <code>aria-rowindex</code>.',
         hasMore:
           'Émet <code>load-more</code> quand la fin des lignes approche. Les lignes restent affichées pendant le chargement.',
         vModelSort: 'Clé et sens du tri, ou <code>null</code>. Changer le tri conserve la page.',
@@ -131,17 +131,17 @@ export default {
         vModelSelected:
           'Identifiants <code>rowKey</code> sélectionnés, conservés entre les pages. La case d’en-tête couvre les lignes de la page affichée, rendues ou non.',
         vModelSearch:
-          'Requête de recherche. La recherche locale ignore la casse et les accents ; le mode serveur la transmet sans filtrer.',
+          'Requête de recherche. La recherche locale ignore la casse et les accents ; le mode serveur la transmet sans filtrer.',
       },
       events: {
         loadMore:
-          'La fin des lignes approche alors que <code>hasMore</code> est actif : ajoutez les lignes suivantes.',
+          'La fin des lignes approche alors que <code>hasMore</code> est actif : ajoutez les lignes suivantes.',
         updateParams:
-          'Changements de requête en mode serveur : recherche, tri, page et taille de page. Non émis au montage ni pour une valeur inchangée.',
+          'Changements de requête en mode serveur : recherche, tri, page et taille de page. Non émis au montage ni pour une valeur inchangée.',
       },
       slots: {
         header:
-          'Contenu remplaçant le titre et le sous-titre. La recherche reste à côté ; nommez le tableau avec <code>aria-label</code>.',
+          'Contenu remplaçant le titre et le sous-titre. La recherche reste à côté ; nommez le tableau avec <code>aria-label</code>.',
         toolbar: 'Rangée entre l’en-tête et le tableau, pour les actions et les filtres.',
         loading: 'Contenu remplaçant l’indicateur et le texte de chargement.',
         empty:

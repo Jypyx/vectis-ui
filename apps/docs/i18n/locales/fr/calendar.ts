@@ -1,6 +1,6 @@
 export default {
   title: 'Calendrier',
-  lead: '<code>VCalendar</code> affiche des événements par jour, semaine, mois ou année. Déplacez et redimensionnez les événements à la souris ou au clavier ; fournissez vos propres formulaires de création et de modification.',
+  lead: '<code>VCalendar</code> affiche des événements par jour, semaine, mois ou année. Déplacez et redimensionnez les événements à la souris ou au clavier ; fournissez vos propres formulaires de création et de modification.',
   examples: {
     variants: {
       title: 'Variantes',
@@ -24,7 +24,7 @@ export default {
     },
     allDay: {
       title: 'Événements sur la journée',
-      text: 'Les événements marqués <code>allDay</code> ou durant au moins 24 heures apparaissent dans la bande dédiée. Un événement plus court passant minuit apparaît sur les deux jours ; une fin à minuit appartient au jour précédent.',
+      text: 'Les événements marqués <code>allDay</code> ou durant au moins 24 heures apparaissent dans la bande dédiée. Un événement plus court passant minuit apparaît sur les deux jours ; une fin à minuit appartient au jour précédent.',
     },
     overlapping: {
       title: 'Événements qui se chevauchent',
@@ -40,19 +40,19 @@ export default {
     },
     editing: {
       title: 'Créer et éditer des événements',
-      text: 'Ouvrez votre éditeur avec <code>event-activate</code> et <code>cell-activate</code>. Avec <code>creatable</code>, tracer une plage horaire vide émet <code>event-create</code> sans ajouter d’événement. Enregistrez les modifications dans <code>v-model:events</code> ; le déplacement et le redimensionnement mettent directement ce modèle à jour.',
+      text: 'Ouvrez votre éditeur avec <code>event-activate</code> et <code>cell-activate</code>. Avec <code>creatable</code>, tracer une plage horaire vide émet <code>event-create</code> sans ajouter d’événement. Enregistrez les modifications dans <code>v-model:events</code> ; le déplacement et le redimensionnement mettent directement ce modèle à jour.',
     },
   },
   api: {
     VCalendar: {
       props: {
-        variant: 'Cadre de la vue : une bordure, une ombre, un fond atténué ou aucun.',
+        variant: 'Cadre de la vue : une bordure, une ombre, un fond atténué ou aucun.',
         views: 'Vues proposées dans le menu, dans l’ordre d’affichage.',
         customDays: 'Nombre de jours de la vue personnalisée et pas de navigation.',
         weekdays:
           'Jours visibles dans l’ordre, avec 0 pour dimanche. La première entrée remplace <code>firstDayOfWeek</code>.',
         firstDayOfWeek:
-          'Premier jour quand <code>weekdays</code> est absent. Dépend de la locale par défaut ; 0 désigne dimanche.',
+          'Premier jour quand <code>weekdays</code> est absent. Dépend de la locale par défaut ; 0 désigne dimanche.',
         locale: 'Locale des dates et heures. Utilise la locale globale par défaut.',
         format: 'Affichage sur 12 ou 24 heures. Dépend de la locale par défaut.',
         dayStart: 'Première heure visible, à partir de 0.',
@@ -62,7 +62,7 @@ export default {
         hideCurrentTime: 'Masque l’indicateur de l’heure actuelle.',
         monthEventLimit: 'Nombre maximal de cartes par jour dans la vue mensuelle.',
         readonly:
-          'Empêche le déplacement et le redimensionnement. La navigation et l’activation restent disponibles ; <code>creatable</code> contrôle la création.',
+          'Empêche le déplacement et le redimensionnement. La navigation et l’activation restent disponibles ; <code>creatable</code> contrôle la création.',
         disabled: 'Désactive la navigation, la création, la modification et l’activation.',
         creatable:
           'Permet de tracer une plage vide pour émettre <code>event-create</code>. N’ajoute aucun événement.',
@@ -79,13 +79,13 @@ export default {
       events: {
         eventActivate: 'Un événement a été activé. Reçoit l’événement.',
         cellActivate:
-          'Une cellule vide a été activée. Reçoit sa date et son heure ; la vue mensuelle utilise <code>dayStart</code>.',
+          'Une cellule vide a été activée. Reçoit sa date et son heure ; la vue mensuelle utilise <code>dayStart</code>.',
         eventMove:
           'Un événement a été déplacé. Reçoit l’événement modifié et ses anciennes dates de début et de fin.',
         eventResize:
           'Un événement a été redimensionné. Reçoit l’événement modifié et ses anciennes dates de début et de fin.',
         eventCreate:
-          'Une plage vide a été tracée. Reçoit son début et sa fin ; ajoutez vous-même l’événement.',
+          'Une plage vide a été tracée. Reçoit son début et sa fin ; ajoutez vous-même l’événement.',
       },
       slots: {
         actions: 'Contrôles de la barre d’outils entre la période et le menu des vues.',

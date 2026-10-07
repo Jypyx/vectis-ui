@@ -7,7 +7,7 @@ export default {
     'Masque visuellement le texte tout en le laissant accessible aux technologies d’assistance. La classe est incluse dans <code>vectis-ui/styles.css</code>.',
 
   layersHeading: 'Couches CSS',
-  layersIntro: 'La bibliothèque déclare ses couches dans cet ordre :',
+  layersIntro: 'La bibliothèque déclare ses couches dans cet ordre :',
   layersBody:
     'Écrivez les surcharges hors couche pour qu’elles priment sur les déclarations normales de la bibliothèque. Si votre application utilise des couches, déclarez sa couche de surcharge après celles de la bibliothèque.',
 

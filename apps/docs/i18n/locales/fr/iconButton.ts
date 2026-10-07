@@ -35,7 +35,7 @@ export default {
     VIconButton: {
       props: {
         label:
-          'Nom accessible, appliqué comme <code>aria-label</code>. Nommez l’action, par exemple « Fermer » ou « Mois suivant ».',
+          'Nom accessible, appliqué comme <code>aria-label</code>. Nommez l’action, par exemple « Fermer » ou « Mois suivant ».',
         variant:
           'Style visuel. Accepte les mêmes valeurs que <code>VButton</code>. Remplacé lorsque <code>VButtonGroup</code> définit une variante.',
         tone: 'Intention de l’action. Si omis, reprend le ton du groupe, ou <code>neutral</code> si le groupe n’en définit pas.',

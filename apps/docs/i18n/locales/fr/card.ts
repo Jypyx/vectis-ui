@@ -1,6 +1,6 @@
 export default {
   title: 'Carte',
-  lead: '<code>VCard</code> regroupe le contenu d’un même sujet : média, titre, corps et actions. Avec <code>href</code>, toute la carte devient un lien.',
+  lead: '<code>VCard</code> regroupe le contenu d’un même sujet : média, titre, corps et actions. Avec <code>href</code>, toute la carte devient un lien.',
   examples: {
     variants: {
       title: 'Variantes',

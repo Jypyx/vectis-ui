@@ -9,7 +9,7 @@ export default {
     '<code>--vectis-font-family-mono</code> : polices système à chasse fixe pour le code.',
   ],
   roles:
-    'Les composants utilisent trois tokens sémantiques : <code>--vectis-text-family</code>, <code>--vectis-text-family-heading</code> et <code>--vectis-text-family-code</code>. Redéfinissez-les sur un conteneur pour changer les polices d’une section ; les alias de primitives déclarés à la racine ne sont pas recalculés dans ce conteneur.',
+    'Les composants utilisent trois tokens sémantiques : <code>--vectis-text-family</code>, <code>--vectis-text-family-heading</code> et <code>--vectis-text-family-code</code>. Redéfinissez-les sur un conteneur pour changer les polices d’une section ; les alias de primitives déclarés à la racine ne sont pas recalculés dans ce conteneur.',
 
   wiringHeading: 'Charger une police web',
   wiringBody:

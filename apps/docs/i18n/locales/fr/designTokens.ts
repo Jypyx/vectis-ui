@@ -4,16 +4,16 @@ import type { DescribedToken, TextRole } from '~/content/designTokens'
 const descriptions: Record<DescribedToken, string> = {
   '--vectis-color-surface': 'Le fond de page par défaut',
   '--vectis-color-surface-muted': 'Un fond atténué, pour les zones secondaires',
-  '--vectis-color-surface-raised': 'Les surfaces surélevées : cartes',
-  '--vectis-color-surface-overlay': 'Les surfaces flottantes : dialogues, popovers, menus',
-  '--vectis-color-surface-sunken': 'Les surfaces en creux : encarts, zones de code',
-  '--vectis-color-surface-inverse': 'Les surfaces à contraste inversé : infobulles',
+  '--vectis-color-surface-raised': 'Les surfaces surélevées : cartes',
+  '--vectis-color-surface-overlay': 'Les surfaces flottantes : dialogues, popovers, menus',
+  '--vectis-color-surface-sunken': 'Les surfaces en creux : encarts, zones de code',
+  '--vectis-color-surface-inverse': 'Les surfaces à contraste inversé : infobulles',
   '--vectis-color-surface-skeleton':
     'Le fond des silhouettes de VSkeletonLoader, dont son reflet est dérivé',
   '--vectis-color-text-on-inverse': 'Le texte posé sur une surface inversée',
   '--vectis-color-text': "Le texte courant de l'interface",
   '--vectis-color-text-muted':
-    'Le texte secondaire : aides, légendes, descriptions, icônes de début',
+    'Le texte secondaire : aides, légendes, descriptions, icônes de début',
   '--vectis-color-text-subtle': 'Placeholders, texte désactivé',
   '--vectis-color-text-on-accent': "Le texte posé sur un fond d'accent, de danger ou de succès",
   '--vectis-color-text-on-warning':
@@ -21,7 +21,7 @@ const descriptions: Record<DescribedToken, string> = {
   '--vectis-color-border': 'Les séparateurs, et le cadre des cartes, des tableaux et des panneaux',
   '--vectis-color-border-strong': 'La bordure des contrôles de formulaire',
   '--vectis-color-border-on-fill':
-    'Un voile bordant ou séparant un fond plein : jointures de VButtonGroup, pastilles de VColorPicker',
+    'Un voile bordant ou séparant un fond plein : jointures de VButtonGroup, pastilles de VColorPicker',
   '--vectis-color-accent':
     "La couleur de marque : boutons pleins, contrôles cochés, l'élément sélectionné",
   '--vectis-color-accent-hover': "La couleur d'accent au survol",
@@ -30,7 +30,7 @@ const descriptions: Record<DescribedToken, string> = {
   '--vectis-color-accent-border':
     "La bordure d'un élément teinté d'accent, assortie à la surface d'accent",
   '--vectis-color-accent-text': "Le texte d'accent sur un fond neutre ou teinté",
-  '--vectis-color-danger': 'Actions destructrices et erreurs : boutons pleins, états en erreur',
+  '--vectis-color-danger': 'Actions destructrices et erreurs : boutons pleins, états en erreur',
   '--vectis-color-danger-hover': 'La couleur de danger au survol',
   '--vectis-color-danger-active': "La couleur de danger à l'appui",
   '--vectis-color-danger-surface':
@@ -39,7 +39,7 @@ const descriptions: Record<DescribedToken, string> = {
     "La bordure d'un élément teinté de danger, assortie à la surface de danger",
   '--vectis-color-danger-text':
     "Le texte de danger sur un fond neutre ou teinté : messages d'erreur, élément de menu destructeur",
-  '--vectis-color-success': 'Une issue positive : chips pleins, badges, notifications',
+  '--vectis-color-success': 'Une issue positive : chips pleins, badges, notifications',
   '--vectis-color-success-hover': 'La couleur de succès au survol',
   '--vectis-color-success-active': "La couleur de succès à l'appui",
   '--vectis-color-success-surface': 'Un fond teinté de succès (chips soft, badges, notifications)',
@@ -68,7 +68,7 @@ const descriptions: Record<DescribedToken, string> = {
   '--vectis-radius-interactive': 'Boutons, champs, contrôles',
   '--vectis-radius-surface': 'Cartes, alertes',
   '--vectis-radius-overlay': 'Dialogues, popovers, menus',
-  '--vectis-radius-pill': 'Arrondi complet : interrupteurs, badges, chips en pilule',
+  '--vectis-radius-pill': 'Arrondi complet : interrupteurs, badges, chips en pilule',
   '--vectis-radius-chip': 'Les chips en shape="chip", qui suivent le rayon interactive par défaut',
   '--vectis-duration-fast': "Changements de couleur et de bordure au survol, au focus, à l'appui",
   '--vectis-duration-base': "La durée par défaut : un panneau qui s'ouvre, une valeur qui bouge",
@@ -207,7 +207,7 @@ const descriptions: Record<DescribedToken, string> = {
     'Le côté du damier visible à travers une couleur translucide (8px)',
   '--vectis-control-size-date-picker-cell': "Le côté d'une case de jour de VDatePicker",
   '--vectis-control-size-date-picker-day':
-    'Le diamètre du disque sur lequel un jour de VDatePicker est dessiné ; la case grandit pour le contenir',
+    'Le diamètre du disque sur lequel un jour de VDatePicker est dessiné ; la case grandit pour le contenir',
   '--vectis-control-size-date-picker-dot': "Le diamètre d'un point d'événement de VDatePicker",
   '--vectis-control-size-date-picker-nav-min':
     "La largeur minimale des boutons de choix du mois et de l'année de VDatePicker (environ 86px)",
@@ -222,7 +222,7 @@ const descriptions: Record<DescribedToken, string> = {
   '--vectis-control-size-time-picker-hand-minor':
     "Le disque de l'aiguille de VTimePicker sur une minute hors des repères de 5 minutes",
   '--vectis-control-size-file-picker-min-block':
-    'La hauteur minimale de la zone de dépôt de VFilePicker : icône, deux lignes, séparateur et bouton',
+    'La hauteur minimale de la zone de dépôt de VFilePicker : icône, deux lignes, séparateur et bouton',
   '--vectis-control-size-file-picker-icon':
     'La grande icône en haut de la zone de dépôt de VFilePicker',
   '--vectis-control-size-file-picker-thumb':
@@ -240,9 +240,9 @@ const descriptions: Record<DescribedToken, string> = {
   '--vectis-control-size-calendar-handle':
     "La bande le long du bord inférieur d'une carte de VCalendar, par laquelle on étire sa fin",
   '--vectis-control-size-calendar-allday-lane':
-    'Une ligne du bandeau « toute la journée » de VCalendar',
+    'Une ligne du bandeau « toute la journée » de VCalendar',
   '--vectis-control-size-calendar-allday-max':
-    'La hauteur au-delà de laquelle le bandeau « toute la journée » de VCalendar défile au lieu de grandir',
+    'La hauteur au-delà de laquelle le bandeau « toute la journée » de VCalendar défile au lieu de grandir',
   '--vectis-control-size-calendar-now-dot':
     "Le point sur la ligne de l'heure actuelle de VCalendar",
   '--vectis-control-size-calendar-event-edge':
@@ -268,7 +268,7 @@ export default {
   title: 'Design tokens',
   lead: 'Les variables CSS sémantiques pour personnaliser Vectis UI, avec leur usage et leurs valeurs par défaut.',
   readingBody:
-    'Pour les références à un token, les tableaux affichent la valeur résolue et l’expression CSS, par exemple <code>var(--vectis-color-gray-900)</code>. Redéfinissez un token sémantique pour modifier son rôle ; changer une primitive affecte tous les rôles qui la référencent.',
+    'Pour les références à un token, les tableaux affichent la valeur résolue et l’expression CSS, par exemple <code>var(--vectis-color-gray-900)</code>. Redéfinissez un token sémantique pour modifier son rôle ; changer une primitive affecte tous les rôles qui la référencent.',
   readingOverrideBefore:
     'Les primitives apparaissent dans les références, sans tableau distinct. Pour des exemples de surcharge, consultez la page',
   readingOverrideAfter: '.',

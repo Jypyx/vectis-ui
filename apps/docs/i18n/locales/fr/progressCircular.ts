@@ -35,7 +35,7 @@ export default {
     VProgressCircular: {
       props: {
         label:
-          'Nom accessible de la tâche. Utilise le dictionnaire par défaut ; les attributs ARIA de nommage fournis sont prioritaires.',
+          'Nom accessible de la tâche. Utilise le dictionnaire par défaut ; les attributs ARIA de nommage fournis sont prioritaires.',
         value: 'Valeur de progression, limitée entre 0 et <code>max</code>.',
         max: 'Valeur représentant la fin de la tâche.',
         indeterminate: 'Anime sans valeur mesurable. Ignore <code>value</code>.',

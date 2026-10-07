@@ -12,7 +12,7 @@ export default {
     },
     effects: {
       title: 'Effets',
-      text: 'Choisissez un glissement, un fondu ou une mise à l’échelle. Le fondu exige une diapositive par vue sans aperçu ; sinon, le glissement est utilisé.',
+      text: 'Choisissez un glissement, un fondu ou une mise à l’échelle. Le fondu exige une diapositive par vue sans aperçu ; sinon, le glissement est utilisé.',
     },
     orientation: {
       title: 'Orientation',
@@ -36,7 +36,7 @@ export default {
     },
     autoplay: {
       title: 'Défilement automatique',
-      text: '<code>autoplay</code> définit un intervalle en millisecondes. Le survol et le focus le suspendent ; la réduction des mouvements le désactive. Ajoutez un bouton de pause qui règle l’intervalle sur 0.',
+      text: '<code>autoplay</code> définit un intervalle en millisecondes. Le survol et le focus le suspendent ; la réduction des mouvements le désactive. Ajoutez un bouton de pause qui règle l’intervalle sur 0.',
     },
   },
   api: {
@@ -45,7 +45,7 @@ export default {
         itemsPerView:
           'Nombre maximal de diapositives par vue. La largeur du conteneur et <code>itemMinSize</code> déterminent combien tiennent.',
         itemMinSize:
-          'Taille minimale d’une diapositive. Les nombres utilisent des pixels ; les chaînes, des longueurs CSS.',
+          'Taille minimale d’une diapositive. Les nombres utilisent des pixels ; les chaînes, des longueurs CSS.',
         peek: 'Partie visible de la diapositive suivante, espacement compris. Incompatible avec le fondu.',
         gap: 'Espacement entre les diapositives.',
         orientation: 'Défilement horizontal ou vertical.',
@@ -54,12 +54,12 @@ export default {
         height: 'Hauteur de la zone visible. Requise pour le défilement vertical.',
         loop: 'Boucle entre les positions initiale et finale. Les contrôles restent désactivés s’il n’y a qu’une position.',
         noJump:
-          'Fait défiler les diapositives intermédiaires lors des déplacements de plusieurs pages. La réduction des mouvements conserve un déplacement instantané.',
+          'Fait défiler les diapositives intermédiaires lors d’un saut de plusieurs pages. Avec la réduction des mouvements, le saut reste instantané.',
         autoplay:
-          'Intervalle de défilement en millisecondes ; 0 le désactive. Se suspend au survol/focus et respecte la réduction des mouvements. Fournissez un contrôle de pause, surtout en boucle.',
+          'Intervalle de défilement en millisecondes ; 0 le désactive. Se suspend au survol/focus et respecte la réduction des mouvements. Fournissez un contrôle de pause, surtout en boucle.',
         controls:
-          'Position des contrôles précédent/suivant : à l’intérieur, à l’extérieur ou masqués.',
-        indicators: 'Position des indicateurs : à l’intérieur, à l’extérieur ou masqués.',
+          'Position des contrôles précédent/suivant : à l’intérieur, à l’extérieur ou masqués.',
+        indicators: 'Position des indicateurs : à l’intérieur, à l’extérieur ou masqués.',
         controlsVisibility:
           'Toujours visibles ou visibles au survol/focus. Ils restent visibles au toucher.',
         prevIcon: 'Icône du contrôle précédent. Flèche adaptée à l’orientation par défaut.',

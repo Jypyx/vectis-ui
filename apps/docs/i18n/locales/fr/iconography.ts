@@ -2,7 +2,7 @@ export default {
   title: 'Iconographie',
   lead: 'Vectis UI inclut des icônes SVG issues de Material Symbols Rounded de Google (graisse 400, GRAD 0, taille optique 24, licence Apache 2.0). Vous pouvez aussi utiliser vos propres SVG, images, composants Vue ou polices d’icônes.',
   weight:
-    'Les icônes intégrées sont des modules distincts. Le bundle inclut les icônes importées par votre application et ses composants ; importer <code>VButton</code> seul n’inclut pas tout le jeu d’icônes.',
+    'Les icônes intégrées sont des modules distincts. Le bundle inclut les icônes importées par votre application et ses composants ; importer <code>VButton</code> seul n’inclut pas tout le jeu d’icônes.',
   gridCaption:
     'Les icônes check_circle et notifications sont présentées en versions contour et pleine.',
 
@@ -26,13 +26,13 @@ export default {
   classBody:
     'Chargez le CSS de votre bibliothèque d’icônes, puis utilisez <code>classIconResolver</code>. Sa fonction <code>className</code> reçoit le nom après résolution de l’alias et l’état <code>filled</code>, puis renvoie les classes à appliquer.',
   classPartial:
-    '<code>strict</code> vaut <code>true</code> par défaut : les noms intégrés sans alias renvoient <code>undefined</code>, ce qui préserve leur SVG de secours s’il est disponible. Les autres noms sont transmis à <code>className</code>, même sans alias.',
+    '<code>strict</code> vaut <code>true</code> par défaut : les noms intégrés sans alias renvoient <code>undefined</code>, ce qui préserve leur SVG de secours s’il est disponible. Les autres noms sont transmis à <code>className</code>, même sans alias.',
 
   ligatureHeading: 'Polices à ligatures',
   ligatureBody:
     'Chargez une police à ligatures et définissez <code>--vectis-font-family-icon</code>. <code>ligatureIconResolver</code> affiche chaque nom comme texte pour cette police, avec des alias facultatifs.',
   ligaturePartial:
-    'Ce résolveur traite tous les noms et remplace les tracés SVG intégrés. Les noms sans alias sont transmis tels quels : la police doit donc les prendre en charge.',
+    'Ce résolveur traite tous les noms et remplace les tracés SVG intégrés. Les noms sans alias sont transmis tels quels : la police doit donc les prendre en charge.',
 
   componentHeading: 'Composants Vue',
   componentBody:
@@ -42,7 +42,7 @@ export default {
 
   handHeading: 'Résolveur personnalisé',
   handBody:
-    'Un résolveur reçoit le nom de l’icône et un contexte contenant <code>filled</code>. Retournez un objet <code>IconRender</code> ou <code>undefined</code>. Cet exemple résout les icônes du site de documentation :',
+    'Un résolveur reçoit le nom de l’icône et un contexte contenant <code>filled</code>. Retournez un objet <code>IconRender</code> ou <code>undefined</code>. Cet exemple résout les icônes du site de documentation :',
 
   sizingHeading: 'Taille',
   sizingBody:
@@ -56,15 +56,15 @@ export default {
   sizingCaption: 'La même icône à 16, 24 et 40 pixels.',
 
   orderHeading: 'Priorité des sources',
-  orderBody: '<code>VIcon</code> utilise la première source disponible dans cet ordre :',
+  orderBody: '<code>VIcon</code> utilise la première source disponible dans cet ordre :',
   orderRules: [
     '<code>render</code> : un objet <code>IconRender</code> décrivant un tracé, un composant, une image, du texte ou une classe CSS.',
     '<code>src</code> : une URL d’image non vide.',
     '<code>name</code> : traité par votre résolveur, puis par le tracé SVG de l’icône importée s’il existe, puis comme ligature de police.',
-    'Slot par défaut : utilisé lorsqu’aucune source n’est fournie.',
+    'Slot par défaut : utilisé lorsqu’aucune source n’est fournie.',
   ],
   noHeuristic:
-    'Les chaînes dans les props d’icône comme <code>iconStart</code> sont des noms, y compris les identifiants comme <code>mdi:close</code>. Utilisez un objet pour les autres sources : <code>{ src }</code>, <code>{ component }</code>, <code>{ path }</code>, <code>{ text }</code> ou <code>{ class }</code>. Avec <code>VIcon</code> directement, passez ces objets à <code>VIcon.render</code>.',
+    'Les chaînes dans les props d’icône comme <code>iconStart</code> sont des noms, y compris les identifiants comme <code>mdi:close</code>. Utilisez un objet pour les autres sources : <code>{ src }</code>, <code>{ component }</code>, <code>{ path }</code>, <code>{ text }</code> ou <code>{ class }</code>. Avec <code>VIcon</code> directement, passez ces objets à <code>VIcon.render</code>.',
 
   listHeading: 'Icônes intégrées',
   listBody:

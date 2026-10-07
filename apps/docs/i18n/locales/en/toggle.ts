@@ -20,7 +20,7 @@ export default {
     },
     filledIcons: {
       title: 'Filled icons',
-      text: '<code>selectedIconFilled</code> fills the selected item’s start icon. An item’s <code>iconFilled</code> fills both icons regardless of selection, where supported.',
+      text: '<code>selectedIconFilled</code> fills the selected item’s start icon. An item’s <code>iconFilled</code> fills both of its icons, selected or not, when the icon has a filled form.',
     },
     detached: {
       title: 'Detached',

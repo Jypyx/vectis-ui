@@ -20,7 +20,7 @@ export default {
     },
     dismissal: {
       title: 'Fermeture',
-      text: '<code>hideClose</code> masque le bouton de fermeture. <code>persistentBackdrop</code> désactive la fermeture au clic extérieur ; <code>persistentEscape</code> désactive Échap seulement si les deux sont activés. Fournissez une action de fermeture si toutes ces possibilités sont désactivées.',
+      text: '<code>hideClose</code> masque le bouton de fermeture. <code>persistentBackdrop</code> désactive la fermeture au clic extérieur ; <code>persistentEscape</code> désactive Échap seulement si les deux sont activés. Fournissez une action de fermeture si toutes ces possibilités sont désactivées.',
     },
     alert: {
       title: "Boîte d'alerte",

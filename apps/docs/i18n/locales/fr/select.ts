@@ -1,6 +1,6 @@
 export default {
   title: 'Sélecteur',
-  lead: '<code>VSelect</code> choisit une ou plusieurs valeurs dans une liste, comme un <code>&lt;select&gt;</code> natif, avec l’apparence de <code>VCombobox</code>. Rien ne se saisit : les lettres tapées sur le champ mettent en évidence l’option correspondante.',
+  lead: '<code>VSelect</code> choisit une ou plusieurs valeurs dans une liste, comme un <code>&lt;select&gt;</code> natif, avec l’apparence de <code>VCombobox</code>. Rien ne se saisit : les lettres tapées sur le champ mettent en évidence l’option correspondante.',
   examples: {
     labelAndHint: {
       title: "Label et texte d'aide",
@@ -43,7 +43,7 @@ export default {
         multiple:
           'Autorise la sélection multiple. Utilisez un tableau pour <code>v-model</code>. La liste reste ouverte pendant que l’on coche les options.',
         display:
-          'Affichage de la sélection multiple : chips amovibles ou texte séparé par des virgules. La sélection simple utilise toujours du texte.',
+          'Affichage de la sélection multiple : chips amovibles ou texte séparé par des virgules. La sélection simple utilise toujours du texte.',
         max: 'Nombre de valeurs visibles sans focus. Le focus affiche toutes les valeurs. Absent ou nul, tout est affiché. S’applique seulement avec <code>multiple</code>.',
         overflowText:
           'Formate le nombre de valeurs masquées par <code>max</code>. Reçoit le nombre masqué.',
@@ -57,7 +57,7 @@ export default {
         placeholder: 'Texte affiché tant que rien n’est choisi.',
         disabled: 'Désactive l’interaction. La valeur n’est pas envoyée.',
         readonly:
-          'Empêche de changer la sélection. Conserve le focus et l’envoi ; masque les actions d’effacement et empêche d’ouvrir la liste.',
+          'Empêche de changer la sélection. Conserve le focus et l’envoi ; masque les actions d’effacement et empêche d’ouvrir la liste.',
         invalid:
           'Définit <code>aria-invalid</code> et le style d’erreur. Ne bloque pas l’envoi du formulaire à lui seul.',
         iconStart:

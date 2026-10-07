@@ -36,7 +36,7 @@ export default {
     },
     form: {
       title: 'Dans un formulaire',
-      text: 'Fournissez <code>name</code>, <code>form</code> et <code>required</code> pour gérer le formulaire natif. Un code partiel est invalide ; un code vide reste accepté sans <code>required</code>.',
+      text: 'Fournissez <code>name</code>, <code>form</code> et <code>required</code> pour gérer le formulaire natif. Un code partiel est invalide ; un code vide reste accepté sans <code>required</code>.',
     },
     states: {
       title: 'États',
@@ -48,9 +48,9 @@ export default {
       props: {
         length: 'Nombre de cases, remplacé par un <code>pattern</code> contenant <code>#</code>.',
         format:
-          'Caractères autorisés : chiffres, lettres majuscules ou les deux. Filtre la saisie et le collage.',
+          'Caractères autorisés : chiffres, lettres majuscules ou les deux. Filtre la saisie et le collage.',
         pattern:
-          'Disposition du code. <code>#</code> crée une case ; les autres caractères sont affichés. Sans <code>#</code>, reprend <code>length</code>.',
+          'Disposition du code. <code>#</code> crée une case ; les autres caractères sont affichés. Sans <code>#</code>, reprend <code>length</code>.',
         separatorIcon:
           'Icône remplaçant tous les caractères littéraux du motif, y compris les préfixes textuels.',
         size: 'Taille des cases.',

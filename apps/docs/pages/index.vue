@@ -359,7 +359,7 @@ const installStep = ref<string>(STEPS[0]!.value)
                   <VToggle
                     v-model="packageManager"
                     mandatory
-                    variant="outline"
+                    item-variant="outline"
                     selected-variant="soft"
                     tone="accent"
                     size="xs"

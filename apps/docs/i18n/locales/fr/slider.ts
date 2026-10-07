@@ -32,11 +32,11 @@ export default {
     },
     inputsPlacement: {
       title: 'Position des champs',
-      text: '<code>ends</code> place les champs aux extrémités de la piste ; <code>top</code> et <code>bottom</code> les placent au-dessus ou en dessous. Sur un slider vertical, ces positions deviennent les côtés de début et de fin.',
+      text: '<code>ends</code> place les champs aux extrémités de la piste ; <code>top</code> et <code>bottom</code> les placent au-dessus ou en dessous. Sur un slider vertical, ces positions deviennent les côtés de début et de fin.',
     },
     format: {
       title: 'Format des nombres',
-      text: '<code>formatOptions</code> reçoit des options <code>Intl.NumberFormat</code> et <code>locale</code> une étiquette de langue. Les deux s’appliquent à l’infobulle, aux champs numériques et à la valeur annoncée par les curseurs. <code>min</code>, <code>max</code> et <code>step</code> restent dans l’unité du modèle : avec <code>style: "percent"</code>, 0,25 s’affiche 25 %.',
+      text: '<code>formatOptions</code> reçoit des options <code>Intl.NumberFormat</code> et <code>locale</code> une étiquette de langue. Les deux s’appliquent à l’infobulle, aux champs numériques et à la valeur annoncée par les curseurs. <code>min</code>, <code>max</code> et <code>step</code> restent dans l’unité du modèle : avec <code>style: "percent"</code>, 0,25 s’affiche 25 %.',
     },
     orientation: {
       title: 'Orientation',
@@ -48,7 +48,7 @@ export default {
     },
     form: {
       title: 'Dans un formulaire',
-      text: '<code>label</code> s’affiche au-dessus du slider et nomme ses curseurs ; <code>hideLabel</code> le masque visuellement. Les noms ARIA fournis prennent le pas sur cette prop. Les attributs natifs atteignent le curseur de fin ; en mode intervalle, seule cette valeur est envoyée.',
+      text: '<code>label</code> s’affiche au-dessus du slider et nomme ses curseurs ; <code>hideLabel</code> le masque visuellement. Les noms ARIA fournis prennent le pas sur cette prop. Les attributs natifs atteignent le curseur de fin ; en mode intervalle, seule cette valeur est envoyée.',
     },
     sizes: {
       title: 'Taille des champs',
@@ -67,7 +67,7 @@ export default {
     VSlider: {
       props: {
         readonly:
-          'Empêche les changements par pointeur ou clavier. Les curseurs gardent le focus ; les champs numériques passent en lecture seule.',
+          'Empêche les changements par pointeur ou clavier. Les curseurs gardent le focus ; les champs numériques passent en lecture seule.',
         invalid:
           'Définit <code>aria-invalid</code> et le style d’erreur. Ne bloque pas à lui seul l’envoi du formulaire.',
         size: 'Taille des champs numériques, remplacée si <code>VInputGroup</code> définit une taille.',
@@ -84,7 +84,7 @@ export default {
         hint: 'Texte d’aide lié par <code>aria-describedby</code>.',
         orientation: 'Sens de la piste. Les sliders verticaux placent le minimum en bas.',
         inputs:
-          'Position des champs numériques : <code>ends</code>, <code>top</code>, <code>bottom</code>, ou <code>false</code> pour les masquer. Le mode intervalle ajoute deux champs.',
+          'Position des champs numériques : <code>ends</code>, <code>top</code>, <code>bottom</code>, ou <code>false</code> pour les masquer. Le mode intervalle ajoute deux champs.',
         ticks:
           'Affiche les repères de pas, aussi activés par <code>labels</code>. Masqués au-delà de 50 pas.',
         labels:

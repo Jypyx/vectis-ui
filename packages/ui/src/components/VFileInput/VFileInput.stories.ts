@@ -378,7 +378,6 @@ export const FieldIcon: Story = {
           v-bind="args"
           icon-start="search"
           clearable
-          clear-visible
           :label="t.searchFiles"
           :model-value="picked"
           picker-label="Add an attachment"

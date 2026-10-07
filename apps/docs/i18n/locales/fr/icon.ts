@@ -16,12 +16,12 @@ export default {
     },
     rendering: {
       title: "D'où vient le dessin",
-      text: 'La première source disponible est utilisée dans cet ordre :',
+      text: 'La première source disponible est utilisée dans cet ordre :',
       order: [
         '<code>render</code> : tracés SVG, composant, image ou classe de police.',
         '<code>src</code> : URL d’image.',
         '<code>name</code> : résolveur, dessin intégré, puis police à ligatures.',
-        'Slot par défaut : SVG en ligne si aucune prop de source n’est définie.',
+        'Slot par défaut : SVG en ligne si aucune prop de source n’est définie.',
       ],
       moreBefore:
         'Un résolveur peut ne rien renvoyer pour utiliser l’icône intégrée. Une chaîne simple désigne un nom d’icône. Pour la configuration et les icônes disponibles, consultez',
@@ -31,7 +31,7 @@ export default {
   api: {
     VIcon: {
       props: {
-        name: 'Nom d’icône ou icône intégrée importée depuis <code>vectis-ui/icons</code>. Le résolveur est prioritaire sur le dessin intégré ; les chaînes non résolues utilisent une police à ligatures.',
+        name: 'Nom d’icône ou icône intégrée importée depuis <code>vectis-ui/icons</code>. Le résolveur est prioritaire sur le dessin intégré ; les chaînes non résolues utilisent une police à ligatures.',
         render: 'Source d’icône explicite. Prioritaire sur les autres sources.',
         src: 'URL d’image. Prioritaire sur <code>name</code>.',
         size: 'Taille en pixels, nombre ou chaîne numérique. Utilise la taille du contexte ou <code>1em</code> par défaut.',

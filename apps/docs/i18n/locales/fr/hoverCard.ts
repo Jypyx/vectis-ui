@@ -4,7 +4,7 @@ export default {
   examples: {
     inText: {
       title: 'Dans le texte',
-      text: 'Le déclencheur suit le fil de la phrase. Le contenu de la carte est monté à la première ouverture : un déclencheur dans un paragraphe produit donc un HTML valide côté serveur.',
+      text: 'Le déclencheur suit le fil de la phrase. Le contenu de la carte est monté à la première ouverture : un déclencheur dans un paragraphe produit donc un HTML valide côté serveur.',
     },
     delays: {
       title: 'Délais',
@@ -12,7 +12,7 @@ export default {
     },
     interactiveContent: {
       title: 'Contenu interactif',
-      text: 'Le focus clavier ouvre la carte après le délai et Tab y entre. Échap la ferme depuis n’importe où et rend le focus au déclencheur. Un tap n’ouvre rien : gardez la même information à la destination du déclencheur.',
+      text: 'Le focus clavier ouvre la carte après le délai et Tab y entre. Échap la ferme depuis n’importe où et rend le focus au déclencheur. Un tap n’ouvre rien : gardez la même information à la destination du déclencheur.',
     },
     loadOnOpen: {
       title: 'Chargement à l’ouverture',
@@ -22,7 +22,7 @@ export default {
   api: {
     VHoverCard: {
       props: {
-        placement: 'Position souhaitée ; bascule si l’espace manque.',
+        placement: 'Position souhaitée ; bascule si l’espace manque.',
         openDelay: 'Attente au survol ou au focus clavier avant l’ouverture, en millisecondes.',
         closeDelay:
           'Attente avant la fermeture une fois que le pointeur a quitté le déclencheur et la carte, en millisecondes.',

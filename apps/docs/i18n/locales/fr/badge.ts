@@ -62,7 +62,7 @@ export default {
       },
       slots: {
         default:
-          'Élément cible. Les badges associés sont masqués aux technologies d’assistance ; incluez leur information dans le nom accessible de la cible.',
+          'Élément cible. Les badges associés sont masqués aux technologies d’assistance ; incluez leur information dans le nom accessible de la cible.',
       },
     },
   },

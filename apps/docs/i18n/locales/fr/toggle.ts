@@ -4,11 +4,11 @@ export default {
   examples: {
     variants: {
       title: 'Variantes et tons',
-      text: '<code>itemVariant</code> définit le style des éléments non sélectionnés. <code>tone</code> s’applique aux éléments sélectionnés ; les autres restent neutres.',
+      text: '<code>itemVariant</code> définit le style des éléments non sélectionnés. <code>tone</code> s’applique aux éléments sélectionnés ; les autres restent neutres.',
     },
     selectedVariants: {
       title: 'Style de la sélection',
-      text: '<code>selectedVariant</code> définit le style de la sélection : <code>solid</code>, <code>soft</code> ou <code>ghost</code>.',
+      text: '<code>selectedVariant</code> définit le style de la sélection : <code>solid</code>, <code>soft</code> ou <code>ghost</code>.',
     },
     sizes: {
       title: 'Tailles',
@@ -20,7 +20,7 @@ export default {
     },
     filledIcons: {
       title: 'Icônes pleines',
-      text: '<code>selectedIconFilled</code> affiche l’icône de début de l’élément sélectionné en version pleine. La prop <code>iconFilled</code> d’un élément fait de même pour ses deux icônes, quelle que soit la sélection, si cette version existe.',
+      text: '<code>selectedIconFilled</code> remplit l’icône de début de l’élément sélectionné. Le <code>iconFilled</code> d’un élément remplit ses deux icônes, sélectionné ou non, quand l’icône a une version pleine.',
     },
     detached: {
       title: 'Éléments séparés',
@@ -40,7 +40,7 @@ export default {
     },
     orientation: {
       title: 'Orientation et clavier',
-      text: '<code>orientation="vertical"</code> dispose les éléments en colonne. Les flèches déplacent le focus sur cet axe ; Home et End ciblent le premier et le dernier élément non désactivé. Chaque élément non désactivé reste accessible par Tab. Espace ou Entrée modifie la sélection.',
+      text: '<code>orientation="vertical"</code> dispose les éléments en colonne. Les flèches déplacent le focus sur cet axe ; Home et End ciblent le premier et le dernier élément non désactivé. Chaque élément non désactivé reste accessible par Tab. Espace ou Entrée modifie la sélection.',
     },
     multiple: {
       title: 'Sélection multiple',
@@ -65,13 +65,13 @@ export default {
         bordered:
           'Ajoute des séparateurs entre les éléments joints. Sans effet avec <code>detached</code>.',
         orientation:
-          'Disposition en ligne horizontale ou en colonne verticale. Définit le sens de navigation avec les flèches.',
+          'Ligne horizontale ou colonne verticale. Fixe le sens de navigation aux flèches.',
         fullWidth:
           'Occupe toute la largeur du parent. Les éléments horizontaux ont la même largeur, mais peuvent déborder si leur contenu est trop large.',
         itemVariant:
-          'Style visuel des éléments non sélectionnés : <code>ghost</code> ou <code>outline</code>.',
+          'Style visuel des éléments non sélectionnés : <code>ghost</code> ou <code>outline</code>.',
         selectedVariant:
-          'Style visuel des éléments sélectionnés : <code>solid</code>, <code>soft</code> ou <code>ghost</code>.',
+          'Style visuel des éléments sélectionnés : <code>solid</code>, <code>soft</code> ou <code>ghost</code>.',
         tone: 'Ton des éléments sélectionnés. Les autres restent neutres.',
         size: 'Taille de tous les éléments.',
         compact: 'Réduit la hauteur des éléments.',
@@ -82,7 +82,7 @@ export default {
         label:
           'Nom accessible du groupe. Fournissez cette prop, un <code>aria-label</code> ou un <code>aria-labelledby</code>.',
         vModel:
-          'Valeur sélectionnée : une chaîne, un nombre ou <code>null</code> en sélection simple ; un tableau en sélection multiple. En mode multiple, une valeur scalaire ou <code>null</code> équivaut à une sélection vide. Activer un élément sélectionné le désélectionne, sauf si <code>mandatory</code> l’empêche.',
+          'Valeur sélectionnée : une chaîne, un nombre ou <code>null</code> en sélection simple ; un tableau en sélection multiple. En mode multiple, une valeur scalaire ou <code>null</code> équivaut à une sélection vide. Activer un élément sélectionné le désélectionne, sauf si <code>mandatory</code> l’empêche.',
       },
       slots: {
         default: 'Les composants <code>VToggleItem</code> du groupe.',

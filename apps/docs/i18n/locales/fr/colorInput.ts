@@ -4,7 +4,7 @@ export default {
   examples: {
     formats: {
       title: 'Formats',
-      text: 'Le champ accepte l’hexadécimal, <code>rgb()</code>, <code>hsl()</code> et <code>oklch()</code>. Entrée ou la sortie du champ réécrit la couleur selon <code>format</code> ; toute autre saisie remet le champ dans son état précédent.',
+      text: 'Le champ accepte l’hexadécimal, <code>rgb()</code>, <code>hsl()</code> et <code>oklch()</code>. Entrée ou la sortie du champ réécrit la couleur selon <code>format</code> ; toute autre saisie remet le champ dans son état précédent.',
     },
     alphaAndSwatches: {
       title: 'Opacité et nuancier',
@@ -16,7 +16,7 @@ export default {
     },
     validation: {
       title: 'Validation',
-      text: 'VColorInput suit le modèle des champs : <code>error</code> remplace l’aide et est annoncé. Les attributs comme <code>name</code> et <code>required</code> vont au champ de saisie.',
+      text: 'VColorInput suit le modèle des champs : <code>error</code> remplace l’aide et est annoncé. Les attributs comme <code>name</code> et <code>required</code> vont au champ de saisie.',
     },
     sizes: {
       title: 'Tailles',
@@ -56,7 +56,7 @@ export default {
           'Couleur écrite selon <code>format</code>, ou <code>null</code> quand le champ est vide. Le texte saisi la met à jour sur Entrée ou à la sortie du champ.',
       },
       events: {
-        clear: 'La valeur a été effacée ; le modèle est déjà réinitialisé.',
+        clear: 'La valeur a été effacée ; le modèle est déjà réinitialisé.',
       },
       slots: {
         valueEnd: 'Contenu placé avant le bouton d’effacement.',

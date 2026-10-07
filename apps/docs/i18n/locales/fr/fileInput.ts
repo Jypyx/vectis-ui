@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> définit la taille du champ ; <code>compact</code> réduit sa hauteur.',
+      text: '<code>size</code> définit la taille du champ ; <code>compact</code> réduit sa hauteur.',
     },
     multiple: {
       title: 'Fichiers multiples',
@@ -50,13 +50,13 @@ export default {
         accept:
           'Types acceptés, selon la syntaxe native comme <code>image/*,.pdf</code>. Filtre les sélections et les fichiers déposés.',
         display:
-          'Affichage de plusieurs fichiers : texte ou chips supprimables. Un fichier unique utilise toujours du texte.',
+          'Affichage de plusieurs fichiers : texte ou chips supprimables. Un fichier unique utilise toujours du texte.',
         maxSize: 'Taille maximale par fichier, en octets.',
         maxTotalSize: 'Taille maximale de la sélection, en octets.',
         maxFiles: 'Nombre maximal de fichiers sélectionnés.',
         counter: 'Affiche le nombre de fichiers et leur taille totale sous le champ.',
         pickerIcon: 'Icône du bouton ouvrant le sélecteur de fichiers.',
-        noDrop: 'Désactive le glisser-déposer ; le sélecteur reste disponible.',
+        noDrop: 'Désactive le glisser-déposer ; le sélecteur reste disponible.',
         size: 'Taille du composant.',
         compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
         disabled: 'Désactive les interactions.',
@@ -72,7 +72,7 @@ export default {
         placeholder:
           'Texte affiché quand la sélection est vide. Utilise le dictionnaire de la bibliothèque par défaut.',
         iconStart:
-          'Icône de début. Un écouteur <code>@click:icon-start</code> en fait un bouton ; fournissez <code>iconStartLabel</code>.',
+          'Icône de début. Un écouteur <code>@click:icon-start</code> en fait un bouton ; fournissez <code>iconStartLabel</code>.',
         iconStartLabel: 'Nom accessible du bouton d’icône de début.',
         pickerLabel:
           'Nom accessible du bouton de sélection de fichiers. Utilise le dictionnaire de la bibliothèque par défaut.',
@@ -88,10 +88,10 @@ export default {
       events: {
         change: 'La sélection a changé. Reçoit le <code>File[]</code> complet.',
         reject:
-          'Émis pour chaque fichier refusé. Reçoit le fichier et un motif : <code>type</code>, <code>size</code>, <code>count</code> ou <code>total-size</code>.',
-        clear: 'La sélection a été effacée ; le modèle est déjà vide.',
+          'Émis pour chaque fichier refusé. Reçoit le fichier et un motif : <code>type</code>, <code>size</code>, <code>count</code> ou <code>total-size</code>.',
+        clear: 'La sélection a été effacée ; le modèle est déjà vide.',
         remove:
-          'Un chip a retiré un fichier. Reçoit le fichier et son index ; suivi de <code>change</code>.',
+          'Un chip a retiré un fichier. Reçoit le fichier et son index ; suivi de <code>change</code>.',
         clickIconStart: 'Le bouton de l’icône de début a été activé.',
       },
       slots: {

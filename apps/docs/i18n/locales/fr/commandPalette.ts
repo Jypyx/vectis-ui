@@ -8,7 +8,7 @@ export default {
     },
     links: {
       title: 'Liens',
-      text: 'Une commande avec <code>href</code> est un lien : Entrée le suit, et un clic modifié l’ouvre dans un nouvel onglet. Avec un routeur, appelez <code>event.preventDefault()</code> dans <code>select</code> et naviguez vous-même.',
+      text: 'Une commande avec <code>href</code> est un lien : Entrée le suit, et un clic modifié l’ouvre dans un nouvel onglet. Avec un routeur, appelez <code>event.preventDefault()</code> dans <code>select</code> et naviguez vous-même.',
     },
     asyncSearch: {
       title: 'Recherche asynchrone',
@@ -39,7 +39,7 @@ export default {
         label: 'Nom accessible de la palette et de sa liste. Par défaut, celui du dictionnaire.',
         searchLabel: 'Nom accessible du champ de recherche. Par défaut, celui du dictionnaire.',
         hideFooter: 'Masque le pied qui liste les touches.',
-        width: 'Largeur de la palette : pixels pour un nombre, sinon une longueur CSS.',
+        width: 'Largeur de la palette : pixels pour un nombre, sinon une longueur CSS.',
         vModelOpen: 'État d’ouverture. La fermeture native met le modèle à jour.',
         vModelQuery: 'Texte recherché. Vidé à la fermeture de la palette.',
       },
@@ -53,7 +53,7 @@ export default {
         trigger: 'Contrôle d’ouverture. Liez-y les <code>triggerProps</code> fournies.',
         item: 'Libellé et description d’une ligne. Reçoit la commande et son état actif.',
         empty:
-          'Contenu de l’état vide. Reçoit la recherche ; définissez aussi <code>emptyText</code>.',
+          'Contenu de l’état vide. Reçoit la recherche ; définissez aussi <code>emptyText</code>.',
         loading: 'Contenu de chargement. Définissez aussi <code>loadingText</code>.',
         footer: 'Remplace le pied qui liste les touches.',
       },

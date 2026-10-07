@@ -24,7 +24,7 @@ export default {
     },
     states: {
       title: 'États',
-      text: '<code>disabled</code> désactive tous les segments. Les segments désactivés individuellement le restent ; définissez les erreurs sur le champ concerné.',
+      text: '<code>disabled</code> désactive tous les segments. Les segments désactivés individuellement le restent ; définissez les erreurs sur le champ concerné.',
     },
     pickers: {
       title: 'Avec des sélecteurs',
@@ -39,9 +39,9 @@ export default {
         error:
           'Message d’erreur affiché à la place de l’aide, lié au groupe par <code>aria-describedby</code> et annoncé quand il apparaît. Marquez les segments en faute avec <code>invalid</code>.',
         hint: 'Texte d’aide commun sous la ligne, lié au groupe par <code>aria-describedby</code>.',
-        size: 'Taille de tous les segments. Remplace les tailles individuelles ; si omise, chaque segment conserve la sienne.',
+        size: 'Taille de tous les segments. Remplace les tailles individuelles ; si omise, chaque segment conserve la sienne.',
         compact:
-          'Réduit la hauteur des segments. Remplace les valeurs individuelles, même avec <code>false</code> ; si omis, chaque segment conserve la sienne.',
+          'Réduit la hauteur des segments. Remplace les valeurs individuelles, même avec <code>false</code> ; si omis, chaque segment conserve la sienne.',
         disabled:
           'Désactive tous les segments. La valeur <code>false</code> ne réactive pas les contrôles désactivés individuellement.',
       },

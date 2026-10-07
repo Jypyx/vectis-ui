@@ -397,7 +397,7 @@ const SHOWCASE = `
     <VBreadcrumb :items="trail" current-path="/projects/vectis" />
 
     <VAccordion>
-      <VAccordionItem :title="t.collapsedPanel" :icon-start="icons.notifications">
+      <VAccordionItem :title="t.collapsedPanel" :icon="icons.notifications">
         {{ t.allFromDs }}
       </VAccordionItem>
     </VAccordion>

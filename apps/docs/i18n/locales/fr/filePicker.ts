@@ -20,7 +20,7 @@ export default {
     },
     multiple: {
       title: 'Fichiers multiples',
-      text: '<code>multiple</code> autorise plusieurs fichiers ; <code>maxFiles</code> limite la sélection.',
+      text: '<code>multiple</code> autorise plusieurs fichiers ; <code>maxFiles</code> limite la sélection.',
     },
     accept: {
       title: 'Types acceptés',
@@ -50,7 +50,7 @@ export default {
         browseText:
           'Texte visible et nom accessible du bouton de parcours. Utilise le dictionnaire de la bibliothèque par défaut.',
         preview:
-          'Position des aperçus : <code>false</code>, <code>bottom</code> ou <code>end</code>. La liste latérale passe en dessous dans un conteneur étroit.',
+          'Position des aperçus : <code>false</code>, <code>bottom</code> ou <code>end</code>. La liste latérale passe en dessous dans un conteneur étroit.',
         hideThumbnails: 'Utilise des icônes de type de fichier à la place des miniatures.',
         typeIcons: 'Icônes personnalisées par catégorie de fichier.',
         removeIcon: 'Icône du bouton de retrait d’un fichier.',
@@ -74,7 +74,7 @@ export default {
       events: {
         change: 'La sélection a changé. Reçoit le <code>File[]</code> complet.',
         reject:
-          'Émis pour chaque fichier refusé. Reçoit le fichier et un motif : <code>type</code>, <code>size</code>, <code>count</code> ou <code>total-size</code>.',
+          'Émis pour chaque fichier refusé. Reçoit le fichier et un motif : <code>type</code>, <code>size</code>, <code>count</code> ou <code>total-size</code>.',
         remove: 'Un fichier a été retiré. Reçoit le fichier et son index.',
       },
       slots: {
@@ -84,7 +84,7 @@ export default {
         subtitle:
           'Contenu des contraintes. Utilisez du texte et des éléments en ligne non interactifs.',
         browse:
-          'Contrôle de parcours personnalisé. Reçoit <code>open</code> et <code>disabled</code> ; appelez <code>open</code> pour ouvrir le sélecteur.',
+          'Contrôle de parcours personnalisé. Reçoit <code>open</code> et <code>disabled</code> ; appelez <code>open</code> pour ouvrir le sélecteur.',
         item: 'Ligne d’aperçu entière. Reçoit le fichier, l’index, la catégorie, la miniature, l’icône, la taille formatée et <code>remove</code>.',
         thumbnail: 'Visuel de l’aperçu. Reçoit les mêmes données que <code>item</code>.',
         remove:

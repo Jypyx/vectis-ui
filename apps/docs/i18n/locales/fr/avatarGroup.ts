@@ -27,8 +27,8 @@ export default {
     VAvatarGroup: {
       props: {
         max: 'Nombre maximal d’avatars visibles avant le compteur. Absent ou égal à 0, affiche tous les avatars.',
-        size: 'Taille des avatars par défaut ; chaque avatar peut la remplacer.',
-        compact: 'Réduit le diamètre de tous les avatars ; les enfants ne peuvent pas l’annuler.',
+        size: 'Taille des avatars par défaut ; chaque avatar peut la remplacer.',
+        compact: 'Réduit le diamètre de tous les avatars ; les enfants ne peuvent pas l’annuler.',
         ringColor: 'Couleur de séparation entre avatars. Couleur de fond de page par défaut.',
         label:
           'Nom accessible du groupe. Les attributs <code>aria-label</code> ou <code>aria-labelledby</code> fournis sont prioritaires.',

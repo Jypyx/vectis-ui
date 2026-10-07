@@ -56,9 +56,9 @@ export default {
           'Message d’erreur affiché à la place de l’aide. Pose <code>aria-invalid</code>, est lié par <code>aria-describedby</code> et est annoncé quand il apparaît.',
         hint: 'Texte d’aide sous le champ, lié par <code>aria-describedby</code>.',
         iconStart:
-          'Icône de début. Devient un bouton avec <code>@click:icon-start</code> ; nécessite alors <code>iconStartLabel</code>.',
+          'Icône de début. Devient un bouton avec <code>@click:icon-start</code> ; nécessite alors <code>iconStartLabel</code>.',
         iconEnd:
-          'Icône de fin. Devient un bouton avec <code>@click:icon-end</code> ; nécessite alors <code>iconEndLabel</code>. Remplacée par <code>#end</code> ou l’indicateur de chargement.',
+          'Icône de fin. Devient un bouton avec <code>@click:icon-end</code> ; nécessite alors <code>iconEndLabel</code>. Remplacée par <code>#end</code> ou l’indicateur de chargement.',
         iconStartLabel: 'Nom accessible du bouton d’icône de début.',
         iconEndLabel: 'Nom accessible du bouton d’icône de fin.',
         loading:
@@ -76,7 +76,7 @@ export default {
         softLimit:
           'Autorise le dépassement de <code>maxlength</code> et signale une erreur de validation native tant que la valeur dépasse la limite.',
         counter:
-          'Nombre de caractères dans le champ : <code>12/80</code> avec une limite, ou <code>12</code> sans limite.',
+          'Nombre de caractères dans le champ : <code>12/80</code> avec une limite, ou <code>12</code> sans limite.',
         vModel:
           'Valeur du champ, chaîne ou nombre. Avec <code>type="number"</code>, Vue convertit la saisie numérique en nombre. Un champ vide utilise une chaîne vide.',
       },
@@ -93,7 +93,7 @@ export default {
           'Contenu après la valeur et le compteur, avant le bouton d’effacement et l’icône de fin.',
         end: 'Contenu remplaçant <code>iconEnd</code>. Masqué pendant le chargement.',
         control:
-          'Contrôle remplaçant l’input, pour les champs composés. Liez-lui les <code>controlProps</code> reçues : id, classe du champ, liens ARIA et attributs transmis.',
+          'Contrôle remplaçant l’input, pour les champs composés. Liez-lui les <code>controlProps</code> reçues : id, classe du champ, liens ARIA et attributs transmis.',
       },
     },
   },

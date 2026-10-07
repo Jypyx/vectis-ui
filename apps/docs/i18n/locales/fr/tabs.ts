@@ -24,7 +24,7 @@ export default {
     },
     fullWidth: {
       title: 'Remplir la barre',
-      text: '<code>fullWidth</code> répartit la barre également entre les onglets. Les longs libellés sont tronqués ; le défilement est désactivé.',
+      text: '<code>fullWidth</code> répartit la barre également entre les onglets. Les longs libellés sont tronqués ; le défilement est désactivé.',
     },
     orientation: {
       title: 'Orientation',
@@ -44,7 +44,7 @@ export default {
     },
     activation: {
       title: "Sélectionner à l'arrivée",
-      text: 'L’activation manuelle déplace le focus avec les flèches et sélectionne avec Entrée ou Espace. L’activation automatique sélectionne au focus ; utilisez-la si les panneaux s’affichent immédiatement.',
+      text: 'L’activation manuelle déplace le focus avec les flèches et sélectionne avec Entrée ou Espace. L’activation automatique sélectionne au focus ; utilisez-la si les panneaux s’affichent immédiatement.',
     },
     disabled: {
       title: 'Onglets désactivés',
@@ -55,7 +55,7 @@ export default {
     VTabs: {
       props: {
         variant:
-          'Style de barre : souligné, encadré par une bordure, une ombre ou un fond atténué, ou en creux.',
+          'Style de barre : souligné, encadré par une bordure, une ombre ou un fond atténué, ou en creux.',
         tone: 'Couleur de l’onglet sélectionné.',
         size: 'Taille du composant.',
         compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
@@ -70,7 +70,7 @@ export default {
         nextLabel: 'Nom accessible du défilement avant. Utilise le dictionnaire par défaut.',
         activation: 'Sélection manuelle avec Entrée/Espace, ou automatique au focus.',
         disabled:
-          'Désactive tous les onglets et contrôles de défilement ; conserve le panneau actuel.',
+          'Désactive tous les onglets et contrôles de défilement ; conserve le panneau actuel.',
         label: 'Nom accessible de la liste d’onglets. Utilise le dictionnaire par défaut.',
         vModel:
           'Valeur de l’onglet sélectionné. Doit désigner un onglet existant et actif pour l’accès au clavier.',
@@ -89,7 +89,7 @@ export default {
         iconStart: 'Icône avant le libellé.',
         iconEnd: 'Icône après le libellé.',
         iconFilled: 'Utilise des icônes pleines si disponibles.',
-        disabled: 'Désactive cet onglet ; la désactivation du groupe s’applique aussi.',
+        disabled: 'Désactive cet onglet ; la désactivation du groupe s’applique aussi.',
       },
       slots: {
         default: 'Contenu remplaçant le libellé.',

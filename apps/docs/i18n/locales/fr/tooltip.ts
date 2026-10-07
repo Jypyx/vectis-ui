@@ -12,11 +12,11 @@ export default {
     },
     delay: {
       title: 'Ouverture et fermeture',
-      text: '<code>openDelay</code> définit l’attente au survol en millisecondes, <code>closeDelay</code> le temps pendant lequel l’infobulle reste une fois le pointeur parti. Le focus ouvre immédiatement ; Échap ou l’activation du déclencheur ferme sans déplacer le focus.',
+      text: '<code>openDelay</code> définit l’attente au survol en millisecondes, <code>closeDelay</code> le temps pendant lequel l’infobulle reste une fois le pointeur parti. Le focus ouvre immédiatement ; Échap ou l’activation du déclencheur ferme sans déplacer le focus.',
     },
     describing: {
       title: 'Décrire, pas nommer',
-      text: 'L’infobulle utilise <code>aria-describedby</code> ; le déclencheur nécessite toujours son propre nom accessible. Le toucher ne l’ouvre pas : rendez les informations essentielles disponibles ailleurs.',
+      text: 'L’infobulle utilise <code>aria-describedby</code> ; le déclencheur nécessite toujours son propre nom accessible. Le toucher ne l’ouvre pas : rendez les informations essentielles disponibles ailleurs.',
     },
     richContent: {
       title: 'Contenu riche',
@@ -27,9 +27,9 @@ export default {
     VTooltip: {
       props: {
         text: 'Description de l’infobulle. Remplacée par le slot <code>content</code>.',
-        placement: 'Position souhaitée ; change de côté si l’espace manque.',
+        placement: 'Position souhaitée ; change de côté si l’espace manque.',
         openDelay:
-          'Délai au survol en millisecondes ; 0 supprime l’attente. Le focus ouvre immédiatement.',
+          'Délai au survol en millisecondes ; 0 supprime l’attente. Le focus ouvre immédiatement.',
         closeDelay:
           'Millisecondes pendant lesquelles l’infobulle reste une fois le pointeur sorti du déclencheur et de l’infobulle.',
       },

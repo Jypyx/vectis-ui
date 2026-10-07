@@ -52,7 +52,7 @@ export default {
     },
     virtual: {
       title: 'Longues listes',
-      text: '<code>virtual</code> ne rend que les options proches de la partie visible du panneau, pour des listes de plusieurs milliers. Les lignes sont mesurées à leur rendu : un <code>#option</code> personnalisé peut varier en hauteur.',
+      text: '<code>virtual</code> ne rend que les options proches de la partie visible du panneau, pour des listes de plusieurs milliers. Les lignes sont mesurées à leur rendu : un <code>#option</code> personnalisé peut varier en hauteur.',
     },
     customOption: {
       title: 'Options personnalisées',
@@ -70,7 +70,7 @@ export default {
           'Options, groupes nommés ou séparateurs. Chaque option possède une valeur et un libellé.',
         multiple: 'Autorise plusieurs sélections. Utilisez un tableau pour <code>v-model</code>.',
         display:
-          'Affichage de la sélection multiple : puces supprimables ou texte séparé par des virgules. La sélection simple utilise toujours du texte.',
+          'Affichage de la sélection multiple : puces supprimables ou texte séparé par des virgules. La sélection simple utilise toujours du texte.',
         max: 'Nombre de valeurs visibles sans focus. Le focus affiche toutes les valeurs. Omis ou nul, affiche tout. S’applique uniquement avec <code>multiple</code>.',
         overflowText:
           'Formate le nombre de valeurs masquées par <code>max</code>. Reçoit ce nombre.',
@@ -84,14 +84,14 @@ export default {
         placeholder: 'Texte indicatif lorsque le champ est vide.',
         disabled: 'Désactive les interactions.',
         readonly:
-          'Empêche la saisie et les changements de sélection. Conserve le focus et la copie ; masque les actions d’effacement et empêche l’ouverture de la liste.',
+          'Empêche la saisie et les changements de sélection. Conserve le focus et la copie ; masque les actions d’effacement et empêche l’ouverture de la liste.',
         invalid:
           'Définit <code>aria-invalid</code> et le style d’erreur. Ne bloque pas à lui seul l’envoi du formulaire.',
         iconStart:
           'Icône avant les valeurs sélectionnées. Un écouteur <code>@click:icon-start</code> en fait un bouton nécessitant <code>iconStartLabel</code>.',
         iconStartLabel: 'Nom accessible du bouton d’icône de début.',
         expandIcon:
-          'Chevron décoratif. Un clic ferme la liste ouverte ; le focus sur le champ ouvre la liste.',
+          'Chevron décoratif. Un clic ferme la liste ouverte ; le focus sur le champ ouvre la liste.',
         clearable: 'Ajoute une action pour effacer la sélection et la recherche.',
         clearLabel:
           'Nom accessible du bouton d’effacement. Utilise le dictionnaire de la bibliothèque par défaut.',
@@ -102,7 +102,7 @@ export default {
         searchDebounce:
           'Délai en millisecondes avant d’émettre une recherche saisie. Zéro émet immédiatement.',
         loading:
-          'Affiche un indicateur dans le champ et un état de chargement : panneau entier sans options, ou pied de liste si des options existent.',
+          'Affiche un indicateur dans le champ et un état de chargement : panneau entier sans options, ou pied de liste si des options existent.',
         loadingText:
           'Texte de chargement annoncé aux lecteurs d’écran. Gardez-le cohérent avec le contenu personnalisé de <code>#loading</code>.',
         hasMore: 'Active la demande d’une nouvelle page lorsque la fin de liste devient visible.',
@@ -126,7 +126,7 @@ export default {
         overflow:
           'Nombre de valeurs masquées. Reçoit <code>count</code>, la taille des puces et l’état compact.',
         empty:
-          'Contenu de l’état vide. Reçoit la recherche ; définissez aussi <code>emptyText</code>.',
+          'Contenu de l’état vide. Reçoit la recherche ; définissez aussi <code>emptyText</code>.',
         loading: 'Contenu du chargement initial. Définissez aussi <code>loadingText</code>.',
         valueEnd: 'Contenu avant l’action d’effacement et l’icône d’ouverture.',
         start: 'Contenu après <code>iconStart</code>, sans remplacer l’icône.',

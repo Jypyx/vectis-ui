@@ -8,7 +8,7 @@ export default {
     },
     interactiveContent: {
       title: 'Contenu interactif',
-      text: 'Les panneaux peuvent contenir des contrôles. Le focus n’est pas piégé ; fournissez un comportement clavier adapté au contenu.',
+      text: 'Les panneaux peuvent contenir des contrôles. Le focus n’est pas piégé ; fournissez un comportement clavier adapté au contenu.',
     },
     modes: {
       title: 'Modes',
@@ -27,10 +27,10 @@ export default {
     VPopover: {
       props: {
         id: 'Identifiant du panneau. Généré si absent.',
-        placement: 'Position souhaitée du panneau ; change de côté si l’espace manque.',
+        placement: 'Position souhaitée du panneau ; change de côté si l’espace manque.',
         mode: '<code>auto</code> utilise la fermeture native au clic extérieur et avec Échap. <code>manual</code> exige vos propres contrôles de fermeture.',
         anchor:
-          'Nom d’ancre CSS existante, comme <code>--tooltip-anchor</code>. Supprime l’enveloppe du déclencheur ; requis pour les champs texte.',
+          'Nom d’ancre CSS existante, comme <code>--tooltip-anchor</code>. Supprime l’enveloppe du déclencheur ; requis pour les champs texte.',
         bare: 'Retire le fond, la bordure, l’ombre et le rayon du panneau.',
         matchTrigger: 'Définit la largeur du déclencheur comme largeur minimale du panneau.',
         vModelOpen:

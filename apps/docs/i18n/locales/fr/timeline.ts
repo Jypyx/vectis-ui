@@ -8,7 +8,7 @@ export default {
     },
     alternate: {
       title: 'Côtés alternés',
-      text: '<code>layout="alternate"</code> envoie un événement sur deux de l’autre côté de la ligne, face à sa date, et revient à <code>stacked</code> sous 36rem. Une année ou un mois s’écrit à cette précision. Les deux dispositions côte à côte prennent leur largeur de leur parent : dans une rangée flex, donnez à la frise une base propre.',
+      text: '<code>layout="alternate"</code> envoie un événement sur deux de l’autre côté de la ligne, face à sa date, et revient à <code>stacked</code> sous 36rem. Une année ou un mois s’écrit à cette précision. Les deux dispositions côte à côte prennent leur largeur de leur parent : dans une rangée flex, donnez à la frise une base propre.',
     },
     horizontal: {
       title: 'Horizontale',
@@ -16,7 +16,7 @@ export default {
     },
     markers: {
       title: 'Marqueurs',
-      text: '<code>tone</code> colore le marqueur et <code>icon</code> le dessine dans une pastille ronde. Le slot <code>marker</code> le remplace, par exemple par un avatar. Les marqueurs sont masqués aux lecteurs d’écran : dites dans le titre ce que signifie le ton.',
+      text: '<code>tone</code> colore le marqueur et <code>icon</code> le dessine dans une pastille ronde. Le slot <code>marker</code> le remplace, par exemple par un avatar. Les marqueurs sont masqués aux lecteurs d’écran : dites dans le titre ce que signifie le ton.',
     },
     dates: {
       title: 'Dates',
@@ -28,7 +28,7 @@ export default {
       props: {
         orientation: 'Événements de haut en bas ou de gauche à droite.',
         layout:
-          'Place des dates d’une frise verticale : au-dessus des titres, en colonne de l’autre côté de la ligne, ou face au contenu sur des côtés alternés.',
+          'Place des dates d’une frise verticale : au-dessus des titres, en colonne de l’autre côté de la ligne, ou face au contenu sur des côtés alternés.',
         size: 'Densité des espacements, des marqueurs et du texte du contenu.',
         headingLevel:
           'Rend les titres en <code>h1</code> à <code>h6</code>. Sans elle, ce sont des paragraphes.',

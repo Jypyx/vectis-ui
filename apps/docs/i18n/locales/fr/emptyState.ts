@@ -4,7 +4,7 @@ export default {
   examples: {
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> ajuste la pastille, les espacements et le titre : <code>sm</code> pour un panneau ou une liste, <code>lg</code> pour une page entière.',
+      text: '<code>size</code> ajuste la pastille, les espacements et le titre : <code>sm</code> pour un panneau ou une liste, <code>lg</code> pour une page entière.',
     },
     content: {
       title: 'Contenu et niveau de titre',
