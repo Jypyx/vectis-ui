@@ -382,8 +382,8 @@ defineExpose({
     --textarea-leading: var(--vectis-text-body-md-leading);
 
     /*
-     * It is DERIVED and must never be written as `1lh`. The buttons happened to be right only
-     * because the reset gives them `font: inherit`.
+     * Derived rather than written as `1lh`: a custom property resolves `lh` where it is used, so
+     * the icons and buttons beside the text would each measure their own line height.
      */
     --textarea-line: calc(var(--control-font-size) * var(--textarea-leading));
 

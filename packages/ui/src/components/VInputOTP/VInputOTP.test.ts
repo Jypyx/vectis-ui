@@ -141,6 +141,42 @@ describe('VInputOTP', () => {
   })
 })
 
+describe('VInputOTP — label', () => {
+  it('renders the label and names the group with it', () => {
+    const { container, getByRole } = renderOtp({ label: 'Sign-in code' })
+    const label = container.querySelector('.v-input-otp-label') as HTMLElement
+    const group = getByRole('group', { name: 'Sign-in code' })
+    expect(group.getAttribute('aria-labelledby')).toBe(label.id)
+    expect(group.hasAttribute('aria-label')).toBe(false)
+  })
+
+  it('without a label, the dictionary names the group', () => {
+    const { container, getByRole } = renderOtp()
+    expect(container.querySelector('.v-input-otp-label')).toBeNull()
+    expect(getByRole('group').getAttribute('aria-label')).toBe('Verification code')
+  })
+
+  it("a consumer's aria-label wins over the visible label", () => {
+    const { getByRole } = render(VInputOTP, {
+      props: { modelValue: '', label: 'Code' },
+      attrs: { 'aria-label': 'Code sent by SMS' },
+    })
+    const group = getByRole('group')
+    expect(group.getAttribute('aria-label')).toBe('Code sent by SMS')
+    expect(group.hasAttribute('aria-labelledby')).toBe(false)
+  })
+
+  it("a consumer's aria-labelledby wins over the visible label", () => {
+    const { getByRole } = render(VInputOTP, {
+      props: { modelValue: '', label: 'Code' },
+      attrs: { 'aria-labelledby': 'outside' },
+    })
+    const group = getByRole('group')
+    expect(group.getAttribute('aria-labelledby')).toBe('outside')
+    expect(group.hasAttribute('aria-label')).toBe(false)
+  })
+})
+
 describe('VInputOTP — hint', () => {
   it('renders the hint and ties it to the group', () => {
     const { container } = renderOtp({ hint: 'Sent to +33 6 12 34 56 78' })

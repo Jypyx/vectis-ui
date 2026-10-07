@@ -8,10 +8,12 @@ import VInputOTP from './VInputOTP.vue'
 const t = storyText({
   en: {
     code: (size: string) => `Code (${size})`,
+    label: 'Verification code',
     hint: 'Sent to +33 6 12 34 56 78, valid for 10 minutes.',
   },
   fr: {
     code: (size: string) => `Code (${size})`,
+    label: 'Code de vérification',
     hint: 'Envoyé au +33 6 12 34 56 78, valable 10 minutes.',
   },
 })
@@ -212,20 +214,28 @@ export const Disabled: Story = {
 }
 
 /**
- * `hint` puts a line of help under the boxes and ties it to the row for assistive technology,
- * exactly as on any other field.
+ * `label` names the row above the boxes and `hint` puts a line of help under them, both tied to
+ * the row for assistive technology, as on any other field.
  */
 export const Hint: Story = {
+  args: {
+    label: 'Email',
+  },
+
   render: (args) => ({
     components: { VInputOTP },
     setup: () => ({ args, t, code: ref('') }),
     template: `
-      <VInputOTP v-bind="args" v-model="code" :hint="t.hint" />
+      <VInputOTP v-bind="args" v-model="code" :label="t.label" :hint="t.hint" />
     `,
   }),
+
   play: async ({ canvasElement }) => {
     const group = canvasElement.querySelector('[role="group"]')!
+    const label = canvasElement.querySelector('.v-input-otp-label')!
     const hint = canvasElement.querySelector('.v-input-otp-hint')!
+    await expect(group).toHaveAttribute('aria-labelledby', label.id)
+    await expect(group).not.toHaveAttribute('aria-label')
     await expect(group).toHaveAttribute('aria-describedby', hint.id)
   },
 }

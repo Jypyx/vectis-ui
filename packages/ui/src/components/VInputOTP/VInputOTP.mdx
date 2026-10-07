@@ -98,15 +98,14 @@ automatically:
 
 <Canvas of={VInputOTPStories.Disabled} />
 
-## Hint
+## Label and hint
 
-`hint` puts a line of help under the boxes and ties it to the row through `aria-describedby`, so
-it is announced along with the row's own name. A consumer's own `aria-describedby` is added to
-rather than replaced.
+`label` displays a label above the boxes and names the row through `aria-labelledby`. A
+consumer's own `aria-label` or `aria-labelledby` takes precedence; without any of them, the row is
+named by the design system dictionary ("Verification code").
 
-It is the one text this component renders. `label` names the row for assistive technology and
-draws nothing: the instructions above the boxes belong to the page around them, which is what
-tells this field apart from VInput and the other text fields.
+`hint` puts a line of help under the boxes and ties it to the row through `aria-describedby`. A
+consumer's own `aria-describedby` is added to rather than replaced.
 
 <Canvas of={VInputOTPStories.Hint} />
 
@@ -124,7 +123,8 @@ hint back.
 
 ## Accessibility
 
-- The root is a `role="group"` named by `label` ("Verification code" by default).
+- The root is a `role="group"` named by `label`, or by `aria-label`, or by the dictionary
+  ("Verification code").
 - Each cell carries an `aria-label` "Character N of M" counted on the editable cells — the pattern's
   literals are decorative (`aria-hidden`) and never focusable.
 - Keyboard navigation: left/right arrows between cells, Home to the first cell, End to the first

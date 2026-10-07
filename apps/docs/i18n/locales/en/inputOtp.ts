@@ -4,7 +4,7 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Label and hint',
-      text: '<code>label</code> provides an accessible group name without visible text. <code>hint</code> displays help below the boxes.',
+      text: '<code>label</code> displays a label above the boxes and names the group. <code>hint</code> displays help below them.',
     },
     sizes: {
       title: 'Sizes',
@@ -57,7 +57,8 @@ export default {
         readonly: 'Prevents user changes while keeping the field focusable.',
         invalid:
           'Sets <code>aria-invalid</code> and the error style. Does not block form submission by itself.',
-        label: 'Accessible group name. Displays no text; defaults to the library dictionary.',
+        label:
+          'Label above the boxes, linked through <code>aria-labelledby</code>. Without it, the group is named by <code>aria-label</code> or the library dictionary.',
         error:
           'Error message shown in place of the hint. Sets <code>aria-invalid</code>, is linked through <code>aria-describedby</code> and is announced when it appears.',
         hint: 'Help text linked through <code>aria-describedby</code>.',

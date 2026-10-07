@@ -8,9 +8,8 @@ type ClassBinding = false | null | undefined | string | Record<string, unknown> 
 
 // @a11y
 /**
- * The attribute split of the wrapper-root pattern, for components whose root is only a
- * container: VInput, VTextarea, VTabs, VCombobox, VDataTable, VDateInput, VTimeInput, VSlider,
- * and the three choice controls, whose root holds the <label> and its hint.
+ * The attribute split of the wrapper-root pattern: `class` and `style` stay on a root that is
+ * only a container, and every other attribute goes to the functional element.
  */
 export function useRootAttrs(): {
   attrs: Record<string, unknown>

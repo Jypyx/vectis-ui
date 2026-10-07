@@ -163,11 +163,6 @@ provide(buttonGroupKey, rowContext)
 
 <style>
 @layer vectis.components {
-  /*
-   * `.v-overlay` is in both guards and neither is optional. A panel must not pass for a
-   * segment: VMenu renders its own as a SIBLING of its trigger.
-   */
-
   .v-input-group {
     display: flex;
     flex-direction: column;
@@ -196,7 +191,8 @@ provide(buttonGroupKey, rowContext)
    * The logic is written this way round because it is the one that enumerates nothing: a bare
    * VButton, or one under two companions, has no `.v-input-field`, so it never stretches
    * without our having to name it. The proportions belong to the consumer, an inline `flex` on
-   * the segment (style="flex: 0 0 9rem").
+   * the segment (style="flex: 0 0 9rem"). Every segment rule excludes `.v-overlay`: VMenu
+   * renders its panel as a sibling of its trigger, and a panel must not pass for a segment.
    */
   .v-input-group-row > :not(:where(.v-overlay)) {
     flex: none;

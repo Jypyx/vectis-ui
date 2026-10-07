@@ -15,7 +15,6 @@ import VTypography from '../VTypography/VTypography.vue'
 import { isDev } from '../../utils/env'
 import { joinIds } from '../../utils/ids'
 
-import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useMessages } from '../../i18n/state'
 
 /** The height of the boxes: 32, 40 or 48 pixels. */
@@ -54,8 +53,8 @@ interface InputOTPProps {
   /** Marks the code as wrong, which colours the boxes and tells assistive technology so. */
   invalid?: boolean
   /**
-   * What screen readers announce for the row as a whole. It falls back to the design system
-   * dictionary.
+   * The label above the boxes, which names the row. Without it, the row is named by its
+   * `aria-label` or by the design system dictionary.
    */
   label?: string
   /**
@@ -87,7 +86,6 @@ const props = withDefaults(defineProps<InputOTPProps>(), {
 })
 
 const m = useMessages()
-const ariaLabel = useAriaLabel(() => props.label ?? m.value.inputOTP.label)
 
 // @a11y
 /*
@@ -108,8 +106,23 @@ const groupAttrs = computed(() =>
 const nativeAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => NATIVE_ONLY.includes(key))),
 )
-// No `useFieldIds` here: the row is named by `aria-label` and renders no `<label>`, so the
-// field id that composable generates would have nothing to point it at.
+// @a11y
+// A `<label for>` names one control, and this names a row of them, so the visible label names
+// the group through `aria-labelledby`. A consumer's `aria-labelledby` or `aria-label` wins; with
+// neither and no label, the dictionary names the row.
+const labelId = useId()
+const labelledBy = computed(() => {
+  const own = attrs['aria-labelledby'] as string | undefined
+  if (own !== undefined) return own
+  return props.label && attrs['aria-label'] === undefined ? labelId : undefined
+})
+const ariaLabel = computed(() =>
+  labelledBy.value
+    ? undefined
+    : ((attrs['aria-label'] as string | undefined) ?? m.value.inputOTP.label),
+)
+
+// No `useFieldIds` here: its field id would have no single control to point at.
 const hintId = useId()
 const errorId = useId()
 const describedBy = computed(() =>
@@ -155,7 +168,7 @@ if (isDev) {
     console.warn("[VInputOTP] pattern without '#' — falling back to `length`.")
 }
 
-const filters: Record<NonNullable<InputOTPProps['format']>, RegExp> = {
+const filters: Record<InputOTPFormat, RegExp> = {
   numeric: /[^0-9]/g,
   alpha: /[^A-Z]/g,
   alphanumeric: /[^A-Z0-9]/g,
@@ -194,6 +207,12 @@ watch([model, slotCount], ([value, count]) => {
 
 /** The first empty box, or -1 once the code is complete. Every box before it is filled. */
 const firstEmpty = () => digits.value.findIndex((d) => !d)
+
+/** The furthest box the focus may reach: the first empty one, or the last of a full code. */
+function reachable() {
+  const empty = firstEmpty()
+  return empty === -1 ? slotCount.value - 1 : empty
+}
 
 /** Takes a character out and moves the following ones back, so no gap is left behind. */
 function removeAt(slot: number) {
@@ -297,9 +316,7 @@ function onFocus(slotIndex: number, event: FocusEvent) {
 
 // @keyboard
 function onKeydown(slotIndex: number, event: KeyboardEvent) {
-  const empty = firstEmpty()
-  // The furthest box the focus may reach: the first empty one, or the last of a full code.
-  const reachable = empty === -1 ? slotCount.value - 1 : empty
+  const last = reachable()
   let target: number | null = null
   switch (event.key) {
     case 'Backspace':
@@ -314,13 +331,13 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
       if (slotIndex > 0) target = slotIndex - 1
       break
     case 'ArrowRight':
-      if (slotIndex < reachable) target = slotIndex + 1
+      if (slotIndex < last) target = slotIndex + 1
       break
     case 'Home':
       target = 0
       break
     case 'End':
-      target = reachable
+      target = last
       break
   }
   if (target === null) return
@@ -328,17 +345,9 @@ function onKeydown(slotIndex: number, event: KeyboardEvent) {
   focusBox(target)
 }
 
-/*
- * `focus` goes to the first empty box rather than to the first box outright, which is where a
- * reader resuming a half-entered code expects to land.
- */
 defineExpose({
   /** Moves the focus to the first empty box, or to the last one when the code is complete. */
-  focus: (options?: FocusOptions) => {
-    const empty = digits.value.findIndex((d) => !d)
-    const target = empty === -1 ? slotCount.value - 1 : empty
-    inputAt(target)?.focus(options)
-  },
+  focus: (options?: FocusOptions) => inputAt(reachable())?.focus(options),
   /** Selects the box the focus is on, as clicking into one already does. */
   select: () => {
     const active = rootEl.value?.querySelector<HTMLInputElement>('.v-input-otp-input:focus')
@@ -356,6 +365,7 @@ defineExpose({
     class="v-input-otp v-control"
     role="group"
     :aria-label="ariaLabel"
+    :aria-labelledby="labelledBy"
     :aria-describedby="describedBy"
     :data-invalid="isInvalid ? '' : undefined"
     :data-size="size"
@@ -363,6 +373,10 @@ defineExpose({
     :data-disabled="disabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
   >
+    <VTypography v-if="label" :id="labelId" as="span" variant="label" class="v-input-otp-label">
+      {{ label }}
+    </VTypography>
+
     <div class="v-input-otp-boxes">
       <template v-for="(cell, i) in cells" :key="i">
         <input
@@ -405,7 +419,7 @@ defineExpose({
       :pattern="`.{${slotCount}}`"
       :disabled="disabled"
       :readonly="readonly || undefined"
-      @focus="focusBox(firstEmpty() === -1 ? 0 : firstEmpty())"
+      @focus="focusBox(reachable())"
     />
 
     <span v-if="error" :id="errorId" class="v-field-error v-input-otp-error">{{ error }}</span>
@@ -433,9 +447,8 @@ defineExpose({
      */
     --input-otp-font-size: var(--vectis-font-size-lg);
 
-    /* A column, so the hint sits under the boxes rather than beside them; the row itself
-       is the box below. `inline-flex` keeps the component's own width, and the start
-       alignment stops the hint from stretching the row to its own length. */
+    /* A column: label, boxes, then hint. `inline-flex` keeps the component's own width, and
+       the start alignment stops the label or the hint from stretching the row to its length. */
     display: inline-flex;
     flex-direction: column;
     align-items: start;
@@ -533,6 +546,7 @@ defineExpose({
   }
 
   .v-input-otp[data-disabled] .v-input-otp-literal,
+  .v-input-otp[data-disabled] .v-input-otp-label,
   .v-input-otp[data-disabled] .v-input-otp-hint {
     color: var(--vectis-color-text-subtle);
   }

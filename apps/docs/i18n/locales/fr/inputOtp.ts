@@ -4,7 +4,7 @@ export default {
   examples: {
     labelAndHint: {
       title: 'Libellé et aide',
-      text: '<code>label</code> fournit un nom accessible au groupe sans texte visible. <code>hint</code> affiche une aide sous les cases.',
+      text: '<code>label</code> affiche un libellé au-dessus des cases et nomme le groupe. <code>hint</code> affiche une aide en dessous.',
     },
     sizes: {
       title: 'Tailles',
@@ -60,7 +60,7 @@ export default {
         invalid:
           'Définit <code>aria-invalid</code> et le style d’erreur. Ne bloque pas à lui seul l’envoi du formulaire.',
         label:
-          'Nom accessible du groupe. N’affiche aucun texte ; utilise le dictionnaire de la bibliothèque par défaut.',
+          'Libellé au-dessus des cases, lié par <code>aria-labelledby</code>. Sans lui, le groupe est nommé par <code>aria-label</code> ou par le dictionnaire de la bibliothèque.',
         error:
           'Message d’erreur affiché à la place de l’aide. Pose <code>aria-invalid</code>, est lié par <code>aria-describedby</code> et est annoncé quand il apparaît.',
         hint: 'Texte d’aide lié par <code>aria-describedby</code>.',
