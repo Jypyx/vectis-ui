@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// @a11y @keyboard @core
+// @keyboard @a11y @core
 /**
  * Implement roving grid focus and date selection because the platform has no composable,
  * stylable date grid. VDateInput reuses this calendar logic.

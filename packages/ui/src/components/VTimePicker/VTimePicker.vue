@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// @a11y @keyboard @core
+// @keyboard @a11y @core
 /**
  * CSS places clock numerals and the hand. JavaScript maps pointer angles and keyboard steps to
  * a time because HTML has no interactive clock-face primitive.

@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="E extends CalendarEvent">
-// @a11y @keyboard @core
+// @keyboard @a11y @core
 /**
  * Render event buttons inside their owning grid cells for ARIA and keyboard navigation. Borders
  * preserve time rulings in forced colours; shared gestures manage editing.

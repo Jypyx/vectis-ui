@@ -21,8 +21,8 @@ function iconClickHandlers(): { start: boolean; end: boolean } {
 }
 
 /**
- * The start-icon listener a field COMPOSED on top of VInput: VCombobox, VDateInput, VTimeInput,
- * VFileInput, binds onto that inner VInput, ready to spread beside the consumer's attributes.
+ * The start-icon listener a field composed on top of VInput binds onto that inner VInput, ready
+ * to spread beside the consumer's attributes. Absent when the consumer attached none.
  */
 export function iconStartListener(
   relay: (event: MouseEvent) => void,

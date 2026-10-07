@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// @a11y @keyboard @core
+// @keyboard @a11y @core
 /**
  * Implement ARIA tab selection and roving focus over native buttons. Overflow measurements
  * control scrolling arrows because CSS cannot expose overflow state.

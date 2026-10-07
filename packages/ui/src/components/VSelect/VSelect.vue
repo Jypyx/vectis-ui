@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// @a11y @keyboard @core
+// @keyboard @a11y @core
 /**
  * A select-only combobox: a native button keeps DOM focus and moves aria-activedescendant through
  * the options, since a native `<select>` cannot draw its list with the design system on every

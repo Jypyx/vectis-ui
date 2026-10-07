@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// @a11y @keyboard @core
+// @keyboard @a11y @core
 /**
  * Native auto popovers form the submenu stack. JavaScript maintains open models, roving focus
  * and explicit source invokers when opening imperatively.
@@ -86,7 +86,7 @@ function onToggle(event: Event) {
   emit('toggle', shown.value)
 }
 
-// @a11y @keyboard
+// @keyboard @a11y
 /**
  * The items the keyboard may move to. Two exclusions matter: `:disabled` only ever matches a
  * `<button>`, so an inert link is recognized by its `aria-disabled` instead; and the final

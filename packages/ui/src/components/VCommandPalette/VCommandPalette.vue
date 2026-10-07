@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// @a11y @keyboard @core
+// @keyboard @a11y @core
 /**
  * A native modal `<dialog>` holding a search field and the listbox it filters. The focus stays
  * in the field, which points at the active command through aria-activedescendant: no native

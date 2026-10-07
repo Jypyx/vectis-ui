@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="E extends CalendarEvent">
-// @a11y @keyboard @core
+// @keyboard @a11y @core
 /**
  * Month cells summarize events and overflow counts. Shared gesture logic supplies dragging and
  * keyboard grabs; grid focus remains in this view.

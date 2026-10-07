@@ -37,7 +37,7 @@ export interface UseFieldPanelOptions {
   openOnFocus?: () => boolean
 }
 
-// @a11y @keyboard @core
+// @keyboard @a11y @core
 /**
  * The panel is written imperatively and read back by model. Bind `open` as `v-model:open` so
  * the DOM feeds it, but the write must stay synchronous: the `rAF` that moves focus assumes the

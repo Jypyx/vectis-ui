@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// @a11y @keyboard @core
+// @keyboard @a11y @core
 /**
  * A hierarchy following the ARIA tree pattern. The rows are rendered flat, in display order, their
  * depth carried by `aria-level`, `aria-setsize` and `aria-posinset`: no native element folds a tree
@@ -329,7 +329,7 @@ function bindRow(value: ItemValue, el: Element | ComponentPublicInstance | null)
   } else rowEls.delete(value)
 }
 
-// @a11y @keyboard
+// @keyboard @a11y
 /**
  * The single tab stop: the node last focused, or its closest ancestor still on screen once a
  * branch above it folds; before any focus, the first selected node on screen, then the current

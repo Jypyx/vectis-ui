@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// @a11y @keyboard @core
+// @keyboard @a11y @core
 /**
  * Keep DOM focus on the field and move aria-activedescendant through options. JavaScript
  * supplies filtering, selection and keyboard navigation unavailable to native text inputs.

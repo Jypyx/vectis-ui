@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// @a11y @keyboard @core
+// @keyboard @a11y @core
 /**
  * The native `contextmenu` event covers the right click, the long press on Android and the
  * Menu key. JavaScript places a zero-size anchor at the pointer so CSS anchoring can position

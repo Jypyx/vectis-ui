@@ -1,4 +1,4 @@
-// @a11y @keyboard
+// @keyboard @a11y
 /**
  * Model a listbox whose DOM focus stays on its field, for VCombobox and VSelect: the field names
  * the highlighted option through aria-activedescendant and moves it by hand, and the panel renders

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// @a11y @keyboard @core
+// @keyboard @a11y @core
 /**
  * A colour picker built from native ranges: the hue and alpha tracks are `<input type="range">`,
  * and the saturation-brightness area holds two hidden ones, one per axis, which assistive
