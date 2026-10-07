@@ -4,11 +4,11 @@
  * machine's time zone.
  */
 
-import { memo } from '../../utils/memo'
+import { dateFormatter } from '../../utils/date'
 
 /** The full names of the twelve months, in January-to-December order. */
 export function monthNames(locale: string): string[] {
-  const fmt = new Intl.DateTimeFormat(locale, MONTH_LONG)
+  const fmt = dateFormatter(locale, MONTH_LONG)
   return Array.from({ length: 12 }, (_, i) => fmt.format(Date.UTC(2021, i, 1)))
 }
 
@@ -31,28 +31,13 @@ export function monthNamesCompact(locale: string): string[] {
     return chars.length <= 4 ? n : chars.slice(0, 3).join('') + '.'
   })
   if (new Set(cut).size === 12) return cut
-  const fmt = new Intl.DateTimeFormat(locale, { ...MONTH_LONG, month: 'short' })
+  const fmt = dateFormatter(locale, { ...MONTH_LONG, month: 'short' })
   return Array.from({ length: 12 }, (_, i) => fmt.format(Date.UTC(2021, i, 1)))
-}
-
-/**
- * One formatter kept per locale and set of options, for the lifetime of the module: the
- * two functions below are asked one month at a time, and building an `Intl` formatter
- * costs far more than using one.
- */
-const formatters = new Map<string, Intl.DateTimeFormat>()
-
-function formatterFor(locale: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
-  return memo(
-    formatters,
-    `${locale}|${JSON.stringify(options)}`,
-    () => new Intl.DateTimeFormat(locale, options),
-  )
 }
 
 /** The full name of one month, 0 being January. */
 export function monthName(locale: string, month0: number): string {
-  return formatterFor(locale, MONTH_LONG).format(Date.UTC(2021, month0, 1))
+  return dateFormatter(locale, MONTH_LONG).format(Date.UTC(2021, month0, 1))
 }
 
 /**
@@ -63,7 +48,7 @@ export function monthName(locale: string, month0: number): string {
 export function monthYearName(locale: string, year: number, month0: number): string {
   const at = new Date(Date.UTC(2021, month0, 1))
   at.setUTCFullYear(year)
-  return formatterFor(locale, {
+  return dateFormatter(locale, {
     ...MONTH_LONG,
     year: 'numeric',
     numberingSystem: 'latn',

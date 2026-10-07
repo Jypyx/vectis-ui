@@ -25,6 +25,8 @@ export default {
         hideEyeDropper:
           'Masque la pipette, affichée sinon là où le navigateur prend en charge l’API <code>EyeDropper</code>.',
         disabled: 'Désactive toutes les commandes.',
+        readonly:
+          'Affiche la couleur sans permettre de la modifier. Les commandes restent focalisables et la valeur est toujours envoyée.',
         label: 'Nom accessible du sélecteur. Par défaut, celui du dictionnaire de la bibliothèque.',
         name: 'Nom du champ à l’envoi du formulaire, par un input caché.',
         vModel: 'Couleur écrite selon <code>format</code>, ou <code>null</code> avant tout choix.',

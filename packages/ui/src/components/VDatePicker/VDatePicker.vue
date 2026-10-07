@@ -36,6 +36,7 @@ import { monthName, monthNames, monthNamesCompact, monthYearName } from './names
 import { PICKER_COLUMNS, dayStep, gridDelta } from './keyboard'
 
 import { toggleValue } from '../../utils/array'
+import { isRtl } from '../../utils/direction'
 import { isDev } from '../../utils/env'
 import { hostWarnsKey } from '../../utils/hostWarns'
 import { resolveMatcher } from '../../utils/matcher'
@@ -251,9 +252,8 @@ const multipleValues = computed<string[]>(() =>
 )
 
 // A range start or a list entry is validated here, the way the single value is validated
-// upstream. Those two reach this component exactly as the consumer wrote them, and a malformed
-// one (`{ start: 'foo' }`) made the focused date unparseable: the month arrows assert that
-// parse, so the first render threw.
+// upstream: both arrive as the consumer wrote them, and the month arrows assert that the focused
+// date parses, so a malformed one (`{ start: 'foo' }`) must never become it.
 function initialFocus(): string {
   if (singleValue.value) return singleValue.value
   const start = rangeValue.value.start
@@ -288,9 +288,9 @@ const today = ref<string | null>(null)
  * With nothing selected, the month on display is read from the clock at setup, on the server
  * and again in the browser, and the two can disagree: a page prerendered in September and
  * opened in October, or a server a timezone behind its visitor on the last evening of a month.
- * Hydration then patches the TEXT and keeps the server's ATTRIBUTES, so the month button said
- * "Oct." on screen and "September" to a screen reader, and the day ids `focusDay` looks up
- * named days that were not there.
+ * Hydration patches the text but keeps the server's attributes, which would leave the month
+ * button's accessible name and the day ids `focusDay` looks up on the server's month: bumping
+ * the epoch re-renders the header and the grid once mounted.
  */
 const renderEpoch = ref(0)
 onMounted(() => {
@@ -543,7 +543,7 @@ function onDaysKeydown(event: KeyboardEvent) {
   // How far the focused day sits from the start of its week, which is exactly what
   // Home and End have to step back and forward by.
   const offset = (d.getDay() - resolvedFirstDay.value + 7) % 7
-  const step = dayStep(event.key, event.shiftKey, offset)
+  const step = dayStep(event.key, event.shiftKey, offset, isRtl(event.currentTarget as Element))
   if (!step) return
   event.preventDefault()
   goTo(
@@ -585,7 +585,7 @@ function onViewKeydown(
     choose(focused.value)
     return
   }
-  const delta = gridDelta(event.key)
+  const delta = gridDelta(event.key, isRtl(event.currentTarget as Element))
   if (delta === undefined) return
   event.preventDefault()
   // A cell the bounds rule out is a disabled button, which cannot take the focus: landing on it

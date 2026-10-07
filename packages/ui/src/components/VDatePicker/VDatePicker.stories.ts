@@ -248,7 +248,7 @@ export const States: Story = {
   },
 }
 
-/** The month arrows in a right-to-left page. */
+/** The month arrows and the inline arrow keys in a right-to-left page. */
 export const Rtl: Story = {
   globals: { direction: 'rtl' },
   args: { modelValue: '2026-06-10' },
@@ -260,5 +260,13 @@ export const Rtl: Story = {
     // The picker is a named group, so it has an accessible name of its own rather than
     // relying on whatever contains it.
     await expect(canvasElement.querySelector('.v-date-picker')).toHaveAttribute('aria-label')
+
+    // The grid is mirrored, so ArrowRight moves to the day drawn on the right: the day before.
+    const selected = canvasElement.querySelector<HTMLElement>('button[data-selected]')!
+    selected.focus()
+    await userEvent.keyboard('{ArrowRight}')
+    await expect(document.activeElement?.textContent?.trim()).toBe('9')
+    await userEvent.keyboard('{ArrowLeft}{ArrowLeft}')
+    await expect(document.activeElement?.textContent?.trim()).toBe('11')
   },
 }

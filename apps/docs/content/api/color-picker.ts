@@ -15,6 +15,7 @@ export default {
         { name: 'hideInput', type: 'boolean', default: 'false' },
         { name: 'hideEyeDropper', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
+        { name: 'readonly', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },
         { name: 'name', type: 'string' },
         { name: 'v-model', key: 'vModel', type: 'string | null', default: 'null' },

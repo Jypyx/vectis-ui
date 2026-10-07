@@ -26,6 +26,7 @@ const meta = {
     hideInput: { control: 'boolean' },
     hideEyeDropper: { control: 'boolean' },
     disabled: { control: 'boolean' },
+    readonly: { control: 'boolean' },
   },
   args: {
     format: 'hex',
@@ -160,6 +161,22 @@ export const Drag: Story = {
         'Saturation 100%, brightness 100%',
       ),
     )
+  },
+}
+
+/** `readonly` shows the colour without letting it change: the controls stay focusable. */
+export const Readonly: Story = {
+  args: { readonly: true, modelValue: '#3b82f6' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const hue = canvas.getByRole('slider', { name: 'Hue' }) as HTMLInputElement
+    await expect(hue).toBeEnabled()
+    await expect(hue).toHaveAttribute('aria-readonly', 'true')
+    const before = hue.value
+    hue.focus()
+    await userEvent.keyboard('{ArrowRight}{ArrowRight}')
+    await expect(hue.value).toBe(before)
+    await expect(canvas.getByRole('textbox', { name: 'Colour value' })).toHaveAttribute('readonly')
   },
 }
 

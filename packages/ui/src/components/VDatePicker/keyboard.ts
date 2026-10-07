@@ -13,20 +13,22 @@ const DAYS_PER_WEEK = 7
 export type DayStep = { days: number } | { months: number }
 
 /**
- * The step a key produces in the days view, given the key itself, whether Shift is held, and
- * how far the focused date sits from the start of its week: the last being what Home and End
- * need to land on the right day.
+ * The step a key produces in the days view, given the key itself, whether Shift is held, how
+ * far the focused date sits from the start of its week (what Home and End need to land on the
+ * right day), and whether the grid reads right to left, which mirrors the inline arrows.
  */
 export function dayStep(
   key: string,
   shiftKey: boolean,
   weekdayOffset: number,
+  rtl = false,
 ): DayStep | undefined {
+  const inline = rtl ? -1 : 1
   switch (key) {
     case 'ArrowRight':
-      return { days: 1 }
+      return { days: inline }
     case 'ArrowLeft':
-      return { days: -1 }
+      return { days: -inline }
     case 'ArrowDown':
       return { days: DAYS_PER_WEEK }
     case 'ArrowUp':
@@ -50,15 +52,16 @@ export function dayStep(
 
 /**
  * The step a key produces in the months and years views, expressed as a movement of a flat
- * index over a grid `PICKER_COLUMNS` wide. `undefined` again means the key is not this table's
- * business.
+ * index over a grid `PICKER_COLUMNS` wide, the inline arrows mirrored in a right-to-left grid.
+ * `undefined` again means the key is not this table's business.
  */
-export function gridDelta(key: string): number | undefined {
+export function gridDelta(key: string, rtl = false): number | undefined {
+  const inline = rtl ? -1 : 1
   switch (key) {
     case 'ArrowRight':
-      return 1
+      return inline
     case 'ArrowLeft':
-      return -1
+      return -inline
     case 'ArrowDown':
       return PICKER_COLUMNS
     case 'ArrowUp':

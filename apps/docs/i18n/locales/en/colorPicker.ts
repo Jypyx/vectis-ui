@@ -25,6 +25,8 @@ export default {
         hideEyeDropper:
           'Hides the eyedropper button, otherwise shown where the browser supports the <code>EyeDropper</code> API.',
         disabled: 'Disables every control.',
+        readonly:
+          'Shows the colour without letting it change. Controls stay focusable and the value is still submitted.',
         label: 'Accessible name of the picker. Defaults to the library dictionary.',
         name: 'Field name in form submissions, through a hidden input.',
         vModel: 'Colour written in <code>format</code>, or <code>null</code> before one is chosen.',

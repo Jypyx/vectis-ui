@@ -45,6 +45,11 @@ interface ColorPickerProps {
   hideEyeDropper?: boolean
   /** Makes the picker unusable. */
   disabled?: boolean
+  /**
+   * Shows the colour without letting it be changed. The controls stay focusable and announce
+   * their values, which separates it from `disabled`, and the value is still submitted.
+   */
+  readonly?: boolean
   /** What the picker is called. It falls back to the design system dictionary. */
   label?: string
   /** The name the value is sent under in a form. */
@@ -58,6 +63,7 @@ const props = withDefaults(defineProps<ColorPickerProps>(), {
   hideInput: false,
   hideEyeDropper: false,
   disabled: false,
+  readonly: false,
   label: undefined,
   name: undefined,
 })
@@ -131,6 +137,8 @@ function onAreaPointerdown(event: PointerEvent) {
   if (props.disabled || event.button !== 0) return
   // The focus is moved by hand, without the scroll a default focus on mousedown could cause.
   event.preventDefault()
+  saturationEl.value?.focus({ preventScroll: true })
+  if (props.readonly) return
   dragging = event.pointerId
   // @fallback
   // Capture keeps the drag going outside the area; synthetic events may not reference a
@@ -140,7 +148,6 @@ function onAreaPointerdown(event: PointerEvent) {
   } catch {
     /* Synthetic pointers cannot be captured. */
   }
-  saturationEl.value?.focus({ preventScroll: true })
   moveTo(event)
 }
 
@@ -159,6 +166,7 @@ function onAreaPointerup(event: PointerEvent) {
  * move its own axis on every arrow.
  */
 function onAreaKeydown(event: KeyboardEvent) {
+  if (props.readonly) return
   const step = event.shiftKey ? 10 : 1
   const moves: Record<string, [axis: 's' | 'v', delta: number]> = {
     ArrowLeft: ['s', -step],
@@ -179,7 +187,19 @@ function onAreaKeydown(event: KeyboardEvent) {
 
 /** What a native range reports on its own: a drag on a track, or assistive technology. */
 function onRangeInput(channel: keyof Hsva, scale: number, event: Event) {
-  write({ ...hsva.value, [channel]: Number((event.target as HTMLInputElement).value) / scale })
+  const el = event.target as HTMLInputElement
+  // @core
+  // A range has no native `readonly`: the move it has already made is put back.
+  if (props.readonly) {
+    el.value = String(Math.round(hsva.value[channel] * scale))
+    return
+  }
+  write({ ...hsva.value, [channel]: Number(el.value) / scale })
+}
+
+/** A read-only swatch refuses the click, which is what checks a radio, arrows included. */
+function onSwatchClick(event: MouseEvent) {
+  if (props.readonly) event.preventDefault()
 }
 
 const shownFormat = ref<ColorFormat>(props.format)
@@ -294,6 +314,7 @@ defineExpose({
     role="group"
     :aria-label="ariaLabel"
     :data-disabled="disabled ? '' : undefined"
+    :data-readonly="readonly ? '' : undefined"
     :style="rootStyle"
   >
     <div
@@ -313,6 +334,7 @@ defineExpose({
         :value="Math.round(hsva.s * 100)"
         :aria-label="m.colorPicker.saturation"
         :aria-valuetext="areaValueText"
+        :aria-readonly="readonly || undefined"
         :disabled="disabled"
         @input="onRangeInput('s', 100, $event)"
         @keydown="onAreaKeydown"
@@ -327,6 +349,7 @@ defineExpose({
         :value="Math.round(hsva.v * 100)"
         :aria-label="m.colorPicker.brightness"
         :aria-valuetext="areaValueText"
+        :aria-readonly="readonly || undefined"
         :disabled="disabled"
         @input="onRangeInput('v', 100, $event)"
         @keydown="onAreaKeydown"
@@ -341,7 +364,7 @@ defineExpose({
         :icon="colorizeIcon"
         :label="m.colorPicker.eyeDropper"
         size="sm"
-        :disabled="disabled"
+        :disabled="disabled || readonly"
         @click="pickFromScreen"
       />
       <span class="v-color-picker-preview" aria-hidden="true" />
@@ -354,6 +377,7 @@ defineExpose({
           :value="Math.round(hsva.h)"
           :aria-label="m.colorPicker.hue"
           :aria-valuetext="degrees.format(Math.round(hsva.h))"
+          :aria-readonly="readonly || undefined"
           :disabled="disabled"
           @input="onRangeInput('h', 1, $event)"
         />
@@ -366,6 +390,7 @@ defineExpose({
           :value="Math.round(hsva.a * 100)"
           :aria-label="m.colorPicker.alpha"
           :aria-valuetext="percent.format(Math.round(hsva.a * 100) / 100)"
+          :aria-readonly="readonly || undefined"
           :disabled="disabled"
           @input="onRangeInput('a', 100, $event)"
         />
@@ -390,6 +415,7 @@ defineExpose({
         autocomplete="off"
         spellcheck="false"
         :disabled="disabled"
+        :readonly="readonly"
         @change="commitField"
         @keydown="onFieldKeydown"
       />
@@ -414,6 +440,8 @@ defineExpose({
           :form="`${swatchGroup}-none`"
           :value="item.color"
           :checked="model !== null && sameColor(item.rgba, rgba, alpha)"
+          :aria-disabled="readonly || undefined"
+          @click="onSwatchClick"
           @change="item.rgba && writeRgba(item.rgba)"
         />
         <span class="v-color-picker-chip" />
@@ -679,6 +707,12 @@ defineExpose({
   .v-color-picker[data-disabled]
     :is(.v-color-picker-area, .v-color-picker-track, .v-color-picker-swatch) {
     cursor: not-allowed;
+  }
+
+  /* A read-only picker is still read, so it keeps the ordinary cursor, as VTimePicker does. */
+  .v-color-picker[data-readonly]
+    :is(.v-color-picker-area, .v-color-picker-track, .v-color-picker-swatch) {
+    cursor: default;
   }
 }
 </style>

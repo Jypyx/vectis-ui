@@ -197,19 +197,22 @@ export function weekdayNames(
   firstDayOfWeek: number,
   weekday: 'short' | 'long' = 'short',
 ): string[] {
-  const fmt = new Intl.DateTimeFormat(locale, { weekday, timeZone: 'UTC' })
+  const fmt = dateFormatter(locale, { weekday, timeZone: 'UTC' })
   return Array.from({ length: 7 }, (_, i) =>
     fmt.format(REF_SUNDAY + ((firstDayOfWeek + i) % 7) * MS_DAY),
   )
 }
 
 /**
- * One formatter kept per locale and set of options, for the lifetime of the module; the same
- * `formatterFor` idiom as in `utils/file.ts` and `utils/time.ts`.
+ * One formatter kept per locale and set of options, for the lifetime of the module: building an
+ * `Intl` formatter costs far more than using one.
  */
 const formatters = new Map<string, Intl.DateTimeFormat>()
 
-function formatterFor(locale: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+export function dateFormatter(
+  locale: string,
+  options: Intl.DateTimeFormatOptions,
+): Intl.DateTimeFormat {
   return memo(
     formatters,
     `${locale}|${JSON.stringify(options)}`,
@@ -228,7 +231,7 @@ export function formatDateDisplay(
   options: Intl.DateTimeFormatOptions,
 ): string {
   const d = parseISO(iso)
-  return d ? formatterFor(locale, options).format(d) : ''
+  return d ? dateFormatter(locale, options).format(d) : ''
 }
 
 /** A period written out for the reader. */
@@ -241,7 +244,7 @@ export function formatDisplayRange(
   const a = parseISO(start)
   const b = parseISO(end)
   if (!a || !b) return ''
-  const fmt = formatterFor(locale, options)
+  const fmt = dateFormatter(locale, options)
   const order = compareISO(start, end)
   if (order === 0) return fmt.format(a)
   return order < 0 ? fmt.formatRange(a, b) : fmt.formatRange(b, a)

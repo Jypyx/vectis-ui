@@ -206,6 +206,52 @@ describe('VColorPicker', () => {
     expect(container.querySelector('fieldset')!.disabled).toBe(true)
   })
 
+  describe('readonly', () => {
+    it('keeps every control focusable and says it is read-only', () => {
+      const { getAllByRole, getByRole } = renderPicker('readonly alpha')
+      for (const slider of getAllByRole<HTMLInputElement>('slider')) {
+        expect(slider.disabled).toBe(false)
+        expect(slider.getAttribute('aria-readonly')).toBe('true')
+      }
+      expect(getByRole<HTMLInputElement>('textbox', { name: 'Colour value' }).readOnly).toBe(true)
+    })
+
+    it('puts back what a native range reports, and writes nothing', async () => {
+      const { value, slider } = renderPicker('readonly')
+      const hue = slider('Hue')
+      const before = hue.value
+      await fireEvent.update(hue, '120')
+      expect(hue.value).toBe(before)
+      expect(value.value).toBe('#3b82f6')
+    })
+
+    it('refuses the swatches and disables the eyedropper', async () => {
+      vi.stubGlobal(
+        'EyeDropper',
+        class {
+          open = () => Promise.resolve({ sRGBHex: '#00ff00' })
+        },
+      )
+      const { value, container, findByRole } = renderPicker('readonly :swatches="[\'#ff0000\']"')
+      const swatch = container.querySelector<HTMLInputElement>('input[type="radio"]')!
+      expect(swatch.getAttribute('aria-disabled')).toBe('true')
+      await fireEvent.click(swatch)
+      expect(swatch.checked).toBe(false)
+      expect(value.value).toBe('#3b82f6')
+      const button = await findByRole<HTMLButtonElement>('button', {
+        name: 'Pick a colour from the screen',
+      })
+      expect(button.disabled).toBe(true)
+    })
+
+    it('still submits the value', () => {
+      const { container } = renderPicker('readonly name="brand"')
+      expect(container.querySelector<HTMLInputElement>('input[type="hidden"]')!.value).toBe(
+        '#3b82f6',
+      )
+    })
+  })
+
   describe('eyedropper', () => {
     it('is absent where the browser has no EyeDropper', () => {
       expect(renderPicker().queryByRole('button')).toBeNull()

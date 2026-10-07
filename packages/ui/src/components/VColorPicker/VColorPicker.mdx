@@ -56,6 +56,15 @@ screen, keeping the opacity already chosen. Elsewhere the button is not rendered
 
 <Canvas of={VColorPickerStories.Drag} />
 
+## States
+
+`readonly` shows the colour without letting it change. The ranges stay focusable and announce
+their values with `aria-readonly`, the field is read-only, the swatches refuse the click and the
+eyedropper is disabled. The format menu still changes how the field writes the colour, and the
+value is still submitted with `name`. `disabled` makes every control unusable.
+
+<Canvas of={VColorPickerStories.Readonly} />
+
 <Canvas of={VColorPickerStories.Disabled} />
 
 ## Accessibility

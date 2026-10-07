@@ -59,3 +59,18 @@ describe('gridDelta', () => {
     expect(gridDelta('Enter')).toBeUndefined()
   })
 })
+
+describe('right to left', () => {
+  it('mirrors the inline arrows of the days view, not the block ones', () => {
+    expect(dayStep('ArrowRight', false, 0, true)).toEqual({ days: -1 })
+    expect(dayStep('ArrowLeft', false, 0, true)).toEqual({ days: 1 })
+    expect(dayStep('ArrowDown', false, 0, true)).toEqual({ days: 7 })
+    expect(dayStep('Home', false, 2, true)).toEqual({ days: -2 })
+  })
+
+  it('mirrors the inline arrows of the months and years views', () => {
+    expect(gridDelta('ArrowRight', true)).toBe(-1)
+    expect(gridDelta('ArrowLeft', true)).toBe(1)
+    expect(gridDelta('ArrowDown', true)).toBe(PICKER_COLUMNS)
+  })
+})
