@@ -12,7 +12,7 @@ import { isDev } from '../utils/env'
  * Whether the component being set up was handed a `@click:icon-start` / `@click:icon-end`
  * listener, in either spelling.
  */
-export function iconClickHandlers(): { start: boolean; end: boolean } {
+function iconClickHandlers(): { start: boolean; end: boolean } {
   const vnodeProps = getCurrentInstance()?.vnode.props ?? {}
   return {
     start: 'onClick:iconStart' in vnodeProps || 'onClick:icon-start' in vnodeProps,

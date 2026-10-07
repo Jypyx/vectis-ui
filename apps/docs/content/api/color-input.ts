@@ -24,7 +24,7 @@ export default {
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'clearable', type: 'boolean', default: 'false' },
         { name: 'clearLabel', type: 'string' },
-        { name: 'pickerButtonLabel', type: 'string' },
+        { name: 'pickerLabel', type: 'string' },
         { name: 'placement', type: 'ColorInputPlacement', values: "'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'", default: "'bottom-start'" },
         { name: 'v-model', key: 'vModel', type: 'string | null', default: 'null' },
       ],

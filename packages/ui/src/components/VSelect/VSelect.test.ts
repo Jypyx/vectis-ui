@@ -55,6 +55,24 @@ describe('VSelect', () => {
     )
   })
 
+  it('loading puts an announced spinner in the place of the chevron', async () => {
+    const { container, getByRole, rerender } = renderSelect({ loading: true })
+    const field = container.querySelector('.v-input-field')!
+    expect(field.querySelector('.v-listbox-chevron')).toBeNull()
+    expect(getByRole('status').textContent).toBe('Loading…')
+    await rerender({ loading: true, loadingText: 'Fetching countries' })
+    expect(getByRole('status').textContent).toBe('Fetching countries')
+    await rerender({ loading: false })
+    expect(field.querySelector('.v-listbox-chevron')).not.toBeNull()
+  })
+
+  it('a loading list still opens', async () => {
+    const { getByRole } = renderSelect({ loading: true })
+    const trigger = getByRole('combobox')
+    await fireEvent.keyDown(trigger, { key: 'ArrowDown' })
+    expect(trigger.getAttribute('aria-expanded')).toBe('true')
+  })
+
   it('is named by its label, which points at the button', () => {
     const { getByRole } = render(VSelect, { props: { options: OPTIONS, label: 'Country' } })
     expect(getByRole('combobox', { name: 'Country' }).tagName).toBe('BUTTON')

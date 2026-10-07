@@ -128,7 +128,7 @@ interface FileInputProps {
    * What the button at the end of the field does, in words. It names the button
    * `pickerIcon` renders, and falls back to the design system dictionary.
    */
-  pickerIconLabel?: string
+  pickerLabel?: string
   /**
    * Shows a spinner at the end of the field, in place of the attach icon, while an upload is
    * under way, typically.
@@ -168,7 +168,7 @@ const props = withDefaults(defineProps<FileInputProps>(), {
   placeholder: undefined,
   iconStart: undefined,
   iconStartLabel: undefined,
-  pickerIconLabel: undefined,
+  pickerLabel: undefined,
   loading: false,
   loadingText: undefined,
   clearable: false,
@@ -302,7 +302,7 @@ const clearVisible = computed(() => canClear(props, resolvedDisabled.value, mode
 const endIcon = computed<IconSource | undefined>(() =>
   props.readonly ? undefined : props.pickerIcon,
 )
-const endIconLabel = computed(() => props.pickerIconLabel ?? m.value.fileInput.openPicker)
+const endIconLabel = computed(() => props.pickerLabel ?? m.value.fileInput.openPicker)
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.fileInput.clear)
 
 const totalSize = computed(() => model.value.reduce((sum, file) => sum + file.size, 0))

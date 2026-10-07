@@ -1,4 +1,4 @@
-import { onBeforeUnmount, provide, ref, useId, watch } from 'vue'
+import { computed, onBeforeUnmount, provide, ref, useId, watch } from 'vue'
 import type { Ref } from 'vue'
 
 import { NO_BUTTON_GROUP, buttonGroupKey } from '../components/VButton/context'
@@ -188,9 +188,31 @@ export function useFieldPanel(options: UseFieldPanelOptions) {
     }
   }
 
+  // @a11y
+  /**
+   * The field's attributes with the popup wiring spread over them, which makes the field the
+   * combobox the pattern calls for. Spread rather than bound after `v-bind`, where a binding wins
+   * even when `undefined`: without a panel the wiring adds no key and the consumer's own `role`
+   * or `aria-controls` stays.
+   */
+  function popupAttrs(base: () => Record<string, unknown>, hasPanel: () => boolean) {
+    return computed(() =>
+      hasPanel()
+        ? {
+            ...base(),
+            role: 'combobox',
+            'aria-haspopup': 'dialog',
+            'aria-expanded': open.value,
+            'aria-controls': panelId,
+          }
+        : base(),
+    )
+  }
+
   return {
     open,
     panelId,
+    popupAttrs,
     openPanel,
     closePanel,
     closeAndFocus,

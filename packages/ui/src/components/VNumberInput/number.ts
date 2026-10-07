@@ -54,7 +54,7 @@ export function decimalsOf(value: number): number {
 }
 
 /** Rounds to a number of decimals, which is what removes the drift of 0.1 + 0.2. */
-export function roundTo(value: number, decimals: number): number {
+function roundTo(value: number, decimals: number): number {
   return Number(value.toFixed(Math.min(decimals, 100)))
 }
 

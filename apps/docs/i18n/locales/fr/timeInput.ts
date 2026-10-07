@@ -75,7 +75,7 @@ export default {
         iconStart:
           'Icône de début. Un écouteur <code>@click:icon-start</code> en fait un bouton ; fournissez <code>iconStartLabel</code>.',
         iconStartLabel: 'Nom accessible du bouton d’icône de début.',
-        pickerIconLabel:
+        pickerLabel:
           'Nom accessible du bouton horloge. Utilise le dictionnaire de la bibliothèque par défaut.',
         loading: 'Remplace l’icône horloge par un indicateur sans désactiver le champ.',
         loadingText:

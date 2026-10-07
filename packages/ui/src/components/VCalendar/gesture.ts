@@ -25,13 +25,13 @@ const GHOST_PREFIX = '__vectis-calendar-ghost__'
  * The id the ghost of a dragged event carries. It has to DIFFER from the event's own, or the
  * two would collide in every map the layout keys by id and only one would ever be drawn.
  */
-export const ghostIdOf = (id: CalendarEventId) => `${GHOST_PREFIX}${id}`
+const ghostIdOf = (id: CalendarEventId) => `${GHOST_PREFIX}${id}`
 /** The dragged event's own id, read back off its ghost's. */
-export const originalIdOf = (id: CalendarEventId) => String(id).slice(GHOST_PREFIX.length)
-export const isGhostId = (id: CalendarEventId) => String(id).startsWith(GHOST_PREFIX)
+const originalIdOf = (id: CalendarEventId) => String(id).slice(GHOST_PREFIX.length)
+const isGhostId = (id: CalendarEventId) => String(id).startsWith(GHOST_PREFIX)
 
 /** The id a card belongs to, read back off the DOM. */
-export function cardIdOf(card: HTMLElement, has: (id: CalendarEventId) => boolean) {
+function cardIdOf(card: HTMLElement, has: (id: CalendarEventId) => boolean) {
   const raw = card.dataset.eventId ?? ''
   return has(raw) ? raw : Number(raw)
 }
@@ -96,7 +96,7 @@ export type GestureInit<G extends GestureBase> = Omit<
  * A gesture held by the KEYBOARD rather than by a pointer: grabbed with Space, and waiting for
  * the arrows to move it.
  */
-export const isGrabbed = (state: GestureBase | null) => state !== null && state.pointerId === null
+const isGrabbed = (state: GestureBase | null) => state !== null && state.pointerId === null
 
 /** The two intents that move a grabbed event, which only a grid can turn into times. */
 export type GrabStep = Extract<CalendarIntent, { kind: 'grabMove' | 'grabResize' }>

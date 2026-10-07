@@ -12,7 +12,7 @@ export default {
     },
     states: {
       title: 'States',
-      text: 'Use <code>disabled</code>, <code>readonly</code> and <code>invalid</code> for field states, and <code>clearable</code> to clear the selection. A read-only field stays focusable but its list never opens.',
+      text: 'Use <code>disabled</code>, <code>readonly</code> and <code>invalid</code> for field states, <code>loading</code> while options are fetched, and <code>clearable</code> to clear the selection. A read-only field stays focusable but its list never opens.',
     },
     groups: {
       title: 'Groups and separators',
@@ -63,6 +63,8 @@ export default {
           'Leading icon before selected values. A <code>@click:icon-start</code> listener makes it a button requiring <code>iconStartLabel</code>.',
         iconStartLabel: 'Accessible name of the start icon button.',
         expandIcon: 'Decorative chevron, turned while the list is open.',
+        loading: 'Replaces the chevron with a spinner. The list still opens.',
+        loadingText: 'Text announced by the spinner. Defaults to the library dictionary.',
         clearable: 'Adds an action to clear the selection.',
         clearLabel: 'Accessible name of the clear button. Defaults to the library dictionary.',
         placement: 'Preferred panel position relative to the field.',

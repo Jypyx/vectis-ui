@@ -19,7 +19,7 @@ export const isCollapsedAt = (size: number, limits: PanelLimits) =>
   limits.collapsible && size <= limits.collapsedSize + EPSILON
 
 /** Rounds a written size so the model does not carry floating-point noise. */
-export const roundSize = (size: number) => Math.round(size * 1000) / 1000
+const roundSize = (size: number) => Math.round(size * 1000) / 1000
 
 /**
  * The starting sizes: each panel's `defaultSize` where given, the rest shared equally. Sizes that

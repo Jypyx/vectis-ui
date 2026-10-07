@@ -67,7 +67,7 @@ interface ColorInputProps {
    * What the swatch at the start of the field does, in words. It falls back to the design
    * system dictionary.
    */
-  pickerButtonLabel?: string
+  pickerLabel?: string
   /** Where the picker opens relative to the field. */
   placement?: ColorInputPlacement
 }
@@ -88,7 +88,7 @@ const props = withDefaults(defineProps<ColorInputProps>(), {
   invalid: false,
   clearable: false,
   clearLabel: undefined,
-  pickerButtonLabel: undefined,
+  pickerLabel: undefined,
   placement: 'bottom-start',
 })
 
@@ -131,6 +131,7 @@ const hasPanel = computed(() => !props.readonly)
 const {
   open,
   panelId,
+  popupAttrs,
   closeAndFocus,
   focusField,
   toggleFromIcon,
@@ -145,19 +146,9 @@ const {
   focusInPanel: () => pickerRef.value?.focus(),
 })
 
-// @a11y
-// The popup wiring is spread over the forwarded attributes rather than bound after them, so a
-// field with no panel carries no key at all and leaves the consumer's own `role` alone.
-const inputAttrs = computed(() =>
-  hasPanel.value
-    ? {
-        ...forwardedAttrs.value,
-        role: 'combobox',
-        'aria-haspopup': 'dialog',
-        'aria-expanded': open.value,
-        'aria-controls': panelId,
-      }
-    : forwardedAttrs.value,
+const inputAttrs = popupAttrs(
+  () => forwardedAttrs.value,
+  () => hasPanel.value,
 )
 
 /** What the field shows: the value, or what is being typed until the reader leaves. */
@@ -270,7 +261,7 @@ defineExpose({
           v-if="hasPanel"
           type="button"
           class="v-field-action v-color-input-swatch"
-          :aria-label="pickerButtonLabel ?? m.colorInput.openPicker"
+          :aria-label="pickerLabel ?? m.colorInput.openPicker"
           :disabled="resolvedDisabled"
           @click="toggleFromIcon"
         >
@@ -348,7 +339,7 @@ defineExpose({
    * border colours; an empty field shows it alone. Forced colours leave the chip untouched: it
    * is the value, not the theme's paint. As on VColorPicker's swatches, the edge is a
    * translucent border shading the colour that runs under it, the checkerboard stopping inside:
-   * an opaque ring left a pale fringe on the antialiased pixels.
+   * an opaque ring would leave a pale fringe on the antialiased pixels.
    */
   .v-color-input-chip {
     inline-size: var(--vectis-icon-size);

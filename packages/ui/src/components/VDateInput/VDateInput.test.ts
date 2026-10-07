@@ -417,7 +417,7 @@ describe('VDateInput — input mode', () => {
 
   it('raises no warning when mounting an empty input field', () => {
     // `useIconClickHandlers` warns AT setup when a `@click:icon-end` is attached without an
-    // `pickerIconLabel`; even with no icon rendered. That is what forces `endIconLabel` to stay
+    // `pickerLabel`; even with no icon rendered. That is what forces `endIconLabel` to stay
     // defined always.
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     mount()
@@ -471,14 +471,14 @@ describe('VDateInput — the field props', () => {
     expect(getByRole('dialog')).toBeTruthy()
   })
 
-  it('pickerIconLabel and clearLabel override the dictionary', () => {
+  it('pickerLabel and clearLabel override the dictionary', () => {
     const { getByRole } = render(VDateInput, {
       props: {
         mode: 'picker',
         modelValue: JUNE,
         label: 'Date',
         clearable: true,
-        pickerIconLabel: 'Pick a date',
+        pickerLabel: 'Pick a date',
         clearLabel: 'Empty the date',
       },
     })
@@ -548,10 +548,10 @@ describe('VDateInput — development warnings and the mask keys', () => {
 
   it('warns for the picker props a typed field without the picker cannot use', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    render(VDateInput, { props: { pickerIconLabel: 'Calendar' } })
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining('pickerIconLabel is ignored'))
+    render(VDateInput, { props: { pickerLabel: 'Calendar' } })
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('pickerLabel is ignored'))
     warn.mockClear()
-    render(VDateInput, { props: { pickerIconLabel: 'Calendar', showPicker: true } })
+    render(VDateInput, { props: { pickerLabel: 'Calendar', showPicker: true } })
     expect(warn).not.toHaveBeenCalled()
   })
 

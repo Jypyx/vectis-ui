@@ -947,15 +947,6 @@ describe('VCombobox asynchronous', () => {
     expect(chevron.getAttribute('aria-hidden')).toBe('true')
   })
 
-  it('hideExpandIcon leaves the chevron out, but not the loading spinner', async () => {
-    const { container, rerender } = renderCombobox({ hideExpandIcon: true })
-    const field = container.querySelector('.v-input-field')!
-    expect(container.querySelector('.v-combobox-chevron')).toBeNull()
-    expect(field.querySelector(':scope > .v-input-icon-end')).toBeNull()
-    await rerender({ hideExpandIcon: true, loading: true })
-    expect(field.querySelector(':scope > .v-combobox-spinner')).not.toBeNull()
-  })
-
   it('exposes focus, select and the real input', async () => {
     const field = ref<InstanceType<typeof VCombobox> | null>(null)
     const container = document.createElement('div')

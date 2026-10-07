@@ -48,7 +48,7 @@ export default {
           'Sets <code>aria-invalid</code> and the error style. Does not block form submission by itself.',
         clearable: 'Adds a button that empties the value.',
         clearLabel: 'Accessible name of the clear button. Defaults to the library dictionary.',
-        pickerButtonLabel:
+        pickerLabel:
           'Accessible name of the swatch button that opens the picker. Defaults to the library dictionary.',
         placement: 'Preferred panel position relative to the field.',
         vModel:

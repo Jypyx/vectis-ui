@@ -36,7 +36,7 @@ export default {
     },
     fieldIcon: {
       title: 'Icône du champ',
-      text: '<code>iconStart</code> ajoute une icône de début. <code>hideExpandIcon</code> masque le chevron ; le focus ouvre toujours la liste.',
+      text: '<code>iconStart</code> ajoute une icône de début, qui devient un bouton quand <code>@click:icon-start</code> est défini.',
     },
     icons: {
       title: 'Icônes des options',
@@ -92,8 +92,6 @@ export default {
         iconStartLabel: 'Nom accessible du bouton d’icône de début.',
         expandIcon:
           'Chevron décoratif. Un clic ferme la liste ouverte ; le focus sur le champ ouvre la liste.',
-        hideExpandIcon:
-          'Masque le chevron. Le focus ouvre toujours la liste et le chargement affiche toujours un indicateur.',
         clearable: 'Ajoute une action pour effacer la sélection et la recherche.',
         clearLabel:
           'Nom accessible du bouton d’effacement. Utilise le dictionnaire de la bibliothèque par défaut.',

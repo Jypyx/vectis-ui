@@ -91,8 +91,7 @@ export default {
         iconStart:
           'Start icon. A <code>@click:icon-start</code> listener makes it a button; provide <code>iconStartLabel</code>.',
         iconStartLabel: 'Accessible name of the start icon button.',
-        pickerIconLabel:
-          'Accessible name of the calendar button. Defaults to the library dictionary.',
+        pickerLabel: 'Accessible name of the calendar button. Defaults to the library dictionary.',
         loading: 'Replaces the calendar icon with a spinner. Does not disable typing or the panel.',
         loadingText:
           'Loading text and accessible spinner name. Defaults to the library dictionary.',

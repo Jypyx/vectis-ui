@@ -31,7 +31,7 @@ export default {
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'iconStart', type: 'IconSource' },
         { name: 'iconStartLabel', type: 'string' },
-        { name: 'pickerIconLabel', type: 'string' },
+        { name: 'pickerLabel', type: 'string' },
         { name: 'loading', type: 'boolean', default: 'false' },
         { name: 'loadingText', type: 'string' },
         { name: 'clearable', type: 'boolean', default: 'false' },

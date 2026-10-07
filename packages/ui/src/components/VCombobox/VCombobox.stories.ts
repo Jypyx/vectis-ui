@@ -531,36 +531,6 @@ export const FieldIcon: Story = {
 }
 
 /**
- * `hideExpandIcon` leaves the chevron out, for a field that reads as a search box with
- * suggestions.
- */
-export const SearchField: Story = {
-  args: { iconStart: 'search', hideExpandIcon: true, clearable: true },
-  render: (args) => ({
-    components: { VCombobox },
-    setup: () => ({ args, t, value: ref('fr') }),
-    template: `
-      <div style="width: 320px">
-        <VCombobox v-bind="args" v-model="value" :label="t.searchCountry" />
-      </div>
-    `,
-  }),
-  play: async ({ canvasElement }) => {
-    const field = canvasElement.querySelector('.v-input-field') as HTMLElement
-    await expect(field.querySelector('.v-combobox-chevron')).toBeNull()
-    const style = getComputedStyle(field)
-    const glyph = field.querySelector('.v-input-clear .v-icon')!.getBoundingClientRect()
-    const edge =
-      field.getBoundingClientRect().right -
-      parseFloat(style.borderInlineEndWidth) -
-      parseFloat(style.paddingInlineStart)
-    await expect(Math.abs(edge - glyph.right)).toBeLessThan(1)
-    const input = field.querySelector('input')!.getBoundingClientRect()
-    await expect(input.right).toBeLessThanOrEqual(glyph.left)
-  },
-}
-
-/**
  * Sizes `sm` (32px), `md` (40px, the default) and `lg` (48px), combinable with `compact`
  * (-4px).
  */

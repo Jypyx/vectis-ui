@@ -72,7 +72,7 @@ export default {
         iconStart:
           'Start icon. A <code>@click:icon-start</code> listener makes it a button; provide <code>iconStartLabel</code>.',
         iconStartLabel: 'Accessible name of the start icon button.',
-        pickerIconLabel:
+        pickerLabel:
           'Accessible name of the file dialog button. Defaults to the library dictionary.',
         loading: 'Shows a spinner without disabling selection or drag and drop.',
         loadingText:

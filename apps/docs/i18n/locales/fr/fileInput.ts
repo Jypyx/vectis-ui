@@ -74,7 +74,7 @@ export default {
         iconStart:
           'Icône de début. Un écouteur <code>@click:icon-start</code> en fait un bouton ; fournissez <code>iconStartLabel</code>.',
         iconStartLabel: 'Nom accessible du bouton d’icône de début.',
-        pickerIconLabel:
+        pickerLabel:
           'Nom accessible du bouton de sélection de fichiers. Utilise le dictionnaire de la bibliothèque par défaut.',
         loading: 'Affiche un indicateur sans désactiver la sélection ni le glisser-déposer.',
         loadingText:

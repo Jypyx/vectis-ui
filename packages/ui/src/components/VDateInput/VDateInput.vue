@@ -155,7 +155,7 @@ interface DateInputProps {
    * What the calendar button does, in words. It names the button `pickerIcon` renders,
    * and falls back to the design system dictionary.
    */
-  pickerIconLabel?: string
+  pickerLabel?: string
   /**
    * Shows a spinner at the end of the field, in place of the calendar icon. It says
    * that something is being loaded and changes nothing else: the field can still be
@@ -213,7 +213,7 @@ const props = withDefaults(defineProps<DateInputProps>(), {
   invalid: false,
   iconStart: undefined,
   iconStartLabel: undefined,
-  pickerIconLabel: undefined,
+  pickerLabel: undefined,
   loading: false,
   loadingText: undefined,
   clearable: false,
@@ -314,7 +314,7 @@ if (isDev) {
     if (typing.value && !props.showPicker) {
       const inert = ([] as string[]).concat(
         props.pickerIcon !== calendarTodayIcon ? 'pickerIcon' : [],
-        props.pickerIconLabel ? 'pickerIconLabel' : [],
+        props.pickerLabel ? 'pickerLabel' : [],
       )
       if (inert.length > 0)
         console.warn(
@@ -355,6 +355,7 @@ const {
 const {
   open,
   panelId,
+  popupAttrs,
   closeAndFocus,
   focusField,
   onFieldFocus,
@@ -381,22 +382,9 @@ const {
   openOnFocus: () => typing.value,
 })
 
-// @a11y
-// The popup wiring is spread OVER the forwarded attributes, never bound as four attributes
-// after them. A binding written after `v-bind` wins even when it is `undefined`, so a field
-// with no panel would erase the consumer's own `role` or `aria-controls`; spread, the wiring
-// carries no key at all when there is no panel, and wins over the consumer's when there is one,
-// which a combobox needs.
-const inputAttrs = computed(() =>
-  hasPanel.value
-    ? {
-        ...fieldAttrs.value,
-        role: 'combobox',
-        'aria-haspopup': 'dialog',
-        'aria-expanded': open.value,
-        'aria-controls': panelId,
-      }
-    : fieldAttrs.value,
+const inputAttrs = popupAttrs(
+  () => fieldAttrs.value,
+  () => hasPanel.value,
 )
 
 const hasValue = computed(() => {
@@ -541,15 +529,12 @@ const clearVisible = computed(() =>
 const endIcon = computed<IconSource | undefined>(() =>
   hasPanel.value ? props.pickerIcon : undefined,
 )
-// @a11y @devwarn
-/*
- * The label is defined always, even when no icon is rendered at all. The helper detecting a
- * click handler on an icon warns AT setup if one is attached without a label, and it has no way
- * of knowing whether an icon exists.
- */
 const m = useMessages()
 
-const endIconLabel = computed(() => props.pickerIconLabel ?? m.value.dateInput.openPicker)
+// @a11y @devwarn
+// Defined even when no icon is rendered: VInput warns at setup about a clickable icon without a
+// label, and cannot know whether the icon exists.
+const endIconLabel = computed(() => props.pickerLabel ?? m.value.dateInput.openPicker)
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.dateInput.clear)
 
 /*
@@ -650,7 +635,6 @@ defineExpose({
       </VInput>
     </div>
 
-    <!-- The absence of a panel is therefore self-enforcing. -->
     <VPopover
       v-if="hasPanel"
       :id="panelId"
@@ -713,14 +697,11 @@ defineExpose({
     anchor-name: --date-input-anchor;
   }
 
-  /*
-   * The mask has a fixed width: tabular figures, otherwise the caret jitters from one digit to
-   * the next.
-   */
   .v-date-input[data-mode='input']:not([data-disabled]):not([data-readonly]) .v-date-input-control {
     cursor: text;
   }
 
+  /* Tabular figures give the mask a fixed width, so the caret does not jitter between digits. */
   .v-date-input[data-mode='input'] .v-input-control {
     font-variant-numeric: tabular-nums;
   }

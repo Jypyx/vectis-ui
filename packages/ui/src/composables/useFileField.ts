@@ -13,6 +13,7 @@ import {
   type Ref,
 } from 'vue'
 
+import { partitionAttrs } from '../utils/attrs'
 import { isDev } from '../utils/env'
 import { screenFiles, type FileRejection } from '../utils/file'
 
@@ -71,14 +72,11 @@ export function useFileField(options: FileFieldOptions) {
   /** Whether files may come in or go out; no dialog, no drop and no removal otherwise. */
   const enabled = computed(() => !disabled() && !props.readonly)
 
-  const controlAttrs = computed(() => {
-    const excluded = options.excludeFromControl ?? []
-    return Object.fromEntries(
-      Object.entries(options.forwardedAttrs.value).filter(
-        ([key]) => !NATIVE_ONLY.includes(key) && !excluded.includes(key),
-      ),
-    )
-  })
+  const split = computed(() => partitionAttrs(options.forwardedAttrs.value, NATIVE_ONLY))
+
+  const controlAttrs = computed(
+    () => partitionAttrs(split.value.rest, options.excludeFromControl ?? []).rest,
+  )
 
   // @core
   /**
@@ -142,9 +140,7 @@ export function useFileField(options: FileFieldOptions) {
    * component is, since a read-only one still submits what it holds (`syncNative`).
    */
   const nativeInputAttrs = computed(() => ({
-    ...Object.fromEntries(
-      Object.entries(options.forwardedAttrs.value).filter(([key]) => NATIVE_ONLY.includes(key)),
-    ),
+    ...split.value.picked,
     type: 'file',
     tabindex: -1,
     'aria-hidden': 'true' as const,

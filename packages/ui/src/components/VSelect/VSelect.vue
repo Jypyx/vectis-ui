@@ -16,6 +16,7 @@ import { inputGroupKey } from '../VInput/context'
 import VListboxChevron from '../VListbox/VListboxChevron.vue'
 import VListboxPanel from '../VListbox/VListboxPanel.vue'
 import VListboxValues from '../VListbox/VListboxValues.vue'
+import VSpinner from '../VSpinner/VSpinner.vue'
 
 import type {
   ItemValue,
@@ -28,6 +29,7 @@ import type {
   ListboxSeparator,
 } from '../../types'
 import { toggleValue } from '../../utils/array'
+import { partitionAttrs } from '../../utils/attrs'
 import { chipScaleFor } from '../../utils/chip'
 import { createNormalizedCache, normalizeText } from '../../utils/text'
 
@@ -144,6 +146,13 @@ interface SelectProps {
    * explicit render.
    */
   expandIcon?: IconSource
+  /**
+   * Says that the options are being loaded: a spinner takes the chevron's place. The list still
+   * opens.
+   */
+  loading?: boolean
+  /** What the spinner is announced as. It falls back to the design system dictionary. */
+  loadingText?: string
   /** Offers a cross that empties the selection. */
   clearable?: boolean
   /** What that cross does, in words. It falls back to the design system dictionary. */
@@ -169,6 +178,8 @@ const props = withDefaults(defineProps<SelectProps>(), {
   iconStart: undefined,
   iconStartLabel: undefined,
   expandIcon: () => expandMoreIcon,
+  loading: false,
+  loadingText: undefined,
   clearable: false,
   clearLabel: undefined,
   placement: 'bottom-start',
@@ -222,16 +233,8 @@ defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 const NATIVE_ONLY = ['name', 'form', 'required', 'autocomplete']
-// Reading every key even when absent keeps the split in step with the attributes.
-const split = computed(() => {
-  const native: Record<string, unknown> = {}
-  const field: Record<string, unknown> = {}
-  for (const [key, value] of Object.entries(forwardedAttrs.value)) {
-    ;(NATIVE_ONLY.includes(key) ? native : field)[key] = value
-  }
-  return { native, field }
-})
-const nativeAttrs = computed(() => split.value.native)
+const split = computed(() => partitionAttrs(forwardedAttrs.value, NATIVE_ONLY))
+const nativeAttrs = computed(() => split.value.picked)
 
 // @a11y
 // `required` is not an attribute of a button: the combobox says it through ARIA instead.
@@ -243,7 +246,7 @@ const required = computed(() => {
 // Declared as this component's own event, `click:icon-start` is out of `$attrs`, so the
 // listener is relayed to the field by hand; and only when the consumer wrote one.
 const iconStartClick = iconStartListener((event) => emit('click:icon-start', event))
-const fieldAttrs = computed(() => ({ ...split.value.field, ...iconStartClick }))
+const fieldAttrs = computed(() => ({ ...split.value.rest, ...iconStartClick }))
 
 const rootEl = ref<HTMLElement | null>(null)
 const triggerEl = ref<HTMLButtonElement | null>(null)
@@ -674,8 +677,10 @@ defineExpose({
 
         <template v-if="$slots['value-end']" #value-end><slot name="value-end" /></template>
 
+        <!-- The spinner takes the chevron's place: the field sizes either as an icon. -->
         <template #end>
-          <VListboxChevron :icon="expandIcon" :open="open" />
+          <VSpinner v-if="loading" class="v-select-spinner v-input-icon-end" :label="loadingText" />
+          <VListboxChevron v-else :icon="expandIcon" :open="open" />
         </template>
       </VInput>
     </div>
@@ -756,6 +761,10 @@ defineExpose({
 
   .v-select-placeholder {
     color: var(--vectis-color-text-subtle);
+  }
+
+  .v-select-spinner {
+    color: var(--vectis-color-text-muted);
   }
 
   /*

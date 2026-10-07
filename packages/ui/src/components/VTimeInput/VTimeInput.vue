@@ -165,7 +165,7 @@ interface TimeInputProps {
    * What the clock button does, in words. It names the button `pickerIcon` renders,
    * and falls back to the design system dictionary.
    */
-  pickerIconLabel?: string
+  pickerLabel?: string
   /**
    * Shows a spinner at the end of the field, in place of the clock icon. It says that
    * something is being loaded and changes nothing else: the field can still be typed
@@ -215,7 +215,7 @@ const props = withDefaults(defineProps<TimeInputProps>(), {
   invalid: false,
   iconStart: undefined,
   iconStartLabel: undefined,
-  pickerIconLabel: undefined,
+  pickerLabel: undefined,
   loading: false,
   loadingText: undefined,
   clearable: false,
@@ -328,7 +328,7 @@ if (isDev) {
     // nothing at all, and their absence is invisible on screen.
     const inert = ([] as string[]).concat(
       props.pickerIcon !== scheduleIcon ? 'pickerIcon' : [],
-      props.pickerIconLabel ? 'pickerIconLabel' : [],
+      props.pickerLabel ? 'pickerLabel' : [],
     )
     const isAre = inert.length > 1 ? 'are' : 'is'
     if (isList.value && inert.length > 0)
@@ -424,6 +424,7 @@ const {
 const {
   open,
   panelId,
+  popupAttrs,
   closeAndFocus,
   focusField,
   onFieldFocus,
@@ -473,6 +474,9 @@ const {
   },
 })
 
+// Escape and the focus leaving both close without committing, as Cancel does: only OK writes
+// the value.
+
 /** OK: the ONE route by which the picker's draft becomes the value. */
 function confirm() {
   if (pickerDraft.value) model.value = pickerDraft.value
@@ -482,19 +486,9 @@ function confirm() {
 /** Cancel: the draft is simply dropped with the panel. */
 const cancel = closeAndFocus
 
-// @a11y
-// Spread popup wiring over forwarded attrs: absent panels must contribute no keys, while
-// present comboboxes require their own role and controls reference.
-const inputAttrs = computed(() =>
-  hasPanel.value
-    ? {
-        ...fieldAttrs.value,
-        role: 'combobox',
-        'aria-haspopup': 'dialog',
-        'aria-expanded': open.value,
-        'aria-controls': panelId,
-      }
-    : fieldAttrs.value,
+const inputAttrs = popupAttrs(
+  () => fieldAttrs.value,
+  () => hasPanel.value,
 )
 
 /*
@@ -510,9 +504,6 @@ function clearValue() {
   focusField()
   emit('clear')
 }
-
-// Escape and the focus leaving both close WITHOUT committing, which is the picker's Cancel
-// behaviour: closing never writes the value, and only OK does.
 
 const m = useMessages()
 
@@ -536,9 +527,9 @@ watchEffect(
 )
 
 /*
- * That is why the caret can be computed outright here, where a date has to look for a separator
- * it cannot predict; and why nothing distinguishes a final commit from a live one, there being
- * no equivalent of expanding a two-digit year.
+ * A time always has the HH:MM shape, so the caret is computed outright where a date has to look
+ * for a separator it cannot predict, and a final commit is no different from a live one: there
+ * is no two-digit year to expand.
  */
 const {
   draft,
@@ -610,9 +601,9 @@ function onRootFocusout(event: FocusEvent) {
 }
 
 /*
- * What is left is the three things a combobox cannot know about times: which rows to offer, how
- * a search matches one, and the fact that this component's value is a nullable string where a
- * combobox's is a plain one.
+ * The list form is a VCombobox, given what a combobox cannot know about times: which rows to
+ * offer, how a search matches one, and a value that is a nullable string where a combobox's is a
+ * plain one.
  */
 
 /**
@@ -677,12 +668,9 @@ const endIcon = computed<IconSource | undefined>(() =>
   hasPanel.value ? props.pickerIcon : undefined,
 )
 // @a11y @devwarn
-/*
- * The label is passed always, even when no icon is rendered at all. The helper detecting a
- * click handler on an icon warns AT setup if one is attached without a label, and it has no way
- * of knowing whether an icon exists.
- */
-const endIconLabel = computed(() => props.pickerIconLabel ?? m.value.timeInput.openPicker)
+// Defined even when no icon is rendered: VInput warns at setup about a clickable icon without a
+// label, and cannot know whether the icon exists.
+const endIconLabel = computed(() => props.pickerLabel ?? m.value.timeInput.openPicker)
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.timeInput.clear)
 
 /*

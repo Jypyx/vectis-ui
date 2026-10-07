@@ -36,7 +36,7 @@ export default {
     },
     fieldIcon: {
       title: 'Field icon',
-      text: '<code>iconStart</code> adds a leading icon. <code>hideExpandIcon</code> hides the chevron; focus still opens the list.',
+      text: '<code>iconStart</code> adds a leading icon, which becomes a button when <code>@click:icon-start</code> is set.',
     },
     icons: {
       title: 'Option icons',
@@ -91,8 +91,6 @@ export default {
         iconStartLabel: 'Accessible name of the start icon button.',
         expandIcon:
           'Decorative chevron. Clicking it closes an open list; focus on the field opens the list.',
-        hideExpandIcon:
-          'Hides the chevron. Focus still opens the list and loading still shows a spinner.',
         clearable: 'Adds an action to clear both selection and search.',
         clearLabel: 'Accessible name of the clear button. Defaults to the library dictionary.',
         emptyText:

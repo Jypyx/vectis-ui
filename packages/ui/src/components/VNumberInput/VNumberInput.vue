@@ -20,6 +20,7 @@ import { inputGroupKey } from '../VInput/context'
 import VSeparator from '../VSeparator/VSeparator.vue'
 
 import { canClear } from '../../composables/useClearable'
+import { partitionAttrs } from '../../utils/attrs'
 import { useControlShape } from '../../composables/useControlShape'
 import { useMessages, useResolvedLocale } from '../../i18n/state'
 
@@ -130,14 +131,10 @@ const { disabled: resolvedDisabled } = useControlShape(props, group)
 // and `form`, which move to a hidden input carrying the bare number: the visible field holds
 // formatted text ("1 234,50 €"), which is not what a form should submit.
 const attrs = useAttrs()
-// Reading both keys even when absent keeps the split in step with the attributes.
-const split = computed(() => {
-  const { name, form, ...field } = attrs
-  return { name: name as string | undefined, form: form as string | undefined, field }
-})
-const fieldAttrs = computed(() => split.value.field)
-const formName = computed(() => split.value.name)
-const formOwner = computed(() => split.value.form)
+const split = computed(() => partitionAttrs(attrs, ['name', 'form']))
+const fieldAttrs = computed(() => split.value.rest)
+const formName = computed(() => split.value.picked.name as string | undefined)
+const formOwner = computed(() => split.value.picked.form as string | undefined)
 
 const percent = computed(() => props.formatOptions?.style === 'percent')
 const separators = computed(() => numberSeparators(resolvedLocale.value))

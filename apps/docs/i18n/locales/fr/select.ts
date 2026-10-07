@@ -12,7 +12,7 @@ export default {
     },
     states: {
       title: 'États',
-      text: 'Utilisez <code>disabled</code>, <code>readonly</code> et <code>invalid</code> pour les états du champ, et <code>clearable</code> pour effacer la sélection. Un champ en lecture seule reste focalisable, mais sa liste ne s’ouvre jamais.',
+      text: 'Utilisez <code>disabled</code>, <code>readonly</code> et <code>invalid</code> pour les états du champ, <code>loading</code> pendant le chargement des options, et <code>clearable</code> pour effacer la sélection. Un champ en lecture seule reste focalisable, mais sa liste ne s’ouvre jamais.',
     },
     groups: {
       title: 'Groupes et séparateurs',
@@ -64,6 +64,8 @@ export default {
           'Icône de début, avant les valeurs choisies. Un écouteur <code>@click:icon-start</code> en fait un bouton qui exige <code>iconStartLabel</code>.',
         iconStartLabel: 'Nom accessible du bouton d’icône de début.',
         expandIcon: 'Chevron décoratif, tourné pendant que la liste est ouverte.',
+        loading: 'Remplace le chevron par un indicateur de chargement. La liste s’ouvre toujours.',
+        loadingText: 'Texte annoncé par l’indicateur. Par défaut, celui du dictionnaire.',
         clearable: 'Ajoute une action pour effacer la sélection.',
         clearLabel: 'Nom accessible du bouton d’effacement. Par défaut, celui du dictionnaire.',
         placement: 'Position préférée du panneau par rapport au champ.',

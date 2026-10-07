@@ -26,6 +26,8 @@ export default {
         { name: 'iconStart', type: 'IconSource' },
         { name: 'iconStartLabel', type: 'string' },
         { name: 'expandIcon', type: 'IconSource', default: 'expand_more' },
+        { name: 'loading', type: 'boolean', default: 'false' },
+        { name: 'loadingText', type: 'string' },
         { name: 'clearable', type: 'boolean', default: 'false' },
         { name: 'clearLabel', type: 'string' },
         { name: 'placement', type: 'SelectPlacement', values: "'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'", default: "'bottom-start'" },

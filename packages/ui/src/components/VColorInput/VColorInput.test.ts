@@ -191,7 +191,7 @@ describe('VColorInput', () => {
   })
 
   it('labels come from props before the dictionary', () => {
-    const { getByRole } = renderInput('clearable picker-button-label="Pick" clear-label="Reset"')
+    const { getByRole } = renderInput('clearable picker-label="Pick" clear-label="Reset"')
     expect(getByRole('button', { name: 'Pick' })).toBeTruthy()
     expect(getByRole('button', { name: 'Reset' })).toBeTruthy()
   })

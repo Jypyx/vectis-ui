@@ -12,6 +12,7 @@ import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
 import VTypography from '../VTypography/VTypography.vue'
 
+import { partitionAttrs } from '../../utils/attrs'
 import { isDev } from '../../utils/env'
 import { joinIds } from '../../utils/ids'
 
@@ -100,12 +101,9 @@ const attrs = useAttrs()
 // What the FORM reads goes on the hidden native input, and everything else on the group:
 // on the group a `name` submits nothing and `required` validates nothing, silently.
 const NATIVE_ONLY = ['name', 'form', 'required']
-const groupAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !NATIVE_ONLY.includes(key))),
-)
-const nativeAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => NATIVE_ONLY.includes(key))),
-)
+const split = computed(() => partitionAttrs(attrs, NATIVE_ONLY))
+const groupAttrs = computed(() => split.value.rest)
+const nativeAttrs = computed(() => split.value.picked)
 // @a11y
 // A `<label for>` names one control, and this names a row of them, so the visible label names
 // the group through `aria-labelledby`. A consumer's `aria-labelledby` or `aria-label` wins; with

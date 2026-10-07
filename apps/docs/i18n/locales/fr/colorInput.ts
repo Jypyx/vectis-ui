@@ -49,7 +49,7 @@ export default {
         clearable: 'Ajoute un bouton qui vide la valeur.',
         clearLabel:
           'Nom accessible du bouton d’effacement. Par défaut, celui du dictionnaire de la bibliothèque.',
-        pickerButtonLabel:
+        pickerLabel:
           'Nom accessible de la pastille qui ouvre le sélecteur. Par défaut, celui du dictionnaire de la bibliothèque.',
         placement: 'Position préférée du panneau par rapport au champ.',
         vModel:

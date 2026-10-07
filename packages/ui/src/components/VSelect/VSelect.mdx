@@ -92,6 +92,14 @@ value: numbers are submitted as their text, and a multiple field submits one ent
 
 <Canvas of={VSelectStories.InAForm} />
 
+## Loading
+
+`loading` replaces the chevron with a spinner while the options are being fetched. The spinner is
+a `role="status"` region announcing `loadingText`, or the dictionary's "Loading…". The list still
+opens.
+
+<Canvas of={VSelectStories.Loading} />
+
 ## States and sizes
 
 `disabled`, `readonly`, `invalid` and `error` behave as on `VInput`. A read-only field stays

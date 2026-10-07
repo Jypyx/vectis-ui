@@ -18,9 +18,8 @@ import type {
 } from '../types'
 import { useVirtualList, type VirtualList, type VirtualSegment } from './useVirtualList'
 
-export const isListboxGroup = (item: ListboxItem): item is ListboxGroup => 'options' in item
-export const isListboxSeparator = (item: ListboxItem): item is ListboxSeparator =>
-  'separator' in item
+const isListboxGroup = (item: ListboxItem): item is ListboxGroup => 'options' in item
+const isListboxSeparator = (item: ListboxItem): item is ListboxSeparator => 'separator' in item
 
 /**
  * The chosen values as a list, whatever the model holds. An empty string is what an emptied

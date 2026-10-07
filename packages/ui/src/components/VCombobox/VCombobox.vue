@@ -168,11 +168,6 @@ interface ComboboxProps {
    * explicit render.
    */
   expandIcon?: IconSource
-  /**
-   * Leaves the chevron out, for a field that reads as a search box with suggestions rather than
-   * as a list to pick from.
-   */
-  hideExpandIcon?: boolean
   /** Offers a cross that empties both the selection and the search. */
   clearable?: boolean
   /** What that cross does, in words. It falls back to the design system dictionary. */
@@ -233,7 +228,6 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   iconStart: undefined,
   iconStartLabel: undefined,
   expandIcon: () => expandMoreIcon,
-  hideExpandIcon: false,
   clearable: false,
   clearLabel: undefined,
   emptyText: undefined,
@@ -514,7 +508,11 @@ const infiniteScroll = useInfiniteScroll({
   onLoadMore: () => emit('load-more'),
 })
 
-function closePanel() {
+/**
+ * Closes the list. The field then shows `label`: the chosen value's, unless the caller passes the
+ * label of the option it has just chosen, which the value read back may not yet carry.
+ */
+function closePanel(label = singleLabel()) {
   if (!open.value) return
   cancelSearch()
   // A page that never arrived; a request that failed; must not leave the paging frozen for
@@ -524,7 +522,7 @@ function closePanel() {
   open.value = false
   activeIndex.value = -1
   typed.value = false
-  query.value = singleLabel()
+  query.value = label
 }
 
 watch(
@@ -538,7 +536,7 @@ watch(
  * Closes as soon as the focus leaves the component; the panel included, which is a descendant
  * of it even while floating above the page.
  */
-const onFocusout = useFocusoutDismiss(rootEl, closePanel)
+const onFocusout = useFocusoutDismiss(rootEl, () => closePanel())
 
 /** The reader is typing: the text becomes a search, and the panel opens. */
 function onInput() {
@@ -597,29 +595,19 @@ function select(option: ComboboxOption) {
   // Remembered immediately: the option may vanish from the list; on the next search; before the
   // parent has even passed the new value back down.
   remember(option)
-  if (!props.multiple) closedTerm.value = searchTerm.value
-  typed.value = false
   if (props.multiple) {
+    typed.value = false
     model.value = toggleValue(selectedValues.value, option.value)
     query.value = ''
     inputRef.value?.focus()
   } else {
     model.value = option.value
-    // This path does not go through the closing function, so the pending search has to be
-    // cancelled here as well; otherwise the last keystroke would fire its request after the
-    // panel had closed. The paging lock goes for the same reason: a page still on its way when
-    // the panel shut would otherwise freeze it on the next opening.
-    cancelSearch()
-    infiniteScroll.reset()
-    // The label is taken from the option just chosen and not by reading the value back.
-    query.value = option.label
-    open.value = false
-    activeIndex.value = -1
+    closePanel(option.label)
   }
 }
 
 function removeValue(value: ItemValue) {
-  if (!props.multiple || props.readonly) return
+  if (!props.multiple || props.readonly || resolvedDisabled.value) return
   model.value = selectedValues.value.filter((v) => v !== value)
   inputRef.value?.focus()
 }
@@ -776,7 +764,7 @@ defineExpose({
           the chevron's place; the field gives a spinner among its direct children the size of
           an icon; so nothing shifts.
         -->
-        <template v-if="loading || !hideExpandIcon" #end>
+        <template #end>
           <VSpinner v-if="loading" class="v-combobox-spinner v-input-icon-end" aria-hidden="true" />
           <VListboxChevron v-else class="v-combobox-chevron" :icon="expandIcon" :open="open" />
         </template>

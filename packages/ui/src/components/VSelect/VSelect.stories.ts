@@ -277,6 +277,25 @@ export const Clearable: Story = {
   },
 }
 
+/** `loading` puts a spinner in the place of the chevron while the options are being fetched. */
+export const Loading: Story = {
+  args: { loading: true },
+  render: (args) => ({
+    components: { VSelect },
+    setup: () => ({ args, t, value: ref('') }),
+    template: `
+      <div style="width: 300px">
+        <VSelect v-bind="args" v-model="value" :label="t.country" :placeholder="t.chooseCountry" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByRole('status')).toHaveTextContent('Loading…')
+    await expect(canvasElement.querySelector('.v-listbox-chevron')).toBeNull()
+  },
+}
+
 /** What `#option` receives lets a row show more than its label. */
 export const CustomOption: Story = {
   render: (args) => ({

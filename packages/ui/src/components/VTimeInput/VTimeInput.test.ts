@@ -448,8 +448,8 @@ describe('VTimeInput — restrictions', () => {
 
   it('warns for the picker props a typed field without the picker cannot use', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    render(VTimeInput, { props: { pickerIconLabel: 'Clock' } })
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining('pickerIconLabel is ignored'))
+    render(VTimeInput, { props: { pickerLabel: 'Clock' } })
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('pickerLabel is ignored'))
     warn.mockRestore()
   })
 })
@@ -731,14 +731,14 @@ describe('VTimeInput — the field props', () => {
     expect(getByRole('dialog')).toBeTruthy()
   })
 
-  it('pickerIconLabel and clearLabel override the dictionary', () => {
+  it('pickerLabel and clearLabel override the dictionary', () => {
     const { getByRole } = render(VTimeInput, {
       props: {
         mode: 'picker',
         modelValue: '09:15',
         label: 'Time',
         clearable: true,
-        pickerIconLabel: 'Pick a time',
+        pickerLabel: 'Pick a time',
         clearLabel: 'Empty the time',
       },
     })
@@ -779,10 +779,10 @@ describe('VTimeInput — the field props', () => {
   it('warns for the end-icon props the list form cannot use', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     render(VTimeInput, {
-      props: { mode: 'list', minuteStep: 30, pickerIconLabel: 'Open', loadingText: 'Loading' },
+      props: { mode: 'list', minuteStep: 30, pickerLabel: 'Open', loadingText: 'Loading' },
     })
     const said = warn.mock.calls.map(String).join(' ')
-    expect(said).toContain('pickerIconLabel is ignored')
+    expect(said).toContain('pickerLabel is ignored')
     expect(said).not.toContain('loadingText')
   })
 

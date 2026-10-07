@@ -518,7 +518,7 @@ export const FieldIcon: Story = {
           :label="t.searchByTime"
           show-picker
           clearable
-          picker-icon-label="Open the clock"
+          picker-label="Open the clock"
           clear-label="Empty the time"
         />
         <VTimeInput v-bind="args" v-model="value" loading :label="t.checkingTime" show-picker />

@@ -381,7 +381,7 @@ export const FieldIcon: Story = {
           clear-visible
           :label="t.searchFiles"
           :model-value="picked"
-          picker-icon-label="Add an attachment"
+          picker-label="Add an attachment"
           clear-label="Remove every attachment"
         />
         <VFileInput v-bind="args" loading :label="t.uploading" :model-value="picked" />

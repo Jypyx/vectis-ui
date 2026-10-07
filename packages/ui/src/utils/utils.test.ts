@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { Fragment, createCommentVNode, createTextVNode, h } from 'vue'
 
 import { toggleValue } from './array'
+import { partitionAttrs } from './attrs'
 import { cssSize, px } from './css'
 import { joinIds } from './ids'
 import { resolveMatcher } from './matcher'
@@ -151,5 +152,25 @@ describe('cssSize on what is not a size', () => {
     expect(cssSize('')).toBeUndefined()
     expect(cssSize(0)).toBe('0px')
     expect(cssSize('50%')).toBe('50%')
+  })
+})
+
+describe('partitionAttrs', () => {
+  it('puts the listed keys on one side and every other one on the other', () => {
+    const { picked, rest } = partitionAttrs(
+      { name: 'code', form: 'f', id: 'x', 'aria-label': 'Code' },
+      ['name', 'form', 'required'],
+    )
+    expect(picked).toEqual({ name: 'code', form: 'f' })
+    expect(rest).toEqual({ id: 'x', 'aria-label': 'Code' })
+  })
+
+  it('reads every listed key, present or not', () => {
+    const read: PropertyKey[] = []
+    const attrs = new Proxy({} as Record<string, unknown>, {
+      get: (target, key) => (read.push(key), Reflect.get(target, key)),
+    })
+    partitionAttrs(attrs, ['name', 'form'])
+    expect(read).toEqual(['name', 'form'])
   })
 })

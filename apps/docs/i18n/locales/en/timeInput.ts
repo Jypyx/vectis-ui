@@ -72,7 +72,7 @@ export default {
         iconStart:
           'Start icon. A <code>@click:icon-start</code> listener makes it a button; provide <code>iconStartLabel</code>.',
         iconStartLabel: 'Accessible name of the start icon button.',
-        pickerIconLabel: 'Accessible name of the clock button. Defaults to the library dictionary.',
+        pickerLabel: 'Accessible name of the clock button. Defaults to the library dictionary.',
         loading: 'Replaces the clock icon with a spinner without disabling the field.',
         loadingText:
           'Loading text and accessible spinner name. Defaults to the library dictionary.',

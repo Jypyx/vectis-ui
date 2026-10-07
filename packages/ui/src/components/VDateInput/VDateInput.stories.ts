@@ -312,7 +312,7 @@ export const FieldIcon: Story = {
           :label="t.searchByDate"
           show-picker
           clearable
-          picker-icon-label="Open the calendar"
+          picker-label="Open the calendar"
           clear-label="Empty the date"
         />
         <VDateInput v-bind="args" v-model="value" loading :label="t.checkingDate" show-picker />
