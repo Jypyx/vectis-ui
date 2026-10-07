@@ -156,7 +156,7 @@ const control = () => (slots.children ? rowEl.value : actionEl.value)
 defineExpose({
   /** Moves the focus to the row: the branch header, or the leaf's link or button. */
   focus: (options?: FocusOptions) => control()?.focus(options),
-  /** That element, which is also where the consumer's attributes land. */
+  /** The row, which is also where the consumer's attributes land. */
   get el() {
     return control()
   },

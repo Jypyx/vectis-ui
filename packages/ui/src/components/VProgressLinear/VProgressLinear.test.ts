@@ -3,9 +3,13 @@ import { describe, expect, it } from 'vitest'
 
 import VProgressLinear from './VProgressLinear.vue'
 
-/** Inline style of the root (the custom properties are set there). */
+/** Inline style of the bar, which carries the fill fraction. */
 const styleOf = (container: Element) =>
   container.querySelector('.v-progress-linear')?.getAttribute('style') ?? ''
+
+/** The root, which carries the tone and the custom properties the bar inherits. */
+const rootOf = (container: Element) => container.querySelector('.v-progress-linear-field')!
+const rootStyleOf = (container: Element) => rootOf(container).getAttribute('style') ?? ''
 
 describe('VProgressLinear', () => {
   it('ARIA contract: the role, faithful bounds and a unitless fraction', () => {
@@ -89,25 +93,25 @@ describe('VProgressLinear', () => {
   })
 
   it('tone: accent by default, an explicit value carried over', async () => {
-    const { getByRole, rerender } = render(VProgressLinear, {
+    const { container, rerender } = render(VProgressLinear, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
-    expect(getByRole('progressbar').getAttribute('data-tone')).toBe('accent')
+    expect(rootOf(container).getAttribute('data-tone')).toBe('accent')
     await rerender({ tone: 'warning' })
-    expect(getByRole('progressbar').getAttribute('data-tone')).toBe('warning')
+    expect(rootOf(container).getAttribute('data-tone')).toBe('warning')
   })
 
   it('custom colour: data-custom + --custom-color (both absent otherwise)', async () => {
-    const { getByRole, container, rerender } = render(VProgressLinear, {
+    const { container, rerender } = render(VProgressLinear, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
-    expect(getByRole('progressbar').hasAttribute('data-custom')).toBe(false)
-    expect(styleOf(container)).not.toContain('--custom-color')
+    expect(rootOf(container).hasAttribute('data-custom')).toBe(false)
+    expect(rootStyleOf(container)).not.toContain('--custom-color')
     await rerender({ color: 'hotpink' })
-    expect(getByRole('progressbar').hasAttribute('data-custom')).toBe(true)
-    expect(styleOf(container)).toContain('--custom-color: hotpink')
+    expect(rootOf(container).hasAttribute('data-custom')).toBe(true)
+    expect(rootStyleOf(container)).toContain('--custom-color: hotpink')
   })
 
   it('thickness: a number → px, a string as-is, absent when not supplied', async () => {
@@ -115,13 +119,13 @@ describe('VProgressLinear', () => {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
-    expect(styleOf(container)).not.toContain('--progress-thickness')
+    expect(rootStyleOf(container)).not.toContain('--progress-thickness')
     await rerender({ thickness: 12 })
-    expect(styleOf(container)).toContain('--progress-thickness: 12px')
+    expect(rootStyleOf(container)).toContain('--progress-thickness: 12px')
     await rerender({ thickness: '12' })
-    expect(styleOf(container)).toContain('--progress-thickness: 12px')
+    expect(rootStyleOf(container)).toContain('--progress-thickness: 12px')
     await rerender({ thickness: 'auto' })
-    expect(styleOf(container)).not.toContain('--progress-thickness')
+    expect(rootStyleOf(container)).not.toContain('--progress-thickness')
   })
 
   it('shape: rounded by default, square carried over', async () => {
@@ -272,18 +276,39 @@ describe('VProgressLinear', () => {
     expect(getByRole('progressbar').getAttribute('data-value-position')).toBe('end')
   })
 
-  it('fallthrough: the consumer class, id and style coexist with the custom properties', () => {
-    const { getByRole } = render(VProgressLinear, {
-      props: { value: 40 },
+  it('fallthrough: class and style stay on the root, the other attributes reach the bar', () => {
+    const { getByRole, container } = render(VProgressLinear, {
+      props: { value: 40, thickness: 8 },
       attrs: { 'aria-label': 'Upload', class: 'my-upload', id: 'up', style: 'margin-top: 4px' },
     })
     const bar = getByRole('progressbar', { name: 'Upload' })
-    expect(bar.classList.contains('v-progress-linear')).toBe(true)
-    expect(bar.classList.contains('my-upload')).toBe(true)
+    const root = rootOf(container)
+    expect(root.classList.contains('my-upload')).toBe(true)
+    expect(bar.classList.contains('my-upload')).toBe(false)
     expect(bar.id).toBe('up')
-    const style = bar.getAttribute('style') ?? ''
-    expect(style).toContain('margin-top: 4px')
-    expect(style).toContain('--fill-fraction: 0.4')
+    expect(rootStyleOf(container)).toContain('margin-top: 4px')
+    expect(rootStyleOf(container)).toContain('--progress-thickness: 8px')
+    expect(styleOf(container)).toContain('--fill-fraction: 0.4')
+  })
+
+  it('label: shown above the bar and naming it by reference', () => {
+    const { getByRole, container } = render(VProgressLinear, {
+      props: { value: 40, label: 'Upload' },
+    })
+    const label = container.querySelector('.v-progress-linear-label') as HTMLElement
+    const bar = getByRole('progressbar', { name: 'Upload' })
+    expect(label.classList.contains('v-visually-hidden')).toBe(false)
+    expect(bar.getAttribute('aria-labelledby')).toBe(label.id)
+    expect(bar.hasAttribute('aria-label')).toBe(false)
+  })
+
+  it('hideLabel hides the label visually, the bar keeping its name', () => {
+    const { getByRole, container } = render(VProgressLinear, {
+      props: { value: 40, label: 'Upload', hideLabel: true },
+    })
+    const label = container.querySelector('.v-progress-linear-label') as HTMLElement
+    expect(label.classList.contains('v-visually-hidden')).toBe(true)
+    expect(getByRole('progressbar', { name: 'Upload' })).toBeTruthy()
   })
 
   it('label: names the indicator, in place of the dictionary default', async () => {

@@ -387,8 +387,8 @@ defineExpose({
   }
 
   /*
-   * That matters because the cross is drawn from the icon font here, and a glyph from a font is
-   * real text, to which the contrast rule applies.
+   * The cross inherits the chip's text colour rather than a muted one: drawn from the icon font,
+   * it is real text, to which the text contrast rule applies.
    */
   .v-chip-dismiss {
     display: inline-flex;

@@ -6,12 +6,18 @@ import { VProgressLinear, VTypography } from 'vectis-ui'
   <div class="column">
     <div class="labelled">
       <VTypography variant="caption" tone="muted">rounded, the default</VTypography>
-      <VProgressLinear :value="60" thickness="14" label="Upload, rounded" />
+      <VProgressLinear :value="60" thickness="14" label="Upload, rounded" hide-label />
     </div>
 
     <div class="labelled">
       <VTypography variant="caption" tone="muted">square</VTypography>
-      <VProgressLinear :value="60" thickness="14" shape="square" label="Upload, square" />
+      <VProgressLinear
+        :value="60"
+        thickness="14"
+        shape="square"
+        label="Upload, square"
+        hide-label
+      />
     </div>
   </div>
 </template>

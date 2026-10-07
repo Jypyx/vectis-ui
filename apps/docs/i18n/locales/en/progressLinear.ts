@@ -39,7 +39,8 @@ export default {
     VProgressLinear: {
       props: {
         label:
-          'Accessible task name. Defaults to the dictionary; consumer ARIA naming attributes take precedence.',
+          'Label above the bar, which also names it. Defaults to the dictionary as an accessible name; consumer ARIA naming attributes take precedence.',
+        hideLabel: 'Hides the label visually while keeping it as the bar name.',
         value: 'Progress value, clamped between 0 and <code>max</code>.',
         max: 'Value representing completion.',
         indeterminate: 'Animates without a measurable value. Ignores <code>value</code>.',

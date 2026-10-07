@@ -91,9 +91,9 @@ single definition serves horizontal, vertical and the reversed reading direction
 ## Vertical
 
 `orientation="vertical"` puts 0 at the bottom and the maximum at the top, through a plain writing
-mode set on the root: the fill, the text's clip and the indeterminate animation all change axis with
+mode set on the bar: the fill, the text's clip and the indeterminate animation all change axis with
 no extra rule. The text itself stays written horizontally — plan a thickness sufficient to host it.
-The height is set in CSS, for want of a parent of known height to align on.
+The length is a height on the root, which the bar fills under the label.
 
 <Canvas of={VProgressLinearStories.Vertical} />
 
@@ -113,10 +113,12 @@ A zero, complete or out-of-bounds value (clamped), a bar at the default thicknes
 
 ## Accessibility
 
-- **Name the bar**: a `progressbar` is never named from its contents, so the component falls back to
-  the dictionary's generic name (`progress.label`). Supply `label` whenever the page
-  holds more than one. A consumer `aria-label` wins over it, and `aria-labelledby` replaces
-  both.
+- **Name the bar**: `label` is shown above the bar and names it through `aria-labelledby`;
+  `hideLabel` hides it visually. A `progressbar` is never named from its contents, so without
+  `label` the component falls back to the dictionary's generic name (`progress.label`). A consumer
+  `aria-label` or `aria-labelledby` wins over both.
+- The root is a layout box holding the label and the bar: `class` and `style` stay on it, with the
+  tone and the custom properties the bar inherits, and every other attribute reaches the bar.
 - The `progressbar` role is "children presentational": the text visible in the bar is **not
   announced** by assistive technologies. It complements the label, it never replaces it.
 - The announced bounds are faithful to `max` ("3 of 8") rather than normalized to 100.

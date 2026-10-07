@@ -1,9 +1,9 @@
 // @ssr @core
 /**
- * That is what separates it from a notification, which reports a state: a notification stacks,
- * because two things can be true at once, whereas only the last action a reader took is worth
- * offering to undo. So there is at most one snackbar at a time, and raising a new one replaces
- * the one before it on the spot.
+ * A snackbar confirms the last action a reader took, which separates it from a notification
+ * reporting a state: notifications stack, because two things can be true at once, whereas only
+ * the last action is worth offering to undo. So there is at most one snackbar at a time, and
+ * raising a new one replaces the one before it on the spot.
  */
 
 import { shallowRef } from 'vue'

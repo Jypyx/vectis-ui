@@ -12,7 +12,12 @@ const COLORS = [
   <div class="column">
     <div v-for="colour in COLORS" :key="colour.value" class="row">
       <VTypography variant="caption" tone="muted" class="name">{{ colour.caption }}</VTypography>
-      <VProgressLinear :value="60" :color="colour.value" :label="`Upload, ${colour.caption}`" />
+      <VProgressLinear
+        :value="60"
+        :color="colour.value"
+        :label="`Upload, ${colour.caption}`"
+        hide-label
+      />
     </div>
   </div>
 </template>

@@ -905,8 +905,9 @@ if (isDev) {
   }
 
   /*
-   * That is what lets every `inside` inset below be written against the stage's edges with no
-   * compensation: an absolutely positioned box resolves against the PADDING box, the edges
+   * The outset is padding on BOTH sides of the axis, which lets every `inside` inset below be
+   * written against the stage's edges with no compensation: an absolutely positioned box
+   * resolves against the PADDING box, the edges
    * those insets pin to are on the cross axis (which this never touches), and the axis they
    * centre on stays symmetric. Make this one-sided and the `inside` indicator bar goes
    * off-centre with nothing to report it.

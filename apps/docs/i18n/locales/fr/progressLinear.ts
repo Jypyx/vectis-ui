@@ -39,7 +39,8 @@ export default {
     VProgressLinear: {
       props: {
         label:
-          'Nom accessible de la tâche. Utilise le dictionnaire par défaut ; les attributs ARIA de nommage fournis sont prioritaires.',
+          'Libellé au-dessus de la barre, qui la nomme aussi. Sans lui, le dictionnaire fournit un nom accessible ; les attributs ARIA de nommage fournis sont prioritaires.',
+        hideLabel: 'Masque visuellement le libellé, qui reste le nom de la barre.',
         value: 'Valeur de progression, limitée entre 0 et <code>max</code>.',
         max: 'Valeur représentant la fin de la tâche.',
         indeterminate: 'Anime sans valeur mesurable. Ignore <code>value</code>.',

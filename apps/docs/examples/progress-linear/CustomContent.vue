@@ -15,12 +15,13 @@ const POSITIONS: ProgressLinearValuePosition[] = ['start', 'center', 'end']
         show-value
         :value-position="position"
         :label="`Upload, ${position}`"
+        hide-label
       />
     </div>
 
     <div class="labelled">
       <VTypography variant="caption" tone="muted">A slot of your own</VTypography>
-      <VProgressLinear :value="7" :max="12" thickness="22" label="Files uploaded">
+      <VProgressLinear :value="7" :max="12" thickness="22" label="Files uploaded" hide-label>
         <template #default="{ value, max }">{{ value }} of {{ max }} files</template>
       </VProgressLinear>
     </div>

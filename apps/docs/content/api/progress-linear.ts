@@ -11,6 +11,7 @@ export default {
       props: [
         { name: 'value', type: 'number', default: '0' },
         { name: 'label', type: 'string' },
+        { name: 'hideLabel', type: 'boolean', default: 'false' },
         { name: 'max', type: 'number', default: '100' },
         { name: 'indeterminate', type: 'boolean', default: 'false' },
         { name: 'tone', type: 'ProgressLinearTone', values: "'neutral' | 'accent' | 'danger' | 'success' | 'warning'", default: "'accent'" },

@@ -8,7 +8,12 @@ const THICKNESSES = [2, 4, 8, 16]
   <div class="column">
     <div v-for="thickness in THICKNESSES" :key="thickness" class="row">
       <VTypography variant="caption" tone="muted" class="name">{{ thickness }}px</VTypography>
-      <VProgressLinear :value="60" :thickness="thickness" :label="`Upload, ${thickness}px`" />
+      <VProgressLinear
+        :value="60"
+        :thickness="thickness"
+        :label="`Upload, ${thickness}px`"
+        hide-label
+      />
     </div>
   </div>
 </template>

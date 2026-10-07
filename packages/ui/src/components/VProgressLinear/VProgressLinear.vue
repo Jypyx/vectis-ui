@@ -3,8 +3,11 @@
  * CSS draws the fill. JavaScript normalizes values shared by geometry, slots and progressbar
  * ARIA attributes.
  */
+import { computed, useId } from 'vue'
+
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useProgressValue } from '../../composables/useProgressValue'
+import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useMessages } from '../../i18n/state'
 import { px } from '../../utils/css'
 
@@ -34,14 +37,16 @@ interface ProgressLinearProps {
   /** How far along it is. Anything outside the range is brought back into it. */
   value?: number
   /**
-   * What is progressing, in words, for screen readers. It draws nothing on screen, and falls
-   * back to the design system dictionary; an `aria-label` or `aria-labelledby` of your own
-   * takes precedence over it.
+   * What is progressing, shown above the bar and naming it for screen readers. Without it, the
+   * bar is named from the design system dictionary; an `aria-label` or `aria-labelledby` of your
+   * own takes precedence.
    */
   label?: string
+  /** Hides the label visually. It still names the bar for screen readers. */
+  hideLabel?: boolean
   /** What counts as finished. The other end is always zero. */
   max?: number
-  /** It is what to use while waiting for a server that reports no percentage. */
+  /** Shows progress that cannot be measured, such as a server that reports no percentage. */
   indeterminate?: boolean
   /** What the progress means, expressed as a colour. */
   tone?: ProgressLinearTone
@@ -75,6 +80,7 @@ interface ProgressLinearProps {
 const props = withDefaults(defineProps<ProgressLinearProps>(), {
   value: 0,
   label: undefined,
+  hideLabel: false,
   max: 100,
   indeterminate: false,
   tone: 'accent',
@@ -107,69 +113,107 @@ const {
   () => props.max,
 )
 
+// The root is a layout box holding the label and the bar: `class` and `style` stay on it, with
+// the tone and the custom properties the bar inherits, and every other attribute goes to the bar.
+defineOptions({ inheritAttrs: false })
+const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
+
 // @a11y
-// The canonical cascade: a consumer's `aria-labelledby`, then their `aria-label`, then the
-// `label` prop, then the dictionary. An indicator takes no name from the text inside it, so
-// without the last step it would have none at all.
-const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
+// A visible label names the bar by reference, unless the consumer named it themselves; without
+// one, the dictionary does. An indicator takes no name from the text inside it.
+const labelId = useId()
+const ariaLabel = useAriaLabel(() => (props.label ? undefined : m.value.progress.label))
+const labelledBy = computed(() =>
+  props.label && attrs['aria-label'] == null && attrs['aria-labelledby'] == null
+    ? labelId
+    : undefined,
+)
 </script>
 
 <template>
   <div
-    class="v-progress-linear v-tone"
-    role="progressbar"
-    :aria-label="ariaLabel"
+    class="v-progress-linear-field v-tone"
+    :class="rootClass"
     :data-tone="tone"
     :data-custom="color !== undefined ? '' : undefined"
-    :data-shape="shape"
     :data-orientation="orientation"
-    :data-value-position="valuePosition"
-    :data-indeterminate="indeterminate ? '' : undefined"
-    :aria-valuenow="indeterminate ? undefined : clamped"
-    aria-valuemin="0"
-    :aria-valuemax="normalizedMax"
-    :style="{
-      '--fill-fraction': String(fraction),
-      '--custom-color': color,
-      '--progress-thickness': px(thickness),
-    }"
+    :style="[{ '--custom-color': color, '--progress-thickness': px(thickness) }, rootStyle]"
   >
-    <span class="v-progress-linear-fill" />
-    <!--
-      The same text twice, each copy cut at the fill's edge so that the two complete
-      each other exactly: the first in the ordinary text colour over the empty track,
-      the second over the filled part, coloured to contrast with it. The second is
-      hidden from screen readers, being a duplicate of text already there.
-    -->
-    <template v-if="!indeterminate && (showValue || $slots.default)">
-      <span class="v-progress-linear-text">
-        <slot :value="clamped" :max="normalizedMax" :percent="percent">
-          {{ m.progress.percent(roundedPercent) }}
-        </slot>
-      </span>
-      <span class="v-progress-linear-text" data-on-fill aria-hidden="true">
-        <slot :value="clamped" :max="normalizedMax" :percent="percent">
-          {{ m.progress.percent(roundedPercent) }}
-        </slot>
-      </span>
-    </template>
+    <span
+      v-if="label"
+      :id="labelId"
+      class="v-progress-linear-label"
+      :class="{ 'v-visually-hidden': hideLabel }"
+      >{{ label }}</span
+    >
+    <div
+      class="v-progress-linear"
+      role="progressbar"
+      :aria-labelledby="labelledBy"
+      :aria-label="ariaLabel"
+      v-bind="forwardedAttrs"
+      :data-shape="shape"
+      :data-orientation="orientation"
+      :data-value-position="valuePosition"
+      :data-indeterminate="indeterminate ? '' : undefined"
+      :aria-valuenow="indeterminate ? undefined : clamped"
+      aria-valuemin="0"
+      :aria-valuemax="normalizedMax"
+      :style="{ '--fill-fraction': String(fraction) }"
+    >
+      <span class="v-progress-linear-fill" />
+      <!--
+        The same text twice, each copy cut at the fill's edge so that the two complete
+        each other exactly: the first in the ordinary text colour over the empty track,
+        the second over the filled part, coloured to contrast with it. The second is
+        hidden from screen readers, being a duplicate of text already there.
+      -->
+      <template v-if="!indeterminate && (showValue || $slots.default)">
+        <span class="v-progress-linear-text">
+          <slot :value="clamped" :max="normalizedMax" :percent="percent">
+            {{ m.progress.percent(roundedPercent) }}
+          </slot>
+        </span>
+        <span class="v-progress-linear-text" data-on-fill aria-hidden="true">
+          <slot :value="clamped" :max="normalizedMax" :percent="percent">
+            {{ m.progress.percent(roundedPercent) }}
+          </slot>
+        </span>
+      </template>
+    </div>
   </div>
 </template>
 
 <style>
 @layer vectis.components {
   /*
-   * The element IS the track, and it takes the whole length available. Sizing it is the
-   * consumer's business, through the parent or through a width of their own; a consumer's style
-   * sits outside our layers and always wins.
+   * The root holds the label and the bar, and declares what the bar reads, so a consumer's style
+   * on it (outside our layers) overrides the thickness and the colours. The bar takes the whole
+   * length available: sizing it is the consumer's business, through the parent or a width of
+   * their own on the root.
    */
-  .v-progress-linear {
+  .v-progress-linear-field {
     --progress-thickness: var(--vectis-control-size-progress-linear-thickness);
     /* Fill, track and the text over the fill are the tone's solid, soft and on-solid
        colours, read from the shared table (`.v-tone`, set in the template). */
     --progress-fill: var(--tone-bg-solid);
     --progress-track: var(--tone-bg-soft);
     --progress-text-fallback: var(--tone-text-solid);
+    display: flex;
+    flex-direction: column;
+    gap: var(--vectis-space-1);
+  }
+
+  .v-progress-linear-label {
+    color: var(--vectis-color-text);
+    font-family: var(--vectis-text-family);
+    font-size: var(--vectis-text-label-size);
+    font-weight: var(--vectis-text-label-weight);
+    line-height: var(--vectis-text-label-leading);
+  }
+
+  /* The element IS the track. */
+  .v-progress-linear {
     position: relative;
     display: block;
     inline-size: 100%;
@@ -281,9 +325,19 @@ const ariaLabel = useAriaLabel(() => props.label ?? m.value.progress.label)
    * to the text of the two copies: bidirectional reordering would then display "50 %" as "%
    * 50". The fill is anchored to the far end of the axis instead.
    */
+  /*
+   * Upright, the root carries the length, so a consumer's height on it sets the bar's: the bar
+   * takes whatever the label leaves, its own inline size being the physical height.
+   */
+  .v-progress-linear-field[data-orientation='vertical'] {
+    align-items: flex-start;
+    block-size: var(--vectis-control-size-progress-linear-length);
+  }
+
   .v-progress-linear[data-orientation='vertical'] {
+    flex: 1 1 0;
     writing-mode: vertical-lr;
-    inline-size: var(--vectis-control-size-progress-linear-length);
+    inline-size: auto;
   }
 
   .v-progress-linear[data-orientation='vertical'] .v-progress-linear-fill {

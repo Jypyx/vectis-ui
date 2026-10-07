@@ -290,6 +290,15 @@ export const Vertical: Story = {
       await expect(Math.abs(drawn.bottom - track.bottom)).toBeLessThan(1)
       await expect(drawn.top - track.top).toBeGreaterThan(1)
     }
+    // A height on the root is the bar's length: the bar fills what the label above it leaves.
+    const sized = canvas.getByRole('progressbar', { name: '240px' })
+    const root = sized.closest('.v-progress-linear-field')!.getBoundingClientRect()
+    const label = sized.parentElement!.querySelector('.v-progress-linear-label')!
+    const bar = sized.getBoundingClientRect()
+    await expect(Math.abs(root.height - 240)).toBeLessThan(1)
+    await expect(Math.abs(bar.bottom - root.bottom)).toBeLessThan(1)
+    await expect(label.getBoundingClientRect().bottom).toBeLessThanOrEqual(bar.top)
+    await expect(bar.height).toBeGreaterThan(200)
   },
 }
 

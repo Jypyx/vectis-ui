@@ -391,10 +391,10 @@ const accessibleName = computed(() =>
   }
 
   /*
-   * That indirection is not a nicety, it is the only correct shape. This selector is (0,2,0)
-   * and `.v-calendar-month-chip`, which needs a different height, is (0,1,0) in ANOTHER SHEET:
-   * matching specificity would hand the winner to whichever order the consumer's bundler
-   * happens to emit, and beating it would need a three-class compound.
+   * The height goes through `--calendar-chip-height`, which `.v-calendar-month-chip` sets,
+   * rather than that rule setting `block-size` itself. This selector is (0,2,0) and that one is
+   * (0,1,0) in ANOTHER SHEET: matching specificity would hand the winner to whichever order the
+   * consumer's bundler emits, and beating it would need a three-class compound.
    */
   .v-calendar-event[data-layout='chip'] {
     block-size: var(--calendar-chip-height, 100%);

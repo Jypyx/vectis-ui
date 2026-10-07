@@ -575,9 +575,10 @@ function onKeydown(event: KeyboardEvent) {
   }
 
   /*
-   * That is the keyboard's route to a new event (WCAG 2.1.1): the cell carries a day and an
-   * hour, and how long the event lasts is a question for the consumer's own form, where the
-   * pointer answers it by how far it was drawn.
+   * Enter or Space on an empty cell reports it through `cell-activate`, the keyboard's route to
+   * a new event (WCAG 2.1.1): the cell carries a day and an hour, and how long the event lasts
+   * is a question for the consumer's own form, where the pointer answers it by how far it was
+   * drawn.
    */
   if (intent.kind === 'activate' || intent.kind === 'openDay') {
     event.preventDefault()
