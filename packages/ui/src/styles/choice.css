@@ -16,10 +16,16 @@
    * an ancestor outside a scroll container instead, they would be neither clipped nor scrolled
    * by it: they would stretch the page, and focusing the input would scroll the page to them.
    */
+  /*
+   * `start` keeps the two tracks together when a grid or flex parent stretches the control:
+   * auto tracks would otherwise share the free width and carry the label away from it. `spread`
+   * distributes that width on purpose, below.
+   */
   .v-choice {
     position: relative;
     display: inline-grid;
     grid-template-columns: auto auto;
+    justify-content: start;
     align-items: center;
     font-family: var(--vectis-text-family);
     font-size: var(--vectis-text-choice-size);

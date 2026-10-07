@@ -230,10 +230,6 @@ const volume = ref(60)
   display: grid;
   gap: var(--vectis-space-4);
 }
-/* A stretched choice spreads its `auto auto` columns apart; keep it at its own width. */
-.vd-showcase-stack > .v-choice {
-  justify-self: start;
-}
 .vd-showcase-controls {
   display: flex;
   justify-content: center;

@@ -155,10 +155,6 @@ function save() {
   gap: var(--vectis-space-3);
   align-content: start;
 }
-/* A stretched choice spreads its `auto auto` columns apart; keep it at its own width. */
-.tp-choices > .v-choice {
-  justify-self: start;
-}
 .tp-footer {
   display: flex;
   flex-wrap: wrap;

@@ -97,6 +97,40 @@ export const Spread: Story = {
       </div>
     `,
   }),
+  play: async ({ canvasElement }) => {
+    const row = within(canvasElement)
+      .getByRole('switch', { name: 'VSwitch on the left' })
+      .closest('label')!
+    const track = row.querySelector('.v-switch-track')!.getBoundingClientRect()
+    const label = row.querySelector('.v-choice-label')!.getBoundingClientRect()
+    await expect(label.left - track.right).toBeGreaterThan(100)
+  },
+}
+
+/**
+ * Stretched by a grid parent, the switch keeps its label beside it: only `spread` pushes the two
+ * apart.
+ */
+export const StretchedByGrid: Story = {
+  render: () => ({
+    components: { VSwitch },
+    setup: () => ({ a: ref(false), b: ref(true), t }),
+    template: `
+      <div style="display: grid; gap: 8px; max-width: 320px">
+        <VSwitch v-model="a">{{ t.labelAfter }}</VSwitch>
+        <VSwitch v-model="b" label-position="start">{{ t.labelBefore }}</VSwitch>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    for (const name of ['Label after (default)', 'Label before']) {
+      const row = within(canvasElement).getByRole('switch', { name }).closest('label')!
+      const track = row.querySelector('.v-switch-track')!.getBoundingClientRect()
+      const label = row.querySelector('.v-choice-label')!.getBoundingClientRect()
+      const gap = label.left > track.left ? label.left - track.right : track.left - label.right
+      await expect(gap).toBeLessThan(16)
+    }
+  },
 }
 
 export const Disabled: Story = {
