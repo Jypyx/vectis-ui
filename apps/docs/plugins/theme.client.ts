@@ -1,11 +1,12 @@
 /**
  * The pre-paint script sets page colours. Update Vue theme state after hydration to avoid
- * mismatching the prerendered icon.
+ * mismatching the prerendered icon. Not on `app:mounted`: it fires before the page's Suspense
+ * has finished hydrating, so the header would still be compared against the new theme.
  */
 import { THEME_STORAGE_KEY, type DocsTheme } from '~/composables/useDocsTheme'
 
-export default defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.hook('app:mounted', () => {
+export default defineNuxtPlugin(() => {
+  onNuxtReady(() => {
     const { theme, pinned } = useDocsTheme()
     const root = document.documentElement
 

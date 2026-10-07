@@ -129,9 +129,13 @@ html {
 [data-theme='dark'] .vd-shell,
 .vd-shell[data-theme='dark'],
 .vd-shell [data-theme='dark'] {
-  --vectis-color-accent: var(--vd-violet-500);
-  --vectis-color-accent-hover: var(--vd-violet-400);
-  --vectis-color-accent-active: var(--vd-violet-300);
+  /*
+   * 600 rather than 500, whose white text reaches only 4.4:1; and darker on hover and press,
+   * as the library's dark danger and success are, since 500 would fall short again.
+   */
+  --vectis-color-accent: var(--vd-violet-600);
+  --vectis-color-accent-hover: var(--vd-violet-700);
+  --vectis-color-accent-active: var(--vd-violet-800);
   --vectis-color-accent-surface: var(--vd-violet-950);
   --vectis-color-accent-border: var(--vd-violet-900);
   --vectis-color-accent-text: var(--vd-violet-300);
