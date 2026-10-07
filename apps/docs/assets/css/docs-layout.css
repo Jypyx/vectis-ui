@@ -165,7 +165,6 @@ html {
   margin-inline-start: var(--vectis-space-5);
 }
 
-/* Hide rather than unmount the field on mobile so its VHotkeys listener remains active. */
 .vd-search {
   display: none;
   flex: none;
@@ -175,6 +174,7 @@ html {
 .vd-under-1024 {
   display: inline-flex;
 }
+.vd-from-640,
 .vd-from-1024 {
   display: none;
 }
@@ -203,11 +203,15 @@ html {
 .vd-hero > div {
   width: 100%;
 }
-/* Use ch units to bound reading length independently of the spacing scale. */
+.vd-hero-chip {
+  margin-block-end: var(--vectis-space-6);
+}
+/* Balance keeps a short headline from leaving one word alone on a phone. */
 .vd-hero-title {
   margin-block-end: var(--vectis-space-4);
-  text-wrap: pretty;
+  text-wrap: balance;
 }
+/* Use ch units to bound reading length independently of the spacing scale. */
 .vd-hero-body {
   margin-inline: auto;
   margin-block-end: var(--vectis-space-7);
@@ -349,18 +353,16 @@ html {
   }
 }
 
-.vd-modal {
-  max-block-size: 80vh;
-  /* Top alignment keeps the search field stationary as the result list changes height. */
-  margin-block: 7vh auto;
-}
-
 @media (min-width: 640px) {
   :root {
     --vd-gutter: var(--vectis-space-6);
   }
   .vd-under-640 {
     display: none;
+  }
+  /* Contents keeps the grouped buttons on the header's own gap. */
+  .vd-from-640 {
+    display: contents;
   }
   .vd-header-end {
     gap: var(--vectis-space-2);

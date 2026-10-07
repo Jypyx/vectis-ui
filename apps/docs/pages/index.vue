@@ -23,6 +23,7 @@ import edgeLogo from '~/assets/img/edge-browser-svg.svg'
 import firefoxLogo from '~/assets/img/firefox-browser-svg.svg'
 import safariLogo from '~/assets/img/safari-browser-svg.svg'
 
+import { LIBRARY_VERSION, RELEASE_URL } from '~/content/release'
 import { SITE_NAME, SITE_NPM_URL, SITE_REPO_URL, SITE_URL } from '~/content/site'
 
 const { t } = useI18n()
@@ -218,11 +219,24 @@ const installStep = ref<string>(STEPS[0]!.value)
   <main class="vd-home">
     <div class="vd-limit vd-hero">
       <div>
+        <VChip
+          :href="RELEASE_URL"
+          target="_blank"
+          rel="noreferrer"
+          variant="soft"
+          tone="accent"
+          shape="pill"
+          size="sm"
+          :icon-end="arrowRightAltIcon"
+          class="vd-hero-chip"
+        >
+          v{{ LIBRARY_VERSION }} · {{ t('home.heroReleaseNotes') }}
+        </VChip>
         <!--
-          The headline comes from the catalogue WITH its line break and its accent span: where a
-          headline breaks is a decision about the sentence, and the two languages break in
-          different places. The accent colour is applied from the scoped block through `:deep`,
-          since content rendered as raw HTML carries no scope attribute of its own.
+          The headline comes from the catalogue WITH its accent span, which the scoped block
+          turns into a line of its own through `:deep`, since content rendered as raw HTML
+          carries no scope attribute. No `<br>`: Chromium does not balance a line ending in a
+          forced break.
         -->
         <DocsProse tag="h1" keypath="home.heroTitle" variant="display" class="vd-hero-title" />
         <DocsProse keypath="home.heroBody" variant="body-xl" tone="muted" class="vd-hero-body" />
@@ -397,7 +411,9 @@ const installStep = ref<string>(STEPS[0]!.value)
  * silently. The `<code>` run inside a sentence is the one piece of type on this page that
  * VTypography cannot carry, being inside an `innerHTML` rather than a slot.
  */
+/* A block of its own, so the title's balanced wrapping treats each line separately. */
 .vd-home :deep(.vd-hero-accent) {
+  display: block;
   color: var(--vectis-color-accent);
 }
 .vd-home :deep(code) {

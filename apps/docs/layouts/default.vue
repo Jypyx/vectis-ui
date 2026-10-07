@@ -10,7 +10,6 @@ withDefaults(defineProps<{ showFooter?: boolean }>(), { showFooter: true })
     <DocsHeader />
     <slot />
     <DocsFooter v-if="showFooter" />
-    <DocsSearch />
     <VSnackbar />
   </div>
 </template>

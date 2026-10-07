@@ -1,9 +1,9 @@
 export default {
-  documentTitle: 'Une bibliothèque UI conçue pour les navigateurs modernes',
-  heroTitle:
-    'Une bibliothèque UI conçue<br><span class="vd-hero-accent">pour les navigateurs modernes.</span>',
+  documentTitle: 'Une UI Vue moderne, native par conception',
+  heroTitle: 'Une UI Vue moderne. <span class="vd-hero-accent">Native par conception.</span>',
   heroBody:
-    'Vectis UI est une suite de composants Vue 3 ultra-légère pilotée par des tokens CSS natifs. Zéro surcouche, zéro dépendance, zéro compromis.',
+    'Des composants Vue 3 bâtis sur les standards du Web. Des tokens CSS natifs, des interactions accessibles, et Vue pour seule dépendance à l’exécution.',
+  heroReleaseNotes: 'Notes de version',
   heroCta: 'Installer la bibliothèque',
   standardsHeading: 'Les standards du Web comme base',
   standardsSubtitle:

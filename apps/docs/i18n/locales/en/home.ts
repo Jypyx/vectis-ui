@@ -1,9 +1,10 @@
-// Keep the headline's line break and accent markup in the translation.
+// Keep the headline's accent markup in the translation: the span starts its second line.
 export default {
-  documentTitle: 'A UI library designed for modern browsers',
-  heroTitle: 'A UI library designed<br><span class="vd-hero-accent">for modern browsers.</span>',
+  documentTitle: 'Modern Vue UI, native by design',
+  heroTitle: 'Modern Vue UI. <span class="vd-hero-accent">Native by design.</span>',
   heroBody:
-    'Vectis UI is an ultra-lightweight suite of Vue 3 components driven by native CSS tokens. Zero overhead, zero dependencies, zero compromises.',
+    'Vue 3 components built on web standards. Native CSS tokens, accessible interactions, and Vue as the only runtime dependency.',
+  heroReleaseNotes: 'Release notes',
   heroCta: 'Install the library',
   standardsHeading: 'Built on web standards',
   standardsSubtitle:

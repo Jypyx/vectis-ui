@@ -8,6 +8,8 @@ export default {
     toLight: 'Passer au thème clair',
     toDark: 'Passer au thème sombre',
     changeLanguage: 'Changer de langue',
+    language: 'Langue',
+    github: 'Dépôt GitHub',
   },
   search: {
     open: 'Rechercher',

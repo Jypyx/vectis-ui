@@ -8,6 +8,8 @@ export default {
     toLight: 'Switch to the light theme',
     toDark: 'Switch to the dark theme',
     changeLanguage: 'Change the language',
+    language: 'Language',
+    github: 'GitHub repository',
   },
   search: {
     open: 'Search',
