@@ -11,7 +11,8 @@ export default {
       props: [
         { name: 'text', type: 'string' },
         { name: 'placement', type: 'TooltipPlacement', values: "'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end' | 'right' | 'right-start' | 'right-end'", default: "'top'" },
-        { name: 'delay', type: 'number', default: '300' },
+        { name: 'openDelay', type: 'number', default: '300' },
+        { name: 'closeDelay', type: 'number', default: '100' },
       ],
       slots: [
         { name: 'default', type: '{ triggerProps: TooltipTriggerProps; }' },

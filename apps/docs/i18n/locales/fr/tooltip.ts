@@ -12,7 +12,7 @@ export default {
     },
     delay: {
       title: 'Ouverture et fermeture',
-      text: '<code>delay</code> définit l’attente au survol en millisecondes. Le focus ouvre immédiatement ; Échap ou l’activation du déclencheur ferme sans déplacer le focus.',
+      text: '<code>openDelay</code> définit l’attente au survol en millisecondes, <code>closeDelay</code> le temps pendant lequel l’infobulle reste une fois le pointeur parti. Le focus ouvre immédiatement ; Échap ou l’activation du déclencheur ferme sans déplacer le focus.',
     },
     describing: {
       title: 'Décrire, pas nommer',
@@ -28,8 +28,10 @@ export default {
       props: {
         text: 'Description de l’infobulle. Remplacée par le slot <code>content</code>.',
         placement: 'Position souhaitée ; change de côté si l’espace manque.',
-        delay:
+        openDelay:
           'Délai au survol en millisecondes ; 0 supprime l’attente. Le focus ouvre immédiatement.',
+        closeDelay:
+          'Millisecondes pendant lesquelles l’infobulle reste une fois le pointeur sorti du déclencheur et de l’infobulle.',
       },
       slots: {
         default: 'Déclencheur accessible au focus. Liez les <code>triggerProps</code> fournis.',

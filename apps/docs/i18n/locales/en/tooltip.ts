@@ -12,7 +12,7 @@ export default {
     },
     delay: {
       title: 'Opening and closing',
-      text: '<code>delay</code> sets the hover wait in milliseconds. Focus opens immediately; Escape or trigger activation closes without moving focus.',
+      text: '<code>openDelay</code> sets the hover wait in milliseconds, <code>closeDelay</code> how long the tooltip stays once the pointer leaves. Focus opens immediately; Escape or trigger activation closes without moving focus.',
     },
     describing: {
       title: 'Describing, not naming',
@@ -28,7 +28,9 @@ export default {
       props: {
         text: 'Tooltip description. Replaced by the <code>content</code> slot.',
         placement: 'Preferred position; flips when space is insufficient.',
-        delay: 'Hover delay in milliseconds; 0 removes the wait. Focus opens immediately.',
+        openDelay: 'Hover delay in milliseconds; 0 removes the wait. Focus opens immediately.',
+        closeDelay:
+          'Milliseconds the tooltip stays once the pointer has left the trigger and the tooltip.',
       },
       slots: {
         default: 'Focusable trigger. Bind the supplied <code>triggerProps</code>.',

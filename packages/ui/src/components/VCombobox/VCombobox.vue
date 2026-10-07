@@ -44,7 +44,7 @@ import { selectionOf, useListbox } from '../../composables/useListbox'
 import { canClear } from '../../composables/useClearable'
 import { iconStartListener } from '../../composables/useIconClickHandlers'
 
-import { useTimer } from '../../composables/useTimer'
+import { useDebouncedSearch } from '../../composables/useDebouncedSearch'
 import { useMessages } from '../../i18n/state'
 
 /** One thing that can be chosen. */
@@ -395,32 +395,11 @@ const stateAnnouncement = computed(() => {
   return props.loading ? resolvedLoadingText.value : resolvedEmptyText.value
 })
 
-// Nothing native waits before sending a request, or refrains from sending the same one twice,
-// so both have to be written. The waiting itself is delegated to `useTimer`; re-arming, a delay
-// of zero running at once, cancellation when the component goes away; and what stays here is
-// specific to this component: not repeating a term, and giving up when the panel closes.
-const searchTimer = useTimer()
-// The last term actually sent, or nothing if none ever was. It is what stops reopening the
-// panel on an unchanged term from firing the request again; a consumer with a cache of their
-// own is of course free to answer instantly.
-let lastEmitted: string | undefined
-
-const cancelSearch = searchTimer.cancel
-
-function emitSearch(term: string, immediate = false) {
-  cancelSearch()
-  if (term === lastEmitted) return
-  searchTimer.start(
-    () => {
-      // The panel may have closed while we were waiting: there is then nothing left to load,
-      // and the check has to happen here rather than before arming the timer.
-      if (!open.value) return
-      lastEmitted = term
-      emit('search', term)
-    },
-    immediate ? 0 : props.searchDebounce,
-  )
-}
+const { request: emitSearch, cancel: cancelSearch } = useDebouncedSearch({
+  delay: () => props.searchDebounce,
+  active: () => open.value,
+  report: (term) => emit('search', term),
+})
 
 watch(searchTerm, (term) => {
   if (!open.value) return

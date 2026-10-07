@@ -10,13 +10,13 @@ import { VButton, VTooltip } from 'vectis-ui'
       </template>
     </VTooltip>
 
-    <VTooltip text="Appears after a longer wait" :delay="800">
+    <VTooltip text="Appears after a longer wait" :open-delay="800">
       <template #default="{ triggerProps }">
         <VButton variant="outline" tone="neutral" v-bind="triggerProps">800ms</VButton>
       </template>
     </VTooltip>
 
-    <VTooltip text="Appears at once" :delay="0">
+    <VTooltip text="Appears at once" :open-delay="0">
       <template #default="{ triggerProps }">
         <VButton variant="outline" tone="neutral" v-bind="triggerProps">No wait</VButton>
       </template>

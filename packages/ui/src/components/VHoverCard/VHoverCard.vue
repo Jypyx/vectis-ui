@@ -5,8 +5,9 @@
  * Manual mode also leaves any open menu or popover untouched.
  */
 
-import { onBeforeUnmount, ref, useId } from 'vue'
+import { ref, useId } from 'vue'
 
+import { useEscapeDismiss } from '../../composables/useEscapeDismiss'
 import { usePopover, usePopoverModel } from '../../composables/usePopover'
 import { useTimer } from '../../composables/useTimer'
 import { isKeyboardFocus } from '../../utils/focus'
@@ -170,23 +171,12 @@ function onFocusOut(event: FocusEvent) {
   if (!hovered) hide()
 }
 
-// @keyboard @a11y
-/*
- * Escape dismisses the card from anywhere on the page (WCAG 1.4.13), since a hovered card rarely
- * holds the focus. The key is spent on it so an enclosing VDialog does not close as well.
- */
-function onDocumentKeydown(event: KeyboardEvent) {
-  if (event.key !== 'Escape' || event.defaultPrevented) return
-  event.preventDefault()
+// Escape closes the card, handing a focus inside it back to the trigger.
+const listen = useEscapeDismiss(() => {
   hovered = false
   focused = false
   hide()
-}
-
-function listen(value: boolean) {
-  if (value) document.addEventListener('keydown', onDocumentKeydown)
-  else document.removeEventListener('keydown', onDocumentKeydown)
-}
+})
 
 function onBeforeToggle(event: Event) {
   syncShown(event)
@@ -202,7 +192,6 @@ function onToggle(event: Event) {
 
 // A model closing the card goes through `hide`, which hands a focus inside it back as well.
 usePopoverModel(open, () => shown.value, showPanel, hide)
-onBeforeUnmount(() => listen(false))
 
 defineExpose({
   /** Opens the card at once, without the delay. */

@@ -49,7 +49,8 @@ const meta = {
   args: {
     text: 'Copy to the clipboard',
     placement: 'top',
-    delay: 300,
+    openDelay: 300,
+    closeDelay: 100,
   },
   render: (args) => ({
     components: { VTooltip, VButton },
@@ -155,7 +156,7 @@ export const Placements: Story = {
             v-if="placement"
             :key="placement"
             :text="args.text"
-            :delay="args.delay"
+            :open-delay="args.openDelay"
             :placement="placement"
           >
             <template #default="{ triggerProps }">
@@ -178,7 +179,7 @@ export const RichContent: Story = {
     setup: () => ({ args, t }),
     template: `
       <div style="padding: 100px 60px">
-        <VTooltip :delay="args.delay" placement="bottom-start">
+        <VTooltip :open-delay="args.openDelay" placement="bottom-start">
           <template #default="{ triggerProps }">
             <VButton variant="outline" tone="neutral" v-bind="triggerProps">{{ t.search }}</VButton>
           </template>
@@ -220,28 +221,28 @@ export const EdgeFlipping: Story = {
           (<code>position-try-fallbacks</code>).
         </VTypography>
         <div style="position: absolute; top: 8px; left: 50%; translate: -50%;">
-          <VTooltip :text="args.text" :delay="args.delay" placement="top">
+          <VTooltip :text="args.text" :open-delay="args.openDelay" placement="top">
             <template #default="{ triggerProps }">
               <VButton variant="outline" tone="neutral" v-bind="triggerProps">top → bottom</VButton>
             </template>
           </VTooltip>
         </div>
         <div style="position: absolute; bottom: 8px; left: 50%; translate: -50%;">
-          <VTooltip :text="args.text" :delay="args.delay" placement="bottom">
+          <VTooltip :text="args.text" :open-delay="args.openDelay" placement="bottom">
             <template #default="{ triggerProps }">
               <VButton variant="outline" tone="neutral" v-bind="triggerProps">bottom → top</VButton>
             </template>
           </VTooltip>
         </div>
         <div style="position: absolute; left: 8px; top: 50%; translate: 0 -50%;">
-          <VTooltip :text="args.text" :delay="args.delay" placement="left">
+          <VTooltip :text="args.text" :open-delay="args.openDelay" placement="left">
             <template #default="{ triggerProps }">
               <VButton variant="outline" tone="neutral" v-bind="triggerProps">left → right</VButton>
             </template>
           </VTooltip>
         </div>
         <div style="position: absolute; right: 8px; top: 50%; translate: 0 -50%;">
-          <VTooltip :text="args.text" :delay="args.delay" placement="right">
+          <VTooltip :text="args.text" :open-delay="args.openDelay" placement="right">
             <template #default="{ triggerProps }">
               <VButton variant="outline" tone="neutral" v-bind="triggerProps">right → left</VButton>
             </template>

@@ -13,6 +13,7 @@ import { menuAnchor, menuKey } from '../VMenu/context'
 import type { MenuSize } from '../VMenu/context'
 import { usePopoverModel } from '../../composables/usePopover'
 import { isRtl } from '../../utils/direction'
+import { clamp } from '../../utils/number'
 
 interface ContextMenuProps {
   /** The element wrapping the zone. Any element able to hold the default slot's content. */
@@ -89,8 +90,7 @@ function placeAnchor(x: number, y: number) {
 function placeUnder(el: Element) {
   const rect = el.getBoundingClientRect()
   const x = isRtl(el) ? rect.right : rect.left
-  const y = Math.min(Math.max(rect.bottom, 0), window.innerHeight)
-  placeAnchor(Math.min(Math.max(x, 0), window.innerWidth), y)
+  placeAnchor(clamp(x, 0, window.innerWidth), clamp(rect.bottom, 0, window.innerHeight))
 }
 
 function openMenu(on: Element | null, keyboard: boolean) {

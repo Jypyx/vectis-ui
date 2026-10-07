@@ -26,7 +26,7 @@ import VSpinner from '../VSpinner/VSpinner.vue'
 import VCommandPaletteItem from './VCommandPaletteItem.vue'
 import { useHotkeyListener } from '../../composables/useHotkeyListener'
 import { useModalDialog } from '../../composables/useModalDialog'
-import { useTimer } from '../../composables/useTimer'
+import { useDebouncedSearch } from '../../composables/useDebouncedSearch'
 import { useMessages } from '../../i18n/state'
 import { cssSize } from '../../utils/css'
 import { createNormalizedCache, normalizeText } from '../../utils/text'
@@ -351,30 +351,18 @@ const stateAnnouncement = computed(() => {
   return props.loading ? resolvedLoadingText.value : resolvedEmptyText.value
 })
 
-// Nothing native waits before reporting a search or refrains from reporting the same one
-// twice. The last term reported is what stops reopening on an unchanged term from asking again.
-const searchTimer = useTimer()
-let lastEmitted: string | undefined
-
-function emitSearch(value: string, immediate = false) {
-  searchTimer.cancel()
-  if (value === lastEmitted) return
-  searchTimer.start(
-    () => {
-      if (!open.value) return
-      lastEmitted = value
-      emit('search', value)
-    },
-    immediate ? 0 : props.searchDebounce,
-  )
-}
+const { request: emitSearch, cancel: cancelSearch } = useDebouncedSearch({
+  delay: () => props.searchDebounce,
+  active: () => open.value,
+  report: (value) => emit('search', value),
+})
 
 watch(open, (value) => {
   if (value) {
     activeIndex.value = firstEnabled()
     emitSearch(term.value, true)
   } else {
-    searchTimer.cancel()
+    cancelSearch()
     query.value = ''
     activeIndex.value = -1
   }

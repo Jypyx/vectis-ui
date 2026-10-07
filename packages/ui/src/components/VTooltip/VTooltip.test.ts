@@ -7,7 +7,7 @@ import VTooltip from './VTooltip.vue'
 const Harness = defineComponent({
   components: { VTooltip },
   template: `
-    <VTooltip text="Aide contextuelle" :delay="300">
+    <VTooltip text="Aide contextuelle" :open-delay="300">
       <template #default="{ triggerProps }">
         <button data-testid="trigger" v-bind="triggerProps">?</button>
       </template>
@@ -54,6 +54,29 @@ describe('VTooltip', () => {
     wrapper.dispatchEvent(new Event('pointerenter'))
     wrapper.dispatchEvent(new Event('pointerleave'))
     vi.advanceTimersByTime(500)
+    expect(panel.hasAttribute('data-popover-open')).toBe(false)
+  })
+
+  it('closeDelay sets how long the tooltip stays once the pointer has left', () => {
+    const { container } = render({
+      components: { VTooltip },
+      template: `
+        <VTooltip text="Help" :open-delay="0" :close-delay="400">
+          <template #default="{ triggerProps }">
+            <button v-bind="triggerProps">?</button>
+          </template>
+        </VTooltip>
+      `,
+    })
+    const wrapper = container.querySelector('.v-tooltip') as HTMLElement
+    const panel = container.querySelector('[role="tooltip"]') as HTMLElement
+
+    wrapper.dispatchEvent(new Event('pointerenter'))
+    expect(panel.hasAttribute('data-popover-open')).toBe(true)
+    wrapper.dispatchEvent(new Event('pointerleave'))
+    vi.advanceTimersByTime(300)
+    expect(panel.hasAttribute('data-popover-open')).toBe(true)
+    vi.advanceTimersByTime(150)
     expect(panel.hasAttribute('data-popover-open')).toBe(false)
   })
 

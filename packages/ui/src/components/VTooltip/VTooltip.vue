@@ -4,10 +4,11 @@
  * native light dismissal. Pointer movement may require keeping the bubble open.
  */
 
-import { computed, onBeforeUnmount, ref, useId } from 'vue'
+import { computed, ref, useId } from 'vue'
 
 import VPopover from '../VPopover/VPopover.vue'
 
+import { useEscapeDismiss } from '../../composables/useEscapeDismiss'
 import { useTimer } from '../../composables/useTimer'
 import { isKeyboardFocus } from '../../utils/focus'
 
@@ -40,13 +41,19 @@ interface TooltipProps {
    */
   placement?: TooltipPlacement
   /** How long the pointer must rest on the element before the tooltip appears, in milliseconds. */
-  delay?: number
+  openDelay?: number
+  /**
+   * How long the tooltip stays once the pointer has left both the element and the tooltip, in
+   * milliseconds. It is the time to cross the gap between them.
+   */
+  closeDelay?: number
 }
 
 const props = withDefaults(defineProps<TooltipProps>(), {
   text: undefined,
   placement: 'top',
-  delay: 300,
+  openDelay: 300,
+  closeDelay: 100,
 })
 
 defineSlots<{
@@ -69,12 +76,6 @@ const popoverRef = ref<InstanceType<typeof VPopover> | null>(null)
 // when the component goes away.
 const timer = useTimer()
 
-/**
- * How long a tooltip the pointer has left waits before going: the time to cross the gap between
- * the trigger and the bubble, which the margin leaves empty and which no pointer event covers.
- */
-const LEAVE_GRACE = 100
-
 let hovered = false
 let focused = false
 
@@ -82,7 +83,7 @@ let focused = false
 function show(immediate = false) {
   // A delay of 0 runs the callback synchronously; the design system's convention, and what lets
   // keyboard focus share this code path without waiting a tick.
-  timer.start(() => popoverRef.value?.show(), immediate ? 0 : props.delay)
+  timer.start(() => popoverRef.value?.show(), immediate ? 0 : props.openDelay)
 }
 
 function hide() {
@@ -98,7 +99,7 @@ function onPointerEnter() {
 function onPointerLeave() {
   hovered = false
   if (focused) return
-  timer.start(() => popoverRef.value?.close(), LEAVE_GRACE)
+  timer.start(() => popoverRef.value?.close(), props.closeDelay)
 }
 
 function onPointerDown() {
@@ -124,28 +125,12 @@ function onFocusIn(event: FocusEvent) {
   show(true)
 }
 
-// @keyboard @a11y
-// Escape must dismiss a tooltip opened by hover or focus without moving the focus anywhere
-// (WCAG 1.4.13), for a magnifier user whose view it may be covering. It is heard on the
-// DOCUMENT while the tooltip shows, since a hovered tooltip rarely holds the focus, and it
-// is SPENT on it: inside a VDialog the same key would otherwise also be the dialog's close
-// request.
-function onDocumentKeydown(event: KeyboardEvent) {
-  if (event.key !== 'Escape' || event.defaultPrevented) return
-  event.preventDefault()
+// Escape hides the tooltip without moving the focus anywhere.
+const onOpenChange = useEscapeDismiss(() => {
   hovered = false
   focused = false
   hide()
-}
-
-let listening = false
-function onOpenChange(open: boolean) {
-  if (open === listening) return
-  listening = open
-  if (open) document.addEventListener('keydown', onDocumentKeydown)
-  else document.removeEventListener('keydown', onDocumentKeydown)
-}
-onBeforeUnmount(() => onOpenChange(false))
+})
 
 defineExpose({
   /** Shows the tooltip at once, without the hover delay. */

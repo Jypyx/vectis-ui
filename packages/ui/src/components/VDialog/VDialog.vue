@@ -100,7 +100,7 @@ const {
   rendered,
   rootAttrs,
   show,
-  close: requestClose,
+  close,
   onClose,
   onCancel,
   onPointerdown,
@@ -126,7 +126,7 @@ defineExpose({
    * Closes the dialog. It closes unconditionally, `persistentEscape` and
    * `persistentBackdrop` governing only the two routes the reader can take.
    */
-  close: requestClose,
+  close,
   /** The `<dialog>` element. It is null while closed: each opening builds a fresh one. */
   el: dialogEl,
 })
@@ -189,7 +189,7 @@ defineExpose({
           variant="ghost"
           tone="neutral"
           size="sm"
-          @click="requestClose"
+          @click="close"
         >
           <VIcon :name="closeIcon" />
         </VIconButton>
