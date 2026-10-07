@@ -234,6 +234,13 @@ export function formatDateDisplay(
   return d ? dateFormatter(locale, options).format(d) : ''
 }
 
+/**
+ * ICU releases disagree on the spaces around a range's dash: Node 24 (ICU 78) writes thin spaces
+ * where Chromium writes plain ones. Writing every thin or hair space as a plain one keeps a
+ * prerendered range identical to the one the browser hydrates.
+ */
+const RANGE_SPACES = /[\u2009\u200A]/g
+
 /** A period written out for the reader. */
 export function formatDisplayRange(
   start: string,
@@ -247,5 +254,6 @@ export function formatDisplayRange(
   const fmt = dateFormatter(locale, options)
   const order = compareISO(start, end)
   if (order === 0) return fmt.format(a)
-  return order < 0 ? fmt.formatRange(a, b) : fmt.formatRange(b, a)
+  const text = order < 0 ? fmt.formatRange(a, b) : fmt.formatRange(b, a)
+  return text.replace(RANGE_SPACES, ' ')
 }

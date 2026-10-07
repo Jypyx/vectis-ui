@@ -227,6 +227,16 @@ describe('utils/date — names and far years', () => {
   })
 })
 
+describe('formatDisplayRange and the ICU in use', () => {
+  it('writes the spaces around the dash as plain spaces, whatever the engine', () => {
+    const options = { day: 'numeric', month: 'long', year: 'numeric' } as const
+    const out = formatDisplayRange('2026-01-05', '2026-01-11', 'en-GB', options)
+    expect(out).not.toMatch(/[\u2009\u200A]/)
+    expect(out).toContain('5')
+    expect(out).toContain('11')
+  })
+})
+
 describe('formatDisplayRange given its ends the wrong way round', () => {
   it('writes the range in order rather than a nonsense span', () => {
     const options = { day: 'numeric', month: 'short', year: 'numeric' } as const
