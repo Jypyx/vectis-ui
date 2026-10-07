@@ -38,6 +38,9 @@ export default {
   api: {
     VInput: {
       props: {
+        required: 'Adds an asterisk after the label and passes <code>required</code> to the field.',
+        hideLabel: 'Hides the label visually while keeping it as the accessible name.',
+        labelPosition: 'Places the label above the field or beside it.',
         size: 'Field size. Overridden when <code>VInputGroup</code> sets <code>size</code>.',
         compact:
           'Reduces the height without changing padding, text or icons. Overridden when <code>VInputGroup</code> sets <code>compact</code>.',
@@ -85,6 +88,7 @@ export default {
           'Emitted when the end icon button is activated. Receives a <code>MouseEvent</code>.',
       },
       slots: {
+        meta: 'Content at the end of the hint line, such as a counter. Bind its <code>id</code>, which joins the field description.',
         start: 'Content after <code>iconStart</code>. Does not replace the icon.',
         valueEnd: 'Content after the value and counter, before the clear button and end icon.',
         end: 'Content replacing <code>iconEnd</code>. Hidden while loading.',

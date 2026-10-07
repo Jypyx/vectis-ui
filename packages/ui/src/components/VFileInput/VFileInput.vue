@@ -4,16 +4,15 @@
  * Compose a read-only VInput with a native file input. useFileField bridges File[] selection to
  * the browser dialog and form submission.
  */
-import { computed, inject, ref, useId } from 'vue'
+import { computed, inject, ref } from 'vue'
 
 import VChip from '../VChip/VChip.vue'
 import type { ChipSize } from '../VChip/VChip.vue'
-import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
+import type { FieldLabelPosition } from '../VField/VField.vue'
 import { attach_file as attachFileIcon } from '../VIcon/icons/attach_file'
 import type { IconSource } from '../VIcon/types'
 import VInput from '../VInput/VInput.vue'
 import { inputGroupKey } from '../VInput/context'
-import VTypography from '../VTypography/VTypography.vue'
 
 import { canClear } from '../../composables/useClearable'
 import { useControlShape } from '../../composables/useControlShape'
@@ -25,7 +24,6 @@ import { useLocale, useMessages } from '../../i18n/state'
 import { chipScaleFor } from '../../utils/chip'
 import { isDev } from '../../utils/env'
 import { fileKey, formatBytes, type FileRejection } from '../../utils/file'
-import { joinIds } from '../../utils/ids'
 import { truncateMiddle } from './truncate'
 
 /** How the chosen files are shown inside the field when several are allowed. */
@@ -98,7 +96,7 @@ interface FileInputProps {
    * by the browser.
    */
   invalid?: boolean
-  /** The label above the field, tied to it so that clicking it focuses the field. */
+  /** The label, tied to the field so that clicking it focuses the field. */
   label?: string
   /**
    * A line of help under the field, to the left of the counter. It is tied to the field
@@ -111,6 +109,19 @@ interface FileInputProps {
    * appears or changes.
    */
   error?: string
+  /**
+   * Marks the field as required: an asterisk follows the label, and the field is announced as
+   * required. The browser does not check it, its message would point at the hidden file input:
+   * validate the v-model and set `error`.
+   */
+  required?: boolean
+  /** Hides the label visually. It still names the field for assistive technology. */
+  hideLabel?: boolean
+  /**
+   * Where the label sits: above the field (`top`, the default), or at its start, in a column of
+   * its own, moving back above when there is not room for both.
+   */
+  labelPosition?: FieldLabelPosition
   /**
    * What the field says while nothing is chosen. It falls back to the design system
    * dictionary.
@@ -165,6 +176,9 @@ const props = withDefaults(defineProps<FileInputProps>(), {
   label: undefined,
   hint: undefined,
   error: undefined,
+  required: false,
+  hideLabel: false,
+  labelPosition: 'top',
   placeholder: undefined,
   iconStart: undefined,
   iconStartLabel: undefined,
@@ -219,7 +233,7 @@ defineSlots<{
 /** Always a LIST of files, whether or not several are allowed, and never a file on its own. */
 const model = defineModel<File[]>({ default: () => [], get: (files) => files ?? [] })
 
-const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
+const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 // Declared as this component's own event, `click:icon-start` is out of `$attrs`, so the
 // listener is relayed to the field by hand; and only when the consumer wrote one.
@@ -240,9 +254,7 @@ const {
 
 /*
  * Here, the bucket meant for "the control the user deals with" goes to the visible field: that
- * is what they see, focus and click, so a consumer's own `<label for>` has to point at it. The
- * description attribute is pulled out of that bucket, because this component re-assembles it
- * further down.
+ * is what they see, focus and click, so a consumer's own `<label for>` has to point at it.
  */
 const {
   fileEl,
@@ -259,7 +271,6 @@ const {
   emit,
   forwardedAttrs,
   disabled: resolvedDisabled,
-  excludeFromControl: ['aria-describedby'],
   onClear: () => emit('clear'),
   warnings: isDev
     ? () => [
@@ -319,26 +330,6 @@ const counterText = computed(() => {
   return model.value.length === 0 ? word : `${word} (${formatBytes(totalSize.value, locale.value)})`
 })
 
-const hintId = useId()
-const counterId = useId()
-const errorId = useId()
-
-// @a11y
-/*
- * What describes the field for a screen reader is a LIST of references, assembled here rather
- * than by VInput: the hint belongs to OUR row under the field, VInput having no such row; its
- * own counter sits inside the field. The counter is deliberately part of that list, unlike in
- * VTextarea.
- */
-const describedBy = computed(() =>
-  joinIds(
-    attrs['aria-describedby'] as string | undefined,
-    !!props.error && errorId,
-    !!props.hint && !props.error && hintId,
-    props.counter && counterId,
-  ),
-)
-
 // The size, the density and the HEIGHT of the chips sitting inside the field, worked out
 // once in `utils/chip.ts` and shared with VCombobox. The height is set inline rather than
 // restated as a table of CSS rules: it belongs to the chips' own subtree, out of the
@@ -354,9 +345,12 @@ const chipScale = computed(() => chipScaleFor(resolvedSize.value, resolvedCompac
 const chipLabels = computed(() => model.value.map((file) => truncateMiddle(file.name)))
 
 function onControlClick(event: MouseEvent) {
-  // Without this guard the attach icon would open the dialog TWICE, and the clear cross would
-  // reopen it immediately after emptying the selection.
-  if ((event.target as HTMLElement).closest('button')) return
+  const target = event.target as HTMLElement
+  // Only the field's box opens the dialog: a click on the label reaches it as the click the
+  // label forwards to the input, and the hint and the counter do nothing. Without the button
+  // guard the attach icon would open the dialog TWICE, and the clear cross would reopen it
+  // immediately after emptying the selection.
+  if (!target.closest('.v-input-field') || target.closest('button')) return
   openPicker()
 }
 
@@ -430,11 +424,16 @@ defineExpose({
         no-typing
         :readonly="readonly"
         :label="label"
+        :hint="hint"
+        :error="error"
+        :required="required"
+        :hide-label="hideLabel"
+        :label-position="labelPosition"
         :placeholder="placeholderText"
         :size="resolvedSize"
         :compact="resolvedCompact"
         :disabled="resolvedDisabled"
-        :invalid="invalid || !!error"
+        :invalid="invalid"
         :clearable="clearable"
         :clear-visible="clearVisible"
         :clear-label="resolvedClearLabel"
@@ -444,7 +443,6 @@ defineExpose({
         :loading-text="loadingText"
         :icon-end="endIcon"
         :icon-end-label="endIconLabel"
-        :aria-describedby="describedBy"
         @click:icon-end="openPicker"
         @clear="clear"
         @keydown="onFieldKeydown"
@@ -480,39 +478,25 @@ defineExpose({
         </template>
 
         <template v-if="$slots['value-end']" #value-end><slot name="value-end" /></template>
+
+        <template v-if="counter" #meta="{ id }">
+          <span :id="id" class="v-file-input-counter v-field-counter">
+            <slot name="counter" :count="model.length" :bytes="totalSize" :text="counterText">
+              {{ counterText }}
+            </slot>
+          </span>
+        </template>
       </VInput>
     </div>
-
-    <div v-if="hint || error || counter" class="v-file-input-meta v-field-meta">
-      <span v-if="error" :id="errorId" class="v-field-error v-file-input-error">{{ error }}</span>
-      <VTypography
-        v-else-if="hint"
-        :id="hintId"
-        variant="caption"
-        tone="muted"
-        class="v-file-input-hint"
-      >
-        {{ hint }}
-      </VTypography>
-      <span v-if="counter" :id="counterId" class="v-file-input-counter v-field-counter">
-        <slot name="counter" :count="model.length" :bytes="totalSize" :text="counterText">
-          {{ counterText }}
-        </slot>
-      </span>
-    </div>
-    <VFieldAnnouncer :text="error" />
   </div>
 </template>
 
 <style>
 @layer vectis.components {
+  /* The label, the hint and the error are those of the VInput inside. */
   .v-file-input {
     position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: var(--vectis-space-1);
     width: 100%;
-    font-family: var(--vectis-text-family);
   }
 
   /*
@@ -545,7 +529,6 @@ defineExpose({
     background: var(--vectis-color-accent-surface);
   }
 
-  .v-file-input[data-disabled] .v-file-input-hint,
   .v-file-input[data-disabled] .v-file-input-counter {
     color: var(--vectis-color-text-subtle);
   }

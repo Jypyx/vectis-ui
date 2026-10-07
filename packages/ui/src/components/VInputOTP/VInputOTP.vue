@@ -5,16 +5,15 @@
  * values, distributes paste and moves focus; pattern literals stay outside the model.
  */
 
-import { computed, ref, useAttrs, useId, watch } from 'vue'
-import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
+import { computed, ref, useAttrs, watch } from 'vue'
+import VField from '../VField/VField.vue'
+import type { FieldLabelPosition } from '../VField/VField.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
-import VTypography from '../VTypography/VTypography.vue'
 
 import { partitionAttrs } from '../../utils/attrs'
 import { isDev } from '../../utils/env'
-import { joinIds } from '../../utils/ids'
 
 import { useMessages } from '../../i18n/state'
 
@@ -69,6 +68,18 @@ interface InputOTPProps {
    * appears or changes.
    */
   error?: string
+  /**
+   * Marks the code as required: an asterisk follows the label, and the hidden input a form reads
+   * is `required`.
+   */
+  required?: boolean
+  /** Hides the label visually. It still names the row for assistive technology. */
+  hideLabel?: boolean
+  /**
+   * Where the label sits: above the boxes (`top`, the default), or at their start, in a column
+   * of its own, moving back above when there is not room for both.
+   */
+  labelPosition?: FieldLabelPosition
 }
 
 const props = withDefaults(defineProps<InputOTPProps>(), {
@@ -84,6 +95,9 @@ const props = withDefaults(defineProps<InputOTPProps>(), {
   label: undefined,
   hint: undefined,
   error: undefined,
+  required: false,
+  hideLabel: false,
+  labelPosition: 'top',
 })
 
 const m = useMessages()
@@ -100,36 +114,18 @@ const attrs = useAttrs()
 
 // What the FORM reads goes on the hidden native input, and everything else on the group:
 // on the group a `name` submits nothing and `required` validates nothing, silently.
-const NATIVE_ONLY = ['name', 'form', 'required']
+const NATIVE_ONLY = ['name', 'form']
 const split = computed(() => partitionAttrs(attrs, NATIVE_ONLY))
 const groupAttrs = computed(() => split.value.rest)
 const nativeAttrs = computed(() => split.value.picked)
 // @a11y
-// A `<label for>` names one control, and this names a row of them, so the visible label names
-// the group through `aria-labelledby`. A consumer's `aria-labelledby` or `aria-label` wins; with
-// neither and no label, the dictionary names the row.
-const labelId = useId()
-const labelledBy = computed(() => {
-  const own = attrs['aria-labelledby'] as string | undefined
-  if (own !== undefined) return own
-  return props.label && attrs['aria-label'] === undefined ? labelId : undefined
-})
-const ariaLabel = computed(() =>
-  labelledBy.value
-    ? undefined
-    : ((attrs['aria-label'] as string | undefined) ?? m.value.inputOTP.label),
-)
+// The row has no visible label to be named by when a consumer gives none or names it
+// themselves (VField's group mode): the dictionary names it then.
+function rowLabel(fieldProps: Record<string, unknown>): string | undefined {
+  if (fieldProps['aria-labelledby']) return undefined
+  return (fieldProps['aria-label'] as string | undefined) ?? m.value.inputOTP.label
+}
 
-// No `useFieldIds` here: its field id would have no single control to point at.
-const hintId = useId()
-const errorId = useId()
-const describedBy = computed(() =>
-  joinIds(
-    attrs['aria-describedby'] as string | undefined,
-    !!props.error && errorId,
-    !!props.hint && !props.error && hintId,
-  ),
-)
 const isInvalid = computed(() => props.invalid || !!props.error)
 
 /**
@@ -357,86 +353,90 @@ defineExpose({
 </script>
 
 <template>
-  <div
-    ref="rootEl"
+  <VField
     v-bind="groupAttrs"
-    class="v-input-otp v-control"
-    role="group"
-    :aria-label="ariaLabel"
-    :aria-labelledby="labelledBy"
-    :aria-describedby="describedBy"
-    :data-invalid="isInvalid ? '' : undefined"
-    :data-size="size"
-    :data-compact="compact ? '' : undefined"
-    :data-disabled="disabled ? '' : undefined"
-    :data-readonly="readonly ? '' : undefined"
+    class="v-input-otp"
+    :label="label"
+    :hint="hint"
+    :error="error"
+    :required="required"
+    :disabled="disabled"
+    :hide-label="hideLabel"
+    :label-position="labelPosition"
+    group
   >
-    <VTypography v-if="label" :id="labelId" as="span" variant="label" class="v-input-otp-label">
-      {{ label }}
-    </VTypography>
-
-    <div class="v-input-otp-boxes">
-      <template v-for="(cell, i) in cells" :key="i">
-        <input
-          v-if="cell.type === 'slot'"
-          type="text"
-          class="v-input-otp-input"
-          :inputmode="format === 'numeric' ? 'numeric' : 'text'"
-          :autocomplete="cell.slotIndex === 0 ? 'one-time-code' : 'off'"
-          :value="digits[cell.slotIndex]"
-          :disabled="disabled"
-          :readonly="readonly || undefined"
-          :aria-label="m.inputOTP.slot(cell.slotIndex + 1, slotCount)"
-          :aria-invalid="isInvalid || undefined"
-          @input="onInput(cell.slotIndex, $event)"
-          @keydown="onKeydown(cell.slotIndex, $event)"
-          @focus="onFocus(cell.slotIndex, $event)"
-        />
-        <!-- A separator from the pattern: shown, never focusable, and never part of the
+    <template #default="{ fieldProps }">
+      <div
+        ref="rootEl"
+        v-bind="fieldProps"
+        class="v-input-otp-group v-control"
+        role="group"
+        :aria-label="rowLabel(fieldProps)"
+        :data-invalid="isInvalid ? '' : undefined"
+        :data-size="size"
+        :data-compact="compact ? '' : undefined"
+        :data-disabled="disabled ? '' : undefined"
+        :data-readonly="readonly ? '' : undefined"
+      >
+        <div class="v-input-otp-boxes">
+          <template v-for="(cell, i) in cells" :key="i">
+            <input
+              v-if="cell.type === 'slot'"
+              type="text"
+              class="v-input-otp-input"
+              :inputmode="format === 'numeric' ? 'numeric' : 'text'"
+              :autocomplete="cell.slotIndex === 0 ? 'one-time-code' : 'off'"
+              :value="digits[cell.slotIndex]"
+              :disabled="disabled"
+              :readonly="readonly || undefined"
+              :aria-label="m.inputOTP.slot(cell.slotIndex + 1, slotCount)"
+              :aria-invalid="isInvalid || undefined"
+              @input="onInput(cell.slotIndex, $event)"
+              @keydown="onKeydown(cell.slotIndex, $event)"
+              @focus="onFocus(cell.slotIndex, $event)"
+            />
+            <!-- A separator from the pattern: shown, never focusable, and never part of the
              value. It is hidden from screen readers, each box already announcing its
              own position in the code. -->
-        <span v-else class="v-input-otp-literal" aria-hidden="true">
-          <VIcon v-if="separatorIcon" v-bind="iconProps(separatorIcon)" />
-          <template v-else>{{ cell.char }}</template>
-        </span>
-      </template>
-    </div>
+            <span v-else class="v-input-otp-literal" aria-hidden="true">
+              <VIcon v-if="separatorIcon" v-bind="iconProps(separatorIcon)" />
+              <template v-else>{{ cell.char }}</template>
+            </span>
+          </template>
+        </div>
 
-    <!--
+        <!--
       Out of the tab order and hidden from assistive technology, the boxes being the control; a
       browser focusing it to report an invalid code is sent on to the box to fill.
     -->
-    <input
-      v-bind="nativeAttrs"
-      class="v-input-otp-native v-visually-hidden"
-      type="text"
-      tabindex="-1"
-      aria-hidden="true"
-      autocomplete="off"
-      :value="model"
-      :pattern="`.{${slotCount}}`"
-      :disabled="disabled"
-      :readonly="readonly || undefined"
-      @focus="focusBox(reachable())"
-    />
-
-    <span v-if="error" :id="errorId" class="v-field-error v-input-otp-error">{{ error }}</span>
-    <VTypography
-      v-else-if="hint"
-      :id="hintId"
-      variant="caption"
-      tone="muted"
-      class="v-input-otp-hint"
-    >
-      {{ hint }}
-    </VTypography>
-    <VFieldAnnouncer :text="error" />
-  </div>
+        <input
+          v-bind="nativeAttrs"
+          class="v-input-otp-native v-visually-hidden"
+          type="text"
+          tabindex="-1"
+          aria-hidden="true"
+          autocomplete="off"
+          :value="model"
+          :pattern="`.{${slotCount}}`"
+          :required="required || undefined"
+          :disabled="disabled"
+          :readonly="readonly || undefined"
+          @focus="focusBox(reachable())"
+        />
+      </div>
+    </template>
+  </VField>
 </template>
 
 <style>
 @layer vectis.components {
-  .v-input-otp {
+  /* Its own width rather than the line's, so that a start label stays next to the boxes. */
+  .v-input-otp.v-field {
+    display: inline-flex;
+    align-items: start;
+  }
+
+  .v-input-otp-group {
     /*
      * The heights and the icon context come from the shared v-control class
      * (styles/control-size.css). The type is the one thing kept local, and set one or
@@ -444,13 +444,6 @@ defineExpose({
      * itself, and at the usual field size it would look lost in it.
      */
     --input-otp-font-size: var(--vectis-font-size-lg);
-
-    /* A column: label, boxes, then hint. `inline-flex` keeps the component's own width, and
-       the start alignment stops the label or the hint from stretching the row to its length. */
-    display: inline-flex;
-    flex-direction: column;
-    align-items: start;
-    gap: var(--vectis-space-1);
   }
 
   /* A code reads left to right in every language, like the HH:MM of VTimeInput: mirrored
@@ -487,14 +480,14 @@ defineExpose({
    * between them and read-only has to come first, or it would repaint the focus and error
    * borders grey.
    */
-  .v-input-otp[data-readonly] .v-input-otp-input {
+  .v-input-otp-group[data-readonly] .v-input-otp-input {
     background: var(--vectis-color-surface-sunken);
     border-color: var(--vectis-color-border);
   }
 
   /* The hover weighs (0,5,0) and keeps itself off a focused, invalid or disabled box
      through its own `:not()`, as VInput's does. */
-  .v-input-otp:not([data-invalid]) .v-input-otp-input:hover:not(:focus, :disabled) {
+  .v-input-otp-group:not([data-invalid]) .v-input-otp-input:hover:not(:focus, :disabled) {
     border-color: color-mix(
       in oklab,
       var(--vectis-color-border-strong),
@@ -513,11 +506,11 @@ defineExpose({
     outline: var(--vectis-focus-ring-width) solid transparent;
   }
 
-  .v-input-otp[data-invalid] .v-input-otp-input {
+  .v-input-otp-group[data-invalid] .v-input-otp-input {
     border-color: var(--vectis-color-danger);
   }
 
-  .v-input-otp[data-invalid] .v-input-otp-input:focus {
+  .v-input-otp-group[data-invalid] .v-input-otp-input:focus {
     box-shadow: 0 0 0 1px var(--vectis-color-danger);
   }
 
@@ -536,26 +529,24 @@ defineExpose({
    * treatment as VInput; `text-muted` inside the box, where `text-subtle` would fall under
    * 4.5:1 against `surface-muted`, and `text-subtle` for what sits on the page.
    */
-  .v-input-otp[data-disabled] .v-input-otp-input {
+  .v-input-otp-group[data-disabled] .v-input-otp-input {
     background: var(--vectis-color-surface-muted);
     color: var(--vectis-color-text-muted);
     border-color: var(--vectis-color-border);
     cursor: not-allowed;
   }
 
-  .v-input-otp[data-disabled] .v-input-otp-literal,
-  .v-input-otp[data-disabled] .v-input-otp-label,
-  .v-input-otp[data-disabled] .v-input-otp-hint {
+  .v-input-otp-group[data-disabled] .v-input-otp-literal {
     color: var(--vectis-color-text-subtle);
   }
 
   /* Of the whole size scale, only the raised type is restated here; the dimensions
      themselves come from v-control. */
-  .v-input-otp[data-size='sm'] {
+  .v-input-otp-group[data-size='sm'] {
     --input-otp-font-size: var(--vectis-font-size-md);
   }
 
-  .v-input-otp[data-size='lg'] {
+  .v-input-otp-group[data-size='lg'] {
     --input-otp-font-size: var(--vectis-font-size-xl);
   }
 

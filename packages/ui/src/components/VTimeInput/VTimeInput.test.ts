@@ -509,7 +509,7 @@ describe('VTimeInput — list mode', () => {
     expect(input.readOnly).toBe(false)
     expect(input.getAttribute('aria-haspopup')).toBe('listbox')
     expect(container.querySelector('.v-time-input-panel')).toBeNull()
-    expect(container.querySelector('.v-input-label')?.textContent?.trim()).toBe('Heure')
+    expect(container.querySelector('.v-field-label')?.textContent?.trim()).toBe('Heure')
 
     await openList(container)
     expect(getByRole('listbox')).toBeTruthy()
@@ -847,7 +847,7 @@ describe('VTimeInput — the footer slot', () => {
 describe('VTimeInput — picker mode is not drawn read-only', () => {
   it('refuses typing without the read-only look', () => {
     const { container } = render(VTimeInput, { props: { mode: 'picker', label: 'When' } })
-    expect(container.querySelector('.v-input')!.hasAttribute('data-readonly')).toBe(false)
+    expect(container.querySelector('.v-input-field')!.hasAttribute('data-readonly')).toBe(false)
     expect((container.querySelector('.v-input-control') as HTMLInputElement).readOnly).toBe(true)
   })
 
@@ -855,7 +855,7 @@ describe('VTimeInput — picker mode is not drawn read-only', () => {
     const { container } = render(VTimeInput, {
       props: { mode: 'picker', label: 'When', readonly: true },
     })
-    expect(container.querySelector('.v-input')!.hasAttribute('data-readonly')).toBe(true)
+    expect(container.querySelector('.v-input-field')!.hasAttribute('data-readonly')).toBe(true)
   })
 })
 

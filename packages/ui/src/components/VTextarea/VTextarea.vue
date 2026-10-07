@@ -6,16 +6,15 @@
  */
 import { computed, ref } from 'vue'
 
-import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
+import VField from '../VField/VField.vue'
+import type { FieldControlProps, FieldLabelPosition } from '../VField/VField.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconName, iconProps } from '../VIcon/iconProps'
 import { close as closeIcon } from '../VIcon/icons/close'
 import type { IconSource } from '../VIcon/types'
 import VSpinner from '../VSpinner/VSpinner.vue'
-import VTypography from '../VTypography/VTypography.vue'
 
 import { useClearable } from '../../composables/useClearable'
-import { useFieldIds } from '../../composables/useFieldIds'
 import { useIconClickHandlers } from '../../composables/useIconClickHandlers'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useTextLimit } from '../../composables/useTextLimit'
@@ -67,6 +66,15 @@ interface TextareaProps {
    * appears or changes.
    */
   error?: string
+  /** Marks the field as required: an asterisk follows the label, and the textarea is `required`. */
+  required?: boolean
+  /** Hides the label visually. It still names the field for assistive technology. */
+  hideLabel?: boolean
+  /**
+   * Where the label sits: above the field (`top`, the default), or at its start, in a column of
+   * its own, moving back above when there is not room for both.
+   */
+  labelPosition?: FieldLabelPosition
   /**
    * An icon inside the field, at the start. It is decorative by default and becomes a real
    * button as soon as a `@click:icon-start` listener is attached, in which case it needs
@@ -131,6 +139,9 @@ const props = withDefaults(defineProps<TextareaProps>(), {
   label: undefined,
   hint: undefined,
   error: undefined,
+  required: false,
+  hideLabel: false,
+  labelPosition: 'top',
   iconStart: undefined,
   iconEnd: undefined,
   iconStartLabel: undefined,
@@ -183,19 +194,12 @@ const resolvedRows = computed(() => Math.max(1, Math.round(props.rows)))
 
 // `class` and `style` stay on the wrapper, where a consumer expects to style the
 // field; every other attribute goes to the textarea, where it does something.
-const { attrs, rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs()
+const { rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs()
 
 // The prop keeps priority; what it falls back to is the dictionary, so the default
 // wording follows the language the design system is set to.
 const m = useMessages()
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.common.clear)
-
-const { fieldId, hintId, counterId, errorId, describedBy } = useFieldIds(
-  attrs,
-  () => !!props.hint && !props.error,
-  () => props.counter,
-  () => !!props.error,
-)
 
 // Every length measurement goes through this projection: a value straight from an API or
 // a database is often `null`, and reading `.length` on it would throw at mount.
@@ -229,6 +233,11 @@ const { counterText, over } = useTextLimit({
   softLimit: () => props.softLimit,
 })
 
+/** The attributes of the textarea, built on VField's: the consumer's win over `invalid`. */
+function textareaAttrs(fieldProps: FieldControlProps): FieldControlProps {
+  return { 'aria-invalid': props.invalid ? 'true' : undefined, ...fieldProps }
+}
+
 defineExpose({
   /** Moves the focus to the real textarea. */
   focus: (options?: FocusOptions) => controlEl.value?.focus(options),
@@ -240,123 +249,103 @@ defineExpose({
 </script>
 
 <template>
-  <div
-    class="v-textarea v-control"
+  <VField
+    v-bind="restAttrs"
+    class="v-textarea"
     :class="rootClass"
     :style="rootStyle"
-    :data-size="size"
-    :data-compact="compact ? '' : undefined"
-    :data-disabled="disabled ? '' : undefined"
-    :data-readonly="readonly ? '' : undefined"
+    :label="label"
+    :hint="hint"
+    :error="error"
+    :required="required"
+    :disabled="disabled"
+    :hide-label="hideLabel"
+    :label-position="labelPosition"
   >
-    <VTypography v-if="label" as="label" variant="label" class="v-textarea-label" :for="fieldId">
-      {{ label }}
-    </VTypography>
-
-    <div
-      class="v-textarea-field"
-      :style="{ '--textarea-rows': resolvedRows }"
-      :data-auto-grow="autoGrow ? '' : undefined"
-    >
-      <!--
+    <template #default="{ fieldProps }">
+      <div
+        class="v-textarea-field v-control"
+        :style="{ '--textarea-rows': resolvedRows }"
+        :data-size="size"
+        :data-compact="compact ? '' : undefined"
+        :data-disabled="disabled ? '' : undefined"
+        :data-readonly="readonly ? '' : undefined"
+        :data-auto-grow="autoGrow ? '' : undefined"
+      >
+        <!--
         The start icon is rendered before the slot, where the end icon is the slot's own
         fallback. The asymmetry is VInput's, mirrored here so the two fields answer the same
         way: what a composed field puts in that zone is OTHER content beside the icon, not
         another way of drawing it.
       -->
-      <button
-        v-if="iconStart && hasIconStartHandler"
-        type="button"
-        class="v-textarea-action v-field-action v-textarea-icon-start"
-        :aria-label="iconStartLabel ?? iconName(iconStart)"
-        :disabled="disabled"
-        @click="emit('click:icon-start', $event)"
-      >
-        <VIcon v-bind="iconProps(iconStart)" />
-      </button>
-      <VIcon v-else-if="iconStart" v-bind="iconProps(iconStart)" class="v-textarea-icon-start" />
-      <slot name="start" />
-
-      <textarea
-        :id="fieldId"
-        ref="controlEl"
-        v-model="model"
-        :aria-invalid="invalid || !!error || undefined"
-        v-bind="restAttrs"
-        class="v-textarea-control"
-        :rows="resolvedRows"
-        :maxlength="softLimit ? undefined : maxlength"
-        :disabled="disabled"
-        :readonly="readonly || undefined"
-        :aria-describedby="describedBy"
-      />
-
-      <slot name="value-end" />
-
-      <button
-        v-if="showClear"
-        type="button"
-        class="v-textarea-action v-field-action v-textarea-clear"
-        :aria-label="resolvedClearLabel"
-        @click="onClear"
-      >
-        <VIcon :name="closeIcon" />
-      </button>
-
-      <VSpinner v-if="loading" :label="loadingText" />
-      <slot v-else name="end">
         <button
-          v-if="iconEnd && hasIconEndHandler"
+          v-if="iconStart && hasIconStartHandler"
           type="button"
-          class="v-textarea-action v-field-action v-textarea-icon-end"
-          :aria-label="iconEndLabel ?? iconName(iconEnd)"
+          class="v-textarea-action v-field-action v-textarea-icon-start"
+          :aria-label="iconStartLabel ?? iconName(iconStart)"
           :disabled="disabled"
-          @click="emit('click:icon-end', $event)"
+          @click="emit('click:icon-start', $event)"
         >
-          <VIcon v-bind="iconProps(iconEnd)" />
+          <VIcon v-bind="iconProps(iconStart)" />
         </button>
-        <VIcon v-else-if="iconEnd" v-bind="iconProps(iconEnd)" class="v-textarea-icon-end" />
-      </slot>
-    </div>
+        <VIcon v-else-if="iconStart" v-bind="iconProps(iconStart)" class="v-textarea-icon-start" />
+        <slot name="start" />
 
-    <div v-if="hint || error || counter" class="v-textarea-meta v-field-meta">
-      <span v-if="error" :id="errorId" class="v-field-error v-textarea-error">{{ error }}</span>
-      <VTypography
-        v-else-if="hint"
-        :id="hintId"
-        variant="caption"
-        tone="muted"
-        class="v-textarea-hint"
-      >
-        {{ hint }}
-      </VTypography>
-      <span
-        v-if="counter"
-        :id="counterId"
-        class="v-textarea-counter v-field-counter"
-        :data-over="over ? '' : undefined"
-      >
+        <!-- The label's `for` matches the id inside fieldProps, which the rule cannot follow. -->
+        <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -->
+        <textarea
+          ref="controlEl"
+          v-model="model"
+          v-bind="textareaAttrs(fieldProps)"
+          class="v-textarea-control"
+          :rows="resolvedRows"
+          :maxlength="softLimit ? undefined : maxlength"
+          :disabled="disabled"
+          :readonly="readonly || undefined"
+        />
+
+        <slot name="value-end" />
+
+        <button
+          v-if="showClear"
+          type="button"
+          class="v-textarea-action v-field-action v-textarea-clear"
+          :aria-label="resolvedClearLabel"
+          @click="onClear"
+        >
+          <VIcon :name="closeIcon" />
+        </button>
+
+        <VSpinner v-if="loading" :label="loadingText" />
+        <slot v-else name="end">
+          <button
+            v-if="iconEnd && hasIconEndHandler"
+            type="button"
+            class="v-textarea-action v-field-action v-textarea-icon-end"
+            :aria-label="iconEndLabel ?? iconName(iconEnd)"
+            :disabled="disabled"
+            @click="emit('click:icon-end', $event)"
+          >
+            <VIcon v-bind="iconProps(iconEnd)" />
+          </button>
+          <VIcon v-else-if="iconEnd" v-bind="iconProps(iconEnd)" class="v-textarea-icon-end" />
+        </slot>
+      </div>
+    </template>
+    <template v-if="counter" #meta="{ id }">
+      <span :id="id" class="v-textarea-counter v-field-counter" :data-over="over ? '' : undefined">
         {{ counterText }}
       </span>
-    </div>
-    <VFieldAnnouncer :text="error" />
-  </div>
+    </template>
+  </VField>
 </template>
 
 <style>
 @layer vectis.components {
+  /* The root is a VField, which lays out the label, the hint and the error. */
   .v-textarea {
-    display: flex;
-    flex-direction: column;
-    gap: var(--vectis-space-1);
     width: 100%;
-    font-family: var(--vectis-text-family);
   }
-
-  /*
-   * The .v-textarea-label and .v-textarea-hint classes remain as hooks: a consumer overrides
-   * through them, and the disabled state below reaches them that way.
-   */
 
   /*
    * This is the box that carries the border, the background, the focus ring and the resize
@@ -368,8 +357,8 @@ defineExpose({
     --field-border-color: var(--vectis-color-border-strong);
 
     /*
-     * Nothing here restates the size scale: the `--control-*` variables are inherited from the
-     * v-control root (styles/control-size.css), the icon context included. The field carries no
+     * Nothing here restates the size scale: the `--control-*` variables come from the v-control
+     * class on this box (styles/control-size.css), the icon context included. The field carries no
      * height of its own: it is the `rows` attribute on the textarea that sets one, and the
      * field is simply as tall as the control it wraps.
      */
@@ -466,7 +455,7 @@ defineExpose({
    * `:has()` taking the specificity of what it contains, so nothing but the source order
    * arbitrates between them.
    */
-  .v-textarea[data-readonly] .v-textarea-field {
+  .v-textarea .v-textarea-field[data-readonly] {
     --field-border-color: var(--vectis-color-border);
 
     background: var(--vectis-color-surface-sunken);
@@ -514,7 +503,7 @@ defineExpose({
    * specificity is what makes it win over all of them, the error included: a disabled field is
    * not submitted, so it has nothing to report.
    */
-  .v-textarea[data-disabled] .v-textarea-field {
+  .v-textarea .v-textarea-field[data-disabled] {
     --field-border-color: var(--vectis-color-border);
 
     background: var(--vectis-color-surface-muted);
@@ -523,14 +512,12 @@ defineExpose({
     resize: none;
   }
 
-  .v-textarea[data-disabled] .v-textarea-label,
-  .v-textarea[data-disabled] .v-textarea-hint,
   .v-textarea[data-disabled] .v-textarea-counter {
     color: var(--vectis-color-text-subtle);
   }
 
-  .v-textarea[data-disabled] .v-textarea-action,
-  .v-textarea[data-disabled] .v-textarea-field > .v-icon {
+  .v-textarea-field[data-disabled] .v-textarea-action,
+  .v-textarea-field[data-disabled] > .v-icon {
     color: inherit;
     cursor: not-allowed;
   }

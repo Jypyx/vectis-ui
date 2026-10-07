@@ -141,7 +141,8 @@ border, and sets `aria-invalid` on each thumb and field.
 
 ## Forms
 
-The root is a layout box holding the labels, the track and the optional number fields, so the
+The root is a `VField` in group mode, which renders the label, the hint and the error around a
+layout box holding the track, its labels and the optional number fields, so the
 attributes you put on the component are redirected onto the real `<input type="range">`:
 `name`, `id`, `required` and the `aria-*` all land there rather than on the wrapper, where a
 `name` would submit nothing and a `<label for>` would point at a div. Only `class` and `style`

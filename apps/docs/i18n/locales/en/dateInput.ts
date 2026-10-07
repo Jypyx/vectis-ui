@@ -62,6 +62,9 @@ export default {
   api: {
     VDateInput: {
       props: {
+        required: 'Adds an asterisk after the label and passes <code>required</code> to the field.',
+        hideLabel: 'Hides the label visually while keeping it as the accessible name.',
+        labelPosition: 'Places the label above the field or beside it.',
         selection: 'Selection mode: one date, a range or several dates.',
         locale: 'BCP 47 locale for date display and week start. Overrides the global locale.',
         firstDayOfWeek: 'First weekday, from 0 (Sunday) to 6 (Saturday). Defaults to the locale.',

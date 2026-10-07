@@ -7,28 +7,33 @@
  * third-party component.
  */
 
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 
 import VTypography from '../VTypography/VTypography.vue'
 import VFieldAnnouncer from './VFieldAnnouncer.vue'
+import VFieldMessage from './VFieldMessage.vue'
 
 import { useFieldIds } from '../../composables/useFieldIds'
 import { useRootAttrs } from '../../composables/useRootAttrs'
+import { joinIds } from '../../utils/ids'
 
 /** Where the label sits: above the control, or at its start. */
 export type FieldLabelPosition = 'top' | 'start'
 
 /**
  * What the slot hands over, to bind on the control with `v-bind`: its id, the references to
- * the hint and the error, `aria-invalid` while there is an error, `required`, and the attributes
- * set on the VField other than `class` and `style`. A key is absent rather than undefined, so
- * that binding it never cancels a value the control sets itself.
+ * the hint and the error, `aria-invalid` while there is an error, `required`, `disabled`, and the
+ * attributes set on the VField other than `class` and `style`. For a group, `aria-labelledby`
+ * replaces the states a group may not carry. A key is absent rather than undefined, so that
+ * binding it never cancels a value the control sets itself.
  */
 export type FieldControlProps = {
   id: string
+  'aria-labelledby'?: string
   'aria-describedby'?: string
   'aria-invalid'?: 'true'
   required?: true
+  disabled?: true
 } & Record<string, unknown>
 
 interface FieldProps {
@@ -47,6 +52,11 @@ interface FieldProps {
    * the control, which is what assistive technology announces.
    */
   required?: boolean
+  /**
+   * Marks the control as disabled: the label and the hint grey out, and `disabled` is handed to
+   * the control.
+   */
+  disabled?: boolean
   /** Hides the label visually. It still names the control for assistive technology. */
   hideLabel?: boolean
   /**
@@ -54,6 +64,13 @@ interface FieldProps {
    * of its own. A start label moves back above the control when there is not room for both.
    */
   labelPosition?: FieldLabelPosition
+  /**
+   * Names a group of elements rather than one control, such as a row of fields with a `group`
+   * role. The label is then plain text that the slot's `aria-labelledby` points at, since a
+   * `<label for>` names one element, and the slot hands over neither `aria-invalid`, `required`
+   * nor `disabled`, which a group may not carry.
+   */
+  group?: boolean
 }
 
 const props = withDefaults(defineProps<FieldProps>(), {
@@ -61,13 +78,20 @@ const props = withDefaults(defineProps<FieldProps>(), {
   hint: undefined,
   error: undefined,
   required: false,
+  disabled: false,
   hideLabel: false,
   labelPosition: 'top',
+  group: false,
 })
 
 defineSlots<{
   /** The control. Bind `fieldProps` on it. */
   default(props: { fieldProps: FieldControlProps }): unknown
+  /**
+   * Content at the end of the hint's line, such as a character counter. Bind `id` on it: it
+   * joins the control's `aria-describedby`, after the error and the hint.
+   */
+  meta?(props: { id: string }): unknown
 }>()
 
 defineOptions({ inheritAttrs: false })
@@ -81,39 +105,56 @@ const { fieldId, hintId, errorId, describedBy } = useFieldIds(
   () => !!props.error,
 )
 
+const labelId = useId()
+const metaId = useId()
+
 const fieldProps = computed<FieldControlProps>(() => {
   const bound: FieldControlProps = { ...forwardedAttrs.value, id: fieldId.value }
   if (describedBy.value) bound['aria-describedby'] = describedBy.value
+  if (props.group) {
+    // A consumer's `aria-labelledby` or `aria-label` names the group instead: ours would cancel
+    // an `aria-label`, `aria-labelledby` winning in the accessible name computation.
+    const named = attrs['aria-labelledby'] !== undefined || attrs['aria-label'] !== undefined
+    if (props.label && !named) bound['aria-labelledby'] = labelId
+    return bound
+  }
   if (props.error) bound['aria-invalid'] = 'true'
   if (props.required) bound.required = true
+  if (props.disabled) bound.disabled = true
   return bound
 })
+
+// Called from the template, where reading `$slots` is reactive, unlike in a computed.
+function withMeta(bound: FieldControlProps): FieldControlProps {
+  return { ...bound, 'aria-describedby': joinIds(bound['aria-describedby'], metaId) }
+}
 </script>
 
 <template>
-  <div class="v-field" :class="rootClass" :style="rootStyle" :data-label-position="labelPosition">
+  <div
+    class="v-field"
+    :class="rootClass"
+    :style="rootStyle"
+    :data-label-position="labelPosition"
+    :data-disabled="disabled ? '' : undefined"
+  >
     <VTypography
       v-if="label"
-      as="label"
+      :id="group ? labelId : undefined"
+      :as="group ? 'span' : 'label'"
       variant="label"
       class="v-field-label"
       :class="{ 'v-visually-hidden': hideLabel }"
-      :for="fieldId"
+      :for="group ? undefined : fieldId"
     >
       {{ label }}<span v-if="required" class="v-field-required" aria-hidden="true">*</span>
     </VTypography>
     <div class="v-field-main">
-      <slot :field-props="fieldProps" />
-      <span v-if="error" :id="errorId" class="v-field-error v-field-message">{{ error }}</span>
-      <VTypography
-        v-else-if="hint"
-        :id="hintId"
-        variant="caption"
-        tone="muted"
-        class="v-field-hint"
-      >
-        {{ hint }}
-      </VTypography>
+      <slot :field-props="$slots.meta ? withMeta(fieldProps) : fieldProps" />
+      <div v-if="error || hint || $slots.meta" class="v-field-meta">
+        <VFieldMessage :hint="hint" :error="error" :hint-id="hintId" :error-id="errorId" />
+        <slot :id="metaId" name="meta" />
+      </div>
       <VFieldAnnouncer :text="error" />
     </div>
   </div>
@@ -135,9 +176,10 @@ const fieldProps = computed<FieldControlProps>(() => {
     min-inline-size: 0;
   }
 
-  .v-field-required {
-    margin-inline-start: var(--vectis-space-1);
-    color: var(--vectis-color-danger-text);
+  /* Child combinators, so that a disabled field leaves a field nested in it alone. */
+  .v-field[data-disabled] > .v-field-label,
+  .v-field[data-disabled] > .v-field-main > .v-field-meta > .v-field-hint {
+    --typography-color: var(--vectis-color-text-subtle);
   }
 
   /*

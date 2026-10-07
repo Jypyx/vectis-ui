@@ -11,8 +11,8 @@ built around a styled native `<textarea>`. A mirror of `VInput` with three diffe
 and the counter rendered **under** the field (on the hint's line), never inside it.
 
 There is no `pattern` prop: `<textarea>` does not support it natively and the component does not
-emulate it (a project decision). The root is a wrapper: the native attributes pass through by
-fallthrough onto the `<textarea>`, except `class`/`style`, which stay on the root — and except
+emulate it (a project decision). The root is a `VField`, which renders the label, the hint and the
+error: the native attributes pass through by fallthrough onto the `<textarea>`, except `class`/`style`, which stay on the root — and except
 `rows`, which is a declared prop so that it can be validated and shared with the CSS.
 
 <Canvas of={VTextareaStories.Default} />
@@ -69,8 +69,10 @@ untouched.
 
 ## Label, hint and counter
 
-`label` is associated through `for`/`id`, `hint` through `aria-describedby`. The counter
-(`counter`) appears under the field, on the right, on the same line as the hint. It counts
+`label` is associated through `for`/`id`, `hint` through `aria-describedby`. As on `VField`,
+`required` adds an asterisk, `hideLabel` hides the label visually and `labelPosition="start"`
+places it beside the field. The counter (`counter`) appears under the field, on the right, on the
+same line as the hint. It counts
 **characters**, as on `VInput`, and takes no slot; on `VFileInput` the same prop counts files and
 bytes, with a `#counter` slot to reword it.
 

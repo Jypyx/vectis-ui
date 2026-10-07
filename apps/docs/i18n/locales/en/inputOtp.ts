@@ -46,6 +46,10 @@ export default {
   api: {
     VInputOTP: {
       props: {
+        required:
+          'Adds an asterisk after the label and sets <code>required</code> on the hidden input the form reads.',
+        hideLabel: 'Hides the label visually while keeping it as the accessible name.',
+        labelPosition: 'Places the label above the field or beside it.',
         length: 'Box count, overridden by a <code>pattern</code> containing <code>#</code>.',
         format: 'Allowed characters: digits, uppercase letters or both. Filters typing and paste.',
         pattern:

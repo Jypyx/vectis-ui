@@ -11,6 +11,7 @@ import { computed, inject, onBeforeUnmount, onMounted, ref, useId, watch } from 
 
 import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
 import type { IconSource } from '../VIcon/types'
+import type { FieldLabelPosition } from '../VField/VField.vue'
 import VInput from '../VInput/VInput.vue'
 import { inputGroupKey } from '../VInput/context'
 import VListboxChevron from '../VListbox/VListboxChevron.vue'
@@ -117,6 +118,18 @@ interface SelectProps {
    * appears or changes.
    */
   error?: string
+  /**
+   * Marks the field as required: an asterisk follows the label, the combobox is announced as
+   * required, and the hidden `<select>` a form reads is `required`.
+   */
+  required?: boolean
+  /** Hides the label visually. It still names the field for assistive technology. */
+  hideLabel?: boolean
+  /**
+   * Where the label sits: above the field (`top`, the default), or at its start, in a column of
+   * its own, moving back above when there is not room for both.
+   */
+  labelPosition?: FieldLabelPosition
   /** The height of the field: 32, 40 or 48 pixels. */
   size?: SelectSize
   /** Takes 4px off the height, as everywhere else in the design system. */
@@ -169,6 +182,9 @@ const props = withDefaults(defineProps<SelectProps>(), {
   label: undefined,
   hint: undefined,
   error: undefined,
+  required: false,
+  hideLabel: false,
+  labelPosition: 'top',
   size: 'md',
   compact: false,
   placeholder: undefined,
@@ -232,16 +248,9 @@ const model = defineModel<ItemValue | ItemValue[]>({ default: '' })
 defineOptions({ inheritAttrs: false })
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
-const NATIVE_ONLY = ['name', 'form', 'required', 'autocomplete']
+const NATIVE_ONLY = ['name', 'form', 'autocomplete']
 const split = computed(() => partitionAttrs(forwardedAttrs.value, NATIVE_ONLY))
 const nativeAttrs = computed(() => split.value.picked)
-
-// @a11y
-// `required` is not an attribute of a button: the combobox says it through ARIA instead.
-const required = computed(() => {
-  const value = nativeAttrs.value.required
-  return value !== undefined && value !== false
-})
 
 // Declared as this component's own event, `click:icon-start` is out of `$attrs`, so the
 // listener is relayed to the field by hand; and only when the consumer wrote one.
@@ -585,6 +594,9 @@ defineExpose({
         :label="label"
         :hint="hint"
         :error="error"
+        :required="required"
+        :hide-label="hideLabel"
+        :label-position="labelPosition"
         :size="resolvedSize"
         :compact="resolvedCompact"
         :invalid="invalid || nativeInvalid"
@@ -658,6 +670,7 @@ defineExpose({
             tabindex="-1"
             aria-hidden="true"
             :multiple="multiple || undefined"
+            :required="required || undefined"
             :disabled="resolvedDisabled || undefined"
             @change="onNativeChange"
             @focus="triggerEl?.focus()"

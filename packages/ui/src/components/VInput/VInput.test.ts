@@ -125,13 +125,15 @@ describe('VInput', () => {
       props: { modelValue: 'text', clearable: true, disabled: true },
     })
     expect(queryByRole('button', { name: 'Effacer' })).toBeNull()
-    expect(container.querySelector('.v-input')?.hasAttribute('data-disabled')).toBe(true)
+    expect(container.querySelector('.v-input-field')?.hasAttribute('data-disabled')).toBe(true)
 
     const readonly = render(VInput, {
       props: { modelValue: 'text', clearable: true, readonly: true },
     })
     expect(readonly.queryByRole('button', { name: 'Effacer' })).toBeNull()
-    expect(readonly.container.querySelector('.v-input')?.hasAttribute('data-readonly')).toBe(true)
+    expect(readonly.container.querySelector('.v-input-field')?.hasAttribute('data-readonly')).toBe(
+      true,
+    )
   })
 
   it('loading: the spinner is present, the end icon absent', () => {
@@ -214,11 +216,11 @@ describe('VInput', () => {
     })
   })
 
-  it('compact: data-compact set on the root', () => {
+  it('compact: data-compact set on the field', () => {
     const { container } = render(VInput, {
       props: { modelValue: '', compact: true },
     })
-    expect(container.querySelector('.v-input')?.hasAttribute('data-compact')).toBe(true)
+    expect(container.querySelector('.v-input-field')?.hasAttribute('data-compact')).toBe(true)
   })
 })
 
@@ -242,7 +244,7 @@ describe('VInput — noTyping and the counter', () => {
       props: { modelValue: 'x', noTyping: true, clearable: true },
     })
     expect((getByRole('textbox') as HTMLInputElement).readOnly).toBe(true)
-    expect(container.querySelector('.v-input')!.hasAttribute('data-readonly')).toBe(false)
+    expect(container.querySelector('.v-input-field')!.hasAttribute('data-readonly')).toBe(false)
     expect(container.querySelector('.v-input-clear')).toBeTruthy()
   })
 
@@ -270,7 +272,7 @@ describe('VInput — noTyping and the counter', () => {
     expect(control.classList.contains('v-input-control')).toBe(true)
     expect(control.getAttribute('aria-invalid')).toBe('true')
     expect(control.getAttribute('aria-describedby')).toBe(
-      container.querySelector('.v-input-error')!.id,
+      container.querySelector('.v-field-error')!.id,
     )
     expect(control.getAttribute('data-test')).toBe('x')
     expect(control.disabled).toBe(true)

@@ -66,6 +66,7 @@ export default {
   api: {
     VSlider: {
       props: {
+        labelPosition: 'Place le libellé au-dessus du champ ou à côté.',
         readonly:
           'Empêche les changements par pointeur ou clavier. Les curseurs gardent le focus ; les champs numériques passent en lecture seule.',
         invalid:

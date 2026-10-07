@@ -46,6 +46,10 @@ export default {
   api: {
     VTimeInput: {
       props: {
+        required:
+          'Ajoute un astérisque après le libellé et transmet <code>required</code> au champ.',
+        hideLabel: 'Masque le libellé visuellement tout en le gardant comme nom accessible.',
+        labelPosition: 'Place le libellé au-dessus du champ ou à côté.',
         format:
           'Affichage sur 12 ou 24 heures. Dépend de la locale par défaut ; le modèle utilise toujours 24 heures.',
         mode: 'Saisie, sélection sur horloge ou liste d’heures filtrable.',

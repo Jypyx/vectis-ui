@@ -139,7 +139,7 @@ describe('VTextarea', () => {
     const { container, rerender } = render(VTextarea, {
       props: { modelValue: 'abc', maxlength: 10, softLimit: true, counter: true },
     })
-    const counter = container.querySelector('.v-textarea-meta .v-textarea-counter') as HTMLElement
+    const counter = container.querySelector('.v-field-meta .v-textarea-counter') as HTMLElement
     expect(counter.textContent?.trim()).toBe('3/10')
     // Never a counter inside the field (unlike VInput)
     expect(container.querySelector('.v-textarea-field .v-textarea-counter')).toBeNull()
@@ -147,11 +147,11 @@ describe('VTextarea', () => {
     expect(counter.hasAttribute('data-over')).toBe(true)
   })
 
-  it('disabled and readonly: data-attributes on the root, native attributes on the control', () => {
+  it('disabled and readonly: data-attributes on the field, native attributes on the control', () => {
     const { container, getByRole } = render(VTextarea, {
       props: { modelValue: '', readonly: true },
     })
-    expect(container.querySelector('.v-textarea')?.hasAttribute('data-readonly')).toBe(true)
+    expect(container.querySelector('.v-textarea-field')?.hasAttribute('data-readonly')).toBe(true)
     expect(getByRole('textbox').hasAttribute('readonly')).toBe(true)
 
     const disabled = render(VTextarea, {
@@ -162,11 +162,11 @@ describe('VTextarea', () => {
     )
   })
 
-  it('compact: data-compact set on the root', () => {
+  it('compact: data-compact set on the field', () => {
     const { container } = render(VTextarea, {
       props: { modelValue: '', compact: true },
     })
-    expect(container.querySelector('.v-textarea')?.hasAttribute('data-compact')).toBe(true)
+    expect(container.querySelector('.v-textarea-field')?.hasAttribute('data-compact')).toBe(true)
   })
 })
 

@@ -18,6 +18,9 @@ export default {
   api: {
     VNumberInput: {
       props: {
+        required: 'Adds an asterisk after the label and passes <code>required</code> to the field.',
+        hideLabel: 'Hides the label visually while keeping it as the accessible name.',
+        labelPosition: 'Places the label above the field or beside it.',
         min: 'Smallest value. A lower typed value is raised to it when committed.',
         max: 'Largest value. A higher typed value is lowered to it when committed.',
         step: 'Distance moved by the arrow keys and the buttons. Page Up and Page Down move ten steps.',

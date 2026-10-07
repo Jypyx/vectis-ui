@@ -19,6 +19,9 @@ export default {
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
         { name: 'error', type: 'string' },
+        { name: 'required', type: 'boolean', default: 'false' },
+        { name: 'hideLabel', type: 'boolean', default: 'false' },
+        { name: 'labelPosition', type: 'FieldLabelPosition', values: "'top' | 'start'", default: "'top'" },
         { name: 'iconStart', type: 'IconSource' },
         { name: 'iconEnd', type: 'IconSource' },
         { name: 'iconStartLabel', type: 'string' },
@@ -43,6 +46,7 @@ export default {
         { name: 'value-end', key: 'valueEnd', type: '{}' },
         { name: 'control', type: '{ controlProps: InputControlProps; }' },
         { name: 'end', type: '{}' },
+        { name: 'meta', type: '{ id: string; }' },
       ],
     },
   ],
@@ -73,7 +77,7 @@ export default {
   id: string
   class: string
   disabled: boolean
-  'aria-invalid'?: true
+  'aria-invalid'?: 'true'
   'aria-describedby'?: string
 } & Record<string, unknown>`,
     },

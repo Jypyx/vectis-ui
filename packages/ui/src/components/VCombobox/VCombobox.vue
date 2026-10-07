@@ -12,6 +12,7 @@ import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
 import { inbox as inboxIcon } from '../VIcon/icons/inbox'
 import { search_off as searchOffIcon } from '../VIcon/icons/search_off'
 import type { IconSource } from '../VIcon/types'
+import type { FieldLabelPosition } from '../VField/VField.vue'
 import VInput from '../VInput/VInput.vue'
 import VListboxChevron from '../VListbox/VListboxChevron.vue'
 import VListboxPanel from '../VListbox/VListboxPanel.vue'
@@ -140,6 +141,15 @@ interface ComboboxProps {
    * appears or changes.
    */
   error?: string
+  /** Marks the field as required: an asterisk follows the label, and the field is `required`. */
+  required?: boolean
+  /** Hides the label visually. It still names the field for assistive technology. */
+  hideLabel?: boolean
+  /**
+   * Where the label sits: above the field (`top`, the default), or at its start, in a column of
+   * its own, moving back above when there is not room for both.
+   */
+  labelPosition?: FieldLabelPosition
   /** The height of the field: 32, 40 or 48 pixels. */
   size?: ComboboxSize
   /** Takes 4px off the height, as everywhere else in the design system. */
@@ -219,6 +229,9 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   label: undefined,
   hint: undefined,
   error: undefined,
+  required: false,
+  hideLabel: false,
+  labelPosition: 'top',
   size: 'md',
   compact: false,
   placeholder: undefined,
@@ -692,6 +705,9 @@ defineExpose({
         :label="label"
         :hint="hint"
         :error="error"
+        :required="required"
+        :hide-label="hideLabel"
+        :label-position="labelPosition"
         :size="resolvedSize"
         :compact="resolvedCompact"
         :invalid="invalid"

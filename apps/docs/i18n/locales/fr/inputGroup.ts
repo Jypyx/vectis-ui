@@ -34,6 +34,10 @@ export default {
   api: {
     VInputGroup: {
       props: {
+        required:
+          'Ajoute un astérisque après le libellé. Marquez les segments eux-mêmes <code>required</code>.',
+        hideLabel: 'Masque le libellé visuellement tout en le gardant comme nom accessible.',
+        labelPosition: 'Place le libellé au-dessus du champ ou à côté.',
         label:
           'Libellé visible commun et nom accessible du groupe. Les attributs <code>aria-label</code> ou <code>aria-labelledby</code> fournis prennent le pas sur cette prop. Nommez chaque champ séparément.',
         error:

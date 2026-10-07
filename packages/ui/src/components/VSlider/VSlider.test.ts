@@ -11,16 +11,16 @@ describe('VSlider', () => {
     const { container, getByRole } = render(VSlider, {
       props: { modelValue: [20, 60], range: true, label: 'Budget' },
     })
-    expect(container.querySelector('.v-slider-name')?.textContent?.trim()).toBe('Budget')
+    expect(container.querySelector('.v-field-label')?.textContent?.trim()).toBe('Budget')
     expect(getByRole('slider', { name: 'Budget (start)' })).toBeTruthy()
     expect(getByRole('slider', { name: 'Budget (end)' })).toBeTruthy()
   })
 
-  it('hideLabel draws nothing, the thumbs keeping their name', () => {
+  it('hideLabel hides the label visually, the thumbs keeping their name', () => {
     const { container, getByRole } = render(VSlider, {
       props: { modelValue: 40, label: 'Volume', hideLabel: true },
     })
-    expect(container.querySelector('.v-slider-name')).toBeNull()
+    expect(container.querySelector('.v-field-label')!.classList).toContain('v-visually-hidden')
     expect(getByRole('slider', { name: 'Volume' })).toBeTruthy()
   })
 
@@ -119,7 +119,7 @@ describe('VSlider', () => {
     const { container } = render(VSlider, {
       props: { modelValue: [25, 75], range: true, label: 'x' },
     })
-    const style = container.querySelector('.v-slider')?.getAttribute('style') ?? ''
+    const style = container.querySelector('.v-slider-body')?.getAttribute('style') ?? ''
     expect(style).toContain('--slider-start-fraction: 0.25')
     expect(style).toContain('--slider-end-fraction: 0.75')
   })
@@ -128,7 +128,7 @@ describe('VSlider', () => {
     const { container, rerender } = render(VSlider, {
       props: { modelValue: 40, label: 'x' },
     })
-    const root = () => container.querySelector('.v-slider')!
+    const root = () => container.querySelector('.v-slider-body')!
     expect(root().getAttribute('data-orientation')).toBe('horizontal')
     await rerender({ orientation: 'vertical' })
     expect(root().getAttribute('data-orientation')).toBe('vertical')
@@ -276,7 +276,7 @@ describe('VSlider', () => {
         props: { modelValue: [20, 60], range: true, inputs, label: 'Budget' },
       })
       expect(order(container)).toEqual(expected)
-      expect(container.querySelector('.v-slider')!.getAttribute('data-inputs')).toBe(inputs)
+      expect(container.querySelector('.v-slider-body')!.getAttribute('data-inputs')).toBe(inputs)
     })
 
     it.each([
@@ -294,7 +294,7 @@ describe('VSlider', () => {
     it('no fields and no data-inputs by default', () => {
       const { container } = render(VSlider, { props: { modelValue: 40, label: 'Volume' } })
       expect(container.querySelector('.v-slider-field')).toBeNull()
-      expect(container.querySelector('.v-slider')!.hasAttribute('data-inputs')).toBe(false)
+      expect(container.querySelector('.v-slider-body')!.hasAttribute('data-inputs')).toBe(false)
     })
 
     it('a bare `inputs` (true) is drawn at the ends, with a dev warning', () => {
@@ -302,7 +302,7 @@ describe('VSlider', () => {
       const { container } = render(VSlider, {
         props: { modelValue: 40, inputs: true as unknown as 'ends', label: 'Volume' },
       })
-      expect(container.querySelector('.v-slider')!.getAttribute('data-inputs')).toBe('ends')
+      expect(container.querySelector('.v-slider-body')!.getAttribute('data-inputs')).toBe('ends')
       expect(container.querySelector('.v-slider-field-end')).toBeTruthy()
       expect(warn).toHaveBeenCalledWith(expect.stringContaining('inputs="true"'))
       warn.mockRestore()
@@ -499,7 +499,8 @@ describe('VSlider — the wrapper-root split', () => {
     const root = container.querySelector('.v-slider') as HTMLElement
     expect(root.classList.contains('mine')).toBe(true)
     expect(root.style.margin).toBe('4px')
-    expect(root.style.getPropertyValue('--slider-end-fraction')).toBe('0.5')
+    const body = container.querySelector('.v-slider-body') as HTMLElement
+    expect(body.style.getPropertyValue('--slider-end-fraction')).toBe('0.5')
   })
 
   it('warns about a name on a range, which cannot submit two values under one', () => {
@@ -597,7 +598,7 @@ describe('VSlider — the wrapper-root split', () => {
     const { container, getAllByRole } = render(VSlider, {
       props: { modelValue: [20, 60], range: true, invalid: true, inputs: 'ends', label: 'x' },
     })
-    expect(container.querySelector('.v-slider')!.hasAttribute('data-invalid')).toBe(true)
+    expect(container.querySelector('.v-slider-body')!.hasAttribute('data-invalid')).toBe(true)
     for (const el of [...getAllByRole('slider'), ...getAllByRole('spinbutton')])
       expect(el.getAttribute('aria-invalid')).toBe('true')
   })
@@ -606,7 +607,7 @@ describe('VSlider — the wrapper-root split', () => {
     const { container, rerender } = render(VSlider, {
       props: { modelValue: 40, inputs: 'ends', label: 'x' },
     })
-    const field = () => container.querySelector('.v-slider-field')!
+    const field = () => container.querySelector('.v-slider-field .v-input-field')!
     expect(field().getAttribute('data-size')).toBe('md')
     await rerender({ size: 'lg' })
     expect(field().getAttribute('data-size')).toBe('lg')
@@ -621,13 +622,15 @@ describe('VSlider — the wrapper-root split', () => {
         </VInputGroup>
       `,
     })
-    expect(container.querySelector('.v-slider-field')!.getAttribute('data-size')).toBe('sm')
+    expect(
+      container.querySelector('.v-slider-field .v-input-field')!.getAttribute('data-size'),
+    ).toBe('sm')
     expect((getByRole('slider') as HTMLInputElement).disabled).toBe(true)
   })
 
   it('single mode: no start fraction, which only a range reads', () => {
     const { container } = render(VSlider, { props: { modelValue: 40, label: 'x' } })
-    const root = container.querySelector('.v-slider') as HTMLElement
+    const root = container.querySelector('.v-slider-body') as HTMLElement
     expect(root.style.getPropertyValue('--slider-start-fraction')).toBe('')
     expect(root.style.getPropertyValue('--slider-end-fraction')).toBe('0.4')
   })

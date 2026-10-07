@@ -46,6 +46,10 @@ export default {
   api: {
     VInputOTP: {
       props: {
+        required:
+          'Ajoute un astérisque après le libellé et pose <code>required</code> sur le champ masqué lu par le formulaire.',
+        hideLabel: 'Masque le libellé visuellement tout en le gardant comme nom accessible.',
+        labelPosition: 'Place le libellé au-dessus du champ ou à côté.',
         length: 'Nombre de cases, remplacé par un <code>pattern</code> contenant <code>#</code>.',
         format:
           'Caractères autorisés : chiffres, lettres majuscules ou les deux. Filtre la saisie et le collage.',

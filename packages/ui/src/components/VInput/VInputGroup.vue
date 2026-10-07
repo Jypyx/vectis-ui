@@ -4,15 +4,14 @@
  * Join functional field boxes rather than their label-and-hint wrappers. Context shares row
  * shape and disables descendants without changing their native controls.
  */
-import { computed, provide, useId } from 'vue'
+import { provide } from 'vue'
 
-import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
-import VTypography from '../VTypography/VTypography.vue'
+import VField from '../VField/VField.vue'
+import type { FieldLabelPosition } from '../VField/VField.vue'
 
 import { buttonGroupKey } from '../VButton/context'
 
 import { useRootAttrs } from '../../composables/useRootAttrs'
-import { joinIds } from '../../utils/ids'
 
 import { inputGroupKey } from './context'
 
@@ -37,6 +36,15 @@ interface InputGroupProps {
    * `invalid`.
    */
   error?: string
+  /** Adds an asterisk after the label. Mark the segments themselves `required`. */
+  required?: boolean
+  /** Hides the label visually. It still names the group for assistive technology. */
+  hideLabel?: boolean
+  /**
+   * Where the label sits: above the row (`top`, the default), or at its start, in a column of
+   * its own, moving back above when there is not room for both.
+   */
+  labelPosition?: FieldLabelPosition
   /**
    * The height every segment takes, whatever it names for itself: a row of controls of
    * two heights stops reading as one object. Left out, each segment keeps its own.
@@ -61,6 +69,9 @@ const props = withDefaults(defineProps<InputGroupProps>(), {
   label: undefined,
   hint: undefined,
   error: undefined,
+  required: false,
+  hideLabel: false,
+  labelPosition: 'top',
   size: undefined,
   compact: undefined,
   disabled: undefined,
@@ -71,37 +82,9 @@ defineSlots<{
   default(): unknown
 }>()
 
-const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
-
-const labelId = useId()
-const hintId = useId()
-const errorId = useId()
-
-// @a11y
-// In the template comes after `v-bind="forwardedAttrs"` and would otherwise overwrite what the
-// consumer wrote, so this computed has to hand their value back itself. An `aria-label` or an
-// `aria-labelledby` written by the consumer names the group, and the VISIBLE label must not
-// double it: `aria-labelledby` wins over `aria-label` in the accessible name computation, so
-// emitting ours on top of a consumer's `aria-label` would silently cancel it.
-const labelledBy = computed(() => {
-  const own = attrs['aria-labelledby'] as string | undefined
-  if (own !== undefined) return own
-  // TRUTHINESS, the test the template renders the label with: an empty `label=""` renders
-  // no element, and naming the group after an id nothing carries leaves it nameless.
-  return props.label && attrs['aria-label'] === undefined ? labelId : undefined
-})
-
-// @a11y
-// This aggregation is also why the component takes `inheritAttrs: false` despite having a
-// single root: left to fallthrough, a consumer's `aria-describedby` would overwrite ours and
-// the hint would stop being announced, with nothing to show for it.
-const describedBy = computed(() =>
-  joinIds(
-    attrs['aria-describedby'] as string | undefined,
-    !!props.error && errorId,
-    !!props.hint && !props.error && hintId,
-  ),
-)
+// The consumer's attributes name and describe the row, which VField's group mode hands over: a
+// consumer's `aria-labelledby` or `aria-label` wins over the visible label.
+const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 // Getters, so the group's props stay reactive on the other side of the injection.
 const rowContext = {
@@ -126,54 +109,36 @@ provide(buttonGroupKey, rowContext)
 </script>
 
 <template>
-  <div
+  <VField
+    v-bind="forwardedAttrs"
     class="v-input-group"
     :class="rootClass"
     :style="rootStyle"
-    role="group"
-    v-bind="forwardedAttrs"
-    :aria-labelledby="labelledBy"
-    :aria-describedby="describedBy"
-    :data-disabled="disabled ? '' : undefined"
+    :label="label"
+    :hint="hint"
+    :error="error"
+    :required="required"
+    :disabled="disabled"
+    :hide-label="hideLabel"
+    :label-position="labelPosition"
+    group
   >
-    <!-- A span and not a `<label for>`: a label points at ONE control, and this names a row
-         of them. The group takes it through aria-labelledby, the ARIA pattern for a
-         composed field. -->
-    <VTypography v-if="label" :id="labelId" as="span" variant="label" class="v-input-group-label">
-      {{ label }}
-    </VTypography>
-
-    <div class="v-input-group-row">
-      <slot />
-    </div>
-
-    <span v-if="error" :id="errorId" class="v-field-error v-input-group-error">{{ error }}</span>
-    <VTypography
-      v-else-if="hint"
-      :id="hintId"
-      variant="caption"
-      tone="muted"
-      class="v-input-group-hint"
-    >
-      {{ hint }}
-    </VTypography>
-    <VFieldAnnouncer :text="error" />
-  </div>
+    <!-- A label points at ONE control, and this names a row of them: the row takes it through
+         aria-labelledby, the ARIA pattern for a composed field. -->
+    <template #default="{ fieldProps }">
+      <div v-bind="fieldProps" class="v-input-group-row" role="group">
+        <slot />
+      </div>
+    </template>
+  </VField>
 </template>
 
 <style>
 @layer vectis.components {
+  /* The root is a VField, which lays out the label, the hint and the error. */
   .v-input-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--vectis-space-1);
     width: 100%;
-    font-family: var(--vectis-text-family);
   }
-
-  /* The label and the hint are rendered by VTypography, which carries their type. The
-     classes stay as hooks: a consumer overrides through them, and the disabled state
-     below reaches them that way. */
 
   /*
    * Do not put v-control on the row: rederiving its inherited height would reset compact
@@ -289,11 +254,6 @@ provide(buttonGroupKey, rowContext)
     > :not(:where(.v-overlay, .v-button-group))
     .v-button:focus-visible:not(:where(.v-overlay *, .v-button-group *)) {
     z-index: 2;
-  }
-
-  /* VInput's rule, at the same values: through the colour tokens, never through opacity. */
-  .v-input-group[data-disabled] :is(.v-input-group-label, .v-input-group-hint) {
-    color: var(--vectis-color-text-subtle);
   }
 }
 </style>

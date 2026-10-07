@@ -30,6 +30,10 @@ export default {
   api: {
     VColorInput: {
       props: {
+        required:
+          'Ajoute un astérisque après le libellé et transmet <code>required</code> au champ.',
+        hideLabel: 'Masque le libellé visuellement tout en le gardant comme nom accessible.',
+        labelPosition: 'Place le libellé au-dessus du champ ou à côté.',
         format: 'Écriture de la valeur. Le champ accepte les quatre formats.',
         alpha: 'Ajoute une piste d’opacité au sélecteur et écrit l’alpha en dessous de 1.',
         swatches: 'Couleurs prédéfinies proposées dans le sélecteur.',

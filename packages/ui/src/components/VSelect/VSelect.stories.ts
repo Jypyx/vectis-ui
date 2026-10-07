@@ -169,7 +169,7 @@ export const WithLabelAndHint: Story = {
 
     // The panel opens against the field's box, covering the hint rather than starting below it.
     const fieldBox = canvasElement.querySelector('.v-input-field')!.getBoundingClientRect()
-    const hintBox = canvasElement.querySelector('.v-input-hint')!.getBoundingClientRect()
+    const hintBox = canvasElement.querySelector('.v-field-hint')!.getBoundingClientRect()
     const panelTop = panel.getBoundingClientRect().top
     await expect(panelTop).toBeGreaterThanOrEqual(fieldBox.bottom)
     await expect(panelTop).toBeLessThan(hintBox.bottom)

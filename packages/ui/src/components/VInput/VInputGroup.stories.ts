@@ -131,7 +131,7 @@ export const Playground: Story = {
     expect(getComputedStyle(number).borderTopLeftRadius).toBe('0px')
     expect(getComputedStyle(number).borderTopRightRadius).not.toBe('0px')
 
-    const group = canvasElement.querySelector('.v-input-group') as HTMLElement
+    const group = canvasElement.querySelector('.v-input-group-row') as HTMLElement
     expect(group.getAttribute('role')).toBe('group')
     expect(within(canvasElement).getByRole('group', { name: 'Phone number' })).toBe(group)
   },

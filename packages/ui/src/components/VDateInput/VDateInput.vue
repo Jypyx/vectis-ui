@@ -39,6 +39,7 @@ import { isDev } from '../../utils/env'
 import { hostWarnsKey } from '../../utils/hostWarns'
 import { calendar_today as calendarTodayIcon } from '../VIcon/icons/calendar_today'
 import type { IconSource } from '../VIcon/types'
+import type { FieldLabelPosition } from '../VField/VField.vue'
 import VInput from '../VInput/VInput.vue'
 import VPopover from '../VPopover/VPopover.vue'
 
@@ -128,6 +129,15 @@ interface DateInputProps {
    * appears or changes.
    */
   error?: string
+  /** Marks the field as required: an asterisk follows the label, and the field is `required`. */
+  required?: boolean
+  /** Hides the label visually. It still names the field for assistive technology. */
+  hideLabel?: boolean
+  /**
+   * Where the label sits: above the field (`top`, the default), or at its start, in a column of
+   * its own, moving back above when there is not room for both.
+   */
+  labelPosition?: FieldLabelPosition
   /** What the field says while empty. */
   placeholder?: string
   /** The height of the field: 32, 40 or 48 pixels. */
@@ -205,6 +215,9 @@ const props = withDefaults(defineProps<DateInputProps>(), {
   label: undefined,
   hint: undefined,
   error: undefined,
+  required: false,
+  hideLabel: false,
+  labelPosition: 'top',
   placeholder: undefined,
   size: 'md',
   compact: false,
@@ -607,6 +620,9 @@ defineExpose({
         :label="label"
         :hint="hint"
         :error="error"
+        :required="required"
+        :hide-label="hideLabel"
+        :label-position="labelPosition"
         :placeholder="placeholder ?? (typing ? maskHint : undefined)"
         :size="resolvedSize"
         :compact="resolvedCompact"

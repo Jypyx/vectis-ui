@@ -66,6 +66,10 @@ export default {
   api: {
     VCombobox: {
       props: {
+        required:
+          'Ajoute un astérisque après le libellé et transmet <code>required</code> au champ.',
+        hideLabel: 'Masque le libellé visuellement tout en le gardant comme nom accessible.',
+        labelPosition: 'Place le libellé au-dessus du champ ou à côté.',
         options:
           'Options, groupes nommés ou séparateurs. Chaque option possède une valeur et un libellé.',
         multiple: 'Autorise plusieurs sélections. Utilisez un tableau pour <code>v-model</code>.',

@@ -16,9 +16,9 @@ element or a third-party component.
 </VField>
 ```
 
-Library controls also have their own `label`, `hint` and `error` props. Use `VField` when the
-control does not, when the label sits beside the control, or to give every field of a form the
-same structure.
+Library controls also have their own `label`, `hint` and `error` props, which render a `VField`
+of their own. Use `VField` directly around a native element or a third-party component, or to give
+every field of a form the same structure.
 
 <Canvas of={VFieldStories.Default} />
 
@@ -27,10 +27,10 @@ same structure.
 ## What `fieldProps` holds
 
 - `id`: the attribute set on the `VField`, or a generated id. The label's `for` points at it.
-- `aria-describedby`: the error or, without one, the hint, after any reference set on the
-  `VField`.
+- `aria-describedby`: the error or, without one, the hint, then the `meta` slot, after any
+  reference set on the `VField`.
 - `aria-invalid="true"` while there is an error.
-- `required` when the field is required.
+- `required` when the field is required, and `disabled` when it is disabled.
 - The other attributes set on the `VField` (`name`, `autocomplete`, `data-*`), so that the
   `VField` can be written like the control. `class` and `style` stay on the `VField` root.
 
@@ -56,6 +56,27 @@ read with the control.
 `required` adds an asterisk after the label and passes `required` to the control. The asterisk is
 hidden from assistive technology, which announces the native `required` state instead.
 
+## Disabled
+
+`disabled` greys out the label and the hint, and passes `disabled` to the control.
+
+## Group of elements
+
+A `<label for>` names one element. When the control is a group of elements, such as a row of fields
+with a `group` role, `group` renders the label as plain text and `fieldProps` names the group
+through `aria-labelledby`. `aria-invalid`, `required` and `disabled` are not handed over, since a
+group may not carry them: set them on the elements of the group.
+
+<Canvas of={VFieldStories.Group} />
+
+## Content beside the hint
+
+The `meta` slot places content at the end of the hint's line, such as a character counter. Bind the
+`id` it provides on that content: the id joins the control's `aria-describedby`, after the error
+and the hint, so the content is read along with the control.
+
+<Canvas of={VFieldStories.WithMeta} />
+
 ## Label beside the control
 
 `labelPosition="start"` puts the label in a column of its own
@@ -75,7 +96,8 @@ when the purpose of the field is clear from what surrounds it, such as a search 
 ## Accessibility
 
 - The label is a native `<label for>`, so clicking it focuses the control. It only works with a
-  labelable element: for a group of controls, use `VFieldset`.
+  labelable element: for a group of elements, use `group`, or `VFieldset` for radios, checkboxes
+  and related fields.
 - The hint, or the error in its place, is linked through `aria-describedby`.
 - The error live region is always mounted, so that the message is announced when it appears. The
   first message rendered with the page is not announced.

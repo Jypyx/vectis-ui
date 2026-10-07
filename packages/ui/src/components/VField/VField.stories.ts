@@ -21,6 +21,10 @@ const t = storyText({
     france: 'France',
     belgium: 'Belgium',
     canada: 'Canada',
+    expiry: 'Expiry date',
+    expiryHint: 'As printed on the card.',
+    month: 'Month',
+    year: 'Year',
   },
   fr: {
     email: 'E-mail',
@@ -34,6 +38,10 @@ const t = storyText({
     france: 'France',
     belgium: 'Belgique',
     canada: 'Canada',
+    expiry: 'Date d’expiration',
+    expiryHint: 'Telle qu’imprimée sur la carte.',
+    month: 'Mois',
+    year: 'Année',
   },
 })
 
@@ -45,6 +53,7 @@ const meta = {
     hint: { control: 'text' },
     error: { control: 'text' },
     required: { control: 'boolean' },
+    disabled: { control: 'boolean' },
     hideLabel: { control: 'boolean' },
     labelPosition: { control: 'inline-radio', options: ['top', 'start'] },
   },
@@ -52,6 +61,7 @@ const meta = {
     label: 'Email',
     hint: 'We send the receipt to this address.',
     required: false,
+    disabled: false,
     hideLabel: false,
     labelPosition: 'top',
   },
@@ -169,5 +179,47 @@ export const HiddenLabel: Story = {
   }),
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).getByRole('searchbox', { name: 'Search' })).toBeVisible()
+  },
+}
+
+/** `group` names a row of elements through `aria-labelledby` rather than `<label for>`. */
+export const Group: Story = {
+  render: () => ({
+    components: { VField, VInput },
+    setup: () => ({ t }),
+    template: `
+      <VField :label="t.expiry" :hint="t.expiryHint" group v-slot="{ fieldProps }">
+        <div v-bind="fieldProps" role="group" style="display: flex; gap: 8px; max-width: 240px">
+          <VInput :aria-label="t.month" inputmode="numeric" />
+          <VInput :aria-label="t.year" inputmode="numeric" />
+        </div>
+      </VField>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const group = within(canvasElement).getByRole('group', { name: 'Expiry date' })
+    await expect(group).toHaveAccessibleDescription('As printed on the card.')
+  },
+}
+
+/** The `meta` slot shares the hint's line; its `id` joins the control's description. */
+export const WithMeta: Story = {
+  render: () => ({
+    components: { VField },
+    setup: () => ({ t, bio: ref('') }),
+    template: `
+      <VField :label="t.bio" :hint="t.bioHint" style="max-width: 360px">
+        <template #default="{ fieldProps }">
+          <textarea v-bind="fieldProps" v-model="bio" maxlength="160" />
+        </template>
+        <template #meta="{ id }">
+          <span :id="id" class="v-field-counter">{{ bio.length }}/160</span>
+        </template>
+      </VField>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const textbox = within(canvasElement).getByRole('textbox', { name: 'About you' })
+    await expect(textbox).toHaveAccessibleDescription('A few lines shown on your profile. 0/160')
   },
 }

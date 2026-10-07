@@ -278,10 +278,18 @@ describe('VFileInput', () => {
   })
 
   it('a click on the field opens the dialog — but never a click on one of its buttons', async () => {
-    const { container, native } = renderPicker({ clearable: true, modelValue: [fileOf('a.pdf')] })
+    const { container, native } = renderPicker({
+      clearable: true,
+      counter: true,
+      modelValue: [fileOf('a.pdf')],
+    })
     native.click = vi.fn()
 
-    await fireEvent.click(container.querySelector('.v-file-input-control')!)
+    await fireEvent.click(container.querySelector('.v-input-field')!)
+    expect(native.click).toHaveBeenCalledOnce()
+
+    // The hint and the counter sit under the field and open nothing.
+    await fireEvent.click(container.querySelector('.v-field-meta')!)
     expect(native.click).toHaveBeenCalledOnce()
 
     // The cross empties the field; without the `closest('button')` guard the
@@ -439,10 +447,13 @@ describe('VFileInput dev warnings', () => {
     warn.mockRestore()
   })
 
-  it('warns on `required`, which cannot work on a non-focusable control', () => {
+  it('required marks the visible field and leaves the hidden file input alone, without warning', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    render(VFileInput, { attrs: { required: true, 'aria-label': 'Attachments' } })
-    expect(warn).toHaveBeenCalledWith(expect.stringMatching(/`required` lands on the hidden/))
+    const { container } = render(VFileInput, { props: { label: 'Attachments', required: true } })
+    expect(container.querySelector('.v-input-control')!.hasAttribute('required')).toBe(true)
+    expect(container.querySelector('.v-field-required')).not.toBeNull()
+    expect(container.querySelector('.v-file-input-native')!.hasAttribute('required')).toBe(false)
+    expect(warn).not.toHaveBeenCalled()
     warn.mockRestore()
   })
 
@@ -545,7 +556,7 @@ describe('VFileInput — slots and keys', () => {
 describe('VFileInput — its field is not drawn read-only', () => {
   it('an editable file field refuses typing without the read-only look', () => {
     const { container } = render(VFileInput, { props: { modelValue: [], label: 'Files' } })
-    expect(container.querySelector('.v-input')!.hasAttribute('data-readonly')).toBe(false)
+    expect(container.querySelector('.v-input-field')!.hasAttribute('data-readonly')).toBe(false)
     expect((container.querySelector('.v-input-control') as HTMLInputElement).readOnly).toBe(true)
   })
 
@@ -553,7 +564,7 @@ describe('VFileInput — its field is not drawn read-only', () => {
     const { container } = render(VFileInput, {
       props: { modelValue: [], label: 'Files', readonly: true },
     })
-    expect(container.querySelector('.v-input')!.hasAttribute('data-readonly')).toBe(true)
+    expect(container.querySelector('.v-input-field')!.hasAttribute('data-readonly')).toBe(true)
   })
 })
 

@@ -66,6 +66,9 @@ export default {
   api: {
     VCombobox: {
       props: {
+        required: 'Adds an asterisk after the label and passes <code>required</code> to the field.',
+        hideLabel: 'Hides the label visually while keeping it as the accessible name.',
+        labelPosition: 'Places the label above the field or beside it.',
         options: 'Options, named groups or separators. Each option has a value and label.',
         multiple: 'Allows multiple selection. Use an array for <code>v-model</code>.',
         display:

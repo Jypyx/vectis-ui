@@ -62,6 +62,10 @@ export default {
   api: {
     VDateInput: {
       props: {
+        required:
+          'Ajoute un astérisque après le libellé et transmet <code>required</code> au champ.',
+        hideLabel: 'Masque le libellé visuellement tout en le gardant comme nom accessible.',
+        labelPosition: 'Place le libellé au-dessus du champ ou à côté.',
         selection: 'Mode de sélection : une date, une période ou plusieurs dates.',
         locale:
           'Locale BCP 47 pour l’affichage des dates et le début de semaine. Remplace la locale globale.',

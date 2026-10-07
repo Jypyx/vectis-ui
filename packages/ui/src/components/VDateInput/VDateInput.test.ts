@@ -573,7 +573,7 @@ describe('VDateInput — development warnings and the mask keys', () => {
 describe('VDateInput — picker mode is not drawn read-only', () => {
   it('refuses typing without the read-only look', () => {
     const { container } = render(VDateInput, { props: { mode: 'picker', label: 'When' } })
-    expect(container.querySelector('.v-input')!.hasAttribute('data-readonly')).toBe(false)
+    expect(container.querySelector('.v-input-field')!.hasAttribute('data-readonly')).toBe(false)
     expect((container.querySelector('.v-input-control') as HTMLInputElement).readOnly).toBe(true)
   })
 
@@ -581,7 +581,7 @@ describe('VDateInput — picker mode is not drawn read-only', () => {
     const { container } = render(VDateInput, {
       props: { mode: 'picker', label: 'When', readonly: true },
     })
-    expect(container.querySelector('.v-input')!.hasAttribute('data-readonly')).toBe(true)
+    expect(container.querySelector('.v-input-field')!.hasAttribute('data-readonly')).toBe(true)
   })
 })
 

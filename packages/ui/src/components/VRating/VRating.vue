@@ -7,13 +7,11 @@
  */
 import { computed, ref, useAttrs, useId } from 'vue'
 
-import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
+import VFieldset from '../VFieldset/VFieldset.vue'
 import VIcon from '../VIcon/VIcon.vue'
-import VTypography from '../VTypography/VTypography.vue'
 import { iconProps } from '../VIcon/iconProps'
 import { star as starIcon } from '../VIcon/icons/star'
 import type { IconSource } from '../VIcon/types'
-import { useFieldIds } from '../../composables/useFieldIds'
 import { useLocale, useMessages } from '../../i18n/state'
 import { customColorStyle } from '../../utils/css'
 import { clamp } from '../../utils/number'
@@ -109,13 +107,6 @@ const locale = useLocale()
 
 const isInvalid = computed(() => props.invalid || !!props.error)
 
-const { hintId, errorId, describedBy } = useFieldIds(
-  attrs,
-  () => !!props.hint && !props.error,
-  undefined,
-  () => !!props.error,
-)
-
 // Radios group by name, so the group needs one even when the form does not.
 const uid = useId()
 const groupName = computed(() => props.name ?? uid)
@@ -145,7 +136,8 @@ function onClick(value: number, event: MouseEvent) {
   if (props.clearable && model.value === value && event.detail > 0) model.value = null
 }
 
-const rootEl = ref<HTMLFieldSetElement | null>(null)
+const fieldset = ref<InstanceType<typeof VFieldset> | null>(null)
+const rootEl = computed(() => fieldset.value?.el ?? null)
 
 defineExpose({
   /** Moves the focus to the checked radio, or to the first icon when there is no rating. */
@@ -160,8 +152,8 @@ defineExpose({
 </script>
 
 <template>
-  <fieldset
-    ref="rootEl"
+  <VFieldset
+    ref="fieldset"
     class="v-rating v-tone"
     :data-tone="tone"
     :data-custom="color !== undefined ? '' : undefined"
@@ -172,12 +164,12 @@ defineExpose({
     :disabled="disabled"
     :aria-label="label ? undefined : m.rating.label"
     v-bind="attrs"
-    :aria-describedby="describedBy"
+    :legend="label"
+    :hint="hint"
+    :error="error"
+    :required="required"
+    :hide-legend="hideLabel"
   >
-    <legend v-if="label" class="v-rating-label" :class="{ 'v-visually-hidden': hideLabel }">
-      {{ label }}<span v-if="required" class="v-rating-required" aria-hidden="true">*</span>
-    </legend>
-
     <span v-if="readonly" class="v-rating-items" role="img" :aria-label="valueText">
       <span
         v-for="value in values"
@@ -231,29 +223,11 @@ defineExpose({
       </label>
     </span>
     <input v-if="readonly && name && model !== null" type="hidden" :name="name" :value="model" />
-
-    <span v-if="error" :id="errorId" class="v-field-error v-rating-error">{{ error }}</span>
-    <VTypography v-else-if="hint" :id="hintId" variant="caption" tone="muted" class="v-rating-hint">
-      {{ hint }}
-    </VTypography>
-    <VFieldAnnouncer :text="error" />
-  </fieldset>
+  </VFieldset>
 </template>
 
 <style>
 @layer vectis.components {
-  .v-rating {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--vectis-space-1);
-    min-inline-size: 0;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    font-family: var(--vectis-text-family);
-  }
-
   .v-rating[data-size='sm'] {
     --vectis-icon-size: var(--vectis-control-size-rating-sm);
   }
@@ -264,21 +238,6 @@ defineExpose({
 
   .v-rating[data-size='lg'] {
     --vectis-icon-size: var(--vectis-control-size-rating-lg);
-  }
-
-  /* A rendered legend is not a flex item of its fieldset, so the gap misses it: a margin. */
-  .v-rating-label {
-    margin-block-end: var(--vectis-space-1);
-    padding: 0;
-    color: var(--vectis-color-text);
-    font-size: var(--vectis-text-label-size);
-    font-weight: var(--vectis-text-label-weight);
-    line-height: var(--vectis-text-label-leading);
-  }
-
-  .v-rating-required {
-    margin-inline-start: var(--vectis-space-1);
-    color: var(--vectis-color-danger-text);
   }
 
   /* Positioned: it holds the hidden "No rating" radio, which has no box of its own. */
@@ -351,10 +310,6 @@ defineExpose({
 
   .v-rating[data-invalid] .v-rating-empty {
     color: var(--vectis-color-danger);
-  }
-
-  .v-rating:disabled .v-rating-label {
-    color: var(--vectis-color-text-subtle);
   }
 
   .v-rating:disabled .v-rating-empty {

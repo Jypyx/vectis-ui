@@ -18,6 +18,14 @@ export default {
       title: 'Hidden label',
       text: '<code>hideLabel</code> hides the label visually. It still names the control for screen readers.',
     },
+    group: {
+      title: 'Group of elements',
+      text: '<code>group</code> names a group of elements, such as a row of fields with a <code>group</code> role. The label becomes plain text and <code>fieldProps</code> provides <code>aria-labelledby</code> instead of the states a group cannot carry.',
+    },
+    meta: {
+      title: 'Content beside the hint',
+      text: 'The <code>meta</code> slot places content at the end of the hint line, such as a character counter. Bind the <code>id</code> it provides: it joins the control’s <code>aria-describedby</code>.',
+    },
   },
   api: {
     VField: {
@@ -28,12 +36,17 @@ export default {
           'Error message shown in place of the hint. Sets <code>aria-invalid</code>, is linked through <code>aria-describedby</code> and is announced when it appears.',
         required:
           'Adds an asterisk after the label and passes <code>required</code> to the control.',
+        disabled:
+          'Greys out the label and the hint and passes <code>disabled</code> to the control.',
         hideLabel: 'Hides the label visually while keeping it as the accessible name.',
         labelPosition: 'Places the label above the control or beside it.',
+        group:
+          'Names a group of elements through <code>aria-labelledby</code> instead of <code>for</code>.',
       },
       slots: {
         default:
-          'The control. Bind <code>fieldProps</code>: id, descriptions, invalid state, <code>required</code> and the attributes set on the field other than <code>class</code> and <code>style</code>.',
+          'The control. Bind <code>fieldProps</code>: id, descriptions, invalid state, <code>required</code>, <code>disabled</code> and the attributes set on the field other than <code>class</code> and <code>style</code>.',
+        meta: 'Content at the end of the hint line, such as a character counter.',
       },
     },
   },

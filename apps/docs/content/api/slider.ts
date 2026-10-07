@@ -19,6 +19,7 @@ export default {
         { name: 'size', type: 'SliderSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
         { name: 'label', type: 'string' },
         { name: 'hideLabel', type: 'boolean', default: 'false' },
+        { name: 'labelPosition', type: 'FieldLabelPosition', values: "'top' | 'start'", default: "'top'" },
         { name: 'hint', type: 'string' },
         { name: 'error', type: 'string' },
         { name: 'orientation', type: 'SliderOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },

@@ -135,9 +135,7 @@ describe('VRating', () => {
     it('required marks every radio and adds a hidden asterisk', () => {
       const { radios, container } = renderRating('label="Quality" required')
       expect(radios().every((radio) => radio.required)).toBe(true)
-      expect(container.querySelector('.v-rating-required')!.getAttribute('aria-hidden')).toBe(
-        'true',
-      )
+      expect(container.querySelector('.v-field-required')!.getAttribute('aria-hidden')).toBe('true')
     })
 
     it('name is given to the radios, and disabled disables the whole group', () => {

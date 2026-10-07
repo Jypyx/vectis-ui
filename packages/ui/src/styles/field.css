@@ -70,6 +70,12 @@
     line-height: var(--vectis-text-caption-leading);
   }
 
+  /* The asterisk after the label or the legend of a required field. */
+  .v-field-required {
+    margin-inline-start: var(--vectis-space-1);
+    color: var(--vectis-color-danger-text);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .v-field-action {
       transition: none;

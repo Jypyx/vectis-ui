@@ -38,6 +38,9 @@ export default {
   api: {
     VTextarea: {
       props: {
+        required: 'Adds an asterisk after the label and passes <code>required</code> to the field.',
+        hideLabel: 'Hides the label visually while keeping it as the accessible name.',
+        labelPosition: 'Places the label above the field or beside it.',
         size: 'Adjusts padding, text and icons. Use <code>rows</code> to set the line count.',
         compact: 'Reduces vertical padding without changing the line count, text or icons.',
         rows: 'Visible line count, rounded to an integer of at least 1. With <code>autoGrow</code>, sets the minimum height.',

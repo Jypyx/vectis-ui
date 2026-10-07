@@ -34,6 +34,10 @@ export default {
   api: {
     VInputGroup: {
       props: {
+        required:
+          'Adds an asterisk after the label. Mark the segments <code>required</code> themselves.',
+        hideLabel: 'Hides the label visually while keeping it as the accessible name.',
+        labelPosition: 'Places the label above the field or beside it.',
         label:
           'Shared visible label and accessible group name. Consumer <code>aria-label</code> or <code>aria-labelledby</code> takes precedence. Name each field separately.',
         error:

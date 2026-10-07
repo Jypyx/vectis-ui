@@ -30,6 +30,9 @@ export default {
   api: {
     VColorInput: {
       props: {
+        required: 'Adds an asterisk after the label and passes <code>required</code> to the field.',
+        hideLabel: 'Hides the label visually while keeping it as the accessible name.',
+        labelPosition: 'Places the label above the field or beside it.',
         format: 'How the value is written. The field accepts all four formats.',
         alpha: 'Adds an opacity track to the picker and writes the alpha below 1.',
         swatches: 'Preset colours offered in the picker.',

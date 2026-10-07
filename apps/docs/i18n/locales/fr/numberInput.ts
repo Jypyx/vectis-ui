@@ -18,6 +18,10 @@ export default {
   api: {
     VNumberInput: {
       props: {
+        required:
+          'Ajoute un astérisque après le libellé et transmet <code>required</code> au champ.',
+        hideLabel: 'Masque le libellé visuellement tout en le gardant comme nom accessible.',
+        labelPosition: 'Place le libellé au-dessus du champ ou à côté.',
         min: 'Plus petite valeur. Une valeur saisie inférieure y est ramenée à la validation.',
         max: 'Plus grande valeur. Une valeur saisie supérieure y est ramenée à la validation.',
         step: 'Déplacement des flèches et des boutons. Page précédente et Page suivante déplacent de dix pas.',

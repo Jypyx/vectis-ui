@@ -124,16 +124,17 @@ drop included, and none of the ones removed.
 
 <Canvas of={VFileInputStories.InAForm} />
 
-`required` lands there too, and the browser does refuse an empty submission, but its message
-points at an input nobody can see. Validate the `v-model` yourself and reflect the result through
-`invalid`; a dev-mode warning says so. Building the request from the model works just as well:
+The `required` prop adds an asterisk after the label and announces the visible field as required,
+but leaves the hidden input alone: the browser would refuse an empty submission with a message
+pointing at an input nobody can see. Validate the `v-model` yourself and report the result through
+`error`. Building the request from the model works just as well:
 
 ```js
 const body = new FormData()
 for (const file of files.value) body.append('attachments', file)
 ```
 
-`name`, `required`, `form` and `capture` land on the hidden input; `id`, every `aria-*` and every
+`name`, `form` and `capture` land on the hidden input; `id`, every `aria-*` and every
 listener land on the visible field, which is what takes focus.
 
 ## Error message

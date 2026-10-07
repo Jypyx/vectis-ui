@@ -38,6 +38,10 @@ export default {
   api: {
     VInput: {
       props: {
+        required:
+          'Ajoute un astérisque après le libellé et transmet <code>required</code> au champ.',
+        hideLabel: 'Masque le libellé visuellement tout en le gardant comme nom accessible.',
+        labelPosition: 'Place le libellé au-dessus du champ ou à côté.',
         size: 'Taille du champ. Remplacée lorsque <code>VInputGroup</code> définit <code>size</code>.',
         compact:
           'Réduit la hauteur sans modifier les espacements internes, le texte ni les icônes. Remplacé lorsque <code>VInputGroup</code> définit <code>compact</code>.',
@@ -88,6 +92,7 @@ export default {
           'Émis à l’activation du bouton d’icône de fin. Transmet un <code>MouseEvent</code>.',
       },
       slots: {
+        meta: 'Contenu en fin de ligne de l’aide, comme un compteur. Liez son <code>id</code>, qui rejoint la description du champ.',
         start: 'Contenu après <code>iconStart</code>. Ne remplace pas l’icône.',
         valueEnd:
           'Contenu après la valeur et le compteur, avant le bouton d’effacement et l’icône de fin.',

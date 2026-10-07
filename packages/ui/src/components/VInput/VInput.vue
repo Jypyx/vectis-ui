@@ -4,23 +4,23 @@
  * Native input owns typing and validity. JavaScript bridges the model and restores focus after
  * the clear button disappears.
  */
-import { computed, inject, ref } from 'vue'
+import { computed, inject, ref, useId } from 'vue'
 
-import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
+import VField from '../VField/VField.vue'
+import type { FieldControlProps, FieldLabelPosition } from '../VField/VField.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconName, iconProps } from '../VIcon/iconProps'
 import { close as closeIcon } from '../VIcon/icons/close'
 import type { IconSource } from '../VIcon/types'
 import VSpinner from '../VSpinner/VSpinner.vue'
-import VTypography from '../VTypography/VTypography.vue'
 
-import { useFieldIds } from '../../composables/useFieldIds'
 import { useIconClickHandlers } from '../../composables/useIconClickHandlers'
 import { useClearable } from '../../composables/useClearable'
 import { useControlShape } from '../../composables/useControlShape'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useTextLimit } from '../../composables/useTextLimit'
 import { useMessages } from '../../i18n/state'
+import { joinIds } from '../../utils/ids'
 
 import { inputGroupKey } from './context'
 
@@ -33,13 +33,14 @@ export type InputType = 'text' | 'email' | 'number' | 'password' | 'search' | 't
 /**
  * What the `#control` slot hands over, to bind on the element replacing the input: its id, which
  * the label points at, the class the field's states are drawn from, the references to the hint
- * and the error, and the attributes set on the field other than `class` and `style`.
+ * and the error, and the attributes set on the field other than `class` and `style`. `required`
+ * is left out: the replacing element states it in its own way.
  */
 export type InputControlProps = {
   id: string
   class: string
   disabled: boolean
-  'aria-invalid'?: true
+  'aria-invalid'?: 'true'
   'aria-describedby'?: string
 } & Record<string, unknown>
 
@@ -68,7 +69,7 @@ interface InputProps {
    * but the field keeps its ordinary look and its clear cross.
    */
   noTyping?: boolean
-  /** The label above the field, tied to it so that clicking it focuses the field. */
+  /** The label, tied to the field so that clicking it focuses the field. */
   label?: string
   /**
    * A line of help under the field. It is tied to the input for assistive
@@ -81,6 +82,15 @@ interface InputProps {
    * appears or changes.
    */
   error?: string
+  /** Marks the field as required: an asterisk follows the label, and the input is `required`. */
+  required?: boolean
+  /** Hides the label visually. It still names the field for assistive technology. */
+  hideLabel?: boolean
+  /**
+   * Where the label sits: above the field (`top`, the default), or at its start, in a column of
+   * its own, moving back above when there is not room for both.
+   */
+  labelPosition?: FieldLabelPosition
   /**
    * An icon inside the field, at the start. It is decorative by default and becomes a real
    * button as soon as a `@click:icon-start` listener is attached, in which case it needs
@@ -149,6 +159,9 @@ const props = withDefaults(defineProps<InputProps>(), {
   label: undefined,
   hint: undefined,
   error: undefined,
+  required: false,
+  hideLabel: false,
+  labelPosition: 'top',
   iconStart: undefined,
   iconEnd: undefined,
   iconStartLabel: undefined,
@@ -197,6 +210,11 @@ defineSlots<{
    * the field is loading, the spinner taking that place.
    */
   end?(): unknown
+  /**
+   * Content at the end of the hint's line, under the field. Bind `id` on it: it joins the
+   * field's description, after the error and the hint.
+   */
+  meta?(props: { id: string }): unknown
 }>()
 
 /** The value, typed as text or a number rather than text alone. */
@@ -209,7 +227,7 @@ const model = defineModel<string | number>({ default: '' })
  */
 const modelText = computed(() => String(model.value ?? ''))
 
-const { attrs, rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs()
+const { rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs()
 
 // `disabled` is the one read as an or, the two answers being cumulative (VInput/context.ts).
 const group = inject(inputGroupKey, null)
@@ -224,12 +242,7 @@ const {
 const m = useMessages()
 const resolvedClearLabel = computed(() => props.clearLabel ?? m.value.common.clear)
 
-const { fieldId, hintId, counterId, errorId, describedBy } = useFieldIds(
-  attrs,
-  () => !!props.hint && !props.error,
-  () => props.counter,
-  () => !!props.error,
-)
+const counterId = useId()
 
 const { hasIconStartHandler, hasIconEndHandler } = useIconClickHandlers({
   name: 'VInput',
@@ -261,16 +274,23 @@ const { counterText, over } = useTextLimit({
   softLimit: () => props.softLimit,
 })
 
-// The same order as on the input: the consumer's attributes win over the invalid state, and the
-// field's own ties win over theirs.
-const controlProps = computed<InputControlProps>(() => ({
-  'aria-invalid': props.invalid || !!props.error || undefined,
-  ...restAttrs.value,
-  id: fieldId.value,
-  class: 'v-input-control',
-  disabled: resolvedDisabled.value,
-  'aria-describedby': describedBy.value,
-}))
+/**
+ * The attributes of the input, built on VField's: the consumer's attributes win over the
+ * `invalid` prop, and the counter inside the field joins the description last.
+ */
+function inputAttrs(fieldProps: FieldControlProps): FieldControlProps {
+  return {
+    'aria-invalid': props.invalid ? 'true' : undefined,
+    ...fieldProps,
+    'aria-describedby': joinIds(fieldProps['aria-describedby'], props.counter && counterId),
+  }
+}
+
+function controlProps(fieldProps: FieldControlProps): InputControlProps {
+  const bound = inputAttrs(fieldProps)
+  delete bound.required
+  return { ...bound, class: 'v-input-control', disabled: resolvedDisabled.value }
+}
 
 // The real input sits inside the wrapper, out of reach of whoever renders this component. These
 // three are how the components built on it get there; VCombobox refocuses the field and selects
@@ -286,121 +306,115 @@ defineExpose({
 </script>
 
 <template>
-  <div
-    class="v-input v-control"
+  <VField
+    v-bind="restAttrs"
+    class="v-input"
     :class="rootClass"
     :style="rootStyle"
-    :data-size="resolvedSize"
-    :data-compact="resolvedCompact ? '' : undefined"
-    :data-disabled="resolvedDisabled ? '' : undefined"
-    :data-readonly="readonly ? '' : undefined"
+    :label="label"
+    :hint="hint"
+    :error="error"
+    :required="required"
+    :disabled="resolvedDisabled"
+    :hide-label="hideLabel"
+    :label-position="labelPosition"
   >
-    <VTypography v-if="label" as="label" variant="label" class="v-input-label" :for="fieldId">
-      {{ label }}
-    </VTypography>
-
-    <div class="v-input-field">
-      <!--
+    <template #default="{ fieldProps }">
+      <div
+        class="v-input-field v-control"
+        :data-size="resolvedSize"
+        :data-compact="resolvedCompact ? '' : undefined"
+        :data-disabled="resolvedDisabled ? '' : undefined"
+        :data-readonly="readonly ? '' : undefined"
+      >
+        <!--
         The start icon is rendered before the slot, where the end icon is the slot's own
         fallback. That asymmetry is what the composed fields need: VCombobox and VFileInput fill
         `#start` with the chips standing for their values, which is OTHER content in the same
         zone rather than another way of drawing the icon.
       -->
-      <button
-        v-if="iconStart && hasIconStartHandler"
-        type="button"
-        class="v-input-action v-field-action v-input-icon-start"
-        :aria-label="iconStartLabel ?? iconName(iconStart)"
-        :disabled="resolvedDisabled"
-        @click="emit('click:icon-start', $event)"
-      >
-        <VIcon v-bind="iconProps(iconStart)" />
-      </button>
-      <VIcon v-else-if="iconStart" v-bind="iconProps(iconStart)" class="v-input-icon-start" />
-      <slot name="start" />
-
-      <slot name="control" :control-props="controlProps">
-        <input
-          :id="fieldId"
-          ref="controlEl"
-          v-model="model"
-          :aria-invalid="invalid || !!error || undefined"
-          v-bind="restAttrs"
-          class="v-input-control"
-          :type="type"
-          :maxlength="softLimit ? undefined : maxlength"
+        <button
+          v-if="iconStart && hasIconStartHandler"
+          type="button"
+          class="v-input-action v-field-action v-input-icon-start"
+          :aria-label="iconStartLabel ?? iconName(iconStart)"
           :disabled="resolvedDisabled"
-          :readonly="readonly || noTyping || undefined"
-          :aria-describedby="describedBy"
-        />
-      </slot>
+          @click="emit('click:icon-start', $event)"
+        >
+          <VIcon v-bind="iconProps(iconStart)" />
+        </button>
+        <VIcon v-else-if="iconStart" v-bind="iconProps(iconStart)" class="v-input-icon-start" />
+        <slot name="start" />
 
-      <span
-        v-if="counter"
-        :id="counterId"
-        class="v-input-counter v-field-counter"
-        :data-over="over ? '' : undefined"
-      >
-        {{ counterText }}
-      </span>
+        <slot name="control" :control-props="controlProps(fieldProps)">
+          <!-- The label's `for` matches the id inside fieldProps, which the rule cannot follow. -->
+          <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -->
+          <input
+            ref="controlEl"
+            v-model="model"
+            v-bind="inputAttrs(fieldProps)"
+            class="v-input-control"
+            :type="type"
+            :maxlength="softLimit ? undefined : maxlength"
+            :disabled="resolvedDisabled"
+            :readonly="readonly || noTyping || undefined"
+          />
+        </slot>
 
-      <!-- Before the clear cross rather than after it, so that a consumer's control reads
+        <span
+          v-if="counter"
+          :id="counterId"
+          class="v-input-counter v-field-counter"
+          :data-over="over ? '' : undefined"
+        >
+          {{ counterText }}
+        </span>
+
+        <!-- Before the clear cross rather than after it, so that a consumer's control reads
            and tabs in the same order: what acts on the value sits next to the value, and
            the field's own controls stay together at the end. -->
-      <slot name="value-end" />
+        <slot name="value-end" />
 
-      <button
-        v-if="showClear"
-        type="button"
-        class="v-input-action v-field-action v-input-clear"
-        :aria-label="resolvedClearLabel"
-        @click="onClear"
-      >
-        <VIcon :name="closeIcon" />
-      </button>
-
-      <VSpinner v-if="loading" :label="loadingText" />
-      <slot v-else name="end">
         <button
-          v-if="iconEnd && hasIconEndHandler"
+          v-if="showClear"
           type="button"
-          class="v-input-action v-field-action v-input-icon-end"
-          :aria-label="iconEndLabel ?? iconName(iconEnd)"
-          :disabled="resolvedDisabled"
-          @click="emit('click:icon-end', $event)"
+          class="v-input-action v-field-action v-input-clear"
+          :aria-label="resolvedClearLabel"
+          @click="onClear"
         >
-          <VIcon v-bind="iconProps(iconEnd)" />
+          <VIcon :name="closeIcon" />
         </button>
-        <VIcon v-else-if="iconEnd" v-bind="iconProps(iconEnd)" class="v-input-icon-end" />
-      </slot>
-    </div>
 
-    <span v-if="error" :id="errorId" class="v-field-error v-input-error">{{ error }}</span>
-    <VTypography v-else-if="hint" :id="hintId" variant="caption" tone="muted" class="v-input-hint">
-      {{ hint }}
-    </VTypography>
-    <VFieldAnnouncer :text="error" />
-  </div>
+        <VSpinner v-if="loading" :label="loadingText" />
+        <slot v-else name="end">
+          <button
+            v-if="iconEnd && hasIconEndHandler"
+            type="button"
+            class="v-input-action v-field-action v-input-icon-end"
+            :aria-label="iconEndLabel ?? iconName(iconEnd)"
+            :disabled="resolvedDisabled"
+            @click="emit('click:icon-end', $event)"
+          >
+            <VIcon v-bind="iconProps(iconEnd)" />
+          </button>
+          <VIcon v-else-if="iconEnd" v-bind="iconProps(iconEnd)" class="v-input-icon-end" />
+        </slot>
+      </div>
+    </template>
+    <template v-if="$slots.meta" #meta="{ id }"><slot :id="id" name="meta" /></template>
+  </VField>
 </template>
 
 <style>
 @layer vectis.components {
+  /* The root is a VField, which lays out the label, the hint and the error. */
   .v-input {
-    display: flex;
-    flex-direction: column;
-    gap: var(--vectis-space-1);
     width: 100%;
-    font-family: var(--vectis-text-family);
   }
 
   /*
-   * The .v-input-label and .v-input-hint classes remain as hooks: a consumer overrides through
-   * them, and the disabled state below reaches them that way.
-   */
-
-  /*
-   * This is the box that carries the border, the background and the focus ring.
-   * `--field-border-color` is the single source of truth for its colour, and the hover, error
+   * This is the box that carries the border, the background and the focus ring, and the size and
+   * state attributes. `--field-border-color` is the single source of truth for its colour, and the hover, error
    * and disabled states do nothing but redefine it.
    */
   .v-input-field {
@@ -473,7 +487,7 @@ defineExpose({
    * `:has()` taking the specificity of what it contains, so nothing but the source order
    * arbitrates between them.
    */
-  .v-input[data-readonly] .v-input-field {
+  .v-input .v-input-field[data-readonly] {
     --field-border-color: var(--vectis-color-border);
 
     background: var(--vectis-color-surface-sunken);
@@ -537,7 +551,7 @@ defineExpose({
    * specificity is what makes it win over all of them, the error included: a disabled field is
    * not submitted, so it has nothing to report.
    */
-  .v-input[data-disabled] .v-input-field {
+  .v-input .v-input-field[data-disabled] {
     --field-border-color: var(--vectis-color-border);
 
     background: var(--vectis-color-surface-muted);
@@ -545,14 +559,12 @@ defineExpose({
     cursor: not-allowed;
   }
 
-  .v-input[data-disabled] .v-input-label,
-  .v-input[data-disabled] .v-input-hint,
-  .v-input[data-disabled] .v-input-counter {
+  .v-input-field[data-disabled] .v-input-counter {
     color: var(--vectis-color-text-subtle);
   }
 
-  .v-input[data-disabled] .v-input-action,
-  .v-input[data-disabled] .v-input-field > .v-icon {
+  .v-input-field[data-disabled] .v-input-action,
+  .v-input-field[data-disabled] > .v-icon {
     color: inherit;
     cursor: not-allowed;
   }

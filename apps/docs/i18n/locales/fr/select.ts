@@ -38,6 +38,10 @@ export default {
   api: {
     VSelect: {
       props: {
+        required:
+          'Ajoute un astérisque après le libellé, pose <code>aria-required</code> sur la liste déroulante et <code>required</code> sur le <code>&lt;select&gt;</code> masqué.',
+        hideLabel: 'Masque le libellé visuellement tout en le gardant comme nom accessible.',
+        labelPosition: 'Place le libellé au-dessus du champ ou à côté.',
         options:
           'Options, groupes nommés ou séparateurs. Chaque option a une valeur et un libellé.',
         multiple:

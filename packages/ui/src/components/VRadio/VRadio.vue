@@ -5,6 +5,7 @@
  */
 
 import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
+import VFieldMessage from '../VField/VFieldMessage.vue'
 
 import { useChoice } from '../../composables/useChoice'
 import type { ItemValue } from '../../types'
@@ -118,10 +119,7 @@ defineExpose(exposed)
         <slot>{{ label }}</slot>
       </span>
     </label>
-    <span v-if="error" :id="errorId" class="v-field-error v-radio-error v-choice-error">{{
-      error
-    }}</span>
-    <span v-else-if="hint" :id="hintId" class="v-radio-hint v-choice-hint">{{ hint }}</span>
+    <VFieldMessage :hint="hint" :error="error" :hint-id="hintId" :error-id="errorId" />
     <VFieldAnnouncer :text="error" />
   </span>
 </template>

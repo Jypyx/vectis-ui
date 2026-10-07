@@ -14,6 +14,7 @@ import { add as addIcon } from '../VIcon/icons/add'
 import { expand_less as expandLessIcon } from '../VIcon/icons/expand_less'
 import { expand_more as expandMoreIcon } from '../VIcon/icons/expand_more'
 import { remove as removeIcon } from '../VIcon/icons/remove'
+import type { FieldLabelPosition } from '../VField/VField.vue'
 import VInput from '../VInput/VInput.vue'
 import type { InputSize } from '../VInput/VInput.vue'
 import { inputGroupKey } from '../VInput/context'
@@ -69,6 +70,15 @@ interface NumberInputProps {
    * field invalid and is announced when it appears or changes.
    */
   error?: string
+  /** Marks the field as required: an asterisk follows the label, and the field is `required`. */
+  required?: boolean
+  /** Hides the label visually. It still names the field for assistive technology. */
+  hideLabel?: boolean
+  /**
+   * Where the label sits: above the field (`top`, the default), or at its start, in a column of
+   * its own, moving back above when there is not room for both.
+   */
+  labelPosition?: FieldLabelPosition
   /** Marks the field as invalid whatever the browser thinks. */
   invalid?: boolean
   /** Makes the field unusable, greyed out through the colour tokens. */
@@ -101,6 +111,9 @@ const props = withDefaults(defineProps<NumberInputProps>(), {
   label: undefined,
   hint: undefined,
   error: undefined,
+  required: false,
+  hideLabel: false,
+  labelPosition: 'top',
   invalid: false,
   disabled: false,
   readonly: false,
@@ -279,6 +292,9 @@ defineExpose({
     :label="label"
     :hint="hint"
     :error="error"
+    :required="required"
+    :hide-label="hideLabel"
+    :label-position="labelPosition"
     :invalid="invalid"
     :disabled="disabled"
     :readonly="readonly"

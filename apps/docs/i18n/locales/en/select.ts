@@ -38,6 +38,10 @@ export default {
   api: {
     VSelect: {
       props: {
+        required:
+          'Adds an asterisk after the label, sets <code>aria-required</code> on the combobox and <code>required</code> on the hidden <code>&lt;select&gt;</code>.',
+        hideLabel: 'Hides the label visually while keeping it as the accessible name.',
+        labelPosition: 'Places the label above the field or beside it.',
         options: 'Options, named groups or separators. Each option has a value and label.',
         multiple:
           'Allows multiple selection. Use an array for <code>v-model</code>. The list stays open while options are toggled.',

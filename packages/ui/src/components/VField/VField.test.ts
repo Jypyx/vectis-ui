@@ -79,6 +79,40 @@ describe('VField', () => {
     expect(getByRole('textbox', { name: 'Email' }).hasAttribute('required')).toBe(true)
   })
 
+  it('disabled: hands disabled to the control and marks the root', () => {
+    const { container, getByLabelText } = renderHarness(
+      '<VField label="Email" disabled v-slot="{ fieldProps }"><input v-bind="fieldProps" /></VField>',
+    )
+    expect(getByLabelText('Email').hasAttribute('disabled')).toBe(true)
+    expect(container.querySelector('.v-field')!.hasAttribute('data-disabled')).toBe(true)
+  })
+
+  it('group: names the group through aria-labelledby, without the states a group may not carry', () => {
+    const { getByRole, getByText } = renderHarness(
+      `<VField label="Card" hint="As printed" error="Expired" required disabled group
+        v-slot="{ fieldProps }"><div role="group" v-bind="fieldProps" /></VField>`,
+    )
+    const group = getByRole('group', { name: 'Card' })
+    expect(getByText('Card').tagName).toBe('SPAN')
+    expect(group.getAttribute('aria-describedby')).toBe(getByText('Expired').id)
+    for (const name of ['aria-invalid', 'required', 'disabled'])
+      expect(group.hasAttribute(name)).toBe(false)
+  })
+
+  it('renders the meta slot on the line of the hint, described after the hint', () => {
+    const { getByText, getByLabelText } = renderHarness(
+      `<VField label="Bio" hint="Shown on your profile">
+        <template #default="{ fieldProps }"><textarea v-bind="fieldProps" /></template>
+        <template #meta="{ id }"><span :id="id">12/80</span></template>
+      </VField>`,
+    )
+    const counter = getByText('12/80')
+    const hint = getByText('Shown on your profile')
+    expect(counter.parentElement!.classList.contains('v-field-meta')).toBe(true)
+    expect(counter.parentElement!.contains(hint)).toBe(true)
+    expect(getByLabelText('Bio').getAttribute('aria-describedby')).toBe(`${hint.id} ${counter.id}`)
+  })
+
   it('hideLabel keeps the label as the accessible name but hides it visually', () => {
     const { getByLabelText, container } = renderHarness(
       '<VField label="Search" hide-label v-slot="{ fieldProps }"><input v-bind="fieldProps" /></VField>',

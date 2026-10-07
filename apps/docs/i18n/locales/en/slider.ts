@@ -66,6 +66,7 @@ export default {
   api: {
     VSlider: {
       props: {
+        labelPosition: 'Places the label above the field or beside it.',
         readonly:
           'Prevents pointer and keyboard changes. Thumbs remain focusable; number fields become read-only.',
         invalid:

@@ -21,6 +21,9 @@ export default {
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
         { name: 'error', type: 'string' },
+        { name: 'required', type: 'boolean', default: 'false' },
+        { name: 'hideLabel', type: 'boolean', default: 'false' },
+        { name: 'labelPosition', type: 'FieldLabelPosition', values: "'top' | 'start'", default: "'top'" },
         { name: 'v-model', key: 'vModel', type: 'string', default: "''" },
       ],
       events: [

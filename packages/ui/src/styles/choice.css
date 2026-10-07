@@ -37,33 +37,25 @@
   }
 
   .v-choice-label,
-  .v-choice-hint,
-  .v-choice-error {
+  .v-choice > :is(.v-field-hint, .v-field-error) {
     margin-inline-start: var(--vectis-space-2);
   }
 
-  .v-choice-error {
+  /* The message is VField's, under the label rather than under the control. */
+  .v-choice > :is(.v-field-hint, .v-field-error) {
     grid-column: 2;
-  }
-
-  /* Read caption weight explicitly rather than inheriting it from the host. */
-  .v-choice-hint {
-    grid-column: 2;
-    font-size: var(--vectis-text-caption-size);
-    font-weight: var(--vectis-text-caption-weight);
-    line-height: var(--vectis-text-caption-leading);
-    color: var(--vectis-color-text-muted);
   }
 
   .v-choice[data-label-position='start'] .v-choice-label {
     order: -1;
   }
 
-  .v-choice[data-label-position='start'] :is(.v-choice-label, .v-choice-hint, .v-choice-error) {
+  .v-choice[data-label-position='start'] .v-choice-label,
+  .v-choice[data-label-position='start'] > :is(.v-field-hint, .v-field-error) {
     margin-inline: 0 var(--vectis-space-2);
   }
 
-  .v-choice[data-label-position='start'] :is(.v-choice-hint, .v-choice-error) {
+  .v-choice[data-label-position='start'] > :is(.v-field-hint, .v-field-error) {
     grid-column: 1;
   }
 
@@ -92,7 +84,7 @@
     cursor: not-allowed;
   }
 
-  .v-choice:has(.v-hidden-input:disabled) .v-choice-hint {
-    color: var(--vectis-color-text-subtle);
+  .v-choice:has(.v-hidden-input:disabled) > .v-field-hint {
+    --typography-color: var(--vectis-color-text-subtle);
   }
 }

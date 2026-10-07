@@ -6,10 +6,10 @@ import * as VInputStories from './VInput.stories'
 # Input
 
 Complete text field — label, internal (clickable) icons, counter, soft limit, loading, clearing
-— built around a styled native `<input>`. The root is a wrapper (label + field + hint): the
-native attributes (`type`, `placeholder`, `required`, `pattern`…) pass through by fallthrough
-onto the `<input>`, **except** `class`/`style`, which stay on the root (consumers size the whole
-component).
+— built around a styled native `<input>`. The root is a `VField`, which renders the label, the
+hint and the error: the native attributes (`type`, `placeholder`, `pattern`…) pass through by
+fallthrough onto the `<input>`, **except** `class`/`style`, which stay on the root (consumers size
+the whole component).
 
 Validation stays native: `:user-invalid` does the error styling with no validation JavaScript.
 
@@ -35,7 +35,10 @@ size (as in `VButton`).
 
 `label` is associated with the field through `for`/`id` (`useId()`, SSR-safe); `hint` is linked
 through `aria-describedby`. Without a `label`, supply an accessible name by fallthrough
-(`aria-label`).
+(`aria-label`). As on `VField`, `required` adds an asterisk after the label and sets `required` on
+the input, `hideLabel` hides the label visually while keeping it as the accessible name, and
+`labelPosition="start"` places the label beside the field. The `meta` slot adds content at the end
+of the hint's line: bind the `id` it provides so that the content joins the description.
 
 <Canvas of={VInputStories.LabelAndHint} />
 

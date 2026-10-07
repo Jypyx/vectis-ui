@@ -144,7 +144,7 @@ describe('VInputOTP', () => {
 describe('VInputOTP — label', () => {
   it('renders the label and names the group with it', () => {
     const { container, getByRole } = renderOtp({ label: 'Sign-in code' })
-    const label = container.querySelector('.v-input-otp-label') as HTMLElement
+    const label = container.querySelector('.v-field-label') as HTMLElement
     const group = getByRole('group', { name: 'Sign-in code' })
     expect(group.getAttribute('aria-labelledby')).toBe(label.id)
     expect(group.hasAttribute('aria-label')).toBe(false)
@@ -152,7 +152,7 @@ describe('VInputOTP — label', () => {
 
   it('without a label, the dictionary names the group', () => {
     const { container, getByRole } = renderOtp()
-    expect(container.querySelector('.v-input-otp-label')).toBeNull()
+    expect(container.querySelector('.v-field-label')).toBeNull()
     expect(getByRole('group').getAttribute('aria-label')).toBe('Verification code')
   })
 
@@ -181,7 +181,7 @@ describe('VInputOTP — hint', () => {
   it('renders the hint and ties it to the group', () => {
     const { container } = renderOtp({ hint: 'Sent to +33 6 12 34 56 78' })
     const group = container.querySelector('[role="group"]') as HTMLElement
-    const hint = container.querySelector('.v-input-otp-hint') as HTMLElement
+    const hint = container.querySelector('.v-field-hint') as HTMLElement
     expect(hint.textContent).toContain('Sent to')
     expect(group.getAttribute('aria-describedby')).toBe(hint.id)
   })
@@ -192,7 +192,7 @@ describe('VInputOTP — hint', () => {
       attrs: { 'aria-describedby': 'outside' },
     })
     const group = container.querySelector('[role="group"]') as HTMLElement
-    const hint = container.querySelector('.v-input-otp-hint') as HTMLElement
+    const hint = container.querySelector('.v-field-hint') as HTMLElement
     expect(group.getAttribute('aria-describedby')).toBe('outside ' + hint.id)
   })
 

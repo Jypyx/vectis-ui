@@ -232,8 +232,8 @@ export const Hint: Story = {
 
   play: async ({ canvasElement }) => {
     const group = canvasElement.querySelector('[role="group"]')!
-    const label = canvasElement.querySelector('.v-input-otp-label')!
-    const hint = canvasElement.querySelector('.v-input-otp-hint')!
+    const label = canvasElement.querySelector('.v-field-label')!
+    const hint = canvasElement.querySelector('.v-field-hint')!
     await expect(group).toHaveAttribute('aria-labelledby', label.id)
     await expect(group).not.toHaveAttribute('aria-label')
     await expect(group).toHaveAttribute('aria-describedby', hint.id)

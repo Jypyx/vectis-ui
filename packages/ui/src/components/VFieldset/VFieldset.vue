@@ -6,10 +6,10 @@
  * allowed on a group, so the invalid state reaches the controls through the slot.
  */
 
-import { useAttrs } from 'vue'
+import { ref, useAttrs } from 'vue'
 
 import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
-import VTypography from '../VTypography/VTypography.vue'
+import VFieldMessage from '../VField/VFieldMessage.vue'
 
 import { useFieldIds } from '../../composables/useFieldIds'
 
@@ -67,31 +67,30 @@ const { hintId, errorId, describedBy } = useFieldIds(
   undefined,
   () => !!props.error,
 )
+
+const rootEl = ref<HTMLFieldSetElement | null>(null)
+
+defineExpose({
+  /** The `<fieldset>`. */
+  el: rootEl,
+})
 </script>
 
 <template>
   <fieldset
+    ref="rootEl"
     v-bind="attrs"
     class="v-fieldset"
     :aria-describedby="describedBy"
     :data-orientation="orientation"
   >
     <legend v-if="legend" class="v-fieldset-legend" :class="{ 'v-visually-hidden': hideLegend }">
-      {{ legend }}<span v-if="required" class="v-fieldset-required" aria-hidden="true">*</span>
+      {{ legend }}<span v-if="required" class="v-field-required" aria-hidden="true">*</span>
     </legend>
     <div class="v-fieldset-body">
       <slot :invalid="!!error" :required="required" />
     </div>
-    <span v-if="error" :id="errorId" class="v-field-error v-fieldset-error">{{ error }}</span>
-    <VTypography
-      v-else-if="hint"
-      :id="hintId"
-      variant="caption"
-      tone="muted"
-      class="v-fieldset-hint"
-    >
-      {{ hint }}
-    </VTypography>
+    <VFieldMessage :hint="hint" :error="error" :hint-id="hintId" :error-id="errorId" />
     <VFieldAnnouncer :text="error" />
   </fieldset>
 </template>
@@ -119,9 +118,13 @@ const { hintId, errorId, describedBy } = useFieldIds(
     line-height: var(--vectis-text-label-leading);
   }
 
-  .v-fieldset-required {
-    margin-inline-start: var(--vectis-space-1);
-    color: var(--vectis-color-danger-text);
+  /* A native `disabled` disables every control of the group: its name and help grey out. */
+  .v-fieldset:disabled > .v-fieldset-legend {
+    color: var(--vectis-color-text-subtle);
+  }
+
+  .v-fieldset:disabled > .v-field-hint {
+    --typography-color: var(--vectis-color-text-subtle);
   }
 
   .v-fieldset-body {

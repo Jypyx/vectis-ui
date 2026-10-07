@@ -46,6 +46,10 @@ export default {
   api: {
     VFileInput: {
       props: {
+        required:
+          'Adds an asterisk after the label and announces the field as required. The browser does not check it: validate the selection and set <code>error</code>.',
+        hideLabel: 'Hides the label visually while keeping it as the accessible name.',
+        labelPosition: 'Places the label above the field or beside it.',
         multiple: 'Allows multiple files. Otherwise, extra files are rejected.',
         accept:
           'Accepted file types, using native syntax such as <code>image/*,.pdf</code>. Filters dialog selections and dropped files.',

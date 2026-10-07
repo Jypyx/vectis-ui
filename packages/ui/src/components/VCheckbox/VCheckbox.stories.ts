@@ -215,7 +215,7 @@ export const WithHint: Story = {
     await expect(box).toHaveAccessibleDescription('A summary of the week, every Monday morning.')
     const root = box.closest('.v-choice')!
     const label = root.querySelector('.v-choice-label')!.getBoundingClientRect()
-    const hint = root.querySelector('.v-choice-hint')!.getBoundingClientRect()
+    const hint = root.querySelector('.v-field-hint')!.getBoundingClientRect()
     await expect(Math.abs(label.left - hint.left)).toBeLessThan(1)
     await expect(hint.top).toBeGreaterThanOrEqual(label.bottom - 1)
   },

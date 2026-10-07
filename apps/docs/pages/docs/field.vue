@@ -4,10 +4,14 @@ import FieldBasic from '~/examples/field/Basic.vue'
 import fieldBasicSource from '~/examples/field/Basic.vue?raw'
 import FieldError from '~/examples/field/Error.vue'
 import fieldErrorSource from '~/examples/field/Error.vue?raw'
+import FieldGroup from '~/examples/field/Group.vue'
+import fieldGroupSource from '~/examples/field/Group.vue?raw'
 import FieldHiddenLabel from '~/examples/field/HiddenLabel.vue'
 import fieldHiddenLabelSource from '~/examples/field/HiddenLabel.vue?raw'
 import FieldLabelStart from '~/examples/field/LabelStart.vue'
 import fieldLabelStartSource from '~/examples/field/LabelStart.vue?raw'
+import FieldMeta from '~/examples/field/Meta.vue'
+import fieldMetaSource from '~/examples/field/Meta.vue?raw'
 import FieldNative from '~/examples/field/Native.vue'
 import fieldNativeSource from '~/examples/field/Native.vue?raw'
 
@@ -50,6 +54,18 @@ useDocsHead('field')
   <DocsProse keypath="field.examples.hiddenLabel.text" />
   <DocsExample stack :source="fieldHiddenLabelSource">
     <FieldHiddenLabel />
+  </DocsExample>
+
+  <h3 id="group-of-elements">{{ t('field.examples.group.title') }}</h3>
+  <DocsProse keypath="field.examples.group.text" />
+  <DocsExample stack :source="fieldGroupSource">
+    <FieldGroup />
+  </DocsExample>
+
+  <h3 id="content-beside-the-hint">{{ t('field.examples.meta.title') }}</h3>
+  <DocsProse keypath="field.examples.meta.text" />
+  <DocsExample stack :source="fieldMetaSource">
+    <FieldMeta />
   </DocsExample>
 
   <DocsApi page="field" :api="api" />

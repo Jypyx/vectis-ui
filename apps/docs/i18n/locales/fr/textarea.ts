@@ -38,6 +38,10 @@ export default {
   api: {
     VTextarea: {
       props: {
+        required:
+          'Ajoute un astérisque après le libellé et transmet <code>required</code> au champ.',
+        hideLabel: 'Masque le libellé visuellement tout en le gardant comme nom accessible.',
+        labelPosition: 'Place le libellé au-dessus du champ ou à côté.',
         size: 'Ajuste les marges internes, le texte et les icônes. <code>rows</code> fixe le nombre de lignes.',
         compact:
           'Réduit les espacements verticaux sans modifier le nombre de lignes, le texte ni les icônes.',

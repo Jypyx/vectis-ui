@@ -180,7 +180,7 @@ export const WithInputs: Story = {
     const canvas = within(canvasElement)
     // The label sits above everything else, the fields at the ends included.
     for (const slider of canvasElement.querySelectorAll('.v-slider')) {
-      const name = slider.querySelector('.v-slider-name')!.getBoundingClientRect()
+      const name = slider.querySelector('.v-field-label')!.getBoundingClientRect()
       const field = slider.querySelector('.v-slider-field')!.getBoundingClientRect()
       await expect(name.bottom).toBeLessThanOrEqual(field.top)
       await expect(name.left).toBeCloseTo(slider.getBoundingClientRect().left, 0)

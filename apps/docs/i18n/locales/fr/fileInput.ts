@@ -46,6 +46,10 @@ export default {
   api: {
     VFileInput: {
       props: {
+        required:
+          'Ajoute un astérisque après le libellé et annonce le champ comme obligatoire. Le navigateur ne le vérifie pas : validez la sélection et renseignez <code>error</code>.',
+        hideLabel: 'Masque le libellé visuellement tout en le gardant comme nom accessible.',
+        labelPosition: 'Place le libellé au-dessus du champ ou à côté.',
         multiple: 'Autorise plusieurs fichiers. Sinon, les fichiers supplémentaires sont refusés.',
         accept:
           'Types acceptés, selon la syntaxe native comme <code>image/*,.pdf</code>. Filtre les sélections et les fichiers déposés.',

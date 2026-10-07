@@ -50,9 +50,7 @@ describe('VFieldset', () => {
     const { getByRole, getAllByRole, container } = renderHarness(
       `<VFieldset legend="Plan" required v-slot="{ invalid, required }">${RADIOS}</VFieldset>`,
     )
-    expect(container.querySelector('.v-fieldset-required')!.getAttribute('aria-hidden')).toBe(
-      'true',
-    )
+    expect(container.querySelector('.v-field-required')!.getAttribute('aria-hidden')).toBe('true')
     expect(getByRole('group', { name: 'Plan' })).toBeTruthy()
     for (const radio of getAllByRole('radio')) expect(radio.hasAttribute('required')).toBe(true)
   })

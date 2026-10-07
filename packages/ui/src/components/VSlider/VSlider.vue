@@ -6,8 +6,8 @@
  */
 
 import { computed, inject, ref, watchEffect } from 'vue'
-import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
-import VTypography from '../VTypography/VTypography.vue'
+import VField from '../VField/VField.vue'
+import type { FieldControlProps, FieldLabelPosition } from '../VField/VField.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
@@ -16,7 +16,6 @@ import VNumberInput from '../VNumberInput/VNumberInput.vue'
 
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useControlShape } from '../../composables/useControlShape'
-import { useFieldIds } from '../../composables/useFieldIds'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { isDev } from '../../utils/env'
 import { clamp } from '../../utils/number'
@@ -81,6 +80,11 @@ interface SliderProps {
   /** Hides the label visually. It still names the thumbs for assistive technology. */
   hideLabel?: boolean
   /**
+   * Where the label sits: above the slider (`top`, the default), or at its start, in a column of
+   * its own, moving back above when there is not room for both.
+   */
+  labelPosition?: FieldLabelPosition
+  /**
    * A line of help under the track, stating what the numbers mean or where they may go. It
    * is tied to the slider for assistive technology, so it is read out after the name rather
    * than as part of it.
@@ -133,6 +137,7 @@ const props = withDefaults(defineProps<SliderProps>(), {
   size: 'md',
   label: undefined,
   hideLabel: false,
+  labelPosition: 'top',
   hint: undefined,
   error: undefined,
   orientation: 'horizontal',
@@ -344,15 +349,19 @@ const endValueText = computed(() => spokenText(endValue.value))
 defineOptions({ inheritAttrs: false })
 const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
-// The hint is APPENDED to whatever the consumer already pointed at rather than replacing
-// it, which is why the binding below sits after the forwarded attributes, as on every
-// other field of the design system.
-const { hintId, errorId, describedBy } = useFieldIds(
-  attrs,
-  () => !!props.hint && !props.error,
-  undefined,
-  () => !!props.error,
-)
+/**
+ * What reaches the end thumb from VField: the consumer's attributes and the description. The
+ * thumbs are named by `aria-label`, carrying the label's words, so VField's reference to the
+ * label text gives way to the consumer's own `aria-labelledby`, if any. A `required` attribute
+ * is VField's prop on the way, which group mode keeps for its asterisk: it is handed on here.
+ */
+function thumbAttrs(fieldProps: FieldControlProps): FieldControlProps {
+  return {
+    ...fieldProps,
+    'aria-labelledby': attrs['aria-labelledby'] as string | undefined,
+    required: attrs.required as true | undefined,
+  }
+}
 const isInvalid = computed(() => props.invalid || !!props.error)
 
 /**
@@ -462,153 +471,158 @@ defineExpose({
 </script>
 
 <template>
-  <div
+  <VField
+    v-bind="forwardedAttrs"
     class="v-slider"
     :class="rootClass"
-    :data-range="range ? '' : undefined"
-    :data-disabled="resolvedDisabled ? '' : undefined"
-    :data-readonly="readonly ? '' : undefined"
-    :data-invalid="isInvalid ? '' : undefined"
-    :data-size="resolvedSize"
-    :data-orientation="orientation"
-    :data-inputs="inputsPlace || undefined"
-    :style="[
-      rootStyle,
-      {
-        '--slider-start-fraction': range ? String(frac(startValue)) : undefined,
-        '--slider-end-fraction': String(frac(endValue)),
-      },
-    ]"
+    :style="rootStyle"
+    :label="label"
+    :hint="hint"
+    :error="error"
+    :disabled="resolvedDisabled"
+    :hide-label="hideLabel"
+    :label-position="labelPosition"
+    group
   >
-    <!-- Text only: the thumbs carry the same words as their accessible names. -->
-    <VTypography v-if="label && !hideLabel" as="span" variant="label" class="v-slider-name">
-      {{ label }}
-    </VTypography>
-    <VNumberInput
-      v-for="which in fieldsBefore"
-      :key="which"
-      :model-value="thumbValue(which)"
-      :class="['v-slider-field', `v-slider-field-${which}`]"
-      controls="none"
-      :format-options="formatOptions"
-      :locale="resolvedLocale"
-      :size="resolvedSize"
-      :compact="resolvedCompact"
-      :min="min"
-      :max="max"
-      :step="step"
-      :disabled="resolvedDisabled"
-      :readonly="readonly"
-      :invalid="isInvalid"
-      :aria-label="fieldLabel(which)"
-      @update:model-value="commitField(which, $event)"
-    />
-    <div class="v-slider-rail">
-      <span class="v-slider-control">
-        <span class="v-slider-track" aria-hidden="true">
-          <span class="v-slider-fill" />
-          <span
-            v-for="(tick, i) in tickPlaces"
-            :key="i"
-            class="v-slider-tick"
-            :data-filled="isFilled(tick.value) ? '' : undefined"
-            :style="tick.style"
-          />
-        </span>
-        <input
-          v-if="range"
-          type="range"
-          class="v-slider-input v-slider-input-start"
+    <!-- The label is text only: the thumbs carry the same words as their accessible names. -->
+    <template #default="{ fieldProps }">
+      <div
+        class="v-slider-body"
+        :data-range="range ? '' : undefined"
+        :data-disabled="resolvedDisabled ? '' : undefined"
+        :data-readonly="readonly ? '' : undefined"
+        :data-invalid="isInvalid ? '' : undefined"
+        :data-size="resolvedSize"
+        :data-orientation="orientation"
+        :data-inputs="inputsPlace || undefined"
+        :style="{
+          '--slider-start-fraction': range ? String(frac(startValue)) : undefined,
+          '--slider-end-fraction': String(frac(endValue)),
+        }"
+      >
+        <VNumberInput
+          v-for="which in fieldsBefore"
+          :key="which"
+          :model-value="thumbValue(which)"
+          :class="['v-slider-field', `v-slider-field-${which}`]"
+          controls="none"
+          :format-options="formatOptions"
+          :locale="resolvedLocale"
+          :size="resolvedSize"
+          :compact="resolvedCompact"
           :min="min"
           :max="max"
           :step="step"
           :disabled="resolvedDisabled"
-          :value="startValue"
-          :aria-label="startLabel"
-          :aria-valuetext="startValueText"
-          :aria-invalid="isInvalid || undefined"
-          :aria-readonly="readonly || undefined"
-          @keydown="onThumbKeydown"
-          @input="onThumbInput('start', $event)"
-          @change="onThumbChange('start', $event)"
+          :readonly="readonly"
+          :invalid="isInvalid"
+          :aria-label="fieldLabel(which)"
+          @update:model-value="commitField(which, $event)"
         />
-        <!--
+        <div class="v-slider-rail">
+          <span class="v-slider-control">
+            <span class="v-slider-track" aria-hidden="true">
+              <span class="v-slider-fill" />
+              <span
+                v-for="(tick, i) in tickPlaces"
+                :key="i"
+                class="v-slider-tick"
+                :data-filled="isFilled(tick.value) ? '' : undefined"
+                :style="tick.style"
+              />
+            </span>
+            <input
+              v-if="range"
+              type="range"
+              class="v-slider-input v-slider-input-start"
+              :min="min"
+              :max="max"
+              :step="step"
+              :disabled="resolvedDisabled"
+              :value="startValue"
+              :aria-label="startLabel"
+              :aria-valuetext="startValueText"
+              :aria-invalid="isInvalid || undefined"
+              :aria-readonly="readonly || undefined"
+              @keydown="onThumbKeydown"
+              @input="onThumbInput('start', $event)"
+              @change="onThumbChange('start', $event)"
+            />
+            <!--
           The consumer's attributes come first, so what the component decides for itself; the
           bounds, the value and the disabled state; cannot be overwritten by one of them, and so
           that an ARIA state the consumer sets is not erased by an `undefined` of ours.
           `aria-valuetext` is one of those: the component has one to say only when `labels` or
           `formatOptions` was given.
         -->
-        <input
-          ref="endThumbEl"
-          :aria-invalid="isInvalid || undefined"
-          :aria-readonly="readonly || undefined"
-          :aria-valuetext="endValueText"
-          v-bind="forwardedAttrs"
-          type="range"
-          class="v-slider-input v-slider-input-end"
+            <input
+              ref="endThumbEl"
+              :aria-invalid="isInvalid || undefined"
+              :aria-readonly="readonly || undefined"
+              :aria-valuetext="endValueText"
+              v-bind="thumbAttrs(fieldProps)"
+              type="range"
+              class="v-slider-input v-slider-input-end"
+              :min="min"
+              :max="max"
+              :step="step"
+              :disabled="resolvedDisabled"
+              :value="endValue"
+              :aria-label="thumbEndLabel"
+              @keydown="onThumbKeydown"
+              @input="onThumbInput('end', $event)"
+              @change="onThumbChange('end', $event)"
+            />
+          </span>
+          <span
+            v-if="tooltip && range"
+            class="v-slider-tooltip v-slider-tooltip-start"
+            aria-hidden="true"
+          >
+            <span class="v-slider-tooltip-bubble">{{ labelTextAt(startValue) }}</span>
+          </span>
+          <span v-if="tooltip" class="v-slider-tooltip v-slider-tooltip-end" aria-hidden="true">
+            <span class="v-slider-tooltip-bubble">{{ labelTextAt(endValue) }}</span>
+          </span>
+        </div>
+        <div v-if="labels" class="v-slider-labels">
+          <span
+            v-for="(item, i) in labels"
+            :key="i"
+            class="v-slider-label"
+            :style="stepPlaces[i]?.style"
+          >
+            <template v-if="typeof item === 'string'">{{ item }}</template>
+            <VIcon v-else v-bind="iconProps(item.icon)" :label="item.label" />
+          </span>
+        </div>
+        <VNumberInput
+          v-for="which in fieldsAfter"
+          :key="which"
+          :model-value="thumbValue(which)"
+          :class="['v-slider-field', `v-slider-field-${which}`]"
+          controls="none"
+          :format-options="formatOptions"
+          :locale="resolvedLocale"
+          :size="resolvedSize"
+          :compact="resolvedCompact"
           :min="min"
           :max="max"
           :step="step"
           :disabled="resolvedDisabled"
-          :value="endValue"
-          :aria-label="thumbEndLabel"
-          :aria-describedby="describedBy"
-          @keydown="onThumbKeydown"
-          @input="onThumbInput('end', $event)"
-          @change="onThumbChange('end', $event)"
+          :readonly="readonly"
+          :invalid="isInvalid"
+          :aria-label="fieldLabel(which)"
+          @update:model-value="commitField(which, $event)"
         />
-      </span>
-      <span
-        v-if="tooltip && range"
-        class="v-slider-tooltip v-slider-tooltip-start"
-        aria-hidden="true"
-      >
-        <span class="v-slider-tooltip-bubble">{{ labelTextAt(startValue) }}</span>
-      </span>
-      <span v-if="tooltip" class="v-slider-tooltip v-slider-tooltip-end" aria-hidden="true">
-        <span class="v-slider-tooltip-bubble">{{ labelTextAt(endValue) }}</span>
-      </span>
-    </div>
-    <div v-if="labels" class="v-slider-labels">
-      <span
-        v-for="(item, i) in labels"
-        :key="i"
-        class="v-slider-label"
-        :style="stepPlaces[i]?.style"
-      >
-        <template v-if="typeof item === 'string'">{{ item }}</template>
-        <VIcon v-else v-bind="iconProps(item.icon)" :label="item.label" />
-      </span>
-    </div>
-    <VNumberInput
-      v-for="which in fieldsAfter"
-      :key="which"
-      :model-value="thumbValue(which)"
-      :class="['v-slider-field', `v-slider-field-${which}`]"
-      controls="none"
-      :format-options="formatOptions"
-      :locale="resolvedLocale"
-      :size="resolvedSize"
-      :compact="resolvedCompact"
-      :min="min"
-      :max="max"
-      :step="step"
-      :disabled="resolvedDisabled"
-      :readonly="readonly"
-      :invalid="isInvalid"
-      :aria-label="fieldLabel(which)"
-      @update:model-value="commitField(which, $event)"
-    />
-    <span v-if="error" :id="errorId" class="v-field-error v-slider-error">{{ error }}</span>
-    <span v-else-if="hint" :id="hintId" class="v-slider-hint">{{ hint }}</span>
-    <VFieldAnnouncer :text="error" />
-  </div>
+      </div>
+    </template>
+  </VField>
 </template>
 
 <style>
 @layer vectis.components {
-  .v-slider {
+  .v-slider-body {
     --slider-thumb: var(--vectis-control-size-slider-thumb);
     --slider-track: var(--vectis-control-size-slider-track);
     display: grid;
@@ -627,43 +641,43 @@ defineExpose({
    * never on source order: `[data-inputs='ends'][data-range]:has(.v-slider-labels)` is (0,4,0)
    * against the (0,3,0) of the two it builds on. `:has()` weighs its argument.
    */
-  .v-slider:has(.v-slider-labels) {
+  .v-slider-body:has(.v-slider-labels) {
     grid-template-areas: 'rail' 'labels';
   }
 
-  .v-slider[data-inputs='ends'] {
+  .v-slider-body[data-inputs='ends'] {
     grid-template-areas: 'rail field-end';
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .v-slider[data-inputs='ends']:has(.v-slider-labels) {
+  .v-slider-body[data-inputs='ends']:has(.v-slider-labels) {
     grid-template-areas: 'rail field-end' 'labels .';
   }
 
-  .v-slider[data-inputs='ends'][data-range] {
+  .v-slider-body[data-inputs='ends'][data-range] {
     grid-template-areas: 'field-start rail field-end';
     grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
-  .v-slider[data-inputs='ends'][data-range]:has(.v-slider-labels) {
+  .v-slider-body[data-inputs='ends'][data-range]:has(.v-slider-labels) {
     grid-template-areas: 'field-start rail field-end' '. labels .';
   }
 
-  .v-slider[data-inputs='top'] {
+  .v-slider-body[data-inputs='top'] {
     grid-template-areas: 'field-start . field-end' 'rail rail rail';
     grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
-  .v-slider[data-inputs='top']:has(.v-slider-labels) {
+  .v-slider-body[data-inputs='top']:has(.v-slider-labels) {
     grid-template-areas: 'field-start . field-end' 'rail rail rail' 'labels labels labels';
   }
 
-  .v-slider[data-inputs='bottom'] {
+  .v-slider-body[data-inputs='bottom'] {
     grid-template-areas: 'rail rail rail' 'field-start . field-end';
     grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
-  .v-slider[data-inputs='bottom']:has(.v-slider-labels) {
+  .v-slider-body[data-inputs='bottom']:has(.v-slider-labels) {
     grid-template-areas: 'rail rail rail' 'labels labels labels' 'field-start . field-end';
   }
 
@@ -714,7 +728,7 @@ defineExpose({
     background: var(--vectis-color-accent);
   }
 
-  .v-slider[data-range] .v-slider-fill {
+  .v-slider-body[data-range] .v-slider-fill {
     --fill-fraction: var(--slider-start-fraction);
     inset-inline-start: var(--slider-at);
     inline-size: calc(
@@ -767,7 +781,7 @@ defineExpose({
    * once, natively and with no code at all. The accepted side effect is that the thumb lights
    * up when the pointer is anywhere over the track.
    */
-  .v-slider:not([data-range]) .v-slider-input {
+  .v-slider-body:not([data-range]) .v-slider-input {
     pointer-events: auto;
     cursor: pointer;
   }
@@ -826,22 +840,22 @@ defineExpose({
     outline: none;
   }
 
-  .v-slider[data-readonly] .v-slider-input {
+  .v-slider-body[data-readonly] .v-slider-input {
     --slider-thumb-bg: var(--vectis-color-surface);
     --slider-thumb-border: var(--vectis-color-text-muted);
     --slider-thumb-cursor: default;
     cursor: default;
   }
 
-  .v-slider[data-readonly] .v-slider-fill {
+  .v-slider-body[data-readonly] .v-slider-fill {
     background: var(--vectis-color-text-muted);
   }
 
-  .v-slider[data-readonly] .v-slider-tick[data-filled] {
+  .v-slider-body[data-readonly] .v-slider-tick[data-filled] {
     background: var(--vectis-color-surface);
   }
 
-  .v-slider[data-invalid] .v-slider-input {
+  .v-slider-body[data-invalid] .v-slider-input {
     --slider-thumb-border: var(--vectis-color-danger);
   }
 
@@ -872,10 +886,10 @@ defineExpose({
     --fill-fraction: var(--slider-end-fraction);
   }
 
-  .v-slider:has(.v-slider-input-start:active) .v-slider-tooltip-start,
-  .v-slider:has(.v-slider-input-start:focus-visible) .v-slider-tooltip-start,
-  .v-slider:has(.v-slider-input-end:active) .v-slider-tooltip-end,
-  .v-slider:has(.v-slider-input-end:focus-visible) .v-slider-tooltip-end {
+  .v-slider-body:has(.v-slider-input-start:active) .v-slider-tooltip-start,
+  .v-slider-body:has(.v-slider-input-start:focus-visible) .v-slider-tooltip-start,
+  .v-slider-body:has(.v-slider-input-end:active) .v-slider-tooltip-end,
+  .v-slider-body:has(.v-slider-input-end:focus-visible) .v-slider-tooltip-end {
     opacity: 1;
     visibility: visible;
   }
@@ -921,34 +935,6 @@ defineExpose({
     white-space: nowrap;
   }
 
-  /* The hint takes no area of its own: it spans every column and is AUTO-PLACED, which
-     drops it into an implicit row under whichever zone template is in force.
-     Given a row in each of them instead, the `row-gap` would open under every slider that
-     has no hint at all. */
-  .v-slider-hint {
-    grid-column: 1 / -1;
-    font-size: var(--vectis-text-caption-size);
-    line-height: var(--vectis-text-caption-leading);
-    color: var(--vectis-color-text-muted);
-  }
-
-  .v-slider-error {
-    grid-column: 1 / -1;
-  }
-
-  /*
-   * Placed in an implicit row BEFORE the explicit grid, ending on its first line: it lands on top
-   * whichever zone template is in force, without a row of its own in each of them.
-   */
-  .v-slider-name {
-    grid-row: span 1 / 1;
-    grid-column: 1 / -1;
-  }
-
-  .v-slider[data-disabled] :is(.v-slider-hint, .v-slider-name) {
-    color: var(--vectis-color-text-subtle);
-  }
-
   .v-slider-field.v-input {
     inline-size: var(--vectis-control-size-slider-field);
   }
@@ -962,34 +948,36 @@ defineExpose({
     grid-area: field-end;
   }
 
-  .v-slider[data-orientation='vertical'] {
+  .v-slider-body[data-orientation='vertical'] {
     grid-template-areas: 'rail';
     grid-template-columns: none;
     inline-size: fit-content;
     justify-items: center;
   }
 
-  .v-slider[data-orientation='vertical']:has(.v-slider-labels) {
+  .v-slider-body[data-orientation='vertical']:has(.v-slider-labels) {
     grid-template-areas: 'rail labels';
     grid-template-columns: auto auto;
   }
 
-  .v-slider[data-orientation='vertical'][data-inputs='ends'] {
+  .v-slider-body[data-orientation='vertical'][data-inputs='ends'] {
     grid-template-areas: 'field-end' 'rail';
     grid-template-columns: none;
   }
 
-  .v-slider[data-orientation='vertical'][data-inputs='ends']:has(.v-slider-labels) {
+  .v-slider-body[data-orientation='vertical'][data-inputs='ends']:has(.v-slider-labels) {
     grid-template-areas: 'field-end .' 'rail labels';
     grid-template-columns: auto auto;
   }
 
-  .v-slider[data-orientation='vertical'][data-inputs='ends'][data-range] {
+  .v-slider-body[data-orientation='vertical'][data-inputs='ends'][data-range] {
     grid-template-areas: 'field-end' 'rail' 'field-start';
     grid-template-columns: none;
   }
 
-  .v-slider[data-orientation='vertical'][data-inputs='ends'][data-range]:has(.v-slider-labels) {
+  .v-slider-body[data-orientation='vertical'][data-inputs='ends'][data-range]:has(
+      .v-slider-labels
+    ) {
     grid-template-areas: 'field-end .' 'rail labels' 'field-start .';
     grid-template-columns: auto auto;
   }
@@ -1000,13 +988,13 @@ defineExpose({
    * field with its bottom, where the values they hold sit. The track spans the three rows and
    * gives them their height, the middle one taking whatever the fields leave.
    */
-  .v-slider[data-orientation='vertical'][data-inputs='top'] {
+  .v-slider-body[data-orientation='vertical'][data-inputs='top'] {
     grid-template-areas: 'field-end rail' '. rail' 'field-start rail';
     grid-template-columns: auto auto;
     grid-template-rows: auto 1fr auto;
   }
 
-  .v-slider[data-orientation='vertical'][data-inputs='top']:has(.v-slider-labels) {
+  .v-slider-body[data-orientation='vertical'][data-inputs='top']:has(.v-slider-labels) {
     grid-template-areas:
       'field-end rail labels'
       '. rail labels'
@@ -1014,13 +1002,13 @@ defineExpose({
     grid-template-columns: auto auto auto;
   }
 
-  .v-slider[data-orientation='vertical'][data-inputs='bottom'] {
+  .v-slider-body[data-orientation='vertical'][data-inputs='bottom'] {
     grid-template-areas: 'rail field-end' 'rail .' 'rail field-start';
     grid-template-columns: auto auto;
     grid-template-rows: auto 1fr auto;
   }
 
-  .v-slider[data-orientation='vertical'][data-inputs='bottom']:has(.v-slider-labels) {
+  .v-slider-body[data-orientation='vertical'][data-inputs='bottom']:has(.v-slider-labels) {
     grid-template-areas:
       'rail labels field-end'
       'rail labels .'
@@ -1028,7 +1016,7 @@ defineExpose({
     grid-template-columns: auto auto auto;
   }
 
-  .v-slider[data-orientation='vertical'] .v-slider-rail {
+  .v-slider-body[data-orientation='vertical'] .v-slider-rail {
     inline-size: var(--slider-thumb);
     block-size: var(--vectis-control-size-slider-length);
   }
@@ -1037,12 +1025,12 @@ defineExpose({
    * Rotate only the track box and reverse its direction; labels remain horizontal and the
    * minimum value stays at the bottom.
    */
-  .v-slider[data-orientation='vertical'] .v-slider-control {
+  .v-slider-body[data-orientation='vertical'] .v-slider-control {
     writing-mode: vertical-lr;
     direction: rtl;
   }
 
-  .v-slider[data-orientation='vertical'] .v-slider-tooltip {
+  .v-slider-body[data-orientation='vertical'] .v-slider-tooltip {
     inset-block-end: var(--slider-at);
     inset-inline-start: auto;
     inset-inline-end: calc(100% + var(--vectis-space-2));
@@ -1052,12 +1040,12 @@ defineExpose({
     justify-content: flex-end;
   }
 
-  .v-slider[data-orientation='vertical'] .v-slider-labels {
+  .v-slider-body[data-orientation='vertical'] .v-slider-labels {
     align-self: stretch;
     min-block-size: auto;
   }
 
-  .v-slider[data-orientation='vertical'] .v-slider-label {
+  .v-slider-body[data-orientation='vertical'] .v-slider-label {
     inset-block-start: auto;
     inset-block-end: var(--slider-at);
     inset-inline-start: 0;
@@ -1072,19 +1060,19 @@ defineExpose({
    * use, and never through opacity. It comes last among the states, so a slider both disabled
    * and read-only or invalid is drawn disabled.
    */
-  .v-slider[data-disabled] {
+  .v-slider-body[data-disabled] {
     cursor: not-allowed;
   }
 
-  .v-slider[data-disabled] .v-slider-track {
+  .v-slider-body[data-disabled] .v-slider-track {
     background: var(--vectis-color-surface-muted);
   }
 
-  .v-slider[data-disabled] .v-slider-fill {
+  .v-slider-body[data-disabled] .v-slider-fill {
     background: var(--vectis-color-text-subtle);
   }
 
-  .v-slider[data-disabled] .v-slider-tick {
+  .v-slider-body[data-disabled] .v-slider-tick {
     background: var(--vectis-color-text-subtle);
   }
 
@@ -1092,15 +1080,15 @@ defineExpose({
    * A tick sitting on the greyed fill takes the light colour back, so that it stays visible
    * against it; the same inversion VCheckbox applies to its disabled tick.
    */
-  .v-slider[data-disabled] .v-slider-tick[data-filled] {
+  .v-slider-body[data-disabled] .v-slider-tick[data-filled] {
     background: var(--vectis-color-surface-muted);
   }
 
-  .v-slider[data-disabled] .v-slider-labels {
+  .v-slider-body[data-disabled] .v-slider-labels {
     color: var(--vectis-color-text-subtle);
   }
 
-  .v-slider[data-disabled] .v-slider-input {
+  .v-slider-body[data-disabled] .v-slider-input {
     --slider-thumb-bg: var(--vectis-color-surface-muted);
     --slider-thumb-border: var(--vectis-color-text-subtle);
     --slider-thumb-shadow: none;
@@ -1113,43 +1101,43 @@ defineExpose({
    * system Highlight/HighlightText for selected portions.
    */
   @media (forced-colors: active) {
-    .v-slider .v-slider-track {
+    .v-slider-body .v-slider-track {
       forced-color-adjust: none;
       background: Canvas;
       box-shadow: inset 0 0 0 var(--vectis-control-border-width) CanvasText;
     }
 
-    .v-slider .v-slider-fill {
+    .v-slider-body .v-slider-fill {
       forced-color-adjust: none;
       background: Highlight;
     }
 
-    .v-slider .v-slider-tick {
+    .v-slider-body .v-slider-tick {
       forced-color-adjust: none;
       background: CanvasText;
     }
 
-    .v-slider .v-slider-tick[data-filled] {
+    .v-slider-body .v-slider-tick[data-filled] {
       background: HighlightText;
     }
 
-    .v-slider .v-slider-input {
+    .v-slider-body .v-slider-input {
       forced-color-adjust: none;
       --slider-thumb-bg: Canvas;
       --slider-thumb-border: CanvasText;
       --slider-thumb-shadow: none;
     }
 
-    .v-slider[data-disabled] .v-slider-track {
+    .v-slider-body[data-disabled] .v-slider-track {
       box-shadow: inset 0 0 0 var(--vectis-control-border-width) GrayText;
     }
 
-    .v-slider[data-disabled] .v-slider-fill,
-    .v-slider[data-disabled] .v-slider-tick {
+    .v-slider-body[data-disabled] .v-slider-fill,
+    .v-slider-body[data-disabled] .v-slider-tick {
       background: GrayText;
     }
 
-    .v-slider[data-disabled] .v-slider-input {
+    .v-slider-body[data-disabled] .v-slider-input {
       --slider-thumb-border: GrayText;
     }
   }

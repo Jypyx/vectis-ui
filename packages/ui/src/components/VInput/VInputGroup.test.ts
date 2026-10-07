@@ -14,18 +14,23 @@ import VTextarea from '../VTextarea/VTextarea.vue'
 import VTimeInput from '../VTimeInput/VTimeInput.vue'
 import VTooltip from '../VTooltip/VTooltip.vue'
 
-/** The group's root, which is also the element every consumer attribute lands on. */
+/** The group's root, which keeps `class` and `style`. */
 const root = (container: Element) => container.querySelector('.v-input-group') as HTMLElement
 
+/** The row, which carries the `group` role and every other consumer attribute. */
+const row = (container: Element) => container.querySelector('.v-input-group-row') as HTMLElement
+
 /** The `.v-input` roots in render order, where each resolved prop shows up. */
-const fields = (container: Element) => [...container.querySelectorAll<HTMLElement>('.v-input')]
+const fields = (container: Element) => [
+  ...container.querySelectorAll<HTMLElement>('.v-input-field'),
+]
 
 describe('VInputGroup', () => {
   it('renders a role="group" holding a row', () => {
     const { container, getByRole } = render(VInputGroup, {
       slots: { default: () => h(VInput) },
     })
-    expect(getByRole('group')).toBe(root(container))
+    expect(getByRole('group')).toBe(row(container))
     expect(container.querySelector('.v-input-group-row')).toBeTruthy()
   })
 
@@ -34,8 +39,9 @@ describe('VInputGroup', () => {
       slots: { default: () => [h(VInput), h(VInput)] },
     })
     const row = container.querySelector('.v-input-group-row') as HTMLElement
-    expect(fields(container)).toHaveLength(2)
-    for (const field of fields(container)) expect(field.parentElement).toBe(row)
+    expect([...container.querySelectorAll('.v-input')]).toHaveLength(2)
+    for (const field of [...container.querySelectorAll('.v-input')])
+      expect(field.parentElement).toBe(row)
   })
 
   it('the root carries neither v-control nor data-size', () => {
@@ -53,16 +59,16 @@ describe('VInputGroup', () => {
         props: { label: 'Phone' },
         slots: { default: () => h(VInput) },
       })
-      const labels = container.querySelectorAll('.v-input-group-label')
+      const labels = container.querySelectorAll('.v-field-label')
       expect(labels).toHaveLength(1)
       expect(labels[0]!.tagName).toBe('SPAN')
-      expect(root(container).getAttribute('aria-labelledby')).toBe(labels[0]!.id)
+      expect(row(container).getAttribute('aria-labelledby')).toBe(labels[0]!.id)
     })
 
     it('no label: nothing is named and no aria-labelledby is emitted', () => {
       const { container } = render(VInputGroup, { slots: { default: () => h(VInput) } })
-      expect(container.querySelector('.v-input-group-label')).toBeNull()
-      expect(root(container).hasAttribute('aria-labelledby')).toBe(false)
+      expect(container.querySelector('.v-field-label')).toBeNull()
+      expect(row(container).hasAttribute('aria-labelledby')).toBe(false)
     })
 
     it('an empty label or hint renders nothing and points at nothing', () => {
@@ -70,8 +76,8 @@ describe('VInputGroup', () => {
         props: { label: '', hint: '' },
         slots: { default: () => h(VInput) },
       })
-      expect(root(container).hasAttribute('aria-labelledby')).toBe(false)
-      expect(root(container).hasAttribute('aria-describedby')).toBe(false)
+      expect(row(container).hasAttribute('aria-labelledby')).toBe(false)
+      expect(row(container).hasAttribute('aria-describedby')).toBe(false)
     })
 
     // Aria-labelledby wins over aria-label in the name computation, so emitting ours on top of
@@ -82,8 +88,8 @@ describe('VInputGroup', () => {
         attrs: { 'aria-label': 'Contact number' },
         slots: { default: () => h(VInput) },
       })
-      expect(root(container).hasAttribute('aria-labelledby')).toBe(false)
-      expect(root(container).getAttribute('aria-label')).toBe('Contact number')
+      expect(row(container).hasAttribute('aria-labelledby')).toBe(false)
+      expect(row(container).getAttribute('aria-label')).toBe('Contact number')
     })
 
     it('a consumer aria-labelledby holds ours back too', () => {
@@ -92,7 +98,7 @@ describe('VInputGroup', () => {
         attrs: { 'aria-labelledby': 'outside' },
         slots: { default: () => h(VInput) },
       })
-      expect(root(container).getAttribute('aria-labelledby')).toBe('outside')
+      expect(row(container).getAttribute('aria-labelledby')).toBe('outside')
     })
 
     it('renders the hint once and points aria-describedby at it', () => {
@@ -100,9 +106,9 @@ describe('VInputGroup', () => {
         props: { hint: 'Include the country code' },
         slots: { default: () => h(VInput) },
       })
-      const hints = container.querySelectorAll('.v-input-group-hint')
+      const hints = container.querySelectorAll('.v-field-hint')
       expect(hints).toHaveLength(1)
-      expect(root(container).getAttribute('aria-describedby')).toBe(hints[0]!.id)
+      expect(row(container).getAttribute('aria-describedby')).toBe(hints[0]!.id)
     })
 
     // Aria-describedby is a LIST: the hint is ADDED to whatever the consumer pointed at. Left
@@ -113,8 +119,8 @@ describe('VInputGroup', () => {
         attrs: { 'aria-describedby': 'outside' },
         slots: { default: () => h(VInput) },
       })
-      const hintId = (container.querySelector('.v-input-group-hint') as HTMLElement).id
-      expect(root(container).getAttribute('aria-describedby')).toBe(`outside ${hintId}`)
+      const hintId = (container.querySelector('.v-field-hint') as HTMLElement).id
+      expect(row(container).getAttribute('aria-describedby')).toBe(`outside ${hintId}`)
     })
 
     it('two groups on the page do not share their ids', () => {
@@ -127,7 +133,7 @@ describe('VInputGroup', () => {
           </div>
         `,
       })
-      const [a, b] = [...container.querySelectorAll<HTMLElement>('.v-input-group')] as [
+      const [a, b] = [...container.querySelectorAll<HTMLElement>('.v-input-group-row')] as [
         HTMLElement,
         HTMLElement,
       ]
@@ -146,13 +152,13 @@ describe('VInputGroup', () => {
       expect(root(container).style.marginTop).toBe('4px')
     })
 
-    it('other native attributes land on the root too', () => {
+    it('other native attributes land on the row', () => {
       const { container } = render(VInputGroup, {
         attrs: { id: 'phone-row', 'data-testid': 'row' },
         slots: { default: () => h(VInput) },
       })
-      expect(root(container).id).toBe('phone-row')
-      expect(root(container).dataset.testid).toBe('row')
+      expect(row(container).id).toBe('phone-row')
+      expect(row(container).dataset.testid).toBe('row')
     })
   })
 
@@ -294,7 +300,7 @@ describe('VInputGroup', () => {
         props: { size: 'lg' },
         slots: { default: () => h(VTextarea, { size: 'sm' }) },
       })
-      expect((container.querySelector('.v-textarea') as HTMLElement).dataset.size).toBe('sm')
+      expect((container.querySelector('.v-textarea-field') as HTMLElement).dataset.size).toBe('sm')
     })
   })
 

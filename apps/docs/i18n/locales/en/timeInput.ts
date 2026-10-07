@@ -46,6 +46,9 @@ export default {
   api: {
     VTimeInput: {
       props: {
+        required: 'Adds an asterisk after the label and passes <code>required</code> to the field.',
+        hideLabel: 'Hides the label visually while keeping it as the accessible name.',
+        labelPosition: 'Places the label above the field or beside it.',
         format: '12- or 24-hour display. Defaults to the locale; the model always uses 24 hours.',
         mode: 'Typed input, clock-only picker or searchable time list.',
         showPicker:
