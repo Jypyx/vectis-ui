@@ -230,6 +230,18 @@ html {
   margin-inline: auto;
 }
 
+/* The home page's section heads. The overline above each heading is the one accent it wears. */
+.vd-section-head {
+  display: grid;
+  gap: var(--vectis-space-3);
+  margin-block-end: var(--vectis-space-8);
+}
+.vd-eyebrow {
+  color: var(--vectis-color-accent-text);
+}
+.vd-showcase-cta {
+  margin-block-start: var(--vectis-space-5);
+}
 /* minmax(0, 1fr) lets the figures shrink below their intrinsic width on narrow screens. */
 .vd-proof {
   display: grid;
@@ -270,6 +282,19 @@ html {
   inline-size: 40px;
   block-size: 40px;
   object-fit: contain;
+}
+.vd-cta {
+  display: grid;
+  gap: var(--vectis-space-4);
+  padding: var(--vectis-space-9) var(--vectis-space-5);
+  border: 1px solid var(--vectis-color-accent-border);
+  border-radius: var(--vectis-radius-overlay);
+  background:
+    radial-gradient(120% 140% at 50% 0%, var(--vectis-color-accent-surface), transparent 70%),
+    var(--vectis-color-surface-raised);
+}
+.vd-cta > .vd-actions {
+  margin-block-start: var(--vectis-space-3);
 }
 .vd-grid-3 {
   display: grid;

@@ -261,6 +261,10 @@ function invite() {
   display: grid;
   gap: var(--vectis-space-4);
 }
+/* A stretched choice spreads its `auto auto` columns apart; keep it at its own width. */
+.tp-stack > .v-choice {
+  justify-self: start;
+}
 .tp-syncing,
 .tp-owner {
   display: inline-flex;

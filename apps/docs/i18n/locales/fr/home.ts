@@ -6,6 +6,13 @@ export default {
   heroReleaseNotes: 'Notes de version',
   heroCta: 'Installer la bibliothèque',
   heroThemeCta: 'Personnaliser le thème',
+  showcaseEyebrow: 'Composants',
+  showcaseHeading: 'De vrais composants, thémés par des tokens',
+  showcaseSubtitle:
+    'Tout ce qui se trouve dans cette fenêtre est interactif. Choisissez un accent pour la repeindre avec les seuls tokens CSS.',
+  showcaseAccent: 'Couleur d’accent',
+  showcaseCta: 'Créer votre thème',
+  standardsEyebrow: 'Principes',
   standardsHeading: 'Les standards du Web comme base',
   standardsSubtitle:
     'Les composants utilisent le HTML sémantique, les API natives du navigateur et les couches CSS. Vue est la seule dépendance à l’exécution.',
@@ -26,6 +33,7 @@ export default {
   iconsTitle: 'Choix des icônes',
   iconsBody:
     'Utilisez les icônes intégrées ou fournissez des tracés SVG, des images, des composants ou des polices d’icônes.',
+  accessibilityEyebrow: 'Accessibilité',
   accessibilityHeading: 'Clavier et lecteurs d’écran',
   accessibilitySubtitle:
     'Les composants gèrent les interactions au clavier, les états ARIA et la réduction des animations. Des tests axe automatisés couvrent les deux thèmes.',
@@ -35,6 +43,7 @@ export default {
   a11yContrastNote: 'minimum WCAG 2 AA pour le texte courant',
   a11yFocusLabel: 'indicateurs de focus',
   a11yFocusNote: 'visibles sur chaque contrôle',
+  installEyebrow: 'Démarrer',
   installHeading: 'Installer, importer, utiliser',
   installSubtitle: 'Installez le paquet, chargez les styles globaux et importez vos composants.',
   installTabsLabel: 'Étapes d’installation',
@@ -44,4 +53,6 @@ export default {
   stepStylesBody: 'Importez les styles globaux au point d’entrée de votre application.',
   stepUseLabel: 'Utilisation',
   stepUseBody: 'Importez les composants nécessaires.',
+  ctaHeading: 'Commencez à construire avec Vectis UI',
+  ctaBody: 'Installez le paquet, ou façonnez d’abord un thème et copiez ses tokens.',
 }

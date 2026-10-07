@@ -7,6 +7,13 @@ export default {
   heroReleaseNotes: 'Release notes',
   heroCta: 'Install the library',
   heroThemeCta: 'Customise theme',
+  showcaseEyebrow: 'Components',
+  showcaseHeading: 'Real components, themed by tokens',
+  showcaseSubtitle:
+    'Everything in this window is live. Pick an accent to repaint it with CSS tokens alone.',
+  showcaseAccent: 'Accent colour',
+  showcaseCta: 'Build your own theme',
+  standardsEyebrow: 'Principles',
   standardsHeading: 'Built on web standards',
   standardsSubtitle:
     'Components use semantic HTML, native browser APIs and CSS layers. Vue is the only runtime dependency.',
@@ -26,6 +33,7 @@ export default {
   ssrBody: 'Components support server-side rendering in Vue and Nuxt applications.',
   iconsTitle: 'Your choice of icons',
   iconsBody: 'Use the built-in icons or provide SVG paths, images, components or icon fonts.',
+  accessibilityEyebrow: 'Accessibility',
   accessibilityHeading: 'Keyboard and screen reader support',
   accessibilitySubtitle:
     'Components include keyboard interactions, ARIA states and reduced-motion styles. Automated axe checks run in both themes.',
@@ -35,6 +43,7 @@ export default {
   a11yContrastNote: 'WCAG 2 AA minimum for normal text',
   a11yFocusLabel: 'focus indicators',
   a11yFocusNote: 'visible on every control',
+  installEyebrow: 'Get started',
   installHeading: 'Install, import, use',
   installSubtitle: 'Install the package, load the global styles and import your components.',
   installTabsLabel: 'Installation steps',
@@ -45,4 +54,6 @@ export default {
   stepStylesBody: "Import the global styles in your application's entry point.",
   stepUseLabel: 'Usage',
   stepUseBody: 'Import the components you need.',
+  ctaHeading: 'Start building with Vectis UI',
+  ctaBody: 'Install the package, or shape a theme first and copy its tokens.',
 }

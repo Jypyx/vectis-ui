@@ -275,49 +275,85 @@ const installStep = ref<string>(STEPS[0]!.value)
     </div>
 
     <!--
-      The section title is deliberately MONOCHROME. The accent span belongs to the hero headline
-      alone, and repeating it down the page would spend the signal it carries.
+      Section headings stay MONOCHROME: the accent span belongs to the hero headline alone, and
+      repeating it down the page would spend the signal it carries. The small overline above
+      each heading is the only accent a section wears.
     -->
-    <section>
-      <div class="vd-limit vd-band vd-centered">
-        <VTypography variant="heading-1" as="h2" class="vd-stack-sm">
-          {{ t('home.standardsHeading') }}
+    <section class="vd-limit vd-band">
+      <div class="vd-section-head vd-centered">
+        <VTypography variant="overline" as="p" class="vd-eyebrow">
+          {{ t('home.showcaseEyebrow') }}
         </VTypography>
+        <VTypography variant="heading-1" as="h2">{{ t('home.showcaseHeading') }}</VTypography>
+        <DocsProse
+          keypath="home.showcaseSubtitle"
+          variant="body-lg"
+          tone="muted"
+          class="vd-measure"
+        />
+      </div>
+      <HomeShowcase />
+      <div class="vd-actions vd-hero-actions vd-showcase-cta">
+        <NuxtLink :to="themePath" custom>
+          <template #default="{ href, navigate }">
+            <VButton
+              variant="ghost"
+              tone="accent"
+              :icon-end="arrowRightAltIcon"
+              :href="href ?? undefined"
+              @click="navigate"
+            >
+              {{ t('home.showcaseCta') }}
+            </VButton>
+          </template>
+        </NuxtLink>
+      </div>
+    </section>
+
+    <section class="vd-limit vd-band">
+      <div class="vd-section-head vd-centered">
+        <VTypography variant="overline" as="p" class="vd-eyebrow">
+          {{ t('home.standardsEyebrow') }}
+        </VTypography>
+        <VTypography variant="heading-1" as="h2">{{ t('home.standardsHeading') }}</VTypography>
         <DocsProse
           keypath="home.standardsSubtitle"
           variant="body-lg"
           tone="muted"
-          class="vd-measure vd-stack-lg"
+          class="vd-measure"
         />
-        <div class="vd-grid-3">
-          <article
-            v-for="card in cards"
-            :key="card.title"
-            class="vd-home-card"
-            :data-accent="card.accent"
-            @pointermove="onCardPointerMove"
-            @pointerleave="onCardPointerLeave"
-          >
-            <VIcon :name="card.icon" :size="32" class="vd-card-icon" />
-            <VTypography variant="heading-3" as="h3" class="vd-stack-sm">
-              {{ t(card.title) }}
-            </VTypography>
-            <DocsProse :keypath="card.body" variant="body-md" tone="muted" />
-          </article>
-        </div>
+      </div>
+      <div class="vd-grid-3">
+        <article
+          v-for="card in cards"
+          :key="card.title"
+          class="vd-home-card"
+          :data-accent="card.accent"
+          @pointermove="onCardPointerMove"
+          @pointerleave="onCardPointerLeave"
+        >
+          <span class="vd-card-icon">
+            <VIcon :name="card.icon" :size="24" />
+          </span>
+          <VTypography variant="heading-4" as="h3">{{ t(card.title) }}</VTypography>
+          <DocsProse :keypath="card.body" variant="body-md" tone="muted" />
+        </article>
       </div>
     </section>
 
     <section class="vd-limit vd-band vd-centered">
-      <VTypography variant="heading-1" as="h2" class="vd-stack-sm">
-        {{ t('home.accessibilityHeading') }}
-      </VTypography>
-      <DocsProse
-        keypath="home.accessibilitySubtitle"
-        variant="body-lg"
-        tone="muted"
-        class="vd-measure vd-stack-lg"
-      />
+      <div class="vd-section-head">
+        <VTypography variant="overline" as="p" class="vd-eyebrow">
+          {{ t('home.accessibilityEyebrow') }}
+        </VTypography>
+        <VTypography variant="heading-1" as="h2">{{ t('home.accessibilityHeading') }}</VTypography>
+        <DocsProse
+          keypath="home.accessibilitySubtitle"
+          variant="body-lg"
+          tone="muted"
+          class="vd-measure"
+        />
+      </div>
       <!--
         Evidence rather than claims: three measures, and nothing arguing for them. What this
         band can say that no other design system's landing page can is that its accessibility is
@@ -347,15 +383,18 @@ const installStep = ref<string>(STEPS[0]!.value)
     </section>
 
     <section class="vd-limit vd-band vd-centered">
-      <VTypography variant="heading-1" as="h2" class="vd-stack-sm">
-        {{ t('home.installHeading') }}
-      </VTypography>
-      <DocsProse
-        keypath="home.installSubtitle"
-        variant="body-lg"
-        tone="muted"
-        class="vd-measure vd-stack-lg"
-      />
+      <div class="vd-section-head">
+        <VTypography variant="overline" as="p" class="vd-eyebrow">
+          {{ t('home.installEyebrow') }}
+        </VTypography>
+        <VTypography variant="heading-1" as="h2">{{ t('home.installHeading') }}</VTypography>
+        <DocsProse
+          keypath="home.installSubtitle"
+          variant="body-lg"
+          tone="muted"
+          class="vd-measure"
+        />
+      </div>
       <!--
         `align="center"` keeps the tabs at their own width, centred; and the rule still runs the
         full width, because the VTabs variant draws it on the BAR while `align` only centres the
@@ -409,6 +448,43 @@ const installStep = ref<string>(STEPS[0]!.value)
         </VTabs>
       </div>
     </section>
+
+    <section class="vd-limit vd-band">
+      <div class="vd-cta vd-centered">
+        <VTypography variant="heading-1" as="h2">{{ t('home.ctaHeading') }}</VTypography>
+        <DocsProse keypath="home.ctaBody" variant="body-lg" tone="muted" class="vd-measure" />
+        <div class="vd-actions vd-hero-actions">
+          <NuxtLink :to="docsHome" custom>
+            <template #default="{ href, navigate }">
+              <VButton
+                variant="solid"
+                tone="accent"
+                size="lg"
+                :icon-end="arrowRightAltIcon"
+                :href="href ?? undefined"
+                @click="navigate"
+              >
+                {{ t('home.heroCta') }}
+              </VButton>
+            </template>
+          </NuxtLink>
+          <NuxtLink :to="themePath" custom>
+            <template #default="{ href, navigate }">
+              <VButton
+                variant="outline"
+                tone="neutral"
+                size="lg"
+                icon-start="palette"
+                :href="href ?? undefined"
+                @click="navigate"
+              >
+                {{ t('home.heroThemeCta') }}
+              </VButton>
+            </template>
+          </NuxtLink>
+        </div>
+      </div>
+    </section>
   </main>
 </template>
 
@@ -454,6 +530,9 @@ const installStep = ref<string>(STEPS[0]!.value)
   --vd-line-c: 0.19;
 
   position: relative;
+  display: grid;
+  gap: var(--vectis-space-2);
+  align-content: start;
   padding: var(--vectis-space-6);
   border: 1px solid var(--vectis-color-border);
   border-radius: var(--vectis-radius-surface);
@@ -497,14 +576,18 @@ const installStep = ref<string>(STEPS[0]!.value)
 }
 
 /*
- * The icon is MONOCHROME, and it is the page's own text colour rather than a black or a white:
- * `--vectis-color-text` is gray-900 in light and gray-50 in dark, which is the near-black and
- * the near-white this site is already set in. A pure #000/#fff pair would be the only two
- * absolute values on the page and would read as harder than everything around them.
+ * The icon sits on a tile of the card's own hue, drawn in the page's text colour: the hue says
+ * which card it is, and the glyph stays as legible as the copy beside it.
  */
 .vd-card-icon {
-  display: block;
-  margin: 0 auto var(--vectis-space-4);
+  display: grid;
+  place-items: center;
+  inline-size: var(--vectis-control-height-md);
+  block-size: var(--vectis-control-height-md);
+  margin-block-end: var(--vectis-space-3);
+  border: 1px solid oklch(var(--vd-line-l) var(--vd-line-c) var(--vd-card-hue) / 0.35);
+  border-radius: var(--vectis-radius-interactive);
+  background: oklch(var(--vd-wash-l) var(--vd-wash-c) var(--vd-card-hue) / var(--vd-wash-a));
   color: var(--vectis-color-text);
 }
 
