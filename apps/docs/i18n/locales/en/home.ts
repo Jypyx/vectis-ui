@@ -6,6 +6,7 @@ export default {
     'Vue 3 components built on web standards. Native CSS tokens, accessible interactions, and Vue as the only runtime dependency.',
   heroReleaseNotes: 'Release notes',
   heroCta: 'Install the library',
+  heroThemeCta: 'Customise theme',
   standardsHeading: 'Built on web standards',
   standardsSubtitle:
     'Components use semantic HTML, native browser APIs and CSS layers. Vue is the only runtime dependency.',

@@ -3,6 +3,7 @@ export default {
     mainNav: 'Main',
     home: 'Home',
     docs: 'Documentation',
+    theme: 'Theme',
     getStarted: 'Get started',
     openNavigation: 'Open the navigation',
     toLight: 'Switch to the light theme',

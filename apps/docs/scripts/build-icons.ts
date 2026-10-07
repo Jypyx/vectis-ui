@@ -32,6 +32,20 @@ const ICONS = [
   'contrast_square',
   'add',
   'remove',
+  // The theme builder's preview, beyond the library's own icons.
+  'home',
+  'settings',
+  'person',
+  'group',
+  'folder',
+  'mail',
+  'edit',
+  'delete',
+  'download',
+  'logout',
+  'bar_chart',
+  'dashboard',
+  'favorite',
 ] as const
 
 /** Google's export grid; the library's registry shares it, hence no per-icon viewBox. */

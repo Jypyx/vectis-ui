@@ -7,7 +7,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { allPages, docRoutes } from '../content/nav'
-import { LOCALE_PREFIXES, SITE_URL } from '../content/site'
+import { FRAMED_PAGES, LOCALE_PREFIXES, SITE_PAGES, SITE_URL } from '../content/site'
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const outDir = join(appRoot, '.output', 'public')
@@ -18,6 +18,7 @@ const fileFor = (route: string) =>
 
 const routes = LOCALE_PREFIXES.flatMap((prefix) => [
   `${prefix}/`,
+  ...[...SITE_PAGES, ...FRAMED_PAGES].map((page) => `${prefix}${page}`),
   `${prefix}/docs`,
   ...docRoutes(prefix),
 ])
@@ -52,7 +53,9 @@ if (pageless.length > 0) {
 }
 
 if (missing.length > 0) {
-  console.error(`check-prerender: ${missing.length} route(s) in content/nav.ts were not rendered:`)
+  console.error(
+    `check-prerender: ${missing.length} route(s) in content/nav.ts or content/site.ts were not rendered:`,
+  )
   for (const route of missing) console.error(`  ${route}`)
   process.exit(1)
 }
@@ -74,6 +77,7 @@ if (seoFiles.length > 0) {
 const sitemapUrls = new Set(
   LOCALE_PREFIXES.flatMap((prefix) => [
     `${SITE_URL}${prefix}/`,
+    ...SITE_PAGES.map((page) => `${SITE_URL}${prefix}${page}/`),
     ...docRoutes(prefix).map((route) => `${SITE_URL}${route}/`),
   ]),
 )
@@ -89,7 +93,7 @@ const unlisted = [...sitemapUrls].filter((url) => !listed.has(url))
 const strays = [...listed].filter((url) => !sitemapUrls.has(url))
 
 if (unlisted.length > 0 || strays.length > 0) {
-  console.error('check-prerender: sitemap.xml does not match content/nav.ts:')
+  console.error('check-prerender: sitemap.xml does not match content/nav.ts and content/site.ts:')
   for (const url of unlisted) console.error(`  missing  ${url}`)
   for (const url of strays) console.error(`  unknown  ${url}`)
   process.exit(1)

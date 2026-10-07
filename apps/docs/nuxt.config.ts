@@ -1,5 +1,5 @@
 import { docRoutes } from './content/nav'
-import { LOCALE_PREFIXES, SITE_URL } from './content/site'
+import { FRAMED_PAGES, LOCALE_PREFIXES, SITE_PAGES, SITE_URL } from './content/site'
 
 /** Central base URL for asset and redirect paths. */
 const BASE_URL = '/'
@@ -70,7 +70,11 @@ export default defineNuxtConfig({
         /* Explicitly prerender these server routes because no page links to them. */
         '/robots.txt',
         '/sitemap.xml',
-        ...LOCALE_PREFIXES.flatMap((prefix) => [`${prefix}/`, ...docRoutes(prefix)]),
+        ...LOCALE_PREFIXES.flatMap((prefix) => [
+          `${prefix}/`,
+          ...[...SITE_PAGES, ...FRAMED_PAGES].map((page) => `${prefix}${page}`),
+          ...docRoutes(prefix),
+        ]),
       ],
       /** Ignore doubled-locale paths produced by prerender crawling. */
       ignore: [

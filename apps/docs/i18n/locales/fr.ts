@@ -69,6 +69,7 @@ import stepper from './fr/stepper'
 import switchPage from './fr/switch'
 import tabs from './fr/tabs'
 import textarea from './fr/textarea'
+import themeBuilder from './fr/themeBuilder'
 import theming from './fr/theming'
 import timeInput from './fr/timeInput'
 import timePicker from './fr/timePicker'
@@ -87,6 +88,7 @@ export default defineI18nLocale((): DocsMessages => ({
   nav,
   error,
   home,
+  themeBuilder,
 
   installation,
   theming,

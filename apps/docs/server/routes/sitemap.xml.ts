@@ -1,5 +1,5 @@
 import { docRoutes } from '../../content/nav'
-import { LOCALE_PREFIXES, SITE_URL } from '../../content/site'
+import { LOCALE_PREFIXES, SITE_PAGES, SITE_URL } from '../../content/site'
 
 /**
  * The sitemap, built from the same `content/nav.ts` the rail and the prerender list are built
@@ -8,6 +8,7 @@ import { LOCALE_PREFIXES, SITE_URL } from '../../content/site'
 export default defineEventHandler((event) => {
   const paths = LOCALE_PREFIXES.flatMap((prefix) => [
     `${prefix}/`,
+    ...SITE_PAGES.map((page) => `${prefix}${page}/`),
     ...docRoutes(prefix).map((route) => `${route}/`),
   ])
 

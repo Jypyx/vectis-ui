@@ -44,6 +44,7 @@ const baseName = computed(() => {
 })
 const isHome = computed(() => baseName.value === 'index')
 const isDocs = computed(() => baseName.value?.startsWith('docs') ?? false)
+const isTheme = computed(() => baseName.value === 'theme')
 
 const variantFor = (active: boolean) => (active ? 'soft' : 'ghost')
 const toneFor = (active: boolean) => (active ? 'accent' : 'neutral')
@@ -54,6 +55,7 @@ const themeLabel = computed(() =>
 )
 
 const docsHome = computed(() => localePath('/docs/installation'))
+const themePath = computed(() => localePath('/theme'))
 
 /**
  * Every documentation page, grouped as the rail groups them. The slug is a keyword so English
@@ -126,6 +128,18 @@ onMounted(() => {
               @click="navigate"
             >
               {{ t('common.header.docs') }}
+            </VButton>
+          </template>
+        </NuxtLink>
+        <NuxtLink :to="themePath" custom>
+          <template #default="{ href, navigate }">
+            <VButton
+              :variant="variantFor(isTheme)"
+              :tone="toneFor(isTheme)"
+              :href="href ?? undefined"
+              @click="navigate"
+            >
+              {{ t('common.header.theme') }}
             </VButton>
           </template>
         </NuxtLink>
@@ -281,6 +295,16 @@ onMounted(() => {
                   :label="t('common.header.docs')"
                   :href="href ?? undefined"
                   :selected="isDocs"
+                  @click="navigate"
+                />
+              </template>
+            </NuxtLink>
+            <NuxtLink :to="themePath" custom>
+              <template #default="{ href, navigate }">
+                <VMenuItem
+                  :label="t('common.header.theme')"
+                  :href="href ?? undefined"
+                  :selected="isTheme"
                   @click="navigate"
                 />
               </template>

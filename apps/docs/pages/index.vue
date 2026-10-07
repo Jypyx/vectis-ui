@@ -78,6 +78,7 @@ useHead(() => {
 })
 
 const docsHome = computed(() => localePath('/docs/installation'))
+const themePath = computed(() => localePath('/theme'))
 
 /**
  * The six feature cards, as data: two catalogue keys, an icon, and an accent. The icons come
@@ -252,6 +253,20 @@ const installStep = ref<string>(STEPS[0]!.value)
                 @click="navigate"
               >
                 {{ t('home.heroCta') }}
+              </VButton>
+            </template>
+          </NuxtLink>
+          <NuxtLink :to="themePath" custom>
+            <template #default="{ href, navigate }">
+              <VButton
+                variant="outline"
+                tone="neutral"
+                size="lg"
+                icon-start="palette"
+                :href="href ?? undefined"
+                @click="navigate"
+              >
+                {{ t('home.heroThemeCta') }}
               </VButton>
             </template>
           </NuxtLink>

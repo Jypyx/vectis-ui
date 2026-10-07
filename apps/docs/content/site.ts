@@ -16,6 +16,15 @@ export const SITE_URL = 'https://vectis-ui.com'
  */
 export const LOCALE_PREFIXES = ['', '/fr']
 
+/**
+ * The site's pages besides the home page and the documentation, without their locale prefix.
+ * The theme builder's preview frame is not one: it is prerendered, but kept out of the sitemap.
+ */
+export const SITE_PAGES = ['/theme']
+
+/** Pages rendered only to be framed by another page. */
+export const FRAMED_PAGES = ['/theme/preview']
+
 /** Where the project lives besides this site: its repository and its published package. */
 export const SITE_REPO_URL = 'https://github.com/Jypyx/vectis-ui'
 export const SITE_NPM_URL = 'https://www.npmjs.com/package/vectis-ui'

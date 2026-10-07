@@ -5,6 +5,7 @@ export default {
     'Des composants Vue 3 bâtis sur les standards du Web. Des tokens CSS natifs, des interactions accessibles, et Vue pour seule dépendance à l’exécution.',
   heroReleaseNotes: 'Notes de version',
   heroCta: 'Installer la bibliothèque',
+  heroThemeCta: 'Personnaliser le thème',
   standardsHeading: 'Les standards du Web comme base',
   standardsSubtitle:
     'Les composants utilisent le HTML sémantique, les API natives du navigateur et les couches CSS. Vue est la seule dépendance à l’exécution.',

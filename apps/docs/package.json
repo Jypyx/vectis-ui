@@ -18,6 +18,8 @@
     "api": "tsx scripts/build-api.ts"
   },
   "dependencies": {
+    "@heroicons/vue": "^2.2.0",
+    "@lucide/vue": "^1.52.0",
     "vectis-ui": "workspace:*",
     "vue": "^3.5.40"
   },

@@ -6,21 +6,11 @@
  */
 import { fr, registerMessages, setIconResolver, setLocale } from 'vectis-ui'
 
-import { docsIcons, type DocsIconName } from '~/icons/icons'
+import { docsIconResolver } from '~/icons/resolver'
 
 import type { Ref } from 'vue'
 
-/**
- * The site's six chrome icons, which the library does not ship. Answering `undefined` is what
- * hands every other name back to the built-in registry; the documented behaviour that makes a
- * PARTIAL mapping legal, and the reason this file does not have to re-list the thirty-four
- * icons the library already draws.
- */
-setIconResolver((name, context) => {
-  const paths = docsIcons[name as DocsIconName] as readonly string[] | undefined
-  if (!paths) return undefined
-  return { path: (context.filled && paths[1]) || paths[0]! }
-})
+setIconResolver(docsIconResolver)
 
 /**
  * The French dictionary is opt-in; importing it is what puts it in the bundle. Registering it
