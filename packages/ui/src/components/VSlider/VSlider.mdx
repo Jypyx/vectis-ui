@@ -59,10 +59,11 @@ Non-numeric values through icons (those names come from the consumer's font):
 
 ## Numeric fields
 
-`inputs` adds `<VInput type="number">` fields for precise adjustment: one in single mode, one per
-bound in range mode. The entry is validated on `change` (blur or Enter), never while typing: parse,
-clamp to the bounds, snap to the last step that fits and push the sibling thumb if needed; an empty
-or invalid entry silently reverts to the current value.
+`inputs` adds `VNumberInput` fields for precise adjustment: one in single mode, one per bound in
+range mode. They show the number in the locale's format and step with the arrow keys. The entry is
+validated on blur or Enter, never while typing: parse, clamp to the bounds, snap to the last step
+that fits and push the sibling thumb if needed; an empty or invalid entry silently reverts to the
+current value.
 
 <Canvas of={VSliderStories.WithInputs} />
 
@@ -86,10 +87,21 @@ follows.
 
 `tooltip` displays a value bubble following the thumb during the drag and on keyboard focus (only
 the bubble of the manipulated thumb appears). It displays the step's label when `labels` is
-supplied, the value otherwise. It is positioned by the same fractions as the fill — no anchor
-positioning: the native thumb is a pseudo-element and cannot be an anchor.
+supplied, the value written in the locale otherwise. It is positioned by the same fractions as the
+fill — no anchor positioning: the native thumb is a pseudo-element and cannot be an anchor.
 
 <Canvas of={VSliderStories.WithTooltip} />
+
+## Number format
+
+`formatOptions` takes the options of `Intl.NumberFormat`, for a price, a unit or a percentage, and
+`locale` the language the value is written in, the design system's by default. Both apply to the
+tooltip, the number fields and `aria-valuetext`, so the thumbs announce "120 €" rather than "120".
+Without `formatOptions` the thumbs announce the bare number. `labels` take precedence over both.
+`min`, `max` and `step` stay in the model's unit: with `style: 'percent'`, the value 0.25 is written
+25% and typed as 25.
+
+<Canvas of={VSliderStories.Price} />
 
 ## Vertical
 
@@ -143,11 +155,10 @@ The accessible name goes through `label`, and an `aria-label` or `aria-labelledb
 takes precedence over it. Whichever you give is what names each thumb of a range, which is why
 the two are announced as its start and its end rather than as two sliders sharing one name.
 
-`label` **draws nothing**: it is an accessible name, unlike the `label` of VInput and the other
-text fields, which is rendered above the field. A visible caption for the slider belongs to the page
-around it, as it does for VInputOTP. What the component does draw is `hint`, a line of help under
-the track, tied to the thumb through `aria-describedby` and appended to whatever you pointed at
-yourself.
+`label` is drawn above the slider, as on VInput and the other fields, with the same words as the
+thumbs' accessible names. `hideLabel` hides it visually; it still names the thumbs. `hint` puts a
+line of help under the track, tied to the thumb through `aria-describedby` and appended to whatever
+you pointed at yourself.
 
 <Canvas of={VSliderStories.WithHint} />
 

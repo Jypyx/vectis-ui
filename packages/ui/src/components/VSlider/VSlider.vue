@@ -5,13 +5,14 @@
  * synchronizes optional number fields, labels and ARIA values.
  */
 
-import { computed, inject, reactive, ref, watch, watchEffect } from 'vue'
+import { computed, inject, ref, watchEffect } from 'vue'
 import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
+import VTypography from '../VTypography/VTypography.vue'
 import VIcon from '../VIcon/VIcon.vue'
 import { iconProps } from '../VIcon/iconProps'
 import type { IconSource } from '../VIcon/types'
-import VInput from '../VInput/VInput.vue'
 import { inputGroupKey } from '../VInput/context'
+import VNumberInput from '../VNumberInput/VNumberInput.vue'
 
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useControlShape } from '../../composables/useControlShape'
@@ -19,7 +20,7 @@ import { useFieldIds } from '../../composables/useFieldIds'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { isDev } from '../../utils/env'
 import { clamp } from '../../utils/number'
-import { useMessages } from '../../i18n/state'
+import { useMessages, useResolvedLocale } from '../../i18n/state'
 
 /**
  * What one step of the track is called: a piece of text, or an icon paired with the words that
@@ -73,11 +74,12 @@ interface SliderProps {
    */
   size?: SliderSize
   /**
-   * What screen readers announce for the slider. It is an accessible name and draws
-   * nothing on screen. In range mode the two thumbs are announced as the start and the
-   * end of it.
+   * The label above the slider, which also names its thumbs: in range mode they are announced
+   * as the start and the end of it.
    */
   label?: string
+  /** Hides the label visually. It still names the thumbs for assistive technology. */
+  hideLabel?: boolean
   /**
    * A line of help under the track, stating what the numbers mean or where they may go. It
    * is tied to the slider for assistive technology, so it is read out after the name rather
@@ -110,6 +112,14 @@ interface SliderProps {
   labels?: SliderLabel[]
   /** Shows the value in a bubble above the thumb while it is being moved or focused. */
   tooltip?: boolean
+  /**
+   * How the value is written in the bubble, the number fields and what the thumbs announce: the
+   * options of `Intl.NumberFormat`, for a price, a unit or a percentage. `min`, `max` and `step`
+   * stay in the model's unit: with `style: 'percent'`, 0.25 is written 25%.
+   */
+  formatOptions?: Intl.NumberFormatOptions
+  /** The locale the value is written and read in. It defaults to the design system's. */
+  locale?: string
 }
 
 const props = withDefaults(defineProps<SliderProps>(), {
@@ -122,6 +132,7 @@ const props = withDefaults(defineProps<SliderProps>(), {
   invalid: false,
   size: 'md',
   label: undefined,
+  hideLabel: false,
   hint: undefined,
   error: undefined,
   orientation: 'horizontal',
@@ -129,6 +140,8 @@ const props = withDefaults(defineProps<SliderProps>(), {
   ticks: false,
   labels: undefined,
   tooltip: false,
+  formatOptions: undefined,
+  locale: undefined,
 })
 
 /** The value: a single number, 0 to begin with, or an ordered pair once `range` is set. */
@@ -280,10 +293,18 @@ const tickPlaces = computed(() =>
 const isFilled = (value: number) =>
   props.range ? value >= startValue.value && value <= endValue.value : value <= endValue.value
 
-/** What a value is called, if the consumer named its step; failing that, the number itself. */
+// Resolved once here and handed to the number fields as the result, so the fields and the
+// bubble can never read the value in two different languages.
+const resolvedLocale = useResolvedLocale(() => props.locale)
+const numberFormat = computed(
+  () => new Intl.NumberFormat(resolvedLocale.value, props.formatOptions),
+)
+const formatValue = (value: number) => numberFormat.value.format(value)
+
+/** What a value is called, if the consumer named its step; failing that, the number written. */
 function labelTextAt(value: number): string {
   const item = props.labels?.[Math.round((value - props.min) / props.step)]
-  if (item === undefined) return String(value)
+  if (item === undefined) return formatValue(value)
   return typeof item === 'string' ? item : item.label
 }
 
@@ -305,10 +326,13 @@ const fieldEndLabel = computed(() =>
   props.range ? endLabel.value : (resolvedLabel.value ?? m.value.slider.value),
 )
 
-const startValueText = computed(() =>
-  props.range && props.labels ? labelTextAt(startValue.value) : undefined,
-)
-const endValueText = computed(() => (props.labels ? labelTextAt(endValue.value) : undefined))
+// @a11y
+// Said only when it adds something to the bare number a range announces: a step label, or a
+// value written with `formatOptions` ("120 €" rather than "120").
+const spokenText = (value: number) =>
+  props.labels || props.formatOptions ? labelTextAt(value) : undefined
+const startValueText = computed(() => (props.range ? spokenText(startValue.value) : undefined))
+const endValueText = computed(() => spokenText(endValue.value))
 
 // @a11y
 /*
@@ -384,20 +408,6 @@ if (isDev) {
   })
 }
 
-// @core
-// It is typed as text or a number because these are number fields, whose value Vue converts to
-// a number as soon as it can be read as one; while an empty field, or one holding a half-typed
-// "1-", stays text. That is why the value is turned back into text when it is committed.
-const fieldText = reactive<Record<Thumb, string | number>>({
-  start: String(startValue.value),
-  end: String(endValue.value),
-})
-
-watch(startValue, (v) => {
-  if (props.range) fieldText.start = String(v)
-})
-watch(endValue, (v) => (fieldText.end = String(v)))
-
 // @a11y
 /*
  * The fields are rendered in the order they are SEEN, before or after the track, so that
@@ -419,27 +429,17 @@ const fieldLabel = (which: Thumb) => (which === 'start' ? startLabel.value : fie
 
 // @core
 /**
- * Takes what was typed in a field and makes it the value; but only once the reader has
- * finished, on leaving the field or on Enter.
+ * What a number field commits, on leaving it or on Enter. VNumberInput has already parsed and
+ * bounded it, and puts its text back to the value it is given when this refuses or changes
+ * what was typed; an emptied field is refused.
  */
-function commitField(which: Thumb) {
-  const raw = fieldText[which]
-  // Parsed rather than converted: an empty string parses to nothing, which triggers the revert
-  // below, where converting it would give ZERO and quietly overwrite the value with it.
-  const parsed = Number.parseFloat(String(raw))
-  if (Number.isNaN(parsed)) {
-    resyncFields()
-    return
-  }
-  // The ceiling is the last step that FITS, never `max` itself. A native range stops there
-  // (that is what `stepCount` counts), so clipped to a `max` the step does not reach, the model
-  // held a value the thumb could not: the browser sanitized its input back down, and the
-  // number, the thumb and the fill then said three different things.
-  const clamped = clamp(parsed, props.min, props.max)
+function commitField(which: Thumb, typed: number | null) {
+  if (typed === null) return
+  // The ceiling is the last step that FITS, never `max` itself: a native range stops there
+  // (what `stepCount` counts), so a value past it would put the thumb, the fill and the number
+  // out of step.
   const snapped =
-    props.step > 0
-      ? props.min + Math.round((clamped - props.min) / props.step) * props.step
-      : clamped
+    props.step > 0 ? props.min + Math.round((typed - props.min) / props.step) * props.step : typed
   const value = Math.min(lastStop.value, Math.round(snapped * 1e10) / 1e10)
   const previous = thumbValue(which)
   const next = writeThumb(which, value)
@@ -447,15 +447,6 @@ function commitField(which: Thumb) {
   // move its thumb; and the payload is `next`, the model's local copy lagging a parent
   // `v-model` (see `onThumbChange`).
   if (writtenFor(next, which) !== previous) emit('change', next)
-  // Put back explicitly, because a commit that does not change the value; typing 200 where the
-  // maximum is 100; changes nothing for the watchers to react to, and the field would go on
-  // showing what was typed.
-  resyncFields()
-}
-
-function resyncFields() {
-  if (props.range) fieldText.start = String(startValue.value)
-  fieldText.end = String(endValue.value)
 }
 
 const endThumbEl = ref<HTMLInputElement | null>(null)
@@ -489,12 +480,18 @@ defineExpose({
       },
     ]"
   >
-    <VInput
+    <!-- Text only: the thumbs carry the same words as their accessible names. -->
+    <VTypography v-if="label && !hideLabel" as="span" variant="label" class="v-slider-name">
+      {{ label }}
+    </VTypography>
+    <VNumberInput
       v-for="which in fieldsBefore"
       :key="which"
-      v-model="fieldText[which]"
+      :model-value="thumbValue(which)"
       :class="['v-slider-field', `v-slider-field-${which}`]"
-      type="number"
+      controls="none"
+      :format-options="formatOptions"
+      :locale="resolvedLocale"
       :size="resolvedSize"
       :compact="resolvedCompact"
       :min="min"
@@ -504,7 +501,7 @@ defineExpose({
       :readonly="readonly"
       :invalid="isInvalid"
       :aria-label="fieldLabel(which)"
-      @change="commitField(which)"
+      @update:model-value="commitField(which, $event)"
     />
     <div class="v-slider-rail">
       <span class="v-slider-control">
@@ -539,8 +536,8 @@ defineExpose({
           The consumer's attributes come first, so what the component decides for itself; the
           bounds, the value and the disabled state; cannot be overwritten by one of them, and so
           that an ARIA state the consumer sets is not erased by an `undefined` of ours.
-          `aria-valuetext` is one of those: the component has one to say only when `labels` was
-          given.
+          `aria-valuetext` is one of those: the component has one to say only when `labels` or
+          `formatOptions` was given.
         -->
         <input
           ref="endThumbEl"
@@ -567,10 +564,10 @@ defineExpose({
         class="v-slider-tooltip v-slider-tooltip-start"
         aria-hidden="true"
       >
-        <span class="v-slider-tooltip-bubble">{{ startValueText ?? startValue }}</span>
+        <span class="v-slider-tooltip-bubble">{{ labelTextAt(startValue) }}</span>
       </span>
       <span v-if="tooltip" class="v-slider-tooltip v-slider-tooltip-end" aria-hidden="true">
-        <span class="v-slider-tooltip-bubble">{{ endValueText ?? endValue }}</span>
+        <span class="v-slider-tooltip-bubble">{{ labelTextAt(endValue) }}</span>
       </span>
     </div>
     <div v-if="labels" class="v-slider-labels">
@@ -584,12 +581,14 @@ defineExpose({
         <VIcon v-else v-bind="iconProps(item.icon)" :label="item.label" />
       </span>
     </div>
-    <VInput
+    <VNumberInput
       v-for="which in fieldsAfter"
       :key="which"
-      v-model="fieldText[which]"
+      :model-value="thumbValue(which)"
       :class="['v-slider-field', `v-slider-field-${which}`]"
-      type="number"
+      controls="none"
+      :format-options="formatOptions"
+      :locale="resolvedLocale"
       :size="resolvedSize"
       :compact="resolvedCompact"
       :min="min"
@@ -599,7 +598,7 @@ defineExpose({
       :readonly="readonly"
       :invalid="isInvalid"
       :aria-label="fieldLabel(which)"
-      @change="commitField(which)"
+      @update:model-value="commitField(which, $event)"
     />
     <span v-if="error" :id="errorId" class="v-field-error v-slider-error">{{ error }}</span>
     <span v-else-if="hint" :id="hintId" class="v-slider-hint">{{ hint }}</span>
@@ -937,7 +936,16 @@ defineExpose({
     grid-column: 1 / -1;
   }
 
-  .v-slider[data-disabled] .v-slider-hint {
+  /*
+   * Placed in an implicit row BEFORE the explicit grid, ending on its first line: it lands on top
+   * whichever zone template is in force, without a row of its own in each of them.
+   */
+  .v-slider-name {
+    grid-row: span 1 / 1;
+    grid-column: 1 / -1;
+  }
+
+  .v-slider[data-disabled] :is(.v-slider-hint, .v-slider-name) {
     color: var(--vectis-color-text-subtle);
   }
 

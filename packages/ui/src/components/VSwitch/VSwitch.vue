@@ -4,12 +4,9 @@
  * Keep the hint outside its accessible name.
  */
 
-import { ref } from 'vue'
-
 import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
 
-import { useFieldIds } from '../../composables/useFieldIds'
-import { useRootAttrs } from '../../composables/useRootAttrs'
+import { useChoice } from '../../composables/useChoice'
 
 /** Which side of the switch the label sits on. */
 export type SwitchLabelPosition = 'start' | 'end'
@@ -62,18 +59,18 @@ const props = withDefaults(defineProps<SwitchProps>(), {
   readonly: false,
 })
 
-// @a11y
-// The root element is a layout box, so the attributes the consumer passes have to be
-// redirected onto the input: `name` for the form, and the aria-* for the element that
-// actually carries the switch role.
 defineOptions({ inheritAttrs: false })
-const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
-const { hintId, errorId, describedBy } = useFieldIds(
-  attrs,
-  () => !!props.hint && !props.error,
-  undefined,
-  () => !!props.error,
-)
+const {
+  rootClass,
+  rootStyle,
+  forwardedAttrs,
+  hintId,
+  errorId,
+  describedBy,
+  inputEl,
+  refuseWhenReadonly,
+  exposed,
+} = useChoice(props)
 
 /** Whether the switch is on. It starts off. */
 const model = defineModel<boolean>({ default: false })
@@ -83,24 +80,7 @@ defineSlots<{
   default?(): unknown
 }>()
 
-const inputEl = ref<HTMLInputElement | null>(null)
-
-// @core
-// The native `readonly` attribute does nothing on a checkbox. Cancelling the click is what
-// refuses the change: the browser puts `checked` back and fires no `change`, so the v-model
-// never hears of it.
-function refuseWhenReadonly(event: MouseEvent) {
-  if (props.readonly) event.preventDefault()
-}
-
-// The root is a wrapper, so a template ref on the component reaches the layout box and not
-// the control: these two are the way to the real switch.
-defineExpose({
-  /** Moves the focus to the real switch. */
-  focus: (options?: FocusOptions) => inputEl.value?.focus(options),
-  /** The real `<input type="checkbox" role="switch">`, for what `focus` does not cover. */
-  el: inputEl,
-})
+defineExpose(exposed)
 </script>
 
 <template>
@@ -144,11 +124,8 @@ defineExpose({
 <style>
 @layer vectis.components {
   /*
-   * The selector is COMPOUNDED with `.v-choice`, which is on this very element and comes from
-   * another sheet at the same (0,1,0). Nothing collides today, this rule setting only custom
-   * properties and that one only real ones, but the day either gains a `display`, a
-   * `font-family` or a `color` the winner would be whichever sheet the consumer's bundler
-   * happened to emit last.
+   * Compounded with `.v-choice`, which sits on this element at the same (0,1,0) in another
+   * sheet: at equal weight the winner would depend on the order a bundler emits the sheets.
    */
   .v-choice.v-switch {
     --switch-track-w: var(--vectis-control-size-switch-w);

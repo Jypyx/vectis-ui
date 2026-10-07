@@ -32,6 +32,7 @@ export default {
         hideLabel: 'Masque visuellement le libellé, qui reste le nom du groupe.',
         hint: 'Texte d’aide sous les icônes.',
         error: 'Message d’erreur qui remplace l’aide. Annoncé quand il apparaît ou change.',
+        invalid: 'Pose <code>aria-invalid</code> et le style d’erreur, sans message.',
         required: 'Rend la note obligatoire dans un formulaire et ajoute un astérisque.',
         name: 'Nom du champ dans l’envoi du formulaire.',
         clearable:

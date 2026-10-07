@@ -28,11 +28,15 @@ export default {
     },
     inputs: {
       title: 'Champs numériques',
-      text: '<code>inputs</code> ajoute des champs numériques. La perte du focus ou Entrée valide la valeur, limitée aux bornes et alignée sur le pas. Une saisie invalide restaure la valeur précédente.',
+      text: '<code>inputs</code> ajoute des champs <code>VNumberInput</code>. La perte du focus ou Entrée valide la valeur, limitée aux bornes et alignée sur le pas. Une saisie invalide restaure la valeur précédente.',
     },
     inputsPlacement: {
       title: 'Position des champs',
       text: '<code>ends</code> place les champs aux extrémités de la piste ; <code>top</code> et <code>bottom</code> les placent au-dessus ou en dessous. Sur un slider vertical, ces positions deviennent les côtés de début et de fin.',
+    },
+    format: {
+      title: 'Format des nombres',
+      text: '<code>formatOptions</code> reçoit des options <code>Intl.NumberFormat</code> et <code>locale</code> une étiquette de langue. Les deux s’appliquent à l’infobulle, aux champs numériques et à la valeur annoncée par les curseurs. <code>min</code>, <code>max</code> et <code>step</code> restent dans l’unité du modèle : avec <code>style: "percent"</code>, 0,25 s’affiche 25 %.',
     },
     orientation: {
       title: 'Orientation',
@@ -44,7 +48,7 @@ export default {
     },
     form: {
       title: 'Dans un formulaire',
-      text: '<code>label</code> nomme le slider sans texte visible. Les noms ARIA fournis prennent le pas sur cette prop. Les attributs natifs atteignent le curseur de fin ; en mode intervalle, seule cette valeur est envoyée.',
+      text: '<code>label</code> s’affiche au-dessus du slider et nomme ses curseurs ; <code>hideLabel</code> le masque visuellement. Les noms ARIA fournis prennent le pas sur cette prop. Les attributs natifs atteignent le curseur de fin ; en mode intervalle, seule cette valeur est envoyée.',
     },
     sizes: {
       title: 'Taille des champs',
@@ -73,7 +77,8 @@ export default {
         range: 'Active deux curseurs et une paire ordonnée pour <code>v-model</code>.',
         disabled: 'Désactive les interactions.',
         label:
-          'Nom accessible sans texte visible. Les curseurs d’intervalle reçoivent des noms distincts de début et de fin.',
+          'Libellé au-dessus du slider, qui nomme aussi les curseurs. Les curseurs d’intervalle reçoivent des noms distincts de début et de fin.',
+        hideLabel: 'Masque visuellement le libellé, qui reste le nom des curseurs.',
         error:
           'Message d’erreur affiché à la place de l’aide. Pose <code>aria-invalid</code>, est lié par <code>aria-describedby</code> et est annoncé quand il apparaît.',
         hint: 'Texte d’aide lié par <code>aria-describedby</code>.',
@@ -86,6 +91,9 @@ export default {
           'Libellés des pas dans l’ordre, chaînes ou objets avec icône et libellé. Fournit aussi le texte de valeur accessible.',
         tooltip:
           'Affiche la valeur pendant le déplacement ou le focus d’un curseur. Masqué aux technologies d’assistance.',
+        formatOptions:
+          'Options <code>Intl.NumberFormat</code> pour l’infobulle, les champs numériques et la valeur annoncée par les curseurs.',
+        locale: 'Langue de la valeur écrite. Par défaut, celle de la bibliothèque.',
         vModel:
           'Nombre ou paire ordonnée avec <code>range</code>. Croiser les curseurs déplace l’autre borne pour conserver l’ordre.',
       },

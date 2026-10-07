@@ -4,13 +4,12 @@
  * synchronize indeterminate after rendering.
  */
 
-import { ref, watchEffect } from 'vue'
+import { watchEffect } from 'vue'
 
 import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
 import VCheckMark from './VCheckMark.vue'
 
-import { useFieldIds } from '../../composables/useFieldIds'
-import { useRootAttrs } from '../../composables/useRootAttrs'
+import { useChoice } from '../../composables/useChoice'
 
 /** Which side of the box the label sits on. */
 export type CheckboxLabelPosition = 'start' | 'end'
@@ -66,18 +65,18 @@ const props = withDefaults(defineProps<CheckboxProps>(), {
   readonly: false,
 })
 
-// @a11y
-// The root element is a layout box, so the attributes the consumer passes must be
-// redirected: `name`, `value`, `required` and the aria-* belong on the input, and left on
-// the wrapper they would take part in neither the form nor the accessibility tree.
 defineOptions({ inheritAttrs: false })
-const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
-const { hintId, errorId, describedBy } = useFieldIds(
-  attrs,
-  () => !!props.hint && !props.error,
-  undefined,
-  () => !!props.error,
-)
+const {
+  rootClass,
+  rootStyle,
+  forwardedAttrs,
+  hintId,
+  errorId,
+  describedBy,
+  inputEl,
+  refuseWhenReadonly,
+  exposed,
+} = useChoice(props)
 
 /**
  * Whether the box is ticked. It starts unticked. `indeterminate` is a separate prop: the
@@ -90,8 +89,6 @@ defineSlots<{
   default?(): unknown
 }>()
 
-const inputEl = ref<HTMLInputElement | null>(null)
-
 // @ssr @core
 // The effect alone is not enough. Activating a checkbox CLEARS the property as part of the
 // gesture, and the prop it reads has not moved, so nothing re-runs it and the dash never comes
@@ -102,22 +99,7 @@ function syncIndeterminate() {
 
 watchEffect(syncIndeterminate, { flush: 'post' })
 
-// @core
-// The native `readonly` attribute does nothing on a checkbox. Cancelling the click is what
-// refuses the change: the browser then puts `checked` and `indeterminate` back as they were and
-// fires no `change`, so the v-model never hears of it.
-function refuseWhenReadonly(event: MouseEvent) {
-  if (props.readonly) event.preventDefault()
-}
-
-// The root is a wrapper, so a template ref on the component reaches the layout box and not
-// the control: these two are the way to the real checkbox.
-defineExpose({
-  /** Moves the focus to the real checkbox. */
-  focus: (options?: FocusOptions) => inputEl.value?.focus(options),
-  /** The real `<input type="checkbox">`, for what `focus` does not cover. */
-  el: inputEl,
-})
+defineExpose(exposed)
 </script>
 
 <template>

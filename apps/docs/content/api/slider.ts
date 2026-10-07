@@ -18,6 +18,7 @@ export default {
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'size', type: 'SliderSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
         { name: 'label', type: 'string' },
+        { name: 'hideLabel', type: 'boolean', default: 'false' },
         { name: 'hint', type: 'string' },
         { name: 'error', type: 'string' },
         { name: 'orientation', type: 'SliderOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },
@@ -25,6 +26,8 @@ export default {
         { name: 'ticks', type: 'boolean', default: 'false' },
         { name: 'labels', type: 'SliderLabel[]' },
         { name: 'tooltip', type: 'boolean', default: 'false' },
+        { name: 'formatOptions', type: 'Intl.NumberFormatOptions' },
+        { name: 'locale', type: 'string' },
         { name: 'v-model', key: 'vModel', type: 'SliderValue', default: '0' },
       ],
       events: [

@@ -9,6 +9,7 @@ const t = storyText({
   en: {
     volume: 'Volume',
     budget: 'Budget',
+    price: 'Price',
     stepsOfTen: 'In steps of 10',
     stepsOfTenNoTicks: 'In steps of 10, without ticks',
     range: 'Range',
@@ -26,6 +27,7 @@ const t = storyText({
   fr: {
     volume: 'Volume',
     budget: 'Budget',
+    price: 'Prix',
     stepsOfTen: 'Par pas de 10',
     stepsOfTenNoTicks: 'Par pas de 10, sans ticks',
     range: 'Plage',
@@ -152,7 +154,7 @@ export const WithHint: Story = {
     setup: () => ({ t, value: ref(40) }),
     template: `
       <div style="width: 320px">
-        <VSlider v-model="value" :label="t.quota" :hint="t.quotaHint" step="5" />
+        <VSlider v-model="value" :label="t.quota" :hint="t.quotaHint" :step="5" />
       </div>
     `,
   }),
@@ -176,14 +178,75 @@ export const WithInputs: Story = {
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // An out-of-bounds entry → committed on change → clamped to max. A synthetic {Enter} does
-    // not trigger the native change: the field is left (blur) as a real user would.
+    // The label sits above everything else, the fields at the ends included.
+    for (const slider of canvasElement.querySelectorAll('.v-slider')) {
+      const name = slider.querySelector('.v-slider-name')!.getBoundingClientRect()
+      const field = slider.querySelector('.v-slider-field')!.getBoundingClientRect()
+      await expect(name.bottom).toBeLessThanOrEqual(field.top)
+      await expect(name.left).toBeCloseTo(slider.getBoundingClientRect().left, 0)
+    }
+    // An out-of-bounds entry is clamped to max when the field is left. The field is a text box
+    // announced as a spinbutton, so its value is text.
     const field = canvas.getByRole('spinbutton', { name: 'Volume' })
     await userEvent.clear(field)
     await userEvent.type(field, '150')
     await userEvent.tab()
     await waitFor(() => expect(canvas.getByText('100')).toBeVisible())
-    await waitFor(() => expect(field).toHaveValue(100))
+    await waitFor(() => expect(field).toHaveValue('100'))
+  },
+}
+
+/**
+ * `formatOptions` and `locale` write the value in the bubble, the number fields and what the
+ * thumbs announce: here a price filter in euros.
+ */
+export const Price: Story = {
+  render: (args) => ({
+    components: { VSlider },
+    setup: () => ({
+      args,
+      t,
+      value: ref<[number, number]>([120, 300]),
+      euros: { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 },
+    }),
+    template: `
+      <div style="width: 420px; padding-block-start: 32px">
+        <VSlider
+          v-bind="args"
+          v-model="value"
+          range
+          :max="500"
+          :step="10"
+          inputs="ends"
+          tooltip
+          locale="fr-FR"
+          :format-options="euros"
+          :label="t.price"
+        />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const euros = new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0,
+    })
+    const start = canvas.getByRole('slider', { name: 'Price (start)' }) as HTMLInputElement
+    await expect(start).toHaveAttribute('aria-valuetext', euros.format(120))
+    await expect(canvas.getByRole('spinbutton', { name: 'Price (end)' })).toHaveValue(
+      euros.format(300),
+    )
+    start.focus()
+    start.value = '130'
+    await fireEvent.input(start)
+    // Compared as text: the matcher would fold the no-break space into a plain one.
+    await waitFor(() =>
+      expect(canvasElement.querySelector('.v-slider-tooltip-start')?.textContent).toBe(
+        euros.format(130),
+      ),
+    )
   },
 }
 

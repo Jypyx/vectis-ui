@@ -31,6 +31,7 @@ export default {
         hideLabel: 'Hides the label visually while keeping it as the group name.',
         hint: 'Help text under the icons.',
         error: 'Error message replacing the hint. Announced when it appears or changes.',
+        invalid: 'Sets <code>aria-invalid</code> and the error style without a message.',
         required: 'Requires a rating in a form and adds an asterisk.',
         name: 'Field name in form submissions.',
         clearable:

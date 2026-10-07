@@ -104,6 +104,14 @@ describe('VRating', () => {
   })
 
   describe('field', () => {
+    it('invalid marks every radio without a message', () => {
+      const { getAllByRole, container } = renderRating('invalid')
+      for (const radio of getAllByRole('radio'))
+        expect(radio.getAttribute('aria-invalid')).toBe('true')
+      expect(container.querySelector('.v-rating')!.hasAttribute('data-invalid')).toBe(true)
+      expect(container.querySelector('.v-field-error')).toBeNull()
+    })
+
     it('describes the group with the hint, replaced by the error', async () => {
       const error = ref<string | undefined>(undefined)
       const { getByRole, getAllByRole } = renderHarness(

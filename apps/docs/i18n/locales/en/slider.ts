@@ -28,11 +28,15 @@ export default {
     },
     inputs: {
       title: 'Number fields',
-      text: '<code>inputs</code> adds number fields. Blur or Enter commits the value, bounded and snapped to the step. Invalid entries restore the previous value.',
+      text: '<code>inputs</code> adds <code>VNumberInput</code> fields. Blur or Enter commits the value, bounded and snapped to the step. Invalid entries restore the previous value.',
     },
     inputsPlacement: {
       title: 'Field placement',
       text: '<code>ends</code> places fields beside the track; <code>top</code> and <code>bottom</code> place them above or below. On vertical sliders, these become the start and end sides.',
+    },
+    format: {
+      title: 'Number format',
+      text: '<code>formatOptions</code> takes <code>Intl.NumberFormat</code> options and <code>locale</code> a language tag. Both apply to the tooltip, the number fields and the value thumbs announce. <code>min</code>, <code>max</code> and <code>step</code> stay in model units: with <code>style: "percent"</code>, 0.25 shows as 25%.',
     },
     orientation: {
       title: 'Orientation',
@@ -44,7 +48,7 @@ export default {
     },
     form: {
       title: 'In a form',
-      text: '<code>label</code> names the slider without visible text. Consumer ARIA names take precedence. Native attributes reach the end thumb; in range mode, only that value is submitted.',
+      text: '<code>label</code> is shown above the slider and names its thumbs; <code>hideLabel</code> hides it visually. Consumer ARIA names take precedence. Native attributes reach the end thumb; in range mode, only that value is submitted.',
     },
     sizes: {
       title: 'Field sizes',
@@ -73,7 +77,8 @@ export default {
         range: 'Enables two thumbs and an ordered pair for <code>v-model</code>.',
         disabled: 'Disables interaction.',
         label:
-          'Accessible name without visible text. Range thumbs receive distinct start and end names.',
+          'Label above the slider, which also names the thumbs. Range thumbs receive distinct start and end names.',
+        hideLabel: 'Hides the label visually while keeping it as the thumbs name.',
         error:
           'Error message shown in place of the hint. Sets <code>aria-invalid</code>, is linked through <code>aria-describedby</code> and is announced when it appears.',
         hint: 'Help text linked through <code>aria-describedby</code>.',
@@ -85,6 +90,9 @@ export default {
           'Ordered step labels, as strings or icon-and-label objects. Also supplies accessible value text.',
         tooltip:
           'Displays the value while a thumb is dragged or focused. Hidden from assistive technology.',
+        formatOptions:
+          '<code>Intl.NumberFormat</code> options for the tooltip, the number fields and the value thumbs announce.',
+        locale: 'Language of the written value. Defaults to the library locale.',
         vModel:
           'Number or ordered pair with <code>range</code>. Crossing thumbs pushes the other endpoint to keep the pair ordered.',
       },

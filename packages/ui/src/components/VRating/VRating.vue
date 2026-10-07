@@ -16,6 +16,7 @@ import type { IconSource } from '../VIcon/types'
 import { useFieldIds } from '../../composables/useFieldIds'
 import { useLocale, useMessages } from '../../i18n/state'
 import { customColorStyle } from '../../utils/css'
+import { clamp } from '../../utils/number'
 
 /** The size of the icons: 20, 24 or 32 pixels. */
 export type RatingSize = 'sm' | 'md' | 'lg'
@@ -40,6 +41,11 @@ interface RatingProps {
    * name. It is announced when it appears or changes.
    */
   error?: string
+  /**
+   * Marks the rating as invalid, which colours the icons and tells assistive technology so. It
+   * is for a rule the browser cannot check by itself.
+   */
+  invalid?: boolean
   /** Requires a rating before the form is sent. An asterisk follows the label. */
   required?: boolean
   /** The name the value is sent under in a form. */
@@ -82,6 +88,7 @@ const props = withDefaults(defineProps<RatingProps>(), {
   hideLabel: false,
   hint: undefined,
   error: undefined,
+  invalid: false,
   required: false,
   name: undefined,
   clearable: false,
@@ -100,6 +107,8 @@ const attrs = useAttrs()
 const m = useMessages()
 const locale = useLocale()
 
+const isInvalid = computed(() => props.invalid || !!props.error)
+
 const { hintId, errorId, describedBy } = useFieldIds(
   attrs,
   () => !!props.hint && !props.error,
@@ -113,19 +122,20 @@ const groupName = computed(() => props.name ?? uid)
 
 const values = computed(() => Array.from({ length: props.max }, (_, index) => index + 1))
 
-const format = (value: number) =>
-  new Intl.NumberFormat(locale.value, { maximumFractionDigits: 1 }).format(value)
+const numberFormat = computed(
+  () => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 1 }),
+)
 
 const valueText = computed(() =>
   m.value.rating.value(
-    format(Math.min(Math.max(model.value ?? 0, 0), props.max)),
-    format(props.max),
+    numberFormat.value.format(clamp(model.value ?? 0, 0, props.max)),
+    numberFormat.value.format(props.max),
   ),
 )
 
 /** How much of the icon for `value` is filled, from 0 to 1. */
 function fill(value: number): number {
-  return Math.min(Math.max((model.value ?? 0) - (value - 1), 0), 1)
+  return clamp((model.value ?? 0) - (value - 1), 0, 1)
 }
 
 // @core
@@ -158,7 +168,7 @@ defineExpose({
     :style="customColorStyle(color)"
     :data-size="size"
     :data-readonly="readonly ? '' : undefined"
-    :data-invalid="error ? '' : undefined"
+    :data-invalid="isInvalid ? '' : undefined"
     :disabled="disabled"
     :aria-label="label ? undefined : m.rating.label"
     v-bind="attrs"
@@ -207,7 +217,7 @@ defineExpose({
           :value="value"
           :checked="model === value"
           :required="required"
-          :aria-invalid="error ? 'true' : undefined"
+          :aria-invalid="isInvalid ? 'true' : undefined"
           @change="model = value"
           @click="onClick(value, $event)"
         />
@@ -215,7 +225,9 @@ defineExpose({
           <VIcon class="v-rating-empty" v-bind="iconProps(icon)" />
           <VIcon class="v-rating-filled" v-bind="iconProps(icon)" filled />
         </span>
-        <span class="v-visually-hidden">{{ m.rating.value(format(value), format(max)) }}</span>
+        <span class="v-visually-hidden">{{
+          m.rating.value(numberFormat.format(value), numberFormat.format(max))
+        }}</span>
       </label>
     </span>
     <input v-if="readonly && name && model !== null" type="hidden" :name="name" :value="model" />

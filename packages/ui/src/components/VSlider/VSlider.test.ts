@@ -7,6 +7,23 @@ import VInputGroup from '../VInput/VInputGroup.vue'
 import VSlider from './VSlider.vue'
 
 describe('VSlider', () => {
+  it('label shows above the slider and names its thumbs', () => {
+    const { container, getByRole } = render(VSlider, {
+      props: { modelValue: [20, 60], range: true, label: 'Budget' },
+    })
+    expect(container.querySelector('.v-slider-name')?.textContent?.trim()).toBe('Budget')
+    expect(getByRole('slider', { name: 'Budget (start)' })).toBeTruthy()
+    expect(getByRole('slider', { name: 'Budget (end)' })).toBeTruthy()
+  })
+
+  it('hideLabel draws nothing, the thumbs keeping their name', () => {
+    const { container, getByRole } = render(VSlider, {
+      props: { modelValue: 40, label: 'Volume', hideLabel: true },
+    })
+    expect(container.querySelector('.v-slider-name')).toBeNull()
+    expect(getByRole('slider', { name: 'Volume' })).toBeTruthy()
+  })
+
   it('single mode: a single range input, a numeric v-model', async () => {
     const { getAllByRole, emitted } = render(VSlider, {
       props: { modelValue: 40, label: 'Volume' },
@@ -91,10 +108,10 @@ describe('VSlider', () => {
     })
     const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
     await fireEvent.update(field, '55')
-    await fireEvent.change(field)
+    await fireEvent.blur(field)
     expect(emitted('change')).toEqual([[55]])
     await fireEvent.update(field, '55')
-    await fireEvent.change(field)
+    await fireEvent.blur(field)
     expect(emitted('change')).toHaveLength(1)
   })
 
@@ -180,7 +197,7 @@ describe('VSlider', () => {
     expect(getByLabelText('Loud')).toBeTruthy()
   })
 
-  it('inputs: one numeric field in single mode, committing on change with clamp and snap', async () => {
+  it('inputs: one numeric field in single mode, committing on blur with clamp and snap', async () => {
     const { getAllByRole, getByRole, emitted } = render(VSlider, {
       props: { modelValue: 40, inputs: 'ends', step: 10, label: 'Volume' },
     })
@@ -188,10 +205,10 @@ describe('VSlider', () => {
     expect(fields).toHaveLength(1)
     const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
     await fireEvent.update(field, '150')
-    await fireEvent.change(field)
+    await fireEvent.blur(field)
     expect(emitted('update:modelValue').at(-1)).toEqual([100])
     await fireEvent.update(field, '42')
-    await fireEvent.change(field)
+    await fireEvent.blur(field)
     expect(emitted('update:modelValue').at(-1)).toEqual([40])
   })
 
@@ -205,7 +222,7 @@ describe('VSlider', () => {
     })
     const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
     await fireEvent.update(field, '95')
-    await fireEvent.change(field)
+    await fireEvent.blur(field)
     expect(emitted('update:modelValue').at(-1)).toEqual([90])
   })
 
@@ -215,7 +232,7 @@ describe('VSlider', () => {
     })
     const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
     await fireEvent.update(field, '55')
-    await fireEvent.change(field)
+    await fireEvent.blur(field)
     expect(emitted('update:modelValue').at(-1)).toEqual([55])
   })
 
@@ -225,7 +242,7 @@ describe('VSlider', () => {
     })
     const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
     await fireEvent.update(field, '')
-    await fireEvent.change(field)
+    await fireEvent.blur(field)
     expect(emitted('update:modelValue')).toBeUndefined()
     expect(field.value).toBe('40')
   })
@@ -237,7 +254,7 @@ describe('VSlider', () => {
     expect(getAllByRole('spinbutton')).toHaveLength(2)
     const start = getByRole('spinbutton', { name: 'Budget (start)' })
     await fireEvent.update(start, '80')
-    await fireEvent.change(start)
+    await fireEvent.blur(start)
     expect(emitted('update:modelValue').at(-1)).toEqual([[80, 80]])
   })
 
@@ -299,7 +316,7 @@ describe('VSlider', () => {
       const field = getByRole('spinbutton', { name: 'Volume' }) as HTMLInputElement
       expect(field.value).toBe('40')
       await fireEvent.update(field, '70')
-      await fireEvent.change(field)
+      await fireEvent.blur(field)
       expect(emitted('update:modelValue').at(-1)).toEqual([70])
     })
   })
@@ -639,5 +656,105 @@ describe('VSlider — a consumer aria-invalid', () => {
       attrs: { 'aria-invalid': 'true' },
     })
     expect(getByRole('slider').getAttribute('aria-invalid')).toBe('true')
+  })
+})
+
+describe('VSlider — formatOptions and locale', () => {
+  const EUR = { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 } as const
+  const written = (locale: string, value: number, options?: Intl.NumberFormatOptions) =>
+    new Intl.NumberFormat(locale, options).format(value)
+
+  it('the thumbs announce the written value', () => {
+    const { getByRole } = render(VSlider, {
+      props: {
+        modelValue: [120, 300],
+        range: true,
+        max: 500,
+        label: 'Price',
+        locale: 'fr-FR',
+        formatOptions: EUR,
+      },
+    })
+    expect(getByRole('slider', { name: 'Price (start)' }).getAttribute('aria-valuetext')).toBe(
+      written('fr-FR', 120, EUR),
+    )
+    expect(getByRole('slider', { name: 'Price (end)' }).getAttribute('aria-valuetext')).toBe(
+      written('fr-FR', 300, EUR),
+    )
+  })
+
+  it('without formatOptions or labels the thumbs announce the bare number', () => {
+    const { getByRole } = render(VSlider, { props: { modelValue: 40, label: 'Volume' } })
+    expect(getByRole('slider', { name: 'Volume' }).hasAttribute('aria-valuetext')).toBe(false)
+  })
+
+  it('the bubble writes the value in the locale, formatOptions or not', () => {
+    const plain = render(VSlider, {
+      props: { modelValue: 1500, max: 5000, tooltip: true, label: 'x', locale: 'fr-FR' },
+    })
+    expect(plain.container.querySelector('.v-slider-tooltip')?.textContent).toBe(
+      written('fr-FR', 1500),
+    )
+    const priced = render(VSlider, {
+      props: { modelValue: 120, max: 500, tooltip: true, label: 'y', formatOptions: EUR },
+    })
+    expect(priced.container.querySelector('.v-slider-tooltip')?.textContent).toBe(
+      written('en', 120, EUR),
+    )
+  })
+
+  it('the number fields write and read the value the same way', async () => {
+    const { getByRole, emitted } = render(VSlider, {
+      props: {
+        modelValue: 120,
+        max: 500,
+        step: 10,
+        inputs: 'ends',
+        label: 'Price',
+        locale: 'fr-FR',
+        formatOptions: EUR,
+      },
+    })
+    const field = getByRole('spinbutton', { name: 'Price' }) as HTMLInputElement
+    expect(field.value).toBe(written('fr-FR', 120, EUR))
+    await fireEvent.focus(field)
+    await fireEvent.update(field, '254')
+    await fireEvent.blur(field)
+    expect(emitted('update:modelValue').at(-1)).toEqual([250])
+  })
+
+  it('a percentage keeps min, max and step in the model unit', async () => {
+    const percent = { style: 'percent' } as const
+    const { getByRole, emitted } = render(VSlider, {
+      props: {
+        modelValue: 0.25,
+        min: 0,
+        max: 1,
+        step: 0.05,
+        inputs: 'ends',
+        label: 'Discount',
+        locale: 'en-US',
+        formatOptions: percent,
+      },
+    })
+    expect(getByRole('slider', { name: 'Discount' }).getAttribute('aria-valuetext')).toBe('25%')
+    const field = getByRole('spinbutton', { name: 'Discount' }) as HTMLInputElement
+    await fireEvent.focus(field)
+    await fireEvent.update(field, '50')
+    await fireEvent.blur(field)
+    expect(emitted('update:modelValue').at(-1)).toEqual([0.5])
+  })
+
+  it('step labels win over formatOptions', () => {
+    const { getByRole } = render(VSlider, {
+      props: {
+        modelValue: 1,
+        max: 2,
+        labels: ['Low', 'Mid', 'High'],
+        label: 'Level',
+        formatOptions: EUR,
+      },
+    })
+    expect(getByRole('slider', { name: 'Level' }).getAttribute('aria-valuetext')).toBe('Mid')
   })
 })

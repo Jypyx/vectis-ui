@@ -13,9 +13,7 @@ function onSubmit(event: Event) {
 
 <template>
   <form class="demo" @submit.prevent="onSubmit">
-    <!-- Use the visible native label instead of an additional accessible-only label. -->
-    <label class="field-label" for="volume">Volume</label>
-    <VSlider id="volume" v-model="volume" name="volume" />
+    <VSlider v-model="volume" name="volume" label="Volume" />
 
     <VButton class="submit" type="submit" size="sm" variant="outline" tone="neutral">
       Submit
@@ -32,10 +30,6 @@ function onSubmit(event: Event) {
 }
 .submit {
   justify-self: start;
-}
-.field-label {
-  font-size: var(--vectis-text-label-size);
-  font-weight: var(--vectis-text-label-weight);
 }
 .log {
   margin: 0;

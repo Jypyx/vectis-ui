@@ -14,6 +14,7 @@ export default {
         { name: 'hideLabel', type: 'boolean', default: 'false' },
         { name: 'hint', type: 'string' },
         { name: 'error', type: 'string' },
+        { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'required', type: 'boolean', default: 'false' },
         { name: 'name', type: 'string' },
         { name: 'clearable', type: 'boolean', default: 'false' },

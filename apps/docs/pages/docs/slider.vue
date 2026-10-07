@@ -12,6 +12,8 @@ import SliderInputs from '~/examples/slider/Inputs.vue'
 import sliderInputsSource from '~/examples/slider/Inputs.vue?raw'
 import SliderInputsPlacement from '~/examples/slider/InputsPlacement.vue'
 import sliderInputsPlacementSource from '~/examples/slider/InputsPlacement.vue?raw'
+import SliderFormat from '~/examples/slider/Format.vue'
+import sliderFormatSource from '~/examples/slider/Format.vue?raw'
 import SliderInvalid from '~/examples/slider/Invalid.vue'
 import sliderInvalidSource from '~/examples/slider/Invalid.vue?raw'
 import SliderMinMax from '~/examples/slider/MinMax.vue'
@@ -94,6 +96,12 @@ useDocsHead('slider')
   <DocsProse keypath="slider.examples.inputsPlacement.text" />
   <DocsExample :source="sliderInputsPlacementSource" stack>
     <SliderInputsPlacement />
+  </DocsExample>
+
+  <h3 id="format">{{ t('slider.examples.format.title') }}</h3>
+  <DocsProse keypath="slider.examples.format.text" />
+  <DocsExample :source="sliderFormatSource" stack>
+    <SliderFormat />
   </DocsExample>
 
   <h3 id="sizes">{{ t('slider.examples.sizes.title') }}</h3>

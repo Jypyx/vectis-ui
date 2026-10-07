@@ -4,12 +4,9 @@
  * it does not become part of the accessible name.
  */
 
-import { ref } from 'vue'
-
 import VFieldAnnouncer from '../VField/VFieldAnnouncer.vue'
 
-import { useFieldIds } from '../../composables/useFieldIds'
-import { useRootAttrs } from '../../composables/useRootAttrs'
+import { useChoice } from '../../composables/useChoice'
 import type { ItemValue } from '../../types'
 
 /** Which side of the dot the label sits on. */
@@ -68,13 +65,17 @@ const props = withDefaults(defineProps<RadioProps>(), {
 // attributes is what makes the arrow keys work at all. The root being a layout box, `name` left
 // on it would reach nothing.
 defineOptions({ inheritAttrs: false })
-const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
-const { hintId, errorId, describedBy } = useFieldIds(
-  attrs,
-  () => !!props.hint && !props.error,
-  undefined,
-  () => !!props.error,
-)
+const {
+  rootClass,
+  rootStyle,
+  forwardedAttrs,
+  hintId,
+  errorId,
+  describedBy,
+  inputEl,
+  refuseWhenReadonly,
+  exposed,
+} = useChoice(props)
 
 /**
  * The value selected in the group, shared by every radio carrying the same `name`. It is
@@ -87,24 +88,7 @@ defineSlots<{
   default?(): unknown
 }>()
 
-const inputEl = ref<HTMLInputElement | null>(null)
-
-// @core
-// The native `readonly` attribute does nothing on a radio button. Cancelling the click is what
-// refuses the selection: the browser puts the group's previous selection back and fires no
-// `change`.
-function refuseWhenReadonly(event: MouseEvent) {
-  if (props.readonly) event.preventDefault()
-}
-
-// The root is a wrapper, so a template ref on the component reaches the layout box and not
-// the control: these two are the way to the real radio button.
-defineExpose({
-  /** Moves the focus to the real radio button. */
-  focus: (options?: FocusOptions) => inputEl.value?.focus(options),
-  /** The real `<input type="radio">`, for what `focus` does not cover. */
-  el: inputEl,
-})
+defineExpose(exposed)
 </script>
 
 <template>
