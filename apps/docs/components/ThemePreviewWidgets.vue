@@ -42,9 +42,14 @@ import {
   star,
 } from 'vectis-ui/icons'
 
-/* The calendar renders in the browser only, so it can open on the current week. */
-const anchor = ref(mondayOf(new Date()))
-const events = ref<CalendarEvent[]>(scheduleFor(anchor.value))
+/* A fixed week for prerendering, moved to the current one once mounted. */
+const REFERENCE_MONDAY = '2026-01-05'
+const anchor = ref(REFERENCE_MONDAY)
+const events = ref<CalendarEvent[]>(scheduleFor(REFERENCE_MONDAY))
+onMounted(() => {
+  anchor.value = mondayOf(new Date())
+  events.value = scheduleFor(anchor.value)
+})
 
 function isoOf(date: Date): string {
   const two = (part: number) => String(part).padStart(2, '0')
@@ -133,19 +138,12 @@ const files = ['Brief.pdf', 'Budget.xlsx', 'Roadmap.md']
 <template>
   <section class="tp-widgets">
     <VCard title="Schedule" class="tp-span-2">
-      <!--
-        Client-only: the calendar marks today, which the prerendered page cannot know, and the
-        difference would be reported as a hydration mismatch.
-      -->
-      <ClientOnly>
-        <VCalendar
-          v-model:date="anchor"
-          v-model:events="events"
-          label="Team schedule"
-          class="tp-calendar"
-        />
-        <template #fallback><div class="tp-calendar" /></template>
-      </ClientOnly>
+      <VCalendar
+        v-model:date="anchor"
+        v-model:events="events"
+        label="Team schedule"
+        class="tp-calendar"
+      />
     </VCard>
 
     <VCard title="Pick a slot">

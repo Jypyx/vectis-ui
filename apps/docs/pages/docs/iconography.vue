@@ -59,7 +59,7 @@ setIconResolver(ligatureIconResolver())
 setIconResolver(ligatureIconResolver({ aliases: { close: 'clear', more_horiz: 'more' } }))`
 
 const componentCode = `import { componentIconResolver, setIconResolver } from 'vectis-ui'
-import { Check, Search, X } from 'lucide-vue-next'
+import { Check, Search, X } from '@lucide/vue'
 
 setIconResolver(
   componentIconResolver({
