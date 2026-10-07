@@ -1,4 +1,4 @@
-﻿import { fireEvent, render } from '@testing-library/vue'
+import { fireEvent, render } from '@testing-library/vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick, ref } from 'vue'
 

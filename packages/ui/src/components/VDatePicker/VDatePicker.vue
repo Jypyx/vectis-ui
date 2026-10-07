@@ -131,8 +131,8 @@ interface DatePickerProps {
    */
   disabledDates?: DatePickerMatcher
   /**
-   * Also fills the empty corners of the grid with the greyed days of the neighbouring
-   * months. It is off by default.
+   * Fills the empty corners of the grid with the greyed days of the neighbouring months. It is
+   * off by default.
    */
   showAdjacentDays?: boolean
   /**

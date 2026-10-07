@@ -16,6 +16,7 @@ import type {
   ListboxOptionSlotProps,
   ListboxSeparator,
 } from '../types'
+import { clamp } from '../utils/number'
 import { useVirtualList, type VirtualList, type VirtualSegment } from './useVirtualList'
 
 const isListboxGroup = (item: ListboxItem): item is ListboxGroup => 'options' in item
@@ -254,7 +255,7 @@ export function useListbox(options: ListboxOptions): Listbox {
   // @keyboard
   function page(delta: number) {
     const list = visible.value
-    const target = Math.min(Math.max(activeIndex.value + delta, 0), list.length - 1)
+    const target = clamp(activeIndex.value + delta, 0, list.length - 1)
     const step = Math.sign(delta)
     // Past a disabled option in the direction of travel, then back if the end was disabled too.
     for (const dir of [step, -step]) {

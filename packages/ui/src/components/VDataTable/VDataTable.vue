@@ -1,4 +1,4 @@
-﻿<script setup lang="ts" generic="Row extends Record<string, unknown>">
+<script setup lang="ts" generic="Row extends Record<string, unknown>">
 // @core
 /**
  * Native table semantics remain intact. JavaScript adds sorting, paging, selection and
@@ -530,10 +530,8 @@ function sortIconFor(column: DataTableColumn): IconSource {
   return sort.value.direction === 'asc' ? props.sortAscIcon : props.sortDescIcon
 }
 
-// And when a server answers, nothing native waits before asking it, so that has to be written.
-// The waiting is delegated to `useTimer`; a delay of zero running at once, cancellation when
-// the component goes away; and the term that was actually committed is what the parameters
-// below report.
+// With `serverSide`, the search reaches the server only once the reader pauses: nothing native
+// waits before asking. The term actually committed is what the parameters below report.
 const committedSearch = ref(search.value)
 const searchTimer = useTimer()
 

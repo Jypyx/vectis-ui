@@ -138,7 +138,7 @@ export interface Messages {
     shift: string
     /** The same key as Command, outside a Mac: the Windows key. */
     windows: string
-    /** And the same key again on Linux. */
+    /** The same key as Command on Linux: the Super key. */
     super: string
     enter: string
     escape: string
@@ -308,7 +308,7 @@ export interface Messages {
     label: string
     /** What the carousel IS, said in place of the word "region". Lower case, as a role name is. */
     roleDescription: string
-    /** And the same for one slide. */
+    /** What one slide IS, said in place of its role name. Lower case, as a role name is. */
     slideRoleDescription: string
     /** What the scrolling area itself is called: it can be reached with the Tab key. */
     slides: string
