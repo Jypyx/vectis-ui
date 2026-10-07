@@ -1,8 +1,5 @@
 // @keyboard @a11y
-/**
- * Arrow-key navigation over a row or column of controls, in one place: VPagination, VTabs,
- * VToggle, VMenuPanel and VSideNavigation all use it.
- */
+/** Arrow-key navigation over a row or column of controls, shared by every roving-focus group. */
 import { isRtl } from './direction'
 
 /** The elements the arrows may land on, discovered from the DOM rather than a registry. */

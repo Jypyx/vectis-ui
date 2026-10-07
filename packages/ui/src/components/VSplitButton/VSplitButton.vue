@@ -78,7 +78,7 @@ interface SplitButtonProps {
    */
   menuWidth?: number | string
   /** Stops the menu from being narrower than the whole control, while leaving it free to grow. */
-  matchWidth?: boolean
+  matchTrigger?: boolean
 }
 
 const props = withDefaults(defineProps<SplitButtonProps>(), {
@@ -100,7 +100,7 @@ const props = withDefaults(defineProps<SplitButtonProps>(), {
   placement: 'bottom-end',
   menuSize: 'sm',
   menuWidth: undefined,
-  matchWidth: false,
+  matchTrigger: false,
 })
 
 const emit = defineEmits<{
@@ -167,7 +167,7 @@ defineExpose({
       :placement="placement"
       :size="menuSize"
       :width="menuWidth"
-      :match-trigger="matchWidth"
+      :match-trigger="matchTrigger"
     >
       <template #trigger="{ triggerProps }">
         <VIconButton

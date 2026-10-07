@@ -4,7 +4,7 @@ import { VMenuItem, VSplitButton } from 'vectis-ui'
 
 <template>
   <div class="column">
-    <VSplitButton full-width match-width placement="bottom-start" label="Export">
+    <VSplitButton full-width match-trigger placement="bottom-start" label="Export">
       <VMenuItem label="Export as CSV" />
       <VMenuItem label="Export as PDF" />
       <VMenuItem label="Export as JSON" />

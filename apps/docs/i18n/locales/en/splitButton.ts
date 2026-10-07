@@ -20,7 +20,7 @@ export default {
     },
     fullWidth: {
       title: 'Full width and menu placement',
-      text: 'The menu is anchored to the whole control and lines up with its end by default. With <code>fullWidth</code>, the main action takes the room and the menu button stays square; <code>matchWidth</code> keeps the menu at least as wide as the control.',
+      text: 'The menu is anchored to the whole control and lines up with its end by default. With <code>fullWidth</code>, the main action takes the room and the menu button stays square; <code>matchTrigger</code> keeps the menu at least as wide as the control.',
     },
   },
   api: {
@@ -46,7 +46,7 @@ export default {
         placement: 'Menu position relative to the whole control; adjusts when space is short.',
         menuSize: 'Row height of the menu.',
         menuWidth: 'Menu width. Numbers use pixels; strings use CSS lengths or keywords.',
-        matchWidth: 'Keeps the menu at least as wide as the whole control.',
+        matchTrigger: 'Keeps the menu at least as wide as the whole control.',
         vModelOpen: 'Open state of the menu.',
       },
       events: {

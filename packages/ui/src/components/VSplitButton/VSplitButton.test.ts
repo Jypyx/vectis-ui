@@ -161,7 +161,7 @@ describe('VSplitButton', () => {
 
   it('menu props reach the panel', () => {
     const { container } = renderHarness(
-      `<VSplitButton label="Save" menu-size="md" menu-width="16rem" match-width>
+      `<VSplitButton label="Save" menu-size="md" menu-width="16rem" match-trigger>
         ${items}
       </VSplitButton>`,
     )

@@ -20,7 +20,7 @@ export default {
     },
     fullWidth: {
       title: 'Pleine largeur et position du menu',
-      text: 'Le menu est ancré à l’ensemble du contrôle et s’aligne par défaut sur sa fin. Avec <code>fullWidth</code>, l’action principale prend la place et le bouton de menu reste carré ; <code>matchWidth</code> garde le menu au moins aussi large que le contrôle.',
+      text: 'Le menu est ancré à l’ensemble du contrôle et s’aligne par défaut sur sa fin. Avec <code>fullWidth</code>, l’action principale prend la place et le bouton de menu reste carré ; <code>matchTrigger</code> garde le menu au moins aussi large que le contrôle.',
     },
   },
   api: {
@@ -48,7 +48,7 @@ export default {
         menuSize: 'Hauteur des lignes du menu.',
         menuWidth:
           'Largeur du menu. Un nombre est lu en pixels ; une chaîne en longueur ou mot-clé CSS.',
-        matchWidth: 'Garde le menu au moins aussi large que l’ensemble du contrôle.',
+        matchTrigger: 'Garde le menu au moins aussi large que l’ensemble du contrôle.',
         vModelOpen: 'État d’ouverture du menu.',
       },
       events: {

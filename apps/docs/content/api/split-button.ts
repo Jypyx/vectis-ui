@@ -28,7 +28,7 @@ export default {
         { name: 'placement', type: 'MenuPlacement', values: "'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end'", default: "'bottom-end'" },
         { name: 'menuSize', type: 'MenuSize', values: "'sm' | 'md' | 'lg'", default: "'sm'" },
         { name: 'menuWidth', type: 'number | string' },
-        { name: 'matchWidth', type: 'boolean', default: 'false' },
+        { name: 'matchTrigger', type: 'boolean', default: 'false' },
         { name: 'v-model:open', key: 'vModelOpen', type: 'boolean', default: 'false' },
       ],
       events: [

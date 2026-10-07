@@ -58,7 +58,7 @@ const meta = {
     fullWidth: { control: 'boolean' },
     disabled: { control: 'boolean' },
     loading: { control: 'boolean' },
-    matchWidth: { control: 'boolean' },
+    matchTrigger: { control: 'boolean' },
   },
   args: {
     label: 'Save',
@@ -72,7 +72,7 @@ const meta = {
     fullWidth: false,
     disabled: false,
     loading: false,
-    matchWidth: false,
+    matchTrigger: false,
     onClick: fn(),
   },
   render: (args) => ({
@@ -244,7 +244,7 @@ export const LinkWithIcon: Story = {
 
 /**
  * `fullWidth` stretches the control: the main action takes the room, the menu button stays
- * square. `matchWidth` keeps the menu at least as wide as the whole control.
+ * square. `matchTrigger` keeps the menu at least as wide as the whole control.
  */
 export const FullWidth: Story = {
   render: () => ({
@@ -252,7 +252,7 @@ export const FullWidth: Story = {
     setup: () => ({ t }),
     template: `
       <div style="inline-size: 360px">
-        <VSplitButton full-width match-width placement="bottom-start" :label="t.export">
+        <VSplitButton full-width match-trigger placement="bottom-start" :label="t.export">
           <VMenuItem :label="t.exportCsv" />
           <VMenuItem :label="t.exportPdf" />
         </VSplitButton>
