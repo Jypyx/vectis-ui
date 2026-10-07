@@ -2,6 +2,50 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.13.0] - 2026-10-07
+
+### Upgrading from 0.12.x
+
+- **Labels, hints and errors are rendered by VField.** VInput, VTextarea, VCombobox, VDateInput, VTimeInput, VFileInput, VInputGroup, VInputOTP and VSlider compose VField, and VCheckbox, VRadio and VSwitch share its message styles. The per-control classes (`.v-input-label`, `.v-input-hint`, `.v-textarea-label`, `.v-textarea-hint`, `.v-file-input-hint`, `.v-input-group-label`, `.v-input-group-hint`, `.v-input-otp-hint`, `.v-slider-hint`, `.v-checkbox-hint`, `.v-radio-hint`, `.v-switch-hint`, `.v-choice-hint`...) are replaced by `.v-field-label`, `.v-field-hint`, `.v-field-error` and `.v-field-required`.
+- **VInput and VTextarea carry their state on the field.** `data-size`, `data-compact`, `data-readonly` and the `v-control` class move from the root to `.v-input-field` and `.v-textarea-field`. VInputGroup and VInputOTP carry their group role and consumer attributes on an inner row, and VSlider its state attributes on `.v-slider-body`.
+- **VFileInput `required` no longer reaches the hidden file input.** It adds the asterisk and announces the field as required; the browser no longer validates it, since its message would point at a hidden element. Check the selection before submitting.
+- **VSlider, VInputOTP and VProgressLinear render `label` as visible text** above the control. Pass `hideLabel` to keep it for assistive technology only, or `aria-label` on VInputOTP for a name without visible text. VProgressLinear wraps its bar in `.v-progress-linear-field`, which takes `class` and `style`; other attributes still reach the bar.
+- **The `outlined` variant is renamed `outline`** on VAccordion, VTabs and VDataTable, without an alias, and paints the page surface instead of the raised one.
+- **VDataTable no longer accepts `caption` or the `#title` slot.** Use `title` and `subtitle`, or the `#header` slot. The row holding the title and the search is now `.v-data-table-header`, and `.v-data-table-toolbar` is the row of the new `#toolbar` slot. The frame moves from the root to `.v-data-table-frame`, which wraps the scroller and the footer: the header and the toolbar no longer take its gutter.
+- **VTooltip `delay` is renamed `openDelay`.** The tooltip now waits `closeDelay` (100 ms by default) before closing.
+- **`pickerIconLabel` is renamed `pickerLabel`** on VDateInput, VTimeInput and VFileInput. VCombobox no longer accepts `hideExpandIcon`.
+- **VCombobox list classes follow the shared listbox.** `.v-combobox-option`, `-group`, `-group-label`, `-separator`, `-spacer`, `-text`, `-overflow` and `-overflow-chip` are now `.v-listbox-*`. The `Combobox*` option types remain as aliases of the new `Listbox*` types.
+- **VCheckbox and VTreeView draw their box with the internal VCheckMark.** `.v-checkbox-box`, `.v-checkbox-mark`, `.v-checkbox-mark-check`, `.v-checkbox-mark-dash` and `.v-tree-check*` are replaced by `.v-check-mark`, `.v-check-mark-glyph`, `.v-check-mark-tick` and `.v-check-mark-dash`.
+
+### Added
+
+- **Forms:** VField and VFieldset wrap any control with a label, a hint, an error and a required marker. VSelect is a select-only combobox with groups, multiple selection, a clear button and native form participation. VNumberInput formats its value for the locale and steps it from the keyboard or its buttons. VColorPicker and VColorInput choose a colour in hex, rgb, hsl or oklch, with an optional opacity track, swatches and an eyedropper. VRating rates out of a row of icons built on native radios.
+- **Feedback and content:** VAlert, VCard, VEmptyState, VMeter and VTimeline.
+- **Navigation and actions:** VLink, VStepper, VTreeView, VSplitButton, VContextMenu and VCommandPalette.
+- **Overlays and layout:** VDrawer, VHoverCard, VResizable with VResizablePanel, and VVirtualList for long lists rendered in a window.
+- Every labelled control gains `error`, which replaces the hint and implies `invalid`, and controls built on VField gain `required`, `hideLabel` and `labelPosition`. VField gains `disabled`, a `group` mode and a `meta` slot.
+- VDataTable gains `virtual` for windowed rendering, `hasMore` with a `load-more` event for infinite scroll, `subtitle`, and the `#header` and `#toolbar` slots. Its default empty state uses VEmptyState and says "No results" after a search.
+- VCombobox gains `virtual`.
+- VCard and VAccordion, VTabs, VDataTable and VCalendar share the `flat`, `outline`, `elevated` and `filled` variants. VCalendar gains `variant`, `outline` by default.
+- VSlider gains `formatOptions` and `locale`, applied to its tooltip, number fields and `aria-valuetext`.
+- The built-in icons `add`, `remove`, `colorize`, `inbox`, `search_off`, `open_in_new`, `priority_high` and `star`.
+- The `--vectis-color-border-on-fill` token, and dimension tokens for the new components.
+- Dictionary namespaces `link`, `select`, `commandPalette`, `meter`, `colorPicker`, `colorInput`, `numberInput`, `splitButton`, `rating`, `resizable`, `stepper` and `treeView`, and `dataTable.noResults`.
+
+### Changed
+
+- VButtonGroup's bordered seams follow each segment's variant, and are hidden beside a filled segment. VSplitButton, VPagination and VToggle inherit the change.
+- The flat variants of VTabs, VAccordion and VDataTable keep the system radius instead of squaring their corners.
+- VCombobox shows a small VEmptyState by default when it has nothing to list.
+
+### Fixed
+
+- VDatePicker mirrors the arrow keys in right-to-left grids.
+- A selection checkbox's hidden input inside a scrolling VDataTable no longer stretches the page or scrolls it on focus.
+- VHotkeys keeps its default inline padding when attached.
+
+**Full diff:** [v0.12.0...v0.13.0](https://github.com/Jypyx/vectis-ui/compare/v0.12.0...v0.13.0)
+
 ## [0.12.0] - 2026-10-05
 
 ### Upgrading from 0.11.x
