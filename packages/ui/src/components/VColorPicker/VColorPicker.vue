@@ -501,7 +501,8 @@ defineExpose({
   .v-color-picker-area {
     position: relative;
     block-size: var(--vectis-control-size-color-picker-area);
-    border-radius: var(--vectis-radius-interactive);
+    /* Capped like VTextarea so a pill theme rounds the area as much as a md VInput, not into a stadium. */
+    border-radius: min(var(--vectis-radius-interactive), calc(var(--vectis-control-height-md) / 2));
     background:
       linear-gradient(to top, black, transparent), linear-gradient(to right, white, transparent),
       hsl(var(--color-picker-hue) 100% 50%);
