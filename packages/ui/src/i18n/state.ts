@@ -63,10 +63,25 @@ function mergeMessages(base: Messages, patch: MessagesInput): Messages {
 }
 
 /**
+ * Whether `Intl` takes a tag: a malformed one ("fr_FR") throws a RangeError in every formatter,
+ * so it is ignored rather than passed on.
+ */
+function isValidTag(tag: string): boolean {
+  try {
+    Intl.getCanonicalLocales(tag)
+    return true
+  } catch {
+    if (isDev) console.warn(`[vectis] Locale “${tag}” ignored: not a language tag ('fr-FR').`)
+    return false
+  }
+}
+
+/**
  * Chooses the locale the library speaks. Those components also take their own `locale`, which
- * wins.
+ * wins. A malformed tag is ignored and the locale in force stays.
  */
 export function setLocale(locale: string): void {
+  if (!isValidTag(locale)) return
   const lang = langOf(locale)
   if (isDev && !registry.has(lang)) {
     console.warn(
@@ -124,6 +139,9 @@ export function useLocale(): ShallowRef<string> {
  * lets the global locale have its chance.
  */
 export function useResolvedLocale(locale: () => string | undefined): ComputedRef<string> {
-  // An empty tag is no tag: handed to `Intl` as it stands, it throws a RangeError.
-  return computed(() => locale() || currentLocale.value)
+  // An empty or malformed tag is no tag: handed to `Intl` as it stands, it throws a RangeError.
+  return computed(() => {
+    const tag = locale()
+    return tag && isValidTag(tag) ? tag : currentLocale.value
+  })
 }

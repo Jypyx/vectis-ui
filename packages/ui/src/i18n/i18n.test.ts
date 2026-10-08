@@ -317,4 +317,29 @@ describe('useResolvedLocale', () => {
     setLocale('fr-FR')
     expect(useResolvedLocale(() => '').value).toBe('fr-FR')
   })
+
+  it('reads a malformed locale as none given, and warns', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    setLocale('fr-FR')
+    expect(useResolvedLocale(() => 'en_US').value).toBe('fr-FR')
+    expect(warn.mock.calls.at(-1)?.[0]).toContain('en_US')
+  })
+})
+
+describe('a malformed locale tag', () => {
+  // "fr_FR" makes every Intl constructor throw a RangeError, which would break each component
+  // formatting a date, a number or a sort order.
+  it('is refused by setLocale, which keeps the locale in force and warns', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    setLocale('fr_FR')
+    expect(useResolvedLocale(() => undefined).value).toBe(DEFAULT_LOCALE)
+    expect(warn).toHaveBeenCalledOnce()
+    expect(warn.mock.calls[0]?.[0]).toContain('fr_FR')
+  })
+
+  it('leaves a component rendering', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    setLocale('fr_FR')
+    expect(() => render(VDatePicker, { props: { locale: 'de_DE' } })).not.toThrow()
+  })
 })
