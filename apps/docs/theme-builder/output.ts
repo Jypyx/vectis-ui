@@ -5,13 +5,10 @@
  */
 import { formatOklch, sameColor } from './color'
 import { BUILTIN_ICON_NAMES } from './iconAliases'
+import { CODE_FONTS, TEXT_FONTS, fontById, googleFontsUrl } from './fonts'
 import {
-  BODY_FONTS,
-  CODE_FONTS,
-  HEADING_FONTS,
+  RADIUS_FULL,
   RADIUS_PRESETS,
-  fontById,
-  googleFontsUrl,
   iconLibraryById,
   materialFontUrl,
   type IconLibrary,
@@ -22,7 +19,6 @@ import {
   GROUP_ROLES,
   cssNameOf,
   resolveColors,
-  resolveRadius,
   type ThemeConfig,
 } from './model'
 
@@ -38,6 +34,7 @@ export interface ThemeDeclarations {
 }
 
 const rem = (px: number) => (px === 0 ? '0px' : `${px / 16}rem`)
+const radiusValue = (px: number) => (px === RADIUS_FULL ? 'var(--vectis-radius-pill)' : rem(px))
 
 /** Every token the configuration sets; with `full`, the unchanged ones too. */
 export function themeDeclarations(config: ThemeConfig, full = false): ThemeDeclarations {
@@ -55,8 +52,8 @@ export function themeDeclarations(config: ThemeConfig, full = false): ThemeDecla
     if (darkChanged) dark.push([cssNameOf(role), formatOklch(darkColors[role]!)])
   }
 
-  const heading = fontById(HEADING_FONTS, config.fonts.heading)
-  const body = fontById(BODY_FONTS, config.fonts.body)
+  const heading = fontById(TEXT_FONTS, config.fonts.heading)
+  const body = fontById(TEXT_FONTS, config.fonts.body)
   const code = fontById(CODE_FONTS, config.fonts.code)
   if (full || heading.google) light.push(['--vectis-text-family-heading', heading.stack])
   if (full || body.google) light.push(['--vectis-text-family', body.stack])
@@ -69,14 +66,14 @@ export function themeDeclarations(config: ThemeConfig, full = false): ThemeDecla
     light.push(['--vectis-font-family-icon', `'${library.fontFamily}'`])
   }
 
-  const radius = resolveRadius(config)
+  const radius = RADIUS_PRESETS[config.radius]
   const initial = RADIUS_PRESETS.medium
   for (const role of ['interactive', 'surface', 'overlay'] as const)
     if (full || radius[role] !== initial[role])
-      light.push([`--vectis-radius-${role}`, rem(radius[role])])
+      light.push([`--vectis-radius-${role}`, radiusValue(radius[role])])
   // The chip radius aliases the control radius, so it needs stating only when they differ.
   if (full || radius.chip !== radius.interactive)
-    light.push(['--vectis-radius-chip', rem(radius.chip)])
+    light.push(['--vectis-radius-chip', radiusValue(radius.chip)])
 
   const rootFontSize =
     full || config.baseSize !== 16 ? `${(config.baseSize / 16) * 100}%` : undefined

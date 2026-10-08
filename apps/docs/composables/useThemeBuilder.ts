@@ -2,8 +2,7 @@
  * The theme builder's configuration, shared by its panel components and kept in the reader's
  * browser between visits.
  */
-import { RADIUS_PRESETS } from '~/theme-builder/options'
-import { DEFAULT_CONFIG, isThemeConfig, seedCustom, type ThemeConfig } from '~/theme-builder/model'
+import { DEFAULT_CONFIG, isThemeConfig, type ThemeConfig } from '~/theme-builder/model'
 
 const STORAGE_KEY = 'vectis-docs-theme-builder'
 
@@ -31,28 +30,12 @@ export function useThemeBuilder() {
     }
   }
 
-  // Key order matches: every config is built from these defaults, the seeds and the presets.
+  // Key order matches: every config is built from these defaults.
   const isDefault = computed(() => JSON.stringify(config.value) === JSON.stringify(DEFAULT_CONFIG))
 
   function reset() {
     config.value = copy(DEFAULT_CONFIG)
   }
 
-  /** Entering the custom mode seeds it from the current preset, unless it was edited. */
-  function setColorMode(mode: ThemeConfig['colors']['mode']) {
-    const { colors } = config.value
-    if (mode === 'custom' && !colors.edited)
-      colors.custom = seedCustom(colors.accent, colors.neutral)
-    colors.mode = mode
-  }
-
-  /** Entering the custom radius starts from the preset in use. */
-  function setRadiusMode(mode: ThemeConfig['radius']['mode']) {
-    const { radius } = config.value
-    if (mode === 'custom' && radius.mode === 'preset')
-      radius.custom = { ...RADIUS_PRESETS[radius.preset] }
-    radius.mode = mode
-  }
-
-  return { config, isDefault, restore, persist, reset, setColorMode, setRadiusMode }
+  return { config, isDefault, restore, persist, reset }
 }

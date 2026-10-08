@@ -1,102 +1,5 @@
-/**
- * The closed lists the builder offers: fonts, icon libraries, radius presets and root sizes.
- * Google Fonts weights are each family's real ones, since the API rejects or substitutes a
- * weight a static family does not have.
- */
-import { tokens } from 'vectis-ui/tokens'
-
+/** The closed lists the builder offers: icon libraries, radius presets and root sizes. */
 import { ICON_ALIASES } from './iconAliases'
-
-import type { DesignToken, TokenGroup } from 'vectis-ui/tokens'
-
-/** Reads a primitive token's literal value by its path, as `font.family.sans`. */
-function primitive(path: string): string {
-  const node = path
-    .split('.')
-    .reduce<TokenGroup | DesignToken>(
-      (group, key) => (group as TokenGroup)[key]!,
-      tokens.primitives,
-    )
-  return (node as DesignToken).$value
-}
-
-/** The library's own stacks, which "System" restores. */
-export const SYSTEM_SANS = primitive('font.family.sans')
-export const SYSTEM_MONO = primitive('font.family.mono')
-
-export interface FontOption {
-  id: string
-  label: string
-  /** The Google Fonts family and the weights to request; absent for the system stacks. */
-  google?: { family: string; weights: string }
-  /** The full `font-family` value, fallbacks included. */
-  stack: string
-}
-
-const sans = (family: string, weights = '400;500;600;700'): FontOption => ({
-  id: family.toLowerCase().replaceAll(' ', '-'),
-  label: family,
-  google: { family, weights },
-  stack: `'${family}', ${SYSTEM_SANS}`,
-})
-const serif = (family: string): FontOption => ({
-  ...sans(family),
-  stack: `'${family}', Georgia, 'Times New Roman', serif`,
-})
-const mono = (family: string): FontOption => ({
-  ...sans(family, '400;500;600;700'),
-  stack: `'${family}', ${SYSTEM_MONO}`,
-})
-
-const SYSTEM: FontOption = { id: 'system', label: 'System', stack: SYSTEM_SANS }
-
-export const HEADING_FONTS: FontOption[] = [
-  SYSTEM,
-  sans('Geist'),
-  sans('Inter'),
-  sans('Josefin Sans'),
-  sans('Poppins'),
-  sans('Montserrat'),
-  sans('Space Grotesk'),
-  serif('Playfair Display'),
-  serif('Fraunces'),
-]
-
-export const BODY_FONTS: FontOption[] = [
-  SYSTEM,
-  sans('Geist'),
-  sans('Inter'),
-  sans('Roboto'),
-  sans('Open Sans'),
-  sans('Lato', '400;700'),
-  sans('IBM Plex Sans'),
-  sans('Source Sans 3'),
-  sans('Nunito Sans'),
-]
-
-export const CODE_FONTS: FontOption[] = [
-  { id: 'system', label: 'System', stack: SYSTEM_MONO },
-  mono('Geist Mono'),
-  mono('JetBrains Mono'),
-  mono('Fira Code'),
-  mono('IBM Plex Mono'),
-  mono('Source Code Pro'),
-]
-
-export const fontById = (list: FontOption[], id: string): FontOption =>
-  list.find((font) => font.id === id) ?? list[0]!
-
-/** The Google Fonts stylesheet for the chosen families, or nothing when all are system. */
-export function googleFontsUrl(fonts: FontOption[]): string | undefined {
-  const families = [
-    ...new Map(fonts.filter((f) => f.google).map((f) => [f.id, f.google!])).values(),
-  ]
-  if (families.length === 0) return undefined
-  const query = families
-    .map(({ family, weights }) => `family=${family.replaceAll(' ', '+')}:wght@${weights}`)
-    .join('&')
-  return `https://fonts.googleapis.com/css2?${query}&display=swap`
-}
 
 export type IconLibraryId =
   | 'material-rounded'
@@ -258,9 +161,11 @@ export const iconLibraryById = (id: IconLibraryId): IconLibrary =>
   ICON_LIBRARIES.find((library) => library.id === id) ?? ICON_LIBRARIES[0]!
 
 export type RadiusRole = 'interactive' | 'surface' | 'overlay' | 'chip'
-export const RADIUS_ROLES: RadiusRole[] = ['interactive', 'surface', 'overlay', 'chip']
 
-export type RadiusPresetId = 'none' | 'small' | 'medium' | 'large' | 'extra'
+export type RadiusPresetId = 'none' | 'small' | 'medium' | 'large' | 'extra' | 'full'
+
+/** The library's pill radius, which the generated theme names rather than spells. */
+export const RADIUS_FULL = 9999
 
 /** Each preset in pixels. Medium is the library's default; chips follow the controls. */
 export const RADIUS_PRESETS: Record<RadiusPresetId, Record<RadiusRole, number>> = {
@@ -269,6 +174,7 @@ export const RADIUS_PRESETS: Record<RadiusPresetId, Record<RadiusRole, number>> 
   medium: { interactive: 6, surface: 8, overlay: 12, chip: 6 },
   large: { interactive: 8, surface: 12, overlay: 16, chip: 8 },
   extra: { interactive: 12, surface: 16, overlay: 24, chip: 12 },
+  full: { interactive: RADIUS_FULL, surface: 16, overlay: 24, chip: RADIUS_FULL },
 }
 
 export const BASE_SIZES = [14, 15, 16, 17, 18] as const

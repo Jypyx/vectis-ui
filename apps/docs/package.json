@@ -15,6 +15,7 @@
     "pretypecheck": "pnpm --filter vectis-ui build",
     "typecheck": "nuxt typecheck",
     "icons": "tsx scripts/build-icons.ts",
+    "fonts": "tsx scripts/build-fonts.ts",
     "api": "tsx scripts/build-api.ts"
   },
   "dependencies": {

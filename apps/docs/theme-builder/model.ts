@@ -1,11 +1,11 @@
 /**
  * What the builder lets one choose, and how the choice becomes token values. The reference
  * for every colour role is the library's own token tree: a preset swaps the hue a role points
- * at, and the custom mode re-centres the same ramp on a colour of one's own.
+ * at.
  */
 import { tokens } from 'vectis-ui/tokens'
 
-import { contrastRatio, deriveColor, formatOklch, parseColor, type Oklch } from './color'
+import { contrastRatio, deriveColor, parseColor, type Oklch } from './color'
 import {
   ACCENT_HUES,
   NEUTRAL_HUES,
@@ -20,7 +20,6 @@ import {
   type BaseSize,
   type IconLibraryId,
   type RadiusPresetId,
-  type RadiusRole,
 } from './options'
 
 import type { DesignToken, TokenGroup } from 'vectis-ui/tokens'
@@ -186,37 +185,13 @@ function neutralPreset(hue: NeutralHue, scheme: Scheme): Record<string, Oklch> {
   )
 }
 
-export interface SchemeColors {
-  /** The base colour, as `oklch()`. */
-  base: string
-  /** Roles set by hand, which win over the derived values. */
-  overrides: Record<string, string>
-}
-
-export type CustomColors = Record<ColorGroup, Record<Scheme, SchemeColors>>
-
 export interface ThemeConfig {
-  version: 1
-  colors: {
-    mode: 'preset' | 'custom'
-    accent: AccentHue
-    neutral: NeutralHue
-    /**
-     * Seeded from the `accent` and `neutral` preset on entering the custom mode, whose ramps
-     * the custom colours are then derived from.
-     */
-    custom: CustomColors
-    /** Whether the custom colours were edited since they were seeded. */
-    edited: boolean
-  }
+  version: 2
+  colors: { accent: AccentHue; neutral: NeutralHue }
   fonts: { heading: string; body: string; code: string }
   icons: IconLibraryId
   baseSize: BaseSize
-  radius: {
-    mode: 'preset' | 'custom'
-    preset: RadiusPresetId
-    custom: Record<RadiusRole, number>
-  }
+  radius: RadiusPresetId
 }
 
 /** The colours a preset gives each group, per scheme. */
@@ -232,134 +207,27 @@ export function presetColors(
   }
 }
 
-/** Custom colours seeded from a preset: its solid tones and its neutral 500 as bases. */
-export function seedCustom(accent: AccentHue, neutral: NeutralHue): CustomColors {
-  const entry = (group: ColorGroup) =>
-    Object.fromEntries(
-      SCHEMES.map((scheme) => {
-        const base =
-          group === 'neutral'
-            ? parseColor(ramps[neutral]['500'])!
-            : presetColors(accent, neutral, scheme)[group]!
-        return [scheme, { base: formatOklch(base), overrides: {} }]
-      }),
-    ) as Record<Scheme, SchemeColors>
-  return Object.fromEntries(COLOR_GROUPS.map((group) => [group, entry(group)])) as CustomColors
-}
-
-/**
- * The colour a custom base stands for in the preset it was seeded from: the solid tone, or the
- * neutral 500 step. Deriving from that preset's own ramp means an untouched base reproduces it.
- */
-function pivotOf(config: ThemeConfig, group: ColorGroup, scheme: Scheme): Oklch {
-  const { accent, neutral } = config.colors
-  return group === 'neutral'
-    ? parseColor(ramps[neutral]['500'])!
-    : presetColors(accent, neutral, scheme)[group]!
-}
-
-/** Every role of a group, derived from its base and then overridden. */
-export function customGroupColors(
-  config: ThemeConfig,
-  group: ColorGroup,
-  scheme: Scheme,
-): Record<string, Oklch> {
-  const { accent, neutral, custom } = config.colors
-  const colors = custom[group][scheme]
-  const references = presetColors(accent, neutral, scheme)
-  const pivot = pivotOf(config, group, scheme)
-  const base = parseColor(colors.base) ?? pivot
-  return Object.fromEntries(
-    GROUP_ROLES[group].map((role) => {
-      const override = parseColor(colors.overrides[role])
-      return [role, override ?? deriveColor(base, references[role]!, pivot)]
-    }),
-  )
-}
-
 /** The colour of every role for a configuration and a scheme. */
-export function resolveColors(config: ThemeConfig, scheme: Scheme): Record<string, Oklch> {
-  const { colors } = config
-  if (colors.mode === 'preset') return presetColors(colors.accent, colors.neutral, scheme)
-  return Object.assign(
-    {},
-    ...COLOR_GROUPS.map((group) => customGroupColors(config, group, scheme)),
-  ) as Record<string, Oklch>
-}
-
-export interface ContrastIssue {
-  scheme: Scheme
-  group: ColorGroup
-  /** The foreground and background roles, `on-accent` standing for white text. */
-  foreground: string
-  background: string
-  ratio: number
-  required: number
-}
-
-const PAIRS: { group: ColorGroup; foreground: string; background: string; required: number }[] = [
-  ...(['accent', 'danger', 'success'] as const).flatMap((tone) => [
-    { group: tone, foreground: 'text-on-accent', background: tone, required: 4.5 },
-    { group: tone, foreground: `${tone}-text`, background: 'surface', required: 4.5 },
-    { group: tone, foreground: `${tone}-text`, background: `${tone}-surface`, required: 4.5 },
-  ]),
-  { group: 'warning', foreground: 'text-on-warning', background: 'warning', required: 4.5 },
-  { group: 'warning', foreground: 'warning-text', background: 'surface', required: 4.5 },
-  { group: 'warning', foreground: 'warning-text', background: 'warning-surface', required: 4.5 },
-  { group: 'accent', foreground: 'focus-ring', background: 'surface', required: 3 },
-  { group: 'neutral', foreground: 'text', background: 'surface', required: 4.5 },
-  { group: 'neutral', foreground: 'text-muted', background: 'surface', required: 4.5 },
-  { group: 'neutral', foreground: 'text-muted', background: 'surface-muted', required: 4.5 },
-  { group: 'neutral', foreground: 'text-on-inverse', background: 'surface-inverse', required: 4.5 },
-]
-
-/** The pairs below WCAG AA in each scheme. Text on accent is white in every theme. */
-export function contrastIssues(config: ThemeConfig): ContrastIssue[] {
-  return SCHEMES.flatMap((scheme) => {
-    const colors: Record<string, Oklch> = {
-      ...resolveColors(config, scheme),
-      'text-on-accent': WHITE,
-    }
-    return PAIRS.flatMap((pair) => {
-      const ratio = contrastRatio(colors[pair.foreground]!, colors[pair.background]!)
-      return ratio < pair.required ? [{ ...pair, scheme, ratio }] : []
-    })
-  })
-}
+export const resolveColors = (config: ThemeConfig, scheme: Scheme): Record<string, Oklch> =>
+  presetColors(config.colors.accent, config.colors.neutral, scheme)
 
 export const DEFAULT_CONFIG: ThemeConfig = {
-  version: 1,
-  colors: {
-    mode: 'preset',
-    accent: ACCENT_HUES[0],
-    neutral: NEUTRAL_HUES[0],
-    custom: seedCustom(ACCENT_HUES[0], NEUTRAL_HUES[0]),
-    edited: false,
-  },
+  version: 2,
+  colors: { accent: ACCENT_HUES[0], neutral: NEUTRAL_HUES[0] },
   fonts: { heading: 'system', body: 'system', code: 'system' },
   icons: 'material-rounded',
   baseSize: 16,
-  radius: { mode: 'preset', preset: 'medium', custom: { ...RADIUS_PRESETS.medium } },
+  radius: 'medium',
 }
 
 /** Whether a stored value still has the shape this version reads; anything else is dropped. */
 export function isThemeConfig(value: unknown): value is ThemeConfig {
   const config = value as ThemeConfig | null
   return (
-    config?.version === 1 &&
+    config?.version === 2 &&
     (ACCENT_HUES as readonly string[]).includes(config.colors?.accent) &&
     (NEUTRAL_HUES as readonly string[]).includes(config.colors?.neutral) &&
-    COLOR_GROUPS.every((group) =>
-      SCHEMES.every((s) => typeof config.colors.custom?.[group]?.[s]?.base === 'string'),
-    ) &&
     (BASE_SIZES as readonly number[]).includes(config.baseSize) &&
-    config.radius?.preset in RADIUS_PRESETS
+    Object.hasOwn(RADIUS_PRESETS, config.radius)
   )
-}
-
-/** The radius of each role in pixels. */
-export function resolveRadius(config: ThemeConfig): Record<RadiusRole, number> {
-  return config.radius.mode === 'preset'
-    ? RADIUS_PRESETS[config.radius.preset]
-    : config.radius.custom
 }
