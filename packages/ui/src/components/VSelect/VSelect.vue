@@ -32,7 +32,7 @@ import type {
 import { toggleValue } from '../../utils/array'
 import { partitionAttrs } from '../../utils/attrs'
 import { chipScaleFor } from '../../utils/chip'
-import { createNormalizedCache, normalizeText } from '../../utils/text'
+import { createNormalizedCache } from '../../utils/text'
 
 import { canClear } from '../../composables/useClearable'
 import { useControlShape } from '../../composables/useControlShape'
@@ -40,7 +40,7 @@ import { useFocusoutDismiss } from '../../composables/useFocusoutDismiss'
 import { iconStartListener } from '../../composables/useIconClickHandlers'
 import { selectionOf, useListbox } from '../../composables/useListbox'
 import { useRootAttrs } from '../../composables/useRootAttrs'
-import { useTimer } from '../../composables/useTimer'
+import { useTypeahead } from '../../composables/useTypeahead'
 import { useMessages } from '../../i18n/state'
 
 /** One thing that can be chosen. */
@@ -367,32 +367,17 @@ function onClear() {
 }
 
 const normalizedOf = createNormalizedCache<SelectOption>()
-let typed = ''
-const typeTimer = useTimer()
+const { find: findTyped, typing } = useTypeahead()
 
 // @keyboard
-/*
- * Typing a label's first letters highlights it, as a native list does: the letters typed within
- * half a second add up to a prefix, and the same letter repeated cycles through the options it
- * starts.
- */
+// Typing a label's first letters highlights it.
 function typeahead(key: string) {
-  typed += normalizeText(key)
-  typeTimer.start(() => (typed = ''), 500)
   const list = visible.value
-  if (list.length === 0) return
-  const cycling = [...typed].every((char) => char === typed[0])
-  const needle = cycling ? typed[0]! : typed
-  // A new prefix may match the highlighted option itself; a cycle moves on from it.
-  const from = activeIndex.value + (typed.length === 1 || cycling ? 1 : 0)
-  for (let step = 0; step < list.length; step++) {
-    const index = (Math.max(from, 0) + step) % list.length
-    const option = list[index]!
-    if (!option.disabled && normalizedOf(option, option.label).startsWith(needle)) {
-      activeIndex.value = index
-      return
-    }
-  }
+  const index = findTyped(key, list.length, activeIndex.value, (i) => {
+    const option = list[i]!
+    return option.disabled ? undefined : normalizedOf(option, option.label)
+  })
+  if (index >= 0) activeIndex.value = index
 }
 
 const printable = (event: KeyboardEvent) =>
@@ -460,7 +445,7 @@ function onKeydown(event: KeyboardEvent) {
     case ' ':
       event.preventDefault()
       // While letters are being typed, a space belongs to the prefix: "New York".
-      if (typed) typeahead(' ')
+      if (typing()) typeahead(' ')
       else chooseActive()
       break
     case 'Enter':

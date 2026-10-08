@@ -20,7 +20,7 @@ import type { ItemValue } from '../../types'
 import { useAriaLabel } from '../../composables/useAriaLabel'
 import { useLiveAnnouncer } from '../../composables/useLiveAnnouncer'
 import { useRootAttrs } from '../../composables/useRootAttrs'
-import { useTimer } from '../../composables/useTimer'
+import { useTypeahead } from '../../composables/useTypeahead'
 import { useMessages } from '../../i18n/state'
 import { isRtl } from '../../utils/direction'
 import { normalizeText } from '../../utils/text'
@@ -358,24 +358,14 @@ function focusRow(node: TreeNode | undefined) {
   if (node) rowEls.get(node.item.value)?.focus()
 }
 
-const typeahead = useTimer()
-let typed = ''
+const { find: findTyped } = useTypeahead()
 
 // @keyboard
-/**
- * Moves to the next row whose label starts with what was typed in the last half-second. Repeating
- * one letter cycles through the rows starting with it.
- */
+// Moves to the row whose label starts with what was typed. Disabled rows stay focusable in a
+// tree, so they are matched too.
 function typeTo(char: string, index: number) {
-  typed += normalizeText(char)
-  typeahead.start(() => (typed = ''), 500)
   const rows = visible.value
-  const needle = [...typed].every((c) => c === typed[0]) ? typed[0]! : typed
-  const start = needle.length === 1 ? index + 1 : index
-  for (let i = 0; i < rows.length; i++) {
-    const node = rows[(start + i) % rows.length]!
-    if (normalizeText(node.item.label).startsWith(needle)) return focusRow(node)
-  }
+  focusRow(rows[findTyped(char, rows.length, index, (i) => normalizeText(rows[i]!.item.label))])
 }
 
 // @keyboard @a11y
