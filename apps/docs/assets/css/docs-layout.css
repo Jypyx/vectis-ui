@@ -756,11 +756,20 @@ html {
 }
 
 /*
- * The theme builder. From 1024px the settings card and the preview fill the viewport below the
- * header without the page scrolling, each scrolling on its own, so Generate and Reset stay in
- * view and a dialog opened in the preview too. Below, the settings open in a bottom drawer.
+ * The theme builder fills the viewport below the header without the page scrolling. From 1024px
+ * the settings card and the preview scroll on their own, so Generate and Reset stay in view and
+ * a dialog opened in the preview too. Below, the preview stops above a bar fixed to the foot of
+ * the viewport, whose button opens the settings in a bottom drawer. The site footer is left out
+ * at every width: the builder is a tool, not a page to read.
  */
+.vd-shell:has(.vd-tb) > .vd-footer {
+  display: none;
+}
+/* 1px is the header's bottom border, which its height variable leaves out. */
 .vd-tb {
+  --vd-tb-h: calc(
+    100dvh - var(--vd-header-h) - 1px - 2 * var(--vectis-space-5) - var(--vd-tb-bar-h, 0px)
+  );
   padding-block: var(--vectis-space-5);
 }
 .vd-tb-layout {
@@ -831,19 +840,20 @@ html {
 .vd-tb-frame {
   display: block;
   inline-size: 100%;
-  block-size: 85dvh;
+  block-size: var(--vd-tb-h);
   border: 1px solid var(--vectis-color-border);
   border-radius: var(--vectis-radius-surface);
   background: var(--vectis-color-surface);
 }
 
 @media (width < 1024px) {
-  /* The shell keeps room for the fixed bar, so it never covers the end of the page. */
+  /* The shell keeps room for the fixed bar, which the preview's height leaves out too. */
   .vd-shell:has(.vd-tb) {
     --vd-tb-bar-pad: calc(var(--vectis-space-3) + env(safe-area-inset-bottom, 0px));
-    padding-block-end: calc(
+    --vd-tb-bar-h: calc(
       var(--vectis-control-height-md) + var(--vectis-space-3) + var(--vd-tb-bar-pad) + 1px
     );
+    padding-block-end: var(--vd-tb-bar-h);
   }
   .vd-tb-panel {
     display: none;
@@ -861,13 +871,6 @@ html {
 }
 @media (min-width: 1024px) {
   .vd-tb-bar {
-    display: none;
-  }
-  /* 1px is the header's bottom border, which its height variable leaves out. */
-  .vd-tb {
-    --vd-tb-h: calc(100dvh - var(--vd-header-h) - 1px - 2 * var(--vectis-space-5));
-  }
-  .vd-shell:has(.vd-tb) > .vd-footer {
     display: none;
   }
   .vd-tb-layout {
@@ -894,8 +897,5 @@ html {
   }
   .vd-tb-panel .v-card-footer {
     position: static;
-  }
-  .vd-tb-frame {
-    block-size: var(--vd-tb-h);
   }
 }
