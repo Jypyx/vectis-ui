@@ -81,9 +81,10 @@ export function useInfiniteScroll(options: InfiniteScrollOptions): InfiniteScrol
 
   // An observer only reports a CROSSING. If the page that arrives is too short to push the
   // marker out of view, the marker stays visible without ever crossing anything again, and the
-  // loading would stop dead at the second page.
-  watch(options.loaded, (list, previous) => {
-    if (list.length === previous.length && !rearm) return
+  // loading would stop dead at the second page. The length is watched as well as the array: a
+  // page pushed into the same array is still an arrival, and both sides then hold that array.
+  watch([options.loaded, () => options.loaded().length], ([, length], [, previousLength]) => {
+    if (length === previousLength && !rearm) return
     rearm = false
     pending = false
     const el = options.sentinelEl.value

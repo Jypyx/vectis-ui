@@ -205,6 +205,40 @@ describe('VVirtualList', () => {
       const { container } = renderHarness(template, { items, extra: {} })
       expect(container.querySelector('.v-virtual-list-more')).toBeNull()
     })
+
+    it('asks for the next page again once a page is pushed into the same array', async () => {
+      let notify: ((entries: Partial<IntersectionObserverEntry>[]) => void) | undefined
+      vi.stubGlobal(
+        'IntersectionObserver',
+        class {
+          constructor(callback: typeof notify) {
+            notify = callback
+          }
+          observe() {}
+          unobserve() {}
+          disconnect() {}
+        },
+      )
+      try {
+        const cross = () => notify?.([{ isIntersecting: true }])
+        const list = ref(items.slice(0, 3))
+        const onLoadMore = vi.fn()
+        renderHarness(
+          `<VVirtualList :items="items" item-key="id" label="Items" has-more @load-more="onLoadMore" />`,
+          { items: list, onLoadMore },
+        )
+        await nextTick()
+        cross()
+        cross()
+        expect(onLoadMore).toHaveBeenCalledTimes(1)
+        list.value.push(...items.slice(3, 6))
+        await nextTick()
+        cross()
+        expect(onLoadMore).toHaveBeenCalledTimes(2)
+      } finally {
+        vi.unstubAllGlobals()
+      }
+    })
   })
 
   describe('server rendering', () => {
