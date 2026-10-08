@@ -758,7 +758,7 @@ html {
 /*
  * The theme builder. From 1024px the settings card and the preview fill the viewport below the
  * header without the page scrolling, each scrolling on its own, so Generate and Reset stay in
- * view and a dialog opened in the preview too.
+ * view and a dialog opened in the preview too. Below, the settings open in a bottom drawer.
  */
 .vd-tb {
   padding-block: var(--vectis-space-5);
@@ -806,7 +806,32 @@ html {
   background: var(--vectis-color-surface);
 }
 
+@media (width < 1024px) {
+  /* The shell keeps room for the fixed bar, so it never covers the end of the page. */
+  .vd-shell:has(.vd-tb) {
+    --vd-tb-bar-pad: calc(var(--vectis-space-3) + env(safe-area-inset-bottom, 0px));
+    padding-block-end: calc(
+      var(--vectis-control-height-md) + var(--vectis-space-3) + var(--vd-tb-bar-pad) + 1px
+    );
+  }
+  .vd-tb-panel {
+    display: none;
+  }
+  /* Under the header's layer; the drawer, in the top layer, covers it. */
+  .vd-tb-bar {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: 20;
+    padding: var(--vectis-space-3) var(--vd-gutter) var(--vd-tb-bar-pad);
+    border-block-start: 1px solid var(--vectis-color-border);
+    background: var(--vectis-color-surface);
+  }
+}
 @media (min-width: 1024px) {
+  .vd-tb-bar {
+    display: none;
+  }
   /* 1px is the header's bottom border, which its height variable leaves out. */
   .vd-tb {
     --vd-tb-h: calc(100dvh - var(--vd-header-h) - 1px - 2 * var(--vectis-space-5));

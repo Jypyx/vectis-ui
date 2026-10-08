@@ -3,6 +3,7 @@ export default {
   lead: 'Choisissez les couleurs, les polices, les icônes et les arrondis, voyez-les sur chaque composant, puis copiez les tokens dans votre projet.',
   reset: 'Réinitialiser',
   resetLabel: 'Réinitialiser tous les réglages',
+  settings: 'Réglages',
   accent: 'Couleur d’accent',
   neutral: 'Couleur de base',
   headingFont: 'Police des titres',

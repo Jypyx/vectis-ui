@@ -3,6 +3,7 @@ export default {
   lead: 'Choose colours, fonts, icons and radii, see them on every component, then copy the tokens into your project.',
   reset: 'Reset',
   resetLabel: 'Reset every setting',
+  settings: 'Settings',
   accent: 'Accent colour',
   neutral: 'Base colour',
   headingFont: 'Heading font',
