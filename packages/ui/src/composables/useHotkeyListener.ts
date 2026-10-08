@@ -58,15 +58,22 @@ export function useHotkeyListener(options: {
     listening = false
   }
 
+  /* A view kept alive by <KeepAlive> is never unmounted, only put aside: its shortcut must
+     stop with it, or a hidden page would go on answering the keyboard; even when `enabled`
+     turns on while it is put aside. */
+  let active = true
+
   onMounted(() => {
     if (options.enabled()) attach()
   })
-  watch(options.enabled, (on) => (on ? attach() : detach()))
+  watch(options.enabled, (on) => (on && active ? attach() : detach()))
   onBeforeUnmount(detach)
-  /* A view kept alive by <KeepAlive> is never unmounted, only put aside: its shortcut must
-     stop with it, or a hidden page would go on answering the keyboard. */
-  onDeactivated(detach)
+  onDeactivated(() => {
+    active = false
+    detach()
+  })
   onActivated(() => {
+    active = true
     if (options.enabled()) attach()
   })
 }

@@ -448,6 +448,32 @@ describe('VHotkeys — listen', () => {
     expect(onTrigger).toHaveBeenCalledTimes(2)
   })
 
+  // A kept-alive page still re-renders while put aside, so its shortcut can be switched on then.
+  it('a KeepAlive view switched on while put aside stays silent until reactivated', async () => {
+    const onTrigger = vi.fn()
+    const shown = ref(true)
+    const listen = ref(false)
+    const Page = {
+      render: () =>
+        h(VHotkeys, { keys: 'mod+k', platform: 'windows', listen: listen.value, onTrigger }),
+    }
+    const Host = { render: () => h(KeepAlive, null, [shown.value ? h(Page) : h('span')]) }
+    render(Host)
+    await nextTick()
+
+    shown.value = false
+    await nextTick()
+    listen.value = true
+    await nextTick()
+    keydown({ key: 'k', ctrlKey: true })
+    expect(onTrigger).not.toHaveBeenCalled()
+
+    shown.value = true
+    await nextTick()
+    keydown({ key: 'k', ctrlKey: true })
+    expect(onTrigger).toHaveBeenCalledOnce()
+  })
+
   it('the listener follows the prop and is removed on unmount', async () => {
     const { emitted, rerender, unmount } = render(VHotkeys, {
       props: { keys: 'mod+k', platform: 'windows', listen: true },
