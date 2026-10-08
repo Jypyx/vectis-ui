@@ -38,7 +38,8 @@ export default {
         placeholder: 'Texte indicatif du champ de recherche. Par défaut, celui du dictionnaire.',
         label: 'Nom accessible de la palette et de sa liste. Par défaut, celui du dictionnaire.',
         searchLabel: 'Nom accessible du champ de recherche. Par défaut, celui du dictionnaire.',
-        hideFooter: 'Masque le pied qui liste les touches.',
+        hideFooter:
+          'Masque le pied qui liste les touches, déjà absent sur les appareils uniquement tactiles.',
         width: 'Largeur de la palette : pixels pour un nombre, sinon une longueur CSS.',
         vModelOpen: 'État d’ouverture. La fermeture native met le modèle à jour.',
         vModelQuery: 'Texte recherché. Vidé à la fermeture de la palette.',

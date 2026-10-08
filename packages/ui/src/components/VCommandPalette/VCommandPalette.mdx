@@ -52,7 +52,8 @@ a block of the latest ones at the top of `items`.
 
 The `#item` slot receives `{ command, active }` and replaces the label and the description; the
 icon and the shortcut stay in place. `#empty` receives the searched term, `#loading` replaces the
-loading row and `#footer` the list of keys, which `hideFooter` removes.
+loading row and `#footer` the list of keys, which `hideFooter` removes. The list of keys is also
+left out on touch-only devices, where no keyboard is expected; a custom `#footer` stays.
 
 <Canvas of={VCommandPaletteStories.CustomItem} />
 

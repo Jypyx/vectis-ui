@@ -777,6 +777,13 @@ defineExpose({
     color: var(--vectis-color-text-muted);
   }
 
+  /* Keys mean nothing without a keyboard; a custom `#footer` stays. A trackpad or mouse keeps it. */
+  @media not (any-pointer: fine) {
+    .v-command-palette-footer:has(> .v-command-palette-hints) {
+      display: none;
+    }
+  }
+
   .v-command-palette-hints {
     display: flex;
     flex-wrap: wrap;

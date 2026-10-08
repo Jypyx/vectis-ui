@@ -37,7 +37,7 @@ export default {
         placeholder: 'Placeholder of the search field. Defaults to the library dictionary.',
         label: 'Accessible name of the palette and its list. Defaults to the library dictionary.',
         searchLabel: 'Accessible name of the search field. Defaults to the library dictionary.',
-        hideFooter: 'Hides the footer listing the keys.',
+        hideFooter: 'Hides the footer listing the keys, already left out on touch-only devices.',
         width: 'Palette width: pixels for numbers, otherwise a CSS length.',
         vModelOpen: 'Palette open state. Native dismissal updates the model.',
         vModelQuery: 'Search text. Emptied when the palette closes.',
