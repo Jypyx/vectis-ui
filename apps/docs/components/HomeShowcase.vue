@@ -50,7 +50,7 @@ const projects = [
 const statusTone = (status: string) =>
   status === 'Active' ? 'success' : status === 'Review' ? 'warning' : 'neutral'
 
-const email = ref('grace@orbit.dev')
+const email = ref('grace@vectis-ui.com')
 const role = ref('editor')
 const roles = [
   { value: 'viewer', label: 'Viewer' },
@@ -68,7 +68,7 @@ const volume = ref(60)
     <div class="vd-showcase-window" :style="accentStyle">
       <div class="vd-showcase-bar" aria-hidden="true">
         <span class="vd-showcase-dots"><i /><i /><i /></span>
-        <span class="vd-showcase-address">orbit.app/projects</span>
+        <span class="vd-showcase-address">vectis-ui.com/app</span>
       </div>
 
       <div class="vd-showcase-grid">
@@ -109,7 +109,14 @@ const volume = ref(60)
 
         <VCard title="Notifications">
           <div class="vd-showcase-stack">
-            <VToggle v-model="channel" label="Notify me about" mandatory full-width size="sm">
+            <VToggle
+              v-model="channel"
+              label="Notify me about"
+              mandatory
+              full-width
+              size="sm"
+              item-variant="outline"
+            >
               <VToggleItem value="all" label="Everything" />
               <VToggleItem value="mentions" label="Mentions" />
               <VToggleItem value="none" label="Nothing" />
