@@ -29,8 +29,8 @@ const PLAIN = /^-?(\d+\.?\d*|\.\d+)$/
  *
  * Group separators and any space are dropped, the locale's decimal separator becomes a point,
  * and a point is also accepted as the decimal separator where the locale does not group with
- * it. Currency, unit and percent symbols are ignored, so a formatted value pasted back in reads
- * as the number it shows.
+ * it. Currency, unit and percent symbols around the number are ignored, so a formatted value
+ * pasted back in reads as the number it shows.
  */
 export function parseNumber(text: string, separators: NumberSeparators): number | null {
   const trimmed = text.trim()
@@ -39,7 +39,9 @@ export function parseNumber(text: string, separators: NumberSeparators): number 
   if (separators.group) plain = plain.split(separators.group).join('')
   plain = plain.replace(/\s/g, '')
   if (separators.decimal !== '.') plain = plain.split(separators.decimal).join('.')
-  plain = plain.replace(/[^\d.-]/g, '')
+  // Symbols are only stripped at either end, the minus kept before a leading one ("-$5.00"): a
+  // letter between digits is a typo, and "1o0" read as 10 would be committed silently.
+  plain = plain.replace(/^(-?)[^\d.-]+/, '$1').replace(/[^\d.]+$/, '')
   return PLAIN.test(plain) ? Number(plain) : Number.NaN
 }
 

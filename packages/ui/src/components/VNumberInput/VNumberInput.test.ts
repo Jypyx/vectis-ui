@@ -55,6 +55,10 @@ describe('number helpers', () => {
     expect(parseNumber('.5', en)).toBe(0.5)
     expect(parseNumber('abc', en)).toBeNaN()
     expect(parseNumber('1-2', en)).toBeNaN()
+    expect(parseNumber('-$5.00', en)).toBe(-5)
+    expect(parseNumber('-5,00 €', fr)).toBe(-5)
+    expect(parseNumber('1o0', en)).toBeNaN()
+    expect(parseNumber('1e5', en)).toBeNaN()
   })
 
   it('counts decimals and scales without drift', () => {
