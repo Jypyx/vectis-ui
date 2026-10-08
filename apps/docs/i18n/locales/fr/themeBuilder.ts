@@ -1,7 +1,6 @@
 export default {
   title: 'Générateur de thème',
   lead: 'Choisissez les couleurs, les polices, les icônes et les arrondis, voyez-les sur chaque composant, puis copiez les tokens dans votre projet.',
-  settings: 'Réglages du thème',
   reset: 'Réinitialiser',
   resetLabel: 'Réinitialiser tous les réglages',
   colors: 'Couleurs',
@@ -75,6 +74,5 @@ export default {
   universal:
     'Appelé au niveau du module, pour que le serveur et le navigateur résolvent les mêmes icônes.',
   preview: 'Aperçu',
-  previewScheme: 'Thème de l’aperçu',
   previewFrame: 'Les composants avec le thème appliqué',
 }

@@ -756,33 +756,19 @@ html {
 }
 
 /*
- * The theme builder. From 1024px the settings card and the preview share the viewport below
- * the header, each scrolling on its own, so a dialog opened in the preview stays in view.
+ * The theme builder. From 1024px the settings card and the preview fill the viewport below the
+ * header without the page scrolling, each scrolling on its own, so Generate and Reset stay in
+ * view and a dialog opened in the preview too.
  */
 .vd-tb {
-  display: grid;
-  gap: var(--vectis-space-6);
-  padding-block: var(--vectis-space-7) var(--vectis-space-9);
-}
-.vd-tb-head {
-  display: grid;
-  gap: var(--vectis-space-2);
-}
-.vd-tb-lead {
-  max-inline-size: 64ch;
+  padding-block: var(--vectis-space-5);
 }
 .vd-tb-layout {
   display: grid;
   gap: var(--vectis-space-6);
   align-items: start;
 }
-.vd-tb-panel-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--vectis-space-3);
-}
-/* The Generate button stays reachable while the settings above it scroll by. */
+/* The Generate and Reset buttons stay reachable while the settings above it scroll by. */
 .vd-tb-panel .v-card-footer {
   position: sticky;
   inset-block-end: 0;
@@ -791,7 +777,7 @@ html {
   margin-block-end: calc(-1 * var(--card-padding));
   padding: var(--vectis-space-3) var(--card-padding) var(--card-padding);
   border-block-start: 1px solid var(--vectis-color-border);
-  background: var(--vectis-color-surface-raised);
+  background: var(--vectis-color-surface);
 }
 .vd-tb-stack {
   display: grid;
@@ -839,18 +825,7 @@ html {
   list-style: none;
 }
 .vd-tb-preview {
-  display: grid;
-  gap: var(--vectis-space-3);
   min-inline-size: 0;
-}
-.vd-tb-preview-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--vectis-space-3);
-}
-.vd-tb-preview-bar > h2 {
-  margin: 0;
 }
 .vd-tb-frame {
   display: block;
@@ -862,15 +837,17 @@ html {
 }
 
 @media (min-width: 1024px) {
+  /* 1px is the header's bottom border, which its height variable leaves out. */
   .vd-tb {
-    --vd-tb-h: calc(100dvh - var(--vd-header-h) - 2 * var(--vectis-space-5));
+    --vd-tb-h: calc(100dvh - var(--vd-header-h) - 1px - 2 * var(--vectis-space-5));
+  }
+  .vd-shell:has(.vd-tb) > .vd-footer {
+    display: none;
   }
   .vd-tb-layout {
     grid-template-columns: 22rem minmax(0, 1fr);
   }
   .vd-tb-panel {
-    position: sticky;
-    inset-block-start: calc(var(--vd-header-h) + var(--vectis-space-5));
     max-block-size: var(--vd-tb-h);
   }
   .vd-tb-panel > .v-card-content {
@@ -884,11 +861,7 @@ html {
   .vd-tb-panel .v-card-footer {
     position: static;
   }
-  .vd-tb-preview {
-    position: sticky;
-    inset-block-start: calc(var(--vd-header-h) + var(--vectis-space-5));
-  }
   .vd-tb-frame {
-    block-size: calc(var(--vd-tb-h) - var(--vectis-control-height-sm) - var(--vectis-space-3));
+    block-size: var(--vd-tb-h);
   }
 }

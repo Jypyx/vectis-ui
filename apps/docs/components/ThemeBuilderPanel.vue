@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** The builder's settings card: colours, typography, icons and radii, then Generate. */
+/** The builder's settings card: colours, typography, icons and radii, then Generate and Reset. */
 import {
   VAccordion,
   VAccordionItem,
@@ -27,7 +27,7 @@ import {
 } from '~/theme-builder/options'
 
 const { t } = useI18n()
-const { config, reset, setRadiusMode } = useThemeBuilder()
+const { config, isDefault, reset, setRadiusMode } = useThemeBuilder()
 
 /** System stacks first, then the Google Fonts families. */
 function fontItems(list: FontOption[]): SelectItem[] {
@@ -67,25 +67,17 @@ const radiusMode = computed({
   set: setRadiusMode,
 })
 const radiusPresets = Object.keys(RADIUS_PRESETS) as RadiusPresetId[]
+
+/** Reset disables itself, which would drop focus to the page: it moves to Generate instead. */
+function onReset(event: MouseEvent) {
+  const footer = (event.currentTarget as HTMLElement).parentElement
+  reset()
+  footer?.querySelector<HTMLElement>('.v-button')?.focus()
+}
 </script>
 
 <template>
-  <VCard variant="elevated" class="vd-tb-panel">
-    <template #header>
-      <div class="vd-tb-panel-head">
-        <VTypography variant="heading-4" as="h2">{{ t('themeBuilder.settings') }}</VTypography>
-        <VButton
-          variant="ghost"
-          tone="neutral"
-          size="sm"
-          :aria-label="t('themeBuilder.resetLabel')"
-          @click="reset"
-        >
-          {{ t('themeBuilder.reset') }}
-        </VButton>
-      </div>
-    </template>
-
+  <VCard variant="outline" class="vd-tb-panel">
     <VAccordion multiple variant="flat">
       <VAccordionItem :title="t('themeBuilder.colors')" default-open>
         <ThemeBuilderColors />
@@ -197,6 +189,17 @@ const radiusPresets = Object.keys(RADIUS_PRESETS) as RadiusPresetId[]
 
     <template #footer>
       <ThemeBuilderGenerate />
+      <VButton
+        variant="ghost"
+        tone="neutral"
+        size="sm"
+        full-width
+        :disabled="isDefault"
+        :aria-label="t('themeBuilder.resetLabel')"
+        @click="onReset"
+      >
+        {{ t('themeBuilder.reset') }}
+      </VButton>
     </template>
   </VCard>
 </template>

@@ -1,7 +1,6 @@
 export default {
   title: 'Theme builder',
   lead: 'Choose colours, fonts, icons and radii, see them on every component, then copy the tokens into your project.',
-  settings: 'Theme settings',
   reset: 'Reset',
   resetLabel: 'Reset every setting',
   colors: 'Colours',
@@ -73,6 +72,5 @@ export default {
   builtinIcons: 'The built-in icons are Material Symbols Rounded: no resolver is needed.',
   universal: 'Called at module level, so the server and the browser resolve the same icons.',
   preview: 'Preview',
-  previewScheme: 'Preview theme',
   previewFrame: 'Components with the theme applied',
 }

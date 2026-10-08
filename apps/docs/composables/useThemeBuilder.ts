@@ -31,6 +31,9 @@ export function useThemeBuilder() {
     }
   }
 
+  // Key order matches: every config is built from these defaults, the seeds and the presets.
+  const isDefault = computed(() => JSON.stringify(config.value) === JSON.stringify(DEFAULT_CONFIG))
+
   function reset() {
     config.value = copy(DEFAULT_CONFIG)
   }
@@ -51,5 +54,5 @@ export function useThemeBuilder() {
     radius.mode = mode
   }
 
-  return { config, restore, persist, reset, setColorMode, setRadiusMode }
+  return { config, isDefault, restore, persist, reset, setColorMode, setRadiusMode }
 }
