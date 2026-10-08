@@ -16,7 +16,12 @@ import {
 
 import { docsIconResolver } from '~/icons/resolver'
 import { iconLibraryById, type IconLibraryId } from '~/theme-builder/options'
-import { previewMessage, readyMessage, type PreviewState } from '~/theme-builder/preview'
+import {
+  appliedMessage,
+  previewMessage,
+  readyMessage,
+  type PreviewState,
+} from '~/theme-builder/preview'
 
 definePageMeta({ layout: false })
 
@@ -60,8 +65,11 @@ async function applyIcons(id: IconLibraryId) {
 let tokens: HTMLStyleElement | undefined
 const links = new Map<string, HTMLLinkElement>()
 
-/** Appended last in the head, so these unlayered rules follow the site's own sheets. */
-function applyStyles(state: PreviewState) {
+/**
+ * Appended last in the head, so these unlayered rules follow the site's own sheets. Settles once
+ * the stylesheets it adds have loaded, or failed to.
+ */
+function applyStyles(state: PreviewState): Promise<unknown> {
   tokens ??= document.head.appendChild(document.createElement('style'))
   tokens.textContent = state.css
 
@@ -70,27 +78,38 @@ function applyStyles(state: PreviewState) {
     link.remove()
     links.delete(href)
   }
+  const loads: Promise<unknown>[] = []
   for (const href of state.stylesheets) {
     if (links.has(href)) continue
     const link = document.createElement('link')
     link.rel = 'stylesheet'
     link.href = href
+    loads.push(new Promise((resolve) => (link.onload = link.onerror = resolve)))
     document.head.append(link)
     links.set(href, link)
   }
+  return Promise.all(loads)
 }
 
 let currentIcons: IconLibraryId | undefined
 
-function onMessage(event: MessageEvent) {
+/** Applies a state, then tells the builder once it is painted, which lifts its loader. */
+async function onMessage(event: MessageEvent) {
   const message = previewMessage(event)
   if (message?.type !== 'state') return
-  applyStyles(message.state)
+  const styles = applyStyles(message.state)
   theme.value = message.state.scheme
+  let icons: Promise<unknown> | undefined
   if (message.state.icons !== currentIcons) {
     currentIcons = message.state.icons
-    void applyIcons(message.state.icons)
+    icons = applyIcons(message.state.icons)
   }
+  await Promise.all([styles, icons])
+  // A font face is requested when laid out: a forced layout starts the loads `ready` awaits.
+  await nextTick()
+  document.body.getBoundingClientRect()
+  await document.fonts.ready
+  window.parent.postMessage(appliedMessage(message.id), window.location.origin)
 }
 
 onMounted(() => {

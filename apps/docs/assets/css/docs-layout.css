@@ -795,7 +795,38 @@ html {
   gap: var(--vectis-space-2);
 }
 .vd-tb-preview {
+  position: relative;
   min-inline-size: 0;
+}
+/*
+ * Shown only when loading lasts beyond a short delay, so a change that paints at once does not
+ * flash it; it fades out without delay. Its blur hides the half-painted frame. Hidden, it lets
+ * clicks through to the frame.
+ */
+.vd-tb-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  border-radius: var(--vectis-radius-surface);
+  background: color-mix(in oklch, var(--vectis-color-surface) 50%, transparent);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--vectis-duration-fast) var(--vectis-ease-default),
+    visibility 0s var(--vectis-duration-fast);
+}
+.vd-tb-loading[data-active] {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: var(--vectis-duration-fast);
+}
+@media (prefers-reduced-motion: reduce) {
+  .vd-tb-loading {
+    transition-duration: 0s;
+  }
 }
 .vd-tb-frame {
   display: block;

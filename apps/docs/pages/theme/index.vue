@@ -2,8 +2,10 @@
 /**
  * The theme builder: settings on the left, and on the right the preview frame, which receives
  * the whole theme each time a setting changes. The frame posts once it is listening; nothing is
- * sent before, since a message to a page still loading is lost.
+ * sent before, since a message to a page still loading is lost. A loader covers the frame from
+ * each message until the frame reports it painted, its fonts and icons loaded.
  */
+import { VSpinner } from 'vectis-ui'
 
 import { iconLibraryById } from '~/theme-builder/options'
 import { themeCss, themeDeclarations } from '~/theme-builder/output'
@@ -44,14 +46,21 @@ const state = computed<PreviewState>(() => {
 })
 
 let ready = false
+/** The id of the last state sent: only its acknowledgement lifts the loader. */
+let sent = 0
+const loading = ref(true)
 
 function post() {
-  if (ready)
-    frame.value?.contentWindow?.postMessage(stateMessage(state.value), window.location.origin)
+  const target = frame.value?.contentWindow
+  if (!ready || !target) return
+  loading.value = true
+  target.postMessage(stateMessage(++sent, state.value), window.location.origin)
 }
 
 function onMessage(event: MessageEvent) {
-  if (previewMessage(event)?.type !== 'ready') return
+  const message = previewMessage(event)
+  if (message?.type === 'applied' && message.id === sent) loading.value = false
+  if (message?.type !== 'ready') return
   ready = true
   post()
 }
@@ -73,13 +82,17 @@ onBeforeUnmount(() => window.removeEventListener('message', onMessage))
     <div class="vd-tb-layout">
       <ThemeBuilderPanel />
 
-      <section class="vd-tb-preview" :aria-label="t('themeBuilder.preview')">
+      <section class="vd-tb-preview" :aria-label="t('themeBuilder.preview')" :aria-busy="loading">
         <iframe
           ref="frame"
           :src="previewSrc"
           :title="t('themeBuilder.previewFrame')"
           class="vd-tb-frame"
         />
+        <!-- aria-busy speaks for it: a status announced at each setting would be noise. -->
+        <div class="vd-tb-loading" :data-active="loading || undefined" aria-hidden="true">
+          <VSpinner :size="32" />
+        </div>
       </section>
     </div>
   </main>

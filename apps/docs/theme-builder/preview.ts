@@ -18,16 +18,25 @@ export interface PreviewState {
 }
 
 export type PreviewMessage =
-  | { source: typeof SOURCE; type: 'state'; state: PreviewState }
+  | { source: typeof SOURCE; type: 'state'; id: number; state: PreviewState }
   | { source: typeof SOURCE; type: 'ready' }
+  /** The state of that id is painted: its stylesheets, fonts and icons have loaded. */
+  | { source: typeof SOURCE; type: 'applied'; id: number }
 
-export const stateMessage = (state: PreviewState): PreviewMessage => ({
+export const stateMessage = (id: number, state: PreviewState): PreviewMessage => ({
   source: SOURCE,
   type: 'state',
+  id,
   state,
 })
 
 export const readyMessage = (): PreviewMessage => ({ source: SOURCE, type: 'ready' })
+
+export const appliedMessage = (id: number): PreviewMessage => ({
+  source: SOURCE,
+  type: 'applied',
+  id,
+})
 
 /** The message, when the event comes from this origin and carries one of ours. */
 export function previewMessage(event: MessageEvent): PreviewMessage | undefined {
