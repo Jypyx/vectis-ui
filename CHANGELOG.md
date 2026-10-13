@@ -2,6 +2,29 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.14.0] - 2026-10-14
+
+### Upgrading from 0.13.x
+
+- **VToggle and VPagination draw their items in `outline` by default.** Pass `itemVariant="ghost"` to keep the previous look. VDataTable keeps its pagination in `ghost`.
+
+### Changed
+
+- VNumberInput no longer reads a letter between digits: `1o0` is rejected instead of committed as `10`. Currency, unit and percent symbols around the number are still ignored.
+- `formatDisplayRange` writes plain spaces around the range dash, so a prerendered range matches the one the browser hydrates whatever the ICU version.
+- A malformed locale tag (`fr_FR`) is ignored with a development warning instead of throwing a `RangeError`, and the locale in force stays.
+- VCommandPalette leaves its list of keys out on touch-only devices. A custom `#footer` stays.
+
+### Fixed
+
+- VTimePicker draws its AM/PM toggle in `outline`, as intended.
+- VVirtualList and VDataTable keep loading pages when rows are pushed into the same array.
+- VHotkeys stays silent in a view kept alive by `<KeepAlive>` when `enabled` turns on while it is hidden.
+- VCheckbox, VRadio and VSwitch keep the label beside the control when a grid or flex parent stretches them.
+- VColorPicker caps its area radius under a pill theme, like VTextarea.
+
+**Full diff:** [v0.13.0...v0.14.0](https://github.com/Jypyx/vectis-ui/compare/v0.13.0...v0.14.0)
+
 ## [0.13.0] - 2026-10-07
 
 ### Upgrading from 0.12.x
