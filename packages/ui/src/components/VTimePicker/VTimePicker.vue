@@ -611,7 +611,7 @@ defineExpose({
         v-model="meridiemModel"
         class="v-time-picker-meridiem"
         mandatory
-        variant="outline"
+        item-variant="outline"
         selected-variant="soft"
         orientation="vertical"
         size="sm"

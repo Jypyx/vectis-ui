@@ -19,7 +19,7 @@ const code = computed(() => commandFor(props.packages))
       <VToggle
         v-model="packageManager"
         mandatory
-        variant="outline"
+        item-variant="outline"
         selected-variant="soft"
         tone="accent"
         size="xs"
