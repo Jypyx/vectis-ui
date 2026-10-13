@@ -28,7 +28,7 @@ const meta = {
     totalVisible: 7,
     detached: false,
     bordered: false,
-    itemVariant: 'ghost',
+    itemVariant: 'outline',
     tone: 'accent',
     size: 'md',
     compact: false,

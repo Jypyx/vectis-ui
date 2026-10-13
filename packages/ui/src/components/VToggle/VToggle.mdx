@@ -8,8 +8,8 @@ import * as VToggleStories from './VToggle.stories'
 A group of selectable buttons driven by a **single v-model**. Composed API: `VToggle` wraps
 `VToggleItem` elements, and every item is a `VButton` — hover, focus, disabling and
 `prefers-reduced-motion` all come from it, and no state rule is redefined. The selected item is
-rendered in the group's `tone` (`selectedVariant`, `solid` by default), the others `ghost` or
-`outline`.
+rendered in the group's `tone` (`selectedVariant`, `solid` by default), the others `outline` by default or
+`ghost`.
 
 <Canvas of={VToggleStories.Default} />
 
@@ -28,7 +28,7 @@ separates them with a gutter, each button regaining its rounded corners.
 
 ## The two appearances
 
-`variant` (`ghost` or `outline`) draws the items that are **not** selected; `selectedVariant`
+`itemVariant` (`outline` by default, or `ghost`) draws the items that are **not** selected; `selectedVariant`
 draws the one that is, in the group's `tone`:
 
 - **`solid`** (the default): a filled segment, the strongest signal.

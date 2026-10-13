@@ -163,7 +163,7 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   totalVisible: undefined,
   detached: false,
   bordered: false,
-  itemVariant: 'ghost',
+  itemVariant: 'outline',
   selectedVariant: 'solid',
   tone: 'accent',
   size: 'md',

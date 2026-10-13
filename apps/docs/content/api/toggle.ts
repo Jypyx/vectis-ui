@@ -15,7 +15,7 @@ export default {
         { name: 'bordered', type: 'boolean', default: 'false' },
         { name: 'orientation', type: 'ToggleOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },
         { name: 'fullWidth', type: 'boolean', default: 'false' },
-        { name: 'itemVariant', type: 'ToggleItemVariant', values: "'ghost' | 'outline'", default: "'ghost'" },
+        { name: 'itemVariant', type: 'ToggleItemVariant', values: "'ghost' | 'outline'", default: "'outline'" },
         { name: 'selectedVariant', type: 'ToggleSelectedVariant', values: "'solid' | 'soft' | 'ghost'", default: "'solid'" },
         { name: 'tone', type: 'ToggleTone', values: "'accent' | 'neutral' | 'danger'", default: "'accent'" },
         { name: 'size', type: 'ToggleSize', values: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },

@@ -101,7 +101,7 @@ const props = withDefaults(defineProps<ToggleProps>(), {
   bordered: false,
   orientation: 'horizontal',
   fullWidth: false,
-  itemVariant: 'ghost',
+  itemVariant: 'outline',
   selectedVariant: 'solid',
   tone: 'accent',
   size: 'md',

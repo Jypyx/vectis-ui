@@ -999,6 +999,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
             :label="m.dataTable.pagination"
             :length="pageCount"
             size="sm"
+            item-variant="ghost"
             :compact="compact"
             align="end"
             :total-visible="0"

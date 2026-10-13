@@ -79,7 +79,7 @@ const meta = {
     bordered: false,
     fullWidth: false,
     orientation: 'horizontal',
-    itemVariant: 'ghost',
+    itemVariant: 'outline',
     selectedVariant: 'solid',
     tone: 'accent',
     size: 'md',
