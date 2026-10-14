@@ -1,5 +1,5 @@
 /** Benchmark pure calendar layout for overlapping, multi-day and dense schedules. */
-import { bench, describe } from 'vitest'
+import { test } from 'vitest'
 
 import {
   coversDay,
@@ -61,16 +61,17 @@ function makeEvents(count: number): CalendarEvent[] {
 
 const SCALES = [50, 200, 2000] as const
 
-describe('monthWeeks', () => {
-  // Independent of the event count: it is pure calendar arithmetic. It earns a place here
-  // because VCalendarYear calls it 36 times per render (12 months × 3 call sites).
-  bench('one month grid', () => {
-    monthWeeks(isoAt(0), WEEKDAYS)
-  })
-
-  bench('a year of grids (the VCalendarYear render)', () => {
-    for (let month = 0; month < 12; month++) monthWeeks(isoAt(month * 30), WEEKDAYS)
-  })
+test('monthWeeks', async ({ bench }) => {
+  await bench.compare(
+    // Independent of the event count: it is pure calendar arithmetic. It earns a place here
+    // because VCalendarYear calls it 36 times per render (12 months × 3 call sites).
+    bench('one month grid', () => {
+      monthWeeks(isoAt(0), WEEKDAYS)
+    }),
+    bench('a year of grids (the VCalendarYear render)', () => {
+      for (let month = 0; month < 12; month++) monthWeeks(isoAt(month * 30), WEEKDAYS)
+    }),
+  )
 })
 
 for (const count of SCALES) {
@@ -78,36 +79,33 @@ for (const count of SCALES) {
   const week = Array.from({ length: 7 }, (_, i) => isoAt(i))
   const monthCells = monthWeeks(isoAt(0), WEEKDAYS).flat()
 
-  describe(`${count} events`, () => {
-    /*
-     * The naive shape is one filter per cell, each filtering and sorting the whole list;
-     * `cells × events`, with 42 sorts. The second is what VCalendarMonth does.
-     */
-    bench('byDay — a filter and a sort per month cell (the naive shape)', () => {
-      for (const cell of monthCells) eventsOnDay(events, cell.iso)
-    })
-
-    bench('byDay — eventsByDay, one pass', () => {
-      eventsByDay(
-        events,
-        monthCells.map((cell) => cell.iso),
-      )
-    })
-
-    bench('eventsByDay — a single day', () => {
-      eventsByDay(events, [isoAt(3)])
-    })
-
-    bench('timedSegments — a week', () => {
-      timedSegments(events, week, WINDOW, 15)
-    })
-
-    bench('packAllDay — a week', () => {
-      packAllDay(events, week)
-    })
-
-    bench('packDayColumn — one column', () => {
-      packDayColumn(timedSegments(events, week, WINDOW, 15).filter((s) => s.dayIndex === 0))
-    })
+  test(`${count} events`, async ({ bench }) => {
+    await bench.compare(
+      /*
+       * The naive shape is one filter per cell, each filtering and sorting the whole list;
+       * `cells × events`, with 42 sorts. The second is what VCalendarMonth does.
+       */
+      bench('byDay — a filter and a sort per month cell (the naive shape)', () => {
+        for (const cell of monthCells) eventsOnDay(events, cell.iso)
+      }),
+      bench('byDay — eventsByDay, one pass', () => {
+        eventsByDay(
+          events,
+          monthCells.map((cell) => cell.iso),
+        )
+      }),
+      bench('eventsByDay — a single day', () => {
+        eventsByDay(events, [isoAt(3)])
+      }),
+      bench('timedSegments — a week', () => {
+        timedSegments(events, week, WINDOW, 15)
+      }),
+      bench('packAllDay — a week', () => {
+        packAllDay(events, week)
+      }),
+      bench('packDayColumn — one column', () => {
+        packDayColumn(timedSegments(events, week, WINDOW, 15).filter((s) => s.dayIndex === 0))
+      }),
+    )
   })
 }

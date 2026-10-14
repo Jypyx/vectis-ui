@@ -60,7 +60,12 @@ export default defineConfig({
           name: 'bench',
           environment: 'node',
           include: [],
-          benchmark: { include: ['src/**/*.bench.ts'] },
+          benchmark: {
+            include: ['src/**/*.bench.ts'],
+            // Module-runner export getters add a constant per-call cost to every compared row;
+            // native ESM is not an option while sources use extensionless relative imports.
+            suppressExportGetterWarnings: true,
+          },
         },
       },
       {
