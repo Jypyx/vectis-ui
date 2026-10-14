@@ -69,7 +69,7 @@
 
 ## Commands and validation
 
-Run commands from the repository root without a leading `cd` or `Set-Location`. Use the package manager pinned in `package.json` through Corepack.
+Run commands from the repository root without a leading `cd` or `Set-Location`. Use the Node version in `.nvmrc` and the package manager pinned in `package.json` through Corepack, which Node 26 no longer bundles: install it with `npm i -g corepack`.
 
 ```sh
 pnpm lint
