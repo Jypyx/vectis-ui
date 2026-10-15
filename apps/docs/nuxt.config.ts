@@ -62,30 +62,33 @@ export default defineNuxtConfig({
     prerender: {
       /** Prerender sequentially because the library locale is shared process-wide. */
       concurrency: 1,
-      crawlLinks: true,
-      // List navigation routes explicitly so missing crawler links cannot silently drop pages.
-      routes: [
-        '/',
-        '/404.html',
-        /* Explicitly prerender these server routes because no page links to them. */
-        '/robots.txt',
-        '/sitemap.xml',
-        ...LOCALE_PREFIXES.flatMap((prefix) => [
-          `${prefix}/`,
-          ...[...SITE_PAGES, ...FRAMED_PAGES].map((page) => `${prefix}${page}`),
-          ...docRoutes(prefix),
-        ]),
-      ],
-      /** Ignore doubled-locale paths produced by prerender crawling. */
-      ignore: [
-        ...LOCALE_PREFIXES.filter(Boolean).map((prefix) => `${prefix}${prefix}`),
-        /*
-         * Exclude demo-only destinations from crawling; their illustrative href values are not
-         * site routes.
-         */
-        '/app',
-      ],
     },
+  },
+
+  prerender: {
+    crawlLinks: true,
+    // List navigation routes explicitly so missing crawler links cannot silently drop pages.
+    routes: [
+      '/',
+      '/404.html',
+      /* Explicitly prerender these server routes because no page links to them. */
+      '/robots.txt',
+      '/sitemap.xml',
+      ...LOCALE_PREFIXES.flatMap((prefix) => [
+        `${prefix}/`,
+        ...[...SITE_PAGES, ...FRAMED_PAGES].map((page) => `${prefix}${page}`),
+        ...docRoutes(prefix),
+      ]),
+    ],
+    /** Ignore doubled-locale paths produced by prerender crawling. */
+    ignore: [
+      ...LOCALE_PREFIXES.filter(Boolean).map((prefix) => `${prefix}${prefix}`),
+      /*
+       * Exclude demo-only destinations from crawling; their illustrative href values are not
+       * site routes.
+       */
+      '/app',
+    ],
   },
 
   routeRules: {

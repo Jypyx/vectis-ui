@@ -70,7 +70,7 @@ const seoFiles = ['robots.txt', 'sitemap.xml'].filter((file) => !existsSync(join
 
 if (seoFiles.length > 0) {
   console.error(`check-prerender: ${seoFiles.join(' and ')} missing from the artefact.`)
-  console.error('  Expected from server/routes/, named in nitro.prerender.routes.')
+  console.error('  Expected from server/routes/, named in prerender.routes.')
   process.exit(1)
 }
 
