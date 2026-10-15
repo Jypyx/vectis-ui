@@ -2,6 +2,14 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.15.0] - 2026-10-15
+
+### Upgrading from 0.14.x
+
+- **`vectis-ui` declares Node 26 or later in `engines`.** Projects that build or prerender on an older Node get an engine warning on install, or an error with `engine-strict`. The browser floor does not change.
+
+**Full diff:** [v0.14.0...v0.15.0](https://github.com/Jypyx/vectis-ui/compare/v0.14.0...v0.15.0)
+
 ## [0.14.0] - 2026-10-14
 
 ### Upgrading from 0.13.x
