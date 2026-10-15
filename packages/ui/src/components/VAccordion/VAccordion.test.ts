@@ -1,5 +1,5 @@
 import { fireEvent, render } from '@testing-library/vue'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { defineComponent, h, nextTick, ref } from 'vue'
 
 import VAccordion from './VAccordion.vue'

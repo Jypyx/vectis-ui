@@ -46,7 +46,8 @@ export interface VirtualListOptions {
 
 /** A row to render, or a block of empty space standing for the rows left out. */
 export type VirtualSegment =
-  { type: 'row'; index: number } | { type: 'spacer'; key: string; size: number }
+  | { type: 'row'; index: number }
+  | { type: 'spacer'; key: string; size: number }
 
 export interface VirtualList {
   /** What to render, in order. */

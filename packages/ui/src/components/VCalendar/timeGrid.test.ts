@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 import { windowOf } from './layout'
 import { drawnSlot, moveEvent, moveTimedEvent, resizeEvent, resizeTimedEvent } from './timeGrid'

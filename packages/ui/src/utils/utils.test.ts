@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { Fragment, createCommentVNode, createTextVNode, h } from 'vue'
 
 import { toggleValue } from './array'

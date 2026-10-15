@@ -80,7 +80,12 @@ const MODES: TimeInputMode[] = ['picker', 'input', 'list']
 
 /** Where the panel opens relative to the field, whether it holds the clock or the list. */
 export type TimeInputPlacement =
-  'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
+  | 'bottom'
+  | 'bottom-start'
+  | 'bottom-end'
+  | 'top'
+  | 'top-start'
+  | 'top-end'
 
 /** The height of the field: 32, 40 or 48 pixels. */
 export type TimeInputSize = 'sm' | 'md' | 'lg'

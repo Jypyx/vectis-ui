@@ -1,5 +1,5 @@
 import { fireEvent, render, waitFor } from '@testing-library/vue'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { defineComponent, ref } from 'vue'
 
 import VColorPicker from './VColorPicker.vue'

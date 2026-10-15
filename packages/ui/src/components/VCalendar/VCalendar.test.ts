@@ -1,5 +1,5 @@
 import { fireEvent, render } from '@testing-library/vue'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { defineComponent, nextTick, ref } from 'vue'
 
 import VCalendar from './VCalendar.vue'
@@ -307,7 +307,7 @@ describe('the events', () => {
   it('reports a card being activated', async () => {
     const { emitted, getByRole } = mount({ events: [event({ id: 'a', title: 'Standup' })] })
     await fireEvent.click(getByRole('button', { name: /Standup/ }))
-    expect((emitted('event-activate')?.at(-1) as CalendarEvent[])[0]!.id).toBe('a')
+    expect((emitted('event-activate')!.at(-1) as CalendarEvent[])[0]!.id).toBe('a')
   })
 })
 

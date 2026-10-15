@@ -1,5 +1,5 @@
 /** Benchmark pure calendar layout for overlapping, multi-day and dense schedules. */
-import { test } from 'vitest'
+import { test } from 'vite-plus/test'
 
 import {
   coversDay,

@@ -3,7 +3,7 @@ import { dirname, join, resolve as resolvePath } from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
 
 import vue from '@vitejs/plugin-vue'
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig, type Plugin, lazyPlugins } from 'vite-plus'
 import dts from 'vite-plugin-dts'
 
 import { tokens } from './src/tokens'
@@ -101,13 +101,13 @@ function dtsExtensions(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [
+  plugins: lazyPlugins(() => [
     vue(),
     dts({ tsconfigPath: './tsconfig.build.json', cleanVueFileName: true }),
     emitTokensJson(),
     shipComponentCss(),
     dtsExtensions(),
-  ],
+  ]),
   build: {
     // Each SFC's <style> becomes its own asset, shipped with its module: a consumer
     // downloads the CSS of the components they import, not of the whole library.

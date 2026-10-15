@@ -24,7 +24,14 @@ export type TypographyVariant =
 
 /** The colour of a text; `default` sets none and inherits. */
 export type TypographyTone =
-  'default' | 'muted' | 'subtle' | 'accent' | 'danger' | 'success' | 'warning' | 'on-inverse'
+  | 'default'
+  | 'muted'
+  | 'subtle'
+  | 'accent'
+  | 'danger'
+  | 'success'
+  | 'warning'
+  | 'on-inverse'
 
 interface TypographyProps {
   /**

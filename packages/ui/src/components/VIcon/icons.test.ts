@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 import { builtinIconNames, builtinIcons, ICON_VIEW_BOX, type IconName } from './icons'
 

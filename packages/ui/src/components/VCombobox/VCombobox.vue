@@ -76,7 +76,12 @@ export type ComboboxFilter = boolean | ((option: ComboboxOption, query: string) 
 
 /** Where the list opens relative to the field. */
 export type ComboboxPlacement =
-  'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
+  | 'bottom'
+  | 'bottom-start'
+  | 'bottom-end'
+  | 'top'
+  | 'top-start'
+  | 'top-end'
 
 /** The height of the field: 32, 40 or 48 pixels. */
 export type ComboboxSize = 'sm' | 'md' | 'lg'

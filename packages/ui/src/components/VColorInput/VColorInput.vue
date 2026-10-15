@@ -25,7 +25,12 @@ export type ColorInputSize = 'sm' | 'md' | 'lg'
 
 /** Where the picker opens relative to the field. */
 export type ColorInputPlacement =
-  'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
+  | 'bottom'
+  | 'bottom-start'
+  | 'bottom-end'
+  | 'top'
+  | 'top-start'
+  | 'top-end'
 
 interface ColorInputProps {
   /**

@@ -1,5 +1,5 @@
 import { render } from '@testing-library/vue'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { defineComponent, h, nextTick, ref } from 'vue'
 
 import VDrawer from './VDrawer.vue'

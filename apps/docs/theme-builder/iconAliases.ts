@@ -72,7 +72,8 @@ export const PREVIEW_ICON_NAMES = [
 ] as const
 
 export type AliasedIconName =
-  (typeof BUILTIN_ICON_NAMES)[number] | (typeof PREVIEW_ICON_NAMES)[number]
+  | (typeof BUILTIN_ICON_NAMES)[number]
+  | (typeof PREVIEW_ICON_NAMES)[number]
 
 /**
  * For the two component libraries, the value is the exported component's name; for the

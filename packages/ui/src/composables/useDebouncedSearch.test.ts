@@ -1,5 +1,5 @@
 import { render } from '@testing-library/vue'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { defineComponent, h } from 'vue'
 
 import { useDebouncedSearch } from './useDebouncedSearch'

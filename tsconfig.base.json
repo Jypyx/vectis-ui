@@ -21,7 +21,7 @@
     "allowArbitraryExtensions": true,
     // NOT `noUnusedLocals`/`noUnusedParameters`: vue-tsc does not count a template
     // string ref (`ref="fileEl"`) as a use of the binding, so both flag a correct SFC
-    // idiom. ESLint's `@typescript-eslint/no-unused-vars` reads the template properly
+    // idiom. ESLint's `@typescript-eslint/no-unused-vars` (eslint.config.js) reads the template
     // and already covers this, at error level.
     //
     // NOT `exactOptionalPropertyTypes` either — measured at 66 errors, none of them a

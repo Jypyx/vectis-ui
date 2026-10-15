@@ -2,7 +2,7 @@
  * Benchmark repeated date-formatting calls to exercise memoized Intl construction under field
  * workloads.
  */
-import { test } from 'vitest'
+import { test } from 'vite-plus/test'
 
 import { buildMonthGrid, firstDayOfWeekFor, formatDateDisplay, weekdayNames } from './date'
 import { dateMaskFor, maskPlaceholder } from '../components/VDateInput/mask'

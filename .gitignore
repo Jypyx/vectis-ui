@@ -18,3 +18,4 @@ coverage/
 # template tracked: it documents which variables are expected and holds no value.
 .env*
 !.env.example
+.vitest/

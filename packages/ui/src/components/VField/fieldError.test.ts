@@ -4,7 +4,7 @@
  * allows it.
  */
 import { render } from '@testing-library/vue'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import type { Component } from 'vue'
 
 import VCheckbox from '../VCheckbox/VCheckbox.vue'

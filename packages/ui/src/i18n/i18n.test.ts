@@ -1,5 +1,5 @@
 import { render } from '@testing-library/vue'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { nextTick } from 'vue'
 
 import VDatePicker from '../components/VDatePicker/VDatePicker.vue'

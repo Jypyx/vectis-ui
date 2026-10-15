@@ -2,7 +2,7 @@
  * Benchmark accent-insensitive search across a full candidate list, matching the per-keystroke
  * workload.
  */
-import { test } from 'vitest'
+import { test } from 'vite-plus/test'
 
 import { normalizeText } from './text'
 

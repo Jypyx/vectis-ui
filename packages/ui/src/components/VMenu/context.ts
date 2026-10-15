@@ -48,7 +48,12 @@ export type MenuSize = 'sm' | 'md' | 'lg'
 
 /** Where the menu itself may open, relative to its trigger. This is public API. */
 export type MenuPlacement =
-  'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end'
+  | 'top'
+  | 'top-start'
+  | 'top-end'
+  | 'bottom'
+  | 'bottom-start'
+  | 'bottom-end'
 
 /**
  * The same list plus the sideways placement submenus use. It is internal: a submenu's

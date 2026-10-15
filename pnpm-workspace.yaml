@@ -18,3 +18,30 @@ minimumReleaseAgeExclude:
   - '@storybook/vue3@10.6.0'
   - storybook@10.6.0
   - eslint-plugin-storybook@10.6.0
+  - vite-plus@1.2.0
+  - '@voidzero-dev/vite-plus-core@1.2.0'
+  - '@voidzero-dev/vite-plus-darwin-arm64@1.2.0'
+  - '@voidzero-dev/vite-plus-darwin-x64@1.2.0'
+  - '@voidzero-dev/vite-plus-linux-arm64-gnu@1.2.0'
+  - '@voidzero-dev/vite-plus-linux-arm64-musl@1.2.0'
+  - '@voidzero-dev/vite-plus-linux-x64-gnu@1.2.0'
+  - '@voidzero-dev/vite-plus-linux-x64-musl@1.2.0'
+  - '@voidzero-dev/vite-plus-win32-arm64-msvc@1.2.0'
+  - '@voidzero-dev/vite-plus-win32-x64-msvc@1.2.0'
+catalog:
+  vite: npm:@voidzero-dev/vite-plus-core@1.2.0
+  vitest: 5.0.4
+  vite-plus: 1.2.0
+  '@vitest/browser-playwright': 5.0.4
+  '@vitest/coverage-v8': 5.0.4
+overrides:
+  # Plain `vite`, not `vite@*`: pnpm 12.6 re-resolves a `vite@*` alias override as `vite@1.2.0`.
+  vite: 'catalog:'
+  vitest@*: 'catalog:'
+peerDependencyRules:
+  allowAny:
+    - vite
+    - vitest
+  allowedVersions:
+    vite: '*'
+    vitest: '*'

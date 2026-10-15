@@ -57,7 +57,12 @@ export type SelectItem = ListboxItem
 
 /** Where the list opens relative to the field. */
 export type SelectPlacement =
-  'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
+  | 'bottom'
+  | 'bottom-start'
+  | 'bottom-end'
+  | 'top'
+  | 'top-start'
+  | 'top-end'
 
 /** The height of the field: 32, 40 or 48 pixels. */
 export type SelectSize = 'sm' | 'md' | 'lg'

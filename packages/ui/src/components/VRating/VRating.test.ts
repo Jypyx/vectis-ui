@@ -1,5 +1,5 @@
 import { fireEvent, render, waitFor } from '@testing-library/vue'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { defineComponent, ref } from 'vue'
 
 import VRating from './VRating.vue'

@@ -1,5 +1,5 @@
 import { render } from '@testing-library/vue'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { defineComponent, h } from 'vue'
 
 import { useEscapeDismiss } from './useEscapeDismiss'

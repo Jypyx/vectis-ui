@@ -619,7 +619,7 @@ const onMonthsKeydown = (event: KeyboardEvent) =>
  * cells are therefore cut into rows of PICKER_COLUMNS, matching the `grid-template-columns` of
  * the stylesheet; the row element itself is `display: contents`, so the CSS grid never sees it.
  */
-const chunk = <T,>(list: T[]) =>
+const chunk = <T>(list: T[]) =>
   Array.from({ length: Math.ceil(list.length / PICKER_COLUMNS) }, (_, r) =>
     list.slice(r * PICKER_COLUMNS, r * PICKER_COLUMNS + PICKER_COLUMNS),
   )

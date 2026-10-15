@@ -1,5 +1,5 @@
 import { fireEvent, render } from '@testing-library/vue'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import { defineComponent, h, nextTick, ref, type Component } from 'vue'
 
 import VVirtualListSfc from './VVirtualList.vue'

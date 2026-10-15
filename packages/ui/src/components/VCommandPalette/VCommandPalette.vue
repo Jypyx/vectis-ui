@@ -72,14 +72,17 @@ export interface CommandPaletteSeparator {
 
 /** Anything the list may hold: a command, a named block, or a separator. */
 export type CommandPaletteItem =
-  CommandPaletteCommand | CommandPaletteGroup | CommandPaletteSeparator
+  | CommandPaletteCommand
+  | CommandPaletteGroup
+  | CommandPaletteSeparator
 
 /**
  * How the list is narrowed as one types: by the label and the keywords, not at all (when the
  * commands arrive already filtered by a server), or by a rule of your own.
  */
 export type CommandPaletteFilter =
-  boolean | ((command: CommandPaletteCommand, query: string) => boolean)
+  | boolean
+  | ((command: CommandPaletteCommand, query: string) => boolean)
 
 /** What the `#item` slot receives. */
 export interface CommandPaletteItemSlotProps {

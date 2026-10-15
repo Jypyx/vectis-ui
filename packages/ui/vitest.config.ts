@@ -1,7 +1,7 @@
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
 import vue from '@vitejs/plugin-vue'
-import { playwright } from '@vitest/browser-playwright'
-import { defineConfig } from 'vitest/config'
+import { playwright } from 'vite-plus/test/browser-playwright'
+import { defineConfig } from 'vite-plus'
 
 /**
  * Separate jsdom logic, Chromium play functions and pure benchmarks; see AGENTS.md for

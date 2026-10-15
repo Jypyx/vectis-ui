@@ -17,7 +17,12 @@ export type ToastVariant = 'soft' | 'solid'
 
 /** The corner of the screen a notification appears in. */
 export type ToastPlacement =
-  'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
+  | 'top-left'
+  | 'top-center'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-center'
+  | 'bottom-right'
 
 /** Everything one can say when raising a notification. */
 export interface ToastOptions {

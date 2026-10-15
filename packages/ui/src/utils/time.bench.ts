@@ -1,5 +1,5 @@
 /** Benchmark repeated time formatting and its Intl cache. */
-import { test } from 'vitest'
+import { test } from 'vite-plus/test'
 
 import { formatTimeDisplay, hourCycleFor, parseTime } from './time'
 import { snapMinute, timeList } from './clock'

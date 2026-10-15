@@ -1,5 +1,5 @@
 import { render } from '@testing-library/vue'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
 import { defineComponent, h } from 'vue'
 
 import { check } from '../VIcon/icons/check'

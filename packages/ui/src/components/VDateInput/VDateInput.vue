@@ -54,7 +54,12 @@ import { useMessages, useResolvedLocale } from '../../i18n/state'
 
 /** Where the calendar opens relative to the field. */
 export type DateInputPlacement =
-  'bottom' | 'bottom-start' | 'bottom-end' | 'top' | 'top-start' | 'top-end'
+  | 'bottom'
+  | 'bottom-start'
+  | 'bottom-end'
+  | 'top'
+  | 'top-start'
+  | 'top-end'
 
 /** Whether the field can be typed into, or only filled from the calendar. */
 export type DateInputMode = 'picker' | 'input'

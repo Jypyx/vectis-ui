@@ -6,7 +6,14 @@
 import type { FileCandidate } from '../../utils/file'
 
 export type FilePickerKind =
-  'image' | 'pdf' | 'audio' | 'video' | 'archive' | 'spreadsheet' | 'code' | 'file'
+  | 'image'
+  | 'pdf'
+  | 'audio'
+  | 'video'
+  | 'archive'
+  | 'spreadsheet'
+  | 'code'
+  | 'file'
 
 const MIME_KINDS: Record<string, FilePickerKind> = {
   'application/pdf': 'pdf',

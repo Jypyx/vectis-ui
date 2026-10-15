@@ -2,7 +2,7 @@
  * Validate token meaning as well as generation freshness; tokens:check alone only compares
  * artefact bytes.
  */
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 import { flattenTokens, resolveTokenValue } from './css'
 import { tokens } from './index'

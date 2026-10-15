@@ -1,5 +1,5 @@
 import { fireEvent, render } from '@testing-library/vue'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { KeepAlive, defineComponent, h, nextTick, ref } from 'vue'
 
 import VHotkeys from './VHotkeys.vue'
