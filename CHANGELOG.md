@@ -2,7 +2,7 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
-## [Unreleased]
+## [0.16.0] - 2026-10-15
 
 ### Upgrading from 0.15.x
 
@@ -11,6 +11,8 @@ Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https:
 ### Added
 
 - The `--vectis-density-delta` token, and a Density setting in the theme builder.
+
+**Full diff:** [v0.15.0...v0.16.0](https://github.com/Jypyx/vectis-ui/compare/v0.15.0...v0.16.0)
 
 ## [0.15.0] - 2026-10-15
 
