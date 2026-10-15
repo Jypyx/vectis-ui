@@ -295,16 +295,15 @@ describe('VContextMenu', () => {
     expect(isOpen(container)).toBe(false)
   })
 
-  it('size, compact and width reach the panel', () => {
+  it('size and width reach the panel', () => {
     const { container } = renderHarness(`
-      <VContextMenu size="lg" compact :width="240">
+      <VContextMenu size="lg" :width="240">
         Zone
         <template #menu><VMenuItem label="Rename" /></template>
       </VContextMenu>
     `)
     const menu = panel(container)
     expect(menu.getAttribute('data-size')).toBe('lg')
-    expect(menu.hasAttribute('data-compact')).toBe(true)
     expect(menu.style.getPropertyValue('--menu-width')).toBe('240px')
   })
 })

@@ -43,9 +43,9 @@ describe('VSplitButton', () => {
     expect(trigger.querySelector('[data-icon]')!.getAttribute('data-icon')).toBe('expand_more')
   })
 
-  it('variant, tone, size, compact and elevated reach both halves', () => {
+  it('variant, tone, size and elevated reach both halves', () => {
     const { getByRole } = renderHarness(
-      `<VSplitButton label="Save" variant="outline" tone="danger" size="lg" compact elevated>
+      `<VSplitButton label="Save" variant="outline" tone="danger" size="lg" elevated>
         ${items}
       </VSplitButton>`,
     )
@@ -56,7 +56,6 @@ describe('VSplitButton', () => {
       expect(button.dataset.variant).toBe('outline')
       expect(button.dataset.tone).toBe('danger')
       expect(button.dataset.size).toBe('lg')
-      expect(button.hasAttribute('data-compact')).toBe(true)
       expect(button.hasAttribute('data-elevated')).toBe(true)
     }
   })

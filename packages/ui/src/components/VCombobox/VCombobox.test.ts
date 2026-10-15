@@ -363,11 +363,11 @@ describe('VCombobox', () => {
         props: { options: MANY, multiple: true, max: 3, size: 'lg', modelValue: FIVE },
         attrs: { 'aria-label': 'Country' },
         slots: {
-          overflow: ({ count, size, compact }: { count: number; size: string; compact: boolean }) =>
-            h('output', { class: 'custom' }, `${count} ${size} ${compact}`),
+          overflow: ({ count, size }: { count: number; size: string }) =>
+            h('output', { class: 'custom' }, `${count} ${size}`),
         },
       })
-      expect(container.querySelector('.custom')?.textContent).toBe('2 sm false')
+      expect(container.querySelector('.custom')?.textContent).toBe('2 sm')
       expect(container.querySelector('.v-listbox-overflow-chip')).toBeNull()
     })
 
@@ -686,28 +686,27 @@ describe('VCombobox asynchronous', () => {
   })
 
   it('sizes: the Chips stay one step below the field, and the panel follows its size', async () => {
-    // A single mapping (in the script) which the CSS `--chip-height` must mirror: xs up
-    // to md, sm at lg; the step below goes through `compact`.
+    // A single mapping (in the script) which the CSS `--chip-height` carries: xs up to md, sm
+    // at lg; an sm field has no smaller size left, so its height goes one step below xs.
     const { container, rerender } = renderCombobox({ multiple: true, modelValue: ['fr'] })
     const chip = () => container.querySelector('.v-chip') as HTMLElement
     const panel = () => container.querySelector('[role="listbox"]') as HTMLElement
+    const chipHeight = () =>
+      (container.querySelector('.v-combobox') as HTMLElement).style.getPropertyValue(
+        '--chip-height',
+      )
 
     expect(chip().getAttribute('data-size')).toBe('xs')
-    expect(chip().hasAttribute('data-compact')).toBe(false)
+    expect(chipHeight()).toContain('--vectis-density-delta')
 
     await rerender({ size: 'sm' })
     expect(chip().getAttribute('data-size')).toBe('xs')
-    expect(chip().hasAttribute('data-compact')).toBe(true)
+    expect(chipHeight()).toContain('--vectis-space-1')
 
-    await rerender({ size: 'lg', compact: false })
+    await rerender({ size: 'lg' })
     expect(chip().getAttribute('data-size')).toBe('sm')
-    expect(chip().hasAttribute('data-compact')).toBe(false)
+    expect(chipHeight()).toContain('--vectis-control-height-sm')
     expect(panel().getAttribute('data-size')).toBe('lg')
-
-    await rerender({ size: 'lg', compact: true })
-    expect(chip().getAttribute('data-size')).toBe('sm')
-    expect(chip().hasAttribute('data-compact')).toBe(true)
-    expect(container.querySelector('.v-combobox')?.hasAttribute('data-compact')).toBe(true)
   })
 
   it('hasMore: a sentinel closes the list (infinite-scroll support)', () => {
@@ -790,7 +789,6 @@ describe('VCombobox asynchronous', () => {
           label: string
           remove: () => void
           size: string
-          compact: boolean
         }) =>
           h(
             'button',

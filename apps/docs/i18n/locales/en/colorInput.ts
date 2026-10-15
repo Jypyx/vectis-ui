@@ -44,7 +44,6 @@ export default {
           'Error message shown in place of the hint. Sets <code>aria-invalid</code> and is announced when it appears.',
         placeholder: 'Placeholder shown when the field is empty.',
         size: 'Component size.',
-        compact: 'Reduces the control height without changing text or icons.',
         disabled: 'Disables interaction.',
         readonly: 'Prevents typing and removes the picker. The field remains focusable.',
         invalid:

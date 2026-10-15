@@ -4,7 +4,7 @@ export default {
   examples: {
     submenus: {
       title: 'Submenus',
-      text: 'The commands are <code>VMenu</code> items, so groups, separators, submenus, <code>size</code> and <code>compact</code> work the same. Near an edge of the viewport the menu flips to stay on screen.',
+      text: 'The commands are <code>VMenu</code> items, so groups, separators, submenus and <code>size</code> work the same. Near an edge of the viewport the menu flips to stay on screen.',
     },
     nativeMenu: {
       title: "The browser's menu",
@@ -20,7 +20,6 @@ export default {
       props: {
         as: 'Element wrapping the zone.',
         size: 'Row size inherited by submenus.',
-        compact: 'Reduces row height, including submenus.',
         width: 'Panel width. Numbers use pixels; strings use CSS lengths or keywords.',
         disabled: "Leaves the zone to the browser's own menu.",
         vModelOpen: 'Open state synchronized with outside clicks, Escape and command selection.',

@@ -47,8 +47,6 @@ export type InputControlProps = {
 interface InputProps {
   /** The height of the field: 32, 40 or 48 pixels. */
   size?: InputSize
-  /** Takes 4px off the height, leaving the padding, the text and the icons as they are. */
-  compact?: boolean
   /**
    * The native type of the input, which is also what tells a phone which keyboard to
    * offer: a numeric pad for `number`, an @ key for `email`.
@@ -151,7 +149,6 @@ defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<InputProps>(), {
   size: 'md',
-  compact: false,
   type: 'text',
   invalid: false,
   disabled: false,
@@ -231,11 +228,7 @@ const { rootClass, rootStyle, forwardedAttrs: restAttrs } = useRootAttrs()
 
 // `disabled` is the one read as an or, the two answers being cumulative (VInput/context.ts).
 const group = inject(inputGroupKey, null)
-const {
-  size: resolvedSize,
-  compact: resolvedCompact,
-  disabled: resolvedDisabled,
-} = useControlShape(props, group)
+const { size: resolvedSize, disabled: resolvedDisabled } = useControlShape(props, group)
 
 // The prop keeps priority; what it falls back to is the dictionary, so the default
 // wording follows the language the design system is set to.
@@ -323,7 +316,6 @@ defineExpose({
       <div
         class="v-input-field v-control"
         :data-size="resolvedSize"
-        :data-compact="resolvedCompact ? '' : undefined"
         :data-disabled="resolvedDisabled ? '' : undefined"
         :data-readonly="readonly ? '' : undefined"
       >
@@ -629,6 +621,11 @@ defineExpose({
 
   .v-input-chips .v-input-control {
     height: var(--chip-height);
+  }
+
+  /* (0,2,0) over the chip's own height, so a chip from the #chip slot fits as well. */
+  .v-input-chips .v-chip {
+    block-size: var(--chip-height);
   }
 
   @media (prefers-reduced-motion: reduce) {

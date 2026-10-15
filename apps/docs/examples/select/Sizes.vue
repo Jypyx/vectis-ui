@@ -8,10 +8,7 @@ const countries = [
   { value: 'ch', label: 'Switzerland' },
 ]
 
-const rows = (['sm', 'md', 'lg'] as const).flatMap((size) => [
-  { key: size, size, compact: false, label: size },
-  { key: `${size}-compact`, size, compact: true, label: `${size}, compact` },
-])
+const rows = (['sm', 'md', 'lg'] as const).map((size) => ({ key: size, size, label: size }))
 </script>
 
 <template>
@@ -22,7 +19,6 @@ const rows = (['sm', 'md', 'lg'] as const).flatMap((size) => [
       :options="countries"
       model-value="fr"
       :size="row.size"
-      :compact="row.compact"
       :label="row.label"
     />
   </div>

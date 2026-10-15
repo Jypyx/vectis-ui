@@ -59,8 +59,6 @@ interface NumberInputProps {
   decrementLabel?: string
   /** The height of the field: 32, 40 or 48 pixels. */
   size?: InputSize
-  /** Takes 4px off the height. */
-  compact?: boolean
   /** The label above the field, tied to it. */
   label?: string
   /** A line of help under the field, read out along with the label. */
@@ -107,7 +105,6 @@ const props = withDefaults(defineProps<NumberInputProps>(), {
   incrementLabel: undefined,
   decrementLabel: undefined,
   size: 'md',
-  compact: false,
   label: undefined,
   hint: undefined,
   error: undefined,
@@ -288,7 +285,6 @@ defineExpose({
     :data-controls="controls"
     v-bind="fieldAttrs"
     :size="size"
-    :compact="compact"
     :label="label"
     :hint="hint"
     :error="error"

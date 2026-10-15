@@ -20,8 +20,6 @@ interface ContextMenuProps {
   as?: string
   /** How tall the rows are: 32, 40 or 48 pixels. Submenus inherit it. */
   size?: MenuSize
-  /** Takes 4px off the height of every row, submenus included. */
-  compact?: boolean
   /**
    * A width for the panel: a number is read as pixels, a string as any CSS length or
    * keyword. Submenus keep the default width.
@@ -38,7 +36,6 @@ defineOptions({ inheritAttrs: false })
 const props = withDefaults(defineProps<ContextMenuProps>(), {
   as: 'div',
   size: 'sm',
-  compact: false,
   width: undefined,
   disabled: false,
 })
@@ -244,7 +241,6 @@ defineExpose({
     placement="bottom-start"
     :anchor="anchor"
     :size="size"
-    :compact="compact"
     :width="width"
     @toggle="onToggle"
     @contextmenu.prevent

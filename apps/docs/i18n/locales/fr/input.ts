@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> ajuste la hauteur, les espacements internes, le texte et les icônes. <code>compact</code> réduit uniquement la hauteur.',
+      text: '<code>size</code> ajuste la hauteur, les espacements internes, le texte et les icônes.',
     },
     icons: {
       title: 'Icônes',
@@ -43,8 +43,6 @@ export default {
         hideLabel: 'Masque le libellé visuellement tout en le gardant comme nom accessible.',
         labelPosition: 'Place le libellé au-dessus du champ ou à côté.',
         size: 'Taille du champ. Remplacée lorsque <code>VInputGroup</code> définit <code>size</code>.',
-        compact:
-          'Réduit la hauteur sans modifier les espacements internes, le texte ni les icônes. Remplacé lorsque <code>VInputGroup</code> définit <code>compact</code>.',
         type: 'Type natif du champ de saisie.',
         invalid:
           'Définit <code>aria-invalid</code> et le style d’erreur. Ne bloque pas à lui seul l’envoi du formulaire.',

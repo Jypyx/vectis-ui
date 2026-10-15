@@ -13,7 +13,6 @@ export default {
         { name: 'variant', type: 'ButtonVariant', values: "'solid' | 'outline' | 'ghost' | 'soft'", default: "'solid'" },
         { name: 'tone', type: 'ButtonTone', values: "'accent' | 'neutral' | 'danger'", default: "'accent'" },
         { name: 'size', type: 'ButtonSize', values: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'elevated', type: 'boolean', default: 'false' },
         { name: 'fullWidth', type: 'boolean', default: 'false' },
         { name: 'href', type: 'string' },

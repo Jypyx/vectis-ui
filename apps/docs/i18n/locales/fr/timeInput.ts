@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> définit la taille du champ ; <code>compact</code> réduit sa hauteur.',
+      text: '<code>size</code> définit la taille du champ.',
     },
     modes: {
       title: 'Modes',
@@ -70,7 +70,6 @@ export default {
         hint: 'Texte d’aide lié par <code>aria-describedby</code>.',
         placeholder: 'Texte indicatif lorsque le champ est vide.',
         size: 'Taille du composant.',
-        compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
         disabled: 'Désactive les interactions.',
         readonly:
           'Empêche la saisie, la sélection, le changement AM/PM et l’effacement. Conserve le focus.',

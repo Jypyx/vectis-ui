@@ -97,9 +97,8 @@ const meta = {
       options: ['bottom-start', 'bottom-end', 'bottom', 'top-start', 'top-end', 'top'],
     },
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
-    compact: { control: 'boolean' },
   },
-  args: { placement: 'bottom-start', size: 'sm', compact: false },
+  args: { placement: 'bottom-start', size: 'sm' },
 } satisfies Meta<typeof VMenu>
 
 export default meta
@@ -256,10 +255,7 @@ export const Groups: Story = {
   },
 }
 
-/**
- * Sm 32px (the default) / md 40px / lg 48px; minimum item height and inline padding; `compact`
- * removes 4px, combinable with all three.
- */
+/** Sm 32px (the default) / md 40px / lg 48px; minimum item height and inline padding. */
 export const Sizes: Story = {
   render: () => ({
     components: { VMenu, VMenuItem, VMenuSeparator, VButton },
@@ -270,9 +266,6 @@ export const Sizes: Story = {
           { label: 'sm', props: {} },
           { label: 'md', props: { size: 'md' } },
           { label: 'lg', props: { size: 'lg' } },
-          { label: 'sm compact', props: { compact: true } },
-          { label: 'md compact', props: { size: 'md', compact: true } },
-          { label: 'lg compact', props: { size: 'lg', compact: true } },
         ]" :key="variant.label" v-bind="variant.props">
           <template #trigger="{ triggerProps }">
             <VButton size="sm" variant="outline" tone="neutral" v-bind="triggerProps">{{ variant.label }}</VButton>

@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> ajuste le champ et les options. <code>compact</code> réduit la hauteur du champ.',
+      text: '<code>size</code> ajuste le champ et les options.',
     },
     states: {
       title: 'États',
@@ -84,7 +84,6 @@ export default {
           'Message d’erreur affiché à la place de l’aide. Pose <code>aria-invalid</code>, est lié par <code>aria-describedby</code> et est annoncé quand il apparaît.',
         hint: 'Texte d’aide lié par <code>aria-describedby</code>.',
         size: 'Taille du champ et des options. Le champ reprend la taille définie par <code>VInputGroup</code>.',
-        compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
         placeholder: 'Texte indicatif lorsque le champ est vide.',
         disabled: 'Désactive les interactions.',
         readonly:
@@ -126,9 +125,8 @@ export default {
       slots: {
         option:
           'Contenu d’une option. Reçoit l’option, son index et ses états actif et sélectionné.',
-        chip: 'Puce sélectionnée. Reçoit la valeur, le libellé, l’option éventuelle, <code>remove</code>, la taille et l’état compact. Reliez l’action de suppression.',
-        overflow:
-          'Nombre de valeurs masquées. Reçoit <code>count</code>, la taille des puces et l’état compact.',
+        chip: 'Puce sélectionnée. Reçoit la valeur, le libellé, l’option éventuelle, <code>remove</code> et la taille de la puce. Reliez l’action de suppression.',
+        overflow: 'Nombre de valeurs masquées. Reçoit <code>count</code> et la taille des puces.',
         empty:
           'Contenu de l’état vide. Reçoit la recherche ; définissez aussi <code>emptyText</code>.',
         loading: 'Contenu du chargement initial. Définissez aussi <code>loadingText</code>.',

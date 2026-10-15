@@ -30,10 +30,6 @@ export default {
       title: 'Sizes',
       text: '<code>size</code> sets the size of every button, overriding individual sizes.',
     },
-    compact: {
-      title: 'Compact',
-      text: '<code>compact</code> reduces each button’s height.',
-    },
     fullWidth: {
       title: 'Full width',
       text: '<code>fullWidth</code> fills the parent’s width. Horizontal groups give each button equal width.',
@@ -64,8 +60,6 @@ export default {
           'Visual style for all buttons. Overrides individual variants; when omitted, each button keeps its own.',
         tone: 'Fallback tone for buttons without their own <code>tone</code>.',
         size: 'Size for all buttons. Overrides individual sizes; when omitted, each button keeps its own.',
-        compact:
-          'Reduces button height. Overrides individual values, including when set to <code>false</code>; when omitted, each button keeps its own.',
         elevated:
           'Adds a group shadow, or individual shadows with <code>detached</code>. Overrides individual values, including when set to <code>false</code>; when omitted, each button keeps its own.',
         disabled:

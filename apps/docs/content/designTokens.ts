@@ -165,6 +165,7 @@ export const radiusRows: TokenRow[] = claim(byPrefix('--vectis-radius-')).map(ro
 export const durationRows: TokenRow[] = claim(byPrefix('--vectis-duration-')).map(rowOf)
 
 export const sizeGroups: TokenRowGroup[] = [
+  { label: 'density', rows: claim(byPrefix('--vectis-density-')).map(rowOf) },
   { label: 'controlHeights', rows: claim(byPrefix('--vectis-control-height-')).map(rowOf) },
   { label: 'iconSizes', rows: claim(byPrefix('--vectis-icon-size-')).map(rowOf) },
 ]

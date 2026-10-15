@@ -53,8 +53,6 @@ interface TabsProps {
   tone?: TabsTone
   /** The height of the tabs, from the scale shared by every control. */
   size?: TabsSize
-  /** Takes 4px off the height of every tab. */
-  compact?: boolean
   /** Whether the tabs run across the page or down its side. */
   orientation?: TabsOrientation
   /** Where the tabs sit along the bar when they do not fill it. */
@@ -95,7 +93,6 @@ const props = withDefaults(defineProps<TabsProps>(), {
   variant: 'flat',
   tone: 'accent',
   size: 'md',
-  compact: false,
   orientation: 'horizontal',
   align: 'start',
   fullWidth: false,
@@ -170,9 +167,6 @@ provide(tabsKey, {
   },
   get size() {
     return props.size
-  },
-  get compact() {
-    return props.compact
   },
   get activation() {
     return props.activation
@@ -330,7 +324,6 @@ defineExpose({
     :data-orientation="orientation"
     :data-align="align"
     :data-full-width="fullWidth ? '' : undefined"
-    :data-compact="compact ? '' : undefined"
   >
     <div class="v-tabs-bar">
       <VIconButton
@@ -338,7 +331,6 @@ defineExpose({
         class="v-tabs-scroll"
         :label="resolvedPrevLabel"
         :size="size"
-        :compact="compact"
         :disabled="disabled || atStart"
         @click="scrollStep(-1)"
       >
@@ -372,7 +364,6 @@ defineExpose({
         class="v-tabs-scroll"
         :label="resolvedNextLabel"
         :size="size"
-        :compact="compact"
         :disabled="disabled || atEnd"
         @click="scrollStep(1)"
       >
@@ -389,22 +380,12 @@ defineExpose({
 <style>
 @layer vectis.components {
   .v-tabs {
-    /*
-     * The panels' padding, and the four pixels the compact density takes off it. The delta is
-     * held apart from the value rather than the two being written out, so the density stays one
-     * subtraction wherever the padding is read instead of a second table to keep in step; the
-     * VAccordion idiom.
-     */
-    --tabs-pad-delta: 0px;
-    --tabs-panels-pad: calc(var(--vectis-space-4) - var(--tabs-pad-delta));
+    /* The panels' padding, less what the density takes off, as on VAccordion. */
+    --tabs-panels-pad: calc(var(--vectis-space-4) - var(--vectis-density-delta));
 
     display: flex;
     flex-direction: column;
     font-family: var(--vectis-text-family);
-  }
-
-  .v-tabs[data-compact] {
-    --tabs-pad-delta: var(--vectis-space-1);
   }
 
   .v-tabs[data-orientation='vertical'] {

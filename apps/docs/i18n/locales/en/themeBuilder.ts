@@ -1,6 +1,6 @@
 export default {
   title: 'Theme builder',
-  lead: 'Choose colours, fonts, icons and radii, see them on every component, then copy the tokens into your project.',
+  lead: 'Choose colours, fonts, icons, radii and density, see them on every component, then copy the tokens into your project.',
   reset: 'Reset',
   resetLabel: 'Reset every setting',
   settings: 'Settings',
@@ -26,6 +26,11 @@ export default {
     large: 'Large',
     extra: 'Extra',
     full: 'Full',
+  },
+  density: 'Density',
+  densities: {
+    standard: 'Standard',
+    compact: 'Compact',
   },
   generate: 'Generate',
   dialogTitle: 'Your theme',

@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> adjusts the height, padding, text and icons. <code>compact</code> reduces the height only.',
+      text: '<code>size</code> adjusts the height, padding, text and icons.',
     },
     icons: {
       title: 'Icons',
@@ -42,8 +42,6 @@ export default {
         hideLabel: 'Hides the label visually while keeping it as the accessible name.',
         labelPosition: 'Places the label above the field or beside it.',
         size: 'Field size. Overridden when <code>VInputGroup</code> sets <code>size</code>.',
-        compact:
-          'Reduces the height without changing padding, text or icons. Overridden when <code>VInputGroup</code> sets <code>compact</code>.',
         type: 'Native input type.',
         invalid:
           'Sets <code>aria-invalid</code> and the error style. Does not block form submission by itself.',

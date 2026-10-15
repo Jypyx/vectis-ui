@@ -20,7 +20,7 @@ export default {
     },
     sizes: {
       title: 'Size and density',
-      text: 'Set <code>size</code> and <code>compact</code> on the group to override individual settings.',
+      text: 'Set <code>size</code> on the group to override individual settings.',
     },
     states: {
       title: 'States',
@@ -44,8 +44,6 @@ export default {
           'Error message shown in place of the hint, linked to the group through <code>aria-describedby</code> and announced when it appears. Mark the faulty segments with <code>invalid</code>.',
         hint: 'Shared help text below the row, linked to the group through <code>aria-describedby</code>.',
         size: 'Size of all segments. Overrides individual sizes; when omitted, each segment keeps its own.',
-        compact:
-          'Reduces segment height. Overrides individual values, including when set to <code>false</code>; when omitted, each segment keeps its own.',
         disabled:
           'Disables all segments. Setting it to <code>false</code> does not enable individually disabled controls.',
       },

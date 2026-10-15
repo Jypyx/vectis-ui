@@ -40,7 +40,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: 'Définissez <code>size</code> et <code>compact</code> sur la navigation pour tous les niveaux.',
+      text: 'Définissez <code>size</code> sur la navigation pour tous les niveaux.',
     },
   },
   api: {
@@ -48,7 +48,6 @@ export default {
       props: {
         label: 'Nom accessible de la navigation. Utilise le dictionnaire par défaut.',
         size: 'Taille des lignes héritée par tous les niveaux.',
-        compact: 'Réduit la hauteur des lignes.',
         exclusive: 'Conserve une seule branche ouverte par niveau.',
         expandIcon: 'Icône de branche fermée.',
         collapseIcon: 'Icône de branche ouverte. Sans cette prop, l’icône d’ouverture tourne.',

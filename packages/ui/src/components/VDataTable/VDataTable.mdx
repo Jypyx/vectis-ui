@@ -119,7 +119,7 @@ The three other variants enclose the rows and the footer in a surface of their o
 corners: a 1px rule on the page surface (`outline`), a shadow over a raised surface with no border
 (`elevated`), or the muted surface with no border (`filled`). The header and the toolbar stay
 outside, on the page. The footer takes the frame's gutter, aligned on the cells' padding, so its
-content lines up with the last column and follows `compact`. Only the table keeps scrolling edge to
+content lines up with the last column and follows the density. Only the table keeps scrolling edge to
 edge. On `filled`, the heading row is a shade darker than the fill so that it stays distinct.
 
 <Canvas of={VDataTableStories.Variants} />
@@ -128,15 +128,14 @@ edge. On `filled`, the heading row is a shade darker than the fill so that it st
 
 The header row is painted on a muted surface of its own, which sets the column headings apart
 from the data under them. `striped` alternates the background of even rows, in a lighter tint
-than the header's so a heading never reads as one more stripe; `compact` reduces the cell paddings by one notch
-and switches the composed parts (the search, the footer) to compact; `stickyHeader` freezes the
+than the header's so a heading never reads as one more stripe. The compact density
+(`--vectis-density-delta`) reduces the cell paddings by one notch, as it does the composed parts
+(the search, the footer). `stickyHeader` freezes the
 header row on vertical scrolling — it assumes a bounded scroll area, through `height` or through a
 parent with a defined height (see **Height**), otherwise nothing scrolls under the header, whose
 opaque background the rows pass beneath.
 
 <Canvas of={VDataTableStories.Striped} />
-
-<Canvas of={VDataTableStories.Compact} />
 
 <Canvas of={VDataTableStories.StickyHeader} />
 

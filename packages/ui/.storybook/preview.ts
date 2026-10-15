@@ -28,8 +28,15 @@ const applyTheme = (theme: string) => {
   }
 }
 
+const applyDensity = (density: string) => {
+  const root = document.documentElement.style
+  if (density === 'compact') root.setProperty('--vectis-density-delta', 'var(--vectis-space-1)')
+  else root.removeProperty('--vectis-density-delta')
+}
+
 const withGlobals: Decorator = (story, context) => {
   applyTheme((context.globals.theme as string | undefined) ?? 'system')
+  applyDensity((context.globals.density as string | undefined) ?? 'standard')
   document.documentElement.dir = (context.globals.direction as string | undefined) ?? 'ltr'
   setLocale((context.globals.locale as string | undefined) ?? 'en-US')
   return {
@@ -84,6 +91,18 @@ const preview: Preview = {
         dynamicTitle: true,
       },
     },
+    density: {
+      description: 'Design system density',
+      toolbar: {
+        title: 'Density',
+        icon: 'component',
+        items: [
+          { value: 'standard', title: 'Standard' },
+          { value: 'compact', title: 'Compact' },
+        ],
+        dynamicTitle: true,
+      },
+    },
     direction: {
       description: 'Text direction',
       toolbar: {
@@ -111,6 +130,7 @@ const preview: Preview = {
   },
   initialGlobals: {
     theme: 'system',
+    density: 'standard',
     direction: 'ltr',
     locale: 'en-US',
   },

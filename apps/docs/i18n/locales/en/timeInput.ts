@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> sets the field size; <code>compact</code> reduces its height.',
+      text: '<code>size</code> sets the field size.',
     },
     modes: {
       title: 'Modes',
@@ -67,7 +67,6 @@ export default {
         hint: 'Help text linked through <code>aria-describedby</code>.',
         placeholder: 'Placeholder shown when the field is empty.',
         size: 'Component size.',
-        compact: 'Reduces the control height without changing text or icons.',
         disabled: 'Disables interaction.',
         readonly: 'Prevents typing, panel selection, AM/PM changes and clearing. Preserves focus.',
         invalid:

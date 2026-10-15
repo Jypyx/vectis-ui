@@ -13,7 +13,6 @@ export default {
         { name: 'variant', type: 'AccordionVariant', values: "'flat' | 'outline' | 'elevated' | 'filled'", default: "'flat'" },
         { name: 'expandIcon', type: 'IconSource', default: 'expand_more' },
         { name: 'collapseIcon', type: 'IconSource' },
-        { name: 'compact', type: 'boolean', default: 'false' },
       ],
       slots: [
         { name: 'default', type: '{}' },

@@ -24,7 +24,6 @@ export default {
         { name: 'searchDebounce', type: 'number', default: '250' },
         { name: 'striped', type: 'boolean', default: 'false' },
         { name: 'stickyHeader', type: 'boolean', default: 'false' },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'height', type: 'number | string' },
         { name: 'sortIcon', type: 'IconSource', default: 'swap_vert' },
         { name: 'sortAscIcon', type: 'IconSource', default: 'arrow_downward' },

@@ -16,15 +16,4 @@ const sizes = ['sm', 'md', 'lg'] as const
     <VMenuItem label="Export" :icon-start="image" />
     <VMenuItem label="Remind me later" :icon-start="schedule" />
   </VMenu>
-
-  <VMenu size="md" compact>
-    <template #trigger="{ triggerProps }">
-      <VButton v-bind="triggerProps" size="md" compact variant="outline" tone="neutral">
-        md compact
-      </VButton>
-    </template>
-    <VMenuItem label="Open" :icon-start="description" />
-    <VMenuItem label="Export" :icon-start="image" />
-    <VMenuItem label="Remind me later" :icon-start="schedule" />
-  </VMenu>
 </template>

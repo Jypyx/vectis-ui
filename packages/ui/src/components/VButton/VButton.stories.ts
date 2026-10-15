@@ -49,7 +49,6 @@ const meta = {
     tone: { control: 'select', options: ['accent', 'neutral', 'danger'] },
     size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
     elevated: { control: 'boolean' },
-    compact: { control: 'boolean' },
     iconStart: { control: 'text' },
     iconEnd: { control: 'text' },
     iconFilled: { control: 'boolean' },
@@ -61,7 +60,6 @@ const meta = {
     tone: 'accent',
     size: 'md',
     elevated: false,
-    compact: false,
     fullWidth: false,
     disabled: false,
     loading: false,
@@ -110,6 +108,7 @@ export const Elevated: Story = {
   }),
 }
 
+/** The five sizes, then the same five in a region that redefines the density token. */
 export const Sizes: Story = {
   render: () => ({
     components: { VButton },
@@ -122,12 +121,12 @@ export const Sizes: Story = {
           <VButton size="lg">Large 48px</VButton>
           <VButton size="xl">XLarge 56px</VButton>
         </div>
-        <div style="display: flex; gap: 8px; align-items: center">
-          <VButton size="xs" compact>XSmall 20px</VButton>
-          <VButton size="sm" compact>Small 28px</VButton>
-          <VButton size="md" compact>Medium 36px</VButton>
-          <VButton size="lg" compact>Large 44px</VButton>
-          <VButton size="xl" compact>XLarge 52px</VButton>
+        <div style="display: flex; gap: 8px; align-items: center; --vectis-density-delta: var(--vectis-space-1)">
+          <VButton size="xs">XSmall 20px</VButton>
+          <VButton size="sm">Small 28px</VButton>
+          <VButton size="md">Medium 36px</VButton>
+          <VButton size="lg">Large 44px</VButton>
+          <VButton size="xl">XLarge 52px</VButton>
         </div>
       </div>
     `,

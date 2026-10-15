@@ -4,8 +4,6 @@ import AvatarBasic from '~/examples/avatar/Basic.vue'
 import avatarBasicSource from '~/examples/avatar/Basic.vue?raw'
 import AvatarColor from '~/examples/avatar/Color.vue'
 import avatarColorSource from '~/examples/avatar/Color.vue?raw'
-import AvatarCompact from '~/examples/avatar/Compact.vue'
-import avatarCompactSource from '~/examples/avatar/Compact.vue?raw'
 import AvatarIcon from '~/examples/avatar/Icon.vue'
 import avatarIconSource from '~/examples/avatar/Icon.vue?raw'
 import AvatarImage from '~/examples/avatar/Image.vue'
@@ -58,12 +56,6 @@ useDocsHead('avatar')
   <DocsProse keypath="avatar.examples.sizes.text" />
   <DocsExample :source="avatarSizesSource">
     <AvatarSizes />
-  </DocsExample>
-
-  <h3 id="compact">{{ t('avatar.examples.compact.title') }}</h3>
-  <DocsProse keypath="avatar.examples.compact.text" />
-  <DocsExample :source="avatarCompactSource">
-    <AvatarCompact />
   </DocsExample>
 
   <h3 id="custom-colour">{{ t('avatar.examples.color.title') }}</h3>

@@ -28,8 +28,6 @@ export interface TabsContext {
   readonly tone: TabsTone
   /** The height of the tabs. */
   readonly size: TabsSize
-  /** The reduced density. */
-  readonly compact: boolean
   /** Whether every tab is unusable, which no tab can refuse. */
   readonly disabled: boolean
   /** Whether moving to a tab selects it, or merely focuses it. */

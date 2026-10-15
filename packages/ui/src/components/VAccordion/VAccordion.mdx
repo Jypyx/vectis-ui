@@ -74,15 +74,12 @@ reading the list, not to framing it.
 
 <Canvas of={VAccordionStories.Variants} />
 
-## Compact
+## Density
 
-`compact` removes 4px from **every** padding — vertical as well as horizontal, header as well as
-panel — and touches nothing else: the typography, the gutter and the icon (20px) stay those of
-normal density. It is the same delta as the `compact` of the fixed-height controls (VButton,
-VInput…); since the accordion has no imposed height, the delta applies here to the paddings,
-driven by a single delta set on the group and inherited by the items.
-
-<Canvas of={VAccordionStories.Compact} />
+The density token `--vectis-density-delta` comes off **every** padding — vertical as well as
+horizontal, header as well as panel — and touches nothing else: the typography, the gutter and the
+icon (20px) stay the same. It is the delta the fixed-height controls take off their height; since
+the accordion has no imposed height, it applies here to the paddings.
 
 ## Disabled item
 

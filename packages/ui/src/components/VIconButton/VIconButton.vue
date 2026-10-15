@@ -38,8 +38,6 @@ interface IconButtonProps {
   elevated?: boolean
   /** The size of the square, taken from the scale shared by every control. */
   size?: ButtonSize
-  /** Takes 4px off both sides of the square, which stays square. */
-  compact?: boolean
   /**
    * The silhouette: a square carrying the corner radius every control shares, or a
    * circle. The box itself is square either way: only the corners change.
@@ -73,7 +71,6 @@ const props = withDefaults(defineProps<IconButtonProps>(), {
   tone: undefined,
   elevated: false,
   size: 'md',
-  compact: false,
   shape: 'square',
   href: undefined,
   type: 'button',
@@ -114,7 +111,6 @@ const resolvedTone = computed<ButtonTone>(() => props.tone ?? group?.tone ?? 'ne
     :tone="resolvedTone"
     :elevated="elevated"
     :size="size"
-    :compact="compact"
     :href="href"
     :type="type"
     :disabled="disabled"

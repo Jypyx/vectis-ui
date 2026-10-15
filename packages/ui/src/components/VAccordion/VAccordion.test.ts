@@ -122,15 +122,6 @@ describe('VAccordion', () => {
     expect(variantOf('variant="outline"')).toBe('outline')
   })
 
-  it('compact: data-compact set on the root only when requested', () => {
-    expect(renderWith().container.querySelector('.v-accordion')?.hasAttribute('data-compact')).toBe(
-      false,
-    )
-    expect(
-      renderWith('compact').container.querySelector('.v-accordion')?.hasAttribute('data-compact'),
-    ).toBe(true)
-  })
-
   it('disabled: an inert summary (aria-disabled, out of the tab order, click cancelled)', () => {
     const { container } = renderWith('', 'disabled')
     const [first, second] = [...container.querySelectorAll('summary')]

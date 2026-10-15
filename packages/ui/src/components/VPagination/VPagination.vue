@@ -89,8 +89,6 @@ interface PaginationProps {
   tone?: PaginationTone
   /** The height of the buttons, from the scale shared by every control. */
   size?: PaginationSize
-  /** Takes 4px off the height of every button. */
-  compact?: boolean
   /** Raises the row off the page, on the terms of VButton's own `elevated`. */
   elevated?: boolean
   /** Where the row sits in the width it is given. */
@@ -167,7 +165,6 @@ const props = withDefaults(defineProps<PaginationProps>(), {
   selectedVariant: 'solid',
   tone: 'accent',
   size: 'md',
-  compact: false,
   elevated: false,
   align: 'start',
   controls: 'icon',
@@ -449,7 +446,6 @@ defineExpose({
       :detached="detached"
       :bordered="bordered"
       :size="size"
-      :compact="compact || undefined"
       :elevated="elevated || undefined"
     >
       <PageControl v-if="controls && edgeControls" side="first" />
@@ -520,7 +516,7 @@ defineExpose({
   .v-pagination-page[data-size] {
     /* A one-digit pill is square, and widens by itself past that. The height variable
        is set by the shared size class on this very element, so this single rule covers
-       all five sizes and their compact forms. */
+       all five sizes in either density. */
     min-inline-size: var(--control-height);
     padding-inline: var(--vectis-space-2);
 

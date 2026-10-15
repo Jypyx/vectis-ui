@@ -24,7 +24,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: 'Définissez <code>size</code> et <code>compact</code> sur le menu ; les sous-menus en héritent.',
+      text: 'Définissez <code>size</code> sur le menu ; les sous-menus en héritent.',
     },
     width: {
       title: 'Largeur',
@@ -44,7 +44,6 @@ export default {
       props: {
         placement: 'Position souhaitée du panneau ; ajustée si l’espace manque.',
         size: 'Taille des lignes héritée par les sous-menus.',
-        compact: 'Réduit la hauteur des lignes, sous-menus compris.',
         width:
           'Largeur du panneau principal. Les nombres utilisent des pixels ; les chaînes, des longueurs ou mots-clés CSS.',
         matchTrigger:

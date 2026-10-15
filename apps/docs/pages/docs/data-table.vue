@@ -2,8 +2,6 @@
 import api from '~/content/api/data-table'
 import DataTableBasic from '~/examples/data-table/Basic.vue'
 import dataTableBasicSource from '~/examples/data-table/Basic.vue?raw'
-import DataTableCompact from '~/examples/data-table/Compact.vue'
-import dataTableCompactSource from '~/examples/data-table/Compact.vue?raw'
 import DataTableCustomCells from '~/examples/data-table/CustomCells.vue'
 import dataTableCustomCellsSource from '~/examples/data-table/CustomCells.vue?raw'
 import DataTableCustomHeaders from '~/examples/data-table/CustomHeaders.vue'
@@ -108,12 +106,6 @@ useDocsHead('dataTable')
   <DocsProse keypath="dataTable.examples.variants.text" />
   <DocsExample :source="dataTableVariantsSource" stack>
     <DataTableVariants />
-  </DocsExample>
-
-  <h3 id="compact">{{ t('dataTable.examples.compact.title') }}</h3>
-  <DocsProse keypath="dataTable.examples.compact.text" />
-  <DocsExample :source="dataTableCompactSource" stack>
-    <DataTableCompact />
   </DocsExample>
 
   <h3 id="striped">{{ t('dataTable.examples.striped.title') }}</h3>

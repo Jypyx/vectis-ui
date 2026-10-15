@@ -35,8 +35,6 @@ export default {
         decrementLabel:
           'Nom accessible du bouton moins. Par défaut, celui du dictionnaire de la bibliothèque.',
         size: 'Taille du champ. Remplacée quand <code>VInputGroup</code> définit <code>size</code>.',
-        compact:
-          'Réduit la hauteur sans changer les marges ni le texte. Remplacé quand <code>VInputGroup</code> définit <code>compact</code>.',
         label:
           'Libellé visible lié au champ. Sans lui, fournissez <code>aria-label</code> ou <code>aria-labelledby</code>.',
         hint: 'Aide sous le champ, liée par <code>aria-describedby</code>.',

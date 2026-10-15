@@ -93,9 +93,9 @@ its chip along with the position it held — `change` follows it, as it follows 
 
 ## Slots
 
-`#chip` replaces a file's chip and receives `{ file, index, label, remove, size, compact }` —
+`#chip` replaces a file's chip and receives `{ file, index, label, remove, size }` —
 `remove`, without which the file could no longer be taken out, `label`, the middle-truncated name,
-and the `size`/`compact` computed to fit inside the field (one step below it). `#counter` receives
+and the `size` computed to fit inside the field (one step below it). `#counter` receives
 `{ count, bytes, text }`, `bytes` being the total size and `text` the ready-made string.
 
 <Canvas of={VFileInputStories.CustomSlots} />

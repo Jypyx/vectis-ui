@@ -157,8 +157,6 @@ interface TimeInputProps {
   placeholder?: string
   /** The height of the field: 32, 40 or 48 pixels. */
   size?: TimeInputSize
-  /** Takes 4px off the height. */
-  compact?: boolean
   /** Makes the field unusable, greyed out through the colour tokens. */
   disabled?: boolean
   /**
@@ -227,7 +225,6 @@ const props = withDefaults(defineProps<TimeInputProps>(), {
   labelPosition: 'top',
   placeholder: undefined,
   size: 'md',
-  compact: false,
   disabled: false,
   readonly: false,
   invalid: false,
@@ -430,11 +427,7 @@ function focusInPanel() {
 // AM/PM button lives INSIDE the field, so a 12 hour field is one box like any other and
 // the row has nothing of its own to join.
 const group = inject(inputGroupKey, null)
-const {
-  size: resolvedSize,
-  compact: resolvedCompact,
-  disabled: resolvedDisabled,
-} = useControlShape(props, group)
+const { size: resolvedSize, disabled: resolvedDisabled } = useControlShape(props, group)
 
 // The whole "field plus panel" shell, shared with VDateInput. What is specific to this
 // component is only what happens around it: preparing the draft as the panel opens, and
@@ -741,7 +734,6 @@ defineExpose({
       :label-position="labelPosition"
       :placeholder="placeholder"
       :size="resolvedSize"
-      :compact="resolvedCompact"
       :disabled="resolvedDisabled"
       :readonly="readonly"
       :invalid="invalid"
@@ -777,7 +769,6 @@ defineExpose({
         :label-position="labelPosition"
         :placeholder="placeholder ?? (typing ? m.timeInput.maskPlaceholder : undefined)"
         :size="resolvedSize"
-        :compact="resolvedCompact"
         :disabled="resolvedDisabled"
         :invalid="invalid"
         :clearable="clearable"

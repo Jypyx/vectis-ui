@@ -4,7 +4,7 @@ export default {
   examples: {
     submenus: {
       title: 'Sous-menus',
-      text: 'Les commandes sont des items de <code>VMenu</code> : groupes, séparateurs, sous-menus, <code>size</code> et <code>compact</code> fonctionnent de la même façon. Près d’un bord de l’écran, le menu se retourne pour rester visible.',
+      text: 'Les commandes sont des items de <code>VMenu</code> : groupes, séparateurs, sous-menus et <code>size</code> fonctionnent de la même façon. Près d’un bord de l’écran, le menu se retourne pour rester visible.',
     },
     nativeMenu: {
       title: 'Le menu du navigateur',
@@ -20,7 +20,6 @@ export default {
       props: {
         as: 'Élément qui enveloppe la zone.',
         size: 'Taille des lignes, héritée par les sous-menus.',
-        compact: 'Réduit la hauteur des lignes, sous-menus compris.',
         width:
           'Largeur du panneau. Un nombre est en pixels ; une chaîne, une longueur ou un mot-clé CSS.',
         disabled: 'Laisse la zone au menu du navigateur.',

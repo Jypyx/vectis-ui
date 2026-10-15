@@ -65,7 +65,7 @@ export default {
     'Transition durations, shared by both themes. Looping animations such as the spinner use primitive duration tokens instead.',
   sizesHeading: 'Sizes',
   sizesBody:
-    'Control heights and icon sizes. <code>compact</code> reduces a control’s height by 4px.',
+    'Density, control heights and icon sizes. Set <code>--vectis-density-delta</code> to <code>var(--vectis-space-1)</code>, in the theme or on a container, to take 4px off every control and component padding.',
   componentsHeading: 'Component dimensions',
   componentsBody:
     'Dimensions specific to each component, such as track thickness or panel width. Group headings link to the component documentation.',
@@ -79,6 +79,7 @@ export default {
     warning: 'Warning',
     backdrop: 'Backdrop',
     events: 'Calendar events',
+    density: 'Density',
     controlHeights: 'Control heights',
     iconSizes: 'Icon sizes',
   },

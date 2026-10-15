@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> ajuste les espacements internes, le texte et les icônes. <code>rows</code> définit le nombre de lignes ; <code>compact</code> réduit les espacements verticaux.',
+      text: '<code>size</code> ajuste les espacements internes, le texte et les icônes. <code>rows</code> définit le nombre de lignes.',
     },
     icons: {
       title: 'Icônes',
@@ -43,8 +43,6 @@ export default {
         hideLabel: 'Masque le libellé visuellement tout en le gardant comme nom accessible.',
         labelPosition: 'Place le libellé au-dessus du champ ou à côté.',
         size: 'Ajuste les marges internes, le texte et les icônes. <code>rows</code> fixe le nombre de lignes.',
-        compact:
-          'Réduit les espacements verticaux sans modifier le nombre de lignes, le texte ni les icônes.',
         rows: 'Nombre de lignes visibles, arrondi à un entier d’au moins 1. Avec <code>autoGrow</code>, définit la hauteur minimale.',
         autoGrow:
           'Adapte la hauteur au contenu avec la propriété CSS <code>field-sizing</code>. Désactive le redimensionnement manuel. Sans prise en charge par le navigateur, le champ garde une hauteur fixe et défile.',

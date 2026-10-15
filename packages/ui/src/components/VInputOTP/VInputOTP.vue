@@ -41,8 +41,6 @@ interface InputOTPProps {
   separatorIcon?: IconSource
   /** The size of the boxes: 32, 40 or 48 pixels. */
   size?: InputOTPSize
-  /** Takes 4px off the boxes, leaving the text and the icons as they are. */
-  compact?: boolean
   /** Makes every box unusable, greyed out through the colour tokens. */
   disabled?: boolean
   /**
@@ -88,7 +86,6 @@ const props = withDefaults(defineProps<InputOTPProps>(), {
   pattern: undefined,
   separatorIcon: undefined,
   size: 'md',
-  compact: false,
   disabled: false,
   readonly: false,
   invalid: false,
@@ -374,7 +371,6 @@ defineExpose({
         :aria-label="rowLabel(fieldProps)"
         :data-invalid="isInvalid ? '' : undefined"
         :data-size="size"
-        :data-compact="compact ? '' : undefined"
         :data-disabled="disabled ? '' : undefined"
         :data-readonly="readonly ? '' : undefined"
       >

@@ -24,8 +24,6 @@ interface SkeletonLoaderProps {
    * has its own height.
    */
   size?: SkeletonLoaderSize
-  /** Takes 4px off the height, as everywhere else in the design system. */
-  compact?: boolean
   /**
    * The width: a number is read as pixels, and anything else as a CSS length of your
    * own, such as `'100%'` or `'12ch'`. Left out, the silhouette takes all the width available.
@@ -64,7 +62,6 @@ interface SkeletonLoaderProps {
 const props = withDefaults(defineProps<SkeletonLoaderProps>(), {
   shape: 'text',
   size: 'md',
-  compact: false,
   width: undefined,
   height: undefined,
   lines: 1,
@@ -98,7 +95,6 @@ const resolvedLabel = computed(() => props.label || m.value.common.loading)
     class="v-skeleton-loader v-control"
     :data-shape="shape"
     :data-size="size"
-    :data-compact="compact ? '' : undefined"
     :data-animation="animation"
     :data-custom="color !== undefined ? '' : undefined"
     :role="announced ? 'status' : undefined"

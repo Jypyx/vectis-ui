@@ -12,11 +12,16 @@ const copy = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T
 export function useThemeBuilder() {
   const config = useState<ThemeConfig>('theme-builder', () => copy(DEFAULT_CONFIG))
 
-  /** Restores the stored configuration; call once mounted. A stale shape is ignored. */
+  /**
+   * Restores the stored configuration; call once mounted. A stale shape is ignored. Settings
+   * added since it was stored take their defaults, so a saved theme survives a new option.
+   */
   function restore() {
     try {
       const stored: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null')
-      if (isThemeConfig(stored)) config.value = stored
+      const merged: unknown =
+        stored && typeof stored === 'object' ? { ...copy(DEFAULT_CONFIG), ...stored } : stored
+      if (isThemeConfig(merged)) config.value = merged
     } catch {
       // Blocked or corrupt storage leaves the defaults in place.
     }

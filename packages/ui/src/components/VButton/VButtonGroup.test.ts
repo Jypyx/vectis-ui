@@ -174,7 +174,7 @@ describe('VButtonGroup', () => {
     expect(toolbar.classList.contains('v-button-group')).toBe(true)
   })
 
-  // A group that names none of the five must leave its children exactly as they would
+  // A group that names none of the four must leave its children exactly as they would
   // have rendered on their own: the context then holds `undefined` throughout.
   it('naming nothing changes nothing about the buttons inside', () => {
     const { container } = render(VButtonGroup, {
@@ -184,27 +184,24 @@ describe('VButtonGroup', () => {
       expect(segment.dataset.variant).toBe('solid')
       expect(segment.dataset.tone).toBe('accent')
       expect(segment.dataset.size).toBe('md')
-      expect(segment.dataset.compact).toBeUndefined()
       expect(segment.dataset.elevated).toBeUndefined()
     }
   })
 
-  // `compact: undefined` and `elevated: undefined` must stay in the group's withDefaults. Vue
-  // casts a Boolean prop with no default to `false`, and a group reading `false` would then
-  // swallow the compact and the elevation of every button inside it, silently: the two lines
-  // look redundant and are not.
-  it('a silent group does not swallow a compact or elevated button', () => {
+  // `elevated: undefined` must stay in the group's withDefaults. Vue casts a Boolean prop with
+  // no default to `false`, and a group reading `false` would then swallow the elevation of
+  // every button inside it, silently: the line looks redundant and is not.
+  it('a silent group does not swallow an elevated button', () => {
     const { container } = render(VButtonGroup, {
-      slots: { default: () => h(VButton, { compact: true, elevated: true }, () => 'One') },
+      slots: { default: () => h(VButton, { elevated: true }, () => 'One') },
     })
     const segment = segments(container)[0]!
-    expect(segment.dataset.compact).toBe('')
     expect(segment.dataset.elevated).toBe('')
   })
 
-  it('hands its variant, size, compact and elevated to every button', () => {
+  it('hands its variant, size and elevated to every button', () => {
     const { container } = render(VButtonGroup, {
-      props: { variant: 'outline', size: 'lg', compact: true, elevated: true },
+      props: { variant: 'outline', size: 'lg', elevated: true },
       slots: { default: () => [h(VButton, () => 'One'), h(VButton, () => 'Two')] },
     })
     const rendered = segments(container)
@@ -212,22 +209,20 @@ describe('VButtonGroup', () => {
     for (const segment of rendered) {
       expect(segment.dataset.variant).toBe('outline')
       expect(segment.dataset.size).toBe('lg')
-      expect(segment.dataset.compact).toBe('')
       expect(segment.dataset.elevated).toBe('')
     }
   })
 
-  it('the group wins over a button that sets its own variant, size or compact', () => {
+  it('the group wins over a button that sets its own variant or size', () => {
     const { container } = render(VButtonGroup, {
-      props: { variant: 'soft', size: 'sm', compact: true },
+      props: { variant: 'soft', size: 'sm' },
       slots: {
-        default: () => h(VButton, { variant: 'solid', size: 'xl', compact: false }, () => 'One'),
+        default: () => h(VButton, { variant: 'solid', size: 'xl' }, () => 'One'),
       },
     })
     const segment = segments(container)[0]!
     expect(segment.dataset.variant).toBe('soft')
     expect(segment.dataset.size).toBe('sm')
-    expect(segment.dataset.compact).toBe('')
   })
 
   it('a button keeps its own tone, and takes the group tone without one', () => {

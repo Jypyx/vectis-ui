@@ -14,10 +14,6 @@ export default {
       title: 'Tailles',
       text: '<code>size</code> ajuste la hauteur, les espacements internes, le texte et les icônes.',
     },
-    compact: {
-      title: 'Compact',
-      text: '<code>compact</code> réduit la hauteur sans modifier les espacements internes, le texte ni les icônes.',
-    },
     fullWidth: {
       title: 'Pleine largeur',
       text: '<code>fullWidth</code> étend le bouton à la largeur de son parent.',
@@ -48,8 +44,6 @@ export default {
         elevated:
           'Ajoute une ombre et, pour <code>ghost</code> et <code>outline</code>, un fond. <code>VButtonGroup</code> impose sa valeur.',
         size: 'Taille du bouton. <code>VButtonGroup</code> impose sa valeur.',
-        compact:
-          'Réduit la hauteur sans modifier les espacements internes, le texte ni les icônes. <code>VButtonGroup</code> impose sa valeur.',
         fullWidth: 'Occupe toute la largeur du parent.',
         href: 'Destination du lien. Affiche un <code>&lt;a&gt;</code> au lieu d’un <code>&lt;button&gt;</code>. Lorsque le bouton est désactivé ou en chargement, le lien perd sa destination et ne peut plus recevoir le focus ni déclencher de navigation.',
         type: 'Type natif du bouton. Ignoré si <code>href</code> est défini.',

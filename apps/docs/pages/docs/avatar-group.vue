@@ -2,8 +2,6 @@
 import api from '~/content/api/avatar-group'
 import AvatarGroupBasic from '~/examples/avatar-group/Basic.vue'
 import avatarGroupBasicSource from '~/examples/avatar-group/Basic.vue?raw'
-import AvatarGroupCompact from '~/examples/avatar-group/Compact.vue'
-import avatarGroupCompactSource from '~/examples/avatar-group/Compact.vue?raw'
 import AvatarGroupCustomOverflow from '~/examples/avatar-group/CustomOverflow.vue'
 import avatarGroupCustomOverflowSource from '~/examples/avatar-group/CustomOverflow.vue?raw'
 import AvatarGroupOverflow from '~/examples/avatar-group/Overflow.vue'
@@ -40,12 +38,6 @@ useDocsHead('avatarGroup')
   <DocsProse keypath="avatarGroup.examples.size.text" />
   <DocsExample :source="avatarGroupSizeSource" stack>
     <AvatarGroupSize />
-  </DocsExample>
-
-  <h3 id="compact">{{ t('avatarGroup.examples.compact.title') }}</h3>
-  <DocsProse keypath="avatarGroup.examples.compact.text" />
-  <DocsExample :source="avatarGroupCompactSource" stack>
-    <AvatarGroupCompact />
   </DocsExample>
 
   <h3 id="custom-overflow">{{ t('avatarGroup.examples.customOverflow.title') }}</h3>

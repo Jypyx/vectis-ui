@@ -18,7 +18,7 @@ rendered in the group's `tone` (`selectedVariant`, `solid` by default), the othe
 ## Joined or detached
 
 The row **is** a `VButtonGroup`, and that is where the drawing lives: `detached`, `bordered`,
-`orientation`, `size`, `compact` and `elevated` are handed straight over to it. What VToggle
+`orientation`, `size` and `elevated` are handed straight over to it. What VToggle
 adds on top is the selection.
 
 Joined by default, the items form one segmented control with no line between them. `detached`
@@ -84,10 +84,9 @@ both of its icons whatever is selected. Neither has any effect on an icon suppli
 
 ## Sizes
 
-The unified `xs`–`xl` scale and `compact` (height reduced by 4px) are set on the group and
-propagate to every item.
+The unified `xs`–`xl` scale is set on the group and propagates to every item.
 
-<Canvas of={VToggleStories.SizesAndCompact} />
+<Canvas of={VToggleStories.Sizes} />
 
 ## Orientation
 

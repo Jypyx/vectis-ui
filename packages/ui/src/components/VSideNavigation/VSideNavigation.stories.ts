@@ -94,10 +94,9 @@ const meta = {
   component: VSideNavigation,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md'] },
-    compact: { control: 'boolean' },
     exclusive: { control: 'boolean' },
   },
-  args: { size: 'md', compact: false, exclusive: false },
+  args: { size: 'md', exclusive: false },
 } satisfies Meta<typeof VSideNavigation>
 
 export default meta
@@ -174,13 +173,16 @@ export const Sizes: Story = {
     template: `
       <div style="display: flex; gap: var(--vectis-space-6);">
         ${['sm', 'md'].map((size) => aside(SIZE_ITEMS, `size="${size}" label="${size}"`)).join('')}
-        ${aside(SIZE_ITEMS, 'size="md" compact label="md compact"')}
+        <div style="--vectis-density-delta: var(--vectis-space-1)">
+          ${aside(SIZE_ITEMS, 'size="md" label="md compact"')}
+        </div>
       </div>
     `,
   }),
   play: async ({ canvasElement }) => {
     // LEVEL 2 rows: they prove the `--control-*` inherit all the way down without
-    // ever setting `v-control` again on a sublist.
+    // ever setting `v-control` again on a sublist, and that a region redefining the
+    // density token reaches them.
     const rows = [...canvasElement.querySelectorAll('.v-side-nav-children a')].map(
       (el) => (el.closest('.v-side-nav-row') as HTMLElement).getBoundingClientRect().height,
     )

@@ -15,11 +15,6 @@ const currencies = [
       <VCombobox :options="currencies" model-value="eur" aria-label="Currency" class="currency" />
       <VInput aria-label="Amount" />
     </VInputGroup>
-
-    <VInputGroup size="md" compact label="md, compact">
-      <VCombobox :options="currencies" model-value="eur" aria-label="Currency" class="currency" />
-      <VInput aria-label="Amount" />
-    </VInputGroup>
   </div>
 </template>
 

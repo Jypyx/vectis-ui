@@ -33,7 +33,6 @@ const meta = {
   component: VAvatarGroup,
   argTypes: {
     size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
-    compact: { control: 'boolean' },
     max: { control: { type: 'number' } },
   },
 } satisfies Meta<typeof VAvatarGroup>

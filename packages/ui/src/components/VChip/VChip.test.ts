@@ -212,15 +212,13 @@ describe('VChip', () => {
     })
   })
 
-  it('sets data-size/data-compact on the v-control root (xs by default)', () => {
+  it('sets data-size on the v-control root (xs by default)', () => {
     const { container, rerender } = render(VChip, { slots: { default: 'Tag' } })
     const root = container.querySelector('.v-chip') as HTMLElement
     expect(root.classList.contains('v-control')).toBe(true)
     expect(root.getAttribute('data-size')).toBe('xs')
-    expect(root.hasAttribute('data-compact')).toBe(false)
-    return rerender({ size: 'sm', compact: true }).then(() => {
+    return rerender({ size: 'sm' }).then(() => {
       expect(root.getAttribute('data-size')).toBe('sm')
-      expect(root.hasAttribute('data-compact')).toBe(true)
     })
   })
 })

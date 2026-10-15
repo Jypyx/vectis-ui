@@ -10,11 +10,6 @@ const sizes = ['sm', 'md', 'lg'] as const
       <VInputOTP :length="4" :size="size" :label="`Code, ${size}`" />
       <VTypography variant="caption" tone="muted">{{ size }}</VTypography>
     </div>
-
-    <div v-for="size in sizes" :key="`${size}-compact`" class="row">
-      <VInputOTP :length="4" :size="size" compact :label="`Code, ${size} compact`" />
-      <VTypography variant="caption" tone="muted">{{ size }} compact</VTypography>
-    </div>
   </div>
 </template>
 

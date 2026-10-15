@@ -64,7 +64,14 @@ export default {
     {
       name: 'FilePickerKind',
       definition: `export type FilePickerKind =
-  'image' | 'pdf' | 'audio' | 'video' | 'archive' | 'spreadsheet' | 'code' | 'file'`,
+  | 'image'
+  | 'pdf'
+  | 'audio'
+  | 'video'
+  | 'archive'
+  | 'spreadsheet'
+  | 'code'
+  | 'file'`,
     },
     {
       name: 'FilePickerRemoveSlotProps',

@@ -20,7 +20,6 @@ const t = storyText({
     favourites: 'Favourites',
     following: 'Following',
     saved: 'Saved',
-    alignmentCompact: 'Alignment (compact)',
     withoutLine: 'Without a line',
     withLine: 'With a line',
     groupDisabled: 'Group disabled',
@@ -44,7 +43,6 @@ const t = storyText({
     favourites: 'Favoris',
     following: 'Suivis',
     saved: 'Enregistrés',
-    alignmentCompact: 'Alignement (compact)',
     withoutLine: 'Sans trait',
     withLine: 'Avec trait',
     groupDisabled: 'Groupe désactivé',
@@ -83,7 +81,6 @@ const meta = {
     selectedVariant: 'solid',
     tone: 'accent',
     size: 'md',
-    compact: false,
     elevated: false,
     disabled: false,
     selectedIconFilled: false,
@@ -376,7 +373,7 @@ export const FilledIcons: Story = {
   args: { multiple: true, selectedIconFilled: true, label: 'Collections' },
 }
 
-export const SizesAndCompact: Story = {
+export const Sizes: Story = {
   render: () => ({
     components: { VToggle, VToggleItem },
     setup: () => ({
@@ -387,11 +384,6 @@ export const SizesAndCompact: Story = {
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
         <VToggle v-for="s in sizes" :key="s" :size="s" :label="t.alignment" v-model="selection">
-          <VToggleItem value="left" :label="t.left" />
-          <VToggleItem value="centre" :label="t.centre" />
-          <VToggleItem value="right" :label="t.right" />
-        </VToggle>
-        <VToggle size="md" compact :label="t.alignmentCompact" v-model="selection">
           <VToggleItem value="left" :label="t.left" />
           <VToggleItem value="centre" :label="t.centre" />
           <VToggleItem value="right" :label="t.right" />

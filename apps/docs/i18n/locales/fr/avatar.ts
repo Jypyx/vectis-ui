@@ -18,10 +18,6 @@ export default {
       title: 'Tailles',
       text: '<code>size</code> définit le diamètre de l’avatar.',
     },
-    compact: {
-      title: 'Compact',
-      text: '<code>compact</code> réduit le diamètre.',
-    },
     color: {
       title: 'Couleur personnalisée',
       text: '<code>color</code> remplace le fond automatique. Vérifiez son contraste avec le contenu blanc.',
@@ -44,7 +40,6 @@ export default {
         alt: 'Nom accessible remplaçant <code>name</code>. L’attribut <code>aria-label</code> fourni est prioritaire.',
         color: 'Couleur CSS de fond personnalisée. Le contenu reste blanc.',
         size: 'Diamètre de l’avatar. Hérite de la taille du groupe ; sinon, <code>md</code> par défaut.',
-        compact: 'Réduit le diamètre. S’applique aussi si le groupe est compact.',
         href: 'Destination du lien. Prioritaire sur <code>clickable</code> ; retirée si le contrôle est désactivé.',
         clickable: 'Affiche un bouton si <code>href</code> est absent.',
         disabled: 'Désactive les avatars interactifs et les retire de l’ordre de tabulation.',

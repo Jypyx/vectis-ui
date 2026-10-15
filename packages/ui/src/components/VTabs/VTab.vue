@@ -93,7 +93,6 @@ function onFocus() {
     :elevated="selected && tabs?.variant === 'inset'"
     :tone="selected && tabs ? tabs.tone : 'neutral'"
     :size="tabs?.size"
-    :compact="tabs?.compact"
     :disabled="resolvedDisabled"
     :data-icon-only="iconOnly() ? '' : undefined"
     @click="tabs?.select(value)"

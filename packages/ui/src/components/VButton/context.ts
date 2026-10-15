@@ -14,8 +14,6 @@ export interface ButtonGroupContext {
   readonly tone?: ButtonTone
   /** The height of the segments. */
   readonly size?: ButtonSize
-  /** The reduced density. */
-  readonly compact?: boolean
   /** Whether the segments are raised off the page. */
   readonly elevated?: boolean
   /** Whether the whole row is unusable, which no segment can refuse. */

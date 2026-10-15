@@ -163,19 +163,13 @@ const emit = defineEmits<{
 }>()
 
 // The number fields are fields of a VInputGroup row like any other, so the row's size and
-// its disabled state reach them through the same arbitration. A slider has no `compact` of
-// its own: only the row's can apply.
+// its disabled state reach them through the same arbitration.
 const group = inject(inputGroupKey, null)
-const {
-  size: resolvedSize,
-  compact: resolvedCompact,
-  disabled: resolvedDisabled,
-} = useControlShape(
+const { size: resolvedSize, disabled: resolvedDisabled } = useControlShape(
   {
     get size() {
       return props.size
     },
-    compact: false,
     get disabled() {
       return props.disabled
     },
@@ -509,7 +503,6 @@ defineExpose({
           :format-options="formatOptions"
           :locale="resolvedLocale"
           :size="resolvedSize"
-          :compact="resolvedCompact"
           :min="min"
           :max="max"
           :step="step"
@@ -605,7 +598,6 @@ defineExpose({
           :format-options="formatOptions"
           :locale="resolvedLocale"
           :size="resolvedSize"
-          :compact="resolvedCompact"
           :min="min"
           :max="max"
           :step="step"

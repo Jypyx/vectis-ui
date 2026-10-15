@@ -14,7 +14,6 @@ export default {
         { name: 'color', type: 'string' },
         { name: 'shape', type: 'ChipShape', values: "'chip' | 'pill'", default: "'chip'" },
         { name: 'size', type: 'ChipSize', values: "'xs' | 'sm'", default: "'xs'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'clickable', type: 'boolean', default: 'false' },
         { name: 'href', type: 'string' },
         { name: 'selectable', type: 'boolean', default: 'false' },

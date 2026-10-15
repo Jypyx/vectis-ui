@@ -73,15 +73,14 @@ describe('VIconButton', () => {
     expect(button.querySelector('[data-testid="slot-svg"]')).not.toBeNull()
   })
 
-  it('supports every variant/tone and forwards compact', () => {
+  it('supports every variant/tone', () => {
     const { getByRole } = render(VIconButton, {
-      props: { label: 'Confirm', variant: 'soft', tone: 'danger', compact: true },
+      props: { label: 'Confirm', variant: 'soft', tone: 'danger' },
       slots: { default: '<svg aria-hidden="true" />' },
     })
     const button = getByRole('button')
     expect(button.dataset.variant).toBe('soft')
     expect(button.dataset.tone).toBe('danger')
-    expect(button.dataset.compact).toBe('')
   })
 
   /* `elevated` has to be forwarded EXPLICITLY: VIconButton renders a VButton, so an

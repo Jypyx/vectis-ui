@@ -174,13 +174,11 @@ describe('VPagination', () => {
           totalVisible: 7,
           bordered: true,
           size: 'sm',
-          compact: true,
         },
       })
       expect(container.querySelector('.v-button-group')?.hasAttribute('data-bordered')).toBe(true)
       const buttons = [...container.querySelectorAll<HTMLElement>('.v-button')]
       expect(buttons.every((el) => el.dataset.size === 'sm')).toBe(true)
-      expect(buttons.every((el) => el.hasAttribute('data-compact'))).toBe(true)
     })
   })
 
@@ -421,14 +419,13 @@ describe('VPagination', () => {
   })
 
   describe('size', () => {
-    it('propagates size and compact to every button', () => {
+    it('propagates size to every button', () => {
       const { container } = render(VPagination, {
-        props: { length: 20, modelValue: 10, size: 'sm', compact: true },
+        props: { length: 20, modelValue: 10, size: 'sm' },
       })
       const buttons = [...container.querySelectorAll<HTMLElement>('.v-button')]
 
       expect(buttons.every((el) => el.dataset.size === 'sm')).toBe(true)
-      expect(buttons.every((el) => el.hasAttribute('data-compact'))).toBe(true)
     })
 
     /*

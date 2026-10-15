@@ -161,13 +161,6 @@ describe('VTextarea', () => {
       true,
     )
   })
-
-  it('compact: data-compact set on the field', () => {
-    const { container } = render(VTextarea, {
-      props: { modelValue: '', compact: true },
-    })
-    expect(container.querySelector('.v-textarea-field')?.hasAttribute('data-compact')).toBe(true)
-  })
 })
 
 describe('VTextarea — expose', () => {

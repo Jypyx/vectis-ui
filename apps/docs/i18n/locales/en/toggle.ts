@@ -12,7 +12,7 @@ export default {
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> sets every item’s size. <code>compact</code> reduces their height.',
+      text: '<code>size</code> sets every item’s size.',
     },
     itemContent: {
       title: 'Item content',
@@ -72,7 +72,6 @@ export default {
           'Visual style of selected items: <code>solid</code>, <code>soft</code> or <code>ghost</code>.',
         tone: 'Tone of selected items. Unselected items remain neutral.',
         size: 'Size of all items.',
-        compact: 'Reduces item height.',
         elevated: 'Adds a group shadow, or individual shadows with <code>detached</code>.',
         disabled: 'Disables all items and removes them from the tab order.',
         selectedIconFilled:

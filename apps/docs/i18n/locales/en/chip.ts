@@ -12,7 +12,7 @@ export default {
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> sets the chip size; <code>compact</code> reduces its height.',
+      text: '<code>size</code> sets the chip size.',
     },
     customColors: {
       title: 'Custom colours',
@@ -47,7 +47,6 @@ export default {
         color: 'Custom CSS colour overriding the tone. Check text contrast for solid chips.',
         shape: 'Rounded corners or pill shape.',
         size: 'Component size.',
-        compact: 'Reduces the control height without changing text or icons.',
         clickable: 'Renders a button without selection state.',
         href: 'Link destination.',
         selectable:

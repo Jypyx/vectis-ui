@@ -18,10 +18,6 @@ export default {
       title: 'Sizes',
       text: '<code>size</code> sets the avatar diameter.',
     },
-    compact: {
-      title: 'Compact',
-      text: '<code>compact</code> reduces the diameter.',
-    },
     color: {
       title: 'Custom colour',
       text: '<code>color</code> overrides the automatic background. Check its contrast with the white foreground.',
@@ -44,7 +40,6 @@ export default {
         alt: 'Accessible name overriding <code>name</code>. Consumer <code>aria-label</code> takes precedence.',
         color: 'Custom CSS background colour. The foreground stays white.',
         size: 'Avatar diameter. Inherits the group size; otherwise defaults to <code>md</code>.',
-        compact: 'Reduces the diameter. Also applies when the group is compact.',
         href: 'Link destination. Takes precedence over <code>clickable</code>; removed when disabled.',
         clickable: 'Renders a button when <code>href</code> is absent.',
         disabled: 'Disables interactive avatars and removes them from the tab order.',

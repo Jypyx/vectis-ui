@@ -92,7 +92,6 @@ const meta = {
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     display: { control: 'inline-radio', options: ['chip', 'text'] },
-    compact: { control: 'boolean' },
     clearable: { control: 'boolean' },
     multiple: { control: 'boolean' },
     disabled: { control: 'boolean' },

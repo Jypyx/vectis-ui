@@ -154,7 +154,6 @@ const meta = {
   component: VCombobox,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
-    compact: { control: 'boolean' },
     clearable: { control: 'boolean' },
     loading: { control: 'boolean' },
     filter: { control: false },
@@ -530,10 +529,7 @@ export const FieldIcon: Story = {
   },
 }
 
-/**
- * Sizes `sm` (32px), `md` (40px, the default) and `lg` (48px), combinable with `compact`
- * (-4px).
- */
+/** Sizes `sm` (32px), `md` (40px, the default) and `lg` (48px). */
 export const Sizes: Story = {
   render: (args) => ({
     components: { VCombobox },
@@ -542,11 +538,8 @@ export const Sizes: Story = {
       t,
       variants: [
         { label: 'sm', props: { size: 'sm' } },
-        { label: 'sm compact', props: { size: 'sm', compact: true } },
         { label: 'md', props: { size: 'md' } },
-        { label: 'md compact', props: { size: 'md', compact: true } },
         { label: 'lg', props: { size: 'lg' } },
-        { label: 'lg compact', props: { size: 'lg', compact: true } },
       ],
       value: ['fr', 'be'],
     }),
@@ -842,13 +835,12 @@ export const CustomChip: Story = {
     template: `
       <div style="width: 380px">
         <VCombobox v-bind="args" :options="options" v-model="value" :placeholder="t.addType" :aria-label="t.fileTypes">
-          <template #chip="{ option, label, remove, size, compact }">
+          <template #chip="{ option, label, remove, size }">
             <VChip
               tone="neutral"
               variant="outline"
               :icon-start="option?.icon"
               :size="size"
-              :compact="compact"
               dismissible
               :dismiss-label="t.remove(label)"
               @dismiss="remove"

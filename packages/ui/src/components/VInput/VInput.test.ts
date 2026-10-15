@@ -215,13 +215,6 @@ describe('VInput', () => {
       expect(getByRole('textbox').getAttribute('type')).toBe('email')
     })
   })
-
-  it('compact: data-compact set on the field', () => {
-    const { container } = render(VInput, {
-      props: { modelValue: '', compact: true },
-    })
-    expect(container.querySelector('.v-input-field')?.hasAttribute('data-compact')).toBe(true)
-  })
 })
 
 // The component's own `invalid` binding comes after the forwarded attributes, so it must hand

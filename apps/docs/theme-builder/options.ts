@@ -1,4 +1,4 @@
-/** The closed lists the builder offers: icon libraries, radius presets and root sizes. */
+/** The closed lists the builder offers: icon libraries, radius presets, root sizes and densities. */
 import { ICON_ALIASES } from './iconAliases'
 
 export type IconLibraryId =
@@ -179,3 +179,11 @@ export const RADIUS_PRESETS: Record<RadiusPresetId, Record<RadiusRole, number>> 
 
 export const BASE_SIZES = [14, 15, 16, 17, 18] as const
 export type BaseSize = (typeof BASE_SIZES)[number]
+
+export type Density = 'standard' | 'compact'
+
+/** The value of `--vectis-density-delta` for each density. Standard is the library's default. */
+export const DENSITY_DELTAS: Record<Density, string> = {
+  standard: '0px',
+  compact: 'var(--vectis-space-1)',
+}

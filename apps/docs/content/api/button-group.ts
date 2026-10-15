@@ -16,7 +16,6 @@ export default {
         { name: 'variant', type: 'ButtonVariant', values: "'solid' | 'outline' | 'ghost' | 'soft'" },
         { name: 'tone', type: 'ButtonTone', values: "'accent' | 'neutral' | 'danger'" },
         { name: 'size', type: 'ButtonSize', values: "'xs' | 'sm' | 'md' | 'lg' | 'xl'" },
-        { name: 'compact', type: 'boolean' },
         { name: 'elevated', type: 'boolean' },
         { name: 'disabled', type: 'boolean' },
         { name: 'label', type: 'string' },

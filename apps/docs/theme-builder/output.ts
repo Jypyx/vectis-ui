@@ -7,6 +7,7 @@ import { formatOklch, sameColor } from './color'
 import { BUILTIN_ICON_NAMES } from './iconAliases'
 import { CODE_FONTS, TEXT_FONTS, fontById, googleFontsUrl } from './fonts'
 import {
+  DENSITY_DELTAS,
   RADIUS_FULL,
   RADIUS_PRESETS,
   iconLibraryById,
@@ -74,6 +75,9 @@ export function themeDeclarations(config: ThemeConfig, full = false): ThemeDecla
   // The chip radius aliases the control radius, so it needs stating only when they differ.
   if (full || radius.chip !== radius.interactive)
     light.push(['--vectis-radius-chip', radiusValue(radius.chip)])
+
+  if (full || config.density !== 'standard')
+    light.push(['--vectis-density-delta', DENSITY_DELTAS[config.density]])
 
   const rootFontSize =
     full || config.baseSize !== 16 ? `${(config.baseSize / 16) * 100}%` : undefined

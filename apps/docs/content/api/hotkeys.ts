@@ -13,7 +13,6 @@ export default {
         { name: 'variant', type: 'HotkeysVariant', values: "'soft' | 'outline' | 'elevated'", default: "'soft'" },
         { name: 'attached', type: 'boolean', default: 'false' },
         { name: 'size', type: 'HotkeysSize', values: "'xs' | 'sm'", default: "'xs'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'platform', type: 'HotkeysPlatform', values: "'mac' | 'windows' | 'linux' | 'other'" },
         { name: 'separator', type: 'string', default: "'+'" },
         { name: 'listen', type: 'boolean', default: 'false' },

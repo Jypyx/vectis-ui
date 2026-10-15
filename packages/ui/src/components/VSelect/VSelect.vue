@@ -137,8 +137,6 @@ interface SelectProps {
   labelPosition?: FieldLabelPosition
   /** The height of the field: 32, 40 or 48 pixels. */
   size?: SelectSize
-  /** Takes 4px off the height, as everywhere else in the design system. */
-  compact?: boolean
   /** What the field says while nothing is chosen. */
   placeholder?: string
   /** Makes the field unusable, greyed out through the colour tokens. Its value is not submitted. */
@@ -191,7 +189,6 @@ const props = withDefaults(defineProps<SelectProps>(), {
   hideLabel: false,
   labelPosition: 'top',
   size: 'md',
-  compact: false,
   placeholder: undefined,
   disabled: false,
   readonly: false,
@@ -236,13 +233,9 @@ defineSlots<{
 }>()
 
 const group = inject(inputGroupKey, null)
-const {
-  size: resolvedSize,
-  compact: resolvedCompact,
-  disabled: resolvedDisabled,
-} = useControlShape(props, group)
+const { size: resolvedSize, disabled: resolvedDisabled } = useControlShape(props, group)
 
-const chipScale = computed(() => chipScaleFor(resolvedSize.value, resolvedCompact.value))
+const chipScale = computed(() => chipScaleFor(resolvedSize.value))
 
 /** The chosen option's `value`, `''` while nothing is chosen, or the list of them when `multiple` is set. */
 const model = defineModel<ItemValue | ItemValue[]>({ default: '' })
@@ -297,7 +290,6 @@ const {
   panelEl: () => panelRef.value?.el ?? null,
   virtual: () => false,
   size: () => resolvedSize.value,
-  compact: () => resolvedCompact.value,
 })
 
 // @a11y
@@ -588,7 +580,6 @@ defineExpose({
         :hide-label="hideLabel"
         :label-position="labelPosition"
         :size="resolvedSize"
-        :compact="resolvedCompact"
         :invalid="invalid || nativeInvalid"
         :disabled="resolvedDisabled"
         :readonly="readonly"
@@ -696,7 +687,6 @@ defineExpose({
       :placement="placement"
       class="v-select-panel"
       :size="resolvedSize"
-      :compact="resolvedCompact"
       :multiple="multiple"
       :blocks="blocks"
       :measure="measureRow"

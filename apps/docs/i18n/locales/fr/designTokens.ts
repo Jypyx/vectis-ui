@@ -77,16 +77,18 @@ const descriptions: Record<DescribedToken, string> = {
     "L'anneau de focus clavier, qui doit ressortir sur le fond de la page",
   '--vectis-focus-ring-width': "L'épaisseur de l'anneau de focus",
   '--vectis-focus-ring-offset': "L'écart entre un contrôle et son anneau de focus",
+  '--vectis-density-delta':
+    'Ce que la densité retire à chaque hauteur de contrôle et aux espacements internes des composants : 0px pour l’échelle standard, le pas --vectis-space-1 pour l’échelle compacte',
   '--vectis-control-height-xs':
-    'La hauteur de tout contrôle en size="xs" (24px), 4px de moins en compact',
+    'La hauteur de tout contrôle en size="xs" (24px), moins le delta de densité',
   '--vectis-control-height-sm':
-    'La hauteur de tout contrôle en size="sm" (32px), 4px de moins en compact',
+    'La hauteur de tout contrôle en size="sm" (32px), moins le delta de densité',
   '--vectis-control-height-md':
-    'La hauteur de tout contrôle en size="md" (40px), 4px de moins en compact',
+    'La hauteur de tout contrôle en size="md" (40px), moins le delta de densité',
   '--vectis-control-height-lg':
-    'La hauteur de tout contrôle en size="lg" (48px), 4px de moins en compact',
+    'La hauteur de tout contrôle en size="lg" (48px), moins le delta de densité',
   '--vectis-control-height-xl':
-    'La hauteur de tout contrôle en size="xl" (56px), 4px de moins en compact',
+    'La hauteur de tout contrôle en size="xl" (56px), moins le delta de densité',
   '--vectis-control-border-width': 'La bordure des contrôles à cocher (VCheckbox, VRadio)',
   '--vectis-control-size-check': 'La boîte des contrôles à cocher (VCheckbox, VRadio)',
   '--vectis-control-size-check-mark': 'La coche dans la boîte de VCheckbox',
@@ -326,7 +328,7 @@ export default {
     'Durées des transitions, communes aux deux thèmes. Les animations en boucle, comme celle du spinner, utilisent plutôt les tokens de durée primitifs.',
   sizesHeading: 'Tailles',
   sizesBody:
-    'Hauteurs des contrôles et tailles des icônes. <code>compact</code> réduit la hauteur d’un contrôle de 4px.',
+    'Densité, hauteurs des contrôles et tailles des icônes. Donnez à <code>--vectis-density-delta</code> la valeur <code>var(--vectis-space-1)</code>, dans le thème ou sur un conteneur, pour retirer 4px à chaque contrôle et aux espacements internes des composants.',
   componentsHeading: 'Dimensions des composants',
   componentsBody:
     'Dimensions propres à chaque composant, comme l’épaisseur d’un rail ou la largeur d’un panneau. Les titres des groupes renvoient à la documentation du composant.',
@@ -340,6 +342,7 @@ export default {
     warning: 'Avertissement',
     backdrop: 'Voile',
     events: 'Événements du calendrier',
+    density: 'Densité',
     controlHeights: 'Hauteurs des contrôles',
     iconSizes: 'Tailles des icônes',
   },

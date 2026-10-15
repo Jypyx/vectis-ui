@@ -2,8 +2,6 @@
 import api from '~/content/api/accordion'
 import AccordionBasic from '~/examples/accordion/Basic.vue'
 import accordionBasicSource from '~/examples/accordion/Basic.vue?raw'
-import AccordionCompact from '~/examples/accordion/Compact.vue'
-import accordionCompactSource from '~/examples/accordion/Compact.vue?raw'
 import AccordionDisabled from '~/examples/accordion/Disabled.vue'
 import accordionDisabledSource from '~/examples/accordion/Disabled.vue?raw'
 import AccordionExclusive from '~/examples/accordion/Exclusive.vue'
@@ -48,12 +46,6 @@ useDocsHead('accordion')
   <DocsProse keypath="accordion.examples.subtitles.text" />
   <DocsExample :source="accordionSubtitlesSource" stack>
     <AccordionSubtitles />
-  </DocsExample>
-
-  <h3 id="compact">{{ t('accordion.examples.compact.title') }}</h3>
-  <DocsProse keypath="accordion.examples.compact.text" />
-  <DocsExample :source="accordionCompactSource" stack>
-    <AccordionCompact />
   </DocsExample>
 
   <h3 id="expand-and-collapse-icons">{{ t('accordion.examples.icons.title') }}</h3>

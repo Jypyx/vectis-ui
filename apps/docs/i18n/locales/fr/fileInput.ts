@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> définit la taille du champ ; <code>compact</code> réduit sa hauteur.',
+      text: '<code>size</code> définit la taille du champ.',
     },
     multiple: {
       title: 'Fichiers multiples',
@@ -62,7 +62,6 @@ export default {
         pickerIcon: 'Icône du bouton ouvrant le sélecteur de fichiers.',
         noDrop: 'Désactive le glisser-déposer ; le sélecteur reste disponible.',
         size: 'Taille du composant.',
-        compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
         disabled: 'Désactive les interactions.',
         readonly:
           'Empêche l’ouverture du sélecteur, le dépôt et le retrait de fichiers. Les contrôles conservent le focus.',

@@ -48,11 +48,6 @@ interface ButtonGroupProps {
    */
   size?: ButtonSize
   /**
-   * Takes 4px off the height of every segment. It wins over the value a button inside
-   * was given.
-   */
-  compact?: boolean
-  /**
    * Raises every segment off the page, on the terms of VButton's own `elevated`. It
    * wins over the value a button inside was given.
    */
@@ -81,7 +76,6 @@ const props = withDefaults(defineProps<ButtonGroupProps>(), {
   variant: undefined,
   tone: undefined,
   size: undefined,
-  compact: undefined,
   elevated: undefined,
   disabled: undefined,
   label: undefined,
@@ -104,9 +98,6 @@ provide(buttonGroupKey, {
   },
   get size() {
     return props.size
-  },
-  get compact() {
-    return props.compact
   },
   get elevated() {
     return props.elevated

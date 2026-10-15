@@ -185,8 +185,6 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
    * of its own.
    */
   stickyHeader?: boolean
-  /** Tightens the cells by one step, and everything the table renders with them. */
-  compact?: boolean
   /**
    * The height of the whole component, header, toolbar and pagination included: a number is read as
    * pixels, anything else as a CSS length. Left out, the table takes its parent's height
@@ -266,7 +264,6 @@ const props = withDefaults(defineProps<DataTableProps<Row>>(), {
   searchDebounce: 250,
   striped: false,
   stickyHeader: false,
-  compact: false,
   height: undefined,
   sortIcon: () => swapVertIcon,
   sortAscIcon: () => arrowDownwardIcon,
@@ -654,15 +651,15 @@ function rowIndexOf(target: EventTarget | null) {
 }
 
 // Only a starting guess, every row being measured once rendered: a line of body text between
-// the cells' block padding, and the border under it.
-const ROW_HEIGHT = { regular: 46, compact: 38 }
+// the cells' block padding in the standard density, and the border under it.
+const ROW_HEIGHT = 46
 
 const virtualList = useVirtualList({
   scrollEl: computed(() => (props.virtual ? scrollerEl.value : null)),
   listEl: tbodyEl,
   count: () => displayedRows.value.length,
   key: (index) => visibleIds.value[index],
-  itemSize: () => (props.compact ? ROW_HEIGHT.compact : ROW_HEIGHT.regular),
+  itemSize: () => ROW_HEIGHT,
   overscan: () => 5,
   initialCount: () => 20,
   pinned: () => (focusedIndex.value >= 0 ? [focusedIndex.value] : []),
@@ -758,7 +755,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     :style="[heightStyle, rootStyle]"
     :data-variant="variant"
     :data-striped="striped ? '' : undefined"
-    :data-compact="compact ? '' : undefined"
     :data-sticky-header="stickyHeader ? '' : undefined"
     :data-selectable="selectable ? '' : undefined"
     :data-virtual="virtual ? '' : undefined"
@@ -792,7 +788,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
         class="v-data-table-search"
         type="search"
         size="sm"
-        :compact="compact"
         :icon-start="searchIcon"
         clearable
         :placeholder="resolvedSearchPlaceholder"
@@ -963,13 +958,12 @@ const heightStyle = computed<StyleValue | undefined>(() =>
                  minimum width with something sensible: a menu of "10", "25", "50" has no
                  use for the width a menu of commands assumes, and it still cannot end up
                  narrower than the button opening it. -->
-            <VMenu size="sm" :compact="compact" placement="top-end" match-trigger>
+            <VMenu size="sm" placement="top-end" match-trigger>
               <template #trigger="{ triggerProps }">
                 <VButton
                   variant="ghost"
                   tone="neutral"
                   size="sm"
-                  :compact="compact"
                   v-bind="triggerProps"
                   :aria-label="m.dataTable.perPageValue(resolvedPerPageText, perPage ?? 0)"
                 >
@@ -1000,7 +994,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
             :length="pageCount"
             size="sm"
             item-variant="ghost"
-            :compact="compact"
             align="end"
             :total-visible="0"
             edge-controls
@@ -1017,11 +1010,11 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   .v-data-table {
     /*
      * It does not go through the shared control scale; there is no single control height in a
-     * table; which is the same case VAccordion is in.
+     * table; which is the same case VAccordion is in. The density comes off every padding.
      */
-    --data-table-pad-block: var(--vectis-space-3);
-    --data-table-pad-inline: var(--vectis-space-3);
-    --data-table-head-pad-block: var(--vectis-space-2);
+    --data-table-pad-block: calc(var(--vectis-space-3) - var(--vectis-density-delta));
+    --data-table-pad-inline: calc(var(--vectis-space-3) - var(--vectis-density-delta));
+    --data-table-head-pad-block: calc(var(--vectis-space-2) - var(--vectis-density-delta));
 
     /* The gutter between the frame and the footer it holds: nothing when the table is
        unframed, so the footer sits flush with the edge, and the cells' own inline padding
@@ -1038,12 +1031,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     display: flex;
     flex-direction: column;
     block-size: 100%;
-  }
-
-  .v-data-table[data-compact] {
-    --data-table-pad-block: var(--vectis-space-2);
-    --data-table-pad-inline: var(--vectis-space-2);
-    --data-table-head-pad-block: var(--vectis-space-1);
   }
 
   /* The same `min-block-size: 0` as the scrolling area below, one level up. */

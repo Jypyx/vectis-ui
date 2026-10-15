@@ -14,7 +14,7 @@ export default {
     },
     sizes: {
       title: 'Sizes',
-      text: 'Choose <code>xs</code> or <code>sm</code>. <code>compact</code> reduces the height.',
+      text: 'Choose <code>xs</code> or <code>sm</code>.',
     },
     attached: {
       title: 'Attached',
@@ -44,7 +44,6 @@ export default {
         variant: 'Keycap style: soft, outlined or raised.',
         attached: 'Frames the whole combination as one key.',
         size: 'Component size.',
-        compact: 'Reduces the control height without changing text or icons.',
         platform: 'Platform override for display and shortcut matching.',
         separator: 'Text between keys. An empty string keeps only spacing.',
         listen: 'Enables shortcut matching and the <code>trigger</code> event.',

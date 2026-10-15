@@ -12,7 +12,6 @@ export default {
         { name: 'variant', type: 'TabsVariant', values: "'flat' | 'outline' | 'elevated' | 'filled' | 'inset'", default: "'flat'" },
         { name: 'tone', type: 'TabsTone', values: "'accent' | 'neutral' | 'danger'", default: "'accent'" },
         { name: 'size', type: 'TabsSize', values: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'orientation', type: 'TabsOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },
         { name: 'align', type: 'TabsAlign', values: "'start' | 'center' | 'end'", default: "'start'" },
         { name: 'fullWidth', type: 'boolean', default: 'false' },

@@ -24,8 +24,6 @@ interface ListboxPanelProps {
   placement: PopoverPlacement
   /** The size the options take, the field's own. */
   size: 'sm' | 'md' | 'lg'
-  /** The field's reduced density. */
-  compact?: boolean
   /** Several options can be chosen. */
   multiple?: boolean
   /** Only the rows near the visible part of the panel are rendered. */
@@ -37,7 +35,6 @@ interface ListboxPanelProps {
 }
 
 withDefaults(defineProps<ListboxPanelProps>(), {
-  compact: false,
   multiple: false,
   virtual: false,
 })
@@ -89,7 +86,6 @@ defineExpose({
     role="listbox"
     class="v-listbox-panel v-control"
     :data-size="size"
-    :data-compact="compact ? '' : undefined"
     :aria-multiselectable="multiple ? 'true' : undefined"
     :data-virtual="virtual ? '' : undefined"
     @mousedown="onMousedown"

@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> and <code>compact</code> apply to control, pill and circle shapes.',
+      text: '<code>size</code> applies to control, pill and circle shapes.',
     },
     paragraph: {
       title: 'Paragraphs of text',
@@ -40,7 +40,6 @@ export default {
       props: {
         shape: 'Placeholder shape: text, control, pill, circle or surface.',
         size: 'Size for control, pill and circle shapes.',
-        compact: 'Reduces the height of control-sized shapes.',
         width:
           'Width as pixels for numbers, otherwise a CSS length. Defaults to the available width.',
         height: 'Height as pixels for numbers, otherwise a CSS length. Overrides shape and size.',

@@ -1,4 +1,4 @@
-/** Share navigation behaviour only; CSS inheritance carries size, compact and branch depth. */
+/** Share navigation behaviour only; CSS inheritance carries size, density and branch depth. */
 
 import type { InjectionKey } from 'vue'
 

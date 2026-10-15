@@ -96,9 +96,7 @@ const text = computed(() =>
     class="v-listbox-overflow"
     :aria-hidden="hideText ? 'true' : undefined"
   >
-    <slot name="overflow" :count="overflowCount" :size="scale.size" :compact="scale.compact">{{
-      overflowLabel
-    }}</slot>
+    <slot name="overflow" :count="overflowCount" :size="scale.size">{{ overflowLabel }}</slot>
   </span>
   <template v-for="value in display === 'chip' ? shown : []" :key="value">
     <slot
@@ -108,12 +106,10 @@ const text = computed(() =>
       :label="labelOf(value)"
       :remove="() => emit('remove', value)"
       :size="scale.size"
-      :compact="scale.compact"
     >
       <VChip
         tone="accent"
         :size="scale.size"
-        :compact="scale.compact"
         :dismissible="removable && !disabled"
         :dismiss-label="m.common.remove(labelOf(value))"
         :disabled="disabled"
@@ -130,16 +126,10 @@ const text = computed(() =>
     name="overflow"
     :count="overflowCount"
     :size="scale.size"
-    :compact="scale.compact"
   >
-    <VChip
-      class="v-listbox-overflow-chip"
-      tone="neutral"
-      :size="scale.size"
-      :compact="scale.compact"
-      :disabled="disabled"
-      >{{ overflowLabel }}</VChip
-    >
+    <VChip class="v-listbox-overflow-chip" tone="neutral" :size="scale.size" :disabled="disabled">{{
+      overflowLabel
+    }}</VChip>
   </slot>
 </template>
 

@@ -1,4 +1,4 @@
-/** Share group icons through context; compact spacing inherits through CSS variables. */
+/** Share group icons through context; the density reaches the rows through its token. */
 
 import type { InjectionKey } from 'vue'
 

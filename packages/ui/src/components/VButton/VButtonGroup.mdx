@@ -11,7 +11,7 @@ row asks for one.
 
 Since the row is one object, how it is drawn is its own decision, and it is made in two places.
 `detached` and `bordered` settle the row itself: whether the buttons are joined at all, and
-whether anything is drawn between them once they are. `variant`, `tone`, `size`, `compact`,
+whether anything is drawn between them once they are. `variant`, `tone`, `size`,
 `elevated` and `disabled` are set **on the group** and reach every button inside it.
 
 <Canvas of={VButtonGroupStories.Default} />
@@ -22,7 +22,7 @@ whether anything is drawn between them once they are. `variant`, `tone`, `size`,
 
 The arbitration is not symmetric, and the asymmetry is the point:
 
-- `variant`, `size`, `compact` and `elevated` are the **shape** of the control, and the group
+- `variant`, `size` and `elevated` are the **shape** of the control, and the group
   wins over the value a button was given. A segment of another height, silhouette or elevation
   no longer lines up with its neighbours, and the merged border stops reading as one object.
 - `tone` is **meaning** rather than shape, so the button wins: its own tone first, the group's
@@ -146,7 +146,7 @@ and pushes the joint away from the button's edge.
 ## Sizes
 
 The size is a property of the row, so it is named once, on the group: `size` from the scale
-shared by every control, and `compact` for the 4px it takes off.
+shared by every control.
 
 <Canvas of={VButtonGroupStories.Sizes} />
 

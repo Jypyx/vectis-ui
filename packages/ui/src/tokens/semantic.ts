@@ -233,26 +233,32 @@ export const semantic = {
     'ring-width': dimension('2px', 'The thickness of the focus ring'),
     'ring-offset': dimension('2px', 'The gap between a control and its focus ring'),
   },
+  density: {
+    delta: dimension(
+      '0px',
+      'What the density takes off every control height and component padding: 0px for the standard scale, the --vectis-space-1 step for the compact one',
+    ),
+  },
   control: {
     'height-xs': dimension(
       '1.5rem',
-      'The height of every control at size="xs" (24px), 4px less when compact',
+      'The height of every control at size="xs" (24px), less the density delta',
     ),
     'height-sm': dimension(
       '2rem',
-      'The height of every control at size="sm" (32px), 4px less when compact',
+      'The height of every control at size="sm" (32px), less the density delta',
     ),
     'height-md': dimension(
       '2.5rem',
-      'The height of every control at size="md" (40px), 4px less when compact',
+      'The height of every control at size="md" (40px), less the density delta',
     ),
     'height-lg': dimension(
       '3rem',
-      'The height of every control at size="lg" (48px), 4px less when compact',
+      'The height of every control at size="lg" (48px), less the density delta',
     ),
     'height-xl': dimension(
       '3.5rem',
-      'The height of every control at size="xl" (56px), 4px less when compact',
+      'The height of every control at size="xl" (56px), less the density delta',
     ),
     'border-width': dimension('2px', 'The border of checkable controls (VCheckbox, VRadio)'),
     'size-check': dimension('1.25rem', 'The box of checkable controls (VCheckbox, VRadio)'),

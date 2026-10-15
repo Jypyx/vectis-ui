@@ -26,7 +26,6 @@ export default {
         { name: 'labelPosition', type: 'FieldLabelPosition', values: "'top' | 'start'", default: "'top'" },
         { name: 'placeholder', type: 'string' },
         { name: 'size', type: 'TimeInputSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'readonly', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },

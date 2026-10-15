@@ -1,18 +1,11 @@
 /*
- * Place v-control on the element carrying data-size/data-compact; inherited --control-*
- * variables size its children.
+ * Place v-control on the element carrying data-size; inherited --control-* variables size its
+ * children. The density delta is read where the height is derived, so redefining
+ * --vectis-density-delta on any ancestor resizes every control beneath it.
  */
 @layer vectis.components {
   .v-control {
-    /*
-     * A nested v-control resets inherited compact height. Apply it only to root menu panels and
-     * leave submenu icon context inherited.
-     */
-    --control-height: var(--control-height-base);
-  }
-
-  .v-control[data-compact] {
-    --control-height: calc(var(--control-height-base) - var(--vectis-space-1));
+    --control-height: calc(var(--control-height-base) - var(--vectis-density-delta));
   }
 
   .v-control[data-size='xs'] {

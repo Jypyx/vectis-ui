@@ -5,11 +5,8 @@ import { VInput } from 'vectis-ui'
 <template>
   <div class="grid">
     <VInput size="sm" label="Small" placeholder="32px" />
-    <VInput size="sm" compact label="Small compact" placeholder="28px" />
     <VInput size="md" label="Medium" placeholder="40px" />
-    <VInput size="md" compact label="Medium compact" placeholder="36px" />
     <VInput size="lg" label="Large" placeholder="48px" />
-    <VInput size="lg" compact label="Large compact" placeholder="44px" />
   </div>
 </template>
 

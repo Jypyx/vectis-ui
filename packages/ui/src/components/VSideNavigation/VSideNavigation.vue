@@ -28,11 +28,6 @@ interface SideNavigationProps {
   /** The height of the rows, 32 or 40 pixels, inherited by every level. */
   size?: SideNavigationSize
   /**
-   * Takes 4px off the height of every row. It is a density setting and not a collapsed
-   * icon-only rail, which this component does not offer.
-   */
-  compact?: boolean
-  /**
    * Keeps a single section open at a time WITHIN EACH LEVEL, which the browser does on
    * its own. It is off by default: a sidebar normally lets several sections stay open.
    */
@@ -49,7 +44,6 @@ interface SideNavigationProps {
 const props = withDefaults(defineProps<SideNavigationProps>(), {
   label: undefined,
   size: 'md',
-  compact: false,
   exclusive: false,
   expandIcon: () => expandMoreIcon,
   collapseIcon: undefined,
@@ -138,7 +132,6 @@ function onKeydown(event: KeyboardEvent) {
     ref="rootEl"
     class="v-side-nav v-control"
     :data-size="size"
-    :data-compact="compact ? '' : undefined"
     :aria-label="ariaLabel"
     @keydown="onKeydown"
   >

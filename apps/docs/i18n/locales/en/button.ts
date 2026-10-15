@@ -14,10 +14,6 @@ export default {
       title: 'Sizes',
       text: '<code>size</code> adjusts the height, padding, text and icons.',
     },
-    compact: {
-      title: 'Compact',
-      text: '<code>compact</code> reduces the height without changing the padding, text or icons.',
-    },
     fullWidth: {
       title: 'Full width',
       text: '<code>fullWidth</code> makes the button fill its parent’s width.',
@@ -48,8 +44,6 @@ export default {
         elevated:
           'Adds a shadow and, for <code>ghost</code> and <code>outline</code>, a background. <code>VButtonGroup</code> overrides this value.',
         size: 'Button size. <code>VButtonGroup</code> overrides this value.',
-        compact:
-          'Reduces the height without changing the padding, text or icons. <code>VButtonGroup</code> overrides this value.',
         fullWidth: 'Fills the parent’s width.',
         href: 'Link destination. Renders an <code>&lt;a&gt;</code> instead of a <code>&lt;button&gt;</code>. When disabled or loading, the link loses its destination and cannot receive focus or navigate.',
         type: 'Native button type. Ignored when <code>href</code> is set.',

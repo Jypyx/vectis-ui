@@ -11,7 +11,6 @@ export default {
       props: [
         { name: 'as', type: 'string', default: "'div'" },
         { name: 'size', type: 'MenuSize', values: "'sm' | 'md' | 'lg'", default: "'sm'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'width', type: 'number | string' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'v-model:open', key: 'vModelOpen', type: 'boolean', default: 'false' },

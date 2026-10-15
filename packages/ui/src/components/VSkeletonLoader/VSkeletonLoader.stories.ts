@@ -65,7 +65,6 @@ const meta = {
   args: {
     shape: 'text',
     size: 'md',
-    compact: false,
     lines: 3,
     animation: 'wave',
     announce: false,
@@ -159,7 +158,7 @@ export const Animations: Story = {
 }
 
 /**
- * `size` and `compact` take the design system's control scale (24/32/40/48/56px): an `md`
+ * `size` takes the design system's control scale (24/32/40/48/56px): an `md`
  * skeleton is exactly the height of an `md` VButton.
  */
 export const Sizes: Story = {
@@ -173,11 +172,6 @@ export const Sizes: Story = {
         </div>
         <div style="display: grid; gap: 8px; width: 240px">
           <VSkeletonLoader v-for="s in sizes" :key="s" shape="control" :size="s" />
-        </div>
-        <div style="display: grid; gap: 8px; width: 240px">
-          <!-- compact: -4px of height, as everywhere else in the DS -->
-          <VSkeletonLoader shape="control" size="md" />
-          <VSkeletonLoader shape="control" size="md" compact />
         </div>
       </div>
     `,

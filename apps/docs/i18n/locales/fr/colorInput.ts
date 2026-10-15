@@ -45,7 +45,6 @@ export default {
           'Message d’erreur affiché à la place de l’aide. Définit <code>aria-invalid</code> et est annoncé à son apparition.',
         placeholder: 'Texte indicatif affiché quand le champ est vide.',
         size: 'Taille du composant.',
-        compact: 'Réduit la hauteur du contrôle sans changer le texte ni les icônes.',
         disabled: 'Désactive l’interaction.',
         readonly: 'Empêche la saisie et retire le sélecteur. Le champ reste focalisable.',
         invalid:

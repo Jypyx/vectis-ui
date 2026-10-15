@@ -41,8 +41,6 @@ export interface FileInputChipSlotProps {
   remove: () => void
   /** The chip size worked out to sit inside the field, one step below it. */
   size: ChipSize
-  /** Whether the chip takes its compact height, to catch up below the smallest step. */
-  compact: boolean
 }
 
 /** What the `#counter` slot receives. */
@@ -83,8 +81,6 @@ interface FileInputProps {
   noDrop?: boolean
   /** The height of the field: 32, 40 or 48 pixels. */
   size?: FileInputSize
-  /** Takes 4px off the height, leaving the padding, the text and the icons as they are. */
-  compact?: boolean
   /** Makes the field unusable, greyed out through the colour tokens. */
   disabled?: boolean
   /**
@@ -169,7 +165,6 @@ const props = withDefaults(defineProps<FileInputProps>(), {
   pickerIcon: () => attachFileIcon,
   noDrop: false,
   size: 'md',
-  compact: false,
   disabled: false,
   readonly: false,
   invalid: false,
@@ -243,14 +238,10 @@ const m = useMessages()
 const locale = useLocale()
 
 // A VInputGroup joins several controls into one object, so the shape of this field is the
-// row's decision rather than its own (VInput/context.ts). The chips read the resolved pair
+// row's decision rather than its own (VInput/context.ts). The chips read the resolved size
 // too, or they would come out one step off the field they sit in.
 const group = inject(inputGroupKey, null)
-const {
-  size: resolvedSize,
-  compact: resolvedCompact,
-  disabled: resolvedDisabled,
-} = useControlShape(props, group)
+const { size: resolvedSize, disabled: resolvedDisabled } = useControlShape(props, group)
 
 /*
  * Here, the bucket meant for "the control the user deals with" goes to the visible field: that
@@ -330,12 +321,12 @@ const counterText = computed(() => {
   return model.value.length === 0 ? word : `${word} (${formatBytes(totalSize.value, locale.value)})`
 })
 
-// The size, the density and the HEIGHT of the chips sitting inside the field, worked out
+// The size and the HEIGHT of the chips sitting inside the field, worked out
 // once in `utils/chip.ts` and shared with VCombobox. The height is set inline rather than
 // restated as a table of CSS rules: it belongs to the chips' own subtree, out of the
 // field's reach, and the field has to force its input to that same height or it grows
 // when focused.
-const chipScale = computed(() => chipScaleFor(resolvedSize.value, resolvedCompact.value))
+const chipScale = computed(() => chipScaleFor(resolvedSize.value))
 
 /**
  * What each chip shows for its file, worked out once per change of the selection rather than on
@@ -401,7 +392,6 @@ defineExpose({
     :class="rootClass"
     :style="[{ '--chip-height': chipScale.height }, rootStyle]"
     :data-size="resolvedSize"
-    :data-compact="resolvedCompact ? '' : undefined"
     :data-display="resolvedDisplay"
     :data-disabled="resolvedDisabled ? '' : undefined"
     :data-readonly="readonly ? '' : undefined"
@@ -431,7 +421,6 @@ defineExpose({
         :label-position="labelPosition"
         :placeholder="placeholderText"
         :size="resolvedSize"
-        :compact="resolvedCompact"
         :disabled="resolvedDisabled"
         :invalid="invalid"
         :clearable="clearable"
@@ -459,12 +448,10 @@ defineExpose({
               :label="chipLabels[index]!"
               :remove="() => removeFile(index)"
               :size="chipScale.size"
-              :compact="chipScale.compact"
             >
               <VChip
                 tone="accent"
                 :size="chipScale.size"
-                :compact="chipScale.compact"
                 :dismissible="enabled"
                 :dismiss-label="m.common.remove(file.name)"
                 :disabled="resolvedDisabled"

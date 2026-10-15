@@ -131,11 +131,10 @@ describe('VInputOTP', () => {
     expect(literal?.querySelector('.v-icon-symbol')?.textContent).toBe('horizontal_rule')
   })
 
-  it('sets data-size/data-compact/data-disabled on the root', () => {
-    const { getByRole, getAllByRole } = renderOtp({ size: 'sm', compact: true, disabled: true })
+  it('sets data-size/data-disabled on the root', () => {
+    const { getByRole, getAllByRole } = renderOtp({ size: 'sm', disabled: true })
     const group = getByRole('group')
     expect(group.getAttribute('data-size')).toBe('sm')
-    expect(group.hasAttribute('data-compact')).toBe(true)
     expect(group.hasAttribute('data-disabled')).toBe(true)
     expect((getAllByRole('textbox')[0] as HTMLInputElement).disabled).toBe(true)
   })

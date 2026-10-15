@@ -16,8 +16,10 @@ import {
 } from './palettes'
 import {
   BASE_SIZES,
+  DENSITY_DELTAS,
   RADIUS_PRESETS,
   type BaseSize,
+  type Density,
   type IconLibraryId,
   type RadiusPresetId,
 } from './options'
@@ -192,6 +194,7 @@ export interface ThemeConfig {
   icons: IconLibraryId
   baseSize: BaseSize
   radius: RadiusPresetId
+  density: Density
 }
 
 /** The colours a preset gives each group, per scheme. */
@@ -218,6 +221,7 @@ export const DEFAULT_CONFIG: ThemeConfig = {
   icons: 'material-rounded',
   baseSize: 16,
   radius: 'medium',
+  density: 'standard',
 }
 
 /** Whether a stored value still has the shape this version reads; anything else is dropped. */
@@ -228,6 +232,7 @@ export function isThemeConfig(value: unknown): value is ThemeConfig {
     (ACCENT_HUES as readonly string[]).includes(config.colors?.accent) &&
     (NEUTRAL_HUES as readonly string[]).includes(config.colors?.neutral) &&
     (BASE_SIZES as readonly number[]).includes(config.baseSize) &&
-    Object.hasOwn(RADIUS_PRESETS, config.radius)
+    Object.hasOwn(RADIUS_PRESETS, config.radius) &&
+    Object.hasOwn(DENSITY_DELTAS, config.density)
   )
 }

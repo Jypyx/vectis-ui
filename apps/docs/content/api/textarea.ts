@@ -10,7 +10,6 @@ export default {
       name: 'VTextarea',
       props: [
         { name: 'size', type: 'TextareaSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'rows', type: 'number', default: '5' },
         { name: 'autoGrow', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },

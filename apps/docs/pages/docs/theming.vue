@@ -81,6 +81,16 @@ const coralCode = `/* Scope overrides to this container. */
   --vectis-color-accent-text: oklch(78% 0.13 32);
 }`
 
+const densityCode = `/* Every control and component padding, across the page. */
+:root {
+  --vectis-density-delta: var(--vectis-space-1);
+}
+
+/* Or a single region, such as a dense toolbar. */
+.toolbar {
+  --vectis-density-delta: var(--vectis-space-1);
+}`
+
 const layersCode = `/* The order the library declares, for reference. */
 @layer vectis.reset, vectis.tokens, vectis.components, vectis.utilities;
 
@@ -159,6 +169,16 @@ export default defineNuxtConfig({
     <NuxtLink :to="localePath('/docs/design-tokens')">{{ t('nav.design-tokens') }}</NuxtLink>
     <DocsProse tag="span" keypath="theming.tokensReferenceAfter" />
   </p>
+
+  <h2 id="density">{{ t('theming.densityHeading') }}</h2>
+  <DocsProse keypath="theming.densityBody" />
+  <DocsCode lang="css" :code="densityCode" />
+  <DocsDemo class="vd-density-compact">
+    <VButton variant="outline" tone="neutral" size="sm">Filter</VButton>
+    <VChip tone="accent" size="sm">Beta</VChip>
+    <VInput size="sm" aria-label="Search" placeholder="Search" />
+  </DocsDemo>
+  <DocsProse keypath="theming.densityDemoCaption" variant="body-sm" tone="muted" />
 
   <h2 id="css-layers">{{ t('theming.layersHeading') }}</h2>
   <DocsProse keypath="theming.layersBody" />

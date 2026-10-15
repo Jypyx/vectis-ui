@@ -6,10 +6,7 @@ const sizes = ['sm', 'md', 'lg'] as const
 
 <template>
   <div class="grid">
-    <template v-for="size in sizes" :key="size">
-      <VTextarea :size="size" :label="size" :rows="2" />
-      <VTextarea :size="size" :label="`${size} compact`" :rows="2" compact />
-    </template>
+    <VTextarea v-for="size in sizes" :key="size" :size="size" :label="size" :rows="2" />
   </div>
 </template>
 

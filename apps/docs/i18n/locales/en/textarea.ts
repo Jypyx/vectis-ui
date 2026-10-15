@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> adjusts padding, text and icons. <code>rows</code> sets the line count; <code>compact</code> reduces vertical padding.',
+      text: '<code>size</code> adjusts padding, text and icons. <code>rows</code> sets the line count.',
     },
     icons: {
       title: 'Icons',
@@ -42,7 +42,6 @@ export default {
         hideLabel: 'Hides the label visually while keeping it as the accessible name.',
         labelPosition: 'Places the label above the field or beside it.',
         size: 'Adjusts padding, text and icons. Use <code>rows</code> to set the line count.',
-        compact: 'Reduces vertical padding without changing the line count, text or icons.',
         rows: 'Visible line count, rounded to an integer of at least 1. With <code>autoGrow</code>, sets the minimum height.',
         autoGrow:
           'Fits the height to the content using CSS <code>field-sizing</code>. Disables manual resizing. Without browser support, the field keeps its fixed height and scrolls.',

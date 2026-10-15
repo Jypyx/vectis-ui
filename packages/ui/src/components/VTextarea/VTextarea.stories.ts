@@ -158,19 +158,6 @@ export const Sizes: Story = {
   }),
 }
 
-/** Compact reduces padding by 4px while preserving rows, type and icon sizes. */
-export const Compact: Story = {
-  render: () => ({
-    components: { VTextarea },
-    template: `
-      <div style="display: grid; gap: 8px; width: 320px">
-        <VTextarea placeholder="Normal" aria-label="Normal" />
-        <VTextarea compact placeholder="Compact" aria-label="Compact" />
-      </div>
-    `,
-  }),
-}
-
 /**
  * Pointing `--vectis-radius-interactive` at the pill token is how a consumer asks for pill
  * controls.

@@ -11,7 +11,6 @@ export default {
       props: [
         { name: 'label', type: 'string' },
         { name: 'size', type: 'SideNavigationSize', values: "'sm' | 'md'", default: "'md'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'exclusive', type: 'boolean', default: 'false' },
         { name: 'expandIcon', type: 'IconSource', default: 'expand_more' },
         { name: 'collapseIcon', type: 'IconSource' },

@@ -11,7 +11,6 @@ export default {
       props: [
         { name: 'placement', type: 'MenuPlacement', values: "'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end'", default: "'bottom-start'" },
         { name: 'size', type: 'MenuSize', values: "'sm' | 'md' | 'lg'", default: "'sm'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'width', type: 'number | string' },
         { name: 'matchTrigger', type: 'boolean', default: 'false' },
         { name: 'v-model:open', key: 'vModelOpen', type: 'boolean', default: 'false' },

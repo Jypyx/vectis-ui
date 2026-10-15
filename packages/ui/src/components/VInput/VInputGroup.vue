@@ -50,8 +50,6 @@ interface InputGroupProps {
    * two heights stops reading as one object. Left out, each segment keeps its own.
    */
   size?: InputGroupSize
-  /** Takes 4px off the height of every segment, the way `compact` does on a lone field. */
-  compact?: boolean
   /**
    * Makes the whole row unusable. It adds to what each segment says rather than
    * replacing it: a segment disabled on its own stays disabled under a row that says
@@ -73,7 +71,6 @@ const props = withDefaults(defineProps<InputGroupProps>(), {
   hideLabel: false,
   labelPosition: 'top',
   size: undefined,
-  compact: undefined,
   disabled: undefined,
 })
 
@@ -90,9 +87,6 @@ const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 const rowContext = {
   get size() {
     return props.size
-  },
-  get compact() {
-    return props.compact
   },
   get disabled() {
     return props.disabled
@@ -141,8 +135,8 @@ provide(buttonGroupKey, rowContext)
   }
 
   /*
-   * Do not put v-control on the row: rederiving its inherited height would reset compact
-   * dimensions already applied by the fields.
+   * Do not put v-control on the row: it has no size of its own, and each field derives its
+   * height itself.
    */
   .v-input-group-row {
     display: flex;

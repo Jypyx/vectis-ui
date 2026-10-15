@@ -509,9 +509,6 @@ export const Sizes: Story = {
         <VButtonGroup size="lg" variant="outline" tone="neutral" label="Large">
           <VButton v-for="l in ['A', 'B', 'C']" :key="l">{{ l }}</VButton>
         </VButtonGroup>
-        <VButtonGroup size="lg" compact variant="outline" tone="neutral" label="Large compact">
-          <VButton v-for="l in ['A', 'B', 'C']" :key="l">{{ l }}</VButton>
-        </VButtonGroup>
       </div>
     `,
   }),

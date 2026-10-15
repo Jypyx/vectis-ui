@@ -9,7 +9,6 @@ const selected = ref<Record<string, string>>({
   md: 'week',
   lg: 'week',
   xl: 'week',
-  compact: 'week',
 })
 </script>
 
@@ -18,15 +17,6 @@ const selected = ref<Record<string, string>>({
     <div v-for="size in sizes" :key="size" class="row">
       <p class="caption">{{ size }}</p>
       <VToggle v-model="selected[size]" :size="size" :label="`Period, ${size}`">
-        <VToggleItem value="day" label="Day" />
-        <VToggleItem value="week" label="Week" />
-        <VToggleItem value="month" label="Month" />
-      </VToggle>
-    </div>
-
-    <div class="row">
-      <p class="caption">md compact</p>
-      <VToggle v-model="selected.compact" size="md" compact label="Period, compact">
         <VToggleItem value="day" label="Day" />
         <VToggleItem value="week" label="Week" />
         <VToggleItem value="month" label="Month" />

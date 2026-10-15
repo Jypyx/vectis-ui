@@ -38,10 +38,6 @@ export default {
       title: 'Variantes',
       text: '<code>flat</code> laisse le tableau sans cadre. <code>outline</code> ajoute une bordure, <code>elevated</code> une surface surélevée avec une ombre et <code>filled</code> une surface atténuée. Le cadre entoure les lignes et le pied ; l’en-tête reste à l’extérieur.',
     },
-    compact: {
-      title: 'Compact',
-      text: '<code>compact</code> réduit les espacements des cellules et la hauteur des contrôles.',
-    },
     striped: {
       title: 'Lignes zébrées',
       text: '<code>striped</code> colore une ligne sur deux.',
@@ -99,7 +95,6 @@ export default {
         striped: 'Colore une ligne sur deux.',
         stickyHeader:
           'Conserve les en-têtes visibles au défilement. Nécessite une hauteur limitée.',
-        compact: 'Réduit les espacements des cellules et la hauteur des contrôles.',
         height:
           'Hauteur totale. Les nombres utilisent des pixels ; les chaînes, des longueurs CSS. Sinon, hérite de la hauteur limitée du parent.',
         sortIcon: 'Icône d’une colonne triable non triée.',

@@ -7,11 +7,6 @@ import { VChip } from 'vectis-ui'
     <VChip size="xs">Extra small</VChip>
     <VChip size="sm">Small</VChip>
   </div>
-
-  <div class="row">
-    <VChip size="xs" compact>Extra small</VChip>
-    <VChip size="sm" compact>Small</VChip>
-  </div>
 </template>
 
 <style scoped>

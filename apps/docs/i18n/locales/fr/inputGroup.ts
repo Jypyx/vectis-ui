@@ -20,7 +20,7 @@ export default {
     },
     sizes: {
       title: 'Taille et densité',
-      text: 'Définissez <code>size</code> et <code>compact</code> sur le groupe pour remplacer les réglages individuels.',
+      text: 'Définissez <code>size</code> sur le groupe pour remplacer les réglages individuels.',
     },
     states: {
       title: 'États',
@@ -44,8 +44,6 @@ export default {
           'Message d’erreur affiché à la place de l’aide, lié au groupe par <code>aria-describedby</code> et annoncé quand il apparaît. Marquez les segments en faute avec <code>invalid</code>.',
         hint: 'Texte d’aide commun sous la ligne, lié au groupe par <code>aria-describedby</code>.',
         size: 'Taille de tous les segments. Remplace les tailles individuelles ; si omise, chaque segment conserve la sienne.',
-        compact:
-          'Réduit la hauteur des segments. Remplace les valeurs individuelles, même avec <code>false</code> ; si omis, chaque segment conserve la sienne.',
         disabled:
           'Désactive tous les segments. La valeur <code>false</code> ne réactive pas les contrôles désactivés individuellement.',
       },

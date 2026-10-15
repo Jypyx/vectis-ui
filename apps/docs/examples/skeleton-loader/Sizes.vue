@@ -17,12 +17,6 @@ const sizes: SkeletonLoaderSize[] = ['xs', 'sm', 'md', 'lg', 'xl']
       <p class="caption">control</p>
       <VSkeletonLoader v-for="size in sizes" :key="size" shape="control" :size="size" />
     </div>
-
-    <div class="row">
-      <p class="caption">md, then md compact</p>
-      <VSkeletonLoader shape="control" size="md" />
-      <VSkeletonLoader shape="control" size="md" compact />
-    </div>
   </div>
 </template>
 

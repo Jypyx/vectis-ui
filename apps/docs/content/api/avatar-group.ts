@@ -11,7 +11,6 @@ export default {
       props: [
         { name: 'max', type: 'number' },
         { name: 'size', type: 'AvatarSize', values: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'ringColor', type: 'string' },
         { name: 'label', type: 'string' },
       ],

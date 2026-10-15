@@ -1,13 +1,15 @@
 <script setup lang="ts">
-/** The builder's settings: colours, typography, icons and radius. */
+/** The builder's settings: colours, typography, icons, radius and density. */
 import { VCombobox, VSelect } from 'vectis-ui'
 import type { SelectItem } from 'vectis-ui'
 
 import { CODE_FONTS, TEXT_FONTS, type FontOption } from '~/theme-builder/fonts'
 import {
   BASE_SIZES,
+  DENSITY_DELTAS,
   ICON_LIBRARIES,
   RADIUS_PRESETS,
+  type Density,
   type IconLibrary,
   type RadiusPresetId,
 } from '~/theme-builder/options'
@@ -51,6 +53,13 @@ const radiusItems = computed(() =>
     label: t(`themeBuilder.radiusPresets.${preset}`),
   })),
 )
+
+const densityItems = computed(() =>
+  (Object.keys(DENSITY_DELTAS) as Density[]).map((density) => ({
+    value: density,
+    label: t(`themeBuilder.densities.${density}`),
+  })),
+)
 </script>
 
 <template>
@@ -77,5 +86,6 @@ const radiusItems = computed(() =>
     <VSelect v-model="config.baseSize" :options="sizeItems" :label="t('themeBuilder.baseSize')" />
     <VSelect v-model="config.icons" :options="iconItems" :label="t('themeBuilder.iconLibrary')" />
     <VSelect v-model="config.radius" :options="radiusItems" :label="t('themeBuilder.radius')" />
+    <VSelect v-model="config.density" :options="densityItems" :label="t('themeBuilder.density')" />
   </div>
 </template>

@@ -12,7 +12,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> définit la taille du chip ; <code>compact</code> réduit sa hauteur.',
+      text: '<code>size</code> définit la taille du chip.',
     },
     customColors: {
       title: 'Couleurs personnalisées',
@@ -48,7 +48,6 @@ export default {
           'Couleur CSS personnalisée remplaçant le ton. Vérifiez le contraste du texte sur les chips pleins.',
         shape: 'Coins arrondis ou forme de capsule.',
         size: 'Taille du composant.',
-        compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
         clickable: 'Affiche un bouton sans état de sélection.',
         href: 'Destination du lien.',
         selectable:

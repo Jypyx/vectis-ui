@@ -12,7 +12,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> ajuste le bouton et son icône. <code>compact</code> réduit la largeur et la hauteur de la même valeur.',
+      text: '<code>size</code> ajuste le bouton et son icône.',
     },
     shapes: {
       title: 'Formes',
@@ -42,8 +42,6 @@ export default {
         elevated:
           'Ajoute une ombre et, pour <code>ghost</code> et <code>outline</code>, un fond. Remplacé lorsque le groupe définit <code>elevated</code>.',
         size: 'Taille du bouton. Remplacée lorsque le groupe définit <code>size</code>.',
-        compact:
-          'Réduit la largeur et la hauteur de la même valeur. Remplacé lorsque le groupe définit <code>compact</code>.',
         shape: 'Forme carrée ou circulaire. La largeur et la hauteur restent égales.',
         href: 'Destination du lien. Lorsqu’il est désactivé ou en chargement, le lien perd sa destination et ne peut recevoir le focus ni naviguer.',
         type: 'Type natif du bouton. Ignoré si <code>href</code> est défini.',

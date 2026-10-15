@@ -17,7 +17,6 @@ export default {
         { name: 'selectedVariant', type: 'PaginationSelectedVariant', values: "'solid' | 'soft' | 'ghost'", default: "'solid'" },
         { name: 'tone', type: 'PaginationTone', values: "'accent' | 'neutral' | 'danger'", default: "'accent'" },
         { name: 'size', type: 'PaginationSize', values: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'elevated', type: 'boolean', default: 'false' },
         { name: 'align', type: 'PaginationAlign', values: "'start' | 'center' | 'end'", default: "'start'" },
         { name: 'controls', type: 'PaginationControls', values: "false | 'icon' | 'text' | 'both'", default: "'icon'" },

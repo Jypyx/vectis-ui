@@ -27,11 +27,6 @@ interface TextareaProps {
   /** The size of the field, which sets its padding, its type scale and its icons. */
   size?: TextareaSize
   /**
-   * Takes 4px off the field by tightening its padding, leaving the number of lines,
-   * the type and the icons alone.
-   */
-  compact?: boolean
-  /**
    * How many lines of text the field shows: the native `rows` attribute, which gives the field
    * its height.
    */
@@ -130,7 +125,6 @@ defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<TextareaProps>(), {
   size: 'md',
-  compact: false,
   rows: 5,
   autoGrow: false,
   invalid: false,
@@ -267,7 +261,6 @@ defineExpose({
         class="v-textarea-field v-control"
         :style="{ '--textarea-rows': resolvedRows }"
         :data-size="size"
-        :data-compact="compact ? '' : undefined"
         :data-disabled="disabled ? '' : undefined"
         :data-readonly="readonly ? '' : undefined"
         :data-auto-grow="autoGrow ? '' : undefined"
@@ -381,7 +374,7 @@ defineExpose({
     gap: var(--control-gap);
     padding-inline: var(--control-padding-inline-field);
     /*
-     * Derive padding from control height minus borders and one line. Read the compact-adjusted
+     * Derive padding from control height minus borders and one line. Read the density-adjusted
      * height so rows=1 matches VInput and each additional row adds one line.
      */
     padding-block: calc((var(--control-height) - 2px - var(--textarea-line)) / 2);

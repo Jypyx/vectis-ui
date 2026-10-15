@@ -126,6 +126,19 @@ Do not confuse `gray` — the greys this design system paints with, very slightl
   ))}
 </div>
 
+## Density
+
+`--vectis-density-delta` is what the density takes off every control height and every component
+padding: `0px` for the standard scale (24/32/40/48/56px), `var(--vectis-space-1)` for the compact
+one (20/28/36/44/52px). Set it in the theme to change the whole interface, or on a container to
+make one region compact; the toolbar's Density switch does the former for every story.
+
+```css
+:root {
+  --vectis-density-delta: var(--vectis-space-1);
+}
+```
+
 ## Typography
 
 ### Primitive sizes

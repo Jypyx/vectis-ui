@@ -31,8 +31,6 @@ export default {
         incrementLabel: 'Accessible name of the plus button. Defaults to the library dictionary.',
         decrementLabel: 'Accessible name of the minus button. Defaults to the library dictionary.',
         size: 'Field size. Overridden when <code>VInputGroup</code> sets <code>size</code>.',
-        compact:
-          'Reduces the height without changing padding or text. Overridden when <code>VInputGroup</code> sets <code>compact</code>.',
         label:
           'Visible label linked to the input. When omitted, provide <code>aria-label</code> or <code>aria-labelledby</code>.',
         hint: 'Help text below the field, linked through <code>aria-describedby</code>.',

@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: 'Définissez <code>size</code> et <code>compact</code> sur le groupe.',
+      text: 'Définissez <code>size</code> sur le groupe.',
     },
     tabContent: {
       title: 'Ce que porte un onglet',
@@ -58,7 +58,6 @@ export default {
           'Style de barre : souligné, encadré par une bordure, une ombre ou un fond atténué, ou en creux.',
         tone: 'Couleur de l’onglet sélectionné.',
         size: 'Taille du composant.',
-        compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
         orientation: 'Navigation horizontale ou verticale.',
         align: 'Alignement des onglets quand la barre n’est pas remplie.',
         fullWidth: 'Répartit les onglets également dans la barre.',

@@ -68,7 +68,8 @@ export default {
     {
       name: 'CommandPaletteFilter',
       definition: `export type CommandPaletteFilter =
-  boolean | ((command: CommandPaletteCommand, query: string) => boolean)`,
+  | boolean
+  | ((command: CommandPaletteCommand, query: string) => boolean)`,
     },
     {
       name: 'CommandPaletteGroup',
@@ -80,7 +81,9 @@ export default {
     {
       name: 'CommandPaletteItem',
       definition: `export type CommandPaletteItem =
-  CommandPaletteCommand | CommandPaletteGroup | CommandPaletteSeparator`,
+  | CommandPaletteCommand
+  | CommandPaletteGroup
+  | CommandPaletteSeparator`,
     },
     {
       name: 'CommandPaletteItemSlotProps',

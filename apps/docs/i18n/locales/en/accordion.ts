@@ -14,10 +14,6 @@ export default {
       title: 'Subtitles and icons',
       text: 'Add <code>icon</code> and <code>subtitle</code>, or use their slots for custom content.',
     },
-    compact: {
-      title: 'Compact',
-      text: '<code>compact</code> reduces padding without changing text or icons.',
-    },
     icons: {
       title: 'Expand and collapse icons',
       text: 'Without <code>collapseIcon</code>, the expand icon rotates when open. With it, the icons switch.',
@@ -35,7 +31,6 @@ export default {
         expandIcon:
           'Closed-section icon. Rotates when open unless <code>collapseIcon</code> is set.',
         collapseIcon: 'Open-section icon replacing the rotated expand icon.',
-        compact: 'Reduces item padding.',
       },
       slots: {
         default: '<code>VAccordionItem</code> children.',

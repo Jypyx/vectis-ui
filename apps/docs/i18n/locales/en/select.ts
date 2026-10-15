@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> adjusts the field and option rows. <code>compact</code> reduces the field height.',
+      text: '<code>size</code> adjusts the field and option rows.',
     },
     states: {
       title: 'States',
@@ -56,7 +56,6 @@ export default {
           'Error message shown in place of the hint. Sets <code>aria-invalid</code>, is linked through <code>aria-describedby</code> and is announced when it appears.',
         hint: 'Help text linked through <code>aria-describedby</code>.',
         size: 'Field and option size. The field inherits a size set by <code>VInputGroup</code>.',
-        compact: 'Reduces the control height without changing text or icons.',
         placeholder: 'Text shown while nothing is chosen.',
         disabled: 'Disables interaction. The value is not submitted.',
         readonly:
@@ -81,9 +80,8 @@ export default {
       },
       slots: {
         option: 'Option content. Receives the option, index, active state and selected state.',
-        chip: 'Selected chip. Receives value, label, optional option, <code>remove</code>, size and compact state. Connect the remove action.',
-        overflow:
-          'Hidden selection count. Receives <code>count</code>, chip size and compact state.',
+        chip: 'Selected chip. Receives value, label, optional option, <code>remove</code> and chip size. Connect the remove action.',
+        overflow: 'Hidden selection count. Receives <code>count</code> and chip size.',
         valueEnd: 'Content before the clear action and expand icon.',
         start: 'Content after <code>iconStart</code> and the chips, without replacing them.',
       },

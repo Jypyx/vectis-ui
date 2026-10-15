@@ -20,7 +20,7 @@ export default {
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> sets the button size; <code>compact</code> reduces its height.',
+      text: '<code>size</code> sets the button size.',
     },
     length: {
       title: 'Length',
@@ -67,7 +67,6 @@ export default {
         selectedVariant: 'Style of the current page.',
         tone: 'Colour of the current page.',
         size: 'Component size.',
-        compact: 'Reduces the control height without changing text or icons.',
         elevated: 'Adds a shadow to the row or detached buttons.',
         align: 'Row alignment within the available width.',
         controls: 'Previous/next content: icons, text, both or <code>false</code>.',

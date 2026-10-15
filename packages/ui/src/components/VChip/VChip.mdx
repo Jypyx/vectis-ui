@@ -122,9 +122,8 @@ chip becomes **square** (width = height, the VIconButton model): remember the `a
 
 ## Sizes
 
-Two sizes (`xs` 24px — the default — and `sm` 32px, the `--vectis-control-height-*` tokens);
-`compact` removes 4px of height without touching the padding, the typography or the icons. The size
-→ height/type/icon mapping is shared by every control (the `v-control` class, see
+Two sizes (`xs` 24px — the default — and `sm` 32px, the `--vectis-control-height-*` tokens),
+less the theme's density. The size → height/type/icon mapping is shared by every control (the `v-control` class, see
 `styles/control-size.css`).
 
 <Canvas of={VChipStories.Sizes} />

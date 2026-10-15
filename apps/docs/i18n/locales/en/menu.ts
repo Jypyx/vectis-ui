@@ -24,7 +24,7 @@ export default {
     },
     sizes: {
       title: 'Sizes',
-      text: 'Set <code>size</code> and <code>compact</code> on the menu; submenus inherit them.',
+      text: 'Set <code>size</code> on the menu; submenus inherit it.',
     },
     width: {
       title: 'Width',
@@ -44,7 +44,6 @@ export default {
       props: {
         placement: 'Preferred panel position; adjusts when space is insufficient.',
         size: 'Row size inherited by submenus.',
-        compact: 'Reduces row height, including submenus.',
         width: 'Main panel width. Numbers use pixels; strings use CSS lengths or keywords.',
         matchTrigger: 'Minimum main panel width matches the trigger. Does not affect submenus.',
         vModelOpen: 'Open state synchronized with outside clicks, Escape and command selection.',

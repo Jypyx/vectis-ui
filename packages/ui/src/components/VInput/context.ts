@@ -10,8 +10,6 @@ import type { InputGroupSize } from './VInputGroup.vue'
 export interface InputGroupContext {
   /** The height of the segments. */
   readonly size?: InputGroupSize
-  /** The reduced density. */
-  readonly compact?: boolean
   /** Whether the whole row is unusable, which no segment can refuse. */
   readonly disabled?: boolean
 }

@@ -14,10 +14,6 @@ export default {
       title: 'Sous-titres et icônes',
       text: 'Ajoutez <code>icon</code> et <code>subtitle</code>, ou utilisez leurs slots pour du contenu personnalisé.',
     },
-    compact: {
-      title: 'Compact',
-      text: '<code>compact</code> réduit les espacements internes sans modifier le texte ni les icônes.',
-    },
     icons: {
       title: "Icônes d'ouverture et de fermeture",
       text: 'Sans <code>collapseIcon</code>, l’icône tourne à l’ouverture. Avec cette prop, les icônes s’échangent.',
@@ -35,7 +31,6 @@ export default {
         expandIcon:
           'Icône de section fermée. Tourne à l’ouverture sauf si <code>collapseIcon</code> est défini.',
         collapseIcon: 'Icône de section ouverte remplaçant l’icône tournée.',
-        compact: 'Réduit les espacements internes des éléments.',
       },
       slots: {
         default: 'Enfants <code>VAccordionItem</code>.',

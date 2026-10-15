@@ -20,7 +20,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> définit la taille des boutons ; <code>compact</code> réduit leur hauteur.',
+      text: '<code>size</code> définit la taille des boutons.',
     },
     length: {
       title: 'Nombre de pages',
@@ -68,7 +68,6 @@ export default {
         selectedVariant: 'Style de la page actuelle.',
         tone: 'Couleur de la page actuelle.',
         size: 'Taille du composant.',
-        compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
         elevated: 'Ajoute une ombre à la ligne ou aux boutons séparés.',
         align: 'Alignement de la ligne dans la largeur disponible.',
         controls: 'Contenu précédent/suivant : icônes, texte, les deux ou <code>false</code>.',

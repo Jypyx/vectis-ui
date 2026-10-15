@@ -23,8 +23,6 @@ const t = storyText({
     closeDefault: 'close (default)',
     xsmall: 'XSmall 24px',
     small: 'Small 32px',
-    xsmallCompact: 'XSmall compact 20px',
-    smallCompact: 'Small compact 28px',
     squareCorners: 'Square corners',
     button: 'Button',
   },
@@ -44,8 +42,6 @@ const t = storyText({
     closeDefault: 'close (défaut)',
     xsmall: 'XSmall 24px',
     small: 'Small 32px',
-    xsmallCompact: 'XSmall compact 20px',
-    smallCompact: 'Small compact 28px',
     squareCorners: 'Coins carrés',
     button: 'Bouton',
   },
@@ -60,7 +56,6 @@ const meta = {
     color: { control: 'color' },
     shape: { control: 'select', options: ['chip', 'pill'] },
     size: { control: 'select', options: ['xs', 'sm'] },
-    compact: { control: 'boolean' },
     clickable: { control: 'boolean' },
     check: { control: 'boolean' },
     checkIcon: { control: 'text' },
@@ -71,7 +66,6 @@ const meta = {
     tone: 'neutral',
     shape: 'chip',
     size: 'xs',
-    compact: false,
     clickable: false,
     check: false,
   },
@@ -345,7 +339,7 @@ export const SelectableAndDismissible: Story = {
   }),
 }
 
-/** Xs 24px (the default) / sm 32px; `compact` removes 4px of height. */
+/** Xs 24px (the default) / sm 32px. */
 export const Sizes: Story = {
   render: () => ({
     components: { VChip },
@@ -354,8 +348,6 @@ export const Sizes: Story = {
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
         <VChip size="xs" dismissible>{{ t.xsmall }}</VChip>
         <VChip size="sm" dismissible>{{ t.small }}</VChip>
-        <VChip size="xs" compact dismissible>{{ t.xsmallCompact }}</VChip>
-        <VChip size="sm" compact dismissible>{{ t.smallCompact }}</VChip>
       </div>
     `,
   }),

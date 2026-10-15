@@ -106,24 +106,15 @@ describe('VAvatarGroup', () => {
     expect(getByTestId('rest').textContent).toBe('2 more')
   })
 
-  it('propagates size and compact to the children and to the root', () => {
+  it('propagates size to the children and to the root', () => {
     const { container } = render(VAvatarGroup, {
-      props: { size: 'lg', compact: true },
+      props: { size: 'lg' },
       slots: { default: () => avatars(['Ada']) },
     })
     const root = container.querySelector('.v-avatar-group') as HTMLElement
     expect(root.classList.contains('v-control')).toBe(true)
     expect(root.dataset.size).toBe('lg')
-    expect(root.dataset.compact).toBe('')
     expect(discs(container)[0]?.getAttribute('data-size')).toBe('lg')
-  })
-
-  it('compact is cumulative: an avatar cannot opt out of a compact group', () => {
-    const { container } = render(VAvatarGroup, {
-      props: { compact: true },
-      slots: { default: () => [h(VAvatar, { name: 'Ada', compact: false })] },
-    })
-    expect(discs(container)[0]?.hasAttribute('data-compact')).toBe(true)
   })
 
   it('sets the ring colour as a custom property, and nothing when absent', () => {

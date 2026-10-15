@@ -33,11 +33,6 @@ interface AvatarGroupProps {
    */
   size?: AvatarSize
   /**
-   * Applies the reduced density to every avatar inside. Unlike `size` it is cumulative: an
-   * avatar cannot opt back out of a compact group.
-   */
-  compact?: boolean
-  /**
    * The colour of the ring drawn around each disc. It defaults to the page background, which
    * makes the ring read as a gap between two avatars.
    */
@@ -52,7 +47,6 @@ interface AvatarGroupProps {
 const props = withDefaults(defineProps<AvatarGroupProps>(), {
   max: undefined,
   size: undefined,
-  compact: false,
   ringColor: undefined,
   label: undefined,
 })
@@ -72,9 +66,6 @@ defineSlots<{
 provide(avatarGroupKey, {
   get size() {
     return props.size
-  },
-  get compact() {
-    return props.compact
   },
 })
 
@@ -108,7 +99,6 @@ const resolvedGroupSize = computed<AvatarSize>(() => props.size ?? AVATAR_DEFAUL
     :aria-label="ariaLabel"
     :style="rootStyle"
     :data-size="resolvedGroupSize"
-    :data-compact="compact ? '' : undefined"
   >
     <component :is="VisibleAvatars" />
     <slot v-if="overflowCount > 0" name="overflow" :count="overflowCount">

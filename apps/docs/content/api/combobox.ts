@@ -21,7 +21,6 @@ export default {
         { name: 'hideLabel', type: 'boolean', default: 'false' },
         { name: 'labelPosition', type: 'FieldLabelPosition', values: "'top' | 'start'", default: "'top'" },
         { name: 'size', type: 'ComboboxSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'placeholder', type: 'string' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'readonly', type: 'boolean', default: 'false' },
@@ -113,7 +112,6 @@ export default {
   label: string
   remove: () => void
   size: ChipSize
-  compact: boolean
 }`,
     },
     {
@@ -150,7 +148,6 @@ export default {
       definition: `export interface ListboxOverflowSlotProps {
   count: number
   size: ChipSize
-  compact: boolean
 }`,
     },
     {

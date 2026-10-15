@@ -18,7 +18,6 @@ export default {
         { name: 'incrementLabel', type: 'string' },
         { name: 'decrementLabel', type: 'string' },
         { name: 'size', type: 'InputSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },
         { name: 'hint', type: 'string' },
         { name: 'error', type: 'string' },

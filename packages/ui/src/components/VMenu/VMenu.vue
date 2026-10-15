@@ -24,8 +24,6 @@ interface MenuProps {
    * once on the menu as a whole.
    */
   size?: MenuSize
-  /** Takes 4px off the height of every row, submenus included. */
-  compact?: boolean
   /**
    * A width for the panel: a number is read as pixels, a string as any CSS length or
    * keyword (`16rem`, `max-content`). It applies to the menu itself; submenus keep the
@@ -42,7 +40,6 @@ interface MenuProps {
 withDefaults(defineProps<MenuProps>(), {
   placement: 'bottom-start',
   size: 'sm',
-  compact: false,
   width: undefined,
   matchTrigger: false,
 })
@@ -151,7 +148,6 @@ defineExpose({
     :anchor="anchor"
     :placement="placement"
     :size="size"
-    :compact="compact"
     :width="width"
     :match-trigger="matchTrigger"
     @toggle="onToggle"

@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> sets the field size; <code>compact</code> reduces its height.',
+      text: '<code>size</code> sets the field size.',
     },
     multiple: {
       title: 'Multiple files',
@@ -61,7 +61,6 @@ export default {
         pickerIcon: 'Icon of the button opening the file dialog.',
         noDrop: 'Disables drag and drop; dialog selection remains available.',
         size: 'Component size.',
-        compact: 'Reduces the control height without changing text or icons.',
         disabled: 'Disables interaction.',
         readonly:
           'Prevents opening the dialog, dropping files and removing them. Controls remain focusable.',

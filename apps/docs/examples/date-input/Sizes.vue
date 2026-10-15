@@ -3,16 +3,12 @@ import { ref } from 'vue'
 import { VDateInput } from 'vectis-ui'
 
 const rows = ref(
-  (['sm', 'md', 'lg'] as const).flatMap((size) => [
-    { key: size, size, compact: false, label: size, date: '2026-06-10' as string | null },
-    {
-      key: `${size}-compact`,
-      size,
-      compact: true,
-      label: `${size}, compact`,
-      date: '2026-06-10' as string | null,
-    },
-  ]),
+  (['sm', 'md', 'lg'] as const).map((size) => ({
+    key: size,
+    size,
+    label: size,
+    date: '2026-06-10' as string | null,
+  })),
 )
 </script>
 
@@ -23,7 +19,6 @@ const rows = ref(
       :key="row.key"
       v-model="row.date"
       :size="row.size"
-      :compact="row.compact"
       :label="row.label"
       show-picker
     />

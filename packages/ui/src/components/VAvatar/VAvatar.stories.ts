@@ -12,9 +12,8 @@ const meta = {
   component: VAvatar,
   argTypes: {
     size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
-    compact: { control: 'boolean' },
   },
-  args: { size: 'md', compact: false, name: 'Xavier Darmet' },
+  args: { size: 'md', name: 'Xavier Darmet' },
 } satisfies Meta<typeof VAvatar>
 
 export default meta
@@ -53,23 +52,6 @@ export const Sizes: Story = {
         <VAvatar size="md" name="Margaret Hamilton" />
         <VAvatar size="lg" name="Katherine Johnson" />
         <VAvatar size="xl" name="Radia Perlman" />
-      </div>
-    `,
-  }),
-}
-
-/** Compact: height reduced by 4px at every size (type and icon unchanged). */
-export const Compact: Story = {
-  render: () => ({
-    components: { VAvatar },
-    template: `
-      <div style="display: flex; gap: 8px; align-items: center">
-        <VAvatar size="sm" name="Ada Lovelace" />
-        <VAvatar size="sm" compact name="Ada Lovelace" />
-        <VAvatar size="md" name="Grace Hopper" />
-        <VAvatar size="md" compact name="Grace Hopper" />
-        <VAvatar size="lg" name="Margaret Hamilton" />
-        <VAvatar size="lg" compact name="Margaret Hamilton" />
       </div>
     `,
   }),

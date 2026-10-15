@@ -333,7 +333,7 @@ export const Preview: Story = {
   }),
 }
 
-/** The three field heights, plus the -4px `compact` variant. */
+/** The three field heights. */
 export const Sizes: Story = {
   args: { multiple: true, display: 'chip' },
   render: (args) => ({
@@ -342,7 +342,6 @@ export const Sizes: Story = {
     template: `
       <div style="width: 340px; display: grid; gap: 16px">
         <VFileInput v-for="size in sizes" :key="size" v-bind="args" :size="size" :label="size" />
-        <VFileInput v-bind="args" compact label="md compact" />
       </div>
     `,
   }),
@@ -408,13 +407,12 @@ export const CustomSlots: Story = {
     template: `
       <div style="width: 340px">
         <VFileInput v-bind="args" v-model="files" :label="t.attachments">
-          <template #chip="{ file, label, remove, size, compact }">
+          <template #chip="{ file, label, remove, size }">
             <VChip
               variant="outline"
               shape="pill"
               :icon-start="icons.attach_file"
               :size="size"
-              :compact="compact"
               dismissible
               :dismiss-label="'Remove ' + file.name"
               @dismiss="remove()"

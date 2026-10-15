@@ -27,12 +27,11 @@ const types: ComboboxOption[] = [
       label="File types"
       placeholder="Add a type"
     >
-      <!-- Forward size, compact and remove to preserve chip sizing and dismissal. -->
-      <template #chip="{ option, label, remove, size, compact }">
+      <!-- Forward size and remove to preserve chip sizing and dismissal. -->
+      <template #chip="{ option, label, remove, size }">
         <VChip
           :icon-start="option?.icon"
           :size="size"
-          :compact="compact"
           :dismiss-label="`Remove ${label}`"
           variant="outline"
           tone="accent"

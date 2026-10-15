@@ -60,12 +60,10 @@ export interface ListboxChipSlotProps {
   label: string
   remove: () => void
   size: ChipSize
-  compact: boolean
 }
 
 /** What the `#overflow` slot of VCombobox and VSelect receives. */
 export interface ListboxOverflowSlotProps {
   count: number
   size: ChipSize
-  compact: boolean
 }

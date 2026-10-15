@@ -48,7 +48,6 @@ const meta = {
     size: { control: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
     shape: { control: 'select', options: ['square', 'circular'] },
     elevated: { control: 'boolean' },
-    compact: { control: 'boolean' },
     icon: { control: 'text' },
     iconFilled: { control: 'boolean' },
   },
@@ -59,7 +58,6 @@ const meta = {
     size: 'md',
     shape: 'square',
     elevated: false,
-    compact: false,
     disabled: false,
     loading: false,
   },
@@ -160,12 +158,12 @@ export const Sizes: Story = {
           <VIconButton v-bind="args" size="lg"><VIcon name="add" /></VIconButton>
           <VIconButton v-bind="args" size="xl"><VIcon name="add" /></VIconButton>
         </div>
-        <div style="display: flex; gap: 8px; align-items: center">
-          <VIconButton v-bind="args" size="xs" compact><VIcon name="add" /></VIconButton>
-          <VIconButton v-bind="args" size="sm" compact><VIcon name="add" /></VIconButton>
-          <VIconButton v-bind="args" size="md" compact><VIcon name="add" /></VIconButton>
-          <VIconButton v-bind="args" size="lg" compact><VIcon name="add" /></VIconButton>
-          <VIconButton v-bind="args" size="xl" compact><VIcon name="add" /></VIconButton>
+        <div style="display: flex; gap: 8px; align-items: center; --vectis-density-delta: var(--vectis-space-1)">
+          <VIconButton v-bind="args" size="xs"><VIcon name="add" /></VIconButton>
+          <VIconButton v-bind="args" size="sm"><VIcon name="add" /></VIconButton>
+          <VIconButton v-bind="args" size="md"><VIcon name="add" /></VIconButton>
+          <VIconButton v-bind="args" size="lg"><VIcon name="add" /></VIconButton>
+          <VIconButton v-bind="args" size="xl"><VIcon name="add" /></VIconButton>
         </div>
       </div>
     `,

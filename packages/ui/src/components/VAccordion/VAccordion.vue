@@ -39,11 +39,6 @@ interface AccordionProps {
    * rotated 180°; provide one and the two icons are swapped instead.
    */
   collapseIcon?: IconSource
-  /**
-   * Reduced density: every padding loses 4px, while the text and the icons keep
-   * their size.
-   */
-  compact?: boolean
 }
 
 const props = withDefaults(defineProps<AccordionProps>(), {
@@ -51,7 +46,6 @@ const props = withDefaults(defineProps<AccordionProps>(), {
   variant: 'flat',
   expandIcon: () => expandMoreIcon,
   collapseIcon: undefined,
-  compact: false,
 })
 
 defineSlots<{
@@ -74,7 +68,7 @@ provide(accordionKey, {
 </script>
 
 <template>
-  <div class="v-accordion" :data-variant="variant" :data-compact="compact ? '' : undefined">
+  <div class="v-accordion" :data-variant="variant">
     <slot />
   </div>
 </template>
@@ -82,10 +76,9 @@ provide(accordionKey, {
 <style>
 @layer vectis.components {
   .v-accordion {
-    --accordion-pad-delta: 0px;
-    --accordion-pad-block: calc(var(--vectis-space-4) - var(--accordion-pad-delta));
-    --accordion-pad-inline: calc(var(--vectis-space-5) - var(--accordion-pad-delta));
-    --accordion-content-pad-start: calc(var(--vectis-space-2) - var(--accordion-pad-delta));
+    --accordion-pad-block: calc(var(--vectis-space-4) - var(--vectis-density-delta));
+    --accordion-pad-inline: calc(var(--vectis-space-5) - var(--vectis-density-delta));
+    --accordion-content-pad-start: calc(var(--vectis-space-2) - var(--vectis-density-delta));
 
     font-family: var(--vectis-text-family);
   }
@@ -94,10 +87,6 @@ provide(accordionKey, {
      so the rows carry the whole radius. */
   .v-accordion[data-variant='flat'] {
     --accordion-corner-radius: var(--vectis-radius-surface);
-  }
-
-  .v-accordion[data-compact] {
-    --accordion-pad-delta: var(--vectis-space-1);
   }
 
   .v-accordion:is([data-variant='outline'], [data-variant='elevated'], [data-variant='filled']) {

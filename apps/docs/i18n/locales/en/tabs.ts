@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Sizes',
-      text: 'Set <code>size</code> and <code>compact</code> on the group.',
+      text: 'Set <code>size</code> on the group.',
     },
     tabContent: {
       title: 'What a tab holds',
@@ -58,7 +58,6 @@ export default {
           'Tab bar style: underlined, framed by a border, a shadow or a muted fill, or inset.',
         tone: 'Colour of the selected tab.',
         size: 'Component size.',
-        compact: 'Reduces the control height without changing text or icons.',
         orientation: 'Horizontal or vertical tab navigation.',
         align: 'Tab alignment when the bar is not full.',
         fullWidth: 'Distributes tabs equally across the bar.',

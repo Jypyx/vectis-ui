@@ -55,7 +55,6 @@ export interface ListboxOptions {
   /** More pages are coming, so the last block's size is unknown. */
   hasMore?: () => boolean
   size: () => ListboxSize
-  compact: () => boolean
 }
 
 /** An option the panel renders, with its index in the visible options. */
@@ -114,7 +113,7 @@ export type ListboxBlock =
   | { kind: 'group'; key: string; label: string; labelId?: string; children: ListboxRow[] }
 
 // Only a starting guess for the virtual mode, every row being measured once rendered: the
-// height of an option at each size, 4px less when compact, as the control heights go.
+// height of an option at each size in the standard density.
 const OPTION_HEIGHT: Record<ListboxSize, number> = { sm: 32, md: 40, lg: 48 }
 
 export interface Listbox {
@@ -374,7 +373,7 @@ export function useListbox(options: ListboxOptions): Listbox {
     scrollEl: computed(() => (options.virtual() ? options.panelEl() : null)),
     count: () => flat.value.rows.length,
     key: (index) => flat.value.rows[index]?.key,
-    itemSize: () => OPTION_HEIGHT[options.size()] - (options.compact() ? 4 : 0),
+    itemSize: () => OPTION_HEIGHT[options.size()],
     overscan: () => 5,
     initialCount: () => 10,
     pinned: () => {

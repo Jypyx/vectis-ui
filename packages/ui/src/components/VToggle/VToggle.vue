@@ -76,8 +76,6 @@ interface ToggleProps {
   tone?: ToggleTone
   /** The height of the items, from the scale shared by every control. */
   size?: ToggleSize
-  /** Takes 4px off the height of every item. */
-  compact?: boolean
   /** Raises the row off the page, on the terms of VButtonGroup's own `elevated`. */
   elevated?: boolean
   /** Makes the whole group unusable. */
@@ -105,7 +103,6 @@ const props = withDefaults(defineProps<ToggleProps>(), {
   selectedVariant: 'solid',
   tone: 'accent',
   size: 'md',
-  compact: false,
   elevated: false,
   disabled: false,
   selectedIconFilled: false,
@@ -218,7 +215,6 @@ defineExpose({
     :bordered="bordered"
     :full-width="fullWidth"
     :size="size"
-    :compact="compact || undefined"
     :elevated="elevated || undefined"
     :disabled="disabled || undefined"
     :label="label"

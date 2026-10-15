@@ -104,7 +104,6 @@ const meta = {
   argTypes: {
     multiple: { control: 'boolean' },
     variant: { control: 'inline-radio', options: ['flat', 'outline', 'elevated', 'filled'] },
-    compact: { control: 'boolean' },
     expandIcon: { control: 'text' },
     collapseIcon: { control: 'text' },
   },
@@ -120,7 +119,7 @@ const ITEMS = `
 `
 
 export const Default: Story = {
-  args: { variant: 'flat', compact: false },
+  args: { variant: 'flat' },
   render: (args) => ({
     components: { VAccordion, VAccordionItem },
     setup: () => ({ args, t }),
@@ -276,17 +275,6 @@ export const Variants: Story = {
     await expect(getComputedStyle(summary).borderTopLeftRadius).not.toBe('0px')
     for (const accordion of framed) await expect(getComputedStyle(accordion).overflow).toBe('clip')
   },
-}
-
-/** `compact`: -4px on every padding, type and icons unchanged. */
-export const Compact: Story = {
-  render: () => ({
-    components: { VAccordion, VAccordionItem },
-    setup: () => ({ t }),
-    template: `
-      <VAccordion compact style="width: 420px">${ITEMS}</VAccordion>
-    `,
-  }),
 }
 
 /** Disabled item: greyed through tokens, inert on click and out of the keyboard path. */

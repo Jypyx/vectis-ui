@@ -89,7 +89,6 @@ const meta = {
     variant: 'flat',
     tone: 'accent',
     size: 'md',
-    compact: false,
     orientation: 'horizontal',
     align: 'start',
     fullWidth: false,
@@ -223,25 +222,6 @@ export const Sizes: Story = {
           <VTab value="a" label="Overview" />
           <VTab value="b" label="Details" icon-start="tune" />
           <VTab value="c" :icon-start="icons.more_horiz" aria-label="Plus" />
-        </VTabs>
-      </div>
-    `,
-  }),
-}
-
-export const Compact: Story = {
-  render: () => ({
-    components: { VTabs, VTab },
-    setup: () => ({ normal: ref('a'), compact: ref('a') }),
-    template: `
-      <div style="display: grid; gap: 24px">
-        <VTabs variant="inset" v-model="normal">
-          <VTab value="a" label="Overview" />
-          <VTab value="b" label="Details" />
-        </VTabs>
-        <VTabs variant="inset" compact v-model="compact">
-          <VTab value="a" label="Overview" />
-          <VTab value="b" label="Details" />
         </VTabs>
       </div>
     `,

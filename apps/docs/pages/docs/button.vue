@@ -2,8 +2,6 @@
 import api from '~/content/api/button'
 import ButtonBasic from '~/examples/button/Basic.vue'
 import buttonBasicSource from '~/examples/button/Basic.vue?raw'
-import ButtonCompact from '~/examples/button/Compact.vue'
-import buttonCompactSource from '~/examples/button/Compact.vue?raw'
 import ButtonCustomIcons from '~/examples/button/CustomIcons.vue'
 import buttonCustomIconsSource from '~/examples/button/CustomIcons.vue?raw'
 import ButtonElevated from '~/examples/button/Elevated.vue'
@@ -54,12 +52,6 @@ useDocsHead('button')
   <DocsProse keypath="button.examples.sizes.text" />
   <DocsExample :source="buttonSizesSource">
     <ButtonSizes />
-  </DocsExample>
-
-  <h3 id="compact">{{ t('button.examples.compact.title') }}</h3>
-  <DocsProse keypath="button.examples.compact.text" />
-  <DocsExample :source="buttonCompactSource">
-    <ButtonCompact />
   </DocsExample>
 
   <h3 id="full-width">{{ t('button.examples.fullWidth.title') }}</h3>

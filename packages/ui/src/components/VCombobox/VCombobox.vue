@@ -157,8 +157,6 @@ interface ComboboxProps {
   labelPosition?: FieldLabelPosition
   /** The height of the field: 32, 40 or 48 pixels. */
   size?: ComboboxSize
-  /** Takes 4px off the height, as everywhere else in the design system. */
-  compact?: boolean
   /** What the field says while nothing is chosen and nothing has been typed. */
   placeholder?: string
   /** Makes the field unusable, greyed out through the colour tokens. */
@@ -238,7 +236,6 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   hideLabel: false,
   labelPosition: 'top',
   size: 'md',
-  compact: false,
   placeholder: undefined,
   disabled: false,
   readonly: false,
@@ -300,17 +297,13 @@ defineSlots<{
 // Everything below reads the RESOLVED values and never the props: the chips, the panel and the
 // field would otherwise come out at three different scales inside the same row.
 const group = inject(inputGroupKey, null)
-const {
-  size: resolvedSize,
-  compact: resolvedCompact,
-  disabled: resolvedDisabled,
-} = useControlShape(props, group)
+const { size: resolvedSize, disabled: resolvedDisabled } = useControlShape(props, group)
 
-// The size, the density and the HEIGHT of the chips sitting inside the field, worked out
+// The size and the HEIGHT of the chips sitting inside the field, worked out
 // once in `utils/chip.ts` and shared with VFileInput. The height is set inline below
 // rather than restated as a table of CSS rules: it is the height the field forces on its
-// input, and deriving both from the same pair is what stops them drifting apart.
-const chipScale = computed(() => chipScaleFor(resolvedSize.value, resolvedCompact.value))
+// input, and deriving both from the same size is what stops them drifting apart.
+const chipScale = computed(() => chipScaleFor(resolvedSize.value))
 
 /** The chosen option's `value`, or the list of them when `multiple` is set. */
 const model = defineModel<ItemValue | ItemValue[]>({ default: '' })
@@ -400,7 +393,6 @@ const {
   virtual: () => props.virtual,
   hasMore: () => props.hasMore,
   size: () => resolvedSize.value,
-  compact: () => resolvedCompact.value,
 })
 
 // @a11y
@@ -683,7 +675,6 @@ defineExpose({
     :class="rootClass"
     :style="[{ '--chip-height': chipScale.height }, rootStyle]"
     :data-size="resolvedSize"
-    :data-compact="resolvedCompact ? '' : undefined"
     :data-multiple="multiple ? '' : undefined"
     :data-collapsed="collapsed ? '' : undefined"
     :data-open="open ? '' : undefined"
@@ -714,7 +705,6 @@ defineExpose({
         :hide-label="hideLabel"
         :label-position="labelPosition"
         :size="resolvedSize"
-        :compact="resolvedCompact"
         :invalid="invalid"
         :disabled="resolvedDisabled"
         :readonly="readonly"
@@ -779,7 +769,6 @@ defineExpose({
       :placement="placement"
       class="v-combobox-panel"
       :size="resolvedSize"
-      :compact="resolvedCompact"
       :multiple="multiple"
       :virtual="virtual"
       :blocks="blocks"

@@ -61,14 +61,6 @@ describe('VSkeletonLoader', () => {
     expect(rootOf(container).getAttribute('data-animation')).toBe('none')
   })
 
-  it('compact sets data-compact, otherwise the attribute is absent', async () => {
-    const { container, rerender } = render(VSkeletonLoader)
-    expect(rootOf(container).hasAttribute('data-compact')).toBe(false)
-
-    await rerender({ compact: true })
-    expect(rootOf(container).hasAttribute('data-compact')).toBe(true)
-  })
-
   it('width/height: a number → px, a CSS string as-is, absent → no custom property', async () => {
     const { container, rerender } = render(VSkeletonLoader)
     expect(styleOf(container)).not.toContain('--skeleton-loader-w')

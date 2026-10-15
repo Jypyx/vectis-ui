@@ -10,7 +10,6 @@ export default {
       name: 'VInput',
       props: [
         { name: 'size', type: 'InputSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'type', type: 'InputType', values: "'text' | 'email' | 'number' | 'password' | 'search' | 'tel' | 'url'", default: "'text'" },
         { name: 'invalid', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },

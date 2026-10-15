@@ -4,7 +4,7 @@ export default {
   examples: {
     variants: {
       title: 'Variantes et tons',
-      text: '<code>variant</code>, <code>tone</code>, <code>size</code>, <code>compact</code> et <code>elevated</code> reprennent les valeurs de <code>VButton</code> et s’appliquent aux deux moitiés. Un trait les sépare toujours.',
+      text: '<code>variant</code>, <code>tone</code>, <code>size</code> et <code>elevated</code> reprennent les valeurs de <code>VButton</code> et s’appliquent aux deux moitiés. Un trait les sépare toujours.',
     },
     sizes: {
       title: 'Tailles',
@@ -30,7 +30,6 @@ export default {
         variant: 'Poids visuel des deux moitiés.',
         tone: 'Couleur des deux moitiés.',
         size: 'Hauteur des deux moitiés, sur l’échelle commune des contrôles.',
-        compact: 'Retire 4px à la hauteur.',
         elevated: 'Surélève le contrôle avec une ombre.',
         fullWidth:
           'Remplit le parent. L’action principale prend la place ; le bouton de menu reste carré.',

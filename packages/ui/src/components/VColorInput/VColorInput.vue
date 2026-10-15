@@ -66,8 +66,6 @@ interface ColorInputProps {
   placeholder?: string
   /** The height of the field: 32, 40 or 48 pixels. */
   size?: ColorInputSize
-  /** Takes 4px off the height. */
-  compact?: boolean
   /** Makes the field unusable. */
   disabled?: boolean
   /** Shows the colour without letting it change: nothing can be typed, and there is no picker. */
@@ -100,7 +98,6 @@ const props = withDefaults(defineProps<ColorInputProps>(), {
   labelPosition: 'top',
   placeholder: undefined,
   size: 'md',
-  compact: false,
   disabled: false,
   readonly: false,
   invalid: false,
@@ -138,11 +135,7 @@ const pickerRef = ref<InstanceType<typeof VColorPicker> | null>(null)
 // A VInputGroup joins several controls into one object, so the shape of this field is the
 // row's decision rather than its own (VInput/context.ts).
 const group = inject(inputGroupKey, null)
-const {
-  size: resolvedSize,
-  compact: resolvedCompact,
-  disabled: resolvedDisabled,
-} = useControlShape(props, group)
+const { size: resolvedSize, disabled: resolvedDisabled } = useControlShape(props, group)
 
 const hasPanel = computed(() => !props.readonly)
 
@@ -267,7 +260,6 @@ defineExpose({
       :label-position="labelPosition"
       :placeholder="placeholder"
       :size="resolvedSize"
-      :compact="resolvedCompact"
       :disabled="resolvedDisabled"
       :invalid="invalid"
       :clearable="clearable"

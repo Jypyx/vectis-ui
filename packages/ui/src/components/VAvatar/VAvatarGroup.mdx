@@ -23,9 +23,8 @@ aggregate avatar. Counting and truncating the slot's children is the component's
 
 ## Inherited size
 
-`size` (and `compact`) set on the group **propagate** to every child through a `provide`/`inject`
-context — no need to repeat them on each `VAvatar`. An explicit `size` prop on a child takes the
-priority back; `compact` is cumulative instead, so a compact group has no avatar that opts out.
+`size` set on the group **propagates** to every child through a `provide`/`inject` context — no
+need to repeat it on each `VAvatar`. An explicit `size` prop on a child takes the priority back.
 
 <Canvas of={VAvatarGroupStories.InheritedSize} />
 

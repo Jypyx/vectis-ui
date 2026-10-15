@@ -1,6 +1,6 @@
 export default {
   title: 'Générateur de thème',
-  lead: 'Choisissez les couleurs, les polices, les icônes et les arrondis, voyez-les sur chaque composant, puis copiez les tokens dans votre projet.',
+  lead: 'Choisissez les couleurs, les polices, les icônes, les arrondis et la densité, voyez-les sur chaque composant, puis copiez les tokens dans votre projet.',
   reset: 'Réinitialiser',
   resetLabel: 'Réinitialiser tous les réglages',
   settings: 'Réglages',
@@ -26,6 +26,11 @@ export default {
     large: 'Grand',
     extra: 'Très grand',
     full: 'Complet',
+  },
+  density: 'Densité',
+  densities: {
+    standard: 'Standard',
+    compact: 'Compacte',
   },
   generate: 'Générer',
   dialogTitle: 'Votre thème',

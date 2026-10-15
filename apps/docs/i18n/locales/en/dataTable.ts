@@ -38,10 +38,6 @@ export default {
       title: 'Variants',
       text: '<code>flat</code> leaves the table unframed. <code>outline</code> adds a border, <code>elevated</code> a raised surface with a shadow and <code>filled</code> a muted surface. The frame surrounds the rows and the footer; the header stays outside.',
     },
-    compact: {
-      title: 'Compact',
-      text: '<code>compact</code> reduces cell spacing and control height.',
-    },
     striped: {
       title: 'Striped rows',
       text: '<code>striped</code> tints alternate rows.',
@@ -96,7 +92,6 @@ export default {
         searchDebounce: 'Server search delay in milliseconds. 0 requests immediately.',
         striped: 'Tints alternate rows.',
         stickyHeader: 'Keeps headings visible while scrolling. Requires a bounded height.',
-        compact: 'Reduces cell spacing and control height.',
         height:
           'Whole component height. Numbers use pixels; strings use CSS lengths. Otherwise inherits a constrained parent height.',
         sortIcon: 'Icon of an unsorted sortable column.',

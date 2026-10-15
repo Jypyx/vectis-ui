@@ -52,8 +52,6 @@ interface ChipProps {
   shape?: ChipShape
   /** The height of the chip. */
   size?: ChipSize
-  /** Takes 4px off the height, leaving the padding, the text and the icons as they are. */
-  compact?: boolean
   /** Makes the chip a button that reacts to clicks, without holding a state. */
   clickable?: boolean
   /**
@@ -105,7 +103,6 @@ const props = withDefaults(defineProps<ChipProps>(), {
   color: undefined,
   shape: 'chip',
   size: 'xs',
-  compact: false,
   clickable: false,
   href: undefined,
   selectable: false,
@@ -224,7 +221,6 @@ defineExpose({
     :data-custom="color !== undefined ? '' : undefined"
     :data-shape="shape"
     :data-size="size"
-    :data-compact="compact ? '' : undefined"
     :data-selected="selectable && selected ? '' : undefined"
     :data-disabled="disabled ? '' : undefined"
     :data-icon-only="iconOnly() ? '' : undefined"

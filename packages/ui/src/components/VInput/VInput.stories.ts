@@ -36,8 +36,6 @@ const t = storyText({
     softHint: 'The limit is soft: exceeding it puts the field into error.',
     loading: 'Loading',
     searching: 'Searching…',
-    compact: 'Compact',
-    reducedHeight: 'Height reduced by 4px',
     disabled: 'Disabled',
     greyHint: 'Everything goes grey, with no opacity.',
     overLimit: 'A sentence that goes over the limit',
@@ -75,8 +73,6 @@ const t = storyText({
     softHint: 'La limite est souple : le dépassement passe le champ en erreur.',
     loading: 'Chargement',
     searching: 'Recherche en cours…',
-    compact: 'Compact',
-    reducedHeight: 'Hauteur réduite de 4px',
     disabled: 'Désactivé',
     greyHint: 'Tout passe en gris, sans opacité.',
     overLimit: 'Une phrase qui dépasse la limite',
@@ -125,20 +121,6 @@ export const Sizes: Story = {
         <VInput size="sm" placeholder="Small" aria-label="Small" />
         <VInput size="md" placeholder="Medium" aria-label="Medium" />
         <VInput size="lg" placeholder="Large" aria-label="Large" />
-      </div>
-    `,
-  }),
-}
-
-/** Height reduced by 4px, padding/type/icons unchanged (as in VButton). */
-export const Compact: Story = {
-  render: () => ({
-    components: { VInput },
-    template: `
-      <div style="display: grid; gap: 8px; width: 260px">
-        <VInput placeholder="Normal" aria-label="Normal" />
-        <VInput compact placeholder="Compact" aria-label="Compact" />
-        <VInput compact size="lg" placeholder="Large compact" aria-label="Large compact" />
       </div>
     `,
   }),
@@ -476,14 +458,6 @@ export const Showcase: Story = {
           :icon-end="icons.search"
           loading
           :placeholder="t.searching"
-        />
-        <VInput
-          v-model="search"
-          compact
-          :label="t.compact"
-          :icon-start="icons.search"
-          clearable
-          :placeholder="t.reducedHeight"
         />
         <VInput v-model="ref_" :label="t.reference" readonly icon-start="tag" />
         <VInput

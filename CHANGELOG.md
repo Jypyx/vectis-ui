@@ -2,6 +2,16 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [Unreleased]
+
+### Upgrading from 0.15.x
+
+- **The `compact` prop is removed from every component.** Density is now a theme setting: set `--vectis-density-delta: var(--vectis-space-1)` on `:root` for the compact scale (20/28/36/44/52px), or on a container for one region. Every control height and the paddings of VAccordion, VTabs and VDataTable follow it. The `compact` member of the `#chip` and `#overflow` slot props of VCombobox, VSelect and VFileInput is removed too: the field sets the height of the chips it holds, custom ones included.
+
+### Added
+
+- The `--vectis-density-delta` token, and a Density setting in the theme builder.
+
 ## [0.15.0] - 2026-10-15
 
 ### Upgrading from 0.14.x

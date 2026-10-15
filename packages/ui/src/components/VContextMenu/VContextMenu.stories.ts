@@ -69,10 +69,9 @@ const meta = {
   component: VContextMenu,
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
-    compact: { control: 'boolean' },
     disabled: { control: 'boolean' },
   },
-  args: { size: 'sm', compact: false, disabled: false },
+  args: { size: 'sm', disabled: false },
 } satisfies Meta<typeof VContextMenu>
 
 export default meta

@@ -31,6 +31,10 @@ export default {
   tokensReferenceBefore:
     'Les descriptions des tokens et leurs valeurs par défaut dans les deux thèmes figurent sur la page',
   tokensReferenceAfter: '.',
+  densityHeading: 'Densité',
+  densityBody:
+    'Les contrôles suivent une échelle standard de 24, 32, 40, 48 et 56px. Donnez à <code>--vectis-density-delta</code> la valeur <code>var(--vectis-space-1)</code> pour passer à l’échelle compacte de 20, 28, 36, 44 et 52px : chaque contrôle perd 4px de hauteur et les composants comme les onglets, les accordéons et les tableaux perdent 4px d’espacement interne. Définissez-la sur <code>:root</code> pour toute l’interface, ou sur un conteneur pour une seule zone, afin de ne jamais juxtaposer des éléments des deux échelles.',
+  densityDemoCaption: 'Ce panneau applique la densité compacte à son conteneur.',
   layersHeading: 'Couches CSS',
   layersBody:
     'La bibliothèque déclare quatre couches, dans cet ordre : <code>vectis.reset</code>, <code>vectis.tokens</code>, <code>vectis.components</code> et <code>vectis.utilities</code>. Écrivez vos surcharges hors de ces couches pour qu’elles priment sur les déclarations normales de la bibliothèque.',

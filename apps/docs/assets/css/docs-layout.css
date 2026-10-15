@@ -722,6 +722,11 @@ html {
   --vectis-color-accent-text: oklch(78% 0.13 32);
 }
 
+/* The region densityCode on the theming page describes. */
+.vd-density-compact {
+  --vectis-density-delta: var(--vectis-space-1);
+}
+
 @media (min-width: 640px) {
   .vd-theme-pair {
     grid-template-columns: 1fr 1fr;

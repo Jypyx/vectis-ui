@@ -414,9 +414,9 @@ describe('VMenu', () => {
     })
   })
 
-  it('size/compact set data-size/data-compact on the root panel', () => {
+  it('size sets data-size on the root panel', () => {
     const { container } = renderHarness(`
-      <VMenu size="md" compact>
+      <VMenu size="md">
         <template #trigger="{ triggerProps }">
           <button v-bind="triggerProps">Actions</button>
         </template>
@@ -425,12 +425,11 @@ describe('VMenu', () => {
     `)
     const menu = container.querySelector('[role="menu"]') as HTMLElement
     expect(menu.getAttribute('data-size')).toBe('md')
-    expect(menu.hasAttribute('data-compact')).toBe(true)
   })
 
-  it('the subpanels render neither data-size nor data-compact (CSS inheritance)', () => {
+  it('the subpanels render neither data-size nor v-control (CSS inheritance)', () => {
     const { container } = renderHarness(`
-      <VMenu size="md" compact>
+      <VMenu size="md">
         <template #trigger="{ triggerProps }">
           <button v-bind="triggerProps">Actions</button>
         </template>
@@ -443,28 +442,8 @@ describe('VMenu', () => {
     `)
     const [root, sub] = [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
     expect(root?.getAttribute('data-size')).toBe('md')
-    expect(sub?.hasAttribute('data-size')).toBe(false)
-    expect(sub?.hasAttribute('data-compact')).toBe(false)
-  })
-
-  it('v-control is set ONLY on the root panel (the inherited compact depends on it)', () => {
-    // On a subpanel, `.v-control` would redefine --control-height from
-    // --control-height-base WITHOUT the [data-compact] condition (which it does not
-    // carry): the height would snap back there to its non-compact value.
-    const { container } = renderHarness(`
-      <VMenu size="md" compact>
-        <template #trigger="{ triggerProps }">
-          <button v-bind="triggerProps">Actions</button>
-        </template>
-        <VMenuItem label="Export">
-          <template #submenu>
-            <VMenuItem label="PDF" />
-          </template>
-        </VMenuItem>
-      </VMenu>
-    `)
-    const [root, sub] = [...container.querySelectorAll<HTMLElement>('[role="menu"]')]
     expect(root?.classList.contains('v-control')).toBe(true)
+    expect(sub?.hasAttribute('data-size')).toBe(false)
     expect(sub?.classList.contains('v-control')).toBe(false)
   })
 

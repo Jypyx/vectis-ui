@@ -69,14 +69,13 @@ custom colour here — a tab is navigation, not a label.
 
 ## Sizes
 
-`size` and `compact` follow the unified control scale and are propagated to every button, including
+`size` follows the unified control scale and is propagated to every button, including
 the scroll controls. A tab reduced to its icon becomes square, through the same
 `[data-icon-only]` rule of VButton that squares a `VIconButton`.
-`compact` also takes four pixels off the padding of the panels, the one measurement the component
-sets for itself rather than passing down.
+The compact density also takes four pixels off the padding of the panels, the one measurement
+the component sets for itself.
 
 <Canvas of={VTabsStories.Sizes} />
-<Canvas of={VTabsStories.Compact} />
 
 ## Tab content
 

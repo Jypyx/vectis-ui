@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> définit les dimensions des cases. <code>compact</code> les réduit sans modifier le texte ni les icônes.',
+      text: '<code>size</code> définit les dimensions des cases.',
     },
     length: {
       title: 'Longueur',
@@ -58,7 +58,6 @@ export default {
         separatorIcon:
           'Icône remplaçant tous les caractères littéraux du motif, y compris les préfixes textuels.',
         size: 'Taille des cases.',
-        compact: 'Réduit les dimensions des cases sans modifier le texte ni les icônes.',
         disabled: 'Désactive les interactions.',
         readonly: 'Empêche les modifications par l’utilisateur et conserve le focus.',
         invalid:

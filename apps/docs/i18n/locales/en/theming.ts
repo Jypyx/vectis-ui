@@ -30,6 +30,10 @@ export default {
     'Five palettes are included: <code>gray</code>, <code>indigo</code>, <code>red</code>, <code>green</code> and <code>amber</code>. To use a different palette, assign your colours to the semantic tokens.',
   tokensReferenceBefore: 'Token descriptions and default values for both themes are listed in',
   tokensReferenceAfter: '.',
+  densityHeading: 'Density',
+  densityBody:
+    'Controls follow a standard scale of 24, 32, 40, 48 and 56px. Set <code>--vectis-density-delta</code> to <code>var(--vectis-space-1)</code> to switch to the compact scale of 20, 28, 36, 44 and 52px: every control loses 4px of height and components such as tabs, accordions and tables lose 4px of padding. Set it on <code>:root</code> for the whole interface, or on a container for one region, so that elements of both scales never sit side by side.',
+  densityDemoCaption: 'This panel sets the compact density on its container.',
   layersHeading: 'CSS layers',
   layersBody:
     'The library declares four layers, in order: <code>vectis.reset</code>, <code>vectis.tokens</code>, <code>vectis.components</code> and <code>vectis.utilities</code>. Write overrides outside these layers to take precedence over the library’s normal declarations.',

@@ -16,15 +16,14 @@ describe('VButton', () => {
     expect(button.getAttribute('type')).toBe('button')
   })
 
-  it('supports every variant/tone and sets data-compact', () => {
+  it('supports every variant/tone', () => {
     const { getByRole } = render(VButton, {
-      props: { variant: 'soft', tone: 'danger', compact: true },
+      props: { variant: 'soft', tone: 'danger' },
       slots: { default: 'Delete' },
     })
     const button = getByRole('button')
     expect(button.dataset.variant).toBe('soft')
     expect(button.dataset.tone).toBe('danger')
-    expect(button.dataset.compact).toBe('')
   })
 
   /* Elevation is orthogonal to the variant, so the two attributes must be able to
@@ -41,11 +40,6 @@ describe('VButton', () => {
 
     await rerender({ variant: 'ghost', elevated: false })
     expect(button.dataset.elevated).toBeUndefined()
-  })
-
-  it('without compact: no data-compact', () => {
-    const { getByRole } = render(VButton, { slots: { default: 'Ok' } })
-    expect(getByRole('button').dataset.compact).toBeUndefined()
   })
 
   /* The stretching itself is CSS, out of jsdom reach: only the attribute wiring is

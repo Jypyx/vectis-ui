@@ -50,8 +50,6 @@ interface AvatarProps {
    * here; on its own it is `md`.
    */
   size?: AvatarSize
-  /** Takes 4px off the diameter, as it does on every other control. */
-  compact?: boolean
   /**
    * Turns the avatar into an `<a>` pointing at this address. A disabled link becomes inert:
    * the address is dropped, so it can be neither focused nor followed.
@@ -76,7 +74,6 @@ const props = withDefaults(defineProps<AvatarProps>(), {
   alt: undefined,
   color: undefined,
   size: undefined,
-  compact: false,
   href: undefined,
   clickable: false,
   disabled: false,
@@ -92,10 +89,8 @@ defineOptions({ inheritAttrs: false })
 const attrs = useAttrs()
 const group = inject(avatarGroupKey, null)
 
-// The size is the avatar's own answer first, then the group's; the density is cumulative,
-// the two terms written out in context.ts.
+// The size is the avatar's own answer first, then the group's (context.ts).
 const resolvedSize = computed<AvatarSize>(() => props.size ?? group?.size ?? AVATAR_DEFAULT_SIZE)
-const resolvedCompact = computed(() => props.compact || Boolean(group?.compact))
 
 // Fallthrough without `style`, which rootStyle merges with the component's own; the click
 // handler is also dropped on an inert link.
@@ -212,7 +207,6 @@ const rootStyle = computed<StyleValue>(() => [
     class="v-avatar v-control"
     :style="rootStyle"
     :data-size="resolvedSize"
-    :data-compact="resolvedCompact ? '' : undefined"
     :data-custom="color !== undefined ? '' : undefined"
     :data-auto="isAuto ? '' : undefined"
     :href="linkHref"

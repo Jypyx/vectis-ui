@@ -443,19 +443,6 @@ export const Variants: Story = {
   },
 }
 
-/** Reduced density: cell paddings one notch down, the composed parts in compact. */
-export const Compact: Story = {
-  args: { compact: true, searchable: true, showRange: true },
-  render: (args) => ({
-    components: { VDataTable },
-    setup: () => ({ args, t, columns, rows: manyRows, perPage: ref(10) }),
-    template: `
-      <VDataTable v-bind="args" :columns="columns" :rows="rows" :title="t.projects"
-        v-model:per-page="perPage" :per-page-options="[10, 20]" style="width: 760px" />
-    `,
-  }),
-}
-
 /**
  * A frozen header: it assumes a bounded scroll area; here through `height`, which bounds the
  * whole component (the header and the pagination included).

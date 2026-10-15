@@ -12,7 +12,7 @@ export default {
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> adjusts the button and icon. <code>compact</code> reduces the width and height equally.',
+      text: '<code>size</code> adjusts the button and icon.',
     },
     shapes: {
       title: 'Shapes',
@@ -42,8 +42,6 @@ export default {
         elevated:
           'Adds a shadow and, for <code>ghost</code> and <code>outline</code>, a background. Overridden when the group sets <code>elevated</code>.',
         size: 'Button size. Overridden when the group sets <code>size</code>.',
-        compact:
-          'Reduces the width and height equally. Overridden when the group sets <code>compact</code>.',
         shape: 'Square or circular shape. The width and height remain equal.',
         href: 'Link destination. When disabled or loading, the link loses its destination and cannot receive focus or navigate.',
         type: 'Native button type. Ignored when <code>href</code> is set.',

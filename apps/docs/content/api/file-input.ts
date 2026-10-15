@@ -19,7 +19,6 @@ export default {
         { name: 'pickerIcon', type: 'IconSource', default: 'attach_file' },
         { name: 'noDrop', type: 'boolean', default: 'false' },
         { name: 'size', type: 'FileInputSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'readonly', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },
@@ -74,7 +73,6 @@ export default {
   label: string
   remove: () => void
   size: ChipSize
-  compact: boolean
 }`,
     },
     {

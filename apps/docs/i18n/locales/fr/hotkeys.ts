@@ -14,7 +14,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: 'Choisissez <code>xs</code> ou <code>sm</code>. <code>compact</code> réduit la hauteur.',
+      text: 'Choisissez <code>xs</code> ou <code>sm</code>.',
     },
     attached: {
       title: 'Attaché',
@@ -44,7 +44,6 @@ export default {
         variant: 'Style des touches : atténué, avec bordure ou en relief.',
         attached: 'Encadre toute la combinaison comme une seule touche.',
         size: 'Taille du composant.',
-        compact: 'Réduit la hauteur du contrôle sans modifier le texte ni les icônes.',
         platform: 'Plateforme imposée pour l’affichage et la détection du raccourci.',
         separator: 'Texte entre les touches. Une chaîne vide conserve uniquement l’espacement.',
         listen: 'Active la détection du raccourci et l’événement <code>trigger</code>.',

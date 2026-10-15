@@ -4,8 +4,6 @@ import ButtonGroupBasic from '~/examples/button-group/Basic.vue'
 import buttonGroupBasicSource from '~/examples/button-group/Basic.vue?raw'
 import ButtonGroupBordered from '~/examples/button-group/Bordered.vue'
 import buttonGroupBorderedSource from '~/examples/button-group/Bordered.vue?raw'
-import ButtonGroupCompact from '~/examples/button-group/Compact.vue'
-import buttonGroupCompactSource from '~/examples/button-group/Compact.vue?raw'
 import ButtonGroupDetached from '~/examples/button-group/Detached.vue'
 import buttonGroupDetachedSource from '~/examples/button-group/Detached.vue?raw'
 import ButtonGroupElevated from '~/examples/button-group/Elevated.vue'
@@ -84,12 +82,6 @@ useDocsHead('buttonGroup')
   <DocsProse keypath="buttonGroup.examples.sizes.text" />
   <DocsExample :source="buttonGroupSizesSource">
     <ButtonGroupSizes />
-  </DocsExample>
-
-  <h3 id="compact">{{ t('buttonGroup.examples.compact.title') }}</h3>
-  <DocsProse keypath="buttonGroup.examples.compact.text" />
-  <DocsExample :source="buttonGroupCompactSource" stack>
-    <ButtonGroupCompact />
   </DocsExample>
 
   <h3 id="full-width">{{ t('buttonGroup.examples.fullWidth.title') }}</h3>

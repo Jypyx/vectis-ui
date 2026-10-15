@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> ajuste le champ et les lignes d’options. <code>compact</code> réduit la hauteur du champ.',
+      text: '<code>size</code> ajuste le champ et les lignes d’options.',
     },
     states: {
       title: 'États',
@@ -57,7 +57,6 @@ export default {
           'Message d’erreur affiché à la place du texte d’aide. Définit <code>aria-invalid</code>, est lié par <code>aria-describedby</code> et est annoncé à son apparition.',
         hint: 'Texte d’aide lié par <code>aria-describedby</code>.',
         size: 'Taille du champ et des options. Le champ hérite d’une taille définie par <code>VInputGroup</code>.',
-        compact: 'Réduit la hauteur du contrôle sans changer le texte ni les icônes.',
         placeholder: 'Texte affiché tant que rien n’est choisi.',
         disabled: 'Désactive l’interaction. La valeur n’est pas envoyée.',
         readonly:
@@ -82,9 +81,8 @@ export default {
       },
       slots: {
         option: 'Contenu d’une option. Reçoit l’option, l’index, l’état actif et l’état choisi.',
-        chip: 'Chip d’une valeur choisie. Reçoit la valeur, le libellé, l’option éventuelle, <code>remove</code>, la taille et l’état compact. Branchez l’action de retrait.',
-        overflow:
-          'Nombre de valeurs masquées. Reçoit <code>count</code>, la taille des chips et l’état compact.',
+        chip: 'Chip d’une valeur choisie. Reçoit la valeur, le libellé, l’option éventuelle, <code>remove</code> et la taille du chip. Branchez l’action de retrait.',
+        overflow: 'Nombre de valeurs masquées. Reçoit <code>count</code> et la taille des chips.',
         valueEnd: 'Contenu avant l’action d’effacement et l’icône d’ouverture.',
         start: 'Contenu après <code>iconStart</code> et les chips, sans les remplacer.',
       },

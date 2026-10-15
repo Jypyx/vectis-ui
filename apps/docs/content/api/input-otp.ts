@@ -14,7 +14,6 @@ export default {
         { name: 'pattern', type: 'string' },
         { name: 'separatorIcon', type: 'IconSource' },
         { name: 'size', type: 'InputOTPSize', values: "'sm' | 'md' | 'lg'", default: "'md'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'readonly', type: 'boolean', default: 'false' },
         { name: 'invalid', type: 'boolean', default: 'false' },

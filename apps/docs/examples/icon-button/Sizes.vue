@@ -16,18 +16,6 @@ const sizes = ['xs', 'sm', 'md', 'lg', 'xl'] as const
       :label="`Search, ${size}`"
     />
   </div>
-
-  <div class="row">
-    <VIconButton
-      v-for="size in sizes"
-      :key="size"
-      :icon="search"
-      :size="size"
-      compact
-      variant="outline"
-      :label="`Search, ${size} compact`"
-    />
-  </div>
 </template>
 
 <style scoped>

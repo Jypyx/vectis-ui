@@ -40,7 +40,7 @@ export default {
     },
     sizes: {
       title: 'Sizes',
-      text: 'Set <code>size</code> and <code>compact</code> once on the navigation for all levels.',
+      text: 'Set <code>size</code> once on the navigation for all levels.',
     },
   },
   api: {
@@ -48,7 +48,6 @@ export default {
       props: {
         label: 'Accessible navigation name. Defaults to the dictionary.',
         size: 'Row size inherited by all levels.',
-        compact: 'Reduces row height.',
         exclusive: 'Keeps one branch open per level.',
         expandIcon: 'Closed-branch icon.',
         collapseIcon: 'Open-branch icon. Without it, the expand icon rotates.',

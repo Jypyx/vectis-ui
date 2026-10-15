@@ -235,7 +235,7 @@ describe('VToggle', () => {
 
   describe('context propagation', () => {
     /*
-     * The four props asserted below; elevated, size, compact, disabled; travel through the
+     * The three props asserted below; elevated, size, disabled; travel through the
      * VButtonGroup the row renders, and not through the toggle's own context: they say how the
      * row is DRAWN, which is that component's decision. What is asserted is unchanged by that,
      * which is the point.
@@ -245,11 +245,10 @@ describe('VToggle', () => {
       expect(itemsOf(container).every((el) => el.hasAttribute('data-elevated'))).toBe(true)
     })
 
-    it('size and compact reach every button', () => {
-      const { container } = mount({ toggleAttrs: 'size="sm" compact' })
+    it('size reaches every button', () => {
+      const { container } = mount({ toggleAttrs: 'size="sm"' })
       const items = itemsOf(container)
       expect(items.every((el) => el.dataset.size === 'sm')).toBe(true)
-      expect(items.every((el) => el.hasAttribute('data-compact'))).toBe(true)
     })
 
     it('fullWidth reaches the row the items are laid out in', () => {

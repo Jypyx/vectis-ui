@@ -89,14 +89,12 @@ export const Sizes: Story = {
       sm: ref(''),
       md: ref(''),
       lg: ref(''),
-      compact: ref(''),
     }),
     template: `
       <div style="display: grid; gap: 16px; justify-items: start">
         <VInputOTP v-bind="args" v-model="sm" size="sm" :label="t.code('sm')" />
         <VInputOTP v-bind="args" v-model="md" size="md" :label="t.code('md')" />
         <VInputOTP v-bind="args" v-model="lg" size="lg" :label="t.code('lg')" />
-        <VInputOTP v-bind="args" v-model="compact" compact :label="t.code('compact')" />
       </div>
     `,
   }),

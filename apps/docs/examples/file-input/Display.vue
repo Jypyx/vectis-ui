@@ -31,11 +31,10 @@ const custom = ref(start())
     />
 
     <VFileInput v-model="custom" multiple display="chip" label="a chip of your own">
-      <template #chip="{ file, label, remove, size, compact }">
+      <template #chip="{ file, label, remove, size }">
         <VChip
           :icon-start="file.type === 'application/pdf' ? pictureAsPdf : description"
           :size="size"
-          :compact="compact"
           :dismiss-label="`Remove ${file.name}`"
           variant="outline"
           tone="accent"

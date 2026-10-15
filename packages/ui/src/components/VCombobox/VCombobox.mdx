@@ -190,8 +190,8 @@ The **`#chip`** slot replaces the VChip of a selected value. It receives:
   in `options`. The component memorizes the selected options: with an asynchronous source, a chosen
   value disappears from the next results without losing its label or its icon;
 - `remove` — to wire onto the removal action, without which the value could no longer be removed;
-- `size` and `compact` — the template computed to fit in the field. Reusing them on the custom VChip
-  avoids making the field grow.
+- `size` — the chip size computed to fit in the field. Reusing it on the custom VChip keeps the
+  field's rhythm; the field sets the chips' height itself, so a custom VChip never makes it grow.
 
 <Canvas of={VComboboxStories.CustomChip} />
 
@@ -221,11 +221,10 @@ keyboard is Escape, so the chevron's pointer shortcut for closing stays hidden f
 
 ## Sizes
 
-`size` accepts `sm` (32 px), `md` (40 px, the default — aligned on `VInput`) and `lg` (48 px),
-combinable with `compact` (-4 px). In multiple mode, the Chips stay **one step below the field** so
-they fit without making it grow: `xs` (24 px) up to `md`, `sm` (32 px) at `lg`. Below the lowest
-step of each pair, the catch-up goes through `compact` rather than one size less — `size="sm"` gives
-`xs` compact Chips (20 px), `size="lg"` + `compact` gives `sm` compact Chips (28 px). The options
+`size` accepts `sm` (32 px), `md` (40 px, the default — aligned on `VInput`) and `lg` (48 px).
+In multiple mode, the Chips stay **one step below the field** so they fit without making it grow:
+`xs` (24 px) up to `md`, `sm` (32 px) at `lg`. An `sm` field has no smaller size left, so its `xs`
+Chips take 20 px, whatever the density. The options
 panel follows the field's size: rows of 32/40/48 px, and at `lg` the same typography (16 px) and the
 same icons (24 px) as the field — an option's label does not change size on its way into the field.
 

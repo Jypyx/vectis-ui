@@ -36,8 +36,6 @@ interface MenuPanelProps {
    * it through CSS instead.
    */
   size?: MenuSize
-  /** The reduced density, again set by the ROOT panel only and inherited through CSS. */
-  compact?: boolean
   /**
    * An explicit width, set by the ROOT panel only. Submenus render no width attribute
    * and keep the default one, so an inherited value cannot reach them.
@@ -54,7 +52,6 @@ const props = withDefaults(defineProps<MenuPanelProps>(), {
   placement: 'bottom-start',
   submenu: false,
   size: undefined,
-  compact: false,
   width: undefined,
   matchTrigger: false,
 })
@@ -190,16 +187,13 @@ defineExpose({
     :class="{
       /*
        * It sets the whole `--control-*` family; height, paddings, gap, type, icon context; and
-       * the submenus, being DOM descendants, inherit every one of them. Adding it to the
-       * submenus as well would BREAK them: the class recomputes the height from the base one
-       * without knowing about the compact attribute, which submenus do not carry, so a compact
-       * menu's submenus would silently snap back to full height.
+       * the submenus, being DOM descendants, inherit every one of them. They carry no size of
+       * their own, so the root panel's is the one they keep.
        */
       'v-control': !submenu,
     }"
     :data-placement="placement"
     :data-size="size"
-    :data-compact="compact ? '' : undefined"
     :data-width="resolvedWidth ? '' : undefined"
     :data-match-trigger="matchTrigger ? '' : undefined"
     :style="{ '--menu-width': resolvedWidth, '--menu-anchor': anchor }"

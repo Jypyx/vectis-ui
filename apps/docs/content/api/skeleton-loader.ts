@@ -11,7 +11,6 @@ export default {
       props: [
         { name: 'shape', type: 'SkeletonLoaderShape', values: "'text' | 'control' | 'pill' | 'circle' | 'surface'", default: "'text'" },
         { name: 'size', type: 'SkeletonLoaderSize', values: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'width', type: 'number | string' },
         { name: 'height', type: 'number | string' },
         { name: 'lines', type: 'number', default: '1' },

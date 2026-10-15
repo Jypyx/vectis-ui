@@ -69,7 +69,6 @@ const meta = {
     size: { control: 'select', options: ['xs', 'sm'] },
     platform: { control: 'select', options: [undefined, 'mac', 'windows', 'linux', 'other'] },
     attached: { control: 'boolean' },
-    compact: { control: 'boolean' },
     listen: { control: 'boolean' },
     allowDefault: { control: 'boolean' },
     allowInInput: { control: 'boolean' },
@@ -82,7 +81,6 @@ const meta = {
     variant: 'soft',
     attached: false,
     size: 'xs',
-    compact: false,
     separator: '+',
     listen: false,
     allowInInput: false,
@@ -195,7 +193,7 @@ export const Attached: Story = {
   },
 }
 
-/** `xs` (the default) and `sm`, the VChip scale; `compact` takes 4px off the height. */
+/** `xs` (the default) and `sm`, the VChip scale. */
 export const Sizes: Story = {
   render: () => ({
     components: { VHotkeys, VButton, VChip },
@@ -204,9 +202,7 @@ export const Sizes: Story = {
       <div style="display: flex; flex-direction: column; gap: 16px">
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
           <VHotkeys keys="mod+k" size="xs" platform="windows" />
-          <VHotkeys keys="mod+k" size="xs" compact platform="windows" />
           <VHotkeys keys="mod+k" size="sm" platform="windows" />
-          <VHotkeys keys="mod+k" size="sm" compact platform="windows" />
         </div>
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
           <VButton size="sm">{{ t.buttonLabel }}</VButton>

@@ -32,7 +32,7 @@ Those two tones do exist, on the components that report a state: `VChip`, `VToas
 
 Inside a `VButtonGroup` these two props are arbitrated by the row: the group's `variant` wins
 over the button's, and its `tone` only stands in for a button that names none. The same goes for
-`size`, `compact` and `elevated`.
+`size` and `elevated`.
 
 <Canvas of={VButtonStories.Variants} />
 
@@ -52,8 +52,9 @@ therefore the combination that reads as a floating card.
 ## Sizes
 
 Five sizes (`xs` 24px, `sm` 32px, `md` 40px, `lg` 48px, `xl` 56px, through the
-`--vectis-control-height-*` tokens). The `compact` prop reduces the height by 4px
-(20/28/36/44/52px) **without touching** the padding, the typography or the icon size. The
+`--vectis-control-height-*` tokens). The compact density reduces every height by 4px
+(20/28/36/44/52px) **without touching** the padding, the typography or the icon size: it is set by
+the theme through `--vectis-density-delta`, or on any container that redefines it. The
 size → height/type/icon/padding mapping is shared by every control in the design system (the
 `v-control` class, see `styles/control-size.css`).
 

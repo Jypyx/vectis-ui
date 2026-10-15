@@ -32,8 +32,6 @@ interface SplitButtonProps {
   tone?: ButtonTone
   /** The height of both halves, from the size scale shared by every control. */
   size?: ButtonSize
-  /** Takes 4px off the height of both halves. */
-  compact?: boolean
   /** Raises the control off the page with a shadow, on the terms of VButton's `elevated`. */
   elevated?: boolean
   /**
@@ -85,7 +83,6 @@ const props = withDefaults(defineProps<SplitButtonProps>(), {
   variant: 'solid',
   tone: 'accent',
   size: 'md',
-  compact: false,
   elevated: false,
   fullWidth: false,
   href: undefined,
@@ -142,7 +139,6 @@ defineExpose({
     :variant="variant"
     :tone="tone"
     :size="size"
-    :compact="compact"
     :elevated="elevated"
     :disabled="disabled"
     :full-width="fullWidth"

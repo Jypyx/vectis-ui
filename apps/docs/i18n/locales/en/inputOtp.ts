@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> sets box dimensions. <code>compact</code> reduces them without changing text or icons.',
+      text: '<code>size</code> sets box dimensions.',
     },
     length: {
       title: 'Length',
@@ -56,7 +56,6 @@ export default {
           'Code layout. <code>#</code> creates a box; other characters are displayed literals. Without <code>#</code>, falls back to <code>length</code>.',
         separatorIcon: 'Icon replacing every pattern literal, including any text prefix.',
         size: 'Box size.',
-        compact: 'Reduces box dimensions without changing text or icons.',
         disabled: 'Disables interaction.',
         readonly: 'Prevents user changes while keeping the field focusable.',
         invalid:

@@ -8,7 +8,7 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> et <code>compact</code> s’appliquent aux formes de contrôle, de capsule et de cercle.',
+      text: '<code>size</code> s’applique aux formes de contrôle, de capsule et de cercle.',
     },
     paragraph: {
       title: 'Paragraphes de texte',
@@ -40,7 +40,6 @@ export default {
       props: {
         shape: 'Forme de l’espace réservé : texte, contrôle, capsule, cercle ou surface.',
         size: 'Taille des formes de contrôle, de capsule et de cercle.',
-        compact: 'Réduit la hauteur des formes dimensionnées comme des contrôles.',
         width:
           'Largeur en pixels pour les nombres, sinon longueur CSS. Occupe la largeur disponible par défaut.',
         height:

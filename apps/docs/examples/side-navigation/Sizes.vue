@@ -36,22 +36,6 @@ import { description, image, table_chart as tableChart } from 'vectis-ui/icons'
         <VSideNavigationItem href="#usage" :icon="tableChart">Reports</VSideNavigationItem>
       </VSideNavigation>
     </aside>
-
-    <aside class="sidebar">
-      <p class="caption">md compact</p>
-      <VSideNavigation label="Rows of 36px" size="md" compact>
-        <VSideNavigationItem href="#usage" :icon="description" current
-          >Documents</VSideNavigationItem
-        >
-        <VSideNavigationItem :icon="image" default-open>
-          Media
-          <template #children>
-            <VSideNavigationItem href="#usage">Images</VSideNavigationItem>
-          </template>
-        </VSideNavigationItem>
-        <VSideNavigationItem href="#usage" :icon="tableChart">Reports</VSideNavigationItem>
-      </VSideNavigation>
-    </aside>
   </div>
 </template>
 

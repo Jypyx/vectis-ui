@@ -4,7 +4,7 @@ export default {
   examples: {
     variants: {
       title: 'Variants and tones',
-      text: '<code>variant</code>, <code>tone</code>, <code>size</code>, <code>compact</code> and <code>elevated</code> take the values of <code>VButton</code> and apply to both halves. A line always separates them.',
+      text: '<code>variant</code>, <code>tone</code>, <code>size</code> and <code>elevated</code> take the values of <code>VButton</code> and apply to both halves. A line always separates them.',
     },
     sizes: {
       title: 'Sizes',
@@ -30,7 +30,6 @@ export default {
         variant: 'Visual weight of both halves.',
         tone: 'Colour of both halves.',
         size: 'Height of both halves, from the shared control scale.',
-        compact: 'Takes 4px off the height.',
         elevated: 'Raises the control with a shadow.',
         fullWidth:
           'Fills the parent. The main action takes the room; the menu button stays square.',

@@ -30,10 +30,6 @@ export default {
       title: 'Tailles',
       text: '<code>size</code> définit la taille de tous les boutons et remplace les tailles individuelles.',
     },
-    compact: {
-      title: 'Compact',
-      text: '<code>compact</code> réduit la hauteur de chaque bouton.',
-    },
     fullWidth: {
       title: 'Pleine largeur',
       text: '<code>fullWidth</code> occupe toute la largeur du parent. Dans un groupe horizontal, les boutons ont la même largeur.',
@@ -65,8 +61,6 @@ export default {
           'Style visuel de tous les boutons. Remplace les variantes individuelles ; si omis, chaque bouton conserve la sienne.',
         tone: 'Ton appliqué aux boutons sans <code>tone</code> propre.',
         size: 'Taille de tous les boutons. Remplace les tailles individuelles ; si omise, chaque bouton conserve la sienne.',
-        compact:
-          'Réduit la hauteur des boutons. Remplace les valeurs individuelles, même avec <code>false</code> ; si omis, chaque bouton conserve la sienne.',
         elevated:
           'Ajoute une ombre au groupe, ou à chaque bouton avec <code>detached</code>. Remplace les valeurs individuelles, même avec <code>false</code> ; si omis, chaque bouton conserve la sienne.',
         disabled:

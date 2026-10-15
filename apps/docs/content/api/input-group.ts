@@ -16,7 +16,6 @@ export default {
         { name: 'hideLabel', type: 'boolean', default: 'false' },
         { name: 'labelPosition', type: 'FieldLabelPosition', values: "'top' | 'start'", default: "'top'" },
         { name: 'size', type: 'InputGroupSize', values: "'sm' | 'md' | 'lg'" },
-        { name: 'compact', type: 'boolean' },
         { name: 'disabled', type: 'boolean' },
       ],
       slots: [

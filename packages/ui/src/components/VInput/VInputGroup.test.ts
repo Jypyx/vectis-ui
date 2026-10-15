@@ -46,7 +46,7 @@ describe('VInputGroup', () => {
 
   it('the root carries neither v-control nor data-size', () => {
     const { container } = render(VInputGroup, {
-      props: { size: 'lg', compact: true },
+      props: { size: 'lg' },
       slots: { default: () => h(VInput) },
     })
     expect(root(container).classList.contains('v-control')).toBe(false)
@@ -163,28 +163,26 @@ describe('VInputGroup', () => {
   })
 
   describe('the row hands its shape down', () => {
-    it('size, compact and disabled reach a VInput segment', () => {
+    it('size and disabled reach a VInput segment', () => {
       const { container } = render(VInputGroup, {
-        props: { size: 'lg', compact: true, disabled: true },
+        props: { size: 'lg', disabled: true },
         slots: { default: () => h(VInput) },
       })
       const field = fields(container)[0]!
       expect(field.dataset.size).toBe('lg')
-      expect(field.hasAttribute('data-compact')).toBe(true)
       expect(field.hasAttribute('data-disabled')).toBe(true)
       expect(container.querySelector<HTMLInputElement>('.v-input-control')?.disabled).toBe(true)
     })
 
     it('a silent group changes nothing about a segment', () => {
       const { container } = render(VInputGroup, {
-        slots: { default: () => h(VInput, { size: 'sm', compact: true }) },
+        slots: { default: () => h(VInput, { size: 'sm' }) },
       })
       const field = fields(container)[0]!
       expect(field.dataset.size).toBe('sm')
-      expect(field.hasAttribute('data-compact')).toBe(true)
     })
 
-    it('the group wins on size and compact, which are the shape of the control', () => {
+    it('the group wins on size, which is the shape of the control', () => {
       const { container } = render(VInputGroup, {
         props: { size: 'lg' },
         slots: { default: () => h(VInput, { size: 'sm' }) },

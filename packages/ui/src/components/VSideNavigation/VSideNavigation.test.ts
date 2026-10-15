@@ -81,14 +81,13 @@ describe('VSideNavigation', () => {
       expect(separator?.getAttribute('aria-hidden')).toBe('true')
     })
 
-    it('`v-control` is set ONLY on the <nav> — otherwise compact would be lost from level 2 on', () => {
-      const { container } = renderTree('size="sm" compact')
+    it('`v-control` is set ONLY on the <nav>, which every level inherits its size from', () => {
+      const { container } = renderTree('size="sm"')
       expect(container.querySelectorAll('.v-control')).toHaveLength(1)
       const nav = container.querySelector('nav')
       expect(nav?.classList.contains('v-control')).toBe(true)
       expect(nav?.dataset.size).toBe('sm')
-      expect(nav?.dataset.compact).toBe('')
-      expect(container.querySelectorAll('[data-size], [data-compact]')).toHaveLength(1)
+      expect(container.querySelectorAll('[data-size]')).toHaveLength(1)
     })
   })
 

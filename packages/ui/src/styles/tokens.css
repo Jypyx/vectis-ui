@@ -253,6 +253,7 @@
     --vectis-focus-ring-color: var(--vectis-color-indigo-500);
     --vectis-focus-ring-width: 2px;
     --vectis-focus-ring-offset: 2px;
+    --vectis-density-delta: 0px;
     --vectis-control-height-xs: 1.5rem;
     --vectis-control-height-sm: 2rem;
     --vectis-control-height-md: 2.5rem;

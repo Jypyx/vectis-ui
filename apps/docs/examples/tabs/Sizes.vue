@@ -9,7 +9,6 @@ const selected = ref<Record<string, string>>({
   md: 'overview',
   lg: 'overview',
   xl: 'overview',
-  compact: 'overview',
 })
 </script>
 
@@ -18,14 +17,6 @@ const selected = ref<Record<string, string>>({
     <div v-for="size in sizes" :key="size" class="row">
       <p class="caption">{{ size }}</p>
       <VTabs v-model="selected[size]" :size="size" :label="`Project, ${size}`">
-        <VTab value="overview" label="Overview" />
-        <VTab value="activity" label="Activity" />
-      </VTabs>
-    </div>
-
-    <div class="row">
-      <p class="caption">md compact</p>
-      <VTabs v-model="selected.compact" size="md" compact label="Project, compact">
         <VTab value="overview" label="Overview" />
         <VTab value="activity" label="Activity" />
       </VTabs>

@@ -29,8 +29,6 @@ interface HotkeysProps {
   attached?: boolean
   /** The size of the caps, `xs` by default: a shortcut is chrome beside other text. */
   size?: HotkeysSize
-  /** Takes 4px off the height, leaving the padding and the text as they are. */
-  compact?: boolean
   /**
    * Forces the keyboard's OS instead of detecting it, for a deterministic
    * rendering (stories, tests, a table showing all three) or a host that already
@@ -69,7 +67,6 @@ const props = withDefaults(defineProps<HotkeysProps>(), {
   variant: 'soft',
   attached: false,
   size: 'xs',
-  compact: false,
   platform: undefined,
   separator: '+',
   listen: false,
@@ -135,7 +132,6 @@ useHotkeyListener({
     :data-variant="variant"
     :data-attached="attached ? '' : undefined"
     :data-size="size"
-    :data-compact="compact ? '' : undefined"
     :data-platform="platform"
   >
     <span class="v-hotkeys-keys" aria-hidden="true">

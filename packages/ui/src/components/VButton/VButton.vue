@@ -48,11 +48,6 @@ interface ButtonProps {
    */
   size?: ButtonSize
   /**
-   * Takes 4px off the height, leaving the padding, the text and the icons as they
-   * are. Inside a VButtonGroup the group's own value wins over this one.
-   */
-  compact?: boolean
-  /**
    * Stretches the button to the whole inline size of its parent, instead of leaving it only as
    * wide as its content.
    */
@@ -95,7 +90,6 @@ const props = withDefaults(defineProps<ButtonProps>(), {
   tone: undefined,
   elevated: false,
   size: 'md',
-  compact: false,
   fullWidth: false,
   href: undefined,
   type: 'button',
@@ -126,11 +120,7 @@ const group = inject(buttonGroupKey, null)
 // The shape of the segmented control belongs to the row: the group is read first, and a
 // group that named nothing hands the prop straight back. The tone goes the other way,
 // the button's own answer first (see context.ts).
-const {
-  size: resolvedSize,
-  compact: resolvedCompact,
-  disabled: resolvedDisabled,
-} = useControlShape<ButtonSize>(props, group)
+const { size: resolvedSize, disabled: resolvedDisabled } = useControlShape<ButtonSize>(props, group)
 const resolvedVariant = computed<ButtonVariant>(() => group?.variant ?? props.variant)
 const resolvedElevated = computed(() => group?.elevated ?? props.elevated)
 // The tone goes the OTHER way, the button's own answer first: one action in a row can be
@@ -164,7 +154,6 @@ const {
     :data-tone="resolvedTone"
     :data-elevated="resolvedElevated ? '' : undefined"
     :data-size="resolvedSize"
-    :data-compact="resolvedCompact ? '' : undefined"
     :data-full-width="fullWidth ? '' : undefined"
     :data-loading="loading ? '' : undefined"
   >

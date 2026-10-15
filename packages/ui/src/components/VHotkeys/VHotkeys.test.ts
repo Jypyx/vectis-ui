@@ -183,12 +183,10 @@ describe('VHotkeys', () => {
     const root = container.firstElementChild as HTMLElement
     expect(root.getAttribute('data-variant')).toBe('soft')
     expect(root.getAttribute('data-size')).toBe('xs')
-    expect(root.hasAttribute('data-compact')).toBe(false)
 
-    await rerender({ variant: 'elevated', size: 'sm', compact: true })
+    await rerender({ variant: 'elevated', size: 'sm' })
     expect(root.getAttribute('data-variant')).toBe('elevated')
     expect(root.getAttribute('data-size')).toBe('sm')
-    expect(root.hasAttribute('data-compact')).toBe(true)
   })
 
   it('the caps follow the platform, which is reflected on data-platform', () => {

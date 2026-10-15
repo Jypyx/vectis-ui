@@ -31,7 +31,6 @@ const meta = {
     itemVariant: 'outline',
     tone: 'accent',
     size: 'md',
-    compact: false,
     align: 'start',
     controls: 'icon',
     edgeControls: false,
@@ -153,19 +152,6 @@ export const Sizes: Story = {
     template: `
       <div style="display: grid; gap: 16px">
         <VPagination v-for="s in sizes" :key="s" :length="8" :size="s" :label="s" v-model="page" />
-      </div>
-    `,
-  }),
-}
-
-export const Compact: Story = {
-  render: () => ({
-    components: { VPagination },
-    setup: () => ({ normal: ref(3), compact: ref(3) }),
-    template: `
-      <div style="display: grid; gap: 16px">
-        <VPagination :length="8" label="normal" v-model="normal" />
-        <VPagination :length="8" compact label="compact" v-model="compact" />
       </div>
     `,
   }),

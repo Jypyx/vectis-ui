@@ -19,7 +19,6 @@ export default {
         { name: 'selectedVariant', type: 'ToggleSelectedVariant', values: "'solid' | 'soft' | 'ghost'", default: "'solid'" },
         { name: 'tone', type: 'ToggleTone', values: "'accent' | 'neutral' | 'danger'", default: "'accent'" },
         { name: 'size', type: 'ToggleSize', values: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
-        { name: 'compact', type: 'boolean', default: 'false' },
         { name: 'elevated', type: 'boolean', default: 'false' },
         { name: 'disabled', type: 'boolean', default: 'false' },
         { name: 'selectedIconFilled', type: 'boolean', default: 'false' },

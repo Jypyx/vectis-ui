@@ -3,10 +3,12 @@ import { ref } from 'vue'
 import { VFileInput } from 'vectis-ui'
 
 const rows = ref(
-  (['sm', 'md', 'lg'] as const).flatMap((size) => [
-    { key: size, size, compact: false, label: size, files: [] as File[] },
-    { key: `${size}-compact`, size, compact: true, label: `${size}, compact`, files: [] as File[] },
-  ]),
+  (['sm', 'md', 'lg'] as const).map((size) => ({
+    key: size,
+    size,
+    label: size,
+    files: [] as File[],
+  })),
 )
 </script>
 
@@ -17,7 +19,6 @@ const rows = ref(
       :key="row.key"
       v-model="row.files"
       :size="row.size"
-      :compact="row.compact"
       :label="row.label"
       multiple
       display="chip"
