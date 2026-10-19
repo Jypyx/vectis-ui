@@ -196,11 +196,11 @@ defineExpose({
       </div>
     </header>
     <div class="v-dialog-scroll">
-      <span class="v-dialog-edge v-dialog-edge--top" aria-hidden="true" />
+      <span class="v-dialog-edge" data-edge="top" aria-hidden="true" />
       <div class="v-dialog-body">
         <slot />
       </div>
-      <span class="v-dialog-edge v-dialog-edge--bottom" aria-hidden="true" />
+      <span class="v-dialog-edge" data-edge="bottom" aria-hidden="true" />
     </div>
     <footer v-if="$slots.footer" class="v-dialog-footer">
       <slot name="footer" />
@@ -288,12 +288,12 @@ defineExpose({
     background: transparent;
   }
 
-  .v-dialog-edge--top {
+  .v-dialog-edge[data-edge='top'] {
     inset-block-start: 0;
     margin-block-end: -1px;
   }
 
-  .v-dialog-edge--bottom {
+  .v-dialog-edge[data-edge='bottom'] {
     inset-block-end: 0;
     margin-block-start: -1px;
   }
@@ -349,13 +349,13 @@ defineExpose({
 
   /* Where it is missing the sentinels simply stay transparent, which is the intended fallback. */
   @container scroll-state(scrollable: top) {
-    .v-dialog-edge--top {
+    .v-dialog-edge[data-edge='top'] {
       background: var(--vectis-color-border);
     }
   }
 
   @container scroll-state(scrollable: bottom) {
-    .v-dialog-edge--bottom {
+    .v-dialog-edge[data-edge='bottom'] {
       background: var(--vectis-color-border);
     }
   }

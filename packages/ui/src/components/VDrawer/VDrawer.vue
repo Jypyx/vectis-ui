@@ -197,11 +197,11 @@ defineExpose({
       </div>
     </header>
     <div class="v-drawer-scroll">
-      <span class="v-drawer-edge v-drawer-edge--top" aria-hidden="true" />
+      <span class="v-drawer-edge" data-edge="top" aria-hidden="true" />
       <div class="v-drawer-body">
         <slot />
       </div>
-      <span class="v-drawer-edge v-drawer-edge--bottom" aria-hidden="true" />
+      <span class="v-drawer-edge" data-edge="bottom" aria-hidden="true" />
     </div>
     <footer v-if="$slots.footer" class="v-drawer-footer">
       <slot name="footer" />
@@ -368,12 +368,12 @@ defineExpose({
     background: transparent;
   }
 
-  .v-drawer-edge--top {
+  .v-drawer-edge[data-edge='top'] {
     inset-block-start: 0;
     margin-block-end: -1px;
   }
 
-  .v-drawer-edge--bottom {
+  .v-drawer-edge[data-edge='bottom'] {
     inset-block-end: 0;
     margin-block-start: -1px;
   }
@@ -422,13 +422,13 @@ defineExpose({
 
   /* Where scroll-state queries are missing, the sentinels simply stay transparent. */
   @container scroll-state(scrollable: top) {
-    .v-drawer-edge--top {
+    .v-drawer-edge[data-edge='top'] {
       background: var(--vectis-color-border);
     }
   }
 
   @container scroll-state(scrollable: bottom) {
-    .v-drawer-edge--bottom {
+    .v-drawer-edge[data-edge='bottom'] {
       background: var(--vectis-color-border);
     }
   }

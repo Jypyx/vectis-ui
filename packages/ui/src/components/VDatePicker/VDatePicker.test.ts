@@ -117,7 +117,7 @@ describe('VDatePicker', () => {
       props: { modelValue: JUNE, showAdjacentDays: false },
     })
     const adjacent = (c: HTMLElement) =>
-      c.querySelectorAll('.v-date-picker-day--static, .v-date-picker-day[data-outside]').length
+      c.querySelectorAll('.v-date-picker-day[data-static], .v-date-picker-day[data-outside]').length
     expect(adjacent(withAdjacent.container as HTMLElement)).toBeGreaterThan(0)
     expect(adjacent(withoutAdjacent.container as HTMLElement)).toBe(0)
   })
@@ -125,7 +125,7 @@ describe('VDatePicker', () => {
   it('does not display the adjacent days by default', () => {
     const { container } = render(VDatePicker, { props: { modelValue: JUNE } })
     const adjacent = container.querySelectorAll(
-      '.v-date-picker-day--static, .v-date-picker-day[data-outside]',
+      '.v-date-picker-day[data-static], .v-date-picker-day[data-outside]',
     )
     expect(adjacent).toHaveLength(0)
   })
@@ -134,7 +134,7 @@ describe('VDatePicker', () => {
     const { container } = render(VDatePicker, {
       props: { modelValue: JUNE, max: '2026-06-24', showAdjacentDays: true },
     })
-    const struck = container.querySelectorAll('.v-date-picker-day--static[data-disabled]')
+    const struck = container.querySelectorAll('.v-date-picker-day[data-static][data-disabled]')
     expect(struck.length).toBeGreaterThan(0)
   })
 
@@ -145,7 +145,7 @@ describe('VDatePicker', () => {
       props: { modelValue: JUNE, showAdjacentDays: true },
       slots: { day: '<span class="marker">{{ params.day }}</span>' },
     })
-    const statics = [...container.querySelectorAll('.v-date-picker-day--static')]
+    const statics = [...container.querySelectorAll('.v-date-picker-day[data-static]')]
     expect(statics.length).toBeGreaterThan(0)
     expect(statics.every((s) => s.querySelector('.marker') !== null)).toBe(true)
   })
@@ -205,7 +205,7 @@ describe('VDatePicker', () => {
     await fireEvent.click(toggle)
     // 2026 ± 100 → the fallback range, rendered rather than crashed.
     expect(
-      container.querySelectorAll('.v-date-picker-view--years .v-date-picker-view-cell'),
+      container.querySelectorAll(".v-date-picker[data-view='years'] .v-date-picker-view-cell"),
     ).toHaveLength(201)
   })
 

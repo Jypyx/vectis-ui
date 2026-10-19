@@ -853,7 +853,8 @@ defineExpose({
           -->
           <span
             v-else-if="cell.kind === 'static'"
-            class="v-date-picker-day v-date-picker-day--static"
+            class="v-date-picker-day"
+            data-static
             :data-disabled="cell.disabled ? '' : undefined"
           >
             <slot name="day" v-bind="daySlotProps(cell)">
@@ -893,7 +894,7 @@ defineExpose({
 
     <div
       v-if="view === 'years'"
-      class="v-date-picker-view v-date-picker-view--years"
+      class="v-date-picker-view"
       role="grid"
       :aria-label="m.datePicker.yearPicker"
       @keydown="onYearsKeydown"
@@ -1060,7 +1061,7 @@ defineExpose({
   /* Hover belongs to the days one can actually click: not the disabled ones, not the
      already selected ones, and not the neighbouring days rendered as plain spans. */
   .v-date-picker-day:hover:not(:disabled):not([aria-disabled='true']):not([data-selected]):not(
-      .v-date-picker-day--static
+      [data-static]
     ) {
     background: var(--vectis-color-surface-muted);
   }
@@ -1113,14 +1114,14 @@ defineExpose({
     color: var(--vectis-color-text-subtle);
   }
 
-  .v-date-picker-day--static {
+  .v-date-picker-day[data-static] {
     color: var(--vectis-color-text-subtle);
     cursor: default;
   }
 
   /* A neighbouring day that falls outside the bounds, or is disabled, is struck
      through like any other unavailable date. */
-  .v-date-picker-day--static[data-disabled] {
+  .v-date-picker-day[data-static][data-disabled] {
     text-decoration: line-through;
     cursor: not-allowed;
   }
@@ -1166,7 +1167,7 @@ defineExpose({
     display: contents;
   }
 
-  .v-date-picker-view--years {
+  .v-date-picker[data-view='years'] .v-date-picker-view {
     max-block-size: calc(6 * var(--date-picker-cell));
     overflow-y: auto;
   }
