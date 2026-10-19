@@ -102,7 +102,9 @@ function oklchToRgb(L: number, C: number, H: number, a: number): Rgba {
 function readNumber(token: string | undefined, percent: number): number | null {
   if (token === undefined) return null
   if (token === 'none') return 0
-  const match = /^([+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?)(%|deg|grad|rad|turn)?$/.exec(token)
+  // No two quantifiers may compete for the same digits: overlapping ones take quadratic time on
+  // a long run of them that fails to match.
+  const match = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)(%|deg|grad|rad|turn)?$/.exec(token)
   if (!match) return null
   const n = Number(match[1])
   switch (match[2]) {
@@ -134,7 +136,8 @@ function parseHex(hex: string): Rgba | null {
 export function parseColor(input: string | null | undefined): Rgba | null {
   const text = (input ?? '').trim().toLowerCase()
   if (!text) return null
-  const fn = /^(rgba?|hsla?|oklch)\(\s*([^)]*)\)$/.exec(text)
+  // The arguments are trimmed below; a `\s*` before them would compete with `[^)]*`.
+  const fn = /^(rgba?|hsla?|oklch)\(([^)]*)\)$/.exec(text)
   if (!fn) return parseHex(text.replace(/^#/, ''))
 
   const [main = '', alphaPart, extra] = fn[2]!.split('/')

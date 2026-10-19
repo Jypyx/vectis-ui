@@ -46,7 +46,7 @@ export default defineConfig({
         test: {
           name: 'unit',
           environment: 'jsdom',
-          include: ['src/**/*.test.ts'],
+          include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
           /* Allow compilation headroom when unit workers and Chromium share the coverage run. */
           testTimeout: 20_000,
           setupFiles: ['./vitest.setup.ts'],

@@ -61,6 +61,14 @@ describe('number helpers', () => {
     expect(parseNumber('1e5', en)).toBeNaN()
   })
 
+  it('reads hostile text in linear time', () => {
+    const en = numberSeparators('en')
+    const start = performance.now()
+    expect(parseNumber(`${'1'.repeat(100_000)}x1`, en)).toBeNaN()
+    expect(parseNumber(`${'a'.repeat(100_000)}1`, en)).toBe(1)
+    expect(performance.now() - start).toBeLessThan(500)
+  })
+
   it('counts decimals and scales without drift', () => {
     expect(decimalsOf(3)).toBe(0)
     expect(decimalsOf(0.25)).toBe(2)

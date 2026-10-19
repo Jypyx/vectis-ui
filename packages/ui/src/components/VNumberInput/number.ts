@@ -22,7 +22,7 @@ export function numberSeparators(locale: string): NumberSeparators {
 const MINUS = /[−‒–﹣－]/g
 
 /** What a number may look like once separators and symbols are gone: "-12", "3.", ".5". */
-const PLAIN = /^-?(\d+\.?\d*|\.\d+)$/
+const PLAIN = /^-?(\d+(?:\.\d*)?|\.\d+)$/
 
 /**
  * Reads a typed number: `null` for an empty field, `NaN` for text that is not a number.
@@ -40,8 +40,10 @@ export function parseNumber(text: string, separators: NumberSeparators): number 
   plain = plain.replace(/\s/g, '')
   if (separators.decimal !== '.') plain = plain.split(separators.decimal).join('.')
   // Symbols are only stripped at either end, the minus kept before a leading one ("-$5.00"): a
-  // letter between digits is a typo, and "1o0" read as 10 would be committed silently.
-  plain = plain.replace(/^(-?)[^\d.-]+/, '$1').replace(/[^\d.]+$/, '')
+  // letter between digits is a typo, and "1o0" read as 10 would be committed silently. The
+  // lookbehind starts the trailing run only once, where a scan from each of its letters would
+  // take quadratic time.
+  plain = plain.replace(/^(-?)[^\d.-]+/, '$1').replace(/(?<=^|[\d.])[^\d.]+$/, '')
   return PLAIN.test(plain) ? Number(plain) : Number.NaN
 }
 

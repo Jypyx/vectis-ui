@@ -104,6 +104,14 @@ export const NestedTheme: Story = {
 /** The `color` prop replaces the auto hue (white text, contrast on the consumer). */
 export const CustomColor: Story = {
   args: { color: 'teal' },
+  play: async ({ canvasElement }) => {
+    const avatar = canvasElement.querySelector<HTMLElement>('.v-avatar')!
+    await expect(getComputedStyle(avatar).backgroundColor).toBe('rgb(0, 128, 128)')
+    // `color` can come from untrusted data: anything but a colour, an image included, is dropped.
+    avatar.style.setProperty('--custom-color', 'url("data:image/gif;base64,R0lGODlhAQABAAAAACw=")')
+    await expect(getComputedStyle(avatar).backgroundImage).toBe('none')
+    avatar.style.setProperty('--custom-color', 'teal')
+  },
 }
 
 /** Rendered as `<button>`: focusable, hover state, keyboard focus ring. */

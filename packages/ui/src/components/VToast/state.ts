@@ -79,14 +79,18 @@ let nextId = 0
  * before its time.
  */
 export function toast(options: ToastOptions): number {
-  // @devwarn
-  // The queue is module state, shared by every request a server renders: raised there, it
-  // would reach another reader's page and differ from what the browser hydrates.
-  if (isDev && typeof document === 'undefined')
-    console.warn(
-      '[toast] called during a server render: call it from a handler or a lifecycle hook that runs in the browser.',
-    )
   const id = nextId++
+  // @ssr
+  // The queue is module state, shared by every request a server renders: raised there, it
+  // would reach another reader's page and never be dismissed, so it is dropped.
+  if (typeof document === 'undefined') {
+    // @devwarn
+    if (isDev)
+      console.warn(
+        '[toast] called during a server render: call it from a handler or a lifecycle hook that runs in the browser.',
+      )
+    return id
+  }
   toasts.push({ tone: 'neutral', variant: 'soft', hideClose: false, ...options, id })
   return id
 }

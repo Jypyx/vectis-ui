@@ -65,8 +65,10 @@ describe('toast (module state)', () => {
 })
 
 describe('toast() and snackbar() on a server', () => {
-  it('say so in development, the queue being shared by every request', async () => {
-    const { snackbar, dismissSnackbar } = await import('../VSnackbar/state')
+  it('drop the message and say so, the queue being shared by every request', async () => {
+    const { snackbar, current, dismissSnackbar } = await import('../VSnackbar/state')
+    dismissToast()
+    dismissSnackbar()
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     vi.stubGlobal('document', undefined)
     try {
@@ -75,10 +77,10 @@ describe('toast() and snackbar() on a server', () => {
     } finally {
       vi.unstubAllGlobals()
     }
+    expect(toasts).toHaveLength(0)
+    expect(current.value).toBeNull()
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('[toast]'))
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('[snackbar]'))
     warn.mockRestore()
-    dismissToast()
-    dismissSnackbar()
   })
 })

@@ -87,6 +87,13 @@ export function renderIconsModules(
       throw new Error(`[icons] "${name}" cannot be an exported binding: rename it or alias it.`)
     }
   }
+  /* The paths are downloaded and written between quotes into source code: anything beyond
+     path data could close the string and inject code into the library. */
+  for (const [name, paths] of entries) {
+    if (paths.some((d) => !/^[MLHVCSQTAZmlhvcsqtaz\d\s.,eE+-]+$/.test(d))) {
+      throw new Error(`[icons] "${name}": a path holds something other than path data.`)
+    }
+  }
 
   files['viewBox.ts'] = `${header(revision)}
 

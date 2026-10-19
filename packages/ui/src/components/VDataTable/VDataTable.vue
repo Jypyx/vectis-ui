@@ -456,9 +456,11 @@ const collator = computed(() => new Intl.Collator(vectisLocale.value, { numeric:
 
 /*
  * What a cell is compared by. A `Date` by its instant: as text it collates on `toString()`,
- * which opens with the WEEKDAY, so Monday the 5th sorted before Saturday the 3rd.
+ * which opens with the WEEKDAY, so Monday the 5th sorted before Saturday the 3rd. The pattern
+ * is tested on every comparison: no two of its quantifiers compete for the same digits, which
+ * would take quadratic time on a long cell another user wrote.
  */
-const NUMERIC_TEXT = /^\s*[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?\s*$/i
+const NUMERIC_TEXT = /^\s*[+-]?(\d+(?:\.\d*)?|\.\d+)(e[+-]?\d+)?\s*$/i
 function sortKey(value: unknown): unknown {
   if (value instanceof Date) return value.getTime()
   if (typeof value === 'string' && NUMERIC_TEXT.test(value)) return Number(value)

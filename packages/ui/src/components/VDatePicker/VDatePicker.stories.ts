@@ -140,6 +140,19 @@ export const Events: Story = {
     }),
     template: `<VDatePicker v-bind="args" v-model="value" :events="events" />`,
   }),
+  play: async ({ canvasElement }) => {
+    // An event's colour can come from untrusted data: an image in its place loads nothing.
+    const dot = canvasElement.querySelector<HTMLElement>(
+      '.v-date-picker-day:not([data-selected]) .v-date-picker-dot',
+    )!
+    const color = dot.style.getPropertyValue('--date-picker-dot-color')
+    dot.style.setProperty(
+      '--date-picker-dot-color',
+      'url("data:image/gif;base64,R0lGODlhAQABAAAAACw=")',
+    )
+    await expect(getComputedStyle(dot).backgroundImage).toBe('none')
+    dot.style.setProperty('--date-picker-dot-color', color)
+  },
 }
 
 export const DaySlot: Story = {

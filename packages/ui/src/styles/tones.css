@@ -3,6 +3,16 @@
  * stylesheet order.
  */
 @layer vectis.tokens {
+  /*
+   * A consumer's colour, typed so that anything other than a colour is dropped: it reaches
+   * `background` shorthands, where a `url()` from untrusted data would load a remote image.
+   */
+  @property --custom-color {
+    syntax: '<color>';
+    inherits: true;
+    initial-value: transparent;
+  }
+
   .v-tone[data-tone='accent'] {
     --tone-bg-solid: var(--vectis-color-accent);
     --tone-bg-solid-hover: var(--vectis-color-accent-hover);

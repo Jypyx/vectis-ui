@@ -99,6 +99,13 @@ Two features set this floor: CSS anchor positioning, used without a JavaScript f
 
 If your bundler targets older browsers, it may rewrite part of the library's CSS during minification. Set `build.cssTarget` to the versions above in your Vite (or Nuxt) config to keep it intact.
 
+## Security
+
+Text passed to components is rendered as text, never as HTML, and `color` props keep only colours: anything else, a `url()` included, is dropped. Two things stay with your application:
+
+- **Addresses.** Like Vue itself, components bind `href` as given, and a `javascript:` address runs its script when clicked. Check the protocol of any address that comes from users (`https:`, `mailto:` or a relative path, for example) before passing it on.
+- **Toasts and snackbars.** Their queue is shared by the whole process, so `toast()` and `snackbar()` do nothing during a server render. Call them from an event handler or a lifecycle hook that runs in the browser.
+
 ## Versioning
 
 Vectis UI follows [Semantic Versioning](https://semver.org/). While the version is still 0.x, a minor release can include breaking changes, so read the [changelog](CHANGELOG.md) before upgrading.

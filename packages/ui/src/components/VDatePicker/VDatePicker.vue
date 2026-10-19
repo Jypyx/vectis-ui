@@ -1146,7 +1146,8 @@ defineExpose({
     inline-size: var(--vectis-control-size-date-picker-dot);
     block-size: var(--vectis-control-size-date-picker-dot);
     border-radius: var(--vectis-radius-pill);
-    background: var(--date-picker-dot-color, var(--vectis-color-accent));
+    /* A longhand: an event's colour can come from untrusted data, and must not load a `url()`. */
+    background-color: var(--date-picker-dot-color, var(--vectis-color-accent));
   }
   .v-date-picker-day[data-selected] .v-date-picker-dot {
     background: var(--vectis-color-text-on-accent);

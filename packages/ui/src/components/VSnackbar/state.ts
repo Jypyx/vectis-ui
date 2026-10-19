@@ -63,14 +63,18 @@ let nextId = 0
  * `dismissSnackbar` can use to take it away again before its time.
  */
 export function snackbar(options: SnackbarOptions): number {
-  // @devwarn
-  // The queue is module state, shared by every request a server renders: raised there, it
-  // would reach another reader's page and differ from what the browser hydrates.
-  if (isDev && typeof document === 'undefined')
-    console.warn(
-      '[snackbar] called during a server render: call it from a handler or a lifecycle hook that runs in the browser.',
-    )
   const id = nextId++
+  // @ssr
+  // The bar is module state, shared by every request a server renders: raised there, it
+  // would reach another reader's page and never be dismissed, so it is dropped.
+  if (typeof document === 'undefined') {
+    // @devwarn
+    if (isDev)
+      console.warn(
+        '[snackbar] called during a server render: call it from a handler or a lifecycle hook that runs in the browser.',
+      )
+    return id
+  }
   current.value = { tone: 'neutral', ...options, id }
   return id
 }

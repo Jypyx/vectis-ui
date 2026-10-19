@@ -44,6 +44,13 @@ describe('parseColor', () => {
       expect(parseColor(input)).toBeNull()
     expect(parseColor(null)).toBeNull()
   })
+
+  it('refuses hostile text in linear time', () => {
+    const start = performance.now()
+    expect(parseColor(`rgb(${'1'.repeat(100_000)}x 0 0)`)).toBeNull()
+    expect(parseColor(`rgb(${' '.repeat(100_000)}`)).toBeNull()
+    expect(performance.now() - start).toBeLessThan(500)
+  })
 })
 
 describe('formatColor', () => {

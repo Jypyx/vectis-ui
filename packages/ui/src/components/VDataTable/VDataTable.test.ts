@@ -539,6 +539,20 @@ describe('VDataTable', () => {
       expect(firstColumnCells(container)).toEqual(['-10', '-5', '1.25', '1.5'])
     })
 
+    it('sorts a long cell that almost reads as a number in linear time', () => {
+      const long = `${'1'.repeat(100_000)}x`
+      const start = performance.now()
+      const { container } = render(VDataTable, {
+        props: {
+          columns: [{ key: 'v', label: 'V', sortable: true }],
+          rows: [{ v: long }, { v: '2' }, { v: '1' }],
+          sort: { key: 'v', direction: 'asc' as const },
+        },
+      })
+      expect(performance.now() - start).toBeLessThan(1000)
+      expect(firstColumnCells(container)).toHaveLength(3)
+    })
+
     it('serverSide: a response changing the total emits no request', async () => {
       const { emitted, rerender } = render(VDataTable, {
         props: { columns: COLUMNS, rows: [], serverSide: true, page: 3, perPage: 10 },

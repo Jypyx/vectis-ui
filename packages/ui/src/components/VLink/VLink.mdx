@@ -67,6 +67,17 @@ VLink always renders a real `<a>`. With Vue Router or Nuxt, render it inside the
 
 `navigate` leaves a click with a modifier key to the browser, so opening in a new tab still works.
 
+## Untrusted addresses
+
+VLink binds `href` as given, like Vue itself, and every other component with an `href` does the
+same. A `javascript:` address runs its script when clicked: check the protocol of an address that
+comes from users before passing it on.
+
+```ts
+const safeHref = (url: string) =>
+  /^(https?:|mailto:|\/(?!\/)|#)/i.test(url.trim()) ? url : undefined
+```
+
 ## Accessibility
 
 - VLink is a native `<a href>`: Enter follows it, and the browser's context menu and middle click
