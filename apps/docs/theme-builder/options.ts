@@ -41,7 +41,13 @@ interface ClassLibrary extends IconLibraryBase {
   className: (name: string, filled: boolean) => string
   /** What the consumer imports, and the CDN copies of those files the preview loads. */
   imports: string[]
-  cdn: string[]
+  cdn: Stylesheet[]
+}
+
+/** A stylesheet to link; `integrity` pins a CDN copy to the release its address names. */
+export interface Stylesheet {
+  href: string
+  integrity?: string
 }
 
 /** Vue components, one per icon. */
@@ -107,8 +113,14 @@ export const ICON_LIBRARIES: IconLibrary[] = [
     className: (name, filled) => `${filled ? 'ph-fill' : 'ph'} ph-${name}`,
     imports: ['@phosphor-icons/web/regular', '@phosphor-icons/web/fill'],
     cdn: [
-      `${JSDELIVR}/@phosphor-icons/web@2.1.2/src/regular/style.css`,
-      `${JSDELIVR}/@phosphor-icons/web@2.1.2/src/fill/style.css`,
+      {
+        href: `${JSDELIVR}/@phosphor-icons/web@2.1.2/src/regular/style.css`,
+        integrity: 'sha384-6p9AefaqUhEVheRlj1mpAkbngHXy9mbYMrIdcIt4Jlc9lOLIablJq3bBsLOjGwZ7',
+      },
+      {
+        href: `${JSDELIVR}/@phosphor-icons/web@2.1.2/src/fill/style.css`,
+        integrity: 'sha384-pPVoXE8ft+zxKtxIDDI7SfTK6y95NHm4qa+hKEg/hs8VkjW5IP+9/dGOPCbDpUPl',
+      },
     ],
   },
   {
@@ -120,7 +132,12 @@ export const ICON_LIBRARIES: IconLibrary[] = [
     classNameSource: '(name) => `ti ti-${name}`',
     className: (name) => `ti ti-${name}`,
     imports: ['@tabler/icons-webfont/dist/tabler-icons.min.css'],
-    cdn: [`${JSDELIVR}/@tabler/icons-webfont@3.49.0/dist/tabler-icons.min.css`],
+    cdn: [
+      {
+        href: `${JSDELIVR}/@tabler/icons-webfont@3.49.0/dist/tabler-icons.min.css`,
+        integrity: 'sha384-IcAOG/1tqv9Qnam+j3mZYPAFcNQMnQpMcafc8Nsvd44AUeTCzhUzdQiJkrROmqW6',
+      },
+    ],
   },
   {
     id: 'remix',
@@ -131,7 +148,12 @@ export const ICON_LIBRARIES: IconLibrary[] = [
     classNameSource: "(name, filled) => `ri-${name}-${filled ? 'fill' : 'line'}`",
     className: (name, filled) => `ri-${name}-${filled ? 'fill' : 'line'}`,
     imports: ['remixicon/fonts/remixicon.css'],
-    cdn: [`${JSDELIVR}/remixicon@4.9.1/fonts/remixicon.css`],
+    cdn: [
+      {
+        href: `${JSDELIVR}/remixicon@4.9.1/fonts/remixicon.css`,
+        integrity: 'sha384-K8MyQheOpUlTMhpk/Rxz4Rtn4VxtjdRLpEhsT/cdBJZeu9Q+2PxLoSpvgvkSwrR2',
+      },
+    ],
   },
   {
     id: 'fontawesome',
@@ -142,7 +164,12 @@ export const ICON_LIBRARIES: IconLibrary[] = [
     classNameSource: '(name) => `fa-solid fa-${name}`',
     className: (name) => `fa-solid fa-${name}`,
     imports: ['@fortawesome/fontawesome-free/css/all.min.css'],
-    cdn: [`${JSDELIVR}/@fortawesome/fontawesome-free@7.3.1/css/all.min.css`],
+    cdn: [
+      {
+        href: `${JSDELIVR}/@fortawesome/fontawesome-free@7.3.1/css/all.min.css`,
+        integrity: 'sha384-qrALq7+6jBOZIQsNnT6xGkMDru64qD6uTlDra39xrt2SoXl4pO3FX6Roz/RpR/BS',
+      },
+    ],
   },
   {
     id: 'bootstrap',
@@ -153,7 +180,12 @@ export const ICON_LIBRARIES: IconLibrary[] = [
     classNameSource: '(name) => `bi bi-${name}`',
     className: (name) => `bi bi-${name}`,
     imports: ['bootstrap-icons/font/bootstrap-icons.min.css'],
-    cdn: [`${JSDELIVR}/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css`],
+    cdn: [
+      {
+        href: `${JSDELIVR}/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css`,
+        integrity: 'sha384-CK2SzKma4jA5H/MXDUU7i1TqZlCFaD4T01vtyDFvPlD97JQyS+IsSh1nI2EFbpyk',
+      },
+    ],
   },
 ]
 

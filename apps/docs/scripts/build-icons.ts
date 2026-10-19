@@ -72,6 +72,10 @@ function pathOf(svg: string, source: string): string {
       `${source}: ${paths.length} <path> instead of one — the registry assumes a single path`,
     )
   }
+  // Written between quotes into source code: anything beyond path data could inject code.
+  if (!/^[MLHVCSQTAZmlhvcsqtaz\d\s.,eE+-]+$/.test(paths[0]!)) {
+    throw new Error(`${source}: the path holds something other than path data`)
+  }
   return paths[0]!
 }
 

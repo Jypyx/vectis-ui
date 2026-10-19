@@ -73,16 +73,22 @@ function applyStyles(state: PreviewState): Promise<unknown> {
   tokens ??= document.head.appendChild(document.createElement('style'))
   tokens.textContent = state.css
 
+  const wanted = new Set(state.stylesheets.map((sheet) => sheet.href))
   for (const [href, link] of links) {
-    if (state.stylesheets.includes(href)) continue
+    if (wanted.has(href)) continue
     link.remove()
     links.delete(href)
   }
   const loads: Promise<unknown>[] = []
-  for (const href of state.stylesheets) {
+  for (const { href, integrity } of state.stylesheets) {
     if (links.has(href)) continue
     const link = document.createElement('link')
     link.rel = 'stylesheet'
+    // Set before `href`, which starts the request. SRI needs a CORS request.
+    if (integrity) {
+      link.integrity = integrity
+      link.crossOrigin = 'anonymous'
+    }
     link.href = href
     loads.push(new Promise((resolve) => (link.onload = link.onerror = resolve)))
     document.head.append(link)

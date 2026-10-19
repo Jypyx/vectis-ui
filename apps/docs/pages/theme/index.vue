@@ -39,7 +39,10 @@ const state = computed<PreviewState>(() => {
   const library = iconLibraryById(config.value.icons)
   return {
     css: themeCss(declarations, false),
-    stylesheets: [...declarations.imports, ...(library.kind === 'class' ? library.cdn : [])],
+    stylesheets: [
+      ...declarations.imports.map((href) => ({ href })),
+      ...(library.kind === 'class' ? library.cdn : []),
+    ],
     icons: config.value.icons,
     scheme: theme.value,
   }

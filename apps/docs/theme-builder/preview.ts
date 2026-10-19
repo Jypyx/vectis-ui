@@ -2,7 +2,7 @@
  * The messages between the builder page and its preview frame. Both are served from the same
  * origin; each side still checks it, since any page can post to a window it holds.
  */
-import type { IconLibraryId } from './options'
+import type { IconLibraryId, Stylesheet } from './options'
 import type { Scheme } from './model'
 
 const SOURCE = 'vectis-theme-builder'
@@ -12,7 +12,7 @@ export interface PreviewState {
   /** The stylesheet of every theme token, without its `@import` rules. */
   css: string
   /** Stylesheets to link: fonts, and an icon webfont's CSS. */
-  stylesheets: string[]
+  stylesheets: Stylesheet[]
   icons: IconLibraryId
   scheme: Scheme
 }
