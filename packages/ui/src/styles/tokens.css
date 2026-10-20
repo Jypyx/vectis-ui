@@ -326,6 +326,9 @@
     --vectis-control-size-badge-dot: 0.625rem;
     --vectis-control-size-badge-ring: 2px;
     --vectis-control-size-avatar-ring: 2px;
+    --vectis-control-size-separator-sm: 1px;
+    --vectis-control-size-separator-md: 2px;
+    --vectis-control-size-separator-lg: 4px;
     --vectis-control-size-color-picker-width: 16rem;
     --vectis-control-size-color-picker-area: 10rem;
     --vectis-control-size-color-picker-track: 0.75rem;

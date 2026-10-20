@@ -441,6 +441,9 @@ export const semantic = {
     'size-badge-dot': dimension('0.625rem', 'The diameter of VBadge in dot mode'),
     'size-badge-ring': dimension('2px', 'The detaching ring of a bordered VBadge'),
     'size-avatar-ring': dimension('2px', 'The ring separating stacked avatars (VAvatarGroup)'),
+    'size-separator-sm': dimension('1px', 'The stroke of a small VSeparator, the default hairline'),
+    'size-separator-md': dimension('2px', 'The stroke of a medium VSeparator'),
+    'size-separator-lg': dimension('4px', 'The stroke of a large VSeparator'),
     'size-color-picker-width': dimension('16rem', 'The width of VColorPicker (256px)'),
     'size-color-picker-area': dimension(
       '10rem',

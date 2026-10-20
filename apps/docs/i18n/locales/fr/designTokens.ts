@@ -193,6 +193,9 @@ const descriptions: Record<DescribedToken, string> = {
   '--vectis-control-size-badge-dot': "Le diamètre d'un VBadge en mode point",
   '--vectis-control-size-badge-ring': "L'anneau qui détache un VBadge bordé",
   '--vectis-control-size-avatar-ring': "L'anneau qui sépare les avatars empilés (VAvatarGroup)",
+  '--vectis-control-size-separator-sm': 'Le trait d’un petit VSeparator, le filet par défaut',
+  '--vectis-control-size-separator-md': 'Le trait d’un VSeparator moyen',
+  '--vectis-control-size-separator-lg': 'Le trait d’un grand VSeparator',
   '--vectis-control-size-color-picker-width': 'La largeur de VColorPicker (256px)',
   '--vectis-control-size-color-picker-area':
     'La hauteur de la zone saturation et luminosité de VColorPicker (160px)',

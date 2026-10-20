@@ -42,7 +42,12 @@ export type {
   PopoverTriggerProps,
 } from './components/VPopover/VPopover.vue'
 export { default as VSeparator } from './components/VSeparator/VSeparator.vue'
-export type { SeparatorOrientation } from './components/VSeparator/VSeparator.vue'
+export type {
+  SeparatorContentPosition,
+  SeparatorOrientation,
+  SeparatorSize,
+  SeparatorVariant,
+} from './components/VSeparator/VSeparator.vue'
 export { default as VResizable } from './components/VResizable/VResizable.vue'
 export type { ResizableLength, ResizableOrientation } from './components/VResizable/VResizable.vue'
 export { default as VResizablePanel } from './components/VResizable/VResizablePanel.vue'

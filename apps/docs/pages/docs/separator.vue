@@ -6,6 +6,8 @@ import SeparatorLabelled from '~/examples/separator/Labelled.vue'
 import separatorLabelledSource from '~/examples/separator/Labelled.vue?raw'
 import SeparatorOrientation from '~/examples/separator/Orientation.vue'
 import separatorOrientationSource from '~/examples/separator/Orientation.vue?raw'
+import SeparatorVariants from '~/examples/separator/Variants.vue'
+import separatorVariantsSource from '~/examples/separator/Variants.vue?raw'
 
 definePageMeta({ layout: 'docs' })
 
@@ -34,6 +36,12 @@ useDocsHead('separator')
   <DocsProse keypath="separator.examples.labelled.text" />
   <DocsExample :source="separatorLabelledSource" stack>
     <SeparatorLabelled />
+  </DocsExample>
+
+  <h3 id="variants">{{ t('separator.examples.variants.title') }}</h3>
+  <DocsProse keypath="separator.examples.variants.text" />
+  <DocsExample :source="separatorVariantsSource" stack>
+    <SeparatorVariants />
   </DocsExample>
 
   <DocsApi page="separator" :api="api" />

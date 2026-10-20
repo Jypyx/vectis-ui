@@ -7,7 +7,8 @@ import * as VSeparatorStories from './VSeparator.stories'
 
 A 1px rule between two blocks. `VSeparator` renders an `<hr>` — the `separator` role comes with
 the element, and it is never focusable, so it stays outside every roving focus. 100% CSS, no
-JavaScript at all.
+JavaScript at all. Given a label, an icon or slot content, it becomes a `<div role="separator">`
+whose two strokes frame that content.
 
 The rule is drawn with a **border**, not a background: under Windows forced colours a background
 is forced to `Canvas` and the rule would vanish, where a border colour is forced to `CanvasText`
@@ -26,6 +27,24 @@ buttons it separates in the toolbar below. **In normal flow it collapses to zero
 error**: outside a flex or grid container, give it a `block-size`.
 
 <Canvas of={VSeparatorStories.Vertical} />
+
+## Label and icon
+
+`label`, `icon` and the default slot break the rule; the icon comes first. `contentPosition`
+places them at the `start`, `center` (default) or `end`: at either end the stroke on that side is
+dropped, so the content sits flush with the edge. A vertical separator keeps its content upright.
+
+<Canvas of={VSeparatorStories.WithContent} />
+
+## Variants, size and colour
+
+`variant` strokes the rule `solid` (default), `dashed` or `dotted`. `size` sets its thickness:
+`sm` (default) is the hairline, `md` and `lg` mark a stronger break and make `dotted` read as
+dots. `color` takes any CSS colour
+and paints the strokes only: the label and icon keep the muted text colour. Under forced colours
+the strokes follow the system colour like any border.
+
+<Canvas of={VSeparatorStories.VariantsAndColour} />
 
 ## Spacing
 
@@ -49,6 +68,9 @@ bundler — at equal specificity the winner would depend on that order.
 
 - The `<hr>` root gives the `separator` role implicitly. It is not focusable, carries no
   accessible name, and needs none.
+- With content, the children of a `separator` are presentational, so its text is never read.
+  `label` is therefore repeated as the separator's `aria-label`; the icon stays decorative. Slot
+  content needs an `aria-label` of your own when its words matter.
 - `aria-orientation` is emitted for `vertical` **only** — a `separator` is horizontal by default,
   so setting it on a horizontal rule would restate the role.
 - When the container's role forbids a `separator` child, pass `role="presentation"`: it falls

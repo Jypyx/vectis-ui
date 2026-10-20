@@ -45,4 +45,44 @@ describe('VSeparator', () => {
     expect(root(container).id).toBe('rule')
     expect(root(container).getAttribute('data-testid')).toBe('x')
   })
+
+  it('variant, size and colour reach the rule', () => {
+    expect(root(render(VSeparator).container).getAttribute('data-size')).toBe('sm')
+    const { container } = render(VSeparator, {
+      props: { variant: 'dotted', size: 'lg', color: 'red' },
+    })
+    expect(root(container).getAttribute('data-variant')).toBe('dotted')
+    expect(root(container).getAttribute('data-size')).toBe('lg')
+    expect(root(container).style.getPropertyValue('--separator-color')).toBe('red')
+  })
+
+  it('a label turns the root into a named role="separator" carrying the text', () => {
+    const { container, getByRole } = render(VSeparator, { props: { label: 'or' } })
+    const rule = getByRole('separator', { name: 'or' })
+    expect(rule).toBe(root(container))
+    expect(rule.tagName).toBe('DIV')
+    expect(rule.textContent).toBe('or')
+    expect(rule.getAttribute('data-content-position')).toBe('center')
+  })
+
+  it('an icon alone breaks the rule, unnamed', () => {
+    const { container } = render(VSeparator, {
+      props: { icon: { path: 'M0 0h1v1z' }, contentPosition: 'end' },
+    })
+    expect(root(container).getAttribute('role')).toBe('separator')
+    expect(root(container).hasAttribute('aria-label')).toBe(false)
+    expect(root(container).getAttribute('data-content-position')).toBe('end')
+    expect(root(container).querySelector('svg')).not.toBeNull()
+  })
+
+  it('the slot replaces the label text; the consumer names it', () => {
+    const { getByRole } = render(VSeparator, {
+      attrs: { 'aria-label': 'Chapter 2' },
+      props: { orientation: 'vertical' },
+      slots: { default: '<strong>2</strong>' },
+    })
+    const rule = getByRole('separator', { name: 'Chapter 2' })
+    expect(rule.querySelector('strong')?.textContent).toBe('2')
+    expect(rule.getAttribute('aria-orientation')).toBe('vertical')
+  })
 })
