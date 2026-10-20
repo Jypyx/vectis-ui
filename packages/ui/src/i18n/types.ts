@@ -128,6 +128,10 @@ export interface Messages {
      */
     label: string
   }
+  meterGroup: {
+    /** What a group of meters is called when the consumer gives it no label. */
+    label: string
+  }
   /**
    * The keys of a keyboard shortcut, in words. Where a symbol exists it wins on screen, and the
    * word wins in what a screen reader says.

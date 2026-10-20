@@ -25,6 +25,7 @@ export default {
         { name: 'color', type: 'string' },
         { name: 'segments', type: 'number', default: '1' },
         { name: 'size', type: 'MeterSize', values: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'" },
+        { name: 'orientation', type: 'MeterOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },
       ],
     },
   ],
@@ -34,6 +35,7 @@ export default {
     { name: '--vectis-control-size-bar-thickness-md', value: '0.5rem' },
     { name: '--vectis-control-size-bar-thickness-lg', value: '0.75rem' },
     { name: '--vectis-control-size-bar-thickness-xl', value: '1.25rem' },
+    { name: '--vectis-control-size-bar-length', value: '10rem' },
     { name: '--vectis-control-size-meter-segment-gap', value: '0.125rem' },
   ],
 } satisfies PageApi

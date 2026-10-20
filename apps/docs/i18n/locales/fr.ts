@@ -48,6 +48,7 @@ import jsHelpers from './fr/jsHelpers'
 import link from './fr/link'
 import menu from './fr/menu'
 import meter from './fr/meter'
+import meterGroup from './fr/meterGroup'
 import nav from './fr/nav'
 import numberInput from './fr/numberInput'
 import pagination from './fr/pagination'
@@ -136,6 +137,7 @@ export default defineI18nLocale((): DocsMessages => ({
   link,
   menu,
   meter,
+  meterGroup,
   numberInput,
   pagination,
   popover,

@@ -77,6 +77,7 @@ export const components = [
   entry('link'),
   entry('menu'),
   entry('meter'),
+  entry('meter-group'),
   entry('number-input'),
   entry('pagination'),
   entry('popover'),

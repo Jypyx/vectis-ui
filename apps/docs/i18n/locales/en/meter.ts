@@ -26,6 +26,10 @@ export default {
       title: 'Sizes',
       text: '<code>size</code> sets the thickness of the bar, from 2 to 20 pixels, on the same scale as <code>VProgressLinear</code>. The meter takes the whole width of its container.',
     },
+    orientation: {
+      title: 'Orientation',
+      text: '<code>orientation="vertical"</code> fills from the bottom up, segments and text inside the bar included. Set a height to control the bar’s length.',
+    },
     hiddenText: {
       title: 'Hidden text',
       text: 'Without <code>showValue</code>, the value is not written, and <code>hideLabel</code> hides the label. Screen readers still hear both.',
@@ -47,11 +51,13 @@ export default {
         valueText: 'Text replacing the formatted value, on screen and for screen readers.',
         formatOptions: '<code>Intl.NumberFormat</code> options formatting the value itself.',
         showValue: 'Writes the value. Screen readers read it either way.',
-        valuePosition: 'Value position: after the label, or inside the bar.',
+        valuePosition:
+          'Value position: after the label, or inside the bar. Vertical start is the bottom.',
         tone: 'Colour of the fill. Chosen from the region when <code>low</code>, <code>high</code> or <code>optimum</code> is set, accent otherwise.',
         color: 'Custom CSS colour replacing the tone.',
         segments: 'Number of equal parts the bar is split into.',
         size: 'Bar thickness. Only <code>xl</code> holds the value inside the bar.',
+        orientation: 'Horizontal or vertical bar. Vertical fills from bottom to top.',
       },
     },
   },

@@ -128,9 +128,11 @@ const descriptions: Record<DescribedToken, string> = {
     "L'épaisseur d'une grande barre de VProgressLinear ou VMeter (12px)",
   '--vectis-control-size-bar-thickness-xl':
     "L'épaisseur d'une barre de VProgressLinear ou VMeter xl, qui contient la valeur écrite à l'intérieur (20px)",
+  '--vectis-control-size-meter-group-swatch':
+    "Le diamètre de la pastille de couleur devant chaque ligne de la légende d'un VMeterGroup (8px)",
   '--vectis-control-size-meter-segment-gap': "L'espace entre deux segments de VMeter (2px)",
-  '--vectis-control-size-progress-linear-length':
-    "La longueur par défaut d'un VProgressLinear vertical, que remplace une hauteur posée sur la barre",
+  '--vectis-control-size-bar-length':
+    "La longueur par défaut d'une barre verticale de VProgressLinear, VMeter ou VMeterGroup, que remplace une hauteur posée sur le composant",
   '--vectis-control-size-progress-circular-diameter': 'Le diamètre par défaut de VProgressCircular',
   '--vectis-control-size-progress-circular-thickness':
     "L'épaisseur de trait par défaut de VProgressCircular (4px)",

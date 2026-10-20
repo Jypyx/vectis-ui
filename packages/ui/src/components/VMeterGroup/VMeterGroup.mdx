@@ -1,0 +1,80 @@
+import { Canvas, Controls, Meta } from '@storybook/addon-docs/blocks'
+import * as VMeterGroupStories from './VMeterGroup.stories'
+
+<Meta of={VMeterGroupStories} />
+
+# MeterGroup
+
+Several measurements sharing one range, drawn as the parts of a single bar with a legend: the
+storage taken by each kind of file, a budget split into expenses. Where VMeter shows one reading,
+VMeterGroup shows how a total breaks down.
+
+<Canvas of={VMeterGroupStories.Default} />
+
+<Controls of={VMeterGroupStories.Default} />
+
+## Items and range
+
+`items` lists the parts in the order they fill the bar, each with a `label` and a `value` on the
+scale of `max`. What the parts leave of the range stays empty. When they add up to more than
+`max`, they share the whole bar in proportion and the legend keeps their real amounts. A negative
+amount, or one that is not a number, counts as zero and draws no part.
+
+<Canvas of={VMeterGroupStories.Overflow} />
+
+## Colours
+
+Each item takes a `tone` or a `color` of your own. Without either, its hue is the accent's turned
+by the golden angle for its position, which keeps neighbouring parts apart for any number of
+items; the first part is the accent itself. Lightness and chroma stay the accent's, so the derived
+colours follow the theme. The legend swatch, or the item's `icon`, takes the same colour.
+
+<Canvas of={VMeterGroupStories.Colours} />
+
+## Values
+
+`showValue` writes the sum of the amounts after the label. The sum and every amount are
+percentages of `max` by default; `formatOptions` formats them for the current locale with
+`Intl.NumberFormat`, and `valueText` replaces the sum with words of your own.
+
+<Canvas of={VMeterGroupStories.Formatted} />
+
+The `value` slot replaces the sum and receives `{ value, max, percent }`. The `item-leading`,
+`item-label` and `item-value` slots replace a legend row's swatch, label and amount, and receive
+`{ item, index, percent }`. What `item-leading` renders is decorative and hidden from screen
+readers.
+
+<Canvas of={VMeterGroupStories.Slots} />
+
+## Sizes
+
+`size` sets the thickness of the bar on the scale of VMeter and VProgressLinear: `xs`, `sm`, `md`
+(the default), `lg` and `xl`. The bar takes the whole width available.
+
+<Canvas of={VMeterGroupStories.Sizes} />
+
+## Vertical
+
+`orientation="vertical"` fills the bar from the bottom up and puts the legend beside it. A height
+on the component sets the bar's length.
+
+<Canvas of={VMeterGroupStories.Vertical} />
+
+## Right to left
+
+The bar fills from the reading start.
+
+<Canvas of={VMeterGroupStories.RightToLeft} />
+
+## Accessibility
+
+- ARIA has no meter holding several values. The bar is therefore hidden from assistive
+  technologies, and the legend, a list whose rows give each label and amount in text, carries the
+  reading. `hideLegend` hides it visually only.
+- The root is a `group` named by `label`, or by the dictionary's generic name (`meterGroup.label`)
+  without one; an `aria-label` or `aria-labelledby` of your own wins over both. The sum written by
+  `showValue` is read as ordinary text.
+- Colour tells the parts apart on screen but never alone: every part has its row in the legend.
+- In forced colours, the parts are painted in the system highlight colour and kept apart by their
+  gaps; the legend still names them.
+- The parts' movement is removed when reduced motion is requested.

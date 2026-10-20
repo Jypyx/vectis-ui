@@ -4,6 +4,8 @@ import MeterBasic from '~/examples/meter/Basic.vue'
 import meterBasicSource from '~/examples/meter/Basic.vue?raw'
 import MeterHiddenText from '~/examples/meter/HiddenText.vue'
 import meterHiddenTextSource from '~/examples/meter/HiddenText.vue?raw'
+import MeterOrientation from '~/examples/meter/Orientation.vue'
+import meterOrientationSource from '~/examples/meter/Orientation.vue?raw'
 import MeterRegions from '~/examples/meter/Regions.vue'
 import meterRegionsSource from '~/examples/meter/Regions.vue?raw'
 import MeterSegments from '~/examples/meter/Segments.vue'
@@ -68,6 +70,12 @@ useDocsHead('meter')
   <DocsProse keypath="meter.examples.sizes.text" />
   <DocsExample :source="meterSizesSource" stack>
     <MeterSizes />
+  </DocsExample>
+
+  <h3 id="orientation">{{ t('meter.examples.orientation.title') }}</h3>
+  <DocsProse keypath="meter.examples.orientation.text" />
+  <DocsExample :source="meterOrientationSource" stack>
+    <MeterOrientation />
   </DocsExample>
 
   <h3 id="hidden-text">{{ t('meter.examples.hiddenText.title') }}</h3>

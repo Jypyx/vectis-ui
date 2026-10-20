@@ -382,3 +382,40 @@ export const RightToLeft: Story = {
     )
   },
 }
+
+/**
+ * `orientation="vertical"` puts the minimum at the bottom: the segments, each fill and the cut of
+ * the text inside the bar all follow. A height on the component sets the bar's length.
+ */
+export const Vertical: Story = {
+  render: () => ({
+    components: { VMeter },
+    setup: () => ({ t }),
+    template: `
+      <div style="display: flex; gap: 32px; align-items: flex-end">
+        <VMeter orientation="vertical" :label="t.storage" :value="40" />
+        <VMeter orientation="vertical" :label="t.battery" :value="70" :segments="5" size="lg" :low="20" :high="50" :optimum="100" />
+        <VMeter orientation="vertical" :label="t.humidity" :value="60" size="xl" show-value value-position="center" style="height: 200px" />
+        <div dir="rtl">
+          <VMeter orientation="vertical" :label="t.temperature" :value="30" :segments="3" size="lg" />
+        </div>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    for (const name of ['Storage', 'Battery', 'Temperature']) {
+      const meter = canvas.getByRole('meter', { name })
+      const track = meter.getBoundingClientRect()
+      const first = meter.querySelector('.v-meter-segment')!.getBoundingClientRect()
+      await expect(Math.abs(first.bottom - track.bottom)).toBeLessThan(1)
+      const fill = meter.querySelector('.v-meter-fill')!
+      await waitFor(() =>
+        expect(Math.abs(fill.getBoundingClientRect().bottom - first.bottom)).toBeLessThan(1),
+      )
+    }
+    // A height on the root is the bar's length.
+    const sized = canvas.getByRole('meter', { name: 'Humidity' })
+    await expect(sized.getBoundingClientRect().height).toBeGreaterThan(150)
+  },
+}

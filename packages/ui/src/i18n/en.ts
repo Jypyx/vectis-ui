@@ -82,6 +82,7 @@ export const en: Messages = {
   },
   progress: { percent: (percent) => `${percent}%`, label: 'Progress' },
   meter: { label: 'Meter' },
+  meterGroup: { label: 'Breakdown' },
   hotkeys: {
     command: 'Command',
     ctrl: 'Ctrl',

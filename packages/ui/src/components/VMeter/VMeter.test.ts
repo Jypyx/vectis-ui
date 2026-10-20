@@ -235,6 +235,14 @@ describe('VMeter', () => {
     expect(meter.classList.contains('mine')).toBe(false)
   })
 
+  it('orientation: horizontal by default, vertical carried on the root', async () => {
+    const { container, rerender } = render(VMeter, { props: { label: 'x' } })
+    const root = container.querySelector('.v-meter')!
+    expect(root.getAttribute('data-orientation')).toBe('horizontal')
+    await rerender({ orientation: 'vertical', label: 'x' })
+    expect(root.getAttribute('data-orientation')).toBe('vertical')
+  })
+
   it('sets the size on the root', () => {
     const { container } = render(VMeter, { props: { size: 'lg', label: 'x' } })
     expect(container.querySelector('.v-meter')!.getAttribute('data-size')).toBe('lg')

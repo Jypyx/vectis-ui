@@ -79,6 +79,7 @@ const PAGES: { slug: string; components: string[]; internals?: string[] }[] = [
     internals: ['VMenuPanel'],
   },
   { slug: 'meter', components: ['VMeter'] },
+  { slug: 'meter-group', components: ['VMeterGroup'] },
   { slug: 'number-input', components: ['VNumberInput'] },
   { slug: 'pagination', components: ['VPagination'] },
   { slug: 'popover', components: ['VPopover'] },

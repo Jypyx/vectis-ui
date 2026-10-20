@@ -254,7 +254,21 @@ export type {
 export { default as VInputOTP } from './components/VInputOTP/VInputOTP.vue'
 export type { InputOTPSize, InputOTPFormat } from './components/VInputOTP/VInputOTP.vue'
 export { default as VMeter } from './components/VMeter/VMeter.vue'
-export type { MeterTone, MeterSize, MeterValuePosition } from './components/VMeter/VMeter.vue'
+export type {
+  MeterTone,
+  MeterSize,
+  MeterValuePosition,
+  MeterOrientation,
+} from './components/VMeter/VMeter.vue'
+export { default as VMeterGroup } from './components/VMeterGroup/VMeterGroup.vue'
+export type {
+  MeterGroupTone,
+  MeterGroupSize,
+  MeterGroupOrientation,
+  MeterGroupItem,
+  MeterGroupItemSlotProps,
+  MeterGroupValueSlotProps,
+} from './components/VMeterGroup/VMeterGroup.vue'
 export { default as VProgressCircular } from './components/VProgressCircular/VProgressCircular.vue'
 export type {
   ProgressCircularTone,

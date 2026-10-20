@@ -285,7 +285,8 @@
     --vectis-control-size-bar-thickness-md: 0.5rem;
     --vectis-control-size-bar-thickness-lg: 0.75rem;
     --vectis-control-size-bar-thickness-xl: 1.25rem;
-    --vectis-control-size-progress-linear-length: 10rem;
+    --vectis-control-size-bar-length: 10rem;
+    --vectis-control-size-meter-group-swatch: 0.5rem;
     --vectis-control-size-meter-segment-gap: 0.125rem;
     --vectis-control-size-progress-circular-diameter: 3rem;
     --vectis-control-size-progress-circular-thickness: 0.25rem;

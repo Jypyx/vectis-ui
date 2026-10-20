@@ -85,6 +85,7 @@ export const fr: Messages = {
   // review.
   progress: { percent: (percent) => `${percent}\u00A0%`, label: 'Progression' },
   meter: { label: 'Jauge' },
+  meterGroup: { label: 'Répartition' },
   hotkeys: {
     command: 'Commande',
     ctrl: 'Ctrl',

@@ -328,9 +328,13 @@ export const semantic = {
       '1.25rem',
       'The thickness of an xl VProgressLinear or VMeter bar, which holds the value written inside it (20px)',
     ),
-    'size-progress-linear-length': dimension(
+    'size-bar-length': dimension(
       '10rem',
-      'The default length of a vertical VProgressLinear, which a height set on the bar replaces',
+      'The default length of a vertical VProgressLinear, VMeter or VMeterGroup bar, which a height set on the component replaces',
+    ),
+    'size-meter-group-swatch': dimension(
+      '0.5rem',
+      'The diameter of the colour swatch before each row of a VMeterGroup legend (8px)',
     ),
     'size-meter-segment-gap': dimension('0.125rem', 'The gap between two VMeter segments (2px)'),
     'size-progress-circular-diameter': dimension(

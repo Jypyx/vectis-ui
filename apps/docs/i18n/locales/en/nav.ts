@@ -55,6 +55,7 @@ const nav: NavMessages = {
   link: 'Link',
   menu: 'Menu',
   meter: 'Meter',
+  'meter-group': 'Meter group',
   'number-input': 'Number input',
   pagination: 'Pagination',
   popover: 'Popover',

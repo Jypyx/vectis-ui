@@ -24,6 +24,9 @@ export type MeterSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 /** Where the value is written: after the label, or inside the bar at its start, centre or end. */
 export type MeterValuePosition = 'header' | 'start' | 'center' | 'end'
 
+/** Which way the bar fills. */
+export type MeterOrientation = 'horizontal' | 'vertical'
+
 interface MeterProps {
   /** The measurement. Anything outside the range is brought back into it. */
   value?: number
@@ -63,7 +66,10 @@ interface MeterProps {
   formatOptions?: Intl.NumberFormatOptions
   /** Writes the value. Screen readers read it from the bar either way. */
   showValue?: boolean
-  /** Where that text is written: at the end of the label's line, or inside the bar. */
+  /**
+   * Where that text is written: at the end of the label's line, or inside the bar. On a vertical
+   * bar the start is the minimum end, hence the bottom.
+   */
   valuePosition?: MeterValuePosition
   /**
    * The colour of the fill. Without it, the region of the value picks one when `low`, `high` or
@@ -79,6 +85,11 @@ interface MeterProps {
   segments?: number
   /** The thickness of the bar. Only `xl` is thick enough to hold the value written inside it. */
   size?: MeterSize
+  /**
+   * Turns the bar upright, filling from the bottom up. Its length is then a height set on the
+   * component.
+   */
+  orientation?: MeterOrientation
 }
 
 // The root only lays out the text and the bar: the consumer's ARIA and other attributes belong
@@ -103,6 +114,7 @@ const props = withDefaults(defineProps<MeterProps>(), {
   color: undefined,
   segments: 1,
   size: 'md',
+  orientation: 'horizontal',
 })
 
 const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
@@ -187,6 +199,7 @@ const labelledBy = useLabelledBy(labelId, () => props.label)
     :data-level="level"
     :data-size="size"
     :data-value-position="valuePosition"
+    :data-orientation="orientation"
   >
     <div v-if="(label && !hideLabel) || valueInHeader" class="v-meter-header">
       <span v-if="label && !hideLabel" :id="labelId" class="v-meter-label">{{ label }}</span>
@@ -287,6 +300,15 @@ const labelledBy = useLabelledBy(labelId, () => props.label)
     font-variant-numeric: tabular-nums;
   }
 
+  /*
+   * Upright, the root carries the length, so a consumer's height on it sets the bar's: the track
+   * takes whatever the header leaves.
+   */
+  .v-meter[data-orientation='vertical'] {
+    align-items: flex-start;
+    block-size: var(--vectis-control-size-bar-length);
+  }
+
   .v-meter-track {
     /*
      * Where the fill ends along the whole track, gaps included: the filled fraction of the
@@ -371,6 +393,47 @@ const labelledBy = useLabelledBy(labelId, () => props.label)
 
   .v-meter-track:dir(rtl) .v-meter-text {
     clip-path: inset(-100vmax var(--meter-clip-start) -100vmax var(--meter-clip-end));
+  }
+
+  /*
+   * As in VProgressLinear, the track turns on its side through its writing mode, so every inline
+   * length and inset above follows. Zero goes to the bottom by anchoring the first segment and
+   * each fill at the far end of the axis, never by reversing the direction, which would reorder
+   * the text's characters.
+   */
+  .v-meter[data-orientation='vertical'] .v-meter-track {
+    flex: 1 1 0;
+    flex-direction: row-reverse;
+    writing-mode: vertical-lr;
+  }
+
+  .v-meter[data-orientation='vertical'] .v-meter-fill {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+  }
+
+  /* A right-to-left page already runs a vertical inline axis from the bottom up. */
+  .v-meter[data-orientation='vertical'] .v-meter-track:dir(rtl) {
+    flex-direction: row;
+  }
+
+  .v-meter[data-orientation='vertical'] .v-meter-track:dir(rtl) .v-meter-fill {
+    inset-inline-start: 0;
+    inset-inline-end: auto;
+  }
+
+  .v-meter[data-orientation='vertical'] .v-meter-text {
+    flex-direction: column-reverse;
+    padding-inline: 0;
+    padding-block: var(--vectis-space-2);
+    /* The text stays upright on a bar turned on its side. */
+    writing-mode: horizontal-tb;
+  }
+
+  /* The second selector outranks the right-to-left rule above instead of tying with it. */
+  .v-meter[data-orientation='vertical'] .v-meter-text,
+  .v-meter[data-orientation='vertical'] .v-meter-track:dir(rtl) .v-meter-text {
+    clip-path: inset(var(--meter-clip-end) -100vmax var(--meter-clip-start) -100vmax);
   }
 
   @media (prefers-reduced-motion: reduce) {

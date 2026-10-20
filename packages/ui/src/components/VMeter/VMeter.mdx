@@ -7,7 +7,8 @@ import * as VMeterStories from './VMeter.stories'
 
 A measurement within a known range: disk usage, a battery level, the strength of a password. Unlike
 VProgressLinear, the value is not on its way to completion; it is a reading, which may be good or
-bad depending on where it sits.
+bad depending on where it sits. To show how a total breaks down into several readings, use
+VMeterGroup.
 
 The bar carries the `meter` role with `aria-valuenow`, `aria-valuemin`, `aria-valuemax` and
 `aria-valuetext`, rather than using the native `<meter>`: that element is styled only through vendor
@@ -87,6 +88,14 @@ elsewhere.
 scale as VProgressLinear. The length is the container's: the meter takes the whole width available.
 
 <Canvas of={VMeterStories.Sizes} />
+
+## Vertical
+
+`orientation="vertical"` puts the minimum at the bottom: the segments, each fill and the text
+inside the bar all follow, the text itself staying upright. The length is a height on the
+component, which the bar fills under the label.
+
+<Canvas of={VMeterStories.Vertical} />
 
 ## Right to left
 

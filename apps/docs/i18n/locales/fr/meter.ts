@@ -26,6 +26,10 @@ export default {
       title: 'Tailles',
       text: '<code>size</code> règle l’épaisseur de la barre, de 2 à 20 pixels, sur la même échelle que <code>VProgressLinear</code>. La jauge occupe toute la largeur de son conteneur.',
     },
+    orientation: {
+      title: 'Orientation',
+      text: '<code>orientation="vertical"</code> remplit du bas vers le haut, segments et texte dans la barre compris. Définissez une hauteur pour régler la longueur de la barre.',
+    },
     hiddenText: {
       title: 'Texte masqué',
       text: 'Sans <code>showValue</code>, la valeur n’est pas écrite, et <code>hideLabel</code> masque le libellé. Les lecteurs d’écran entendent toujours les deux.',
@@ -47,11 +51,14 @@ export default {
         valueText: 'Texte remplaçant la valeur formatée, à l’écran et pour les lecteurs d’écran.',
         formatOptions: 'Options de <code>Intl.NumberFormat</code> formatant la valeur elle-même.',
         showValue: 'Écrit la valeur. Les lecteurs d’écran la lisent dans tous les cas.',
-        valuePosition: 'Position de la valeur : après le libellé, ou dans la barre.',
+        valuePosition:
+          'Position de la valeur : après le libellé, ou dans la barre. En vertical, le début est en bas.',
         tone: 'Couleur du remplissage. Choisie selon la zone quand <code>low</code>, <code>high</code> ou <code>optimum</code> est défini, accent sinon.',
         color: 'Couleur CSS personnalisée remplaçant le ton.',
         segments: 'Nombre de parts égales de la barre.',
         size: 'Épaisseur de la barre. Seule <code>xl</code> contient la valeur dans la barre.',
+        orientation:
+          'Barre horizontale ou verticale. En vertical, le remplissage va du bas vers le haut.',
       },
     },
   },

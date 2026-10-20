@@ -53,6 +53,7 @@ const nav: NavMessages = {
   link: 'Lien',
   menu: 'Menu',
   meter: 'Jauge',
+  'meter-group': 'Groupe de jauges',
   'number-input': 'Champ numérique',
   pagination: 'Pagination',
   popover: 'Popover',

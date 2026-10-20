@@ -372,7 +372,7 @@ const showsValue = (inHeader: boolean) =>
    */
   .v-progress-linear-field[data-orientation='vertical'] {
     align-items: flex-start;
-    block-size: var(--vectis-control-size-progress-linear-length);
+    block-size: var(--vectis-control-size-bar-length);
   }
 
   .v-progress-linear[data-orientation='vertical'] {
