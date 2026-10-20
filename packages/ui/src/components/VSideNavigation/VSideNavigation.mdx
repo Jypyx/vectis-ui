@@ -60,6 +60,13 @@ expand the branch containing the current route, for instance).
 
 <Canvas of={VSideNavigationStories.Depth} />
 
+`guides` draws a vertical line beside the subitems of each branch, under the middle of the parent's
+icon slot, whether or not the parent shows an icon. The highlight of a subitem then starts after
+the line instead of running the full width, so the line stays visible on the hovered and current
+rows; the labels keep the same indent. The line is painted as a border, which forced colours keep.
+
+<Canvas of={VSideNavigationStories.Guides} />
+
 `exclusive` limits opening to **one branch per level**: opening a section closes its sibling. The
 mechanism is the native `<details name>` attribute, applied level by level — a deep branch never
 closes a branch of another level.

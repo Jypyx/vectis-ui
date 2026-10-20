@@ -14,6 +14,7 @@ export default {
         { name: 'exclusive', type: 'boolean', default: 'false' },
         { name: 'expandIcon', type: 'IconSource', default: 'expand_more' },
         { name: 'collapseIcon', type: 'IconSource' },
+        { name: 'guides', type: 'boolean', default: 'false' },
       ],
       slots: [
         { name: 'default', type: '{}' },

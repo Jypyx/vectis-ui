@@ -95,8 +95,9 @@ const meta = {
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md'] },
     exclusive: { control: 'boolean' },
+    guides: { control: 'boolean' },
   },
-  args: { size: 'md', exclusive: false },
+  args: { size: 'md', exclusive: false, guides: false },
 } satisfies Meta<typeof VSideNavigation>
 
 export default meta
@@ -239,6 +240,35 @@ export const Depth: Story = {
     }
     await expect(indents[1]! - indents[0]!).toBe(indents[3]! - indents[2]!)
 
+    const edge = (name: string) => canvas.getByText(name).getBoundingClientRect().left
+    for (const level of [0, 1, 2]) {
+      await expect(edge(`Level ${level + 1}`)).toBe(edge(`Level ${level} (branch)`))
+    }
+  },
+}
+
+export const Guides: Story = {
+  args: { guides: true },
+  render: Depth.render,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const lists = [...canvasElement.querySelectorAll('.v-side-nav-children')]
+    const lineOf = (list: Element) =>
+      list.getBoundingClientRect().left + Number.parseFloat(getComputedStyle(list, '::before').left)
+
+    // Each sublist's line runs under the middle of its parent's icon, at every level
+    for (const [level, list] of lists.entries()) {
+      const icon = canvas
+        .getByText(`Level ${level} (branch)`)
+        .closest('.v-side-nav-row')!
+        .querySelector('.v-side-nav-icon')!
+        .getBoundingClientRect()
+      await expect(Math.abs(lineOf(list) - (icon.left + icon.width / 2))).toBeLessThanOrEqual(1)
+    }
+
+    // A subitem's highlight starts after the line, and its label keeps the indent
+    const row = canvas.getByRole('link', { name: 'Level 1' }).closest('.v-side-nav-row')!
+    await expect(row.getBoundingClientRect().left).toBeGreaterThan(lineOf(lists[0]!) + 1)
     const edge = (name: string) => canvas.getByText(name).getBoundingClientRect().left
     for (const level of [0, 1, 2]) {
       await expect(edge(`Level ${level + 1}`)).toBe(edge(`Level ${level} (branch)`))

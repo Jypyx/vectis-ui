@@ -14,6 +14,8 @@ import SideNavigationExclusive from '~/examples/side-navigation/Exclusive.vue'
 import sideNavigationExclusiveSource from '~/examples/side-navigation/Exclusive.vue?raw'
 import SideNavigationGroups from '~/examples/side-navigation/Groups.vue'
 import sideNavigationGroupsSource from '~/examples/side-navigation/Groups.vue?raw'
+import SideNavigationGuides from '~/examples/side-navigation/Guides.vue'
+import sideNavigationGuidesSource from '~/examples/side-navigation/Guides.vue?raw'
 import SideNavigationLinks from '~/examples/side-navigation/Links.vue'
 import sideNavigationLinksSource from '~/examples/side-navigation/Links.vue?raw'
 import SideNavigationOpenState from '~/examples/side-navigation/OpenState.vue'
@@ -68,6 +70,12 @@ useDocsHead('sideNavigation')
   <DocsProse keypath="sideNavigation.examples.depth.text" />
   <DocsExample :source="sideNavigationDepthSource">
     <SideNavigationDepth />
+  </DocsExample>
+
+  <h3 id="guides">{{ t('sideNavigation.examples.guides.title') }}</h3>
+  <DocsProse keypath="sideNavigation.examples.guides.text" />
+  <DocsExample :source="sideNavigationGuidesSource">
+    <SideNavigationGuides />
   </DocsExample>
 
   <h3 id="chevrons">{{ t('sideNavigation.examples.chevrons.title') }}</h3>

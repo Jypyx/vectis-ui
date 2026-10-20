@@ -81,6 +81,13 @@ describe('VSideNavigation', () => {
       expect(separator?.getAttribute('aria-hidden')).toBe('true')
     })
 
+    it('`guides` marks the <nav> only, the line being drawn in CSS', () => {
+      expect(renderTree().container.querySelector('nav')?.hasAttribute('data-guides')).toBe(false)
+      const { container } = renderTree('guides')
+      expect(container.querySelector('nav')?.hasAttribute('data-guides')).toBe(true)
+      expect(container.querySelectorAll('[data-guides]')).toHaveLength(1)
+    })
+
     it('`v-control` is set ONLY on the <nav>, which every level inherits its size from', () => {
       const { container } = renderTree('size="sm"')
       expect(container.querySelectorAll('.v-control')).toHaveLength(1)

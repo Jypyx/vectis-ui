@@ -39,6 +39,11 @@ interface SideNavigationProps {
    * by 180°.
    */
   collapseIcon?: IconSource
+  /**
+   * Draws a vertical line beside the subitems of each branch, under the middle of the
+   * parent's icon, to show which row they belong to.
+   */
+  guides?: boolean
 }
 
 const props = withDefaults(defineProps<SideNavigationProps>(), {
@@ -47,6 +52,7 @@ const props = withDefaults(defineProps<SideNavigationProps>(), {
   exclusive: false,
   expandIcon: () => expandMoreIcon,
   collapseIcon: undefined,
+  guides: false,
 })
 
 defineSlots<{
@@ -132,6 +138,7 @@ function onKeydown(event: KeyboardEvent) {
     ref="rootEl"
     class="v-side-nav v-control"
     :data-size="size"
+    :data-guides="guides ? '' : undefined"
     :aria-label="ariaLabel"
     @keydown="onKeydown"
   >

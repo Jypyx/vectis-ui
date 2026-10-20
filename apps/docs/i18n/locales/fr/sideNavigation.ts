@@ -22,6 +22,10 @@ export default {
       title: 'Imbrication',
       text: 'Le slot <code>children</code> transforme un élément en branche. Les branches peuvent contenir d’autres branches.',
     },
+    guides: {
+      title: 'Lignes de rattachement',
+      text: '<code>guides</code> trace un trait vertical à côté des sous-éléments de chaque branche, sous le milieu de l’icône du parent.',
+    },
     chevrons: {
       title: 'Le chevron des sections',
       text: 'Définissez <code>expandIcon</code> sur la navigation. L’icône tourne à l’ouverture sauf si <code>collapseIcon</code> la remplace.',
@@ -51,6 +55,7 @@ export default {
         exclusive: 'Conserve une seule branche ouverte par niveau.',
         expandIcon: 'Icône de branche fermée.',
         collapseIcon: 'Icône de branche ouverte. Sans cette prop, l’icône d’ouverture tourne.',
+        guides: 'Trace un trait à côté des sous-éléments de chaque branche.',
       },
       slots: {
         default: 'Éléments, groupes et séparateurs du premier niveau.',

@@ -434,6 +434,36 @@ function onActionClick(event: MouseEvent) {
     );
   }
 
+  /*
+   * The line sits under the middle of the parent's icon, whether or not it has one. A row
+   * of the sublist then starts a gutter after the line, so its highlight never covers it, and
+   * its padding takes up the rest: the label stays where the indent puts it.
+   *
+   * Painted with a border and not a background, which forced colours would turn to Canvas.
+   */
+  .v-side-nav[data-guides] .v-side-nav-children {
+    position: relative;
+  }
+
+  .v-side-nav[data-guides] .v-side-nav-children::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: calc(
+      var(--control-padding-inline) + var(--side-nav-parent-level) * var(--side-nav-indent) +
+        var(--vectis-icon-size) / 2
+    );
+    border-inline-start: 1px solid var(--vectis-color-border);
+  }
+
+  .v-side-nav[data-guides] .v-side-nav-children .v-side-nav-row {
+    margin-inline-start: calc(
+      var(--control-padding-inline) + (var(--side-nav-level) - 1) * var(--side-nav-indent) +
+        var(--vectis-icon-size) / 2 + var(--control-gap)
+    );
+    padding-inline-start: calc(var(--vectis-icon-size) / 2);
+  }
+
   /* A CLOSED branch holding the current page keeps a mark of it, so the reader can see
      where they are without opening every section. The lookup is deliberately a
      descendant one: the page may be several levels down. */

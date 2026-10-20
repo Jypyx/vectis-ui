@@ -22,6 +22,10 @@ export default {
       title: 'Nesting',
       text: 'The <code>children</code> slot turns an item into a branch. Branches can contain further branches.',
     },
+    guides: {
+      title: 'Guide lines',
+      text: '<code>guides</code> draws a vertical line beside the subitems of each branch, under the middle of the parent icon.',
+    },
     chevrons: {
       title: 'Section chevrons',
       text: 'Set <code>expandIcon</code> on the navigation. It rotates on opening unless <code>collapseIcon</code> replaces it.',
@@ -51,6 +55,7 @@ export default {
         exclusive: 'Keeps one branch open per level.',
         expandIcon: 'Closed-branch icon.',
         collapseIcon: 'Open-branch icon. Without it, the expand icon rotates.',
+        guides: 'Draws a line beside the subitems of each branch.',
       },
       slots: {
         default: 'Items, groups and separators at the first level.',
