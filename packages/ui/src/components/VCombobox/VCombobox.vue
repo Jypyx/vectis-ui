@@ -40,7 +40,7 @@ import { useRootAttrs } from '../../composables/useRootAttrs'
 
 import { useFocusoutDismiss } from '../../composables/useFocusoutDismiss'
 import { useInfiniteScroll } from '../../composables/useInfiniteScroll'
-import { selectionOf, useListbox } from '../../composables/useListbox'
+import { optionsOf, selectionOf, useListbox } from '../../composables/useListbox'
 
 import { canClear } from '../../composables/useClearable'
 import { iconStartListener } from '../../composables/useIconClickHandlers'
@@ -194,6 +194,13 @@ interface ComboboxProps {
   /** How the list is narrowed as one types. */
   filter?: ComboboxFilter
   /**
+   * Lets what has been typed become a value of its own. When it matches no option's label and no
+   * chosen value, a last row offers to create it; choosing that row adds the text to the value
+   * and emits `create`. Instead of an empty state, the list stays out of sight while it has
+   * nothing to show, and the chevron is dropped while there are no options at all.
+   */
+  creatable?: boolean
+  /**
    * How long to wait before telling the source what is being searched for, in
    * milliseconds. Zero tells it at once, which suits a source that is not a network
    * request.
@@ -247,6 +254,7 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   clearLabel: undefined,
   emptyText: undefined,
   filter: true,
+  creatable: false,
   searchDebounce: 250,
   loading: false,
   loadingText: undefined,
@@ -267,6 +275,11 @@ const emit = defineEmits<{
   'load-more': []
   /** The clear cross emptied the selection and the search. */
   clear: []
+  /**
+   * What had been typed was added to the value. Add the matching option to `options`, or replace
+   * the value with an identifier of your own.
+   */
+  create: [query: string]
   /** The start icon was clicked. Attaching this listener is what makes it a button. */
   'click:icon-start': [event: MouseEvent]
 }>()
@@ -361,6 +374,26 @@ const closedTerm = ref<string | null>(null)
 
 const panelRef = ref<InstanceType<typeof VListboxPanel> | null>(null)
 
+/** The options the consumer gave, without the row offering to create one. */
+const offered = computed(() => optionsOf(props.options))
+
+// Private, so that it can never pass for an option's value nor for a chosen one.
+const createValue = `${optionsId}-create`
+
+/**
+ * The row offering to create what has been typed, unless an option or a chosen value already
+ * bears that label. A created value is its own label, so chosen values are compared as they are.
+ */
+const createOption = computed<ComboboxOption | null>(() => {
+  const term = closedTerm.value ?? searchTerm.value
+  if (!props.creatable || !term) return null
+  const needle = normalizeText(term)
+  const taken =
+    offered.value.some((o) => normalizedLabelOf(o) === needle) ||
+    selectedValues.value.some((v) => typeof v === 'string' && normalizeText(v) === needle)
+  return taken ? null : { value: createValue, label: m.value.combobox.create(term) }
+})
+
 const {
   allOptions,
   visible: filtered,
@@ -376,15 +409,19 @@ const {
   blocks,
   measureRow,
 } = useListbox({
-  items: () => props.options,
+  items: () => (createOption.value ? [...props.options, createOption.value] : props.options),
   filter: (list) => {
     const matcher = props.filter
     if (matcher === false) return list
     const q = closedTerm.value ?? searchTerm.value
     if (!q) return list
-    if (typeof matcher === 'function') return list.filter((o) => matcher(o, q))
     const needle = normalizeText(q)
-    return list.filter((o) => normalizedLabelOf(o).includes(needle))
+    const matches =
+      typeof matcher === 'function'
+        ? (o: ComboboxOption) => matcher(o, q)
+        : (o: ComboboxOption) => normalizedLabelOf(o).includes(needle)
+    // The row creating the term is the term itself: no rule may narrow it away.
+    return list.filter((o) => o === createOption.value || matches(o))
   },
   selected: () => selectedValues.value,
   open: () => open.value,
@@ -397,11 +434,21 @@ const {
 
 // @a11y
 /**
+ * Whether the panel is on screen. A creatable field hides it rather than show an empty state, a
+ * free entry needing no list; it stays open underneath, so the search, the paging and the
+ * closing carry on as usual, and it reappears as soon as there is something to show.
+ */
+const panelShown = computed(
+  () => open.value && (!props.creatable || filtered.value.length > 0 || props.loading),
+)
+
+// @a11y
+/**
  * What is announced about the state of the panel; that nothing matches, or that something is
  * loading.
  */
 const stateAnnouncement = computed(() => {
-  if (!open.value || filtered.value.length > 0) return ''
+  if (!panelShown.value || filtered.value.length > 0) return ''
   return props.loading ? resolvedLoadingText.value : resolvedEmptyText.value
 })
 
@@ -493,7 +540,7 @@ const infiniteScroll = useInfiniteScroll({
   // Found by its ARIA role, which is public API, rather than by an internal class.
   root: (sentinel) => sentinel.closest('[role="listbox"]'),
   canLoad: () => open.value && props.hasMore && !props.loading,
-  loaded: () => allOptions.value,
+  loaded: () => offered.value,
   onLoadMore: () => emit('load-more'),
 })
 
@@ -581,6 +628,10 @@ function onControlClick(event: MouseEvent) {
 
 function select(option: ComboboxOption) {
   if (option.disabled || props.readonly || resolvedDisabled.value) return
+  if (option.value === createValue) {
+    create()
+    return
+  }
   // Remembered immediately: the option may vanish from the list; on the next search; before the
   // parent has even passed the new value back down.
   remember(option)
@@ -593,6 +644,22 @@ function select(option: ComboboxOption) {
     model.value = option.value
     closePanel(option.label)
   }
+}
+
+/** Adds what has been typed as a value of its own, labelled by itself until an option holds it. */
+function create() {
+  const text = searchTerm.value
+  remember({ value: text, label: text })
+  if (props.multiple) {
+    typed.value = false
+    model.value = [...selectedValues.value, text]
+    query.value = ''
+    inputRef.value?.focus()
+  } else {
+    model.value = text
+    closePanel(text)
+  }
+  emit('create', text)
 }
 
 function removeValue(value: ItemValue) {
@@ -639,12 +706,10 @@ function onKeydown(event: KeyboardEvent) {
       }
       break
     case 'Escape':
-      // Consumed only when it closes the list, so a surrounding VDialog stays open; on a
-      // closed list it is left to go on and close the dialog.
-      if (open.value) {
-        event.preventDefault()
-        closePanel()
-      }
+      // Consumed only when it closes a list on screen, so a surrounding VDialog stays open; on a
+      // closed or hidden list it is left to go on and close the dialog.
+      if (panelShown.value) event.preventDefault()
+      closePanel()
       break
     case 'Tab':
       closePanel()
@@ -695,7 +760,7 @@ defineExpose({
         role="combobox"
         aria-haspopup="listbox"
         aria-autocomplete="list"
-        :aria-expanded="open"
+        :aria-expanded="panelShown"
         :aria-controls="optionsId"
         v-bind="fieldAttrs"
         :label="label"
@@ -714,7 +779,7 @@ defineExpose({
         :clear-visible="clearVisible"
         :clear-label="resolvedClearLabel"
         :placeholder="selectedValues.length === 0 ? placeholder : undefined"
-        :aria-activedescendant="open && activeIndex >= 0 ? optionId(activeIndex) : undefined"
+        :aria-activedescendant="panelShown && activeIndex >= 0 ? optionId(activeIndex) : undefined"
         @input="onInput"
         @keydown="onKeydown"
         @focus="onFocus"
@@ -756,7 +821,12 @@ defineExpose({
         -->
         <template #end>
           <VSpinner v-if="loading" class="v-combobox-spinner v-input-icon-end" aria-hidden="true" />
-          <VListboxChevron v-else class="v-combobox-chevron" :icon="expandIcon" :open="open" />
+          <VListboxChevron
+            v-else-if="!creatable || offered.length > 0"
+            class="v-combobox-chevron"
+            :icon="expandIcon"
+            :open="panelShown"
+          />
         </template>
       </VInput>
     </div>
@@ -764,7 +834,7 @@ defineExpose({
     <VListboxPanel
       :id="optionsId"
       ref="panelRef"
-      v-model:open="open"
+      :open="panelShown"
       anchor="--combobox-anchor"
       :placement="placement"
       class="v-combobox-panel"
@@ -791,7 +861,11 @@ defineExpose({
           <span>{{ resolvedLoadingText }}</span>
         </slot>
       </div>
-      <div v-else-if="filtered.length === 0" class="v-combobox-state" aria-hidden="true">
+      <div
+        v-else-if="filtered.length === 0 && !creatable"
+        class="v-combobox-state"
+        aria-hidden="true"
+      >
         <slot name="empty" :query="searchTerm">
           <VEmptyState
             size="sm"

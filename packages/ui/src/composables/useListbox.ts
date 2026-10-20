@@ -154,15 +154,18 @@ export interface Listbox {
   measureRow: VirtualList['measure']
 }
 
+/** Every option of a list, the blocks unwrapped and the separators dropped, in the order given. */
+export function optionsOf(items: ListboxItem[]): ListboxOption[] {
+  return items.flatMap((item) => {
+    if (isListboxSeparator(item)) return []
+    return isListboxGroup(item) ? item.options : [item]
+  })
+}
+
 export function useListbox(options: ListboxOptions): Listbox {
   // The ONE reading of the items the rest of the module does: the filtering, the memory of what
   // was chosen, the labels and the paging all ignore the hierarchy entirely.
-  const allOptions = computed<ListboxOption[]>(() =>
-    options.items().flatMap((item) => {
-      if (isListboxSeparator(item)) return []
-      return isListboxGroup(item) ? item.options : [item]
-    }),
-  )
+  const allOptions = computed<ListboxOption[]>(() => optionsOf(options.items()))
 
   const visible = computed(() => options.filter?.(allOptions.value) ?? allOptions.value)
 

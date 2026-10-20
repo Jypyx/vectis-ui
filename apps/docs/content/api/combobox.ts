@@ -32,6 +32,7 @@ export default {
         { name: 'clearLabel', type: 'string' },
         { name: 'emptyText', type: 'string' },
         { name: 'filter', type: 'ComboboxFilter', default: 'true' },
+        { name: 'creatable', type: 'boolean', default: 'false' },
         { name: 'searchDebounce', type: 'number', default: '250' },
         { name: 'loading', type: 'boolean', default: 'false' },
         { name: 'loadingText', type: 'string' },
@@ -45,6 +46,7 @@ export default {
         { name: 'click:icon-start', key: 'clickIconStart', type: '[event: MouseEvent]' },
         { name: 'clear', type: '[]' },
         { name: 'load-more', key: 'loadMore', type: '[]' },
+        { name: 'create', type: '[query: string]' },
       ],
       slots: [
         { name: 'start', type: '{}' },

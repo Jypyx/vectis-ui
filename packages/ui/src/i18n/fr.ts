@@ -37,6 +37,7 @@ export const fr: Messages = {
   combobox: {
     empty: 'Aucun résultat',
     clear: 'Effacer la sélection',
+    create: (query) => `Créer « ${query} »`,
   },
   select: { clear: 'Effacer la sélection' },
   commandPalette: {

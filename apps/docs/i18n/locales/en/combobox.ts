@@ -26,6 +26,10 @@ export default {
       title: 'Multiple selection',
       text: '<code>multiple</code> uses an array for the selection and displays removable chips.',
     },
+    creatable: {
+      title: 'Creating values',
+      text: '<code>creatable</code> adds a last row offering to create the typed text when no option or chosen value has that label. Choosing it adds the text to <code>v-model</code> and emits <code>create</code>, where you can add the matching option. With nothing to show, the list stays hidden, so <code>:options="[]"</code> gives a free tags input.',
+    },
     textDisplay: {
       title: 'Values as text',
       text: '<code>display="text"</code> joins selected labels on one line. Deselect options in the list, or remove the last value with Backspace when the search is empty.',
@@ -97,6 +101,8 @@ export default {
         clearLabel: 'Accessible name of the clear button. Defaults to the library dictionary.',
         emptyText:
           'Title of the default <code>VEmptyState</code>, also announced to screen readers. Keep it consistent with custom <code>#empty</code> content.',
+        creatable:
+          'Offers to create the typed text as a new value when it matches no option or chosen value. The list stays hidden instead of showing an empty state, and the chevron is removed while there are no options.',
         filter:
           'Built-in accent-insensitive filtering, disabled filtering, or a custom function receiving the option and trimmed query.',
         searchDebounce:
@@ -117,6 +123,8 @@ export default {
           'Emits the search term after <code>searchDebounce</code>, or immediately on opening. Consecutive duplicate terms are skipped.',
         loadMore: 'Requests the next page when the list end becomes visible.',
         clear: 'Emitted after clearing selection and search.',
+        create:
+          'Emitted with the typed text after it is added to the value. Add the matching option, or replace the value with your own identifier.',
         clickIconStart: 'Emitted when the start icon button is activated.',
       },
       slots: {

@@ -96,6 +96,7 @@ const PARAMETERISED: Record<DictionaryLanguage, Record<ParameterisedKey, string>
   en: {
     'common.remove': '(name) => `Remove ${name}`',
     'pagination.page': '(page) => `Page ${page}`',
+    'combobox.create': '(query) => `Create "${query}"`',
     'dataTable.perPageValue': '(label, value) => `${label}: ${value}`',
     'dataTable.selectRow': '(index) => `Select row ${index}`',
     'dataTable.selection': "(count) => `${count} item${count === 1 ? '' : 's'} selected`",
@@ -124,6 +125,7 @@ const PARAMETERISED: Record<DictionaryLanguage, Record<ParameterisedKey, string>
   fr: {
     'common.remove': '(name) => `Retirer ${name}`',
     'pagination.page': '(page) => `Page ${page}`',
+    'combobox.create': '(query) => `Créer «\u00A0${query}\u00A0»`',
     'dataTable.perPageValue': '(label, value) => `${label} : ${value}`',
     'dataTable.selectRow': '(index) => `Sélectionner la ligne ${index}`',
     'dataTable.selection':

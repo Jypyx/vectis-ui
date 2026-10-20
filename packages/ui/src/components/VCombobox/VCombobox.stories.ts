@@ -97,6 +97,10 @@ const t = storyText({
     frozenHint: 'Set by your subscription.',
     searchCountry: 'Search a country',
     moreCountries: (count: number) => `+${count} more ${count === 1 ? 'country' : 'countries'}`,
+    tags: 'Tags',
+    addTag: 'Add a tag…',
+    freeTags: 'Free entry (no options)',
+    suggestedTags: 'Suggestions, extended as values are created',
   },
   fr: {
     chooseCountry: 'Choisir un pays…',
@@ -130,6 +134,10 @@ const t = storyText({
     frozenHint: 'Défini par votre abonnement.',
     searchCountry: 'Rechercher un pays',
     moreCountries: (count: number) => `+${count} ${count === 1 ? 'autre pays' : 'autres pays'}`,
+    tags: 'Étiquettes',
+    addTag: 'Ajouter une étiquette…',
+    freeTags: 'Saisie libre (sans options)',
+    suggestedTags: 'Suggestions, enrichies à chaque création',
   },
 })
 
@@ -333,6 +341,63 @@ export const MultipleSelection: Story = {
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('be'))
     await userEvent.click(canvas.getByRole('button', { name: 'Clear selection' }))
     await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent(/^$/))
+  },
+}
+
+/**
+ * `creatable` turns the field into a tags input: what has been typed can be added as a value of
+ * its own through the last row of the list. With no options, the list only appears once something
+ * is typed. `@create` is where to add the matching option, so that it is suggested again.
+ */
+export const Creatable: Story = {
+  render: (args) => ({
+    components: { VCombobox },
+    setup: () => {
+      const suggestions = ref<ComboboxOption[]>([
+        { value: 'vue', label: 'Vue' },
+        { value: 'nuxt', label: 'Nuxt' },
+        { value: 'vite', label: 'Vite' },
+      ])
+      const addSuggestion = (text: string) => suggestions.value.push({ value: text, label: text })
+      return {
+        args,
+        t,
+        free: ref<string[]>([]),
+        tags: ref<string[]>(['vue']),
+        suggestions,
+        addSuggestion,
+      }
+    },
+    template: `
+      <div style="display: grid; gap: 16px; width: 340px">
+        <div style="display: grid; gap: 4px">
+          <span style="font: 12px sans-serif; color: var(--vectis-color-text-muted)">{{ t.freeTags }}</span>
+          <VCombobox v-bind="args" :options="[]" multiple creatable v-model="free" :placeholder="t.addTag" :aria-label="t.tags" />
+          <output data-testid="mirror">{{ free.join(',') }}</output>
+        </div>
+        <div style="display: grid; gap: 4px">
+          <span style="font: 12px sans-serif; color: var(--vectis-color-text-muted)">{{ t.suggestedTags }}</span>
+          <VCombobox v-bind="args" :options="suggestions" multiple creatable v-model="tags" :placeholder="t.addTag" :aria-label="t.suggestedTags" @create="addSuggestion" />
+        </div>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const [free, suggested] = canvas.getAllByRole('combobox') as [HTMLElement, HTMLElement]
+
+    await userEvent.click(free)
+    await expect(free).toHaveAttribute('aria-expanded', 'false')
+    await userEvent.keyboard('design{Enter}')
+    await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent(/^design$/))
+    await userEvent.keyboard('ux{Enter}')
+    await waitFor(() => expect(canvas.getByTestId('mirror')).toHaveTextContent('design,ux'))
+
+    await userEvent.click(suggested)
+    await userEvent.keyboard('vi')
+    await waitFor(() =>
+      expect(within(document.body).getByRole('option', { name: 'Create "vi"' })).toBeVisible(),
+    )
   },
 }
 

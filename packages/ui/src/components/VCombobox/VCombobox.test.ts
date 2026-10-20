@@ -1203,3 +1203,84 @@ describe('VCombobox virtual', () => {
     expect(container.querySelector('.v-listbox-spacer')).toBeNull()
   })
 })
+
+describe('VCombobox creatable', () => {
+  const optionTexts = (container: Element) =>
+    [...container.querySelectorAll('[role="option"]')].map((o) => o.textContent?.trim())
+
+  it('with no option, stays hidden and chevron-less until something is typed', async () => {
+    const { getByRole, container } = renderCombobox({ options: [], creatable: true })
+    const input = getByRole('combobox')
+    await fireEvent.keyDown(input, { key: 'ArrowDown' })
+    expect(input.getAttribute('aria-expanded')).toBe('false')
+    expect(container.querySelector('.v-combobox-state')).toBeNull()
+    expect(container.querySelector('.v-combobox-chevron')).toBeNull()
+    expect(container.querySelector('[role="status"]')?.textContent).toBe('')
+  })
+
+  it('tags: Enter creates the typed value, without submitting a surrounding form', async () => {
+    const { getByRole, container, emitted } = renderCombobox({
+      options: [],
+      creatable: true,
+      multiple: true,
+      modelValue: [],
+    })
+    const input = getByRole('combobox') as HTMLInputElement
+    await fireEvent.update(input, ' vue ')
+    expect(input.getAttribute('aria-expanded')).toBe('true')
+    expect(optionTexts(container)).toEqual(['Create "vue"'])
+    expect(input.getAttribute('aria-activedescendant')).toBe(
+      container.querySelector('[role="option"]')?.id,
+    )
+
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true })
+    input.dispatchEvent(enter)
+    await nextTick()
+    expect(enter.defaultPrevented).toBe(true)
+    expect(emitted('update:modelValue')).toEqual([[['vue']]])
+    expect(emitted('create')).toEqual([['vue']])
+    expect(input.value).toBe('')
+    expect(input.getAttribute('aria-expanded')).toBe('false')
+  })
+
+  it('a created value is labelled by itself, and is not offered again', async () => {
+    const { getByRole, container } = renderCombobox({
+      options: [],
+      creatable: true,
+      multiple: true,
+      modelValue: ['vue'],
+    })
+    const input = getByRole('combobox')
+    await fireEvent.update(input, 'VUE')
+    expect(optionTexts(container)).toEqual([])
+    expect(input.getAttribute('aria-expanded')).toBe('false')
+    expect(container.querySelector('.v-chip')?.textContent).toContain('vue')
+  })
+
+  it('offers creation last, after the partial matches, and not on an exact label', async () => {
+    const { getByRole, container } = renderCombobox({ creatable: true })
+    const input = getByRole('combobox')
+    await fireEvent.update(input, 'fra')
+    expect(optionTexts(container)).toEqual(['France', 'Create "fra"'])
+    expect(container.querySelector('[role="option"][data-active]')?.textContent).toContain('France')
+    await fireEvent.update(input, 'reunion')
+    expect(optionTexts(container)).toEqual(['Réunion'])
+  })
+
+  it('the created row escapes a filter of your own', async () => {
+    const { getByRole, container } = renderCombobox({ creatable: true, filter: () => false })
+    await fireEvent.update(getByRole('combobox'), 'Spain')
+    expect(optionTexts(container)).toEqual(['Create "Spain"'])
+  })
+
+  it('single: choosing the created row sets the value and closes on its text', async () => {
+    const { getByRole, container, emitted } = renderCombobox({ creatable: true })
+    const input = getByRole('combobox') as HTMLInputElement
+    await fireEvent.update(input, 'Spain')
+    await fireEvent.click(container.querySelector('[role="option"]')!)
+    expect(emitted('update:modelValue')).toEqual([['Spain']])
+    expect(emitted('create')).toEqual([['Spain']])
+    expect(input.value).toBe('Spain')
+    expect(input.getAttribute('aria-expanded')).toBe('false')
+  })
+})

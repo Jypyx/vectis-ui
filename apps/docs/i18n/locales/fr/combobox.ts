@@ -26,6 +26,10 @@ export default {
       title: 'Sélection multiple',
       text: '<code>multiple</code> utilise un tableau pour la sélection et affiche des puces supprimables.',
     },
+    creatable: {
+      title: 'Création de valeurs',
+      text: '<code>creatable</code> ajoute une dernière ligne proposant de créer le texte saisi lorsqu’aucune option ni valeur choisie ne porte ce libellé. La choisir ajoute le texte au <code>v-model</code> et émet <code>create</code>, où vous pouvez ajouter l’option correspondante. Sans rien à afficher, la liste reste masquée : <code>:options="[]"</code> donne un champ d’étiquettes libre.',
+    },
     textDisplay: {
       title: 'Valeurs en texte',
       text: '<code>display="text"</code> réunit les libellés sélectionnés sur une ligne. Désélectionnez les options dans la liste, ou retirez la dernière valeur avec Retour arrière lorsque la recherche est vide.',
@@ -100,6 +104,8 @@ export default {
           'Nom accessible du bouton d’effacement. Utilise le dictionnaire de la bibliothèque par défaut.',
         emptyText:
           'Titre du <code>VEmptyState</code> par défaut, aussi annoncé lorsque la liste est vide. Gardez-le cohérent avec le contenu personnalisé de <code>#empty</code>.',
+        creatable:
+          'Propose de créer le texte saisi comme nouvelle valeur lorsqu’il ne correspond à aucune option ni valeur choisie. La liste reste masquée au lieu d’afficher un état vide, et le chevron disparaît tant qu’il n’y a aucune option.',
         filter:
           'Filtrage intégré insensible aux accents, filtrage désactivé ou fonction personnalisée recevant l’option et la recherche sans espaces aux extrémités.',
         searchDebounce:
@@ -120,6 +126,8 @@ export default {
           'Émet la recherche après <code>searchDebounce</code>, ou immédiatement à l’ouverture. Les recherches identiques consécutives sont ignorées.',
         loadMore: 'Demande la page suivante lorsque la fin de liste devient visible.',
         clear: 'Émis après l’effacement de la sélection et de la recherche.',
+        create:
+          'Émis avec le texte saisi après son ajout à la valeur. Ajoutez l’option correspondante, ou remplacez la valeur par votre propre identifiant.',
         clickIconStart: 'Émis à l’activation du bouton d’icône de début.',
       },
       slots: {

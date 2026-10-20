@@ -46,6 +46,8 @@ export interface Messages {
   combobox: {
     empty: string
     clear: string
+    /** The row of a `creatable` list that adds what has been typed as a new value. */
+    create: (query: string) => string
   }
   select: {
     clear: string

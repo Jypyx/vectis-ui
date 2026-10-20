@@ -4,6 +4,8 @@ import ComboboxAsynchronousSearch from '~/examples/combobox/AsynchronousSearch.v
 import comboboxAsynchronousSearchSource from '~/examples/combobox/AsynchronousSearch.vue?raw'
 import ComboboxBasic from '~/examples/combobox/Basic.vue'
 import comboboxBasicSource from '~/examples/combobox/Basic.vue?raw'
+import ComboboxCreatable from '~/examples/combobox/Creatable.vue'
+import comboboxCreatableSource from '~/examples/combobox/Creatable.vue?raw'
 import ComboboxCustomChip from '~/examples/combobox/CustomChip.vue'
 import comboboxCustomChipSource from '~/examples/combobox/CustomChip.vue?raw'
 import ComboboxCustomOption from '~/examples/combobox/CustomOption.vue'
@@ -84,6 +86,12 @@ useDocsHead('combobox')
   <DocsProse keypath="combobox.examples.multiple.text" />
   <DocsExample :source="comboboxMultipleSource" stack>
     <ComboboxMultiple />
+  </DocsExample>
+
+  <h3 id="creatable">{{ t('combobox.examples.creatable.title') }}</h3>
+  <DocsProse keypath="combobox.examples.creatable.text" />
+  <DocsExample :source="comboboxCreatableSource" stack>
+    <ComboboxCreatable />
   </DocsExample>
 
   <h3 id="text-display">{{ t('combobox.examples.textDisplay.title') }}</h3>

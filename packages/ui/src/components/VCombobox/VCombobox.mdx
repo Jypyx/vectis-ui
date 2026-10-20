@@ -195,6 +195,23 @@ The **`#chip`** slot replaces the VChip of a selected value. It receives:
 
 <Canvas of={VComboboxStories.CustomChip} />
 
+## Creating values
+
+`creatable` lets what has been typed become a value of its own, the behaviour of a tags input.
+When the search matches no option's label exactly (ignoring case and accents) and no chosen value,
+a last row offers to create it. Partial matches come first, so **Enter** still picks the first of
+them; the row is highlighted when nothing else matches.
+
+Choosing that row adds the text to the `v-model` and emits `create` with it. The chip shows the
+text until an option holds that value: add one to `options` in the `create` handler so that it is
+suggested again, or replace the value with an identifier of your own.
+
+With nothing to show, the list stays out of sight rather than displaying an empty state, and the
+chevron is dropped while `options` is empty. A free-entry field is therefore simply
+`<VCombobox v-model="tags" :options="[]" multiple creatable />`.
+
+<Canvas of={VComboboxStories.Creatable} />
+
 ## Label and hint
 
 `label` is rendered above the field and `hint` below it, both tied to it for assistive technology.
