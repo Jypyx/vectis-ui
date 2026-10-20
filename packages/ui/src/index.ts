@@ -254,7 +254,7 @@ export type {
 export { default as VInputOTP } from './components/VInputOTP/VInputOTP.vue'
 export type { InputOTPSize, InputOTPFormat } from './components/VInputOTP/VInputOTP.vue'
 export { default as VMeter } from './components/VMeter/VMeter.vue'
-export type { MeterTone, MeterSize } from './components/VMeter/VMeter.vue'
+export type { MeterTone, MeterSize, MeterValuePosition } from './components/VMeter/VMeter.vue'
 export { default as VProgressCircular } from './components/VProgressCircular/VProgressCircular.vue'
 export type {
   ProgressCircularTone,
@@ -265,6 +265,7 @@ export { default as VProgressLinear } from './components/VProgressLinear/VProgre
 export type {
   ProgressLinearTone,
   ProgressLinearShape,
+  ProgressLinearSize,
   ProgressLinearValuePosition,
   ProgressLinearOrientation,
   ProgressLinearSlotProps,

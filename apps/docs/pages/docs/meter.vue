@@ -12,6 +12,8 @@ import MeterSizes from '~/examples/meter/Sizes.vue'
 import meterSizesSource from '~/examples/meter/Sizes.vue?raw'
 import MeterTones from '~/examples/meter/Tones.vue'
 import meterTonesSource from '~/examples/meter/Tones.vue?raw'
+import MeterValuePosition from '~/examples/meter/ValuePosition.vue'
+import meterValuePositionSource from '~/examples/meter/ValuePosition.vue?raw'
 import MeterValueText from '~/examples/meter/ValueText.vue'
 import meterValueTextSource from '~/examples/meter/ValueText.vue?raw'
 
@@ -48,6 +50,12 @@ useDocsHead('meter')
   <DocsProse keypath="meter.examples.valueText.text" />
   <DocsExample :source="meterValueTextSource" stack>
     <MeterValueText />
+  </DocsExample>
+
+  <h3 id="value-position">{{ t('meter.examples.valuePosition.title') }}</h3>
+  <DocsProse keypath="meter.examples.valuePosition.text" />
+  <DocsExample :source="meterValuePositionSource" stack>
+    <MeterValuePosition />
   </DocsExample>
 
   <h3 id="segments">{{ t('meter.examples.segments.title') }}</h3>

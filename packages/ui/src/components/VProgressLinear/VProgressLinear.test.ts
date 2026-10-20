@@ -36,14 +36,6 @@ describe('VProgressLinear', () => {
     expect(bar.getAttribute('aria-valuenow')).toBe('0')
   })
 
-  it('a thickness in another unit is refused rather than read as pixels', () => {
-    const { container } = render(VProgressLinear, {
-      props: { value: 10, thickness: '1rem' },
-      attrs: { 'aria-label': 'x' },
-    })
-    expect(styleOf(container)).not.toContain('--progress-thickness')
-  })
-
   it('clamps above the max', () => {
     const { getByRole, container } = render(VProgressLinear, {
       props: { value: 250, max: 100 },
@@ -114,18 +106,14 @@ describe('VProgressLinear', () => {
     expect(rootStyleOf(container)).toContain('--custom-color: hotpink')
   })
 
-  it('thickness: a number → px, a string as-is, absent when not supplied', async () => {
+  it('size: sm by default, an explicit value carried over', async () => {
     const { container, rerender } = render(VProgressLinear, {
       props: { value: 40 },
       attrs: { 'aria-label': 'x' },
     })
-    expect(rootStyleOf(container)).not.toContain('--progress-thickness')
-    await rerender({ thickness: 12 })
-    expect(rootStyleOf(container)).toContain('--progress-thickness: 12px')
-    await rerender({ thickness: '12' })
-    expect(rootStyleOf(container)).toContain('--progress-thickness: 12px')
-    await rerender({ thickness: 'auto' })
-    expect(rootStyleOf(container)).not.toContain('--progress-thickness')
+    expect(rootOf(container).getAttribute('data-size')).toBe('sm')
+    await rerender({ size: 'xl' })
+    expect(rootOf(container).getAttribute('data-size')).toBe('xl')
   })
 
   it('shape: rounded by default, square carried over', async () => {
@@ -150,7 +138,7 @@ describe('VProgressLinear', () => {
 
   it('showValue: two copies of the text, only the clipped one is aria-hidden', () => {
     const { container } = render(VProgressLinear, {
-      props: { value: 50, showValue: true },
+      props: { value: 50, showValue: true, valuePosition: 'center' },
       attrs: { 'aria-label': 'x' },
     })
     const copies = [...container.querySelectorAll('.v-progress-linear-text')]
@@ -201,7 +189,7 @@ describe('VProgressLinear', () => {
         props: { value, showValue: true },
         attrs: { 'aria-label': 'x' },
       })
-        .container.querySelector('.v-progress-linear-text')
+        .container.querySelector('.v-progress-linear-value')
         ?.textContent?.trim()
     expect(text(99.6)).toBe('99%')
     expect(text(0.4)).toBe('1%')
@@ -210,25 +198,17 @@ describe('VProgressLinear', () => {
     expect(text(42.4)).toBe('42%')
   })
 
-  it('a negative thickness is refused rather than written as an invalid length', () => {
-    const { container } = render(VProgressLinear, {
-      props: { value: 10, thickness: -3 },
-      attrs: { 'aria-label': 'x' },
-    })
-    expect(styleOf(container)).not.toContain('--progress-thickness')
-  })
-
   it('showValue: the percentage is rounded and derived from max', () => {
     const { container } = render(VProgressLinear, {
       props: { value: 1, max: 3, showValue: true },
       attrs: { 'aria-label': 'x' },
     })
-    expect(container.querySelector('.v-progress-linear-text')?.textContent?.trim()).toBe('33%')
+    expect(container.querySelector('.v-progress-linear-value')?.textContent?.trim()).toBe('33%')
   })
 
   it('the scoped slot: it receives value/max/percent and wins over showValue', () => {
     const { container } = render(VProgressLinear, {
-      props: { value: 30, max: 60, showValue: true },
+      props: { value: 30, max: 60, showValue: true, valuePosition: 'center' },
       attrs: { 'aria-label': 'x' },
       slots: {
         default: '<template #default="s">{{ s.value }}/{{ s.max }} — {{ s.percent }}</template>',
@@ -241,7 +221,7 @@ describe('VProgressLinear', () => {
 
   it('the slot alone is enough to render the text (without showValue)', () => {
     const { container } = render(VProgressLinear, {
-      props: { value: 40 },
+      props: { value: 40, valuePosition: 'center' },
       attrs: { 'aria-label': 'x' },
       slots: { default: 'Uploading…' },
     })
@@ -260,25 +240,50 @@ describe('VProgressLinear', () => {
 
   it('vertical: the text is rendered as in horizontal', () => {
     const { container } = render(VProgressLinear, {
-      props: { value: 40, orientation: 'vertical', showValue: true },
+      props: { value: 40, orientation: 'vertical', showValue: true, valuePosition: 'start' },
       attrs: { 'aria-label': 'x' },
     })
     expect(container.querySelectorAll('.v-progress-linear-text')).toHaveLength(2)
   })
 
-  it('valuePosition: center by default, an explicit value carried over', async () => {
+  it('valuePosition: header by default, an explicit value carried over', async () => {
     const { getByRole, rerender } = render(VProgressLinear, {
       props: { value: 40, showValue: true },
       attrs: { 'aria-label': 'x' },
     })
-    expect(getByRole('progressbar').getAttribute('data-value-position')).toBe('center')
+    expect(getByRole('progressbar').getAttribute('data-value-position')).toBe('header')
     await rerender({ valuePosition: 'end' })
     expect(getByRole('progressbar').getAttribute('data-value-position')).toBe('end')
   })
 
+  it('valuePosition header: one copy after the label, hidden, and none in the bar', () => {
+    const { container } = render(VProgressLinear, {
+      props: { value: 40, showValue: true, label: 'Upload' },
+    })
+    const value = container.querySelector('.v-progress-linear-header .v-progress-linear-value')!
+    expect(value.textContent?.trim()).toBe('40%')
+    expect(value.getAttribute('aria-hidden')).toBe('true')
+    expect(container.querySelectorAll('.v-progress-linear-text')).toHaveLength(0)
+  })
+
+  it('valuePosition inside the bar: no value in the header', () => {
+    const { container } = render(VProgressLinear, {
+      props: { value: 40, showValue: true, valuePosition: 'end', label: 'Upload' },
+    })
+    expect(container.querySelector('.v-progress-linear-value')).toBeNull()
+    expect(container.querySelectorAll('.v-progress-linear-text')).toHaveLength(2)
+  })
+
+  it('renders no header when neither label nor value is shown', () => {
+    const { container } = render(VProgressLinear, {
+      props: { value: 40, label: 'Upload', hideLabel: true },
+    })
+    expect(container.querySelector('.v-progress-linear-header')).toBeNull()
+  })
+
   it('fallthrough: class and style stay on the root, the other attributes reach the bar', () => {
     const { getByRole, container } = render(VProgressLinear, {
-      props: { value: 40, thickness: 8 },
+      props: { value: 40 },
       attrs: { 'aria-label': 'Upload', class: 'my-upload', id: 'up', style: 'margin-top: 4px' },
     })
     const bar = getByRole('progressbar', { name: 'Upload' })
@@ -287,7 +292,6 @@ describe('VProgressLinear', () => {
     expect(bar.classList.contains('my-upload')).toBe(false)
     expect(bar.id).toBe('up')
     expect(rootStyleOf(container)).toContain('margin-top: 4px')
-    expect(rootStyleOf(container)).toContain('--progress-thickness: 8px')
     expect(styleOf(container)).toContain('--fill-fraction: 0.4')
   })
 
@@ -297,7 +301,6 @@ describe('VProgressLinear', () => {
     })
     const label = container.querySelector('.v-progress-linear-label') as HTMLElement
     const bar = getByRole('progressbar', { name: 'Upload' })
-    expect(label.classList.contains('v-visually-hidden')).toBe(false)
     expect(bar.getAttribute('aria-labelledby')).toBe(label.id)
     expect(bar.hasAttribute('aria-label')).toBe(false)
   })
@@ -306,8 +309,8 @@ describe('VProgressLinear', () => {
     const { getByRole, container } = render(VProgressLinear, {
       props: { value: 40, label: 'Upload', hideLabel: true },
     })
-    const label = container.querySelector('.v-progress-linear-label') as HTMLElement
-    expect(label.classList.contains('v-visually-hidden')).toBe(true)
+    expect(container.querySelector('.v-progress-linear-label')).toBeNull()
+    expect(container.querySelector('.v-visually-hidden')?.textContent).toBe('Upload')
     expect(getByRole('progressbar', { name: 'Upload' })).toBeTruthy()
   })
 

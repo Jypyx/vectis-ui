@@ -9,7 +9,7 @@
  */
 import { computed, useId } from 'vue'
 
-import { useAriaLabel } from '../../composables/useAriaLabel'
+import { useAriaLabel, useLabelledBy } from '../../composables/useAriaLabel'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useLocale, useMessages } from '../../i18n/state'
 import { customColorStyle } from '../../utils/css'
@@ -18,8 +18,11 @@ import { clamp } from '../../utils/number'
 /** The colour of the fill, which replaces the one chosen from `low`, `high` and `optimum`. */
 export type MeterTone = 'accent' | 'neutral' | 'success' | 'warning' | 'danger'
 
-/** The thickness of the bar, 4, 8 or 12 pixels, and the size of the text above it. */
-export type MeterSize = 'sm' | 'md' | 'lg'
+/** The thickness of the bar: 2, 4, 8, 12 or 20 pixels. */
+export type MeterSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+
+/** Where the value is written: after the label, or inside the bar at its start, centre or end. */
+export type MeterValuePosition = 'header' | 'start' | 'center' | 'end'
 
 interface MeterProps {
   /** The measurement. Anything outside the range is brought back into it. */
@@ -49,8 +52,8 @@ interface MeterProps {
   /** Hides the label visually. It still names the bar for screen readers. */
   hideLabel?: boolean
   /**
-   * The value as written above the bar and read by screen readers, such as "7.2 GB of 10 GB" or
-   * "Strong". It replaces the formatted value.
+   * The value as written and read by screen readers, such as "7.2 GB of 10 GB" or "Strong". It
+   * replaces the formatted value.
    */
   valueText?: string
   /**
@@ -58,8 +61,10 @@ interface MeterProps {
    * value is written as a percentage of the range.
    */
   formatOptions?: Intl.NumberFormatOptions
-  /** Hides the value visually. Screen readers still read it from the bar. */
-  hideValue?: boolean
+  /** Writes the value. Screen readers read it from the bar either way. */
+  showValue?: boolean
+  /** Where that text is written: at the end of the label's line, or inside the bar. */
+  valuePosition?: MeterValuePosition
   /**
    * The colour of the fill. Without it, the region of the value picks one when `low`, `high` or
    * `optimum` is set: success, warning or danger; otherwise the accent.
@@ -72,7 +77,7 @@ interface MeterProps {
   color?: string
   /** Splits the bar into this many equal parts, for a strength or a battery level. */
   segments?: number
-  /** The thickness of the bar and the size of the text above it. */
+  /** The thickness of the bar. Only `xl` is thick enough to hold the value written inside it. */
   size?: MeterSize
 }
 
@@ -91,7 +96,8 @@ const props = withDefaults(defineProps<MeterProps>(), {
   hideLabel: false,
   valueText: undefined,
   formatOptions: undefined,
-  hideValue: false,
+  showValue: false,
+  valuePosition: 'header',
   // Deliberately undefined: the region of the value then picks the tone.
   tone: undefined,
   color: undefined,
@@ -99,7 +105,7 @@ const props = withDefaults(defineProps<MeterProps>(), {
   size: 'md',
 })
 
-const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
+const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 const m = useMessages()
 const locale = useLocale()
 const labelId = useId()
@@ -161,15 +167,14 @@ const segmentCount = computed(() =>
 /** How much of segment `index` is filled, from 0 to 1. */
 const segmentFill = (index: number) => clamp(fraction.value * segmentCount.value - index, 0, 1)
 
+const valueInHeader = computed(() => props.showValue && props.valuePosition === 'header')
+const valueInBar = computed(() => props.showValue && props.valuePosition !== 'header')
+
 // @a11y
 // A visible label names the bar by reference, unless the consumer named it themselves; without
 // one, the dictionary does.
 const ariaLabel = useAriaLabel(() => (props.label ? undefined : m.value.meter.label))
-const labelledBy = computed(() =>
-  props.label && attrs['aria-label'] == null && attrs['aria-labelledby'] == null
-    ? labelId
-    : undefined,
-)
+const labelledBy = useLabelledBy(labelId, () => props.label)
 </script>
 
 <template>
@@ -181,11 +186,12 @@ const labelledBy = computed(() =>
     :data-custom="color !== undefined ? '' : undefined"
     :data-level="level"
     :data-size="size"
+    :data-value-position="valuePosition"
   >
-    <div v-if="(label && !hideLabel) || !hideValue" class="v-meter-header">
+    <div v-if="(label && !hideLabel) || valueInHeader" class="v-meter-header">
       <span v-if="label && !hideLabel" :id="labelId" class="v-meter-label">{{ label }}</span>
       <!-- Read from the bar's `aria-valuetext`, so hidden here to avoid reading it twice. -->
-      <span v-if="!hideValue" class="v-meter-value" aria-hidden="true">{{ text }}</span>
+      <span v-if="valueInHeader" class="v-meter-value" aria-hidden="true">{{ text }}</span>
     </div>
     <span v-if="label && hideLabel" :id="labelId" class="v-visually-hidden">{{ label }}</span>
     <div
@@ -198,6 +204,11 @@ const labelledBy = computed(() =>
       :aria-labelledby="labelledBy"
       :aria-label="ariaLabel"
       v-bind="forwardedAttrs"
+      :style="{
+        '--meter-fraction': String(fraction),
+        '--meter-segments': String(segmentCount),
+        '--meter-gaps-filled': String(Math.floor(fraction * segmentCount)),
+      }"
     >
       <span
         v-for="segment in segmentCount"
@@ -207,6 +218,15 @@ const labelledBy = computed(() =>
       >
         <span class="v-meter-fill" />
       </span>
+      <!--
+        The same text twice, as in VProgressLinear: each copy is cut at the fill's edge, the
+        second coloured to contrast with the fill. Both are hidden, `aria-valuetext` carrying
+        the text.
+      -->
+      <template v-if="valueInBar">
+        <span class="v-meter-text" aria-hidden="true">{{ text }}</span>
+        <span class="v-meter-text" data-on-fill aria-hidden="true">{{ text }}</span>
+      </template>
     </div>
   </div>
 </template>
@@ -214,13 +234,12 @@ const labelledBy = computed(() =>
 <style>
 @layer vectis.components {
   .v-meter {
-    --meter-thickness: var(--vectis-control-size-meter-thickness-md);
-    /*
-     * Fill and track come from the shared tone table. The track takes the soft border rather than
-     * the soft background: the empty part must stay visible, since the reading is a proportion.
-     */
+    --meter-thickness: var(--vectis-control-size-bar-thickness-md);
+    /* Fill, track and the text over the fill come from the shared tone table, as in
+       VProgressLinear. */
     --meter-fill: var(--tone-bg-solid);
-    --meter-track: var(--tone-border-soft);
+    --meter-track: var(--tone-bg-soft);
+    --meter-text-fallback: var(--tone-text-solid);
     display: flex;
     flex-direction: column;
     gap: var(--vectis-space-1);
@@ -228,17 +247,20 @@ const labelledBy = computed(() =>
     font-family: var(--vectis-text-family);
   }
 
-  /* The custom-colour row of the tone table defines no soft border; the tone's would show. */
-  .v-meter[data-custom] {
-    --meter-track: color-mix(in oklab, var(--custom-color), var(--vectis-color-surface) 70%);
+  .v-meter[data-size='xs'] {
+    --meter-thickness: var(--vectis-control-size-bar-thickness-xs);
   }
 
   .v-meter[data-size='sm'] {
-    --meter-thickness: var(--vectis-control-size-meter-thickness-sm);
+    --meter-thickness: var(--vectis-control-size-bar-thickness-sm);
   }
 
   .v-meter[data-size='lg'] {
-    --meter-thickness: var(--vectis-control-size-meter-thickness-lg);
+    --meter-thickness: var(--vectis-control-size-bar-thickness-lg);
+  }
+
+  .v-meter[data-size='xl'] {
+    --meter-thickness: var(--vectis-control-size-bar-thickness-xl);
   }
 
   .v-meter-header {
@@ -265,14 +287,17 @@ const labelledBy = computed(() =>
     font-variant-numeric: tabular-nums;
   }
 
-  .v-meter[data-size='sm'] .v-meter-label,
-  .v-meter[data-size='sm'] .v-meter-value {
-    font-size: var(--vectis-text-caption-size);
-    font-weight: var(--vectis-text-caption-weight);
-    line-height: var(--vectis-text-caption-leading);
-  }
-
   .v-meter-track {
+    /*
+     * Where the fill ends along the whole track, gaps included: the filled fraction of the
+     * segments' total length, plus every gap the fill has crossed.
+     */
+    --meter-edge: calc(
+      (100% - (var(--meter-segments) - 1) * var(--vectis-control-size-meter-segment-gap)) *
+        var(--meter-fraction) + var(--meter-gaps-filled) *
+        var(--vectis-control-size-meter-segment-gap)
+    );
+    position: relative;
     display: flex;
     gap: var(--vectis-control-size-meter-segment-gap);
     block-size: var(--meter-thickness);
@@ -298,8 +323,59 @@ const labelledBy = computed(() =>
       background-color var(--vectis-duration-base) var(--vectis-ease-default);
   }
 
+  /*
+   * The two copies are complementary, each cut to its own side of the fill's edge, so every
+   * letter is painted once. The large negative insets keep text taller than the bar uncropped.
+   */
+  .v-meter-text {
+    --meter-clip-start: var(--meter-edge);
+    --meter-clip-end: -100vmax;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-inline: var(--vectis-space-2);
+    color: var(--vectis-color-text);
+    font-size: var(--vectis-text-caption-size);
+    font-weight: var(--vectis-text-control-weight);
+    line-height: var(--vectis-text-control-leading);
+    font-variant-numeric: tabular-nums;
+    clip-path: inset(-100vmax var(--meter-clip-end) -100vmax var(--meter-clip-start));
+    transition: clip-path var(--vectis-duration-base) var(--vectis-ease-default);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .v-meter[data-value-position='start'] .v-meter-text {
+    justify-content: start;
+  }
+
+  .v-meter[data-value-position='end'] .v-meter-text {
+    justify-content: end;
+  }
+
+  /* The fallback stands alone for the reason given in VProgressLinear: a var() in a second
+     declaration would win the cascade and then turn invalid. */
+  .v-meter-text[data-on-fill] {
+    --meter-clip-start: -100vmax;
+    --meter-clip-end: calc(100% - var(--meter-edge));
+    color: var(--meter-text-fallback);
+  }
+
+  @supports (color: contrast-color(red)) {
+    .v-meter-text[data-on-fill] {
+      color: contrast-color(var(--meter-fill));
+    }
+  }
+
+  .v-meter-track:dir(rtl) .v-meter-text {
+    clip-path: inset(-100vmax var(--meter-clip-start) -100vmax var(--meter-clip-end));
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .v-meter-fill {
+    .v-meter-fill,
+    .v-meter-text {
       transition: none;
     }
   }
@@ -313,6 +389,15 @@ const labelledBy = computed(() =>
 
     .v-meter-fill {
       background: Highlight;
+    }
+
+    .v-meter-text {
+      forced-color-adjust: none;
+      color: CanvasText;
+    }
+
+    .v-meter-text[data-on-fill] {
+      color: HighlightText;
     }
   }
 }

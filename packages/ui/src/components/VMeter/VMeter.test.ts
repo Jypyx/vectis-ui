@@ -125,7 +125,7 @@ describe('VMeter', () => {
   })
 
   it('writes the value once on screen, hidden from screen readers', () => {
-    const { getByText } = render(VMeter, { props: { value: 72.4, label: 'x' } })
+    const { getByText } = render(VMeter, { props: { value: 72.4, showValue: true, label: 'x' } })
     expect(getByText('72%').getAttribute('aria-hidden')).toBe('true')
   })
 
@@ -136,6 +136,7 @@ describe('VMeter', () => {
         min: -10,
         max: 40,
         formatOptions: { style: 'unit', unit: 'celsius' },
+        showValue: true,
         label: 'x',
       },
     })
@@ -150,6 +151,7 @@ describe('VMeter', () => {
         max: 4,
         valueText: 'Strong',
         formatOptions: { style: 'unit', unit: 'byte' },
+        showValue: true,
         label: 'x',
       },
     })
@@ -157,19 +159,41 @@ describe('VMeter', () => {
     expect(getByText('Strong')).toBeTruthy()
   })
 
-  it('hideValue removes the text but keeps aria-valuetext', () => {
-    const { container, getByRole } = render(VMeter, {
-      props: { value: 50, hideValue: true, label: 'x' },
-    })
+  it('without showValue, writes no text but keeps aria-valuetext', () => {
+    const { container, getByRole } = render(VMeter, { props: { value: 50, label: 'x' } })
     expect(container.querySelector('.v-meter-value')).toBeNull()
+    expect(container.querySelector('.v-meter-text')).toBeNull()
     expect(getByRole('meter').getAttribute('aria-valuetext')).toBe('50%')
   })
 
   it('renders no header when neither label nor value is shown', () => {
     const { container } = render(VMeter, {
-      props: { value: 50, label: 'x', hideLabel: true, hideValue: true },
+      props: { value: 50, label: 'x', hideLabel: true },
     })
     expect(container.querySelector('.v-meter-header')).toBeNull()
+  })
+
+  it('valuePosition inside the bar: two hidden copies there, none in the header', () => {
+    const { container } = render(VMeter, {
+      props: { value: 50, showValue: true, valuePosition: 'end', label: 'x' },
+    })
+    const copies = [...container.querySelectorAll('[role=meter] .v-meter-text')]
+    expect(copies).toHaveLength(2)
+    for (const copy of copies) {
+      expect(copy.textContent).toBe('50%')
+      expect(copy.getAttribute('aria-hidden')).toBe('true')
+    }
+    expect(copies[1]!.hasAttribute('data-on-fill')).toBe(true)
+    expect(container.querySelector('.v-meter-value')).toBeNull()
+    expect(container.querySelector('.v-meter')!.getAttribute('data-value-position')).toBe('end')
+  })
+
+  it('gives the text the fill edge across segments and their gaps', () => {
+    const { getByRole } = render(VMeter, { props: { value: 70, segments: 5, label: 'x' } })
+    const style = getByRole('meter').style
+    expect(style.getPropertyValue('--meter-fraction')).toBe('0.7')
+    expect(style.getPropertyValue('--meter-segments')).toBe('5')
+    expect(style.getPropertyValue('--meter-gaps-filled')).toBe('3')
   })
 
   it('a single segment holds the whole fraction', () => {

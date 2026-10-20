@@ -18,17 +18,17 @@ export default {
       title: 'Custom colours',
       text: '<code>color</code> overrides the tone with a CSS colour.',
     },
-    thickness: {
-      title: 'Thickness',
-      text: '<code>thickness</code> sets the stroke width in pixels. The bar fills its container’s width.',
+    sizes: {
+      title: 'Sizes',
+      text: '<code>size</code> sets the thickness of the bar, from 2 to 20 pixels, on the same scale as <code>VMeter</code>. The bar fills its container’s width.',
     },
     shape: {
       title: 'Shape',
       text: '<code>shape</code> selects rounded or square stroke ends.',
     },
     customContent: {
-      title: 'Content inside the bar',
-      text: '<code>showValue</code> displays the percentage; <code>valuePosition</code> positions it. The default slot receives <code>value</code>, <code>max</code> and <code>percent</code>. It renders twice: use non-interactive content without side effects.',
+      title: 'Value position',
+      text: '<code>showValue</code> displays the percentage. <code>valuePosition</code> writes it after the label or inside the bar, which needs <code>size="xl"</code>. The default slot receives <code>value</code>, <code>max</code> and <code>percent</code>. Inside the bar it renders twice: use non-interactive content without side effects.',
     },
     orientation: {
       title: 'Orientation',
@@ -46,15 +46,16 @@ export default {
         indeterminate: 'Animates without a measurable value. Ignores <code>value</code>.',
         tone: 'Colour tone.',
         color: 'Custom CSS colour overriding the tone.',
-        thickness: 'Bar thickness in pixels. Increase it before displaying text inside.',
+        size: 'Bar thickness. Only <code>xl</code> holds the value inside the bar.',
         shape: 'Rounded or square stroke ends.',
         showValue: 'Displays the percentage. Ignored in indeterminate mode.',
-        valuePosition: 'Text position along the bar. Vertical start is the bottom.',
+        valuePosition:
+          'Text position: after the label, or along the bar. Vertical start is the bottom.',
         orientation: 'Horizontal or vertical bar. Vertical progress fills from bottom to top.',
       },
       slots: {
         default:
-          'Content replacing the percentage. Receives <code>value</code>, <code>max</code> and <code>percent</code>. Renders twice; keep content non-interactive and free of side effects.',
+          'Content replacing the percentage. Receives <code>value</code>, <code>max</code> and <code>percent</code>. Renders twice inside the bar; keep content non-interactive and free of side effects.',
       },
     },
   },

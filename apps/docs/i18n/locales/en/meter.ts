@@ -12,7 +12,11 @@ export default {
     },
     valueText: {
       title: 'Value',
-      text: 'The value is a percentage of the range by default. <code>formatOptions</code> formats the value itself for the current locale, and <code>valueText</code> replaces it with your own words. Screen readers read the same text.',
+      text: '<code>showValue</code> writes the value after the label. It is a percentage of the range by default. <code>formatOptions</code> formats the value itself for the current locale, and <code>valueText</code> replaces it with your own words. Screen readers read the same text, written or not.',
+    },
+    valuePosition: {
+      title: 'Value position',
+      text: '<code>valuePosition</code> writes the value inside the bar, at its start, centre or end, as in <code>VProgressLinear</code>. Only <code>size="xl"</code> is thick enough to hold it.',
     },
     segments: {
       title: 'Segments',
@@ -20,11 +24,11 @@ export default {
     },
     sizes: {
       title: 'Sizes',
-      text: '<code>size</code> sets the thickness of the bar, 4, 8 or 12 pixels. The meter takes the whole width of its container.',
+      text: '<code>size</code> sets the thickness of the bar, from 2 to 20 pixels, on the same scale as <code>VProgressLinear</code>. The meter takes the whole width of its container.',
     },
     hiddenText: {
       title: 'Hidden text',
-      text: '<code>hideLabel</code> and <code>hideValue</code> remove the text above the bar. Screen readers still hear the label and the value.',
+      text: 'Without <code>showValue</code>, the value is not written, and <code>hideLabel</code> hides the label. Screen readers still hear both.',
     },
   },
   api: {
@@ -42,11 +46,12 @@ export default {
         hideLabel: 'Hides the label visually. Screen readers still read it.',
         valueText: 'Text replacing the formatted value, on screen and for screen readers.',
         formatOptions: '<code>Intl.NumberFormat</code> options formatting the value itself.',
-        hideValue: 'Hides the value visually. Screen readers still read it.',
+        showValue: 'Writes the value. Screen readers read it either way.',
+        valuePosition: 'Value position: after the label, or inside the bar.',
         tone: 'Colour of the fill. Chosen from the region when <code>low</code>, <code>high</code> or <code>optimum</code> is set, accent otherwise.',
         color: 'Custom CSS colour replacing the tone.',
         segments: 'Number of equal parts the bar is split into.',
-        size: 'Thickness of the bar and size of the text.',
+        size: 'Bar thickness. Only <code>xl</code> holds the value inside the bar.',
       },
     },
   },

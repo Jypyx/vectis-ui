@@ -14,7 +14,8 @@ const t = storyText({
     error: 'Error',
     neutral: 'Neutral',
     purple: 'Purple',
-    defaultThickness: '4px (the default)',
+    defaultSize: 'sm, 4px (the default)',
+    header: 'After the label (the default)',
     start: 'Start',
     centre: 'Centre',
     end: 'End',
@@ -38,7 +39,7 @@ const t = storyText({
     zero: 'Zero',
     complete: 'Complete',
     outOfBounds: 'Out of bounds',
-    defaultThicknessBar: 'Bar at the default thickness',
+    defaultThicknessBar: 'Bar at the default size',
     veryLongText: 'Very long text',
     compressing: 'Compressing the project resources…',
   },
@@ -50,7 +51,8 @@ const t = storyText({
     error: 'Erreur',
     neutral: 'Neutre',
     purple: 'Violet',
-    defaultThickness: '4px (défaut)',
+    defaultSize: 'sm, 4px (défaut)',
+    header: 'Après le libellé (défaut)',
     start: 'Début',
     centre: 'Centre',
     end: 'Fin',
@@ -74,7 +76,7 @@ const t = storyText({
     zero: 'Zéro',
     complete: 'Complet',
     outOfBounds: 'Hors bornes',
-    defaultThicknessBar: "Barre à l'épaisseur par défaut",
+    defaultThicknessBar: 'Barre à la taille par défaut',
     veryLongText: 'Texte très long',
     compressing: 'Compression des ressources du projet en cours…',
   },
@@ -86,7 +88,8 @@ const meta = {
   argTypes: {
     tone: { control: 'select', options: ['accent', 'success', 'warning', 'danger', 'neutral'] },
     shape: { control: 'select', options: ['rounded', 'square'] },
-    valuePosition: { control: 'select', options: ['start', 'center', 'end'] },
+    size: { control: 'inline-radio', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
+    valuePosition: { control: 'select', options: ['header', 'start', 'center', 'end'] },
     orientation: { control: 'select', options: ['horizontal', 'vertical'] },
   },
   args: {
@@ -95,7 +98,8 @@ const meta = {
     indeterminate: false,
     tone: 'accent',
     shape: 'rounded',
-    valuePosition: 'center',
+    size: 'sm',
+    valuePosition: 'header',
   },
   render: (args) => ({
     components: { VProgressLinear },
@@ -160,26 +164,37 @@ export const CustomColor: Story = {
   }),
 }
 
-export const Thickness: Story = {
+/** Five thicknesses shared with VMeter: 2, 4, 8, 12 and 20 pixels. */
+export const Sizes: Story = {
   render: () => ({
     components: { VProgressLinear },
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear :value="40" :label="t.defaultThickness" />
-        <VProgressLinear :thickness="8" :value="55" label="8px" />
-        <VProgressLinear :thickness="16" :value="70" label="16px" />
-        <!-- always pixels: a numeric string is equivalent to the number -->
-        <VProgressLinear thickness="24" :value="85" label="24px" />
+        <VProgressLinear size="xs" :value="30" label="xs, 2px" />
+        <VProgressLinear :value="40" :label="t.defaultSize" />
+        <VProgressLinear size="md" :value="55" label="md, 8px" />
+        <VProgressLinear size="lg" :value="70" label="lg, 12px" />
+        <VProgressLinear size="xl" :value="85" label="xl, 20px" />
       </div>
     `,
   }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const height = (name: RegExp) =>
+      canvas.getByRole('progressbar', { name }).getBoundingClientRect().height
+    await expect(height(/^xs/)).toBe(2)
+    await expect(height(/^sm/)).toBe(4)
+    await expect(height(/^md/)).toBe(8)
+    await expect(height(/^lg/)).toBe(12)
+    await expect(height(/^xl/)).toBe(20)
+  },
 }
 
 /**
- * The text is rendered as two complementary copies: one on the track, the other on the filled
- * portion and contrasted on the fill, each cut to its own side of the fill's edge. The default
- * thickness (4px) cannot host it: displaying text implies a `thickness`.
+ * The value is written after the label by default. Inside the bar, it is rendered as two
+ * complementary copies: one on the track, the other on the filled portion and contrasted on the
+ * fill, each cut to its own side of the fill's edge. Only `size="xl"` is thick enough to hold it.
  */
 export const Value: Story = {
   render: () => ({
@@ -187,15 +202,19 @@ export const Value: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear :thickness="20" show-value value-position="start" :value="35" :label="t.start" />
-        <VProgressLinear :thickness="20" show-value value-position="center" :value="35" :label="t.centre" />
-        <VProgressLinear :thickness="20" show-value value-position="end" :value="35" :label="t.end" />
-        <VProgressLinear :thickness="20" show-value value-position="center" :value="92" :label="t.almostDone" />
+        <VProgressLinear show-value :value="35" :label="t.header" />
+        <VProgressLinear size="xl" show-value value-position="start" :value="35" :label="t.start" />
+        <VProgressLinear size="xl" show-value value-position="center" :value="35" :label="t.centre" />
+        <VProgressLinear size="xl" show-value value-position="end" :value="35" :label="t.end" />
+        <VProgressLinear size="xl" show-value value-position="center" :value="92" :label="t.almostDone" />
       </div>
     `,
   }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
+    const header = canvas.getByRole('progressbar', { name: /^After the label/ })
+    await expect(header.querySelector('.v-progress-linear-text')).toBeNull()
+    await expect(within(header.parentElement!).getByText('35%')).toBeVisible()
     const bar = canvas.getByRole('progressbar', { name: 'Centre' })
     const [base, onFill] = [...bar.querySelectorAll('.v-progress-linear-text')]
     await expect(getComputedStyle(base!).color).not.toBe(getComputedStyle(onFill!).color)
@@ -218,10 +237,10 @@ export const CustomContent: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear :value="3" :max="8" :thickness="24" :label="t.filesSent">
+        <VProgressLinear :value="3" :max="8" :label="t.filesSent">
           <template #default="{ value, max }">{{ value }}/{{ max }} {{ t.files }}</template>
         </VProgressLinear>
-        <VProgressLinear :value="72" :thickness="24" value-position="end" :label="t.spaceUsed">
+        <VProgressLinear :value="72" size="xl" value-position="end" :label="t.spaceUsed">
           <template #default="{ percent }">{{ t.ofGb(Math.round(percent)) }}</template>
         </VProgressLinear>
       </div>
@@ -237,7 +256,7 @@ export const Square: Story = {
       <div style="display: grid; gap: 16px; width: 320px">
         <VProgressLinear shape="rounded" :value="60" :label="t.roundedDefault" />
         <VProgressLinear shape="square" :value="60" :label="t.square" />
-        <VProgressLinear shape="square" :value="60" :thickness="20" show-value :label="t.thickSquare" />
+        <VProgressLinear shape="square" :value="60" size="xl" show-value value-position="center" :label="t.thickSquare" />
       </div>
     `,
   }),
@@ -251,8 +270,8 @@ export const Indeterminate: Story = {
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
         <VProgressLinear indeterminate :label="t.loading" />
-        <VProgressLinear indeterminate tone="success" :thickness="8" :label="t.syncing" />
-        <VProgressLinear indeterminate color="teal" :thickness="12" shape="square" :label="t.analysis" />
+        <VProgressLinear indeterminate tone="success" size="md" :label="t.syncing" />
+        <VProgressLinear indeterminate color="teal" size="lg" shape="square" :label="t.analysis" />
       </div>
     `,
   }),
@@ -271,11 +290,11 @@ export const Vertical: Story = {
       <div style="display: flex; gap: 32px; align-items: flex-end">
         <VProgressLinear orientation="vertical" :value="40" :label="t.default" />
         <VProgressLinear orientation="vertical" :value="75" style="height: 240px" tone="success" label="240px" />
-        <VProgressLinear orientation="vertical" :value="30" :thickness="20" shape="square" tone="warning" :label="t.thickSquareBar" />
-        <VProgressLinear orientation="vertical" :value="60" :thickness="32" style="height: 200px" show-value :label="t.withText" />
-        <VProgressLinear orientation="vertical" indeterminate :thickness="12" :label="t.indeterminate" />
+        <VProgressLinear orientation="vertical" :value="30" size="xl" shape="square" tone="warning" :label="t.thickSquareBar" />
+        <VProgressLinear orientation="vertical" :value="60" size="xl" style="height: 200px" show-value value-position="center" :label="t.withText" />
+        <VProgressLinear orientation="vertical" indeterminate size="lg" :label="t.indeterminate" />
         <div dir="rtl">
-          <VProgressLinear orientation="vertical" :value="30" :thickness="32" show-value :label="t.rightToLeft" />
+          <VProgressLinear orientation="vertical" :value="30" size="xl" show-value value-position="center" :label="t.rightToLeft" />
         </div>
       </div>
     `,
@@ -315,7 +334,7 @@ export const Progression: Story = {
     },
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear :value="value" :thickness="20" show-value :label="t.upload" />
+        <VProgressLinear :value="value" size="xl" show-value value-position="center" :label="t.upload" />
         <div style="display: flex; gap: 8px">
           <button type="button" @click="bump(-10)">−10</button>
           <button type="button" @click="bump(10)">+10</button>
@@ -341,7 +360,7 @@ export const Progression: Story = {
 
 /** A free `max`: the ARIA bounds stay faithful ("3 of 8"). */
 export const CustomMax: Story = {
-  args: { value: 3, max: 8, showValue: true, thickness: 20 },
+  args: { value: 3, max: 8, showValue: true },
 }
 
 export const EdgeCases: Story = {
@@ -350,13 +369,13 @@ export const EdgeCases: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 16px; width: 320px">
-        <VProgressLinear :value="0" :thickness="20" show-value :label="t.zero" />
-        <VProgressLinear :value="100" :thickness="20" show-value :label="t.complete" />
+        <VProgressLinear :value="0" size="xl" show-value value-position="center" :label="t.zero" />
+        <VProgressLinear :value="100" size="xl" show-value value-position="center" :label="t.complete" />
         <!-- past the max: clamped -->
-        <VProgressLinear :value="250" :max="100" :thickness="20" show-value :label="t.outOfBounds" />
+        <VProgressLinear :value="250" :max="100" size="xl" show-value value-position="center" :label="t.outOfBounds" />
         <!-- text taller than the bar: it overflows visibly, uncropped -->
-        <VProgressLinear :value="45" show-value :label="t.defaultThicknessBar" />
-        <VProgressLinear :value="45" :thickness="24" :label="t.veryLongText">
+        <VProgressLinear :value="45" show-value value-position="center" :label="t.defaultThicknessBar" />
+        <VProgressLinear :value="45" size="xl" value-position="center" :label="t.veryLongText">
           <template #default>{{ t.compressing }}</template>
         </VProgressLinear>
       </div>

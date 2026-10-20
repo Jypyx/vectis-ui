@@ -48,15 +48,21 @@ derived from it against the theme.
 reader to learn what is measured. Without it, the bar takes a generic name from the dictionary;
 an `aria-label` or `aria-labelledby` of your own wins over both.
 
-The value is written at the end of the same line. It is a percentage of the range by default.
-`formatOptions` formats the value itself for the current locale with `Intl.NumberFormat`, such as a
-unit or a currency, and `valueText` replaces it with your own words. Screen readers read that same
-text through `aria-valuetext`, so the copy on screen is hidden from them.
+`showValue` writes the value at the end of the same line. It is a percentage of the range by
+default. `formatOptions` formats the value itself for the current locale with `Intl.NumberFormat`,
+such as a unit or a currency, and `valueText` replaces it with your own words. Screen readers read
+that same text through `aria-valuetext`, with or without `showValue`, so the copy on screen is
+hidden from them.
 
 <Canvas of={VMeterStories.ValueText} />
 
-`hideLabel` and `hideValue` remove the text above the bar without removing what screen readers
-hear.
+`valuePosition` moves the value inside the bar, at the start, in the centre or at the end, as in
+VProgressLinear: two complementary copies cut at the fill's edge, the second contrasted on the
+fill. Only `size="xl"` is thick enough to hold it.
+
+<Canvas of={VMeterStories.ValueInside} />
+
+`hideLabel` hides the label without removing what screen readers hear.
 
 <Canvas of={VMeterStories.HiddenText} />
 
@@ -77,8 +83,8 @@ elsewhere.
 
 ## Sizes
 
-`size` sets the thickness of the bar, 4, 8 or 12 pixels, and the text above it is smaller at `sm`.
-The length is the container's: the meter takes the whole width available.
+`size` sets the thickness of the bar: `xs`, `sm`, `md` (the default), `lg` and `xl`, the same
+scale as VProgressLinear. The length is the container's: the meter takes the whole width available.
 
 <Canvas of={VMeterStories.Sizes} />
 

@@ -6,7 +6,7 @@ import { VProgressLinear, VTypography } from 'vectis-ui'
   <div class="column">
     <VProgressLinear indeterminate label="Waiting for the server" />
 
-    <VProgressLinear indeterminate tone="neutral" thickness="8" label="Loading" />
+    <VProgressLinear indeterminate tone="neutral" size="md" label="Loading" />
 
     <VTypography variant="body-sm" tone="muted">
       For a server that reports no percentage. Under reduced motion the bar is slowed rather than

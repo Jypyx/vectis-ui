@@ -308,17 +308,30 @@ export const semantic = {
     ),
     'size-menu-min': dimension('11rem', "The minimum width of VMenu's panel"),
     'size-menu-max': dimension('20rem', "The maximum width of VMenu's panel"),
-    'size-progress-linear-thickness': dimension(
+    'size-bar-thickness-xs': dimension(
+      '0.125rem',
+      'The thickness of an xs VProgressLinear or VMeter bar (2px)',
+    ),
+    'size-bar-thickness-sm': dimension(
       '0.25rem',
-      "The default thickness of VProgressLinear's bar (4px)",
+      'The thickness of a small VProgressLinear or VMeter bar (4px)',
+    ),
+    'size-bar-thickness-md': dimension(
+      '0.5rem',
+      'The thickness of a medium VProgressLinear or VMeter bar (8px)',
+    ),
+    'size-bar-thickness-lg': dimension(
+      '0.75rem',
+      'The thickness of a large VProgressLinear or VMeter bar (12px)',
+    ),
+    'size-bar-thickness-xl': dimension(
+      '1.25rem',
+      'The thickness of an xl VProgressLinear or VMeter bar, which holds the value written inside it (20px)',
     ),
     'size-progress-linear-length': dimension(
       '10rem',
       'The default length of a vertical VProgressLinear, which a height set on the bar replaces',
     ),
-    'size-meter-thickness-sm': dimension('0.25rem', 'The thickness of a small VMeter (4px)'),
-    'size-meter-thickness-md': dimension('0.5rem', 'The thickness of a medium VMeter (8px)'),
-    'size-meter-thickness-lg': dimension('0.75rem', 'The thickness of a large VMeter (12px)'),
     'size-meter-segment-gap': dimension('0.125rem', 'The gap between two VMeter segments (2px)'),
     'size-progress-circular-diameter': dimension(
       '3rem',

@@ -4,9 +4,9 @@ import { VMeter } from 'vectis-ui'
 
 <template>
   <div class="meters">
-    <VMeter label="Humidity" :value="45" :low="30" :high="60" />
-    <VMeter label="CPU load" :value="55" :low="30" :high="70" :optimum="0" />
-    <VMeter label="Battery" :value="12" :low="20" :high="50" :optimum="100" />
+    <VMeter label="Humidity" :value="45" :low="30" :high="60" show-value />
+    <VMeter label="CPU load" :value="55" :low="30" :high="70" :optimum="0" show-value />
+    <VMeter label="Battery" :value="12" :low="20" :high="50" :optimum="100" show-value />
   </div>
 </template>
 

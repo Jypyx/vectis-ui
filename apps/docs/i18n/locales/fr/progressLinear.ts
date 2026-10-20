@@ -18,17 +18,17 @@ export default {
       title: 'Couleurs personnalisées',
       text: '<code>color</code> remplace le ton par une couleur CSS.',
     },
-    thickness: {
-      title: 'Épaisseur',
-      text: '<code>thickness</code> définit l’épaisseur en pixels. La barre occupe la largeur de son conteneur.',
+    sizes: {
+      title: 'Tailles',
+      text: '<code>size</code> règle l’épaisseur de la barre, de 2 à 20 pixels, sur la même échelle que <code>VMeter</code>. La barre occupe la largeur de son conteneur.',
     },
     shape: {
       title: 'Forme',
       text: '<code>shape</code> choisit des extrémités arrondies ou carrées.',
     },
     customContent: {
-      title: 'Du contenu dans la barre',
-      text: '<code>showValue</code> affiche le pourcentage ; <code>valuePosition</code> le positionne. Le slot par défaut reçoit <code>value</code>, <code>max</code> et <code>percent</code>. Il est rendu deux fois : utilisez du contenu non interactif sans effets de bord.',
+      title: 'Position de la valeur',
+      text: '<code>showValue</code> affiche le pourcentage. <code>valuePosition</code> l’écrit après le libellé ou dans la barre, ce qui demande <code>size="xl"</code>. Le slot par défaut reçoit <code>value</code>, <code>max</code> et <code>percent</code>. Dans la barre, il est rendu deux fois : utilisez du contenu non interactif sans effets de bord.',
     },
     orientation: {
       title: 'Orientation',
@@ -46,17 +46,17 @@ export default {
         indeterminate: 'Anime sans valeur mesurable. Ignore <code>value</code>.',
         tone: 'Ton de couleur.',
         color: 'Couleur CSS personnalisée remplaçant le ton.',
-        thickness:
-          'Épaisseur de la barre en pixels. Augmentez-la pour afficher du texte à l’intérieur.',
+        size: 'Épaisseur de la barre. Seule <code>xl</code> contient la valeur dans la barre.',
         shape: 'Extrémités arrondies ou carrées.',
         showValue: 'Affiche le pourcentage. Ignoré en mode indéterminé.',
-        valuePosition: 'Position du texte dans la barre. En vertical, le début est en bas.',
+        valuePosition:
+          'Position du texte : après le libellé, ou le long de la barre. En vertical, le début est en bas.',
         orientation:
           'Barre horizontale ou verticale. En vertical, le remplissage va du bas vers le haut.',
       },
       slots: {
         default:
-          'Contenu remplaçant le pourcentage. Reçoit <code>value</code>, <code>max</code> et <code>percent</code>. Rendu deux fois ; gardez le contenu non interactif et sans effets de bord.',
+          'Contenu remplaçant le pourcentage. Reçoit <code>value</code>, <code>max</code> et <code>percent</code>. Rendu deux fois dans la barre ; gardez le contenu non interactif et sans effets de bord.',
       },
     },
   },

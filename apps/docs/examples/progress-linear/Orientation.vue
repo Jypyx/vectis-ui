@@ -8,7 +8,7 @@ import { VProgressLinear, VTypography } from 'vectis-ui'
       <VProgressLinear
         :value="value"
         orientation="vertical"
-        thickness="14"
+        size="lg"
         :label="`Tank, ${value} percent`"
         hide-label
       />
@@ -16,13 +16,7 @@ import { VProgressLinear, VTypography } from 'vectis-ui'
     </div>
 
     <div class="gauge">
-      <VProgressLinear
-        indeterminate
-        orientation="vertical"
-        thickness="14"
-        label="Filling"
-        hide-label
-      />
+      <VProgressLinear indeterminate orientation="vertical" size="lg" label="Filling" hide-label />
       <VTypography variant="caption" tone="muted">indeterminate</VTypography>
     </div>
   </div>

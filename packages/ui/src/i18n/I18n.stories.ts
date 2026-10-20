@@ -109,7 +109,7 @@ const SHOWCASE = `
       <VSpinner />
     </div>
 
-    <VProgressLinear :value="42" show-value :thickness="20" />
+    <VProgressLinear :value="42" show-value />
 
     <VDataTable
       :columns="columns"

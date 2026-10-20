@@ -5,9 +5,9 @@ import * as VProgressLinearStories from './VProgressLinear.stories'
 
 # ProgressLinear
 
-A progress bar: five semantic colours or a free one, thickness and length to the pixel, rounded or
-blunt ends, progress text readable inside the bar, an indeterminate state and a vertical
-orientation.
+A progress bar: five semantic colours or a free one, five sizes shared with VMeter, rounded or
+blunt ends, the value written after the label or inside the bar, an indeterminate state and a
+vertical orientation.
 
 It is the only component of the design system that **gives up its native primitive**. `<progress>`
 offers the role, the value and `:indeterminate` for free, but its pseudo-elements can only be styled
@@ -37,24 +37,24 @@ light or dark theme automatically, without the consumer having to supply two val
 
 <Canvas of={VProgressLinearStories.CustomColor} />
 
-## Thickness
+## Sizes
 
-`thickness` is **always expressed in pixels**: `12` as well as `'12'` gives twelve pixels. With no
-value, the thickness is 4 pixels — too little to host text, which therefore implies an explicit
-`thickness`.
+`size` sets the thickness of the bar: `xs`, `sm` (the default), `md`, `lg` and `xl`, the same scale
+as VMeter. Only `xl` is thick enough to hold the value written inside the bar.
 
-The **length**, on the other hand, is not a prop: the bar takes all the available room and it is up
-to the container to define it — `width` in horizontal, `height` in vertical.
+The **length** is not a prop: the bar takes all the available room and it is up to the container
+to define it, `width` in horizontal, `height` in vertical.
 
-<Canvas of={VProgressLinearStories.Thickness} />
+<Canvas of={VProgressLinearStories.Sizes} />
 
-## Text inside the bar
+## Value
 
-`showValue` displays the percentage, and `valuePosition` places it at the start, in the centre (the
-default) or at the end. The text is rendered as **two complementary copies**, cut exactly at the
-fill's edge: one in the current text colour over the track, the other over the fill and coloured by
-contrast on it. Each glyph is painted once and once only, so text straddling the two backgrounds
-stays readable on both sides of the boundary, at 5% as well as at 95%.
+`showValue` writes the percentage. `valuePosition` places it at the end of the label's line
+(`header`, the default) or inside the bar, at the start, in the centre or at the end; use
+`size="xl"` for the latter. Inside the bar, the text is rendered as **two complementary copies**,
+cut exactly at the fill's edge: one in the current text colour over the track, the other over the
+fill and coloured by contrast on it. Each glyph is painted once and once only, so text straddling
+the two backgrounds stays readable on both sides of the boundary, at 5% as well as at 95%.
 
 The automatic contrast rests on `contrast-color()` (Safari 26+); elsewhere, the tone's fallback
 colour applies — the same trade-off already documented for VBadge.
@@ -62,7 +62,7 @@ colour applies — the same trade-off already documented for VBadge.
 <Canvas of={VProgressLinearStories.Value} />
 
 The default slot receives `{ value, max, percent }` and replaces the percentage with whatever you
-want. It is evaluated twice, once per copy: its content must be pure.
+want. Inside the bar it is evaluated twice, once per copy: its content must be pure.
 
 <Canvas of={VProgressLinearStories.CustomContent} />
 
@@ -92,7 +92,7 @@ single definition serves horizontal, vertical and the reversed reading direction
 
 `orientation="vertical"` puts 0 at the bottom and the maximum at the top, through a plain writing
 mode set on the bar: the fill, the text's clip and the indeterminate animation all change axis with
-no extra rule. The text itself stays written horizontally — plan a thickness sufficient to host it.
+no extra rule. The text inside the bar stays written horizontally, so a short value fits best.
 The length is a height on the root, which the bar fills under the label.
 
 <Canvas of={VProgressLinearStories.Vertical} />
@@ -106,7 +106,7 @@ same duration and the same curve.
 
 ## Edge cases
 
-A zero, complete or out-of-bounds value (clamped), a bar at the default thickness carrying text
+A zero, complete or out-of-bounds value (clamped), a bar at the default size carrying text
 (which overflows without being cropped), a very long label.
 
 <Canvas of={VProgressLinearStories.EdgeCases} />
@@ -120,7 +120,8 @@ A zero, complete or out-of-bounds value (clamped), a bar at the default thicknes
 - The root is a layout box holding the label and the bar: `class` and `style` stay on it, with the
   tone and the custom properties the bar inherits, and every other attribute reaches the bar.
 - The `progressbar` role is "children presentational": the text visible in the bar is **not
-  announced** by assistive technologies. It complements the label, it never replaces it.
+  announced** by assistive technologies. Written after the label, it is hidden from them to match.
+  It complements the label, it never replaces it.
 - The announced bounds are faithful to `max` ("3 of 8") rather than normalized to 100.
 - `aria-valuenow` is absent when indeterminate, which is precisely how unknown progress is
   announced.

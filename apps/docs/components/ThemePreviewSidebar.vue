@@ -37,7 +37,7 @@ import { inbox, table_chart as tableChart } from 'vectis-ui/icons'
     </VSideNavigation>
 
     <div class="tp-rail-end">
-      <VMeter :value="72" label="Storage" value-text="7.2 of 10 GB" size="sm" />
+      <VMeter :value="72" label="Storage" value-text="7.2 of 10 GB" size="sm" show-value />
 
       <VMenu placement="top-start" match-trigger>
         <template #trigger="{ triggerProps }">

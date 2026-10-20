@@ -18,6 +18,7 @@ const text = computed(() => strengths[strength.value - 1])
       :optimum="4"
       :segments="4"
       :value-text="text"
+      show-value
     />
     <div class="actions">
       <VButton variant="outline" size="sm" :disabled="strength <= 1" @click="strength--">
@@ -27,7 +28,15 @@ const text = computed(() => strengths[strength.value - 1])
         Stronger
       </VButton>
     </div>
-    <VMeter label="Battery" :value="70" :low="20" :high="50" :optimum="100" :segments="5" />
+    <VMeter
+      label="Battery"
+      :value="70"
+      :low="20"
+      :high="50"
+      :optimum="100"
+      :segments="5"
+      show-value
+    />
   </div>
 </template>
 

@@ -194,6 +194,7 @@ const COMPONENT_DIMENSIONS: { slugs: DocsSlug[]; prefixes: string[] }[] = [
   { slugs: ['hover-card'], prefixes: ['size-hover-card-'] },
   { slugs: ['input'], prefixes: ['action-size-'] },
   { slugs: ['menu'], prefixes: ['size-menu-'] },
+  { slugs: ['meter', 'progress-linear'], prefixes: ['size-bar-'] },
   { slugs: ['meter'], prefixes: ['size-meter-'] },
   { slugs: ['progress-circular'], prefixes: ['size-progress-circular-'] },
   { slugs: ['progress-linear'], prefixes: ['size-progress-linear-'] },

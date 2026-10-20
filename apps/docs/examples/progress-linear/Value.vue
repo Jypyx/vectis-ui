@@ -8,7 +8,7 @@ const step = (delta: number) => (value.value += delta)
 
 <template>
   <div class="column">
-    <VProgressLinear :value="value" thickness="10" label="Upload" show-value />
+    <VProgressLinear :value="value" label="Upload" show-value />
 
     <div class="row">
       <VButton variant="outline" tone="neutral" size="sm" @click="step(-25)">-25</VButton>
@@ -16,10 +16,7 @@ const step = (delta: number) => (value.value += delta)
       <VTypography variant="body-sm" tone="muted">value = {{ value }}, max = 100</VTypography>
     </div>
 
-    <div class="labelled">
-      <VTypography variant="caption" tone="muted">7 of 12 files, max = 12</VTypography>
-      <VProgressLinear :value="7" :max="12" thickness="10" label="Files" show-value hide-label />
-    </div>
+    <VProgressLinear :value="7" :max="12" label="7 of 12 files, max = 12" show-value />
   </div>
 </template>
 
@@ -34,9 +31,5 @@ const step = (delta: number) => (value.value += delta)
   flex-wrap: wrap;
   align-items: center;
   gap: var(--vectis-space-3);
-}
-.labelled {
-  display: grid;
-  gap: var(--vectis-space-2);
 }
 </style>

@@ -24,10 +24,11 @@ const t = storyText({
     warning: 'Warning',
     danger: 'Danger',
     purple: 'Purple',
-    small: 'Small',
-    medium: 'Medium (the default)',
-    large: 'Large',
+    medium: 'md, 8px (the default)',
     quota: 'Quota',
+    start: 'Start',
+    centre: 'Centre',
+    end: 'End',
   },
   fr: {
     storage: 'Stockage',
@@ -46,10 +47,11 @@ const t = storyText({
     warning: 'Avertissement',
     danger: 'Danger',
     purple: 'Violet',
-    small: 'Petite',
-    medium: 'Moyenne (défaut)',
-    large: 'Grande',
+    medium: 'md, 8px (défaut)',
     quota: 'Quota',
+    start: 'Début',
+    centre: 'Centre',
+    end: 'Fin',
   },
 })
 
@@ -61,7 +63,8 @@ const meta = {
       control: 'select',
       options: [undefined, 'accent', 'neutral', 'success', 'warning', 'danger'],
     },
-    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
+    size: { control: 'inline-radio', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
+    valuePosition: { control: 'select', options: ['header', 'start', 'center', 'end'] },
     segments: { control: { type: 'number', min: 1, max: 20 } },
   },
   args: {
@@ -69,7 +72,8 @@ const meta = {
     min: 0,
     max: 100,
     hideLabel: false,
-    hideValue: false,
+    showValue: true,
+    valuePosition: 'header',
     segments: 1,
     size: 'md',
   },
@@ -151,15 +155,16 @@ export const ValueText: Story = {
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 20px; width: 320px">
-        <VMeter :label="t.humidity" :value="45" />
+        <VMeter :label="t.humidity" :value="45" show-value />
         <VMeter
           :label="t.temperature"
           :value="21.5"
           :min="-10"
           :max="40"
           :format-options="{ style: 'unit', unit: 'celsius' }"
+          show-value
         />
-        <VMeter :label="t.storage" :value="7.2" :max="10" :value-text="t.storageUsed" />
+        <VMeter :label="t.storage" :value="7.2" :max="10" :value-text="t.storageUsed" show-value />
       </div>
     `,
   }),
@@ -195,6 +200,7 @@ export const Segments: Story = {
           :optimum="4"
           :segments="4"
           :value-text="t.strengths[2]"
+          show-value
         />
         <VMeter :label="t.battery" :value="70" :low="20" :high="50" :optimum="100" :segments="5" />
       </div>
@@ -235,6 +241,7 @@ export const Live: Story = {
           :optimum="4"
           :segments="4"
           :value-text="text"
+          show-value
         />
         <div style="display: flex; gap: 8px">
           <VButton variant="outline" size="sm" :disabled="strength <= 1" @click="strength--">
@@ -261,16 +268,18 @@ export const Live: Story = {
   },
 }
 
-/** Three thicknesses, with smaller text at the smallest. */
+/** Five thicknesses shared with VProgressLinear: 2, 4, 8, 12 and 20 pixels. */
 export const Sizes: Story = {
   render: () => ({
     components: { VMeter },
     setup: () => ({ t }),
     template: `
       <div style="display: grid; gap: 20px; width: 320px">
-        <VMeter size="sm" :label="t.small" :value="40" />
-        <VMeter size="md" :label="t.medium" :value="40" />
-        <VMeter size="lg" :label="t.large" :value="40" />
+        <VMeter size="xs" label="xs, 2px" :value="40" />
+        <VMeter size="sm" label="sm, 4px" :value="40" />
+        <VMeter :label="t.medium" :value="40" />
+        <VMeter size="lg" label="lg, 12px" :value="40" />
+        <VMeter size="xl" label="xl, 20px" :value="40" />
       </div>
     `,
   }),
@@ -278,15 +287,55 @@ export const Sizes: Story = {
     const canvas = within(canvasElement)
     const height = (name: RegExp) =>
       canvas.getByRole('meter', { name }).getBoundingClientRect().height
-    await expect(height(/^Small/)).toBe(4)
-    await expect(height(/^Medium/)).toBe(8)
-    await expect(height(/^Large/)).toBe(12)
+    await expect(height(/^xs/)).toBe(2)
+    await expect(height(/^sm/)).toBe(4)
+    await expect(height(/^md/)).toBe(8)
+    await expect(height(/^lg/)).toBe(12)
+    await expect(height(/^xl/)).toBe(20)
   },
 }
 
 /**
- * `hideLabel` and `hideValue` remove the text above the bar. The label still names it and the
- * value is still read from it.
+ * Inside the bar, the value is rendered as two complementary copies cut at the fill's edge, the
+ * second contrasted on the fill. Only `size="xl"` is thick enough to hold it.
+ */
+export const ValueInside: Story = {
+  render: () => ({
+    components: { VMeter },
+    setup: () => ({ t }),
+    template: `
+      <div style="display: grid; gap: 20px; width: 320px">
+        <VMeter size="xl" show-value value-position="start" :label="t.start" :value="35" />
+        <VMeter size="xl" show-value value-position="center" :label="t.centre" :value="35" />
+        <VMeter size="xl" show-value value-position="end" :label="t.end" :value="35" />
+        <VMeter
+          size="xl"
+          show-value
+          value-position="center"
+          :label="t.battery"
+          :value="70"
+          :low="20"
+          :high="50"
+          :optimum="100"
+          :segments="5"
+        />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const meter = within(canvasElement).getByRole('meter', { name: 'Battery' })
+    const [base, onFill] = [...meter.querySelectorAll('.v-meter-text')]
+    await expect(getComputedStyle(base!).color).not.toBe(getComputedStyle(onFill!).color)
+    // Without both cuts the two colours overlap, a halo nothing else here would catch.
+    const baseClip = getComputedStyle(base!).clipPath
+    await expect(baseClip).not.toBe('none')
+    await expect(baseClip).not.toBe(getComputedStyle(onFill!).clipPath)
+  },
+}
+
+/**
+ * The value is not written by default: `showValue` writes it. `hideLabel` hides the label, which
+ * still names the bar, and the value is still read from it.
  */
 export const HiddenText: Story = {
   render: () => ({
@@ -294,7 +343,7 @@ export const HiddenText: Story = {
     setup: () => ({ t }),
     template: `
       <div style="width: 320px">
-        <VMeter :label="t.quota" :value="30" hide-label hide-value />
+        <VMeter :label="t.quota" :value="30" hide-label />
       </div>
     `,
   }),
@@ -315,7 +364,7 @@ export const RightToLeft: Story = {
     setup: () => ({ t }),
     template: `
       <div dir="rtl" style="width: 320px">
-        <VMeter :label="t.storage" :value="30" :segments="3" />
+        <VMeter :label="t.storage" :value="30" :segments="3" show-value />
       </div>
     `,
   }),

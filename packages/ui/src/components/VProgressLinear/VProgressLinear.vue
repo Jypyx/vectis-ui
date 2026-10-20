@@ -3,13 +3,12 @@
  * CSS draws the fill. JavaScript normalizes values shared by geometry, slots and progressbar
  * ARIA attributes.
  */
-import { computed, useId } from 'vue'
+import { useId, useSlots } from 'vue'
 
-import { useAriaLabel } from '../../composables/useAriaLabel'
+import { useAriaLabel, useLabelledBy } from '../../composables/useAriaLabel'
 import { useProgressValue } from '../../composables/useProgressValue'
 import { useRootAttrs } from '../../composables/useRootAttrs'
 import { useMessages } from '../../i18n/state'
-import { px } from '../../utils/css'
 
 /** What the progress means, in colour. */
 export type ProgressLinearTone = 'neutral' | 'accent' | 'danger' | 'success' | 'warning'
@@ -17,8 +16,11 @@ export type ProgressLinearTone = 'neutral' | 'accent' | 'danger' | 'success' | '
 /** How the track and the fill end. */
 export type ProgressLinearShape = 'rounded' | 'square'
 
-/** Where the value sits along the bar. */
-export type ProgressLinearValuePosition = 'start' | 'center' | 'end'
+/** The thickness of the bar: 2, 4, 8, 12 or 20 pixels. */
+export type ProgressLinearSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+
+/** Where the value is written: after the label, or inside the bar at its start, centre or end. */
+export type ProgressLinearValuePosition = 'header' | 'start' | 'center' | 'end'
 
 /** Which way the bar fills. */
 export type ProgressLinearOrientation = 'horizontal' | 'vertical'
@@ -56,21 +58,18 @@ interface ProgressLinearProps {
    * the dark one.
    */
   color?: string
-  /**
-   * How thick the bar is, always in PIXELS: `12` and `'12'` both give 12px. It is 4px by
-   * default, and showing text inside a bar that thin needs an explicit thickness.
-   */
-  thickness?: number | string
+  /** The thickness of the bar. Only `xl` is thick enough to hold the value written inside it. */
+  size?: ProgressLinearSize
   /** Whether the ends of the bar are rounded or square. */
   shape?: ProgressLinearShape
   /**
-   * Writes the percentage inside the bar. It is ignored while the progress is
-   * unmeasurable, there being no figure to write.
+   * Writes the percentage. It is ignored while the progress is unmeasurable, there being no
+   * figure to write.
    */
   showValue?: boolean
   /**
-   * Where that text sits along the bar. On a vertical bar the start is the zero end,
-   * hence the bottom.
+   * Where that text is written: at the end of the label's line, or inside the bar. On a vertical
+   * bar the start is the zero end, hence the bottom.
    */
   valuePosition?: ProgressLinearValuePosition
   /** Turns the bar upright, filling from the bottom up. */
@@ -85,15 +84,15 @@ const props = withDefaults(defineProps<ProgressLinearProps>(), {
   indeterminate: false,
   tone: 'accent',
   color: undefined,
-  thickness: undefined,
+  size: 'sm',
   shape: 'rounded',
   showValue: false,
-  valuePosition: 'center',
+  valuePosition: 'header',
   orientation: 'horizontal',
 })
 
 defineSlots<{
-  /** What to write inside the bar instead of the percentage. */
+  /** What to write instead of the percentage. */
   default?(props: ProgressLinearSlotProps): unknown
 }>()
 
@@ -116,18 +115,21 @@ const {
 // The root is a layout box holding the label and the bar: `class` and `style` stay on it, with
 // the tone and the custom properties the bar inherits, and every other attribute goes to the bar.
 defineOptions({ inheritAttrs: false })
-const { attrs, rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
+const { rootClass, rootStyle, forwardedAttrs } = useRootAttrs()
 
 // @a11y
 // A visible label names the bar by reference, unless the consumer named it themselves; without
 // one, the dictionary does. An indicator takes no name from the text inside it.
 const labelId = useId()
 const ariaLabel = useAriaLabel(() => (props.label ? undefined : m.value.progress.label))
-const labelledBy = computed(() =>
-  props.label && attrs['aria-label'] == null && attrs['aria-labelledby'] == null
-    ? labelId
-    : undefined,
-)
+const labelledBy = useLabelledBy(labelId, () => props.label)
+
+// Read during render rather than computed: `slots` is not reactive.
+const slots = useSlots()
+const showsValue = (inHeader: boolean) =>
+  !props.indeterminate &&
+  (props.showValue || !!slots.default) &&
+  (props.valuePosition === 'header') === inHeader
 </script>
 
 <template>
@@ -137,15 +139,22 @@ const labelledBy = computed(() =>
     :data-tone="tone"
     :data-custom="color !== undefined ? '' : undefined"
     :data-orientation="orientation"
-    :style="[{ '--custom-color': color, '--progress-thickness': px(thickness) }, rootStyle]"
+    :data-size="size"
+    :style="[{ '--custom-color': color }, rootStyle]"
   >
-    <span
-      v-if="label"
-      :id="labelId"
-      class="v-progress-linear-label"
-      :class="{ 'v-visually-hidden': hideLabel }"
-      >{{ label }}</span
-    >
+    <div v-if="(label && !hideLabel) || showsValue(true)" class="v-progress-linear-header">
+      <span v-if="label && !hideLabel" :id="labelId" class="v-progress-linear-label">{{
+        label
+      }}</span>
+      <!-- The text inside the bar is presentational under the progressbar role; this copy,
+           outside it, is hidden to match. -->
+      <span v-if="showsValue(true)" class="v-progress-linear-value" aria-hidden="true">
+        <slot :value="clamped" :max="normalizedMax" :percent="percent">
+          {{ m.progress.percent(roundedPercent) }}
+        </slot>
+      </span>
+    </div>
+    <span v-if="label && hideLabel" :id="labelId" class="v-visually-hidden">{{ label }}</span>
     <div
       class="v-progress-linear"
       role="progressbar"
@@ -168,7 +177,7 @@ const labelledBy = computed(() =>
         the second over the filled part, coloured to contrast with it. The second is
         hidden from screen readers, being a duplicate of text already there.
       -->
-      <template v-if="!indeterminate && (showValue || $slots.default)">
+      <template v-if="showsValue(false)">
         <span class="v-progress-linear-text">
           <slot :value="clamped" :max="normalizedMax" :percent="percent">
             {{ m.progress.percent(roundedPercent) }}
@@ -188,12 +197,11 @@ const labelledBy = computed(() =>
 @layer vectis.components {
   /*
    * The root holds the label and the bar, and declares what the bar reads, so a consumer's style
-   * on it (outside our layers) overrides the thickness and the colours. The bar takes the whole
-   * length available: sizing it is the consumer's business, through the parent or a width of
-   * their own on the root.
+   * on it (outside our layers) overrides the colours. The bar takes the whole length available:
+   * sizing it is the consumer's business, through the parent or a width of their own on the root.
    */
   .v-progress-linear-field {
-    --progress-thickness: var(--vectis-control-size-progress-linear-thickness);
+    --progress-thickness: var(--vectis-control-size-bar-thickness-sm);
     /* Fill, track and the text over the fill are the tone's solid, soft and on-solid
        colours, read from the shared table (`.v-tone`, set in the template). */
     --progress-fill: var(--tone-bg-solid);
@@ -204,12 +212,45 @@ const labelledBy = computed(() =>
     gap: var(--vectis-space-1);
   }
 
+  .v-progress-linear-field[data-size='xs'] {
+    --progress-thickness: var(--vectis-control-size-bar-thickness-xs);
+  }
+
+  .v-progress-linear-field[data-size='md'] {
+    --progress-thickness: var(--vectis-control-size-bar-thickness-md);
+  }
+
+  .v-progress-linear-field[data-size='lg'] {
+    --progress-thickness: var(--vectis-control-size-bar-thickness-lg);
+  }
+
+  .v-progress-linear-field[data-size='xl'] {
+    --progress-thickness: var(--vectis-control-size-bar-thickness-xl);
+  }
+
+  .v-progress-linear-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: var(--vectis-space-2);
+    font-family: var(--vectis-text-family);
+  }
+
   .v-progress-linear-label {
     color: var(--vectis-color-text);
-    font-family: var(--vectis-text-family);
     font-size: var(--vectis-text-label-size);
     font-weight: var(--vectis-text-label-weight);
     line-height: var(--vectis-text-label-leading);
+  }
+
+  /* Pushed to the end even without a label before it. */
+  .v-progress-linear-value {
+    margin-inline-start: auto;
+    color: var(--vectis-color-text-muted);
+    font-size: var(--vectis-text-body-md-size);
+    font-weight: var(--vectis-text-body-md-weight);
+    line-height: var(--vectis-text-body-md-leading);
+    font-variant-numeric: tabular-nums;
   }
 
   /* The element IS the track. */

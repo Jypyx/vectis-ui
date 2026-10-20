@@ -14,3 +14,18 @@ export function useAriaLabel(label: () => string | undefined): ComputedRef<strin
       : ((attrs['aria-label'] as string | undefined) ?? label()),
   )
 }
+
+// @a11y
+/**
+ * The id of a visible label naming the element by reference, unless the consumer named it with
+ * `aria-label` or `aria-labelledby`.
+ */
+export function useLabelledBy(
+  id: string,
+  label: () => string | undefined,
+): ComputedRef<string | undefined> {
+  const attrs = useAttrs()
+  return computed(() =>
+    label() && attrs['aria-label'] == null && attrs['aria-labelledby'] == null ? id : undefined,
+  )
+}

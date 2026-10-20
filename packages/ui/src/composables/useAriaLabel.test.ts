@@ -2,7 +2,7 @@ import { render } from '@testing-library/vue'
 import { describe, expect, it } from 'vite-plus/test'
 import { defineComponent, h } from 'vue'
 
-import { useAriaLabel } from './useAriaLabel'
+import { useAriaLabel, useLabelledBy } from './useAriaLabel'
 
 const Named = defineComponent({
   props: { label: { type: String, default: 'Default' } },
@@ -44,5 +44,29 @@ describe('useAriaLabel', () => {
       attrs: { 'aria-labelledby': null },
     })
     expect(groupOf(container)?.getAttribute('aria-label')).toBe('Alignment')
+  })
+})
+
+const Labelled = defineComponent({
+  props: { label: { type: String, default: undefined } },
+  setup(props) {
+    const labelledBy = useLabelledBy('label-id', () => props.label)
+    return () => h('div', { role: 'group', 'aria-labelledby': labelledBy.value })
+  },
+})
+
+describe('useLabelledBy', () => {
+  it('points at the label only when there is one', async () => {
+    const { container, rerender } = render(Labelled)
+    expect(groupOf(container)?.hasAttribute('aria-labelledby')).toBe(false)
+    await rerender({ label: 'Upload' })
+    expect(groupOf(container)?.getAttribute('aria-labelledby')).toBe('label-id')
+  })
+
+  it('gives way to a name of the consumer', () => {
+    for (const attrs of [{ 'aria-label': 'Mine' }, { 'aria-labelledby': 'heading' }]) {
+      const { container } = render(Labelled, { props: { label: 'Upload' }, attrs })
+      expect(groupOf(container)?.getAttribute('aria-labelledby')).not.toBe('label-id')
+    }
   })
 })

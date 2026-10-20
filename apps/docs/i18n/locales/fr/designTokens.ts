@@ -118,12 +118,17 @@ const descriptions: Record<DescribedToken, string> = {
     'La hauteur maximale du panneau de liste de VSelect (la zone qui défile)',
   '--vectis-control-size-menu-min': 'La largeur minimale du panneau de VMenu',
   '--vectis-control-size-menu-max': 'La largeur maximale du panneau de VMenu',
-  '--vectis-control-size-meter-thickness-sm': "L'épaisseur d'un VMeter petit (4px)",
-  '--vectis-control-size-meter-thickness-md': "L'épaisseur d'un VMeter moyen (8px)",
-  '--vectis-control-size-meter-thickness-lg': "L'épaisseur d'un VMeter grand (12px)",
+  '--vectis-control-size-bar-thickness-xs':
+    "L'épaisseur d'une barre de VProgressLinear ou VMeter xs (2px)",
+  '--vectis-control-size-bar-thickness-sm':
+    "L'épaisseur d'une petite barre de VProgressLinear ou VMeter (4px)",
+  '--vectis-control-size-bar-thickness-md':
+    "L'épaisseur d'une barre moyenne de VProgressLinear ou VMeter (8px)",
+  '--vectis-control-size-bar-thickness-lg':
+    "L'épaisseur d'une grande barre de VProgressLinear ou VMeter (12px)",
+  '--vectis-control-size-bar-thickness-xl':
+    "L'épaisseur d'une barre de VProgressLinear ou VMeter xl, qui contient la valeur écrite à l'intérieur (20px)",
   '--vectis-control-size-meter-segment-gap': "L'espace entre deux segments de VMeter (2px)",
-  '--vectis-control-size-progress-linear-thickness':
-    "L'épaisseur par défaut de la barre de VProgressLinear (4px)",
   '--vectis-control-size-progress-linear-length':
     "La longueur par défaut d'un VProgressLinear vertical, que remplace une hauteur posée sur la barre",
   '--vectis-control-size-progress-circular-diameter': 'Le diamètre par défaut de VProgressCircular',

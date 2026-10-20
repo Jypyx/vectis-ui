@@ -16,10 +16,10 @@ export default {
         { name: 'indeterminate', type: 'boolean', default: 'false' },
         { name: 'tone', type: 'ProgressLinearTone', values: "'neutral' | 'accent' | 'danger' | 'success' | 'warning'", default: "'accent'" },
         { name: 'color', type: 'string' },
-        { name: 'thickness', type: 'number | string' },
+        { name: 'size', type: 'ProgressLinearSize', values: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'sm'" },
         { name: 'shape', type: 'ProgressLinearShape', values: "'rounded' | 'square'", default: "'rounded'" },
         { name: 'showValue', type: 'boolean', default: 'false' },
-        { name: 'valuePosition', type: 'ProgressLinearValuePosition', values: "'start' | 'center' | 'end'", default: "'center'" },
+        { name: 'valuePosition', type: 'ProgressLinearValuePosition', values: "'header' | 'start' | 'center' | 'end'", default: "'header'" },
         { name: 'orientation', type: 'ProgressLinearOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },
       ],
       slots: [
@@ -38,7 +38,11 @@ export default {
     },
   ],
   cssVars: [
-    { name: '--vectis-control-size-progress-linear-thickness', value: '0.25rem' },
+    { name: '--vectis-control-size-bar-thickness-xs', value: '0.125rem' },
+    { name: '--vectis-control-size-bar-thickness-sm', value: '0.25rem' },
+    { name: '--vectis-control-size-bar-thickness-md', value: '0.5rem' },
+    { name: '--vectis-control-size-bar-thickness-lg', value: '0.75rem' },
+    { name: '--vectis-control-size-bar-thickness-xl', value: '1.25rem' },
     { name: '--vectis-control-size-progress-linear-length', value: '10rem' },
   ],
 } satisfies PageApi

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { VMeter } from 'vectis-ui'
+import { VMeter, type MeterSize } from 'vectis-ui'
+
+const SIZES: MeterSize[] = ['xs', 'sm', 'md', 'lg', 'xl']
 </script>
 
 <template>
   <div class="meters">
-    <VMeter size="sm" label="Small" :value="40" />
-    <VMeter size="md" label="Medium" :value="40" />
-    <VMeter size="lg" label="Large" :value="40" />
+    <VMeter v-for="size in SIZES" :key="size" :size="size" :label="size" :value="40" />
   </div>
 </template>
 

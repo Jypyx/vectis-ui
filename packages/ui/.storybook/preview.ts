@@ -60,7 +60,11 @@ const preview: Preview = {
        * derive from the fill or hand they overlap, rather than the track or panel axe measures.
        */
       context: {
-        exclude: ['.v-progress-linear-text[data-on-fill]', '.v-time-picker-number[data-selected]'],
+        exclude: [
+          '.v-progress-linear-text[data-on-fill]',
+          '.v-meter-text[data-on-fill]',
+          '.v-time-picker-number[data-selected]',
+        ],
       },
       /*
        * Dispose timers and queue state between Storybook navigations; the preview process

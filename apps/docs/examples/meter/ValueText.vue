@@ -4,15 +4,16 @@ import { VMeter } from 'vectis-ui'
 
 <template>
   <div class="meters">
-    <VMeter label="Humidity" :value="45" />
+    <VMeter label="Humidity" :value="45" show-value />
     <VMeter
       label="Temperature"
       :value="21.5"
       :min="-10"
       :max="40"
       :format-options="{ style: 'unit', unit: 'celsius' }"
+      show-value
     />
-    <VMeter label="Storage" :value="7.2" :max="10" value-text="7.2 GB of 10 GB" />
+    <VMeter label="Storage" :value="7.2" :max="10" value-text="7.2 GB of 10 GB" show-value />
   </div>
 </template>
 

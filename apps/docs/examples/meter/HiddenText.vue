@@ -3,7 +3,7 @@ import { VMeter } from 'vectis-ui'
 </script>
 
 <template>
-  <VMeter class="meter" label="Quota" :value="30" hide-label hide-value />
+  <VMeter class="meter" label="Quota" :value="30" hide-label />
 </template>
 
 <style scoped>

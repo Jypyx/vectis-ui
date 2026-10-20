@@ -12,8 +12,8 @@ import ProgressLinearOrientation from '~/examples/progress-linear/Orientation.vu
 import progressLinearOrientationSource from '~/examples/progress-linear/Orientation.vue?raw'
 import ProgressLinearShape from '~/examples/progress-linear/Shape.vue'
 import progressLinearShapeSource from '~/examples/progress-linear/Shape.vue?raw'
-import ProgressLinearThickness from '~/examples/progress-linear/Thickness.vue'
-import progressLinearThicknessSource from '~/examples/progress-linear/Thickness.vue?raw'
+import ProgressLinearSizes from '~/examples/progress-linear/Sizes.vue'
+import progressLinearSizesSource from '~/examples/progress-linear/Sizes.vue?raw'
 import ProgressLinearTones from '~/examples/progress-linear/Tones.vue'
 import progressLinearTonesSource from '~/examples/progress-linear/Tones.vue?raw'
 import ProgressLinearValue from '~/examples/progress-linear/Value.vue'
@@ -60,10 +60,10 @@ useDocsHead('progressLinear')
     <ProgressLinearCustomColors />
   </DocsExample>
 
-  <h3 id="thickness">{{ t('progressLinear.examples.thickness.title') }}</h3>
-  <DocsProse keypath="progressLinear.examples.thickness.text" />
-  <DocsExample :source="progressLinearThicknessSource" stack>
-    <ProgressLinearThickness />
+  <h3 id="sizes">{{ t('progressLinear.examples.sizes.title') }}</h3>
+  <DocsProse keypath="progressLinear.examples.sizes.text" />
+  <DocsExample :source="progressLinearSizesSource" stack>
+    <ProgressLinearSizes />
   </DocsExample>
 
   <h3 id="shape">{{ t('progressLinear.examples.shape.title') }}</h3>
@@ -72,7 +72,7 @@ useDocsHead('progressLinear')
     <ProgressLinearShape />
   </DocsExample>
 
-  <h3 id="custom-content">{{ t('progressLinear.examples.customContent.title') }}</h3>
+  <h3 id="value-position">{{ t('progressLinear.examples.customContent.title') }}</h3>
   <DocsProse keypath="progressLinear.examples.customContent.text" />
   <DocsExample :source="progressLinearCustomContentSource" stack>
     <ProgressLinearCustomContent />

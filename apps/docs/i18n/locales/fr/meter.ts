@@ -12,7 +12,11 @@ export default {
     },
     valueText: {
       title: 'Valeur',
-      text: 'La valeur est par défaut un pourcentage de la plage. <code>formatOptions</code> formate la valeur elle-même selon la locale courante, et <code>valueText</code> la remplace par vos propres mots. Les lecteurs d’écran lisent le même texte.',
+      text: '<code>showValue</code> écrit la valeur après le libellé. C’est par défaut un pourcentage de la plage. <code>formatOptions</code> formate la valeur elle-même selon la locale courante, et <code>valueText</code> la remplace par vos propres mots. Les lecteurs d’écran lisent le même texte, écrit ou non.',
+    },
+    valuePosition: {
+      title: 'Position de la valeur',
+      text: '<code>valuePosition</code> écrit la valeur dans la barre, au début, au centre ou à la fin, comme dans <code>VProgressLinear</code>. Seule <code>size="xl"</code> est assez épaisse pour la contenir.',
     },
     segments: {
       title: 'Segments',
@@ -20,11 +24,11 @@ export default {
     },
     sizes: {
       title: 'Tailles',
-      text: '<code>size</code> règle l’épaisseur de la barre, 4, 8 ou 12 pixels. La jauge occupe toute la largeur de son conteneur.',
+      text: '<code>size</code> règle l’épaisseur de la barre, de 2 à 20 pixels, sur la même échelle que <code>VProgressLinear</code>. La jauge occupe toute la largeur de son conteneur.',
     },
     hiddenText: {
       title: 'Texte masqué',
-      text: '<code>hideLabel</code> et <code>hideValue</code> retirent le texte au-dessus de la barre. Les lecteurs d’écran entendent toujours le libellé et la valeur.',
+      text: 'Sans <code>showValue</code>, la valeur n’est pas écrite, et <code>hideLabel</code> masque le libellé. Les lecteurs d’écran entendent toujours les deux.',
     },
   },
   api: {
@@ -42,11 +46,12 @@ export default {
         hideLabel: 'Masque le libellé à l’écran. Les lecteurs d’écran le lisent toujours.',
         valueText: 'Texte remplaçant la valeur formatée, à l’écran et pour les lecteurs d’écran.',
         formatOptions: 'Options de <code>Intl.NumberFormat</code> formatant la valeur elle-même.',
-        hideValue: 'Masque la valeur à l’écran. Les lecteurs d’écran la lisent toujours.',
+        showValue: 'Écrit la valeur. Les lecteurs d’écran la lisent dans tous les cas.',
+        valuePosition: 'Position de la valeur : après le libellé, ou dans la barre.',
         tone: 'Couleur du remplissage. Choisie selon la zone quand <code>low</code>, <code>high</code> ou <code>optimum</code> est défini, accent sinon.',
         color: 'Couleur CSS personnalisée remplaçant le ton.',
         segments: 'Nombre de parts égales de la barre.',
-        size: 'Épaisseur de la barre et taille du texte.',
+        size: 'Épaisseur de la barre. Seule <code>xl</code> contient la valeur dans la barre.',
       },
     },
   },
