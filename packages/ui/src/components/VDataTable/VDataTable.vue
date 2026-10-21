@@ -1198,6 +1198,12 @@ const heightStyle = computed<StyleValue | undefined>(() =>
     inline-size: 0;
   }
 
+  /* Block-level so the box leaves the cell's line box: inline, it sits on the text baseline
+     above the strut's descent and reads off-centre. */
+  .v-data-table-table .v-data-table-select .v-choice {
+    display: grid;
+  }
+
   /* By the row's own index: in the virtual mode, the space standing for hidden rows is a row too. */
   .v-data-table[data-striped] tbody tr[data-stripe] {
     background-color: var(--vectis-color-surface-sunken);
