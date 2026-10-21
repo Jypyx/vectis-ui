@@ -2,6 +2,37 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.17.0] - 2026-10-21
+
+### Upgrading from 0.16.x
+
+- **`vectis-ui` requires Vue 3.5.42 or later**, the first release without an XSS in `@vue/server-renderer`.
+- **VProgressLinear `thickness` is replaced by `size`** (`xs`, `sm`, `md`, `lg`, `xl`: 2, 4, 8, 12, 20px; `sm` by default), and `valuePosition` defaults to `header` instead of `center`.
+- **VMeter no longer writes its value by default.** `hideValue` is removed: pass `showValue` to write it. Its text no longer shrinks at `sm`.
+- **Bar tokens are renamed.** `--vectis-control-size-progress-linear-length` becomes `--vectis-control-size-bar-length`, and the `progress-linear-thickness` and `meter-thickness-*` tokens are replaced by `--vectis-control-size-bar-thickness-*`.
+- **Modifier classes become data attributes.** `.v-date-picker-day--static` becomes `[data-static]`, `.v-date-picker-view--years` is read from the root's `data-view`, and `.v-dialog-edge--top|bottom` and `.v-drawer-edge--top|bottom` become `[data-edge='top']` and `[data-edge='bottom']`.
+
+### Added
+
+- VMeterGroup shows how a total breaks down, as the parts of one bar with a legend, horizontal or vertical.
+- VMeter and VProgressLinear share `size`, `showValue` and `valuePosition` (`header`, `start`, `center`, `end`). VMeter gains `orientation`.
+- VSeparator takes a `label`, an `icon` or content in its default slot, placed by `contentPosition`, and gains `variant` (solid, dashed, dotted), `size` and `color`.
+- VCombobox `creatable` offers to create a value from the typed text and emits `create`.
+- VSideNavigation draws guide lines beside subitems.
+
+### Changed
+
+- VProgressLinear and VMeter tracks use the tone's soft background.
+
+### Fixed
+
+- `toast()` and `snackbar()` drop the message during a server render, where it reached the next requests' pages.
+- Five regular expressions no longer take quadratic time on long strings. VDataTable ran one on every sort comparison, so one hostile cell could freeze the page.
+- A `url()` passed as a custom colour no longer loads a remote image.
+- VDataTable centres its selection checkboxes vertically.
+
+**Full diff:** [v0.16.0...v0.17.0](https://github.com/Jypyx/vectis-ui/compare/v0.16.0...v0.17.0)
+
 ## [0.16.0] - 2026-10-15
 
 ### Upgrading from 0.15.x
