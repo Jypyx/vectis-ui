@@ -138,13 +138,14 @@ jobs:
           path: package
 
       # npm refuses a version the registry already holds, so a green step means published.
+      # The `./` is required: npm reads `package/<file>.tgz` as a GitHub `owner/repo` spec.
       - name: Publish
         env:
           VERSION: ${{ needs.build.outputs.version }}
           DIST_TAG: ${{ needs.build.outputs.dist-tag }}
         run: |
           echo "publishing vectis-ui@$VERSION under the dist-tag $DIST_TAG"
-          npm publish "package/vectis-ui-$VERSION.tgz" --tag "$DIST_TAG"
+          npm publish "./package/vectis-ui-$VERSION.tgz" --tag "$DIST_TAG"
 
   # A job of its own, after the publish: it needs `contents: write`, which the publish job
   # has no reason to hold, and a GitHub release announcing a version npm refused would be a
