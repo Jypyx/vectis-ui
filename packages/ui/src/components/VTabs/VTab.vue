@@ -129,6 +129,9 @@ function onFocus() {
      */
     flex: none;
     white-space: nowrap;
+    /* A tab squared along its indicator edge turns a large themed radius into an arch: cap it
+       well below the pill. The default radius stays under the cap at every size. */
+    border-radius: min(var(--vectis-radius-interactive), calc(var(--control-height) / 4));
   }
 
   /*
