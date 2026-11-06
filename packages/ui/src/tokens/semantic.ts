@@ -264,7 +264,7 @@ export const semantic = {
     'size-check': dimension('1.25rem', 'The box of checkable controls (VCheckbox, VRadio)'),
     'size-check-mark': dimension('0.875rem', "The tick inside VCheckbox's box"),
     'size-check-dot': dimension('0.5rem', "The dot inside VRadio's circle"),
-    'size-switch-w': dimension('2.5rem', "The width of VSwitch's track"),
+    'size-switch-w': dimension('2.25rem', "The width of VSwitch's track"),
     'size-switch-h': dimension('1.25rem', "The height of VSwitch's track"),
     'size-switch-pad': dimension(
       '0.125rem',

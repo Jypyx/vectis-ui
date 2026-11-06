@@ -25,7 +25,7 @@ export default {
     },
   ],
   cssVars: [
-    { name: '--vectis-control-size-switch-w', value: '2.5rem' },
+    { name: '--vectis-control-size-switch-w', value: '2.25rem' },
     { name: '--vectis-control-size-switch-h', value: '1.25rem' },
     { name: '--vectis-control-size-switch-pad', value: '0.125rem' },
   ],
