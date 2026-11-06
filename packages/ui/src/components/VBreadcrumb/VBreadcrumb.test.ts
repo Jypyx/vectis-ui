@@ -1,4 +1,4 @@
-import { render } from '@testing-library/vue'
+import { fireEvent, render } from '@testing-library/vue'
 import { describe, expect, it } from 'vite-plus/test'
 import { nextTick } from 'vue'
 
@@ -166,6 +166,60 @@ describe('VBreadcrumb', () => {
         (el) => el.textContent?.trim() === 'Projects',
       )
       expect(folded?.getAttribute('aria-current')).toBe('page')
+    })
+  })
+
+  describe('navigate', () => {
+    // Every handler cancels the click: jsdom cannot follow a path, and a router would do the same.
+    const cancel = (_item: BreadcrumbItem, event: MouseEvent) => event.preventDefault()
+
+    it('emits the item and the click, which the handler can cancel', async () => {
+      let prevented: boolean | undefined
+      const { getByRole, emitted } = render(VBreadcrumb, {
+        props: { items, onNavigate: cancel },
+      })
+      const link = getByRole('link', { name: 'Projects' })
+      link.addEventListener('click', (event) => (prevented = event.defaultPrevented))
+
+      await fireEvent.click(link)
+
+      const navigate = emitted('navigate') as Array<[BreadcrumbItem, MouseEvent]>
+      expect(navigate).toHaveLength(1)
+      expect(navigate[0]![0]).toEqual(items[1])
+      expect(navigate[0]![1]).toBeInstanceOf(MouseEvent)
+      expect(prevented).toBe(true)
+    })
+
+    it('leaves a click with a modifier or another button to the browser', async () => {
+      const { getByRole, emitted } = render(VBreadcrumb, { props: { items } })
+      const link = getByRole('link', { name: 'Projects' })
+      // Stops jsdom from attempting the navigation the component deliberately leaves alone.
+      link.addEventListener('click', (event) => event.preventDefault())
+
+      for (const modifier of ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'] as const) {
+        await fireEvent.click(link, { [modifier]: true })
+      }
+      await fireEvent.click(link, { button: 1 })
+
+      expect(emitted('navigate')).toBeUndefined()
+    })
+
+    it('emits from a segment folded into the menu', async () => {
+      const long: BreadcrumbItem[] = [
+        { label: 'Home', href: '/' },
+        { label: 'Alpha', href: '/a' },
+        { label: 'Bravo', href: '/a/b' },
+        { label: 'Charlie', href: '/a/b/c' },
+      ]
+      const { getByRole, emitted, container } = render(VBreadcrumb, {
+        props: { items: long, maxItems: 3, onNavigate: cancel },
+      })
+      ;(container.querySelector('[role="menu"]') as HTMLElement).showPopover()
+      await nextTick()
+
+      await fireEvent.click(getByRole('menuitem', { name: 'Alpha' }))
+
+      expect((emitted('navigate') as Array<[BreadcrumbItem, MouseEvent]>)[0]![0]).toEqual(long[1])
     })
   })
 })

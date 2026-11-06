@@ -14,6 +14,10 @@ export default {
       title: 'Troncature',
       text: 'Au-delà de <code>maxItems</code>, le fil conserve le premier élément et les deux derniers. Un menu de points de suspension liste les éléments masqués.',
     },
+    router: {
+      title: 'Routeur',
+      text: 'Chaque segment est un vrai <code>&lt;a&gt;</code>. Un clic émet <code>navigate</code> avec l’élément et l’événement : avec Nuxt ou Vue Router, appelez <code>preventDefault()</code> et poussez <code>item.href</code>. Un clic avec une touche de modification n’émet rien et ouvre toujours un nouvel onglet.',
+    },
   },
   api: {
     VBreadcrumb: {
@@ -26,6 +30,10 @@ export default {
         maxItems: 'Seuil de troncature, avec un minimum effectif de 3.',
         ellipsisLabel:
           'Nom accessible du menu de points de suspension. Utilise le dictionnaire par défaut.',
+      },
+      events: {
+        navigate:
+          'Segment suivi, depuis le fil ou le menu des points de suspension. Reçoit l’élément et le clic ; appelez <code>preventDefault()</code> pour le routage. Les clics avec une touche modificatrice ne l’émettent pas.',
       },
     },
   },

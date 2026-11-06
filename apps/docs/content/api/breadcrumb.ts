@@ -16,6 +16,9 @@ export default {
         { name: 'maxItems', type: 'number' },
         { name: 'ellipsisLabel', type: 'string' },
       ],
+      events: [
+        { name: 'navigate', type: '[item: BreadcrumbItem, event: MouseEvent]' },
+      ],
     },
   ],
   types: [

@@ -69,6 +69,24 @@ const props = withDefaults(defineProps<BreadcrumbProps>(), {
   ellipsisLabel: undefined,
 })
 
+const emit = defineEmits<{
+  /**
+   * A segment was followed, from the trail or from the menu of folded segments, with the click
+   * that followed it. A single-page application calls `preventDefault()` on the event and hands
+   * `item.href` to its router instead of letting the browser load the page.
+   */
+  navigate: [item: BreadcrumbItem, event: MouseEvent]
+}>()
+
+// @core
+// A click with a modifier (Ctrl or Cmd, Shift, Alt) or another button opens the link elsewhere:
+// the page on screen stays, so it is left to the browser and emits nothing. Routers make the
+// same test before taking a click over.
+function follow(item: BreadcrumbItem, event: MouseEvent) {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+  emit('navigate', item, event)
+}
+
 const m = useMessages()
 const ariaLabel = useAriaLabel(() => props.label ?? m.value.breadcrumb.label)
 const resolvedEllipsisLabel = computed(() => props.ellipsisLabel ?? m.value.breadcrumb.ellipsis)
@@ -130,6 +148,7 @@ const visibleItems = computed(() =>
               :icon-start="hidden.icon"
               :selected="isCurrent(hidden)"
               :aria-current="isCurrent(hidden) ? 'page' : undefined"
+              @click="follow(hidden, $event)"
             />
           </VMenu>
         </li>
@@ -139,6 +158,7 @@ const visibleItems = computed(() =>
             class="v-breadcrumb-link"
             :href="item.href"
             :aria-current="isCurrent(item) ? 'page' : undefined"
+            @click="follow(item, $event)"
           >
             <VIcon v-if="item.icon" v-bind="iconProps(item.icon)" />
             {{ item.label }}

@@ -51,6 +51,28 @@ Long labels wrap rather than being cut, and the list wraps onto a second line wh
 
 <Canvas of={VBreadcrumbStories.LongLabels} />
 
+## Router
+
+Each segment is a real `<a>`. A click on a segment, in the trail or in the menu of folded segments,
+emits `navigate` with the item and the click. With Vue Router or Nuxt, cancel the click and hand the
+address to the router:
+
+```vue
+<VBreadcrumb
+  :items="items"
+  :current-path="$route.path"
+  @navigate="
+    (item, event) => {
+      event.preventDefault()
+      $router.push(item.href)
+    }
+  "
+/>
+```
+
+A click with a modifier key (Ctrl or Cmd, Shift, Alt) or the middle button emits nothing: the
+browser opens the link elsewhere, as it would without a router.
+
 ## Validating `href`
 
 `items[].href` is rendered as-is into the link, with no scheme filtering — like every `href` in the

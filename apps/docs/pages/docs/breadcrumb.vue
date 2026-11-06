@@ -13,6 +13,12 @@ definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
 useDocsHead('breadcrumb')
+
+const routerCode = `<VBreadcrumb
+  :items="items"
+  :current-path="$route.path"
+  @navigate="(item, event) => { event.preventDefault(); $router.push(item.href) }"
+/>`
 </script>
 
 <template>
@@ -43,6 +49,10 @@ useDocsHead('breadcrumb')
   <DocsExample :source="breadcrumbTruncatedSource" stack>
     <BreadcrumbTruncated />
   </DocsExample>
+
+  <h3 id="router">{{ t('breadcrumb.examples.router.title') }}</h3>
+  <DocsProse keypath="breadcrumb.examples.router.text" />
+  <DocsCode lang="vue" :code="routerCode" />
 
   <DocsApi page="breadcrumb" :api="api" />
 </template>
