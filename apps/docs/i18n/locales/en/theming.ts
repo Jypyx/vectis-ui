@@ -9,9 +9,9 @@ export default {
   switchScope:
     'Set <code>data-theme</code> on a container to theme one section. Nested containers can use a different theme.',
   switchColorScheme:
-    'Each theme also sets <code>color-scheme</code>, which adapts native form controls and scrollbars.',
+    'Each theme also sets <code>color-scheme</code>, which adapts native form controls and scrollbars. The stylesheet paints <code>body</code> with the theme surface and text colours.',
   switchSystem:
-    'The library does not select a theme from the system preference. Read <code>prefers-color-scheme</code> in your application if needed. This example reads the preference once; apply it before first paint to avoid a theme flash.',
+    'Set <code>data-theme="system"</code> to follow the <code>prefers-color-scheme</code> preference. It applies from the first paint, follows preference changes and needs no script. Dark-theme overrides written for <code>[data-theme="dark"]</code> must also target <code>[data-theme="system"]</code> inside a <code>@media (prefers-color-scheme: dark)</code> rule.',
   tokensHeading: 'Customise colours and tokens',
   tokensBody: 'Design tokens are exposed as CSS variables at two levels:',
   tokensLevels: [

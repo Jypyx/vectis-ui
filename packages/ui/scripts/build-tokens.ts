@@ -46,7 +46,8 @@ ${toCssDeclarations(primitives, known, INDENT)}
    * ORDER of these blocks, and nothing else. Never move the dark block above this one.
    */
   :root,
-  [data-theme='light'] {
+  [data-theme='light'],
+  [data-theme='system'] {
     color-scheme: light;
 ${toCssDeclarations(semantic, known, INDENT)}
   }
@@ -54,6 +55,17 @@ ${toCssDeclarations(semantic, known, INDENT)}
   [data-theme='dark'] {
     color-scheme: dark;
 ${toCssDeclarations(dark, known, INDENT)}
+  }
+
+  /*
+   * \`system\` follows the OS preference without script, so it is right on first paint. It is
+   * light above and overridden here by the same specificity, so this block stays last.
+   */
+  @media (prefers-color-scheme: dark) {
+    [data-theme='system'] {
+      color-scheme: dark;
+${toCssDeclarations(dark, known, INDENT + '  ')}
+    }
   }
 }
 `

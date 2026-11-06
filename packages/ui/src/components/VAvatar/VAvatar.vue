@@ -271,7 +271,8 @@ const rootStyle = computed<StyleValue>(() => [
    * resolved by the NEAREST scope, which is exactly how the semantic tokens behave.
    */
   :root,
-  [data-theme='light'] {
+  [data-theme='light'],
+  [data-theme='system'] {
     --avatar-auto-bg-lc: 0.9 0.06;
     --avatar-auto-text-lc: 0.42 0.13;
   }
@@ -279,6 +280,13 @@ const rootStyle = computed<StyleValue>(() => [
   [data-theme='dark'] {
     --avatar-auto-bg-lc: 0.42 0.09;
     --avatar-auto-text-lc: 0.92 0.05;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    [data-theme='system'] {
+      --avatar-auto-bg-lc: 0.42 0.09;
+      --avatar-auto-text-lc: 0.92 0.05;
+    }
   }
 
   .v-avatar[data-auto] {

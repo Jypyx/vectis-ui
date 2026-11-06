@@ -9,9 +9,9 @@ export default {
   switchScope:
     'Placez <code>data-theme</code> sur un conteneur pour limiter le thème à une section. Les conteneurs imbriqués peuvent utiliser un autre thème.',
   switchColorScheme:
-    'Chaque thème définit aussi <code>color-scheme</code>, qui adapte les contrôles de formulaire natifs et les barres de défilement.',
+    'Chaque thème définit aussi <code>color-scheme</code>, qui adapte les contrôles de formulaire natifs et les barres de défilement. La feuille de styles applique à <code>body</code> les couleurs de surface et de texte du thème.',
   switchSystem:
-    'La bibliothèque ne choisit pas de thème selon la préférence système. Lisez <code>prefers-color-scheme</code> dans votre application si nécessaire. Cet exemple lit la préférence une seule fois ; appliquez-la avant le premier affichage pour éviter un flash de thème.',
+    'Utilisez <code>data-theme="system"</code> pour suivre la préférence <code>prefers-color-scheme</code>. Le thème s’applique dès le premier affichage, suit les changements de préférence et ne nécessite aucun script. Les surcharges du thème sombre écrites pour <code>[data-theme="dark"]</code> doivent aussi cibler <code>[data-theme="system"]</code> dans une règle <code>@media (prefers-color-scheme: dark)</code>.',
   tokensHeading: 'Personnaliser les couleurs et les tokens',
   tokensBody: 'Les design tokens sont exposés sous forme de variables CSS à deux niveaux :',
   tokensLevels: [

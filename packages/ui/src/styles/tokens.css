@@ -142,7 +142,8 @@
    * ORDER of these blocks, and nothing else. Never move the dark block above this one.
    */
   :root,
-  [data-theme='light'] {
+  [data-theme='light'],
+  [data-theme='system'] {
     color-scheme: light;
     --vectis-color-surface: var(--vectis-color-white);
     --vectis-color-surface-muted: var(--vectis-color-gray-100);
@@ -420,5 +421,59 @@
     --vectis-color-event-border: oklch(0.42 0.08 265);
     --vectis-color-event-text: oklch(0.9 0.06 265);
     --vectis-focus-ring-color: var(--vectis-color-indigo-400);
+  }
+
+  /*
+   * `system` follows the OS preference without script, so it is right on first paint. It is
+   * light above and overridden here by the same specificity, so this block stays last.
+   */
+  @media (prefers-color-scheme: dark) {
+    [data-theme='system'] {
+      color-scheme: dark;
+      --vectis-color-surface: var(--vectis-color-gray-950);
+      --vectis-color-surface-muted: var(--vectis-color-gray-800);
+      --vectis-color-surface-raised: var(--vectis-color-gray-900);
+      --vectis-color-surface-overlay: var(--vectis-color-gray-900);
+      --vectis-color-surface-sunken: oklch(11% 0.006 260);
+      --vectis-color-surface-inverse: var(--vectis-color-gray-800);
+      --vectis-color-surface-skeleton: var(--vectis-color-gray-800);
+      --vectis-color-text-on-inverse: var(--vectis-color-gray-50);
+      --vectis-color-text: var(--vectis-color-gray-50);
+      --vectis-color-text-muted: var(--vectis-color-gray-300);
+      --vectis-color-text-subtle: var(--vectis-color-gray-400);
+      --vectis-color-text-on-accent: var(--vectis-color-white);
+      --vectis-color-border: var(--vectis-color-gray-800);
+      --vectis-color-border-strong: var(--vectis-color-gray-700);
+      --vectis-color-border-on-fill: oklch(100% 0 0 / 0.15);
+      --vectis-color-accent: var(--vectis-color-indigo-500);
+      --vectis-color-accent-hover: var(--vectis-color-indigo-400);
+      --vectis-color-accent-active: var(--vectis-color-indigo-300);
+      --vectis-color-accent-surface: var(--vectis-color-indigo-950);
+      --vectis-color-accent-border: var(--vectis-color-indigo-900);
+      --vectis-color-accent-text: var(--vectis-color-indigo-300);
+      --vectis-color-danger: var(--vectis-color-red-600);
+      --vectis-color-danger-hover: var(--vectis-color-red-700);
+      --vectis-color-danger-active: var(--vectis-color-red-800);
+      --vectis-color-danger-surface: var(--vectis-color-red-950);
+      --vectis-color-danger-border: var(--vectis-color-red-900);
+      --vectis-color-danger-text: var(--vectis-color-red-300);
+      --vectis-color-success: var(--vectis-color-green-700);
+      --vectis-color-success-hover: var(--vectis-color-green-800);
+      --vectis-color-success-active: var(--vectis-color-green-900);
+      --vectis-color-success-surface: var(--vectis-color-green-950);
+      --vectis-color-success-border: var(--vectis-color-green-900);
+      --vectis-color-success-text: var(--vectis-color-green-300);
+      --vectis-color-warning: var(--vectis-color-amber-500);
+      --vectis-color-warning-hover: var(--vectis-color-amber-400);
+      --vectis-color-warning-active: var(--vectis-color-amber-300);
+      --vectis-color-warning-surface: var(--vectis-color-amber-950);
+      --vectis-color-warning-border: var(--vectis-color-amber-900);
+      --vectis-color-warning-text: var(--vectis-color-amber-300);
+      --vectis-color-backdrop: oklch(0% 0 0 / 0.6);
+      --vectis-color-event-surface: oklch(0.3 0.05 265);
+      --vectis-color-event-border: oklch(0.42 0.08 265);
+      --vectis-color-event-text: oklch(0.9 0.06 265);
+      --vectis-focus-ring-color: var(--vectis-color-indigo-400);
+    }
   }
 }

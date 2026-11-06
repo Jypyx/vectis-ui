@@ -57,9 +57,8 @@ const themeScopeCode = `<!-- Use a dark theme for the aside. -->
   </aside>
 </main>`
 
-const themeSystemCode = `// Read the system preference once, in the browser.
-const dark = window.matchMedia('(prefers-color-scheme: dark)')
-document.documentElement.dataset.theme = dark.matches ? 'dark' : 'light'`
+const themeSystemCode = `<!-- Light or dark, following the system preference -->
+<html data-theme="system">`
 
 const coralCode = `/* Scope overrides to this container. */
 .coral {
@@ -145,7 +144,7 @@ export default defineNuxtConfig({
   <DocsCode lang="html" :code="themeScopeCode" />
   <DocsProse keypath="theming.switchColorScheme" />
   <DocsProse keypath="theming.switchSystem" />
-  <DocsCode lang="ts" :code="themeSystemCode" />
+  <DocsCode lang="html" :code="themeSystemCode" />
 
   <h2 id="customize-tokens">{{ t('theming.tokensHeading') }}</h2>
   <DocsProse keypath="theming.tokensBody" />

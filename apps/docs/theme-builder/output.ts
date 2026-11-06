@@ -28,9 +28,9 @@ export interface ThemeDeclarations {
   imports: string[]
   /** The root font size as a percentage, when it changes. */
   rootFontSize?: string
-  /** Declarations for `:root, [data-theme='light']`. */
+  /** Declarations for `:root, [data-theme='light'], [data-theme='system']`. */
   light: [string, string][]
-  /** Declarations for `[data-theme='dark']`. */
+  /** Declarations for `[data-theme='dark']`, repeated for `system` in a dark colour scheme. */
   dark: [string, string][]
 }
 
@@ -93,8 +93,11 @@ export function themeCss(declarations: ThemeDeclarations, withImports = true): s
   const parts = [
     ...(withImports ? declarations.imports.map((url) => `@import url('${url}');`) : []),
     declarations.rootFontSize && block('html', [['font-size', declarations.rootFontSize]]),
-    declarations.light.length > 0 && block(":root,\n[data-theme='light']", declarations.light),
+    declarations.light.length > 0 &&
+      block(":root,\n[data-theme='light'],\n[data-theme='system']", declarations.light),
     declarations.dark.length > 0 && block("[data-theme='dark']", declarations.dark),
+    declarations.dark.length > 0 &&
+      `@media (prefers-color-scheme: dark) {\n${indent(block("[data-theme='system']", declarations.dark), '  ')}\n}`,
   ].filter(Boolean)
   return parts.join('\n\n')
 }

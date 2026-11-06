@@ -10,23 +10,7 @@ import './preview.css'
  * Apply toolbar globals in the decorator body: Storybook reruns it without remounting Vue
  * setup. Reactive library locale state updates mounted components.
  */
-const darkMedia = window.matchMedia('(prefers-color-scheme: dark)')
-
 registerMessages('fr', fr)
-
-const applySystemTheme = () => {
-  document.documentElement.dataset.theme = darkMedia.matches ? 'dark' : 'light'
-}
-
-const applyTheme = (theme: string) => {
-  darkMedia.removeEventListener('change', applySystemTheme)
-  if (theme === 'system') {
-    applySystemTheme()
-    darkMedia.addEventListener('change', applySystemTheme)
-  } else {
-    document.documentElement.dataset.theme = theme
-  }
-}
 
 const applyDensity = (density: string) => {
   const root = document.documentElement.style
@@ -35,7 +19,7 @@ const applyDensity = (density: string) => {
 }
 
 const withGlobals: Decorator = (story, context) => {
-  applyTheme((context.globals.theme as string | undefined) ?? 'system')
+  document.documentElement.dataset.theme = (context.globals.theme as string | undefined) ?? 'system'
   applyDensity((context.globals.density as string | undefined) ?? 'standard')
   document.documentElement.dir = (context.globals.direction as string | undefined) ?? 'ltr'
   setLocale((context.globals.locale as string | undefined) ?? 'en-US')

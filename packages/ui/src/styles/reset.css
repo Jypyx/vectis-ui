@@ -19,6 +19,8 @@
   }
 
   body {
+    background-color: var(--vectis-color-surface);
+    color: var(--vectis-color-text);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
