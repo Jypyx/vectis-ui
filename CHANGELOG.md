@@ -2,6 +2,19 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.18.0] - 2026-11-06
+
+### Upgrading from 0.17.x
+
+- **Nuxt needs `build: { transpile: ['vectis-ui'] }`** in `nuxt.config.ts`. Without it, the production server loads the package with Node, which cannot import the component CSS files, and every page answers 500. Vite server rendering outside Nuxt needs `ssr.noExternal: ['vectis-ui']`.
+- **The reset paints `body`** with `--vectis-color-surface` and `--vectis-color-text`. A `body` background or colour in your own CSS still wins.
+
+### Added
+
+- `data-theme="system"` follows the `prefers-color-scheme` preference, from the first paint and without script. The theme builder's exported CSS supports it.
+
+**Full diff:** [v0.17.2...v0.18.0](https://github.com/Jypyx/vectis-ui/compare/v0.17.2...v0.18.0)
+
 ## [0.17.2] - 2026-11-06
 
 No public API changes. No migration is required from 0.17.1.
