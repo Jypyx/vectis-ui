@@ -39,7 +39,8 @@ for it.
 ## Size
 
 **1em by default**: the icon follows the size of the surrounding text, with no configuration.
-The `size` prop (a number, in pixels) allows a free override: `:size="32"` → 32px.
+The `size` prop allows a free override: a number is read as pixels (`:size="32"` → 32px), a
+string as a CSS length (`size="1.5rem"`).
 
 <Canvas of={VIconStories.TextAdapted} />
 
@@ -70,7 +71,7 @@ catalogue.
 Without a `size` prop, any parent can size its icons by setting the custom properties
 **`--vectis-icon-size`** (size) and **`--vectis-icon-opsz`** (optical axis). That is what
 `VButton`, `VInput` and `VTextarea` do according to their own size (sm → 16px/opsz 20,
-md → 20px/opsz 20, lg → 24px/opsz 24). Resolution follows the priority: numeric `size` prop >
+md → 20px/opsz 20, lg → 24px/opsz 24). Resolution follows the priority: `size` prop >
 parent context > 1em.
 
 **`--vectis-icon-opsz` only applies to the ligature**: it is a variable font axis, with no

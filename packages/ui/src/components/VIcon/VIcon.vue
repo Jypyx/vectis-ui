@@ -10,7 +10,7 @@ import { ICON_VIEW_BOX } from './icons/viewBox'
 import { resolveIcon } from './resolver'
 import type { BuiltinIcon, IconRender } from './types'
 
-import { px } from '../../utils/css'
+import { cssSize, px } from '../../utils/css'
 
 interface IconProps {
   /** Which icon to draw. */
@@ -23,9 +23,9 @@ interface IconProps {
   /** The address of an image to use as the icon. It wins over `name`. */
   src?: string
   /**
-   * A size in pixels, as a number or a numeric string. Left out, or given something that
-   * is not a number, the icon takes the size its context imposes (a button sets one for
-   * the icons inside it), and failing that 1em, which makes it follow the surrounding
+   * A size: a number or a numeric string is read as pixels, any other string is a CSS length
+   * (`1.5rem`, `2em`). Left out, the icon takes the size its context imposes (a button sets
+   * one for the icons inside it), and failing that 1em, which makes it follow the surrounding
    * text.
    */
   size?: number | string
@@ -87,6 +87,8 @@ function tag(render: IconRender): Resolved {
  * The icon's identity: the name the resolver is asked for, and the one `data-icon`
  * records whatever the drawing turned out to come from.
  */
+// A numeric string stays in pixels: cssSize alone would pass `24` through without a unit.
+const iconSize = computed(() => px(props.size) ?? cssSize(props.size))
 const iconName = computed(() => nameOf(props.name))
 
 // @fallback
@@ -121,7 +123,7 @@ const resolved = computed<Resolved | undefined>(() => {
 <template>
   <span
     class="v-icon"
-    :style="px(size) !== undefined ? { '--vectis-icon-size': px(size) } : undefined"
+    :style="iconSize !== undefined ? { '--vectis-icon-size': iconSize } : undefined"
     :data-icon="iconName"
     :data-filled="filled || undefined"
     :data-mirror="mirrored || undefined"

@@ -4,7 +4,7 @@ export default {
   examples: {
     size: {
       title: 'Size',
-      text: '<code>size</code> sets the square icon size in pixels. Without it, the icon uses its context size or <code>1em</code>.',
+      text: '<code>size</code> sets the square icon size: a number in pixels, or a CSS length such as <code>1.5rem</code>. Without it, the icon uses its context size or <code>1em</code>.',
     },
     filled: {
       title: 'Filled',
@@ -34,7 +34,7 @@ export default {
         name: 'Icon name or built-in icon imported from <code>vectis-ui/icons</code>. The resolver takes precedence over the built-in drawing; unresolved strings use a ligature font.',
         render: 'Explicit icon source. Takes precedence over other sources.',
         src: 'Image URL. Takes precedence over <code>name</code>.',
-        size: 'Size in pixels, as a number or numeric string. Defaults to the context size or <code>1em</code>.',
+        size: 'Size: a number or numeric string in pixels, or a CSS length. Defaults to the context size or <code>1em</code>.',
         label: 'Accessible name. Omit it for decorative icons.',
         filled: 'Uses a filled variant when supported by the icon source.',
         mirrored: 'Flips the icon horizontally in a right-to-left context.',

@@ -4,7 +4,7 @@ export default {
   examples: {
     size: {
       title: 'Taille',
-      text: '<code>size</code> définit la taille carrée en pixels. Sans cette prop, l’icône utilise la taille du contexte ou <code>1em</code>.',
+      text: '<code>size</code> définit la taille carrée : un nombre en pixels, ou une longueur CSS comme <code>1.5rem</code>. Sans cette prop, l’icône utilise la taille du contexte ou <code>1em</code>.',
     },
     filled: {
       title: 'Pleine',
@@ -34,7 +34,7 @@ export default {
         name: 'Nom d’icône ou icône intégrée importée depuis <code>vectis-ui/icons</code>. Le résolveur est prioritaire sur le dessin intégré ; les chaînes non résolues utilisent une police à ligatures.',
         render: 'Source d’icône explicite. Prioritaire sur les autres sources.',
         src: 'URL d’image. Prioritaire sur <code>name</code>.',
-        size: 'Taille en pixels, nombre ou chaîne numérique. Utilise la taille du contexte ou <code>1em</code> par défaut.',
+        size: 'Taille : nombre ou chaîne numérique en pixels, ou longueur CSS. Utilise la taille du contexte ou <code>1em</code> par défaut.',
         label: 'Nom accessible. Omettez-le pour une icône décorative.',
         filled: 'Utilise une variante pleine si la source la prend en charge.',
         mirrored: 'Retourne l’icône horizontalement dans un contexte de droite à gauche.',

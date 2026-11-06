@@ -154,4 +154,10 @@ describe('VIcon', () => {
       false,
     )
   })
+
+  it('size passes a CSS length through untouched', () => {
+    const { container } = render(VIcon, { props: { name: 'add', size: '1.5rem' } })
+    const icon = container.querySelector('.v-icon') as HTMLElement
+    expect(icon.style.getPropertyValue('--vectis-icon-size')).toBe('1.5rem')
+  })
 })
