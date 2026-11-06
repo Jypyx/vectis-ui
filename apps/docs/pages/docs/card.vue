@@ -21,6 +21,10 @@ definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
 useDocsHead('card')
+
+const routerCode = `<RouterLink v-slot="{ href, navigate }" to="/settings" custom>
+  <VCard :href="href" title="Settings" @click="navigate" />
+</RouterLink>`
 </script>
 
 <template>
@@ -75,6 +79,10 @@ useDocsHead('card')
   <DocsExample :source="cardLoadingSource">
     <CardLoading />
   </DocsExample>
+
+  <h3 id="router">{{ t('card.examples.router.title') }}</h3>
+  <DocsProse keypath="card.examples.router.text" />
+  <DocsCode lang="vue" :code="routerCode" />
 
   <DocsApi page="card" :api="api" />
 </template>

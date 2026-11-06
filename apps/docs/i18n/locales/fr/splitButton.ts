@@ -22,6 +22,10 @@ export default {
       title: 'Pleine largeur et position du menu',
       text: 'Le menu est ancré à l’ensemble du contrôle et s’aligne par défaut sur sa fin. Avec <code>fullWidth</code>, l’action principale prend la place et le bouton de menu reste carré ; <code>matchTrigger</code> garde le menu au moins aussi large que le contrôle.',
     },
+    router: {
+      title: 'Routeur',
+      text: 'VSplitButton rend un vrai <code>&lt;a&gt;</code> dès que <code>href</code> est défini. Avec Nuxt ou Vue Router, placez-le dans le lien du routeur en mode <code>custom</code> et transmettez <code>href</code> et <code>navigate</code>. Un clic avec une touche de modification ouvre toujours un nouvel onglet. Seul le bouton principal navigue.',
+    },
   },
   api: {
     VSplitButton: {

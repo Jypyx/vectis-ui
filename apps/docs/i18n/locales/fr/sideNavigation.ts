@@ -46,6 +46,10 @@ export default {
       title: 'Tailles',
       text: 'Définissez <code>size</code> sur la navigation pour tous les niveaux.',
     },
+    router: {
+      title: 'Routeur',
+      text: 'VSideNavigationItem rend un vrai <code>&lt;a&gt;</code> dès que <code>href</code> est défini. Avec Nuxt ou Vue Router, placez-le dans le lien du routeur en mode <code>custom</code> et transmettez <code>href</code> et <code>navigate</code>. Un clic avec une touche de modification ouvre toujours un nouvel onglet. <code>isExactActive</code> peut piloter <code>current</code>.',
+    },
   },
   api: {
     VSideNavigation: {

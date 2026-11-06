@@ -38,6 +38,10 @@ export default {
       title: 'Knowing whether it is open',
       text: '<code>v-model:open</code> tracks opening and dismissal by outside click, Escape or command selection.',
     },
+    router: {
+      title: 'Router',
+      text: 'VMenuItem renders a real <code>&lt;a&gt;</code> when <code>href</code> is set. With Nuxt or Vue Router, render it inside the router link in <code>custom</code> mode and pass on <code>href</code> and <code>navigate</code>. A click with a modifier key still opens a new tab. The menu still closes after the navigation.',
+    },
   },
   api: {
     VMenu: {

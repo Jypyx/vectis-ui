@@ -23,6 +23,10 @@ definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
 useDocsHead('button')
+
+const routerCode = `<RouterLink v-slot="{ href, navigate }" to="/settings" custom>
+  <VButton :href="href" @click="navigate">Settings</VButton>
+</RouterLink>`
 </script>
 
 <template>
@@ -83,6 +87,10 @@ useDocsHead('button')
   <DocsExample :source="buttonStatesSource" stack>
     <ButtonStates />
   </DocsExample>
+
+  <h3 id="router">{{ t('button.examples.router.title') }}</h3>
+  <DocsProse keypath="button.examples.router.text" />
+  <DocsCode lang="vue" :code="routerCode" />
 
   <DocsApi page="button" :api="api" />
 </template>

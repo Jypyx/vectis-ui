@@ -25,6 +25,10 @@ definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
 useDocsHead('chip')
+
+const routerCode = `<RouterLink v-slot="{ href, navigate }" to="/settings" custom>
+  <VChip :href="href" @click="navigate">Settings</VChip>
+</RouterLink>`
 </script>
 
 <template>
@@ -91,6 +95,10 @@ useDocsHead('chip')
   <DocsExample :source="chipStatesSource" stack>
     <ChipStates />
   </DocsExample>
+
+  <h3 id="router">{{ t('chip.examples.router.title') }}</h3>
+  <DocsProse keypath="chip.examples.router.text" />
+  <DocsCode lang="vue" :code="routerCode" />
 
   <DocsApi page="chip" :api="api" />
 </template>

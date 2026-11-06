@@ -122,6 +122,19 @@ sublabel longer than that is truncated with an ellipsis rather than wrapped, as 
 
 <Canvas of={VMenuStories.LongLabels} />
 
+## Router
+
+VMenuItem renders a real `<a>` when `href` is set. With Vue Router or Nuxt, render it inside the router
+link's `custom` mode and pass on its address and navigation:
+
+```vue
+<RouterLink v-slot="{ href, navigate }" to="/settings" custom>
+  <VMenuItem :href="href" label="Settings" @click="navigate" />
+</RouterLink>
+```
+
+`navigate` leaves a click with a modifier key to the browser, so opening in a new tab still works. The menu still closes after the navigation.
+
 ## Accessibility
 
 - ARIA roles: `role="menu"` on the panel, `role="menuitem"` per item (button or link),

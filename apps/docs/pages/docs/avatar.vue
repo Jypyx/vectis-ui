@@ -21,6 +21,10 @@ definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
 useDocsHead('avatar')
+
+const routerCode = `<RouterLink v-slot="{ href, navigate }" to="/profile" custom>
+  <VAvatar :href="href" name="Ada Lovelace" @click="navigate" />
+</RouterLink>`
 </script>
 
 <template>
@@ -75,6 +79,10 @@ useDocsHead('avatar')
   <DocsExample :source="avatarTooltipSource">
     <AvatarTooltip />
   </DocsExample>
+
+  <h3 id="router">{{ t('avatar.examples.router.title') }}</h3>
+  <DocsProse keypath="avatar.examples.router.text" />
+  <DocsCode lang="vue" :code="routerCode" />
 
   <DocsApi page="avatar" :api="api" />
 </template>

@@ -30,6 +30,10 @@ export default {
       title: 'Avec une infobulle',
       text: 'Pour <code>VTooltip</code>, rendez l’avatar accessible au focus avec <code>clickable</code> ou <code>href</code> et liez <code>triggerProps</code>.',
     },
+    router: {
+      title: 'Routeur',
+      text: 'VAvatar rend un vrai <code>&lt;a&gt;</code> dès que <code>href</code> est défini. Avec Nuxt ou Vue Router, placez-le dans le lien du routeur en mode <code>custom</code> et transmettez <code>href</code> et <code>navigate</code>. Un clic avec une touche de modification ouvre toujours un nouvel onglet.',
+    },
   },
   api: {
     VAvatar: {

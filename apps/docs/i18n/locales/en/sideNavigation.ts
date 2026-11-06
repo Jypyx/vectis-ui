@@ -46,6 +46,10 @@ export default {
       title: 'Sizes',
       text: 'Set <code>size</code> once on the navigation for all levels.',
     },
+    router: {
+      title: 'Router',
+      text: 'VSideNavigationItem renders a real <code>&lt;a&gt;</code> when <code>href</code> is set. With Nuxt or Vue Router, render it inside the router link in <code>custom</code> mode and pass on <code>href</code> and <code>navigate</code>. A click with a modifier key still opens a new tab. <code>isExactActive</code> can drive <code>current</code>.',
+    },
   },
   api: {
     VSideNavigation: {

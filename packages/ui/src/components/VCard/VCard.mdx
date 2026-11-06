@@ -70,6 +70,19 @@ announces it.
 
 <Canvas of={VCardStories.Loading} />
 
+## Router
+
+VCard renders a real `<a>` when `href` is set. With Vue Router or Nuxt, render it inside the router
+link's `custom` mode and pass on its address and navigation:
+
+```vue
+<RouterLink v-slot="{ href, navigate }" to="/settings" custom>
+  <VCard :href="href" title="Settings" @click="navigate" />
+</RouterLink>
+```
+
+`navigate` leaves a click with a modifier key to the browser, so opening in a new tab still works. The click handler goes to the title link.
+
 ## Accessibility
 
 - The card is a `<div>` by default. `as` renders it as an `<article>`, a `<section>` or a `<li>`

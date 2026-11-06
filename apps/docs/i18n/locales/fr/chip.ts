@@ -38,6 +38,10 @@ export default {
       title: 'États',
       text: '<code>disabled</code> empêche les interactions. Les liens désactivés perdent leur destination et quittent l’ordre de tabulation.',
     },
+    router: {
+      title: 'Routeur',
+      text: 'VChip rend un vrai <code>&lt;a&gt;</code> dès que <code>href</code> est défini. Avec Nuxt ou Vue Router, placez-le dans le lien du routeur en mode <code>custom</code> et transmettez <code>href</code> et <code>navigate</code>. Un clic avec une touche de modification ouvre toujours un nouvel onglet.',
+    },
   },
   api: {
     VChip: {

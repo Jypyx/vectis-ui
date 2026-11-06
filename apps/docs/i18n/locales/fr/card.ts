@@ -30,6 +30,10 @@ export default {
       title: 'Chargement',
       text: '<code>loading</code> affiche des emplacements de chargement et masque le pied. Définissez <code>loadingText</code> pour annoncer le chargement aux lecteurs d’écran.',
     },
+    router: {
+      title: 'Routeur',
+      text: 'VCard rend un vrai <code>&lt;a&gt;</code> dès que <code>href</code> est défini. Avec Nuxt ou Vue Router, placez-le dans le lien du routeur en mode <code>custom</code> et transmettez <code>href</code> et <code>navigate</code>. Un clic avec une touche de modification ouvre toujours un nouvel onglet. Le gestionnaire de clic va sur le lien du titre.',
+    },
   },
   api: {
     VCard: {

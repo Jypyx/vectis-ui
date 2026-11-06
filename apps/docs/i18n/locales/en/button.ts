@@ -34,6 +34,10 @@ export default {
       title: 'States',
       text: '<code>disabled</code> prevents activation. <code>loading</code> also shows a spinner and sets <code>aria-busy</code>.',
     },
+    router: {
+      title: 'Router',
+      text: 'VButton renders a real <code>&lt;a&gt;</code> when <code>href</code> is set. With Nuxt or Vue Router, render it inside the router link in <code>custom</code> mode and pass on <code>href</code> and <code>navigate</code>. A click with a modifier key still opens a new tab.',
+    },
   },
   api: {
     VButton: {

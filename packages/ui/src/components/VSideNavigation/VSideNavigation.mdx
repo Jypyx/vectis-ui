@@ -139,6 +139,19 @@ the titles.
 
 <Canvas of={VSideNavigationStories.LongTexts} />
 
+## Router
+
+VSideNavigationItem renders a real `<a>` when `href` is set. With Vue Router or Nuxt, render it inside the router
+link's `custom` mode and pass on its address and navigation:
+
+```vue
+<RouterLink v-slot="{ href, navigate, isExactActive }" to="/settings" custom>
+  <VSideNavigationItem :href="href" :current="isExactActive" label="Settings" @click="navigate" />
+</RouterLink>
+```
+
+`navigate` leaves a click with a modifier key to the browser, so opening in a new tab still works. `isExactActive` can drive `current`.
+
 ## Accessibility
 
 - The root is a named `<nav>` (`label`, or the DS dictionary): indispensable as soon as a page holds

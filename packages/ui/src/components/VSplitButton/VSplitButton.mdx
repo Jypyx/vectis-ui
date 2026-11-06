@@ -59,6 +59,21 @@ its width. `menuSize` sets the height of its rows.
 
 <Canvas of={VSplitButtonStories.FullWidth} />
 
+## Router
+
+VSplitButton renders a real `<a>` when `href` is set. With Vue Router or Nuxt, render it inside the router
+link's `custom` mode and pass on its address and navigation:
+
+```vue
+<RouterLink v-slot="{ href, navigate }" to="/settings" custom>
+  <VSplitButton :href="href" label="Settings" menu-label="More settings" @click="navigate">
+    <VMenuItem label="Reset" />
+  </VSplitButton>
+</RouterLink>
+```
+
+`navigate` leaves a click with a modifier key to the browser, so opening in a new tab still works. Only the main button navigates.
+
 ## Accessibility
 
 - Both halves are native buttons in a `role="group"`: Tab reaches the main action, then the menu

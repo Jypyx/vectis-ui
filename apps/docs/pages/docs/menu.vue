@@ -25,6 +25,10 @@ definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
 useDocsHead('menu')
+
+const routerCode = `<RouterLink v-slot="{ href, navigate }" to="/settings" custom>
+  <VMenuItem :href="href" label="Settings" @click="navigate" />
+</RouterLink>`
 </script>
 
 <template>
@@ -91,6 +95,10 @@ useDocsHead('menu')
   <DocsExample :source="menuOpenSource" stack>
     <MenuOpen />
   </DocsExample>
+
+  <h3 id="router">{{ t('menu.examples.router.title') }}</h3>
+  <DocsProse keypath="menu.examples.router.text" />
+  <DocsCode lang="vue" :code="routerCode" />
 
   <DocsApi page="menu" :api="api" />
 </template>

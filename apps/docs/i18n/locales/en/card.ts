@@ -30,6 +30,10 @@ export default {
       title: 'Loading',
       text: '<code>loading</code> shows placeholders and hides the footer. Set <code>loadingText</code> to announce the loading to screen readers.',
     },
+    router: {
+      title: 'Router',
+      text: 'VCard renders a real <code>&lt;a&gt;</code> when <code>href</code> is set. With Nuxt or Vue Router, render it inside the router link in <code>custom</code> mode and pass on <code>href</code> and <code>navigate</code>. A click with a modifier key still opens a new tab. The click handler goes to the title link.',
+    },
   },
   api: {
     VCard: {

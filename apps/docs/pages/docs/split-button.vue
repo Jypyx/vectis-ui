@@ -17,6 +17,12 @@ definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
 useDocsHead('splitButton')
+
+const routerCode = `<RouterLink v-slot="{ href, navigate }" to="/settings" custom>
+  <VSplitButton :href="href" label="Settings" menu-label="More settings" @click="navigate">
+    <VMenuItem label="Reset" />
+  </VSplitButton>
+</RouterLink>`
 </script>
 
 <template>
@@ -59,6 +65,10 @@ useDocsHead('splitButton')
   <DocsExample :source="splitButtonFullWidthSource" stack>
     <SplitButtonFullWidth />
   </DocsExample>
+
+  <h3 id="router">{{ t('splitButton.examples.router.title') }}</h3>
+  <DocsProse keypath="splitButton.examples.router.text" />
+  <DocsCode lang="vue" :code="routerCode" />
 
   <DocsApi page="splitButton" :api="api" />
 </template>

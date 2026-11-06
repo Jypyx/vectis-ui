@@ -38,6 +38,10 @@ export default {
       title: 'Savoir si le menu est ouvert',
       text: '<code>v-model:open</code> suit l’ouverture et la fermeture au clic extérieur, avec Échap ou lors du choix d’une commande.',
     },
+    router: {
+      title: 'Routeur',
+      text: 'VMenuItem rend un vrai <code>&lt;a&gt;</code> dès que <code>href</code> est défini. Avec Nuxt ou Vue Router, placez-le dans le lien du routeur en mode <code>custom</code> et transmettez <code>href</code> et <code>navigate</code>. Un clic avec une touche de modification ouvre toujours un nouvel onglet. Le menu se ferme toujours après la navigation.',
+    },
   },
   api: {
     VMenu: {

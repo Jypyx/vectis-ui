@@ -30,6 +30,10 @@ export default {
       title: 'États',
       text: '<code>disabled</code> empêche l’activation. <code>loading</code> remplace aussi l’icône par un indicateur de chargement et définit <code>aria-busy</code>.',
     },
+    router: {
+      title: 'Routeur',
+      text: 'VIconButton rend un vrai <code>&lt;a&gt;</code> dès que <code>href</code> est défini. Avec Nuxt ou Vue Router, placez-le dans le lien du routeur en mode <code>custom</code> et transmettez <code>href</code> et <code>navigate</code>. Un clic avec une touche de modification ouvre toujours un nouvel onglet.',
+    },
   },
   api: {
     VIconButton: {

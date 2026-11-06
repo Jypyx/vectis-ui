@@ -136,6 +136,19 @@ internal buttons are natively disabled, and a link becomes inert.
 
 <Canvas of={VChipStories.Disabled} />
 
+## Router
+
+VChip renders a real `<a>` when `href` is set. With Vue Router or Nuxt, render it inside the router
+link's `custom` mode and pass on its address and navigation:
+
+```vue
+<RouterLink v-slot="{ href, navigate }" to="/settings" custom>
+  <VChip :href="href" @click="navigate">Settings</VChip>
+</RouterLink>
+```
+
+`navigate` leaves a click with a modifier key to the browser, so opening in a new tab still works.
+
 ## Accessibility
 
 - A static chip = a plain `<span>`: no interactive role wrongly announced.

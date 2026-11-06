@@ -29,6 +29,10 @@ definePageMeta({ layout: 'docs' })
 
 const { t } = useI18n()
 useDocsHead('sideNavigation')
+
+const routerCode = `<RouterLink v-slot="{ href, navigate, isExactActive }" to="/settings" custom>
+  <VSideNavigationItem :href="href" :current="isExactActive" label="Settings" @click="navigate" />
+</RouterLink>`
 </script>
 
 <template>
@@ -107,6 +111,10 @@ useDocsHead('sideNavigation')
   <DocsExample :source="sideNavigationSizesSource" stack>
     <SideNavigationSizes />
   </DocsExample>
+
+  <h3 id="router">{{ t('sideNavigation.examples.router.title') }}</h3>
+  <DocsProse keypath="sideNavigation.examples.router.text" />
+  <DocsCode lang="vue" :code="routerCode" />
 
   <DocsApi page="sideNavigation" :api="api" />
 </template>
