@@ -10,6 +10,7 @@ import 'vectis-ui/styles.css'`
 const nuxtStylesCode = `// nuxt.config.ts
 export default defineNuxtConfig({
   css: ['vectis-ui/styles.css'],
+  build: { transpile: ['vectis-ui'] },
 })`
 </script>
 
@@ -32,4 +33,5 @@ export default defineNuxtConfig({
 
   <h2 id="component-css">{{ t('installation.cssHeading') }}</h2>
   <DocsProse keypath="installation.cssBody" />
+  <DocsProse keypath="installation.cssSsr" />
 </template>

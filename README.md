@@ -31,9 +31,9 @@ A few things you get out of the box:
 
 - **No runtime dependency** other than Vue itself.
 - **Pay for what you import.** Each component ships as its own module with its own stylesheet.
-- **SSR-safe**, so it works with Nuxt 3 and 4 without a module or a plugin.
+- **SSR-safe**, so it works with Nuxt 3 and 4 without a module or a plugin, through two lines of config.
 - **Accessible by default.** Keyboard support and ARIA semantics on every component, with axe checks run in CI against both the light and the dark theme.
-- **Light and dark themes**, switchable on any DOM subtree with a `data-theme` attribute.
+- **Light and dark themes**, switchable on any DOM subtree with a `data-theme` attribute, or following the system preference with `data-theme="system"`.
 - **English and French** built in, and any other language can be added from your app.
 - **No icon font required.** The icons the library draws are embedded SVGs, and you can plug in your own icon set.
 
@@ -72,12 +72,13 @@ const email = ref('')
 </template>
 ```
 
-Using Nuxt? Declare the stylesheet in `nuxt.config.ts` instead, so it's injected during server rendering:
+Using Nuxt? Declare the stylesheet in `nuxt.config.ts` instead, so it's injected during server rendering, and transpile the package so the server bundles its component CSS imports:
 
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
   css: ['vectis-ui/styles.css'],
+  build: { transpile: ['vectis-ui'] },
 })
 ```
 
