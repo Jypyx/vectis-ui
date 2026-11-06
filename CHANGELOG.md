@@ -2,6 +2,23 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.19.0] - 2026-11-06
+
+### Upgrading from 0.18.x
+
+- **The reset sets the font of `body`** to `--vectis-text-family`. Text outside components, previously in the browser's serif, now follows the theme. A `body` font in your own CSS still wins.
+
+### Added
+
+- VBreadcrumb emits `navigate` with the item and the click, from the trail or the menu of folded segments, so a single-page application can call `preventDefault()` and hand the address to its router. A click with a modifier key emits nothing and still opens a new tab.
+- A Router section for VButton, VIconButton, VSplitButton, VChip, VAvatar, VCard, VMenuItem, VSideNavigationItem and VBreadcrumb, in Storybook and on the documentation site.
+
+### Fixed
+
+- VIcon's `size` accepts CSS lengths such as `1.5rem`, which were ignored. Numbers and numeric strings are still read as pixels.
+
+**Full diff:** [v0.18.0...v0.19.0](https://github.com/Jypyx/vectis-ui/compare/v0.18.0...v0.19.0)
+
 ## [0.18.0] - 2026-11-06
 
 ### Upgrading from 0.17.x
