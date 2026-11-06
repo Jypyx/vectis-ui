@@ -21,6 +21,7 @@
   body {
     background-color: var(--vectis-color-surface);
     color: var(--vectis-color-text);
+    font-family: var(--vectis-text-family);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
