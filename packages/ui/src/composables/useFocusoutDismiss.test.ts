@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vite-plus/test'
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 
 import { useFocusoutDismiss } from './useFocusoutDismiss'
 
@@ -20,30 +20,57 @@ function setup() {
   return { root, inside, close, onFocusout }
 }
 
-const focusout = (relatedTarget: EventTarget | null) =>
-  new FocusEvent('focusout', { relatedTarget })
+/** A focusout as the browser sends it: dispatched FROM the element losing the focus. */
+function focusout(from: Element, relatedTarget: EventTarget | null) {
+  const event = new FocusEvent('focusout', { relatedTarget })
+  from.dispatchEvent(event)
+  return event
+}
 
 describe('useFocusoutDismiss', () => {
   it('closes when the focus leaves for an outside element', () => {
-    const { close, onFocusout } = setup()
+    const { inside, close, onFocusout } = setup()
     const outside = document.createElement('button')
     document.body.append(outside)
 
-    onFocusout(focusout(outside))
+    onFocusout(focusout(inside, outside))
     expect(close).toHaveBeenCalledTimes(1)
   })
 
   it('does not close while the focus stays inside the root', () => {
     const { inside, close, onFocusout } = setup()
 
-    onFocusout(focusout(inside))
+    onFocusout(focusout(inside, inside))
     expect(close).not.toHaveBeenCalled()
   })
 
-  it('closes on a null relatedTarget — leaving the window counts as leaving', () => {
-    const { close, onFocusout } = setup()
+  it('closes on a null relatedTarget — leaving the window counts as leaving', async () => {
+    const { inside, close, onFocusout } = setup()
 
-    onFocusout(focusout(null))
+    onFocusout(focusout(inside, null))
+    await nextTick()
+    expect(close).toHaveBeenCalledTimes(1)
+  })
+
+  // Chromium fires focusout from a focused element a re-render removes, with no destination.
+  it('does not close when the focused element was removed and the focus came back inside', async () => {
+    const { root, inside, close, onFocusout } = setup()
+    const day = document.createElement('button')
+    root.append(day)
+
+    onFocusout(focusout(inside, null))
+    inside.remove()
+    day.focus()
+    await nextTick()
+    expect(close).not.toHaveBeenCalled()
+  })
+
+  it('closes when the focused element was removed and nothing took the focus back', async () => {
+    const { inside, close, onFocusout } = setup()
+
+    onFocusout(focusout(inside, null))
+    inside.remove()
+    await nextTick()
     expect(close).toHaveBeenCalledTimes(1)
   })
 
@@ -55,7 +82,7 @@ describe('useFocusoutDismiss', () => {
     panel.append(option)
     root.append(panel)
 
-    onFocusout(focusout(option))
+    onFocusout(focusout(option, option))
     expect(close).not.toHaveBeenCalled()
   })
 
@@ -63,7 +90,8 @@ describe('useFocusoutDismiss', () => {
     const close = vi.fn()
     const onFocusout = useFocusoutDismiss(ref<HTMLElement | null>(null), close)
 
-    onFocusout(focusout(document.createElement('button')))
+    const from = document.createElement('button')
+    onFocusout(focusout(from, document.createElement('button')))
     expect(close).toHaveBeenCalledTimes(1)
   })
 })

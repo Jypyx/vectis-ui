@@ -364,6 +364,44 @@ export const ClickInTheVoid: Story = {
 }
 
 /**
+ * Choosing a month or a year swaps the calendar back to its days: the panel stays open, with the
+ * focus on a day of the month chosen. The cell clicked leaves the document as the view changes,
+ * and Chromium reports that as the focus leaving for nowhere; the panel must not read it as an
+ * exit.
+ */
+export const MonthAndYearViews: Story = {
+  args: { mode: 'picker' },
+  render: (args) => ({
+    components: { VDateInput },
+    setup: () => ({ args, t, value: ref('2026-06-10') }),
+    template: `
+      <div style="width: 280px">
+        <VDateInput v-bind="args" v-model="value" :label="t.date" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const field = canvas.getByRole('combobox', { name: 'Date' })
+    await userEvent.click(field)
+    const panel = await waitFor(() => canvas.getByRole('dialog'))
+    // The opening focus lands under a rAF and resets the view: wait for it before switching.
+    await waitFor(() => expect(within(panel).getByRole('button', { name: '10' })).toHaveFocus())
+
+    await userEvent.click(within(panel).getByRole('button', { name: 'June' }))
+    await userEvent.click(await within(panel).findByRole('gridcell', { name: 'March' }))
+    await waitFor(() => expect(within(panel).getByRole('button', { name: '10' })).toHaveFocus())
+    await expect(panel.matches(':popover-open')).toBe(true)
+
+    await userEvent.click(within(panel).getByRole('button', { name: /2026/ }))
+    await userEvent.click(await within(panel).findByRole('gridcell', { name: '2027' }))
+    await waitFor(() => expect(within(panel).getByRole('button', { name: '10' })).toHaveFocus())
+    await expect(panel.matches(':popover-open')).toBe(true)
+    await expect(field).toHaveValue('Jun 10, 2026')
+  },
+}
+
+/**
  * `showPicker` makes the calendar reachable from an input field: a clickable icon at the end of
  * the field, and a panel opened on focus; without grabbing the caret, so typing continues in
  * the field.
