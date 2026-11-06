@@ -2,6 +2,16 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.17.2] - 2026-11-06
+
+No public API changes. No migration is required from 0.17.1.
+
+### Fixed
+
+- VDateInput no longer closes its panel when a month or a year is chosen in Chromium: the calendar returns to its days, as in other browsers. The fix lies in the focus handling shared with VTimeInput, VColorInput, VSelect and VCombobox.
+
+**Full diff:** [v0.17.1...v0.17.2](https://github.com/Jypyx/vectis-ui/compare/v0.17.1...v0.17.2)
+
 ## [0.17.1] - 2026-10-23
 
 No public API changes. No migration is required from 0.17.0.
