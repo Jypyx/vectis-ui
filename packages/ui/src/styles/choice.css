@@ -22,6 +22,8 @@
    * distributes that width on purpose, below.
    */
   .v-choice {
+    --choice-control-size: var(--vectis-control-size-check);
+
     position: relative;
     display: inline-grid;
     grid-template-columns: auto auto;
@@ -38,8 +40,20 @@
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
-    align-items: center;
+    align-items: start;
     cursor: pointer;
+  }
+
+  /*
+   * A wrapping label keeps the control on its first line: whichever of the two is shorter is
+   * centred against the other, the control against one line box, or the line against the control.
+   */
+  .v-choice-row > .v-hidden-input + * {
+    margin-block-start: max(0px, (1lh - var(--choice-control-size)) / 2);
+  }
+
+  .v-choice-label {
+    margin-block-start: max(0px, (var(--choice-control-size) - 1lh) / 2);
   }
 
   .v-choice-label,

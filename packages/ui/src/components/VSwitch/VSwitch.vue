@@ -129,6 +129,7 @@ defineExpose(exposed)
     --switch-track-w: var(--vectis-control-size-switch-w);
     --switch-track-h: var(--vectis-control-size-switch-h);
     --switch-pad: var(--vectis-control-size-switch-pad);
+    --choice-control-size: var(--switch-track-h);
   }
 
   .v-switch-track {
