@@ -1016,7 +1016,6 @@ const heightStyle = computed<StyleValue | undefined>(() =>
      */
     --data-table-pad-block: calc(var(--vectis-space-3) - var(--vectis-density-delta));
     --data-table-pad-inline: calc(var(--vectis-space-3) - var(--vectis-density-delta));
-    --data-table-head-pad-block: calc(var(--vectis-space-2) - var(--vectis-density-delta));
 
     /* The gutter between the frame and the footer it holds: nothing when the table is
        unframed, so the footer sits flush with the edge, and the cells' own inline padding
@@ -1156,7 +1155,7 @@ const heightStyle = computed<StyleValue | undefined>(() =>
   }
 
   .v-data-table-table th {
-    padding: var(--data-table-head-pad-block) var(--data-table-pad-inline);
+    padding: var(--data-table-pad-block) var(--data-table-pad-inline);
     text-align: start;
     font-size: var(--vectis-text-body-md-size);
     /*
