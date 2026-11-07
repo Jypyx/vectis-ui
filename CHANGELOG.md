@@ -2,6 +2,32 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.20.0] - 2026-11-07
+
+### Upgrading from 0.19.x
+
+- **`--vectis-radius-chip` is no longer declared in `tokens.css`**, nor listed in `tokens.json`. Setting it still rounds chips; CSS that reads `var(--vectis-radius-chip)` no longer gets a value and should read `--vectis-radius-interactive` instead. An interactive radius set on a container now reaches the chips.
+
+### Added
+
+- `--vectis-radius-button` rounds VButton, VIconButton and VButtonGroup apart from fields, for instance as pills beside rectangular inputs. It is unset by default, and buttons fall back to `--vectis-radius-interactive`.
+- VStepper's `textPosition="bottom"` centres each title and description under its circle, the steps sharing the width equally. `hideText` keeps only the circles on screen and leaves the text to assistive technology. The `StepperTextPosition` type is exported.
+- VStepper draws a step's `icon` in its circle in place of the number. A step that is done or in error keeps its tick or exclamation mark.
+- The theme builder sets the button and chip radii, or keeps them on the control radius.
+
+### Changed
+
+- Hovering a VStepper step tints its circle and turns its text to the accent, instead of filling the whole step. The current step shows no hover.
+- A VBreadcrumb link turns to the accent on hover. The current page shows no hover.
+
+### Fixed
+
+- A VStepper title too wide for its step ends with an ellipsis instead of running under the connector. In a narrow space, steps no longer shrink into their connectors.
+- VInput keeps the first row of chips in place when they wrap onto a second row.
+- VDataTable's heading row has the same block padding as the rows.
+
+**Full diff:** [v0.19.1...v0.20.0](https://github.com/Jypyx/vectis-ui/compare/v0.19.1...v0.20.0)
+
 ## [0.19.1] - 2026-11-07
 
 No public API changes. No migration is required from 0.19.0.
