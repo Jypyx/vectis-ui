@@ -616,7 +616,8 @@ defineExpose({
     flex-wrap: wrap;
     height: auto;
     min-height: var(--control-height);
-    padding-block: var(--vectis-space-1);
+    /* A lone row fills min-height exactly (less the 1px border), so it stays put as chips wrap. */
+    padding-block: calc((var(--control-height) - var(--chip-height)) / 2 - 1px);
   }
 
   .v-input-chips .v-input-control {
