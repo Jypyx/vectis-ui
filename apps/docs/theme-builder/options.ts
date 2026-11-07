@@ -192,21 +192,24 @@ export const ICON_LIBRARIES: IconLibrary[] = [
 export const iconLibraryById = (id: IconLibraryId): IconLibrary =>
   ICON_LIBRARIES.find((library) => library.id === id) ?? ICON_LIBRARIES[0]!
 
-export type RadiusRole = 'interactive' | 'surface' | 'overlay' | 'chip'
+export type RadiusRole = 'interactive' | 'surface' | 'overlay'
 
 export type RadiusPresetId = 'none' | 'small' | 'medium' | 'large' | 'extra' | 'full'
+
+/** The radius of buttons or chips: a preset's control radius, or `inherit` to follow the controls. */
+export type ComponentRadius = RadiusPresetId | 'inherit'
 
 /** The library's pill radius, which the generated theme names rather than spells. */
 export const RADIUS_FULL = 9999
 
-/** Each preset in pixels. Medium is the library's default; chips follow the controls. */
+/** Each preset in pixels. Medium is the library's default; buttons and chips follow the controls. */
 export const RADIUS_PRESETS: Record<RadiusPresetId, Record<RadiusRole, number>> = {
-  none: { interactive: 0, surface: 0, overlay: 0, chip: 0 },
-  small: { interactive: 4, surface: 6, overlay: 8, chip: 4 },
-  medium: { interactive: 6, surface: 8, overlay: 12, chip: 6 },
-  large: { interactive: 8, surface: 12, overlay: 16, chip: 8 },
-  extra: { interactive: 12, surface: 16, overlay: 24, chip: 12 },
-  full: { interactive: RADIUS_FULL, surface: 16, overlay: 24, chip: RADIUS_FULL },
+  none: { interactive: 0, surface: 0, overlay: 0 },
+  small: { interactive: 4, surface: 6, overlay: 8 },
+  medium: { interactive: 6, surface: 8, overlay: 12 },
+  large: { interactive: 8, surface: 12, overlay: 16 },
+  extra: { interactive: 12, surface: 16, overlay: 24 },
+  full: { interactive: RADIUS_FULL, surface: 16, overlay: 24 },
 }
 
 export const BASE_SIZES = [14, 15, 16, 17, 18] as const

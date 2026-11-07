@@ -27,6 +27,9 @@ export default {
     extra: 'Très grand',
     full: 'Complet',
   },
+  buttonRadius: 'Arrondi des boutons',
+  chipRadius: 'Arrondi des chips',
+  radiusInherit: 'Comme l’arrondi des angles',
   density: 'Densité',
   densities: {
     standard: 'Standard',

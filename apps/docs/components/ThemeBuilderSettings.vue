@@ -54,6 +54,11 @@ const radiusItems = computed(() =>
   })),
 )
 
+const componentRadiusItems = computed(() => [
+  { value: 'inherit', label: t('themeBuilder.radiusInherit') },
+  ...radiusItems.value,
+])
+
 const densityItems = computed(() =>
   (Object.keys(DENSITY_DELTAS) as Density[]).map((density) => ({
     value: density,
@@ -86,6 +91,16 @@ const densityItems = computed(() =>
     <VSelect v-model="config.baseSize" :options="sizeItems" :label="t('themeBuilder.baseSize')" />
     <VSelect v-model="config.icons" :options="iconItems" :label="t('themeBuilder.iconLibrary')" />
     <VSelect v-model="config.radius" :options="radiusItems" :label="t('themeBuilder.radius')" />
+    <VSelect
+      v-model="config.buttonRadius"
+      :options="componentRadiusItems"
+      :label="t('themeBuilder.buttonRadius')"
+    />
+    <VSelect
+      v-model="config.chipRadius"
+      :options="componentRadiusItems"
+      :label="t('themeBuilder.chipRadius')"
+    />
     <VSelect v-model="config.density" :options="densityItems" :label="t('themeBuilder.density')" />
   </div>
 </template>

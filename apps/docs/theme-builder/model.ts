@@ -19,6 +19,7 @@ import {
   DENSITY_DELTAS,
   RADIUS_PRESETS,
   type BaseSize,
+  type ComponentRadius,
   type Density,
   type IconLibraryId,
   type RadiusPresetId,
@@ -194,6 +195,8 @@ export interface ThemeConfig {
   icons: IconLibraryId
   baseSize: BaseSize
   radius: RadiusPresetId
+  buttonRadius: ComponentRadius
+  chipRadius: ComponentRadius
   density: Density
 }
 
@@ -221,8 +224,13 @@ export const DEFAULT_CONFIG: ThemeConfig = {
   icons: 'material-rounded',
   baseSize: 16,
   radius: 'medium',
+  buttonRadius: 'inherit',
+  chipRadius: 'inherit',
   density: 'standard',
 }
+
+const isComponentRadius = (value: unknown) =>
+  value === 'inherit' || Object.hasOwn(RADIUS_PRESETS, value as string)
 
 /** Whether a stored value still has the shape this version reads; anything else is dropped. */
 export function isThemeConfig(value: unknown): value is ThemeConfig {
@@ -233,6 +241,8 @@ export function isThemeConfig(value: unknown): value is ThemeConfig {
     (NEUTRAL_HUES as readonly string[]).includes(config.colors?.neutral) &&
     (BASE_SIZES as readonly number[]).includes(config.baseSize) &&
     Object.hasOwn(RADIUS_PRESETS, config.radius) &&
+    isComponentRadius(config.buttonRadius) &&
+    isComponentRadius(config.chipRadius) &&
     Object.hasOwn(DENSITY_DELTAS, config.density)
   )
 }

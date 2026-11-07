@@ -72,9 +72,13 @@ export function themeDeclarations(config: ThemeConfig, full = false): ThemeDecla
   for (const role of ['interactive', 'surface', 'overlay'] as const)
     if (full || radius[role] !== initial[role])
       light.push([`--vectis-radius-${role}`, radiusValue(radius[role])])
-  // The chip radius aliases the control radius, so it needs stating only when they differ.
-  if (full || radius.chip !== radius.interactive)
-    light.push(['--vectis-radius-chip', radiusValue(radius.chip)])
+  // Unset, these follow the control radius wherever it is overridden: state them only when chosen.
+  for (const [name, choice] of [
+    ['button', config.buttonRadius],
+    ['chip', config.chipRadius],
+  ] as const)
+    if (choice !== 'inherit')
+      light.push([`--vectis-radius-${name}`, radiusValue(RADIUS_PRESETS[choice].interactive)])
 
   if (full || config.density !== 'standard')
     light.push(['--vectis-density-delta', DENSITY_DELTAS[config.density]])

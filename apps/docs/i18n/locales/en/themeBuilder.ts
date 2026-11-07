@@ -27,6 +27,9 @@ export default {
     extra: 'Extra',
     full: 'Full',
   },
+  buttonRadius: 'Button radius',
+  chipRadius: 'Chip radius',
+  radiusInherit: 'Same as corner radius',
   density: 'Density',
   densities: {
     standard: 'Standard',
