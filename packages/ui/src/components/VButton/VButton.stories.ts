@@ -4,6 +4,7 @@ import { expect, within } from 'storybook/test'
 import { builtinIcons as icons } from '../VIcon/icons'
 import { storyText } from '../../stories/storyText'
 import VIcon from '../VIcon/VIcon.vue'
+import VInput from '../VInput/VInput.vue'
 import VButton from './VButton.vue'
 
 const t = storyText({
@@ -22,6 +23,8 @@ const t = storyText({
     bySvg: 'By SVG',
     byImage: 'By image',
     disabledLink: 'Disabled link',
+    email: 'Email',
+    subscribe: 'Subscribe',
   },
   fr: {
     save: 'Enregistrer',
@@ -38,6 +41,8 @@ const t = storyText({
     bySvg: 'Par SVG',
     byImage: 'Par image',
     disabledLink: 'Lien désactivé',
+    email: 'E-mail',
+    subscribe: "S'abonner",
   },
 })
 
@@ -297,4 +302,36 @@ export const Disabled: Story = {
       </div>
     `,
   }),
+}
+
+/**
+ * `--vectis-radius-button` rounds the buttons apart from the fields. Unset, it falls back to
+ * `--vectis-radius-interactive` on the button itself, so a container override reaches both.
+ */
+export const CustomRadius: Story = {
+  render: () => ({
+    components: { VButton, VInput },
+    setup: () => ({ t }),
+    template: `
+      <div style="display: grid; gap: 16px">
+        <div data-testid="split" style="--vectis-radius-button: var(--vectis-radius-pill); display: flex; gap: 8px; align-items: end">
+          <VInput :label="t.email" type="email" />
+          <VButton>{{ t.subscribe }}</VButton>
+        </div>
+        <div data-testid="shared" style="--vectis-radius-interactive: 0px; display: flex; gap: 8px; align-items: end">
+          <VInput :label="t.email" type="email" />
+          <VButton>{{ t.subscribe }}</VButton>
+        </div>
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const radiusOf = (row: string, selector: string) =>
+      getComputedStyle(within(canvasElement).getByTestId(row).querySelector(selector)!)
+        .borderTopLeftRadius
+    await expect(radiusOf('split', '.v-input-field')).not.toBe('9999px')
+    await expect(radiusOf('split', '.v-button')).toBe('9999px')
+    await expect(radiusOf('shared', '.v-input-field')).toBe('0px')
+    await expect(radiusOf('shared', '.v-button')).toBe('0px')
+  },
 }

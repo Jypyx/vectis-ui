@@ -46,10 +46,9 @@ in light/dark, across all three variants.
 
 <Canvas of={VChipStories.Shapes} />
 
-`--vectis-radius-chip` points at `--vectis-radius-interactive` by default, so a chip rounds like
-every other control until it is given a value of its own. The alias is resolved where the token
-is declared, on `:root`: an override of `--vectis-radius-interactive` on a narrower selector does
-not reach the chips, which then need `--vectis-radius-chip` set on that same selector.
+`--vectis-radius-chip` is unset by default, so a chip falls back to `--vectis-radius-interactive`
+and rounds like every other control, wherever that radius is overridden, until it is given a
+value of its own.
 
 <Canvas of={VChipStories.CustomRadius} />
 

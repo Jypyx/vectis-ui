@@ -72,7 +72,6 @@ const coralCode = `/* Scope overrides to this container. */
   /* Set the focus colour separately from the accent. */
   --vectis-focus-ring-color: oklch(58% 0.16 32);
   --vectis-radius-interactive: var(--vectis-radius-pill);
-  --vectis-radius-chip: var(--vectis-radius-pill);
 }
 
 /* Use a lighter accent text colour in the dark theme. */

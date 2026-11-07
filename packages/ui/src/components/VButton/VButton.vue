@@ -183,7 +183,9 @@ const {
     block-size: var(--control-height);
     padding-inline: var(--control-padding-inline);
     border: 1px solid transparent;
-    border-radius: var(--vectis-radius-interactive);
+    /* Unset by default: the fallback resolves here, so an interactive radius set on any
+       ancestor still reaches the button. */
+    border-radius: var(--vectis-radius-button, var(--vectis-radius-interactive));
     font-family: var(--vectis-text-family);
     font-size: var(--control-font-size);
     font-weight: var(--vectis-text-control-weight);

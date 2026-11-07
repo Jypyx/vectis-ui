@@ -469,7 +469,7 @@ defineExpose({
       > .v-button[data-elevated],
       > :not(:where(.v-overlay, .v-button-group)) .v-button[data-elevated]:not(:where(.v-overlay *))
     ) {
-    border-radius: var(--vectis-radius-interactive);
+    border-radius: var(--vectis-radius-button, var(--vectis-radius-interactive));
     box-shadow: var(--vectis-shadow-sm);
   }
 

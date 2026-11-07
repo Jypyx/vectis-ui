@@ -125,6 +125,15 @@ automatically:
 
 <Canvas of={VButtonStories.Disabled} />
 
+## Corner radius
+
+Buttons read `--vectis-radius-button`, unset by default: they fall back to
+`--vectis-radius-interactive` and round like the fields, wherever that radius is overridden. Set
+`--vectis-radius-button` to round them apart, for instance as pills beside rectangular fields.
+`VIconButton` and `VButtonGroup` follow it.
+
+<Canvas of={VButtonStories.CustomRadius} />
+
 ## Router
 
 VButton renders a real `<a>` when `href` is set. With Vue Router or Nuxt, render it inside the router

@@ -135,8 +135,8 @@ const resolvedTone = computed<ButtonTone>(() => props.tone ?? group?.tone ?? 'ne
    * what is left here is the silhouette. [data-shape] takes the selector to (0,2,0), which
    * beats the border-radius VButton sets on that very element at (0,1,0) whatever the
    * consumer's bundler decides about the order of the two sheets. The `square` value writes
-   * nothing; it IS the radius VButton already applies, so a consumer overriding
-   * --vectis-radius-interactive keeps a single place to change.
+   * nothing; it IS the radius VButton already applies, so --vectis-radius-button and its
+   * --vectis-radius-interactive fallback stay the only places to change.
    */
   .v-icon-button[data-shape='circular'] {
     border-radius: var(--vectis-radius-pill);

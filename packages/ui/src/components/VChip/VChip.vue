@@ -269,7 +269,8 @@ defineExpose({
     align-items: center;
     block-size: var(--control-height);
     border: 1px solid transparent;
-    border-radius: var(--vectis-radius-chip);
+    /* Unset by default, as VButton's --vectis-radius-button. */
+    border-radius: var(--vectis-radius-chip, var(--vectis-radius-interactive));
     font-family: var(--vectis-text-family);
     font-size: var(--control-font-size);
     font-weight: var(--vectis-text-control-weight);

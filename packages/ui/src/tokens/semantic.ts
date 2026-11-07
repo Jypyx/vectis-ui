@@ -210,14 +210,10 @@ export const semantic = {
     },
   },
   radius: {
-    interactive: dimension('{radius.md}', 'Buttons, inputs, controls'),
+    interactive: dimension('{radius.md}', 'Inputs and controls; buttons and chips fall back to it'),
     surface: dimension('{radius.lg}', 'Cards, alerts'),
     overlay: dimension('{radius.xl}', 'Dialogs, popovers, menus'),
     pill: dimension('{radius.full}', 'Full rounding: switches, badges, pill-shaped chips'),
-    chip: dimension(
-      '{radius.interactive}',
-      'Chips with shape="chip", which follow the interactive radius by default',
-    ),
   },
   /** Semantic transition durations are theme-independent. */
   duration: {

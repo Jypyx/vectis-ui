@@ -65,11 +65,10 @@ const descriptions: Record<DescribedToken, string> = {
   '--vectis-text-family-heading':
     "La police des rôles display et heading, celle du texte courant tant qu'elle n'est pas surchargée",
   '--vectis-text-family-code': 'La police du code (le rôle code, VInputOTP)',
-  '--vectis-radius-interactive': 'Boutons, champs, contrôles',
+  '--vectis-radius-interactive': 'Champs et contrôles ; les boutons et les chips le reprennent',
   '--vectis-radius-surface': 'Cartes, alertes',
   '--vectis-radius-overlay': 'Dialogues, popovers, menus',
   '--vectis-radius-pill': 'Arrondi complet : interrupteurs, badges, chips en pilule',
-  '--vectis-radius-chip': 'Les chips en shape="chip", qui suivent le rayon interactive par défaut',
   '--vectis-duration-fast': "Changements de couleur et de bordure au survol, au focus, à l'appui",
   '--vectis-duration-base': "La durée par défaut : un panneau qui s'ouvre, une valeur qui bouge",
   '--vectis-duration-slow': "Les mouvements assez amples pour être suivis de l'œil",
@@ -332,7 +331,7 @@ export default {
   } satisfies Record<TextRole, string>,
   radiusHeading: 'Rayons des angles',
   radiusBody:
-    '<code>--vectis-radius-chip</code> référence <code>--vectis-radius-interactive</code> à la racine. Si vous redéfinissez le rayon des contrôles sur un conteneur, définissez aussi celui des chips pour modifier les deux.',
+    'Les boutons et les chips lisent aussi <code>--vectis-radius-button</code> et <code>--vectis-radius-chip</code>. Tous deux sont indéfinis par défaut et reprennent <code>--vectis-radius-interactive</code>, où qu’il soit redéfini. Définissez-en un pour arrondir ces composants autrement que les champs, par exemple des boutons en capsule à côté de champs rectangulaires.',
   motionHeading: 'Animations',
   motionBody:
     'Durées des transitions, communes aux deux thèmes. Les animations en boucle, comme celle du spinner, utilisent plutôt les tokens de durée primitifs.',

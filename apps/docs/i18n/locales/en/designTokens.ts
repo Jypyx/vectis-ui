@@ -59,7 +59,7 @@ export default {
   } satisfies Record<TextRole, string>,
   radiusHeading: 'Corner radii',
   radiusBody:
-    '<code>--vectis-radius-chip</code> references <code>--vectis-radius-interactive</code> at the root. When overriding the interactive radius on a container, also set the chip radius if you want both to change.',
+    'Buttons and chips also read <code>--vectis-radius-button</code> and <code>--vectis-radius-chip</code>. Both are unset by default and fall back to <code>--vectis-radius-interactive</code>, wherever it is overridden. Set one to round those components apart from the fields, for instance pill buttons beside rectangular fields.',
   motionHeading: 'Motion',
   motionBody:
     'Transition durations, shared by both themes. Looping animations such as the spinner use primitive duration tokens instead.',
