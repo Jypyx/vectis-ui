@@ -226,8 +226,10 @@ const visibleItems = computed(() =>
     transition: color var(--vectis-duration-fast) var(--vectis-ease-default);
   }
 
-  .v-breadcrumb-link:hover {
-    color: var(--vectis-color-text);
+  /* The accent, as on any link that inherits its colour. The current page offers nothing to go
+     to: it shows no hover. */
+  .v-breadcrumb-link:hover:not([aria-current='page']) {
+    color: var(--vectis-color-accent-text);
     text-decoration: underline;
   }
 
