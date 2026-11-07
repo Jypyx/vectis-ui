@@ -37,6 +37,13 @@ never one.
 
 <Canvas of={VStepperStories.Vertical} />
 
+## Text under the circles
+
+`textPosition="bottom"` centres the title and description under each circle, and the steps share
+the width equally. It applies to a horizontal stepper.
+
+<Canvas of={VStepperStories.TextBottom} />
+
 ## Narrow space
 
 A horizontal stepper is a size container. Below 36rem, only the current step keeps its title on
@@ -45,6 +52,11 @@ As a container, it takes its width from its parent rather than from its steps: i
 row, give it a basis of its own.
 
 <Canvas of={VStepperStories.Narrow} />
+
+When even the title of the current step does not fit, `hideText` keeps only the circles. Titles and
+descriptions stay readable by assistive technology, and the current step is the filled circle.
+
+<Canvas of={VStepperStories.HideText} />
 
 ## Accessibility
 

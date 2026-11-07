@@ -10,9 +10,13 @@ export default {
       title: 'Non-linear',
       text: 'By default only the steps already reached are buttons. <code>nonLinear</code> makes every step one; set <code>completed</code> on the steps that are done.',
     },
+    textPosition: {
+      title: 'Text under the circles',
+      text: '<code>textPosition="bottom"</code> centres the title and description under each circle. The steps then share the width equally.',
+    },
     vertical: {
       title: 'Vertical',
-      text: '<code>orientation="vertical"</code> lays the steps down a column, for a sidebar. Below 36rem, a horizontal stepper keeps only the title of the current step on screen.',
+      text: '<code>orientation="vertical"</code> lays the steps down a column, for a sidebar. Below 36rem, a horizontal stepper keeps only the title of the current step on screen, and <code>hideText</code> keeps only the circles.',
     },
   },
   api: {
@@ -23,6 +27,10 @@ export default {
         orientation: 'Layout direction.',
         nonLinear:
           'Makes every step that is not disabled a button. By default, only the steps already reached are.',
+        textPosition:
+          'Where the title and description sit: beside the circle, or centred under it. Horizontal stepper only.',
+        hideText:
+          'Keeps only the circles on screen. Titles and descriptions stay readable by assistive technology.',
         label: 'Accessible name of the list of steps. Defaults to the library dictionary.',
         vModel: 'Value of the current step. The first step is current when it is unset.',
       },

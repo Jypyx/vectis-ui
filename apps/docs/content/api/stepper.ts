@@ -12,6 +12,8 @@ export default {
         { name: 'steps', type: 'StepperStep[]' },
         { name: 'orientation', type: 'StepperOrientation', values: "'horizontal' | 'vertical'", default: "'horizontal'" },
         { name: 'nonLinear', type: 'boolean', default: 'false' },
+        { name: 'textPosition', type: 'StepperTextPosition', values: "'end' | 'bottom'", default: "'end'" },
+        { name: 'hideText', type: 'boolean', default: 'false' },
         { name: 'label', type: 'string' },
         { name: 'v-model', key: 'vModel', type: 'ItemValue' },
       ],

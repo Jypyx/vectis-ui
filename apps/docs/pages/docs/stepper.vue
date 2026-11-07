@@ -6,6 +6,8 @@ import StepperNonLinear from '~/examples/stepper/NonLinear.vue'
 import stepperNonLinearSource from '~/examples/stepper/NonLinear.vue?raw'
 import StepperStates from '~/examples/stepper/States.vue'
 import stepperStatesSource from '~/examples/stepper/States.vue?raw'
+import StepperTextPosition from '~/examples/stepper/TextPosition.vue'
+import stepperTextPositionSource from '~/examples/stepper/TextPosition.vue?raw'
 import StepperVertical from '~/examples/stepper/Vertical.vue'
 import stepperVerticalSource from '~/examples/stepper/Vertical.vue?raw'
 
@@ -36,6 +38,12 @@ useDocsHead('stepper')
   <DocsProse keypath="stepper.examples.nonLinear.text" />
   <DocsExample :source="stepperNonLinearSource" stack>
     <StepperNonLinear />
+  </DocsExample>
+
+  <h3 id="text-position">{{ t('stepper.examples.textPosition.title') }}</h3>
+  <DocsProse keypath="stepper.examples.textPosition.text" />
+  <DocsExample :source="stepperTextPositionSource" stack>
+    <StepperTextPosition />
   </DocsExample>
 
   <h3 id="vertical">{{ t('stepper.examples.vertical.title') }}</h3>

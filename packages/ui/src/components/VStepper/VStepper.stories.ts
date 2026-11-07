@@ -185,6 +185,42 @@ export const States: Story = {
   },
 }
 
+/** `textPosition="bottom"` centres the text under each circle; the steps share the width equally. */
+export const TextBottom: Story = {
+  render: () => ({
+    components: { VStepper },
+    setup: () => ({ current: ref('shipping'), steps }),
+    template: `
+      <div style="max-width: 760px">
+        <VStepper v-model="current" :steps="steps" text-position="bottom" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const center = (el: Element) => {
+      const box = el.getBoundingClientRect()
+      return { x: box.left + box.width / 2, y: box.top + box.height / 2 }
+    }
+    const indicators = [...canvasElement.querySelectorAll('.v-stepper-indicator')]
+    const titles = [...canvasElement.querySelectorAll('.v-stepper-title')]
+    for (const [index, indicator] of indicators.entries()) {
+      // Each title sits centred under its circle.
+      expect(Math.abs(center(titles[index]!).x - center(indicator).x)).toBeLessThanOrEqual(1)
+      expect(titles[index]!.getBoundingClientRect().top).toBeGreaterThan(
+        indicator.getBoundingClientRect().bottom,
+      )
+    }
+    // Each line runs at the height of the circles, between two of them without touching either.
+    const connectors = [...canvasElement.querySelectorAll('.v-stepper-connector')]
+    for (const [index, connector] of connectors.entries()) {
+      const line = connector.getBoundingClientRect()
+      expect(Math.abs(center(connector).y - center(indicators[index]!).y)).toBeLessThanOrEqual(1)
+      expect(line.left).toBeGreaterThan(indicators[index]!.getBoundingClientRect().right)
+      expect(line.right).toBeLessThan(indicators[index + 1]!.getBoundingClientRect().left)
+    }
+  },
+}
+
 /**
  * Below 36rem, a horizontal stepper keeps the title of the current step only; the others stay
  * readable by assistive technology.
@@ -208,6 +244,44 @@ export const Narrow: Story = {
       false,
       false,
     ])
+    // The current title stays inside its trigger, under the hover fill and clear of the connector.
+    const trigger = canvasElement.querySelector<HTMLElement>('[data-active] .v-stepper-trigger')!
+    expect(trigger.scrollWidth).toBeLessThanOrEqual(trigger.clientWidth)
+    // Each connector runs between two circles without touching either.
+    const indicators = [...canvasElement.querySelectorAll('.v-stepper-indicator')]
+    const connectors = [...canvasElement.querySelectorAll('.v-stepper-connector')]
+    for (const [index, connector] of connectors.entries()) {
+      const line = connector.getBoundingClientRect()
+      expect(line.left).toBeGreaterThan(indicators[index]!.getBoundingClientRect().right)
+      expect(line.right).toBeLessThan(indicators[index + 1]!.getBoundingClientRect().left)
+    }
     expect(canvas.getByRole('button', { name: /Account/ })).toBeInTheDocument()
+  },
+}
+
+/** `hideText` keeps only the circles, for a space too tight for any title. */
+export const HideText: Story = {
+  render: () => ({
+    components: { VStepper },
+    setup: () => ({ current: ref('shipping'), steps }),
+    template: `
+      <div style="width: 300px">
+        <VStepper v-model="current" :steps="steps" hide-text />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const texts = [...canvasElement.querySelectorAll('.v-stepper-text')]
+    expect(texts.every((text) => text.getBoundingClientRect().width <= 1)).toBe(true)
+    // Each connector runs between two circles without touching either.
+    const indicators = [...canvasElement.querySelectorAll('.v-stepper-indicator')]
+    const connectors = [...canvasElement.querySelectorAll('.v-stepper-connector')]
+    for (const [index, connector] of connectors.entries()) {
+      const line = connector.getBoundingClientRect()
+      expect(line.left).toBeGreaterThan(indicators[index]!.getBoundingClientRect().right)
+      expect(line.right).toBeLessThan(indicators[index + 1]!.getBoundingClientRect().left)
+    }
+    expect(canvas.getByRole('button', { name: /Shipping/ })).toHaveAttribute('aria-current', 'step')
   },
 }

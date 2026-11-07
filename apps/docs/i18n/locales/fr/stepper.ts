@@ -10,9 +10,13 @@ export default {
       title: 'Non linéaire',
       text: 'Par défaut, seules les étapes déjà atteintes sont des boutons. <code>nonLinear</code> en fait des boutons pour toutes ; indiquez <code>completed</code> sur les étapes terminées.',
     },
+    textPosition: {
+      title: 'Texte sous les cercles',
+      text: '<code>textPosition="bottom"</code> centre le titre et la description sous chaque cercle. Les étapes se partagent alors la largeur à parts égales.',
+    },
     vertical: {
       title: 'Verticale',
-      text: '<code>orientation="vertical"</code> dispose les étapes en colonne, pour une barre latérale. Sous 36rem, un stepper horizontal ne garde à l’écran que le titre de l’étape courante.',
+      text: '<code>orientation="vertical"</code> dispose les étapes en colonne, pour une barre latérale. Sous 36rem, un stepper horizontal ne garde à l’écran que le titre de l’étape courante, et <code>hideText</code> ne garde que les cercles.',
     },
   },
   api: {
@@ -23,6 +27,10 @@ export default {
         orientation: 'Sens de disposition.',
         nonLinear:
           'Fait de chaque étape non désactivée un bouton. Par défaut, seules les étapes déjà atteintes le sont.',
+        textPosition:
+          'Position du titre et de la description : à côté du cercle, ou centrés dessous. Stepper horizontal uniquement.',
+        hideText:
+          'Ne garde que les cercles à l’écran. Titres et descriptions restent lus par les technologies d’assistance.',
         label:
           'Nom accessible de la liste d’étapes. Par défaut, celui du dictionnaire de la bibliothèque.',
         vModel: 'Valeur de l’étape courante. Sans elle, la première étape est courante.',

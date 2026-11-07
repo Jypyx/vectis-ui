@@ -93,6 +93,7 @@ export type {
   StepperOrientation,
   StepperStep,
   StepperStepState,
+  StepperTextPosition,
 } from './components/VStepper/VStepper.vue'
 export { default as VToggle } from './components/VToggle/VToggle.vue'
 export type {

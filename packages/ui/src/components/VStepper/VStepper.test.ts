@@ -146,6 +146,22 @@ describe('VStepper', () => {
     expect(list?.getAttribute('data-qa')).toBe('steps')
   })
 
+  it('textPosition is exposed as data-text-position, beside the circle by default', () => {
+    expect(renderStepper().container.querySelector('ol')?.dataset.textPosition).toBe('end')
+    const { container } = renderStepper('text-position="bottom"')
+    expect(container.querySelector('ol')?.dataset.textPosition).toBe('bottom')
+  })
+
+  it('hideText hides every title visually, not from assistive technology', () => {
+    const { items, getByRole } = renderStepper('hide-text')
+    expect(
+      items().every((item) =>
+        item.querySelector('.v-stepper-text')?.classList.contains('v-visually-hidden'),
+      ),
+    ).toBe(true)
+    expect(getByRole('button', { name: /Account/ })).toBeTruthy()
+  })
+
   it('the #indicator slot replaces the circle content', () => {
     const value = ref('a')
     const { container } = renderHarness(

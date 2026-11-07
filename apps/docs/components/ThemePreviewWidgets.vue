@@ -166,7 +166,7 @@ const files = ['Brief.pdf', 'Budget.xlsx', 'Roadmap.md']
 
     <VCard title="Getting started">
       <div class="tp-stack">
-        <VStepper v-model="step" :steps="steps" />
+        <VStepper v-model="step" :steps="steps" hide-text />
         <VAccordion>
           <VAccordionItem title="Connect a repository" default-open>
             Orbit builds every push to your default branch.

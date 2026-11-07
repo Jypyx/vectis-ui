@@ -16,6 +16,9 @@ import { useMessages } from '../../i18n/state'
 /** Whether the steps run across or down. */
 export type StepperOrientation = 'horizontal' | 'vertical'
 
+/** Where the title and description of a step sit: beside its circle, or centred under it. */
+export type StepperTextPosition = 'end' | 'bottom'
+
 /** How a step is drawn: done, current, in error, or still ahead. */
 export type StepperStepState = 'completed' | 'active' | 'error' | 'upcoming'
 
@@ -57,6 +60,16 @@ interface StepperProps {
    */
   nonLinear?: boolean
   /**
+   * Where the title and description of a step sit: beside its circle, or centred under it. Under
+   * it, the steps share the width equally. Applies to a horizontal stepper.
+   */
+  textPosition?: StepperTextPosition
+  /**
+   * Keeps only the circles on screen, for a space too tight for any title. Titles and
+   * descriptions stay readable by assistive technology.
+   */
+  hideText?: boolean
+  /**
    * What screen readers announce for the list of steps. It falls back to the design system
    * dictionary.
    */
@@ -66,6 +79,8 @@ interface StepperProps {
 const props = withDefaults(defineProps<StepperProps>(), {
   orientation: 'horizontal',
   nonLinear: false,
+  textPosition: 'end',
+  hideText: false,
   label: undefined,
 })
 
@@ -112,7 +127,12 @@ function select(step: StepperStep) {
 </script>
 
 <template>
-  <ol class="v-stepper" :data-orientation="orientation" :aria-label="resolvedLabel">
+  <ol
+    class="v-stepper"
+    :data-orientation="orientation"
+    :data-text-position="textPosition"
+    :aria-label="resolvedLabel"
+  >
     <li
       v-for="(step, index) in steps"
       :key="step.value"
@@ -135,7 +155,7 @@ function select(step: StepperStep) {
             <template v-else>{{ index + 1 }}</template>
           </slot>
         </span>
-        <span class="v-stepper-text">
+        <span :class="['v-stepper-text', { 'v-visually-hidden': hideText }]">
           <span class="v-stepper-title">{{ step.title }}</span>
           <span v-if="step.description" class="v-stepper-description">
             {{ step.description }}
@@ -250,6 +270,13 @@ function select(step: StepperStep) {
     min-inline-size: 0;
   }
 
+  /* A word wider than the room left is cut short rather than spilling over the connector. */
+  .v-stepper-title,
+  .v-stepper-description {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .v-stepper-title {
     color: var(--vectis-color-text-muted);
     font-size: var(--vectis-text-label-size);
@@ -313,6 +340,40 @@ function select(step: StepperStep) {
     border-block-start: 1px solid var(--stepper-connector-color);
   }
 
+  /*
+   * Text under the circles: the steps are equal columns, so a line can run from the middle of its
+   * step to the middle of the next, short of both circles, across the gap between them.
+   */
+  .v-stepper[data-orientation='horizontal'][data-text-position='bottom'] {
+    align-items: flex-start;
+  }
+
+  .v-stepper[data-orientation='horizontal'][data-text-position='bottom'] > .v-stepper-step {
+    position: relative;
+    flex: 1 1 0;
+    justify-content: center;
+  }
+
+  .v-stepper[data-orientation='horizontal'][data-text-position='bottom'] .v-stepper-trigger {
+    flex-direction: column;
+    gap: var(--vectis-space-2);
+    text-align: center;
+  }
+
+  .v-stepper[data-orientation='horizontal'][data-text-position='bottom'] .v-stepper-connector {
+    --stepper-connector-inset: calc(
+      var(--vectis-control-size-stepper-indicator) / 2 + var(--vectis-space-3)
+    );
+
+    position: absolute;
+    inset-block-start: calc(
+      var(--vectis-space-1) + var(--vectis-control-size-stepper-indicator) / 2
+    );
+    inset-inline: calc(50% + var(--stepper-connector-inset))
+      calc(var(--stepper-connector-inset) - 50% - var(--vectis-space-2));
+    min-inline-size: 0;
+  }
+
   /* Down the indicator's centre, from one circle to the next. */
   .v-stepper[data-orientation='vertical'] .v-stepper-connector {
     min-block-size: var(--vectis-control-size-stepper-connector-min);
@@ -329,6 +390,11 @@ function select(step: StepperStep) {
    * a container query accepting no variables: about four steps with short titles fit above it.
    */
   @container v-stepper (max-width: 36rem) {
+    /* Down to a circle and a line, the other steps cannot shrink: only the current title gives way. */
+    .v-stepper[data-orientation='horizontal'] > .v-stepper-step:not([data-active]) {
+      flex-shrink: 0;
+    }
+
     .v-stepper-step:not([data-active]) .v-stepper-text {
       position: absolute;
       width: 1px;
