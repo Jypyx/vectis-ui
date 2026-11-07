@@ -2,6 +2,17 @@
 
 Notable changes to `vectis-ui`. The package follows [Semantic Versioning](https://semver.org/): while the major version is 0, a minor release may change the public API.
 
+## [0.19.1] - 2026-11-07
+
+No public API changes. No migration is required from 0.19.0.
+
+### Fixed
+
+- VCheckbox, VRadio and VSwitch keep the control on the first line of a label that wraps, instead of centring it against the whole label.
+- VSwitch's track is narrower, 36px instead of 40px (`--vectis-control-size-switch-w`): two thumbs wide plus its side padding.
+
+**Full diff:** [v0.19.0...v0.19.1](https://github.com/Jypyx/vectis-ui/compare/v0.19.0...v0.19.1)
+
 ## [0.19.0] - 2026-11-06
 
 ### Upgrading from 0.18.x
