@@ -258,8 +258,10 @@ export const Bordered: Story = {
 
     const [day, week, month] = segmentsOf('Seamless')
     await expect(getComputedStyle(week!, '::before').content).not.toBe(GENERATED)
-    await expect(getComputedStyle(day!).borderInlineEndColor).toBe(TRANSPARENT)
-    await expect(getComputedStyle(month!).borderInlineStartColor).toBe(TRANSPARENT)
+    // Shared edges lose their width, not just their colour: a transparent side would mitre.
+    await expect(getComputedStyle(day!).borderInlineEndWidth).toBe('0px')
+    await expect(getComputedStyle(month!).borderInlineStartWidth).toBe('0px')
+    await expect(getComputedStyle(month!).marginInlineStart).toBe('0px')
     await expect(getComputedStyle(day!).borderInlineStartColor).not.toBe(TRANSPARENT)
     await expect(getComputedStyle(month!).borderInlineEndColor).not.toBe(TRANSPARENT)
   },
@@ -354,10 +356,10 @@ export const FullWidth: Story = {
       .getAllByRole('button')
       .map((button) => button.getBoundingClientRect().width)
     await expect(widths).toHaveLength(3)
-    await expect(widths[1]).toBeCloseTo(widths[0]! + 1, 1)
-    await expect(widths[2]).toBeCloseTo(widths[0]! + 1, 1)
+    await expect(widths[1]).toBeCloseTo(widths[0]!, 1)
+    await expect(widths[2]).toBeCloseTo(widths[0]!, 1)
 
-    await expect(widths[0]! + widths[1]! + widths[2]!).toBeGreaterThan(parentWidth)
+    await expect(widths[0]! + widths[1]! + widths[2]!).toBeCloseTo(parentWidth, 1)
   },
 }
 
@@ -478,15 +480,14 @@ export const Companions: Story = {
 
     /*
      * A wrapped segment takes its equal share of a full-width row like any other, and the
-     * button inside fills the share the wrapper was given. The middle and last segments measure
-     * a pixel more, the overlap the seam sits on.
+     * button inside fills the share the wrapper was given.
      */
     const widths = within(canvas.getByRole('group', { name: 'Full width' }))
       .getAllByRole('button')
       .map((button) => button.getBoundingClientRect().width)
     await expect(widths).toHaveLength(3)
-    await expect(widths[1]).toBeCloseTo(widths[0]! + 1, 1)
-    await expect(widths[2]).toBeCloseTo(widths[0]! + 1, 1)
+    await expect(widths[1]).toBeCloseTo(widths[0]!, 1)
+    await expect(widths[2]).toBeCloseTo(widths[0]!, 1)
 
     // The story ends with the panel open: axe audits what is left on screen, and this is
     // the one place a menu panel is a child of a row it must not be counted a segment of.

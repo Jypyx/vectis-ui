@@ -38,10 +38,10 @@ which is also why a nested group (a `VToggle`, say) keeps its own rendering insi
 
 ## Joined, detached, bordered
 
-Joined is the default: the buttons are pulled onto one another by a pixel, and nothing is drawn
-between them. The borders on **both** sides of every shared edge are cleared, since the segments
-overlap and a neighbour's border sits in the same pixel column. The outer edges stay, so an
-`outline` row reads as one frame rather than as three boxes.
+Joined is the default: the buttons touch, and nothing is drawn between them. The borders on
+**both** sides of every shared edge are removed, so the top and bottom lines run unbroken across
+the joint. The outer edges stay, so an `outline` row reads as one frame rather than as three
+boxes.
 
 `detached` gives up the joining entirely: the buttons are spaced, each keeping its own corners
 and its own borders, and an `elevated` row then lets each of them cast its own shadow. Everything

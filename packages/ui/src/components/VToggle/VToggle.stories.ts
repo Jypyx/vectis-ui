@@ -247,9 +247,8 @@ export const Bordered: Story = {
     `,
   }),
   /*
-   * The group's cleared edges are (0,6,0) for exactly this, and at equal specificity with the
-   * frame the winner would be whichever sheet the bundler put last. The middle item is the
-   * selected one, which is why it is the one read.
+   * The frame sets only a colour, so it cannot bring back the shared edges the group removes by
+   * width. The middle item is the selected one, which is why it is the one read.
    */
   play: async ({ canvasElement }) => {
     const TRANSPARENT = 'rgba(0, 0, 0, 0)'
@@ -257,8 +256,8 @@ export const Bordered: Story = {
     const [plain, lined] = [...canvasElement.querySelectorAll<HTMLElement>('.v-toggle')]
 
     const centre = getComputedStyle(itemsOf(plain as HTMLElement)[1] as HTMLElement)
-    await expect(centre.borderInlineStartColor).toBe(TRANSPARENT)
-    await expect(centre.borderInlineEndColor).toBe(TRANSPARENT)
+    await expect(centre.borderInlineStartWidth).toBe('0px')
+    await expect(centre.borderInlineEndWidth).toBe('0px')
     await expect(centre.borderBlockStartColor).not.toBe(TRANSPARENT)
     await expect(centre.borderBlockEndColor).not.toBe(TRANSPARENT)
 

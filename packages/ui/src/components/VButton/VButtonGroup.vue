@@ -206,13 +206,14 @@ defineExpose({
   }
 
   /*
-   * The negative margin pulls each segment onto its neighbour so their two 1px borders collapse
-   * into one line, over which the seam below is then laid: it draws the separation the filled
-   * variants would otherwise lack (their border is transparent) and unifies the joint between
-   * two outlined ones. Each block is scoped to one orientation on purpose.
+   * In a bordered row, the negative margin pulls each segment onto its neighbour so their two
+   * 1px borders collapse into one line, over which the seam below is then laid: it draws the
+   * separation the filled variants would otherwise lack (their border is transparent) and
+   * unifies the joint between two outlined ones. An unbordered row has no border on its shared
+   * edges to collapse. Each block is scoped to one orientation on purpose.
    */
-  .v-button-group:not([data-detached])[data-orientation='horizontal'] > .v-button:not(:first-child),
-  .v-button-group:not([data-detached])[data-orientation='horizontal']
+  .v-button-group[data-bordered][data-orientation='horizontal'] > .v-button:not(:first-child),
+  .v-button-group[data-bordered][data-orientation='horizontal']
     > :not(:where(.v-overlay, .v-button-group)):has(.v-button:not(:where(.v-overlay *))):not(
       :first-child
     ) {
@@ -240,8 +241,8 @@ defineExpose({
     border-end-end-radius: 0;
   }
 
-  .v-button-group:not([data-detached])[data-orientation='vertical'] > .v-button:not(:first-child),
-  .v-button-group:not([data-detached])[data-orientation='vertical']
+  .v-button-group[data-bordered][data-orientation='vertical'] > .v-button:not(:first-child),
+  .v-button-group[data-bordered][data-orientation='vertical']
     > :not(:where(.v-overlay, .v-button-group)):has(.v-button:not(:where(.v-overlay *))):not(
       :first-child
     ) {
@@ -420,20 +421,18 @@ defineExpose({
   }
 
   /*
-   * Unless the row is bordered, the borders on both sides of every shared edge are cleared. The
-   * `:not([data-detached])` guard is also what brings these to (0,6,0), and that weight is not
-   * decoration. Without it they are (0,5,0), which TIES with the compound a component overrides
-   * a segment's border through
-   * (VToggle's outline frame,
-   * `.v-toggle[data-item-variant='outline'] > .v-toggle-item[aria-pressed='true']:is(…)`), and
-   * a tie between two sheets is settled by whichever the consumer's bundler put last.
+   * Unless the row is bordered, the borders on both sides of every shared edge are removed. Their
+   * width goes to zero rather than their colour to transparent: a transparent side still meets
+   * the coloured top and bottom at a MITRE, which notches the outline and shows the segment's own
+   * background through the corner. A component restyling a segment's border (VToggle's outline
+   * frame) sets only its colour, so it never brings a shared edge back.
    */
   .v-button-group:not([data-detached]):not([data-bordered])[data-orientation='horizontal']
     > .v-button:not(:first-child),
   .v-button-group:not([data-detached]):not([data-bordered])[data-orientation='horizontal']
     > :not(:where(.v-overlay, .v-button-group)):not(:first-child)
     .v-button:not(:where(.v-overlay *)) {
-    border-inline-start-color: transparent;
+    border-inline-start-width: 0;
   }
 
   .v-button-group:not([data-detached]):not([data-bordered])[data-orientation='horizontal']
@@ -441,7 +440,7 @@ defineExpose({
   .v-button-group:not([data-detached]):not([data-bordered])[data-orientation='horizontal']
     > :not(:where(.v-overlay, .v-button-group)):has(~ :not(.v-overlay))
     .v-button:not(:where(.v-overlay *)) {
-    border-inline-end-color: transparent;
+    border-inline-end-width: 0;
   }
 
   .v-button-group:not([data-detached]):not([data-bordered])[data-orientation='vertical']
@@ -449,7 +448,7 @@ defineExpose({
   .v-button-group:not([data-detached]):not([data-bordered])[data-orientation='vertical']
     > :not(:where(.v-overlay, .v-button-group)):not(:first-child)
     .v-button:not(:where(.v-overlay *)) {
-    border-block-start-color: transparent;
+    border-block-start-width: 0;
   }
 
   .v-button-group:not([data-detached]):not([data-bordered])[data-orientation='vertical']
@@ -457,7 +456,7 @@ defineExpose({
   .v-button-group:not([data-detached]):not([data-bordered])[data-orientation='vertical']
     > :not(:where(.v-overlay, .v-button-group)):has(~ :not(.v-overlay))
     .v-button:not(:where(.v-overlay *)) {
-    border-block-end-color: transparent;
+    border-block-end-width: 0;
   }
 
   /*

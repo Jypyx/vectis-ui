@@ -229,8 +229,7 @@ defineExpose({
 @layer vectis.components {
   /*
    * The `:not(:where(.v-overlay))` guard weighs nothing and keeps a panel from passing for an
-   * item; the pair is one specificity, so the arbitration with the group's cleared edges holds
-   * on both shapes. The frame of an `outline` row, which only that row has: the colour its
+   * item. The frame of an `outline` row, which only that row has: the colour its
    * unselected items already paint.
    */
   .v-toggle[data-item-variant='outline'] {
