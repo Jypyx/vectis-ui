@@ -162,6 +162,20 @@ describe('VStepper', () => {
     expect(getByRole('button', { name: /Account/ })).toBeTruthy()
   })
 
+  it('icon replaces the number, not the tick nor the exclamation mark', () => {
+    const steps: StepperStep[] = [
+      { value: 'a', title: 'A', icon: 'mail' },
+      { value: 'b', title: 'B', icon: 'mail', error: true },
+      { value: 'c', title: 'C', icon: 'mail' },
+      { value: 'd', title: 'D' },
+    ]
+    const { items } = renderStepper('', 'c', steps)
+    const indicators = items().map((item) => item.querySelector('.v-stepper-indicator')!)
+    const iconName = (el: Element) => el.querySelector('[data-icon]')?.getAttribute('data-icon')
+    expect(indicators.map(iconName)).toEqual(['check', 'priority_high', 'mail', undefined])
+    expect(indicators[3]!.textContent?.trim()).toBe('4')
+  })
+
   it('the #indicator slot replaces the circle content', () => {
     const value = ref('a')
     const { container } = renderHarness(

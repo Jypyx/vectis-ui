@@ -4,6 +4,10 @@ import { computed, ref } from 'vue'
 
 import { storyText } from '../../stories/storyText'
 import VButton from '../VButton/VButton.vue'
+import { calendar_today as calendarIcon } from '../VIcon/icons/calendar_today'
+import { description as descriptionIcon } from '../VIcon/icons/description'
+import { inbox as inboxIcon } from '../VIcon/icons/inbox'
+import { star as starIcon } from '../VIcon/icons/star'
 import VTypography from '../VTypography/VTypography.vue'
 import VStepper from './VStepper.vue'
 import type { StepperStep } from './VStepper.vue'
@@ -182,6 +186,31 @@ export const States: Story = {
     )
     expect(states).toEqual(['completed', 'completed', 'error', 'active'])
     expect(within(first as HTMLElement).queryByRole('button', { name: /Shipping/ })).toBeNull()
+  },
+}
+
+/** `icon` replaces the number; a step that is done or in error keeps its tick or exclamation mark. */
+export const Icons: Story = {
+  render: () => ({
+    components: { VStepper },
+    setup: () => {
+      const icons = [descriptionIcon, inboxIcon, calendarIcon, starIcon]
+      const withIcons = computed(() =>
+        steps.value.map((step, index) => ({ ...step, icon: icons[index] })),
+      )
+      return { current: ref('payment'), withIcons }
+    },
+    template: `
+      <div style="max-width: 760px">
+        <VStepper v-model="current" :steps="withIcons" />
+      </div>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    const icons = [...canvasElement.querySelectorAll('.v-stepper-indicator')].map((indicator) =>
+      indicator.querySelector('[data-icon]')?.getAttribute('data-icon'),
+    )
+    expect(icons).toEqual(['check', 'check', 'calendar_today', 'star'])
   },
 }
 

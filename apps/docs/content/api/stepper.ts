@@ -24,6 +24,26 @@ export default {
   ],
   types: [
     {
+      name: 'BuiltinIcon',
+      definition: `export interface BuiltinIcon {
+  name: string
+  paths: readonly [string] | readonly [string, string]
+}`,
+    },
+    {
+      name: 'IconRender',
+      definition: `export type IconRender =
+  | { path: string; viewBox?: string }
+  | { component: Component; props?: Record<string, unknown> }
+  | { src: string }
+  | { text: string; class?: string }
+  | { class: string }`,
+    },
+    {
+      name: 'IconSource',
+      definition: `export type IconSource = string | BuiltinIcon | IconRender`,
+    },
+    {
       name: 'ItemValue',
       definition: `export type ItemValue = string | number`,
     },
@@ -41,6 +61,7 @@ export default {
   value: ItemValue
   title: string
   description?: string
+  icon?: IconSource
   error?: boolean
   completed?: boolean
   disabled?: boolean

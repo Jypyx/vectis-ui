@@ -23,7 +23,7 @@ export default {
     VStepper: {
       props: {
         steps:
-          'Étapes dans l’ordre : <code>value</code>, <code>title</code>, et en option <code>description</code>, <code>error</code>, <code>completed</code> et <code>disabled</code>.',
+          'Étapes dans l’ordre : <code>value</code>, <code>title</code>, et en option <code>description</code>, <code>icon</code>, <code>error</code>, <code>completed</code> et <code>disabled</code>.',
         orientation: 'Sens de disposition.',
         nonLinear:
           'Fait de chaque étape non désactivée un bouton. Par défaut, seules les étapes déjà atteintes le sont.',

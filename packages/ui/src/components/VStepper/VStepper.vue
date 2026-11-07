@@ -8,6 +8,8 @@
 import { computed, ref, watch } from 'vue'
 
 import VIcon from '../VIcon/VIcon.vue'
+import { iconProps } from '../VIcon/iconProps'
+import type { IconSource } from '../VIcon/types'
 import { check as checkIcon } from '../VIcon/icons/check'
 import { priority_high as priorityHighIcon } from '../VIcon/icons/priority_high'
 import type { ItemValue } from '../../types'
@@ -30,6 +32,11 @@ export interface StepperStep {
   title: string
   /** A line under the title. */
   description?: string
+  /**
+   * Drawn in the circle instead of the number. A step that is done or in error still shows its
+   * tick or its exclamation mark.
+   */
+  icon?: IconSource
   /** Marks the step as having a problem to fix. It wins over every other state. */
   error?: boolean
   /**
@@ -152,6 +159,7 @@ function select(step: StepperStep) {
           <slot name="indicator" :step="step" :index="index" :state="states[index]!">
             <VIcon v-if="states[index] === 'completed'" :name="checkIcon" />
             <VIcon v-else-if="states[index] === 'error'" :name="priorityHighIcon" />
+            <VIcon v-else-if="step.icon" v-bind="iconProps(step.icon)" />
             <template v-else>{{ index + 1 }}</template>
           </slot>
         </span>
