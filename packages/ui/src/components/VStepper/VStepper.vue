@@ -242,12 +242,9 @@ function select(step: StepperStep) {
     text-align: start;
   }
 
-  button.v-stepper-trigger {
+  /* The current step is a button too, but going to it does nothing: it shows no hover. */
+  .v-stepper-step:not([data-active]) > button.v-stepper-trigger {
     cursor: pointer;
-  }
-
-  button.v-stepper-trigger:hover {
-    background: var(--vectis-color-surface-muted);
   }
 
   button.v-stepper-trigger:focus-visible {
@@ -322,6 +319,44 @@ function select(step: StepperStep) {
   }
 
   .v-stepper-step[data-state='error'] .v-stepper-title {
+    color: var(--vectis-color-danger-text);
+  }
+
+  /*
+   * Hovering a step to go to: the text turns to the accent and the circle steps up the way a
+   * button does. Tinted, it darkens like a soft button; empty, it takes the tint like an outline
+   * one; filled, it takes its hover colour like a solid one.
+   */
+  .v-stepper-step:not([data-active])
+    > button.v-stepper-trigger:hover
+    :is(.v-stepper-title, .v-stepper-description) {
+    color: var(--vectis-color-accent-text);
+  }
+
+  .v-stepper-step[data-state='completed'] > button.v-stepper-trigger:hover .v-stepper-indicator {
+    background: color-mix(
+      in oklab,
+      var(--vectis-color-accent-surface),
+      var(--vectis-color-accent-text) 8%
+    );
+  }
+
+  .v-stepper-step[data-state='upcoming'] > button.v-stepper-trigger:hover .v-stepper-indicator {
+    background: var(--vectis-color-accent-surface);
+    color: var(--vectis-color-accent-text);
+  }
+
+  .v-stepper-step[data-state='error']:not([data-active])
+    > button.v-stepper-trigger:hover
+    .v-stepper-indicator {
+    border-color: var(--vectis-color-danger-hover);
+    background: var(--vectis-color-danger-hover);
+  }
+
+  /* An error stays red under the pointer. */
+  .v-stepper-step[data-state='error']:not([data-active])
+    > button.v-stepper-trigger:hover
+    :is(.v-stepper-title, .v-stepper-description) {
     color: var(--vectis-color-danger-text);
   }
 

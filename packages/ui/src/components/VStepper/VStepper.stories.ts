@@ -116,6 +116,11 @@ export const Default: Story = {
     expect(canvas.getByRole('button', { name: /Payment/ })).toBeVisible()
     await userEvent.click(canvas.getByRole('button', { name: /Shipping/ }))
     await waitFor(() => expect(currentTitle(canvasElement)).toBe('Shipping'))
+
+    // The current step offers nothing to go to: no pointer. `:hover` itself is out of reach of
+    // the synthetic events of `userEvent.hover()`.
+    const cursor = (name: RegExp) => getComputedStyle(canvas.getByRole('button', { name })).cursor
+    expect([cursor(/Account/), cursor(/Shipping/)]).toEqual(['pointer', 'default'])
   },
 }
 
